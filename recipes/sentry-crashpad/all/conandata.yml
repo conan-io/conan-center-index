@@ -27,17 +27,31 @@ patches:
   "0.4.12":
     - patch_file: "patches/0.4.12-0001-getopt.patch"
       base_path: "source_subfolder"
+  "0.4.11":
+    - patch_file: "patches/0.4.12-0001-getopt.patch"
+      base_path: "source_subfolder"
+  "0.4.10":
+    - patch_file: "patches/0.4.12-0001-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.9":
     - patch_file: "patches/0.4.9-0001-missing-installed-headers.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
       base_path: "source_subfolder"
   "0.4.8":
     - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.7":
     - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.1":
     - patch_file: "patches/0.4.1-0001-missing-installed-headers.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
       base_path: "source_subfolder"
   "0.2.6":
     - patch_file: "patches/0.2.6-0001-missing-installed-headers.patch"

@@ -125,9 +125,6 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["compat"].system_libs.append("dl")
 
-        if self.settings.os == "Windows":
-            self.cpp_info.components["getopt"].libs = ["crashpad_getopt"]
-
         self.cpp_info.components["util"].libs = ["crashpad_util"]
         self.cpp_info.components["util"].requires = ["compat", "mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
@@ -153,6 +150,9 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].requires = ["compat", "snapshot", "util", "mini_chromium"]
 
         if tools.Version(self.version) > "0.3":
+            if self.settings.os == "Windows":
+                self.cpp_info.components["getopt"].libs = ["crashpad_getopt"]
+
             self.cpp_info.components["handler"].libs = ["crashpad_handler_lib"]
             self.cpp_info.components["handler"].requires = ["compat", "minidump", "snapshot", "util", "mini_chromium"]
             if self.settings.os == "Windows":
