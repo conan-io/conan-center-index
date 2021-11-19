@@ -91,6 +91,13 @@ class ArmadilloConan(ConanFile):
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
 
+        # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
+        # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
+        # Therefore, in these cases we remove the `use_extern_rng` option in conan
+        windows_subsystem = tools.os_info.detect_windows_subsystem()
+        if windows_subsystem in ["MSYS", "MSYS2", "CYGWIN"] or self.settings.compiler == "msvc":
+            del self.options.use_extern_rng
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
