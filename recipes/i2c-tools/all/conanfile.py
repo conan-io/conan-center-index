@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 
+requires_conan_version = ">=1.33.0"
+
 
 class I2cConan(ConanFile):
     name = "i2c-tools"
