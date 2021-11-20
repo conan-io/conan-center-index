@@ -187,8 +187,11 @@ class PdalConan(ConanFile):
         self.cpp_info.libs = [pdal_base_name, "pdal_util"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["pdal_arbiter", "pdal_kazhdan"])
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "m"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.extend(["dl", "m"])
+            elif self.settings.os == "Windows":
+                # dependency of pdal_arbiter
+                self.cpp_info.system_libs.append("shlwapi")
         self.cpp_info.requires = [
             "boost::filesystem", "eigen::eigen", "gdal::gdal",
             "libcurl::libcurl", "libgeotiff::libgeotiff", "nanoflann::nanoflann"
