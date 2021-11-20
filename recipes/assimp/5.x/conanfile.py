@@ -180,7 +180,12 @@ class Assimp(ConanFile):
             tools.replace_in_file(os.path.join(
                 self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        for vendor in ["irrXML", "poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]:
+        vendors = ["poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]
+        if tools.Version(self.version) < "5.1.0":
+            vendors.append("irrXML")
+        else:
+            vendors.append("pugixml")
+        for vendor in vendors:
             tools.rmdir(os.path.join(
                 self._source_subfolder, "contrib", vendor))
 
