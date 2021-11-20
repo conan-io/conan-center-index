@@ -33,6 +33,10 @@ class Antlr4CppRuntimeConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _main_code_subfolder(self):
+        return "antlr4-" + self.version
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,6 +49,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = os.path.join( "antlr4-" + self.version , "runtime", "Cpp" )
         os.rename(extracted_dir, self._source_subfolder)
+
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -65,6 +70,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        self.copy("LICENSE.txt", src=self._main_code_subfolder, dst="licenses")
+
         self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy(pattern="*.a", dst="lib", keep_path=False)
         self.copy(pattern="*.so", dst="lib", keep_path=False)
@@ -76,3 +83,6 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.filenames["cmake_find_package"] = "antlr4-cppruntime"
         self.cpp_info.includedirs = ["include", os.path.join("include", "antlr4-runtime")]
+
+        self.cpp_info.names["cmake_find_package"] = "Antlr4-cppruntime"
+        self.cpp_info.names["cmake_find_package_multi"] = "Antlr4-cppruntime"
