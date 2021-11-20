@@ -1,5 +1,6 @@
 from conans import CMake, ConanFile, tools
 import functools
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -51,7 +52,15 @@ class TreeSitterCConan(ConanFile):
         cmake.configure()
         return cmake
 
+    def _patch_sources(self):
+        if not self.options.shared:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "parser.c"),
+                "__declspec(dllexport)", ""
+            )
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

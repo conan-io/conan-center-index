@@ -5,12 +5,14 @@ include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(tree-sitter REQUIRED CONFIG)
+include(GenerateExportHeader)
 
 file(WRITE api.h [[
 #pragma once
 #include <tree_sitter/parser.h>
+#include "tree_sitter_c_export.h"
 
-extern const TSLanguage *tree_sitter_c(void);
+TREE_SITTER_C_EXPORT const TSLanguage *tree_sitter_c(void);
 ]])
 
 add_library(${PROJECT_NAME}
@@ -28,7 +30,11 @@ target_include_directories(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         C_STANDARD 99
-        PUBLIC_HEADER "api.h"
+        PUBLIC_HEADER "api.h;${CMAKE_CURRENT_BINARY_DIR}/tree_sitter_c_export.h"
+)
+generate_export_header(${PROJECT_NAME}
+    BASE_NAME TREE_SITTER_C
+    EXPORT_FILE_NAME "tree_sitter_c_export.h"
 )
 
 include(GNUInstallDirs)
