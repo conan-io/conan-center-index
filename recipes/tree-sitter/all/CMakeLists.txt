@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.4)
 project(tree-sitter C)
 
 include(conanbuildinfo.cmake)
@@ -21,6 +21,7 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         C_STANDARD 99
         PUBLIC_HEADER "${HEADERS}"
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 include(GNUInstallDirs)
