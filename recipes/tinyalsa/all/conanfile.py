@@ -23,9 +23,11 @@ class TinyAlsaConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
+            raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
+
+    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
