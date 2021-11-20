@@ -35,6 +35,8 @@ class TreeSitterCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("tree-sitter/0.20.0")
