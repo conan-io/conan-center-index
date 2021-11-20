@@ -82,12 +82,13 @@ class grpcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        # Fix the protoc search path for cross compiling
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
-                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
-                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
-        )
-        if tools.Version(self.version) >= "1.39.0":
+        if tools.Version(self.version) < "1.42.0":
+            # Fix the protoc search path for cross compiling
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
+                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
+                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
+            )
+        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
             # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
             #   executable when cross-building
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -157,7 +158,7 @@ class grpcConan(ConanFile):
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.cmake", dst=os.path.join("lib", "cmake"), src=os.path.join(self.source_folder, "cmake"))
-    
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
