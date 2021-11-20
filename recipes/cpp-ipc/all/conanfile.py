@@ -82,3 +82,5 @@ class CppIPCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ipc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["rt"]
