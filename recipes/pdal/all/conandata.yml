@@ -9,12 +9,14 @@ patches:
   "2.3.0":
     - patch_file: "patches/0001-cmakelists.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-deps-2.3.0.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/0005-vendor-nanoflann.patch"
       base_path: "source_subfolder"
   "2.2.0":
     - patch_file: "patches/0001-cmakelists.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-cmake-deps.patch"
+    - patch_file: "patches/0002-cmake-deps-2.2.0.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-stdexcept.patch"
       base_path: "source_subfolder"

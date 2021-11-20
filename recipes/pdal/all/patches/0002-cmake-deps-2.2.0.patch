@@ -1,18 +1,3 @@
-diff --git a/cmake/geotiff.cmake b/cmake/geotiff.cmake
-index 1d1e8af85..a3969996b 100644
---- a/cmake/geotiff.cmake
-+++ b/cmake/geotiff.cmake
-@@ -4,8 +4,8 @@
- 
- find_package(GeoTIFF REQUIRED 1.3.0)
- set_package_properties(GeoTIFF PROPERTIES TYPE REQUIRED)
--if (GEOTIFF_FOUND)
--    include_directories("${GEOTIFF_INCLUDE_DIR}")
-+if (GeoTIFF_FOUND)
-+    include_directories("${GeoTIFF_INCLUDE_DIR}")
-     set(PDAL_HAVE_LIBGEOTIFF 1)
-     mark_as_advanced(CLEAR TIFF_INCLUDE_DIR)
-     mark_as_advanced(CLEAR TIFF_LIBRARY)
 diff --git a/cmake/unwind.cmake b/cmake/unwind.cmake
 index 460a43c15..aa4356070 100644
 --- a/cmake/unwind.cmake
