@@ -281,7 +281,7 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.names["pkg_config"] = "armadillo"
 
-        if self.options.use_extern_rng:
+        if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
 
         if self.settings.build_type == "Release":
