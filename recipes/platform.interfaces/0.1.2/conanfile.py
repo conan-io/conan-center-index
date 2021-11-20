@@ -54,6 +54,10 @@ class PlatformInterfacesConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
+        if not self.settings.compiler:
+            raise ConanInvalidConfiguration("{}/{} requires {} compiler".format(self.name, self.version,
+                self.settings.compiler))
+
     def package_id(self):
         self.info.header_only()
 
