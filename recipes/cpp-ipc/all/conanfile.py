@@ -26,7 +26,7 @@ class CppIPCConan(ConanFile):
 
     _compiler_required_cpp17 = {
         "Visual Studio": "17",
-        "gcc": "7",
+        "gcc": "8",
         "clang": "4",
     }
 
