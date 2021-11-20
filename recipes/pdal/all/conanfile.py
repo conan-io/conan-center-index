@@ -93,6 +93,8 @@ class PdalConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
             raise ConanInvalidConfiguration ("This compiler version is unsupported")
+        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
+            raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
