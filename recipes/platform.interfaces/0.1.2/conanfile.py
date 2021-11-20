@@ -41,9 +41,9 @@ class PlatformInterfacesConan(ConanFile):
     def validate(self):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
 
-        if not minimum_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+        if not self.settings.compiler:
+            raise ConanInvalidConfiguration("{}/{} requires {} compiler").format(
+                self.name, self.version, self.settings.compiler)
 
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("{}/{} requires c++{}, "
@@ -53,10 +53,6 @@ class PlatformInterfacesConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
-
-        if not self.settings.compiler:
-            raise ConanInvalidConfiguration("{}/{} requires {} compiler".format(self.name, self.version,
-                self.settings.compiler))
 
     def package_id(self):
         self.info.header_only()
