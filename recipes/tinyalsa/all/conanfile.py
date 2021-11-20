@@ -11,6 +11,7 @@ class TinyAlsaConan(ConanFile):
     homepage = "https://github.com/tinyalsa/tinyalsa"
     topics = ("tiny", "alsa", "sound", "audio", "tinyalsa")
     description = "A small library to interface with ALSA in the Linux kernel"
+    exports_sources = ["patches/*",]
     options = {"shared": [True, False], "with_utils": [True, False]}
     default_options = {'shared': False, 'with_utils': False}
     settings = "os", "compiler", "build_type", "arch"
@@ -18,10 +19,6 @@ class TinyAlsaConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def validate(self):
         if self.settings.os != "Linux":
