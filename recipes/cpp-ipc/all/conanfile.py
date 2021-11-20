@@ -58,6 +58,8 @@ class CppIPCConan(ConanFile):
         else:
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
+            raise ConanInvalidConfiguration("{} doesn't support clang with libc++".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
