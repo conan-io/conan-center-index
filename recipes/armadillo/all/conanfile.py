@@ -155,9 +155,10 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        if self.options.use_wrapper and not self.options.use_extern_rng:
+        # Ignore use_extern_rng when the option has been removed
+        if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
             raise ConanInvalidConfiguration(
-                "use_extern_rng must be enabled when use_wrapper is enabled"
+                "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
             )
 
     def requirements(self):
