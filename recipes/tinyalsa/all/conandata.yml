@@ -7,5 +7,5 @@ sources:
     sha256: "d92b438cea348ae316c4b2cbf367b4f01ed821a947e6a34d813624e9e3c936c1"
 patches:
   "2.0.0":
-    - patch_file: "patches/2.0.0-strncpy-warning.patch"
+    - patch_file: "patches/tinyalsa-2.0.0-strncpy-warning.patch"
       base_path: "source_subfolder"
