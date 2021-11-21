@@ -11,7 +11,7 @@ class Antlr4CppRuntimeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -37,6 +37,10 @@ class Antlr4CppRuntimeConan(ConanFile):
     def _main_code_subfolder(self):
         return "antlr4-" + self.version
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,12 +51,11 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = os.path.join( "antlr4-" + self.version , "runtime", "Cpp" )
+        extracted_dir = os.path.join( self._main_code_subfolder , "runtime", "Cpp" )
         os.rename(extracted_dir, self._source_subfolder)
 
-
     def requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
     def _configure_cmake(self):
@@ -63,6 +66,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
