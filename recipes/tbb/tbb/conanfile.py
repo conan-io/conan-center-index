@@ -41,20 +41,18 @@ that have future-proof scalability"""
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            
+
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
         if self.settings.os == "Macos" and \
            self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) < "8.0":
-            raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} couldn not be built by apple-clang < 8.0")
         if not self.options.shared:
             self.output.warn("Intel-TBB strongly discourages usage of static linkage")
-        if self.options.tbbproxy and \
-           (not self.options.shared or \
-            not self.options.tbbmalloc):
-            raise ConanInvalidConfiguration("tbbproxy needs tbbmaloc and shared options")
+        if self.options.tbbproxy and (not self.options.shared or not self.options.tbbmalloc):
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} with tbbproxy needs tbbmalloc and shared options")
 
     def package_id(self):
         del self.info.options.tbbmalloc

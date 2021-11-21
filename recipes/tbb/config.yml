@@ -1,11 +1,13 @@
 versions:
   "2019_u9":
-    folder: all
+    folder: tbb
   "2020.0":
-    folder: all
+    folder: tbb
   "2020.1":
-    folder: all
+    folder: tbb
   "2020.2":
-    folder: all
+    folder: tbb
   "2020.3":
-    folder: all
+    folder: tbb
+  "2021.4":
+    folder: onetbb
