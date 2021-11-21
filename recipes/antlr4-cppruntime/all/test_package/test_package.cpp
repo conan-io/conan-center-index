@@ -8,8 +8,6 @@ using namespace std;
 
 int main(int argc, const char *args[])
 {
-    ifstream ins;
-    ins.open(args[1]);
-    ANTLRInputStream input(ins);
+    ANTLRInputStream input("test string");
     return 0;
 }
