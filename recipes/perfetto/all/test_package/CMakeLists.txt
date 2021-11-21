@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 find_package(perfetto REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
+target_compile_features(test_package PRIVATE cxx_std_11 cxx_constexpr)
 target_link_libraries(${PROJECT_NAME} perfetto::perfetto)
