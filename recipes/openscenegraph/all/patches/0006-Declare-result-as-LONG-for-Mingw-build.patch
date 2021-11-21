@@ -1,0 +1,29 @@
+From d1f1f1c180256a09fa940b660facf20740d08edb Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Tue, 16 Nov 2021 21:24:10 +0100
+Subject: [PATCH] Declare "result" as LONG for Mingw build
+
+Win32's ChangeDisplaySettingsEx() API function is documented as returning `LONG`, which evidently is not always the same as `unsigned int` (Mingw64.)
+This cause a compile error on Mingw with clang10.
+
+This patch was taken from the upstream commit 67468cce344dd5e503aaa1063845f34720563f79.
+---
+ src/osgViewer/GraphicsWindowWin32.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/osgViewer/GraphicsWindowWin32.cpp b/src/osgViewer/GraphicsWindowWin32.cpp
+index 88156a6..f1f3bf6 100644
+--- a/src/osgViewer/GraphicsWindowWin32.cpp
++++ b/src/osgViewer/GraphicsWindowWin32.cpp
+@@ -1101,7 +1101,7 @@ bool Win32WindowingSystem::changeScreenSettings( const osg::GraphicsContext::Scr
+     // Start by testing if the change would be successful (without applying it)
+     //
+ 
+-    unsigned int result = ::ChangeDisplaySettingsEx(displayDevice.DeviceName, &deviceMode, NULL, CDS_TEST, NULL);
++    LONG result = ::ChangeDisplaySettingsEx(displayDevice.DeviceName, &deviceMode, NULL, CDS_TEST, NULL);
+     if (result==DISP_CHANGE_SUCCESSFUL)
+     {
+         result = ::ChangeDisplaySettingsEx(displayDevice.DeviceName, &deviceMode, NULL, 0, NULL);
+-- 
+2.34.0.windows.1
+

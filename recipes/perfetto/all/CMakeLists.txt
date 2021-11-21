@@ -1,15 +1,13 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.8)
 project(perfetto CXX)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(PUBLIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/sdk/perfetto.h)
 
 add_library(perfetto source_subfolder/sdk/perfetto.cc)
+target_compile_features(perfetto PRIVATE cxx_std_11 cxx_constexpr)
 set_target_properties(perfetto PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 install(

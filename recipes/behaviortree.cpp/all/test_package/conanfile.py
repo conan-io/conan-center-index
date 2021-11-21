@@ -1,8 +1,8 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import CMake, ConanFile, tools
 
 
-class TestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
