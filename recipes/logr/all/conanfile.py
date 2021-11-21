@@ -132,18 +132,18 @@ class LogrConan(ConanFile):
         elif self.options.backend == "glog":
             self.cpp_info.components["logr_glog"].includedirs = []
             self.cpp_info.components["logr_glog"].requires = [
-                "logr::logr_base",
+                "logr_base",
                 "glog::glog",
             ]
         elif self.options.backend == "log4cplus":
             self.cpp_info.components["logr_log4cplus"].includedirs = []
             self.cpp_info.components["logr_log4cplus"].requires = [
-                "logr::logr_base",
+                "logr_base",
                 "log4cplus::log4cplus",
             ]
         elif self.options.backend == "boostlog":
             self.cpp_info.components["logr_boostlog"].includedirs = []
             self.cpp_info.components["logr_boostlog"].requires = [
-                "logr::logr_base",
+                "logr_base",
                 "boost::log",
             ]
