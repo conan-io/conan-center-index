@@ -1,0 +1,4 @@
+sources:
+  "2.4.4":
+    url: "https://github.com/oneapi-src/oneDNN/archive/refs/tags/v2.4.4.tar.gz"
+    sha256: "29ce33da3eaf48cbc39cfd9e9af0d7d00e256dcd84168b906df48fb75f5f844e"
