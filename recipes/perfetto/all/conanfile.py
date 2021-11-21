@@ -68,7 +68,6 @@ class PerfettoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["perfetto"]
-        self.cpp_info.names["pkgconfig"] = "perfetto"
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
