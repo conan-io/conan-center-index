@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.42.1"
 
@@ -55,8 +56,14 @@ class Antlr4CppRuntimeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
-        if self.settings.os != "Windows":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("libuuid/1.0.3")
+
+    def validate(self):
+        if str(self.settings.arch).startswith("arm"):
+            raise ConanInvalidConfiguration("ARM not supported")
+            # Need to deal with missing libuuid on Arm.
+            # So far ANTLR delivers macOS binary package.
 
     def _configure_cmake(self):
         if self._cmake:
