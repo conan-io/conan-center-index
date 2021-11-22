@@ -2,6 +2,6 @@
 
 int main(int argc, const char *args[])
 {
-    antlr4::ANTLRInputStream input();
+    antlr4::ANTLRInputStream input;
     return 0;
 }
