@@ -57,6 +57,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
+        self.requires("utfcpp/3.2.1")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("libuuid/1.0.3")
 
