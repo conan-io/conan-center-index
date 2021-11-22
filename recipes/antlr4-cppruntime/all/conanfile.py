@@ -62,7 +62,7 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     def validate(self):
         if str(self.settings.arch).startswith("arm"):
-            raise ConanInvalidConfiguration("ARM not supported")
+            raise ConanInvalidConfiguration(f"arm architectures are not supported")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
 
