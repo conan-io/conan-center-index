@@ -64,6 +64,12 @@ class Antlr4CppRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(f"arm architectures are not supported")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
+        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
+        if compiler == "Visual Studio" and version < "16":
+            raise ConanInvalidConfiguration(f"library claims C2668 'Ambiguous call to overloaded function'")
+            # Compilation of this library on version 15 claims C2668 Error.
+            # This could be Bogus error or malformed Antl4 libary.
+            # Version 16 compiles this code correctly.
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
