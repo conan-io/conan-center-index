@@ -35,9 +35,6 @@ class Antlr4CppRuntimeConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _main_code_subfolder(self):
-        return "antlr4-" + self.version
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
