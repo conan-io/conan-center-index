@@ -16,12 +16,25 @@ set(OSG_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS})
 set(OSG_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}/osg")
 set(OSG_GEN_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}/osg")
 
+# gdal
+find_package(GDAL REQUIRED)
+set(GDAL_LIBRARY ${GDAL_LIBRARIES})
+
+# curl
+find_package(CURL REQUIRED)
+set(CURL_LIBRARY ${CURL_LIBRARIES})
+
+# protobuf
+find_package(Protobuf)
+set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
+set(Protobuf_LIBRARIES ${protobuf_LIBRARIES})
+
 # GEOS
 if (OSGEARTH_WITH_GEOS)
     find_package(geos)
 endif ()
-set(GEOS_FOUND ${GEOS_LIBRARY})
 set(GEOS_LIBRARY ${GEOS_LIBS})
+set(GEOS_FOUND ${GEOS_LIBRARY})
 
 # SQLite3
 if (OSGEARTH_WITH_SQLITE3)
@@ -37,7 +50,7 @@ if (OSGEARTH_WITH_WEBP)
 endif ()
 set(WEBP_FOUND ${WebP_FOUND})
 set(WEBP_LIBRARY ${WebP_LIBRARIES})
-set(WEBP_INCLUDE_DIR ${WebP_INCLUDE_DIR}})
+set(WEBP_INCLUDE_DIR ${WebP_INCLUDE_DIR})
 
 # libzip
 if (OSGEARTH_BUILD_ZIP_PLUGIN)
@@ -45,11 +58,12 @@ if (OSGEARTH_BUILD_ZIP_PLUGIN)
 endif ()
 set(LIBZIP_FOUND ${libzip_FOUND})
 set(LIBZIP_LIBRARY ${libzip_LIBRARIES})
-set(LIBZIP_INCLUDE_DIR ${libzip_INCLUDE_DIR}})
+set(LIBZIP_INCLUDE_DIR ${libzip_INCLUDE_DIR})
 
+# leveldb
 find_package(leveldb)
 set(LEVELDB_FOUND ${leveldb_FOUND})
 set(LEVELDB_LIBRARY ${leveldb_LIBRARIES})
-set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR}})
+set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR})
 
 add_subdirectory(source_subfolder)
