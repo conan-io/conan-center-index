@@ -54,6 +54,11 @@ class PhysXConan(ConanFile):
         if self.settings.os not in ["Windows", "Android"]:
             del self.options.enable_simd
 
+    def validate(self):
+        if self.settings.os == "Macos" and not (self.settings.arch == "x86" or self.settings.arch == "x86_64"):
+            raise ConanInvalidConfiguration(
+                "{} only supports x86 and x86_64 on macOS".format(self.name))
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -328,7 +333,7 @@ class PhysXConan(ConanFile):
         self.cpp_info.components["physxcharacterkinematic"].names["cmake_find_package"] = "PhysXCharacterKinematic"
         self.cpp_info.components["physxcharacterkinematic"].names["cmake_find_package_multi"] = "PhysXCharacterKinematic"
         self.cpp_info.components["physxcharacterkinematic"].libs = ["PhysXCharacterKinematic"]
-        self.cpp_info.components["physxcharacterkinematic"].requires = ["physxfoundation"]
+        self.cpp_info.components["physxcharacterkinematic"].requires = ["physxfoundation", "physxcommon", "physxextensions"]
         # PhysXCooking
         self.cpp_info.components["physxcooking"].names["cmake_find_package"] = "PhysXCooking"
         self.cpp_info.components["physxcooking"].names["cmake_find_package_multi"] = "PhysXCooking"
@@ -340,9 +345,9 @@ class PhysXConan(ConanFile):
         self.cpp_info.components["physxvehicle"].names["cmake_find_package"] = "PhysXVehicle"
         self.cpp_info.components["physxvehicle"].names["cmake_find_package_multi"] = "PhysXVehicle"
         self.cpp_info.components["physxvehicle"].libs = ["PhysXVehicle"]
-        self.cpp_info.components["physxvehicle"].requires = ["physxfoundation", "physxpvdsdk"]
+        self.cpp_info.components["physxvehicle"].requires = ["physxfoundation", "physxpvdsdk", "physxextensions"]
         # PhysXExtensions
         self.cpp_info.components["physxextensions"].names["cmake_find_package"] = "PhysXExtensions"
         self.cpp_info.components["physxextensions"].names["cmake_find_package_multi"] = "PhysXExtensions"
         self.cpp_info.components["physxextensions"].libs = ["PhysXExtensions"]
-        self.cpp_info.components["physxextensions"].requires = ["physxfoundation", "physxpvdsdk", "physxmain"]
+        self.cpp_info.components["physxextensions"].requires = ["physxfoundation", "physxpvdsdk", "physxmain", "physxcommon"]
