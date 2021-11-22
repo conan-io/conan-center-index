@@ -93,5 +93,5 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.copy(pattern="*.dll", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["antlr4-runtime" if self.options.shared else "antlr4-runtime-static"]
         self.cpp_info.includedirs.append(os.path.join("include", "antlr4-runtime"))
