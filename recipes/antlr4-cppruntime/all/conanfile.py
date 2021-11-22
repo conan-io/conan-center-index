@@ -1,8 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.42.1"
+
 
 class Antlr4CppRuntimeConan(ConanFile):
     name = "antlr4-cppruntime"
