@@ -76,17 +76,15 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        if self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
+        else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*antlr4-runtime.*")
 
-        self.copy("LICENSE.txt", src=self._main_code_subfolder, dst="licenses")
-
-        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so", dst="lib", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dll", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["antlr4-runtime" if self.options.shared else "antlr4-runtime-static"]
