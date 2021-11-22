@@ -89,6 +89,8 @@ class Antlr4CppRuntimeConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime-static.*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.a")
         else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*antlr4-runtime.dylib*")
