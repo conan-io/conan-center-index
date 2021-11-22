@@ -64,8 +64,8 @@ class DiligentCoreConan(ConanFile):
         self.requires("libpng/1.6.37")
 
         self.requires("spirv-cross/cci.20210930")
-        self.options["spirv-cross"].namespace = "diligent_spirv_cross"
-
+        # commented out due to conan-center CI limitations
+        #self.options["spirv-cross"].namespace = "diligent_spirv_cross"
         self.requires("spirv-headers/cci.20211010")
         self.requires("spirv-tools/2021.4")
         self.requires("glslang/11.7.0")
