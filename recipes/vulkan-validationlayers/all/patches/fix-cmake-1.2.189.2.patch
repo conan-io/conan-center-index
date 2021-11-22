@@ -8,7 +8,28 @@
 -	set(ROBIN_HOOD_HASHING_INSTALL_DIR $ENV{ROBIN_HOOD_HASHING_INSTALL_DIR} PATH "Path to robin-hood-hashing repository")
 -    endif()
 -    set(ROBIN_HOOD_HASHING_INCLUDE_DIR "${ROBIN_HOOD_HASHING_INSTALL_DIR}/src/include" PATH "Path to robin-hood-hashing/src/include")
-+    include_directories(${CONAN_INCLUDE_DIRS_ROBIN-HOOD-HASHING})
++    find_package(robin_hood REQUIRED CONFIG)
  endif()
  
  if(BUILD_TESTS)
+@@ -375,7 +372,7 @@ target_include_directories(VkLayer_utils
+                                   ${VulkanHeaders_INCLUDE_DIR})
+ 
+ if (USE_ROBIN_HOOD_HASHING)
+-    target_include_directories(VkLayer_utils PUBLIC ${ROBIN_HOOD_HASHING_INCLUDE_DIR})
++    target_link_libraries(VkLayer_utils PUBLIC robin_hood::robin_hood)
+     target_compile_definitions(VkLayer_utils PUBLIC USE_ROBIN_HOOD_HASHING)
+ endif()
+ 
+--- a/layers/CMakeLists.txt
++++ b/layers/CMakeLists.txt
+@@ -297,9 +297,6 @@ if(BUILD_LAYERS)
+     if(INSTRUMENT_OPTICK)
+         target_include_directories(VkLayer_khronos_validation PRIVATE ${OPTICK_SOURCE_DIR})
+     endif()
+-    if (USE_ROBIN_HOOD_HASHING)
+-        target_include_directories(VkLayer_khronos_validation PRIVATE ${ROBIN_HOOD_HASHING_INCLUDE_DIR})
+-    endif()
+     target_link_libraries(VkLayer_khronos_validation PRIVATE ${SPIRV_TOOLS_LIBRARIES})
+ 
+     # The output file needs Unix "/" separators or Windows "\" separators On top of that, Windows separators actually need to be doubled
