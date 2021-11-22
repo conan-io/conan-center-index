@@ -1,5 +1,5 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
+--- runtime/Cpp/CMakeLists.txt
++++ runtime/Cpp/CMakeLists.txt
 @@ -40,8 +40,7 @@
  endif()
  
@@ -10,8 +10,8 @@
  endif()
  if(APPLE)
    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
---- runtime/CMakeLists.txt
-+++ runtime/CMakeLists.txt
+--- runtime/Cpp/runtime/CMakeLists.txt
++++ runtime/Cpp/runtime/CMakeLists.txt
 @@ -76,8 +76,8 @@
  endif()
  
