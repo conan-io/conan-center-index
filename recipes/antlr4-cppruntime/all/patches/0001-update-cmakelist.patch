@@ -23,7 +23,7 @@
  elseif(APPLE)
    target_link_libraries(antlr4_shared ${COREFOUNDATION_LIBRARY})
    target_link_libraries(antlr4_static ${COREFOUNDATION_LIBRARY})
-@@ -141,7 +141,7 @@
+@@ -141,8 +141,8 @@
                                   COMPILE_FLAGS "${disabled_compile_warnings} ${extra_static_compile_flags}")
  
  install(TARGETS antlr4_shared
@@ -33,13 +33,4 @@
 +        ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
  install(TARGETS antlr4_static
          DESTINATION lib
-@@ -141,7 +141,7 @@
-                                  COMPILE_FLAGS "${disabled_compile_warnings} ${extra_static_compile_flags}")
- 
- install(TARGETS antlr4_shared
--        DESTINATION lib
--        EXPORT antlr4-targets)
-+        EXPORT antlr4-targets
-+        ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
- install(TARGETS antlr4_static
-         DESTINATION lib
+         EXPORT antlr4-targets)
