@@ -9,7 +9,7 @@ class Antlr4CppRuntimeConan(ConanFile):
     name = "antlr4-cppruntime"
     homepage = "https://github.com/antlr/antlr4/tree/master/runtime/Cpp"
     description = "C++ runtime support for ANTLR (ANother Tool for Language Recognition)"
-    topics = ("conan", "antlr", "parser")
+    topics = ("antlr", "parser", "runtime")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
