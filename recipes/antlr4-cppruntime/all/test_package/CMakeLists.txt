@@ -2,10 +2,14 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(Antlr4-cppruntime REQUIRED CONFIG)
+find_package(antlr4-cppruntime REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if(TARGET antlr4_shared)
+  target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
+else()
+  target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_static)
+endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
