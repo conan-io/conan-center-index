@@ -1,0 +1,21 @@
+--- a/getProcAddress.cpp
++++ b/getProcAddress.cpp
+@@ -21,7 +21,7 @@ ProcAddress getProcAddress(const char * name)
+     static auto module = LoadLibrary(_T("OPENGL32.DLL"));
+ 
+ 	// Prevent static linking of opengl32
+-	static auto wglGetProcAddress_ = reinterpret_cast<void * (__stdcall *)(const char *)>(::GetProcAddress(module, "wglGetProcAddress"));
++	static auto wglGetProcAddress_ = reinterpret_cast<void * (__stdcall *)(const char *)>((uintptr_t)::GetProcAddress(module, "wglGetProcAddress"));
+ 	assert(wglGetProcAddress_ != nullptr);
+ 
+ 	auto procAddress = wglGetProcAddress_(name);
+@@ -30,7 +30,7 @@ ProcAddress getProcAddress(const char * name)
+ 		return reinterpret_cast<ProcAddress>(procAddress);
+ 	}
+ 
+-	procAddress = ::GetProcAddress(module, name);
++	procAddress = (void*)::GetProcAddress(module, name);
+     return reinterpret_cast<ProcAddress>(procAddress);
+ }
+
+
