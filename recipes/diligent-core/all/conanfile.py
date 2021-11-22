@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
-
+from conans.errors import ConanInvalidConfiguration
 
 class DiligentCoreConan(ConanFile):
     name = "diligent-core"
@@ -40,6 +40,10 @@ class DiligentCoreConan(ConanFile):
                 self.info.settings.compiler.runtime = "MD/MDd"
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
+
+    def validate(self):
+        if self.options["spirv-cross"].namespace != 'diligent_spirv_cross':
+            raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross")
 
     def config_options(self):
         if self.settings.os == "Windows":
