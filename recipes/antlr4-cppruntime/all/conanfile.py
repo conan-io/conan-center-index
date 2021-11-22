@@ -52,9 +52,8 @@ class Antlr4CppRuntimeConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = os.path.join( self._main_code_subfolder , "runtime", "Cpp" )
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         self.requires("utfcpp/3.2.1")
