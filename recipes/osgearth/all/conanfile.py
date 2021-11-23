@@ -1,11 +1,13 @@
 from conans import ConanFile, CMake, tools
 from conan.tools.files import rename
+from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
 
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
+    version = "3.2"
     license = "OSGEARTH SOFTWARE LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     description = "osgEarth is a C++ geospatial SDK and terrain engine. \
@@ -75,6 +77,8 @@ class OsgearthConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
+        elif self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("With apple-clang cppstd needs to be set, since default is not at least c++11.")
 
     def configure(self):
         if self.options.shared:
@@ -83,6 +87,9 @@ class OsgearthConan(ConanFile):
     def config_options(self):
         if not os_info.is_windows:
             self.options.enable_wininet_for_http = False
+            
+        if self.settings.compiler == "Visual Studio":
+            self.options.build_procedural_nodekit = False
 
     def requirements(self):
 
@@ -154,7 +161,7 @@ class OsgearthConan(ConanFile):
         if hasattr(self, "_cmake"):
             return self._cmake
 
-        generator_ = None
+        generator_ = "Ninja"
         if os_info.detect_windows_subsystem() == "MSYS2":
             generator_ = "MinGW Makefiles"
 
@@ -199,7 +206,8 @@ class OsgearthConan(ConanFile):
         if self.options.install_shaders:
             rename(self, os.path.join(self.package_folder, "resources"), os.path.join(self.package_folder, "res"))
 
-        rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
+        if os_info.is_linux:
+            rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
@@ -230,6 +238,8 @@ class OsgearthConan(ConanFile):
 
         osgearth = setup_lib("osgEarth", required_libs)
 
+        if not self.options.shared and self.settings.compiler == "Visual Studio":
+            osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
         if self.options.build_zip_plugin:
             osgearth.requires += ["libzip::libzip"]
             osgearth.requires += ["zstd::zstd"]
