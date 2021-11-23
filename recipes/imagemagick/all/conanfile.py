@@ -319,6 +319,7 @@ class ImageMagicConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(
             self, win_bash=tools.os_info.is_windows
         )
+        self._autotools.libs = []
 
         # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
         xft_path = os.path.join(self.build_folder, "xft.pc")
