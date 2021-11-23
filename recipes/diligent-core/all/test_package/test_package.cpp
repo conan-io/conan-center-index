@@ -1,3 +1,4 @@
+#include "Common/interface/RefCntAutoPtr.hpp"
 
 int main()
 {

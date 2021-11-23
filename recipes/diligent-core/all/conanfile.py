@@ -43,7 +43,7 @@ class DiligentCoreConan(ConanFile):
 
     def validate(self):
         if self.options["spirv-cross"].namespace != 'diligent_spirv_cross':
-            raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross")
+            raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross. To do so, add [-o spirv-cross:namespace=diligent_spirv_cross]")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -120,16 +120,21 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+                     dst=os.path.join(self.package_folder, "include", "DiligentCore"))
+
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
+            self.cpp_info.libdirs.append("lib/DiligentCore")
         if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
+            self.cpp_info.libdirs.append("lib/DiligentCore")
 
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "source_subfolder"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
+        # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE=diligent_spirv_cross")
         self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
