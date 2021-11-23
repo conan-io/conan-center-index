@@ -161,7 +161,7 @@ class OsgearthConan(ConanFile):
         if hasattr(self, "_cmake"):
             return self._cmake
 
-        generator_ = "Ninja"
+        generator_ = None
         if os_info.detect_windows_subsystem() == "MSYS2":
             generator_ = "MinGW Makefiles"
 
