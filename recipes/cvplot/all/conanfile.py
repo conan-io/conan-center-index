@@ -25,7 +25,7 @@ class CvPlotConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            self.options.remove("shared")
+            del self.options.shared
 
     def package_id(self):
         if self.options.header_only:
