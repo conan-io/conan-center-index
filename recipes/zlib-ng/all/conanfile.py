@@ -85,7 +85,7 @@ class ZlibNgConan(ConanFile):
         suffix = "" if self.options.zlib_compat else "-ng"
         self.cpp_info.names["pkg_config"] = "zlib" + suffix
         if self.settings.os == "Windows":
-            static_flag = "" if not self.options.shared else "static"
+            static_flag = "" if self.options.shared else "static"
             build_type = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.libs = ["zlib{}{}{}".format(static_flag, suffix, build_type)]
         else:
