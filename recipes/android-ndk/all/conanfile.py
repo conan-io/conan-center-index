@@ -94,18 +94,20 @@ class AndroidNDKConan(ConanFile):
         return f"{arch}-linux-{abi}"
 
     @property
+    def _ndk_major_minor(self):
+        match = re.search(r"r(\d+)(\w?)", self.version)
+        assert match
+        major, minor = match.groups()
+        assert major
+        return int(major), minor if minor else "a"
+
+    @property
     def _ndk_version_major(self):
-        match = re.search(r"r(\d+)\w?", self.version)
-        assert(match != None)
-        assert(match.group(1))
-        return int(match.group(1))
-        
+        return self._ndk_major_minor[0]
+
     @property
     def _ndk_version_minor(self):
-        match = re.search(r"r\d+(\w?)", self.version)
-        assert(match != None)
-        # pretend that there's an 'a' for the first of each major version
-        return match.group(1) if match.group(1) else 'a'
+        return self._ndk_major_minor[1]
 
     def _fix_permissions(self):
         if os.name != "posix":
