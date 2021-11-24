@@ -10,7 +10,7 @@ class Iir1Conan(ConanFile):
     homepage = "https://github.com/berndporr/iir1"
     topics = ("dsp", "signals", "filtering")
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -67,6 +67,8 @@ class Iir1Conan(ConanFile):
         self.copy('COPYING', dst='licenses', src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
 
 
     def package_info(self):
