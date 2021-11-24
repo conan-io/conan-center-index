@@ -45,6 +45,10 @@ class Iir1Conan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
+            
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if self.settings.compiler == "gcc" and compiler_version <= 5:
+            raise ConanInvalidConfiguration("GCC version < 5 not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
