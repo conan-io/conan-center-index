@@ -3,15 +3,17 @@ from conans.errors import ConanInvalidConfiguration
 
 import os
 
+equired_conan_version = ">=1.33.0"
+
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
     description = "zlib data compression library for the next generation systems"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/Dead2/zlib-ng/"
+    homepage = "https://github.com/zlib-ng/zlib-ng/"
     license ="Zlib"
-    topics = ("conan", "zlib", "compression")
+    topics = ("zlib", "compression")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake",
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "zlib_compat": [True, False],
@@ -48,8 +50,8 @@ class ZlibNgConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("zlib-ng-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
         if self.options.zlib_compat and not self.options.with_gzfileop:
