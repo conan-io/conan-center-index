@@ -198,12 +198,15 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_os(self):
-        _, _, target_os = tools.get_gnu_triplet(
-            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
-            str(self.settings.arch),
-            str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        ).split("-")
-        return target_os
+        if self.settings.compiler == "Visual Studio":
+            return "win32"
+        else:
+            _, _, target_os = tools.get_gnu_triplet(
+                "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+                str(self.settings.arch),
+                str(self.settings.compiler) if self.settings.os == "Windows" else None,
+            ).split("-")
+            return target_os
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_libx264 and not self.options["libx264"].shared:
