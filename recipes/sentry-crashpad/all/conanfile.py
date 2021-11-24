@@ -144,7 +144,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["snapshot"].libs = ["crashpad_snapshot"]
         self.cpp_info.components["snapshot"].requires = ["client", "compat", "util", "mini_chromium"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["snapshot"].system_libs.append("PowrProf")
+            self.cpp_info.components["snapshot"].system_libs.append("powrprof")
 
         self.cpp_info.components["minidump"].libs = ["crashpad_minidump"]
         self.cpp_info.components["minidump"].requires = ["compat", "snapshot", "util", "mini_chromium"]
