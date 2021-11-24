@@ -1,5 +1,9 @@
 # Changelog
 
+### 22-November-2021 - 17:53 CET
+
+- [feature] Cache computation of package IDs.
+
 ### 15-November-2021 - 11:03 CET
 
 - [feature] Add `xlarge` pod size in Linux for building packages with higher memory requirements.
