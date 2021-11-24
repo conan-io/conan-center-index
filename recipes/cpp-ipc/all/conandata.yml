@@ -1,0 +1,4 @@
+sources:
+  "1.1.1":
+    url: "https://github.com/mutouyun/cpp-ipc/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "5c7539de763e5cf3bb3469df17837793cebe2cd9fe44ab2f6ef1ba45f06206a5"

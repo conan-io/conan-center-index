@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
-    test_type = "build_requires"
+    test_type = "build_requires", "requires"
 
     @property
     def _settings_build(self):

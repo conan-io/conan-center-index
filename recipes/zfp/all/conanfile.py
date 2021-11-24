@@ -91,6 +91,18 @@ class ZfpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        if not self.options.shared and self.options.with_openmp:
+            openmp_flags = []
+            if self.settings.compiler in ("Visual Studio", "msvc"):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler in ("gcc", "clang"):
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "apple-clang":
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+
+            self.cpp_info.components["_zfp"].sharedlinkflags = openmp_flags
+            self.cpp_info.components["_zfp"].exelinkflags = openmp_flags
+
         # zfp
         self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"
         self.cpp_info.components["_zfp"].names["cmake_find_package_multi"] = "zfp"
