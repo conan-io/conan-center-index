@@ -9,8 +9,8 @@ boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
 caffe/1.0.windows.dssl2
-cpython-distro/2.7.18.dssl1
 dlib/19.4
+dojo-toolkit/1.11.4@trassir/sdk120
 ffmpeg/3.3.1.dssl1
 freetype/2.10.1
 gflags/2.2.2
@@ -19,6 +19,7 @@ gsoap_utils/2.8.93@trassir/stable
 Guardant/7.update7@trassir/stable
 hdf5/1.10.6
 hidapi/0.10.1
+hikvision-pacs-sdk/6.1.4.42@trassir/sdk142
 icu/64.2.dssl2
 intel_media_sdk/2018R2_1
 jansson/2.12
