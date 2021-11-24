@@ -46,7 +46,7 @@ class CxxOptsConan(ConanFile):
 
     def requirements(self):
         if self.options.unicode:
-            self.requires("icu/64.2")
+            self.requires("icu/70.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
