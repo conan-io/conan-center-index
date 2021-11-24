@@ -57,6 +57,7 @@ class OdbcConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
         static_flag = "no" if self.options.shared else "yes"
         shared_flag = "yes" if self.options.shared else "no"
         libiconv_flag = "yes" if self.options.with_libiconv else "no"
