@@ -87,7 +87,10 @@ class OsgearthConan(ConanFile):
     def config_options(self):
         if not os_info.is_windows:
             self.options.enable_wininet_for_http = False
-            
+
+        if os_info.is_windows:
+            del self.options.fPIC
+
         if self.settings.compiler == "Visual Studio":
             self.options.build_procedural_nodekit = False
 
