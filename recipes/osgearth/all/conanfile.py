@@ -93,10 +93,10 @@ class OsgearthConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.options.build_procedural_nodekit = False
 
-        if self.settings.compiler == "gcc" and self.compiler.version == "11":
+        if self.settings.compiler == "gcc" and self.settings.compiler.version == "11":
             # need draco >= 1.4.0 for gcc11
             # https://github.com/google/draco/issues/635
-            del self.options.with_draco
+            self.options.with_draco = False
 
     def requirements(self):
 
