@@ -129,6 +129,12 @@ class Assimp(ConanFile):
         return self.options.with_gltf or self.options.with_gltf_exporter
 
     @property
+    def _depends_on_draco(self):
+        if tools.Version(self.version) < tools.Version("5.1.0"):
+            return False
+        return self.options.with_gltf or self.options.with_gltf_exporter
+
+    @property
     def _depends_on_zlib(self):
         return self.options.with_assbin or self.options.with_assbin_exporter or \
             self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
@@ -155,6 +161,8 @@ class Assimp(ConanFile):
             self.requires("rapidjson/cci.20200410")
         if self._depends_on_zlib:
             self.requires("zlib/1.2.11")
+        if self._depends_on_draco:
+            self.requires("draco/1.4.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -184,7 +192,7 @@ class Assimp(ConanFile):
         if tools.Version(self.version) < "5.1.0":
             vendors.append("irrXML")
         else:
-            vendors.append("pugixml")
+            vendors.extend(["pugixml", "draco"])
         for vendor in vendors:
             tools.rmdir(os.path.join(
                 self._source_subfolder, "contrib", vendor))
