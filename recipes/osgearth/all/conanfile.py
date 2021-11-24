@@ -7,7 +7,6 @@ import os
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
-    version = "3.2"
     license = "OSGEARTH SOFTWARE LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     description = "osgEarth is a C++ geospatial SDK and terrain engine. \
@@ -94,6 +93,11 @@ class OsgearthConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.options.build_procedural_nodekit = False
 
+        if self.settings.compiler == "gcc" and self.compiler.version == "11":
+            # need draco >= 1.4.0 for gcc11
+            # https://github.com/google/draco/issues/635
+            del self.options.with_draco
+
     def requirements(self):
 
         self.requires("opengl/system")
@@ -120,12 +124,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.36.0")
         if self.options.with_draco:
-            if self.settings.compiler == "gcc" and self.compiler.version == "11":
-                # need draco >= 1.4.0 for gcc11
-                # https://github.com/google/draco/issues/635
-                self.requires("draco/[>=1.4.0]")
-            else:
-                self.requires("draco/[>1.3.6]")
+            self.requires("draco/[>1.3.6]")
         # if self.options.with_basisu:
         #     self.requires("basisu")
         # if self.options.with_glew:
