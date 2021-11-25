@@ -74,7 +74,10 @@ class Iir1Conan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-
-
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["iir" if self.options.shared else "iir_static"]
+        self.cpp_info.filenames["cmake_find_package"] = "iir"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "iir"
+        self.cpp_info.names["cmake_find_package"] = "iir" if self.options.shared else "iir_static"
+        self.cpp_info.names["cmake_find_package_multi"] = "iir" if self.options.shared else "iir_static"
+        self.cpp_info.names["pkg_config"] = "iir"
