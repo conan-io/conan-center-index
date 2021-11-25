@@ -39,6 +39,8 @@ class GperftoolsConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
