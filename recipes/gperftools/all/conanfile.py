@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import functools
 import os
 
-from conans import ConanInvalidConfiguration
+required_conan_version = ">=1.33.0"
 
 
 class GperftoolsConan(ConanFile):
