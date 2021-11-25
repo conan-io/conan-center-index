@@ -99,9 +99,35 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": True,
         "with_programs": True,
     }
-
     generators = "pkg_config"
 
+    _dependencies = {
+        "avdevice": ["avcodec"],
+        "avformat": ["avcodec"],
+        "avdevice": ["avformat"],
+        "avfilter": ["avformat"],
+        "with_bzip2": ["avformat"],
+        "with_ssl": ["avformat"],
+        "with_zlib": ["avcodec"],
+        "with_lzma": ["avcodec"],
+        "with_libiconv": ["avcodec"],
+        "with_openjpeg": ["avcodec"],
+        "with_openh264": ["avcodec"],
+        "with_vorbis": ["avcodec"],
+        "with_opus": ["avcodec"],
+        "with_libx264": ["avcodec"],
+        "with_libx265": ["avcodec"],
+        "with_libvpx": ["avcodec"],
+        "with_libmp3lame": ["avcodec"],
+        "with_libfdk_aac": ["avcodec"],
+        "with_libwebp": ["avcodec"],
+        "with_freetype": ["avfilter"],
+        "with_zeromq": ["avfilter", "avformat"],
+        "with_libalsa": ["avdevice"],
+        "with_xcb": ["avdevice"],
+        "with_pulse": ["avdevice"],
+        "with_sdl": ["with_programs"]
+    }
     _autotools = None
 
     @property
@@ -188,65 +214,14 @@ class FFMpegConan(ConanFile):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("securetransport is only available on Apple")
 
-        if not self.options.avcodec:
-            if self.options.avdevice:
-                raise ConanInvalidConfiguration("FFmpeg 'avdevice' option requires 'avcodec' option to be enabled")
-            if self.options.avformat:
-                raise ConanInvalidConfiguration("FFmpeg 'avformat' option requires 'avcodec' option to be enabled")
-        if not self.options.avformat:
-            if self.options.avdevice:
-                raise ConanInvalidConfiguration("FFmpeg 'avdevice' option requires 'avformat' option to be enabled")
-            if self.options.avfilter:
-                raise ConanInvalidConfiguration("FFmpeg 'avfilter' option requires 'avformat' option to be enabled")
-
-        if not self.options.avformat:
-            if self.options.with_bzip2:
-                raise ConanInvalidConfiguration("FFmpeg 'with_bzip2' option requires 'avformat' option to be enabled")
-            if self.options.with_ssl:
-                raise ConanInvalidConfiguration("FFmpeg 'with_ssl' option requires 'avformat' option to be enabled")
-        if not self.options.avcodec:
-            if self.options.with_zlib:
-                raise ConanInvalidConfiguration("FFmpeg 'with_zlib' option requires 'avcodec' option to be enabled")
-            if self.options.with_lzma:
-                raise ConanInvalidConfiguration("FFmpeg 'with_lzma' option requires 'avcodec' option to be enabled")
-            if self.options.with_libiconv:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libiconv' option requires 'avcodec' option to be enabled")
-            if self.options.with_openjpeg:
-                raise ConanInvalidConfiguration("FFmpeg 'with_openjpeg' option requires 'avcodec' option to be enabled")
-            if self.options.with_openh264:
-                raise ConanInvalidConfiguration("FFmpeg 'with_openh264' option requires 'avcodec' option to be enabled")
-            if self.options.with_vorbis:
-                raise ConanInvalidConfiguration("FFmpeg 'with_vorbis' option requires 'avcodec' option to be enabled")
-            if self.options.with_opus:
-                raise ConanInvalidConfiguration("FFmpeg 'with_opus' option requires 'avcodec' option to be enabled")
-            if self.options.with_libx264:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libx264' option requires 'avcodec' option to be enabled")
-            if self.options.with_libx265:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libx265' option requires 'avcodec' option to be enabled")
-            if self.options.with_libvpx:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libvpx' option requires 'avcodec' option to be enabled")
-            if self.options.with_libmp3lame:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libmp3lame' option requires 'avcodec' option to be enabled")
-            if self.options.with_libfdk_aac:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libfdk_aac' option requires 'avcodec' option to be enabled")
-            if self.options.with_libwebp:
-                raise ConanInvalidConfiguration("FFmpeg 'with_libwebp' option requires 'avcodec' option to be enabled")
-        if not self.options.avfilter:
-            if self.options.with_freetype:
-                raise ConanInvalidConfiguration("FFmpeg 'with_freetype' option requires 'avfilter' option to be enabled")
-        if not self.options.avfilter and not self.options.avformat:
-            if self.options.with_zeromq:
-                raise ConanInvalidConfiguration("FFmpeg 'with_zeromq' option requires 'avfilter' or 'avformat' option to be enabled")
-        if not self.options.avdevice:
-            if self.options.get_safe("with_libalsa"):
-                raise ConanInvalidConfiguration("FFmpeg 'with_libalsa' option requires 'avdevice' option to be enabled")
-            if self.options.get_safe("with_xcb"):
-                raise ConanInvalidConfiguration("FFmpeg 'with_xcb' option requires 'avdevice' option to be enabled")
-            if self.options.get_safe("with_pulse"):
-                raise ConanInvalidConfiguration("FFmpeg 'with_pulse' option requires 'avdevice' option to be enabled")
-        if not self.options.with_programs:
-            if self.options.with_sdl:
-                raise ConanInvalidConfiguration("FFmpeg 'with_sdl' option requires 'with_programs' option to be enabled")
+        for dependency, features in self._dependencies.items():
+            if not self.options.get_safe(dependency):
+                continue
+            used = False
+            for feature in features:
+                used = used or self.options.get_safe(feature)
+            if not used:
+                raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(dependency, "' or '".join(features)))
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
