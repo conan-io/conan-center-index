@@ -48,10 +48,6 @@ class LibdeflateConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"),
-            """SHARED_LIB_LDFLAGS := -Wl,--out-implib,libdeflate.lib """,
-            """$(warning aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
-            SHARED_LIB_LDFLAGS := -Wl,--out-implib,libdeflate.dll.a """)
 
     def _build_msvc(self):
         makefile_msc_file = os.path.join(self._source_subfolder, "Makefile.msc")
@@ -72,10 +68,7 @@ class LibdeflateConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
                 if self.settings.os == "Windows":
-                    if self.settings.compiler == "Visual Studio":
-                        suffix = ".dll" if self.options.shared else "static.lib"
-                    else:
-                        suffix = ".so" if self.options.shared else ".a"
+                    suffix = ".dll" if self.options.shared else "static.lib"
                 elif tools.is_apple_os(self.settings.os):
                     suffix = ".dylib" if self.options.shared else ".a"
                 else:
@@ -99,12 +92,8 @@ class LibdeflateConan(ConanFile):
         self.copy("*.dylib", src=self._source_subfolder, dst="lib", symlinks=True)
 
     def package_info(self):
-        prefix = ""
-        suffix = ""
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            prefix = "lib"
-            if not self.options.shared:
-                suffix = "static"
+        prefix = "lib" if self.settings.os == "Windows" else ""
+        suffix = "static" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.libs = ["{0}deflate{1}".format(prefix, suffix)]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["LIBDEFLATE_DLL"]
