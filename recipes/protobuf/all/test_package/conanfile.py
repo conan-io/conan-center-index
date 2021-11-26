@@ -9,6 +9,10 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.build_requires(str(self.requires['protobuf']))
+        if tools.is_apple_os(self.settings.os):
+            # FIXME: CCI uses 3.16.4 on apple-clang 11 machine
+            # up-to-date CMake is required to whitelist DYLD_LIBRARY_PATH for SIP protection
+            self.build_requires("cmake/3.22.0")
 
     @contextmanager
     def _env(self):
