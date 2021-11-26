@@ -37,12 +37,18 @@ class LibZipppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        libzippp_version = str(self.version)
+        if libzippp_version != "4.0" and len(libzippp_version.split("-")) != 2:
+            raise tools.ConanInvalidConfiguration("{}: version number must include '-'. (ex. '5.0-1.8.0')".format(self.name))
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         if tools.Version(self.version) == "4.0":
             self.requires("libzip/1.7.3")
         else:
-            self.requires("libzip/1.8.0")
+            libzip_version = str(self.version).split("-")[1]
+            self.requires("libzip/{}".format(libzip_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
