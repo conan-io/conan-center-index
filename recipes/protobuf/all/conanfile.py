@@ -141,23 +141,6 @@ class ProtobufConan(ConanFile):
             protoc_target
         )
 
-        # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
-        # (even with virtualrunenv, this fix might be required due to SIP)
-        # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if tools.is_apple_os(self.settings.os):
-            tools.replace_in_file(
-                protobuf_config_cmake,
-                "add_custom_command(",
-                ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
-                 "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
-                 "add_custom_command(")
-            )
-            tools.replace_in_file(
-                protobuf_config_cmake,
-                "COMMAND  protobuf::protoc",
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
-            )
-
         # Disable a potential warning in protobuf-module.cmake.in
         # TODO: remove this patch? Is it really useful?
         protobuf_module_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in")
