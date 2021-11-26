@@ -58,6 +58,8 @@ class DiligentCoreConan(ConanFile):
             tools.patch(**patch)
 
     def requirements(self):
+        self.requires("opengl/system")
+
         self.requires("libjpeg/9d")
         self.requires("libtiff/4.3.0")
         self.requires("zlib/1.2.11")
@@ -66,11 +68,11 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-cross/cci.20210930")
         # commented out due to conan-center CI limitations
         #self.options["spirv-cross"].namespace = "diligent_spirv_cross"
-        self.requires("spirv-headers/cci.20211010")
+        self.requires("spirv-headers/1.2.198.0")
         self.requires("spirv-tools/2021.4")
         self.requires("glslang/11.7.0")
-        self.requires("vulkan-headers/1.2.195")
-        self.requires("volk/1.2.195")
+        self.requires("vulkan-headers/1.2.198")
+        self.requires("volk/1.2.198")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
@@ -127,9 +129,9 @@ class DiligentCoreConan(ConanFile):
 
     def package_info(self):
         if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/DiligentCore")
+            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
         if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/DiligentCore")
+            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
