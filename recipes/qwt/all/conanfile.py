@@ -89,7 +89,6 @@ class QwtConan(ConanFile):
 
     def build(self):
         self._patch_qwt_config_files()
-        self._patch_qmake_generator_files()
 
         if self.settings.compiler == "Visual Studio":
             vcvars = tools.vcvars_command(self.settings)
