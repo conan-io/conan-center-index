@@ -171,7 +171,8 @@ class AndroidNDKConan(ConanFile):
 
     def _define_tool_var_naked(self, name, value):
         ndk_bin = os.path.join(self._ndk_root, "bin")
-        path = os.path.join(ndk_bin, value)
+        suffix = ".exe" if self.settings_build.os == "Windows" else ""
+        path = os.path.join(ndk_bin, value + suffix)
         if not os.path.isfile(path):
             raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
