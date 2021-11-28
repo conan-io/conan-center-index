@@ -7,7 +7,7 @@ import shutil
 required_conan_version = ">=1.33.0"
 
 class OpenSimulationInterfaceConan(ConanFile):
-    name = "open_simulation_interface"
+    name = "open-simulation-interface"
     homepage = "https://github.com/OpenSimulationInterface/open-simulation-interface"
     description = 'Generic interface environmental perception of automated driving functions in virtual scenarios'
     topics = ("ASAM", "OSI", "ADAS", "simulation")
