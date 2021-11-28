@@ -11,8 +11,8 @@
 +    find_package(robin_hood REQUIRED CONFIG)
  endif()
  
- if(BUILD_TESTS OR BUILD_LAYERS)
-@@ -389,7 +386,7 @@ target_include_directories(VkLayer_utils
+ if(BUILD_TESTS)
+@@ -372,7 +369,7 @@ target_include_directories(VkLayer_utils
                                    ${VulkanHeaders_INCLUDE_DIR})
  
  if (USE_ROBIN_HOOD_HASHING)
@@ -23,7 +23,7 @@
  
 --- a/layers/CMakeLists.txt
 +++ b/layers/CMakeLists.txt
-@@ -291,9 +291,6 @@ if(BUILD_LAYERS)
+@@ -301,9 +301,6 @@ if(BUILD_LAYERS)
      if(INSTRUMENT_OPTICK)
          target_include_directories(VkLayer_khronos_validation PRIVATE ${OPTICK_SOURCE_DIR})
      endif()
