@@ -6,48 +6,6 @@ import shutil
 
 required_conan_version = ">=1.33.0"
 
-
-def _patch_cmake_file(cmake_file):
-    """
-        Removes all the different artifacts and configures the cmake file to
-        generate only one library.
-    """
-    cmake_patch = '''
-
-add_library(${PROJECT_NAME} ${PROTO_SRCS} ${PROTO_HEADERS})
-
-target_include_directories(${PROJECT_NAME}
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-        $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
-)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC protobuf::libprotobuf)
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-set_property(
-    TARGET ${PROJECT_NAME}
-    PROPERTY SOVERSION ${${PROJECT_NAME}_SOVERSION}
-)
-set_property(
-    TARGET ${PROJECT_NAME}
-    PROPERTY VERSION ${${PROJECT_NAME}_LIBVERSION}
-)
-
-    '''
-
-    result = None
-    with open(cmake_file) as f:
-        lines = f.read()
-        result = re.sub("(add_library\(\$\{PROJECT_NAME\}_static.+?)\n(set_property\(\n.+?\)\n)", rf"{cmake_patch}", lines,
-                flags=re.S)
-
-    with open(cmake_file, 'w') as fh:
-        fh.write(result)
-
-
-
 class OpenSimulationInterfaceConan(ConanFile):
     name = "open_simulation_interface"
     homepage = "https://github.com/OpenSimulationInterface/open-simulation-interface"
@@ -65,7 +23,6 @@ class OpenSimulationInterfaceConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_paths", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
     _cmake = None
 
     @property
@@ -75,6 +32,12 @@ class OpenSimulationInterfaceConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -94,10 +57,9 @@ class OpenSimulationInterfaceConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        _patch_cmake_file(f"{self._source_subfolder}/CMakeLists.txt")
-        tools.replace_in_file(f"{self._source_subfolder}/CMakeLists.txt",
-                "set(INSTALL_LIB_DIR ${INSTALL_LIB_DIR}/osi${VERSION_MAJOR})",
-                "")
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -126,5 +88,4 @@ class OpenSimulationInterfaceConan(ConanFile):
         self.cpp_info.components["libopen_simulation_interface"].names["cmake_find_package_multi"] = "open_simulation_interface"
         self.cpp_info.components["libopen_simulation_interface"].libs = ["open_simulation_interface"]
         self.cpp_info.components["libopen_simulation_interface"].requires = ["protobuf::libprotobuf"]
-        #self.cpp_info.components["libopen_simulation_interface"].requires = ["protobuf::protobuf"]
 
