@@ -48,6 +48,7 @@ class VulkanValidationLayersConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
+            "1.2.198.0": "2021.4",
             "1.2.189.2": "2021.3",
             "1.2.182": "2021.2",
             "1.2.154.0": "2020.5",
@@ -56,6 +57,7 @@ class VulkanValidationLayersConan(ConanFile):
     @property
     def _get_compatible_vulkan_headers_version(self):
         return {
+            "1.2.198.0": "1.2.198.0",
             "1.2.189.2": "1.2.189",
             "1.2.182": "1.2.182",
             "1.2.154.0": "1.2.154.0",
