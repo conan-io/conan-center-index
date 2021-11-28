@@ -23,7 +23,10 @@ class DlibConan(ConanFile):
         "with_png": [True, False],
         "with_sse2": [True, False, "auto"],
         "with_sse4": [True, False, "auto"],
-        "with_avx": [True, False, "auto"]
+        "with_avx": [True, False, "auto"],
+        "with_blas": [True, False],
+        "with_lapack": [True, False],
+        "with_mkl_fft": [True, False]
     }
     default_options = {
         "shared": False,
@@ -33,7 +36,10 @@ class DlibConan(ConanFile):
         "with_png": True,
         "with_sse2": "auto",
         "with_sse4": "auto",
-        "with_avx": "auto"
+        "with_avx": "auto",
+        "with_blas": True,
+        "with_lapack": True,
+        "with_mkl_fft": True
     }
 
     _cmake = None
@@ -86,6 +92,10 @@ class DlibConan(ConanFile):
         self._cmake.definitions["DLIB_GIF_SUPPORT"] = self.options.with_gif
         self._cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         self._cmake.definitions["DLIB_PNG_SUPPORT"] = self.options.with_png
+
+        self._cmake.definitions["DLIB_USE_BLAS"] = self.options.with_blas
+        self._cmake.definitions["DLIB_USE_LAPACK"] = self.options.with_lapack
+        self._cmake.definitions["DLIB_USE_MKL_FFT"] = self.options.with_mkl_fft
 
         # Configure SIMD options if possible
         if self.settings.arch in ["x86", "x86_64"]:
