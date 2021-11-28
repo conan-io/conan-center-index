@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class MoltenVKConan(ConanFile):
@@ -167,8 +167,8 @@ class MoltenVKConan(ConanFile):
 
         if self.options.shared:
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
-            self.output.info("Appending VK_ICD_FILENAMES environment variable: {}".format(moltenvk_icd_path))
-            self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
+            self.output.info("Prepending to VK_ICD_FILENAMES runtime environment variable: {}".format(moltenvk_icd_path))
+            self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")
