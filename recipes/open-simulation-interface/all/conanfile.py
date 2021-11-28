@@ -77,7 +77,7 @@ class OpenSimulationInterfaceConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         try:
-            shutil.rmtree(os.path.join(self.package_folder, "CMake"))
+            shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
         except:
             pass
 
