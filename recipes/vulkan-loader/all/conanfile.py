@@ -31,7 +31,6 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "pkg_config"
     _cmake = None
 
@@ -42,6 +41,11 @@ class VulkanLoaderConan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
