@@ -141,9 +141,11 @@ class VulkanValidationLayersConan(ConanFile):
             tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
             tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
             # move dll and json manifest files in bin folder
+            bin_dir = os.path.join(self.package_folder, "bin")
+            tools.mkdir(bin_dir)
             for ext in ("*.dll", "*.json"):
-                for bin_file in glob.glob(os.path.join(self.package_folder, "lib", ext)):
-                    shutil.move(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
+                for bin_file in glob.glob(os.path.join(lib_dir, ext)):
+                    shutil.move(bin_file, os.path.join(bin_dir, os.path.basename(bin_file)))
         else:
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
