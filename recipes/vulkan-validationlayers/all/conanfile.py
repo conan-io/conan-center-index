@@ -149,7 +149,7 @@ class VulkanValidationLayersConan(ConanFile):
         else:
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
-            os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+            tools.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.libs = ["VkLayer_utils"]
