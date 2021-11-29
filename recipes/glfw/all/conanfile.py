@@ -133,6 +133,10 @@ class GlfwConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "glfw3")
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
