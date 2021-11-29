@@ -169,6 +169,8 @@ class MoltenVKConan(ConanFile):
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
             self.output.info("Prepending to VK_ICD_FILENAMES runtime environment variable: {}".format(moltenvk_icd_path))
             self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)
+            # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+            self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")
