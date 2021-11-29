@@ -104,7 +104,7 @@ class LitehtmlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"litehtml": "litehtml::litehtml", 
+            {"litehtml": "litehtml::litehtml",
              "gumbo":"litehtml::gumbo"}
         )
 
@@ -130,14 +130,20 @@ class LitehtmlConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
     def package_info(self):
         self.cpp_info.components["litehtml_litehtml"].set_property("cmake_target_name", "litehtml")
+
+        self.cpp_info.components["litehtml_litehtml"].names["cmake_find_package"] = "litehtml"
+        self.cpp_info.components["litehtml_litehtml"].names["cmake_find_package_multi"] = "litehtml"
+
         self.cpp_info.components["litehtml_litehtml"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["litehtml_litehtml"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
         self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
         if self.options.with_icu:
             self.cpp_info.components["litehtml_litehtml"].requires.append("icu::icu")
-        
+
         if True: # FIXME: remove once we use a vendored gumbo library
             self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
             self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
+            self.cpp_info.components["gumbo"].names["cmake_find_package"] = "gumbo"
+            self.cpp_info.components["gumbo"].names["cmake_find_package_multi"] = "gumbo"
