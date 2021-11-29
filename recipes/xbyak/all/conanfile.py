@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class XbyakConan(ConanFile):
@@ -30,4 +30,6 @@ class XbyakConan(ConanFile):
         self.copy("*.h", dst=os.path.join("include", "xbyak"), src=os.path.join(self._source_subfolder, "xbyak"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "xbyak"
+        self.cpp_info.names["cmake_find_package_multi"] = "xbyak"
         self.cpp_info.set_property("cmake_file_name", "xbyak")
