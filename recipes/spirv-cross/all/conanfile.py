@@ -218,7 +218,6 @@ class SpirvCrossConan(ConanFile):
 
             if self.options.shared:
                 self.cpp_info.components[target_lib].set_property("pkg_config_name", target_lib)
-
             prefix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
             self.cpp_info.components[target_lib].libs = ["{}{}".format(target_lib, prefix)]
             self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "spirv_cross"))
