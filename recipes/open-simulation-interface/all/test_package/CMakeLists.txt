@@ -1,15 +1,13 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(open_simulation_interface REQUIRED)
-find_package(Protobuf REQUIRED)
 
-add_executable(example example.cpp)
-target_link_libraries(example
-  protobuf::libprotobuf
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME}
   open_simulation_interface::open_simulation_interface
   )
 

@@ -10,10 +10,10 @@ class OpenSimulationInterfaceConan(ConanFile):
     name = "open-simulation-interface"
     homepage = "https://github.com/OpenSimulationInterface/open-simulation-interface"
     description = 'Generic interface environmental perception of automated driving functions in virtual scenarios'
-    topics = ("ASAM", "OSI", "ADAS", "simulation")
+    topics = ("asam", "adas", "open simulation", "automated driving")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL 2.0"
-    settings = "cppstd", "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
