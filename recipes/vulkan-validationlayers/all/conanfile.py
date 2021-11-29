@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -138,6 +140,10 @@ class VulkanValidationLayersConan(ConanFile):
             lib_dir = os.path.join(self.package_folder, "lib")
             tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
             tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
+            # move dll and json manifest files in bin folder
+            for ext in ("*.dll", "*.json"):
+                for bin_file in glob.glob(os.path.join(self.package_folder, "lib", ext)):
+                    shutil.move(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
         else:
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
