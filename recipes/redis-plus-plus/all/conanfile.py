@@ -121,6 +121,12 @@ class RedisPlusPlusConan(ConanFile):
         self.cpp_info.components["redis++lib"].set_property("cmake_target_name", "redis++" + "_static" if not self.options.shared else "")
         self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++" + "_static" if not self.options.shared else "")
 
+        self.cpp_info.names["cmake_find_package"] = "redis++"
+        self.cpp_info.names["cmake_find_package_multi"] = "redis++"
+        self.cpp_info.names["pkg_config"] = "redis++"
+        self.cpp_info.components["redis++lib"].names["cmake_find_package"] = "redis++" + "_static" if not self.options.shared else ""
+        self.cpp_info.components["redis++lib"].names["cmake_find_package_multi"] = "redis++" + "_static" if not self.options.shared else ""
+
         suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.components["redis++lib"].libs = ["redis++" + suffix]
         self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
