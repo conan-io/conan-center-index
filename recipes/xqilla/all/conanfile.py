@@ -76,6 +76,10 @@ class ConanXqilla(ConanFile):
         if self.options.get_safe("fPIC", True):
             conf_args.extend(["--with-pic"])
 
+        
+        if self.settings.arch == "armv8":
+            conf_args.extend(["--build=aarch64-unknown-linux-gnu"])
+
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
