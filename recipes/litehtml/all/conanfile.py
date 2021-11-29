@@ -136,6 +136,10 @@ class LitehtmlConan(ConanFile):
 
         self.cpp_info.components["litehtml_litehtml"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["litehtml_litehtml"].set_property("cmake_build_modules", [self._module_file_rel_path])
+
+        self.cpp_info.components["litehtml_litehtml"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["litehtml_litehtml"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
         self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
         self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
         if self.options.with_icu:
