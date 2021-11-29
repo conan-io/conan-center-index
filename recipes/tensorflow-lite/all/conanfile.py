@@ -170,6 +170,8 @@ class TensorflowLiteConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "tensorflowlite"
         self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
         self.cpp_info.names["cmake_find_package_multi"] = "tensorflowlite"
+        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [os.path.join(self._module_subfolder, self._module_file)]
 
         defines = []
         if not self.options.shared:
