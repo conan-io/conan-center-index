@@ -91,3 +91,11 @@ class GlewConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
         self.cpp_info.components["glewlib"].requires = ["opengl::opengl", "glu::glu"]
+
+        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
+        self.cpp_info.names["cmake_find_package"] = "GLEW"
+        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
+        self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
+        self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = "glew" if self.options.shared else "glew_s"
+
