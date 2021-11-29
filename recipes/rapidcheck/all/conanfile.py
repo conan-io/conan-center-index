@@ -132,6 +132,10 @@ class RapidcheckConan(ConanFile):
 
         self.cpp_info.components["rapidcheck_rapidcheck"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_build_modules", [self._module_file_rel_path])
+
+        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
         self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
         version = self.version[4:]
         if tools.Version(version) < "20201218":
