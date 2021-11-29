@@ -46,5 +46,11 @@ class CSVMONEKYConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
         self.cpp_info.set_property("cmake_target_name", "csvmonkey")
         self.cpp_info.set_property("pkg_config_name", "csvmonkey")
+
+        self.cpp_info.filenames["cmake_find_package"] = "csvmonkey"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "csvmonkey"
+        self.cpp_info.names["cmake_find_package"] = "csvmonkey"
+        self.cpp_info.names["cmake_find_package_multi"] = "csvmonkey"
+
         if self.options.with_spirit:
             self.cpp_info.defines.append("USE_SPIRIT")
