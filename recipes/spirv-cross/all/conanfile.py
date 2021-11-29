@@ -215,6 +215,8 @@ class SpirvCrossConan(ConanFile):
 
             self.cpp_info.components[target_lib].names["cmake_find_package"] = target_lib
             self.cpp_info.components[target_lib].names["cmake_find_package_multi"] = target_lib
+            self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
             if self.options.shared:
                 self.cpp_info.components[target_lib].set_property("pkg_config_name", target_lib)
