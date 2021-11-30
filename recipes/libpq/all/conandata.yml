@@ -54,3 +54,6 @@ patches:
   "13.3":
     - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
       base_path: "source_subfolder"
+  "9.6.19":
+    - patch_file: "patches/9.6.19/new.patch"
+      base_path: "source_subfolder"

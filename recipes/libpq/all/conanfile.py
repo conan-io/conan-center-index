@@ -4,7 +4,7 @@ import os
 import glob
 
 
-class LibpqConan(ConanFile):
+class ConanFile(ConanFile):
     name = "libpq"
     description = "The library used by all the standard PostgreSQL tools."
     topics = "libpq", "postgresql", "database", "db"
@@ -73,6 +73,10 @@ class LibpqConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1h")
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -232,6 +236,8 @@ class LibpqConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
         self.env_info.PostgreSQL_ROOT = self.package_folder
+
+        self.cpp_info.components["pq"].defines.append["foo"]
 
         self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
 
