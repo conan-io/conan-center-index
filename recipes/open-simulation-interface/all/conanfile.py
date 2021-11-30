@@ -79,7 +79,10 @@ class OpenSimulationInterfaceConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         try:
-            shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+            if self.settings.os == "Windows":
+                shutil.rmtree(os.path.join(self.package_folder, "CMake"))
+            else:
+                shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
         except:
             pass
 
