@@ -79,4 +79,5 @@ class MsgpackCConan(ConanFile):
         self.cpp_info.components["msgpack"].names["cmake_find_package"] = "msgpack-c"
         self.cpp_info.components["msgpack"].names["cmake_find_package_multi"] = "msgpack-c"
         self.cpp_info.components["msgpack"].set_property("cmake_target_name", "msgpack-c")
+        self.cpp_info.components["msgpack"].set_property("pkg_config_name", "msgpack")
         self.cpp_info.components["msgpack"].libs = ["msgpackc"]
