@@ -6,3 +6,7 @@ patches:
   "1.17.4":
     - patch_file: "patches/binutils-2.34-libbfd-fix.patch"
       base_path: "source_subfolder/util/cairo-trace"
+    - patch_file: "patches/cairo-1.17.4-trace-cflags-fix.patch"
+      base_path: "source_subfolder/util/cairo-trace"
+    - patch_file: "patches/cairo-1.17.4-xlib-xrender-option.patch"
+      base_path: "source_subfolder"
