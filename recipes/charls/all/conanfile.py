@@ -113,6 +113,14 @@ class CharlsConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
+        self.cpp_info.filenames["cmake_find_package"] = "charls"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "charls"
+        self.cpp_info.names["cmake_find_package"] = "charls"
+        self.cpp_info.names["cmake_find_package_multi"] = "charls"
+
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append("CHARLS_STATIC")
