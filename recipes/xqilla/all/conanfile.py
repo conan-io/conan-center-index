@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.40.0"
+required_conan_version = ">=1.33.0"
 
 
 class ConanXqilla(ConanFile):
