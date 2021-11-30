@@ -45,8 +45,8 @@ class ConanXqilla(ConanFile):
         )
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("The xqilla recipe currently only support Linux.")
+        if self.settings.os != "Linux" or self.settings.os != "Macos":
+            raise ConanInvalidConfiguration("The xqilla recipe currently only supports Linux or Macos.")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
