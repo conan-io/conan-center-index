@@ -212,6 +212,12 @@ class SpirvCrossConan(ConanFile):
             self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
             self.cpp_info.components[target_lib].builddirs.append(self._module_subfolder)
             self.cpp_info.components[target_lib].set_property("cmake_build_modules", [self._module_file_rel_path])
+
+            self.cpp_info.components[target_lib].names["cmake_find_package"] = target_lib
+            self.cpp_info.components[target_lib].names["cmake_find_package_multi"] = target_lib
+            self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
             if self.options.shared:
                 self.cpp_info.components[target_lib].set_property("pkg_config_name", target_lib)
             prefix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
