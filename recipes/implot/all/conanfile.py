@@ -60,7 +60,12 @@ class ImplotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["implot"]
-        
+
         self.cpp_info.set_property("cmake_file_name", "implot")
         self.cpp_info.set_property("cmake_target_name", "implot")
         self.cpp_info.set_property("pkg_config_name", "implot")
+
+        self.cpp_info.filenames["cmake_find_package"] = "implot"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "implot"
+        self.cpp_info.names["cmake_find_package"] = "implot"
+        self.cpp_info.names["cmake_find_package_multi"] = "implot"
