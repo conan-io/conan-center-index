@@ -38,7 +38,6 @@ class OpenSimulationInterfaceConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +53,9 @@ class OpenSimulationInterfaceConan(ConanFile):
 
     def requirements(self):
         self.requires("protobuf/3.17.1")
+
+    def build_requirements(self):
+        self.build_requires("protobuf/3.17.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
