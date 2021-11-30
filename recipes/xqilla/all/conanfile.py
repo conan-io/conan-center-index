@@ -1,6 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.40.0"
 
@@ -49,6 +50,9 @@ class ConanXqilla(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20210814")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -76,16 +80,20 @@ class ConanXqilla(ConanFile):
         if self.options.get_safe("fPIC", True):
             conf_args.extend(["--with-pic"])
 
-        
-        if self.settings.arch == "armv8":
-            conf_args.extend(["--build=aarch64-unknown-linux-gnu"])
-
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
+
+    @property 
+    def _user_info_build(self): 
+        return getattr(self, "user_info_build", self.deps_user_info) 
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "autotools","config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "autotools","config.guess"))
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -112,3 +120,4 @@ class ConanXqilla(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.path.append(bin_path)
+
