@@ -85,6 +85,8 @@ class AwsCCal(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.set_property("cmake_target_name", "AWS")
+        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package"] = "aws-c-cal"
+        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
         self.cpp_info.components["aws-c-cal-lib"].set_property("cmake_target_name", "aws-c-cal")
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
