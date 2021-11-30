@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
 
 class MimallocConan(ConanFile):
     name = "mimalloc"
@@ -10,7 +11,7 @@ class MimallocConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/mimalloc"
     description = "mimalloc is a compact general purpose allocator with excellent performance."
-    topics = ("conan", "mimalloc", "allocator", "performance", "microsoft")
+    topics = ("mimalloc", "allocator", "performance", "microsoft")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -95,8 +96,8 @@ class MimallocConan(ConanFile):
             raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++17")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mimalloc-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -142,6 +143,7 @@ class MimallocConan(ConanFile):
             cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
         if self.options.get_safe("single_object"):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"),
