@@ -70,7 +70,13 @@ class MsgpackCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "msgpack-c"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "msgpack-c"
         self.cpp_info.set_property("cmake_file_name", "msgpack-c")
+        self.cpp_info.names["cmake_find_package"] = "msgpack"
+        self.cpp_info.names["cmake_find_package_multi"] = "msgpack"
         self.cpp_info.set_property("cmake_target_name", "msgpack")
+        self.cpp_info.components["msgpack"].names["cmake_find_package"] = "msgpack-c"
+        self.cpp_info.components["msgpack"].names["cmake_find_package_multi"] = "msgpack-c"
         self.cpp_info.components["msgpack"].set_property("cmake_target_name", "msgpack-c")
         self.cpp_info.components["msgpack"].libs = ["msgpackc"]
