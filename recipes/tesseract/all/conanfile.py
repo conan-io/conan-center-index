@@ -78,7 +78,7 @@ class TesseractConan(ConanFile):
         if tools.Version(self.version) >= "5.0.0":
             # 5.0.0 requires C++-17 compiler
             minimal_version = {
-                "Visual Studio": "15.7",
+                "Visual Studio": "16",
                 "gcc": "9",
                 "clang": "7",
                 "apple-clang": "11"
