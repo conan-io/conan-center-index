@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class GlfwConan(ConanFile):
@@ -129,7 +129,7 @@ class GlfwConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glfw3")
-        self.cpp_info.set_property("cmake_target_name", "glfw")
+        self.cpp_info.set_property("cmake_target_name", "glfw::glfw")
         self.cpp_info.set_property("pkg_config_name", "glfw3")
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
