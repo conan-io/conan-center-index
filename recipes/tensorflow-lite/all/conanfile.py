@@ -163,8 +163,7 @@ class TensorflowLiteConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
-        self.cpp_info.set_property("cmake_target_name", "tensorflowlite::tensorflowlite")
-        self.cpp_info.set_property("cmake_target_aliases", ["tensorflow::tensorflowlite"])
+        self.cpp_info.set_property("cmake_target_name", "tensorflow::tensorflowlite")
 
         self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
         self.cpp_info.filenames["cmake_find_package_multi"] = "tensorflowlite"
