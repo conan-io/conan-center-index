@@ -21,14 +21,18 @@ class TesseractConan(ConanFile):
         "fPIC": [True, False],
         "with_auto_optimize": [True, False],
         "with_march_native": [True, False],
-        "with_training": [True, False]
+        "with_training": [True, False],
+        "with_libcurl": [True, False],
+        "with_libarchive": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_auto_optimize": False,
         "with_march_native": False,
-        "with_training": False
+        "with_training": False,
+        "with_libcurl": True,
+        "with_libarchive": True
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -46,6 +50,9 @@ class TesseractConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "5.0.0":
+            del self.options.with_libcurl
+            del self.options.with_libarchive
 
     def configure(self):
         if self.options.shared:
@@ -55,8 +62,13 @@ class TesseractConan(ConanFile):
             self.output.warn("*** Build with training is not yet supported, continue on your own")
 
     def requirements(self):
-        self.requires("leptonica/1.81.0")
-        self.requires("libarchive/3.5.1")
+        self.requires("leptonica/1.82.0")
+        # libarchive is required for 4.x so default value is true
+        if self.options.get_safe("with_libarchive", default=True):
+            self.requires("libarchive/3.5.2")
+        # libarchive is not required for 4.x
+        if self.options.get_safe("with_libcurl", default=False):
+            self.requires("libcurl/7.79.1")
 
     def validate(self):
         # Check compiler version
@@ -93,6 +105,10 @@ class TesseractConan(ConanFile):
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
         cmake.definitions["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
+
+        if tools.Version(self.version) >= "5.0.0":
+            cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
+            cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -157,7 +173,11 @@ class TesseractConan(ConanFile):
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].libs = [self._libname]
-        self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive"]
+        self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica"]
+        if self.options.get_safe("with_libcurl", default=False):
+            self.cpp_info.components["libtesseract"].requires.append("libcurl::libcurl")
+        if self.options.get_safe("with_libarchive", default=True):
+            self.cpp_info.components["libtesseract"].requires.append("libarchive::libarchive")
         if self.options.shared:
             self.cpp_info.components["libtesseract"].defines = ["TESS_IMPORTS"]
         if self.settings.os in ["Linux", "FreeBSD"]:
