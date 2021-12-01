@@ -1,5 +1,13 @@
 # Changelog
 
+### 01-December-2021 - 12:29 CET
+
+- [config] Bump Conan client version to 1.42.2.
+
+### 24-November-2021 - 17:49 CET
+
+- [feature] Return host requirements when computing package IDs.
+
 ### 22-November-2021 - 17:53 CET
 
 - [feature] Cache computation of package IDs.
