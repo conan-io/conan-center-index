@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class RedisPlusPlusConan(ConanFile):
@@ -114,12 +114,9 @@ class RedisPlusPlusConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "redis++")
-        self.cpp_info.set_property("cmake_target_name", "redis++")
+        self.cpp_info.set_property("cmake_target_name", "redis++::redis++")
         self.cpp_info.set_property("pkg_config_name", "redis++")
-        self.cpp_info.components["redis++lib"].set_property("cmake_find_package", "redis++" + "_static" if not self.options.shared else "")
-        self.cpp_info.components["redis++lib"].set_property("cmake_target_name", "redis++" + "_static" if not self.options.shared else "")
-        self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++" + "_static" if not self.options.shared else "")
+        self.cpp_info.components["redis++lib"].set_property("cmake_target_name", "redis++::redis++" + "_static" if not self.options.shared else "")
 
         self.cpp_info.names["cmake_find_package"] = "redis++"
         self.cpp_info.names["cmake_find_package_multi"] = "redis++"
