@@ -106,7 +106,7 @@ class CairoConan(ConanFile):
                 self.requires("glext/cci.20210420")
                 self.requires("wglext/cci.20200813")
                 self.requires("khrplatform/cci.20200529")
-        if self.options.with_opengl and self.settings.os != "Windows":
+        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
 
     def build_requirements(self):
@@ -256,7 +256,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo_"].requires.append("opengl::opengl")
             if self.settings.os == "Windows":
                 self.cpp_info.components["cairo_"].requires.extend(["glext::glext", "wglext::wglext", "khrplatform::khrplatform"])
-        if self.options.with_opengl and self.settings.os != "Windows":
+        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo_"].requires.append("egl::egl")
         if self.options.with_opengl == "gles2" or self.options.with_opengl == "gles3":
             self.cpp_info.components["cairo_"].system_libs.append("GLESv2")
@@ -338,7 +338,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-glesv3"].requires = ["cairo_"]
             self.cpp_info.components["cairo-glesv3"].system_libs = ["GLESv2"]
 
-        if self.options.with_opengl and self.settings.os != "Windows":
+        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo-egl"].names["pkg_config"] = "cairo-egl"
             self.cpp_info.components["cairo-egl"].requires = ["cairo_", "egl::egl"]
 
