@@ -94,7 +94,7 @@ class GlewConan(ConanFile):
 
         self.cpp_info.filenames["cmake_find_package"] = "GLEW"
         self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
-        self.cpp_info.names["cmake_find_package"] = "∑"
+        self.cpp_info.names["cmake_find_package"] = "GLEW"
         self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
         self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
         self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = glewlib_target_name
