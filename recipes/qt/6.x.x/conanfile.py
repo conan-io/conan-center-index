@@ -48,7 +48,7 @@ class QtConan(ConanFile):
                    "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
                    "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
-                   "qtremoteobjects"]
+                   "qtremoteobjects", "qtpositioning"]
 
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
