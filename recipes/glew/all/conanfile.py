@@ -79,12 +79,14 @@ class GlewConan(ConanFile):
             os.remove(pdb_file)
 
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-
+        
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "GLEW", "cmake_find_package")
-        self.cpp_info.set_property("cmake_file_name", "glew", "cmake_find_package_multi")
+        self.cpp_info.set_property("cmake_module_file_name", "GLEW")
+        self.cpp_info.set_property("cmake_file_name", "glew")
         self.cpp_info.set_property("cmake_target_name", "GLEW::GLEW")
-        self.cpp_info.components["glewlib"].set_property("cmake_module_target_name", "GLEW::GLEW")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.components["glewlib"].set_property("cmake_module_target_name", "GLEW")
+        
         glewlib_target_name = "glew" if self.options.shared else "glew_s"
         self.cpp_info.components["glewlib"].set_property("cmake_target_name", "GLEW::{}".format(glewlib_target_name))
         self.cpp_info.components["glewlib"].libs = tools.collect_libs(self)
