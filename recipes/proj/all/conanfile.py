@@ -131,7 +131,7 @@ class ProjConan(ConanFile):
         cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
         cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
-        self.cpp_info.set_property("cmake_target_name", "{0}::{0}".format(cmake_namespace))
+        self.cpp_info.set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.set_property("pkg_config_name", "proj")
         self.cpp_info.components["projlib"].set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
