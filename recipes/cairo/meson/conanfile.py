@@ -74,6 +74,8 @@ class CairoConan(ConanFile):
             del self.options.with_xlib_xrender
             del self.options.with_xcb
             del self.options.with_symbol_lookup
+        if self.settings.os in ["Macos", "Windows"]:
+            del self.options.with_opengl
 
     def configure(self):
         if self.options.shared:
@@ -100,13 +102,13 @@ class CairoConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
-        if self.options.with_opengl == "desktop":
+        if self.options.get_safe("with_opengl") == "desktop":
             self.requires("opengl/system")
             if self.settings.os == "Windows":
                 self.requires("glext/cci.20210420")
                 self.requires("wglext/cci.20200813")
                 self.requires("khrplatform/cci.20200529")
-        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
 
     def build_requirements(self):
@@ -142,16 +144,16 @@ class CairoConan(ConanFile):
         else:
             defs["xcb"] = "disabled"
             defs["xlib"] = "disabled"
-        if self.options.with_opengl == "desktop":
+        if self.options.get_safe("with_opengl") == "desktop":
             defs["gl-backend"] = "gl"
-        elif self.options.with_opengl == "gles2":
+        elif self.options.get_safe("with_opengl") == "gles2":
             defs["gl-backend"] = "glesv2"
-        elif self.options.with_opengl == "gles3":
+        elif self.options.get_safe("with_opengl") == "gles3":
             defs["gl-backend"] = "glesv3"
         else:
             defs["gl-backend"] = "disabled"
-        defs["glesv2"] = yes_no(self.options.with_opengl)
-        defs["glesv3"] = yes_no(self.options.with_opengl)
+        defs["glesv2"] = yes_no(self.options.get_safe("with_opengl") == "gles2")
+        defs["glesv3"] = yes_no(self.options.get_safe("with_opengl") == "gles3")
         defs["tee"] = yes_no(self.options.tee)
         defs["symbol-lookup"] = yes_no(self.options.get_safe("with_symbol_lookup"))
 
@@ -168,7 +170,7 @@ class CairoConan(ConanFile):
         meson_args = ""
         if not self.options.shared and self.settings.compiler == "Visual Studio":
             meson_args += " -DCAIRO_WIN32_STATIC_BUILD"
-        if self.options.with_opengl == "desktop" and self.settings.os == "Windows":
+        if self.options.get_safe("with_opengl") == "desktop" and self.settings.os == "Windows":
             gl_includes = []
             for dependency in ["glext", "wglext", "khrplatform"]:
                 package = self.dependencies[dependency]
@@ -252,13 +254,13 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
-        if self.options.with_opengl == "desktop":
+        if self.options.get_safe("with_opengl") == "desktop":
             self.cpp_info.components["cairo_"].requires.append("opengl::opengl")
             if self.settings.os == "Windows":
                 self.cpp_info.components["cairo_"].requires.extend(["glext::glext", "wglext::wglext", "khrplatform::khrplatform"])
-        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo_"].requires.append("egl::egl")
-        if self.options.with_opengl == "gles2" or self.options.with_opengl == "gles3":
+        if self.options.get_safe("with_opengl") == "gles2" or self.options.get_safe("with_opengl") == "gles3":
             self.cpp_info.components["cairo_"].system_libs.append("GLESv2")
         self.cpp_info.components["cairo_"].requires.append("pixman::pixman")
 
@@ -316,7 +318,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-win32-font"].names["pkg_config"] = "cairo-win32-font"
             self.cpp_info.components["cairo-win32-font"].requires = ["cairo_"]
 
-        if self.options.with_opengl == "desktop":
+        if self.options.get_safe("with_opengl") == "desktop":
             self.cpp_info.components["cairo-gl"].names["pkg_config"] = "cairo-gl"
             self.cpp_info.components["cairo-gl"].requires = ["cairo_", "opengl::opengl"]
 
@@ -328,17 +330,17 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo-wgl"].names["pkg_config"] = "cairo-wgl"
                 self.cpp_info.components["cairo-wgl"].requires = ["cairo_", "glext::glext", "wglext::wglext"]
 
-        if self.options.with_opengl == "gles2":
+        if self.options.get_safe("with_opengl") == "gles2":
             self.cpp_info.components["cairo-glesv2"].names["pkg_config"] = "cairo-glesv2"
             self.cpp_info.components["cairo-glesv2"].requires = ["cairo_"]
             self.cpp_info.components["cairo-glesv2"].system_libs = ["GLESv2"]
 
-        if self.options.with_opengl == "gles3":
+        if self.options.get_safe("with_opengl") == "gles3":
             self.cpp_info.components["cairo-glesv3"].names["pkg_config"] = "cairo-glesv3"
             self.cpp_info.components["cairo-glesv3"].requires = ["cairo_"]
             self.cpp_info.components["cairo-glesv3"].system_libs = ["GLESv2"]
 
-        if self.options.with_opengl and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo-egl"].names["pkg_config"] = "cairo-egl"
             self.cpp_info.components["cairo-egl"].requires = ["cairo_", "egl::egl"]
 
