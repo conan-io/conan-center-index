@@ -646,6 +646,9 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
+            tools.replace_in_file(f,
+                " IMPORTED)\n",
+                " IMPORTED GLOBAL)\n", strict=False)
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
             build_env = tools.RunEnvironment(self).vars if self.settings.compiler == "Visual Studio" else {}
