@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class UTConan(ConanFile):
