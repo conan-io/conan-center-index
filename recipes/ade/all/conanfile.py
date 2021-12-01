@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class AdeConan(ConanFile):
@@ -89,7 +89,7 @@ class AdeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ade")
-        self.cpp_info.set_property("cmake_target_name", "ade")
+        self.cpp_info.set_property("cmake_target_name", "ade::ade")
 
         self.cpp_info.names["cmake_find_package"] = "ade"
         self.cpp_info.names["cmake_find_package_multi"] = "ade"
