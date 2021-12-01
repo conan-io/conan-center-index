@@ -407,6 +407,11 @@ class QtConan(ConanFile):
                                "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
                                "enable_testing()")
 
+        tools.replace_in_files(os.path.join("qt6", "qtbase", "cmake", "QtFindPackageHelpers.cmake",
+                                            "                    qt_find_package_promote_targets_to_global_scope("
+                                            "                        \"${qt_find_package_target_name}\")",
+                                            "")                                            
+
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if tools.Version(self.version) >= "6.2.0":
