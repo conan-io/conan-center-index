@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class RapidcheckConan(ConanFile):
@@ -123,10 +123,11 @@ class RapidcheckConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "rapidcheck")
         self.cpp_info.names["cmake_find_package"] = "rapidcheck"
         self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
 
-        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck::rapidcheck")
         self.cpp_info.components["rapidcheck_rapidcheck"].names["cmake_find_package"] = "rapidcheck"
         self.cpp_info.components["rapidcheck_rapidcheck"].names["cmake_find_package_multi"] = "rapidcheck"
 
