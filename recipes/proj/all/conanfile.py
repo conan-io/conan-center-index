@@ -133,7 +133,6 @@ class ProjConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
         self.cpp_info.set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.set_property("pkg_config_name", "proj")
-        self.cpp_info.components["projlib"].set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
         self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
 
