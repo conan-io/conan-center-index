@@ -330,6 +330,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
+            self.requires("nss/3.72")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -1121,7 +1122,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine"):
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
-                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", "nss::nss"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngineQuick", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
