@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.40.1" # For https://github.com/conan-io/conan/pull/9568
 
 class QwtConan(ConanFile):
     name = "qwt"
@@ -87,15 +87,8 @@ class QwtConan(ConanFile):
             qwtbuild += "CONFIG += force_debug_info\n"
         tools.save(qwtbuild_path, qwtbuild)
 
-    def _patch_qmake_generator_files(self):
-        # Work around the qmake generator bug (https://github.com/conan-io/conan/pull/9568) which
-        # causes exe linker flags to be set on DLL, causing link failure.
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self.build_folder, "conanbuildinfo.pri"), "CONAN_QMAKE_LFLAGS += -ENTRY:mainCRTStartup", "", strict=False)
-
     def build(self):
         self._patch_qwt_config_files()
-        self._patch_qmake_generator_files()
 
         if self.settings.compiler == "Visual Studio":
             vcvars = tools.vcvars_command(self.settings)
