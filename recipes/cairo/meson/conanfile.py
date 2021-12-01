@@ -165,9 +165,9 @@ class CairoConan(ConanFile):
         defs["gtk2-utils"] = "disabled"
         defs["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
+        meson_args = ""
         if not self.options.shared and self.settings.compiler == "Visual Studio":
-            meson.options["c_args"] = " -DCAIRO_WIN32_STATIC_BUILD"
-            meson.options["cpp_args"] = " -DCAIRO_WIN32_STATIC_BUILD"
+            meson_args += " -DCAIRO_WIN32_STATIC_BUILD"
         if self.options.with_opengl == "desktop" and self.settings.os == "Windows":
             gl_includes = []
             for dependency in ["glext", "wglext", "khrplatform"]:
@@ -175,8 +175,11 @@ class CairoConan(ConanFile):
                 for include in package.cpp_info.includedirs:
                     gl_includes.append(os.path.join(package.package_folder, include))
             for gl_include in gl_includes:
-                meson.options["c_args"] += " -I{}".format(gl_include)
-                meson.options["cpp_args"] += " -I{}".format(gl_include)
+                meson_args += " -I{}".format(gl_include)
+        if len(meson_args):
+            meson.options["c_args"] = meson_args
+            meson.options["cpp_args"] = meson_args
+
         meson.configure(
             source_folder=self._source_subfolder,
             args=["--wrap-mode=nofallback"],
