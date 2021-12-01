@@ -1,8 +1,8 @@
+import os
+import textwrap
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-import os
-import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -11,7 +11,7 @@ class TesseractConan(ConanFile):
     name = "tesseract"
     description = "Tesseract Open Source OCR Engine"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "ocr", "image", "multimedia", "graphics")
+    topics = ("ocr", "image", "multimedia", "graphics")
     license = "Apache-2.0"
     homepage = "https://github.com/tesseract-ocr/tesseract"
 
