@@ -27,6 +27,7 @@ class CairoConan(ConanFile):
         "with_zlib": [True, False],
         "with_png": [True, False],
         "with_opengl": [False, "desktop", "gles2", "gles3"],
+        "with_symbol_lookup": [True, False],
         "tee": [True, False],
     }
     default_options = {
@@ -42,6 +43,7 @@ class CairoConan(ConanFile):
         "with_zlib": True,
         "with_png": True,
         "with_opengl": "desktop",
+        "with_symbol_lookup": False,
         "tee": True,
     }
 
@@ -71,6 +73,7 @@ class CairoConan(ConanFile):
             del self.options.with_xlib
             del self.options.with_xlib_xrender
             del self.options.with_xcb
+            del self.options.with_symbol_lookup
 
     def configure(self):
         if self.options.shared:
@@ -150,6 +153,7 @@ class CairoConan(ConanFile):
         defs["glesv2"] = yes_no(self.options.with_opengl)
         defs["glesv3"] = yes_no(self.options.with_opengl)
         defs["tee"] = yes_no(self.options.tee)
+        defs["symbol-lookup"] = yes_no(self.options.get_safe("with_symbol_lookup"))
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
@@ -216,7 +220,9 @@ class CairoConan(ConanFile):
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
         if self.settings.os == "Linux":
-            self.cpp_info.components["cairo_"].system_libs.extend(["m", "dl", "pthread", "bfd"])
+            self.cpp_info.components["cairo_"].system_libs.extend(["m", "dl", "pthread"])
+            if self.options.get_safe("with_symbol_lookup"):
+                self.cpp_info.components["cairo_"].system_libs.append("bfd")
             self.cpp_info.components["cairo_"].cflags = ["-pthread"]
             self.cpp_info.components["cairo_"].cxxflags = ["-pthread"]
         if self.options.with_lzo:
