@@ -101,12 +101,6 @@ class TesseractConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        if not self.options.with_march_native:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "if(COMPILER_SUPPORTS_MARCH_NATIVE)",
-                "if(False)")
-
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
