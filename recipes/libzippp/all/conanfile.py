@@ -83,6 +83,8 @@ class LibZipppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "libzippp"
+        self.cpp_info.names["cmake_find_package_multi"] = "libzippp"
         self.cpp_info.set_property("cmake_file_name", "libzippp")
         if self.options.with_encryption:
             self.cpp_info.defines.append("LIBZIPPP_WITH_ENCRYPTION")
