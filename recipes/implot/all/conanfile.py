@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class ImplotConan(ConanFile):
     name = "implot"
@@ -62,7 +62,7 @@ class ImplotConan(ConanFile):
         self.cpp_info.libs = ["implot"]
 
         self.cpp_info.set_property("cmake_file_name", "implot")
-        self.cpp_info.set_property("cmake_target_name", "implot")
+        self.cpp_info.set_property("cmake_target_name", "implot::implot")
         self.cpp_info.set_property("pkg_config_name", "implot")
 
         self.cpp_info.filenames["cmake_find_package"] = "implot"
