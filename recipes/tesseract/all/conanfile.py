@@ -75,12 +75,21 @@ class TesseractConan(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
-        minimal_version = {
-            "Visual Studio": "14",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "6"
-        }
+        if tools.Version(self.version) >= "5.0.0":
+            # 5.0.0 requires C++-17 compiler
+            minimal_version = {
+                "Visual Studio": "15.7",
+                "gcc": "9",
+                "clang": "7",
+                "apple-clang": "11"
+            }
+        else:
+            minimal_version = {
+                "Visual Studio": "14",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "6"
+            }
         if compiler not in minimal_version:
             self.output.warn(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
