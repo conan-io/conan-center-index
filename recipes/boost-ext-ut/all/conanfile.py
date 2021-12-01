@@ -69,8 +69,8 @@ class UTConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ut")
-        self.cpp_info.set_property("cmake_target_name", "boost")
-        self.cpp_info.components["ut"].set_property("cmake_target_name", "ut")
+        self.cpp_info.set_property("cmake_target_name", "boost::boost")
+        self.cpp_info.components["ut"].set_property("cmake_target_name", "boost::ut")
 
         self.cpp_info.names["cmake_find_package"] = "boost"
         self.cpp_info.names["cmake_find_package_multi"] = "boost"
