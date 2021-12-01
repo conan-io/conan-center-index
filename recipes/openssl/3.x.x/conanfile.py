@@ -6,7 +6,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -712,7 +712,7 @@ class OpenSSLConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
-        self.cpp_info.set_property("cmake_target_name", "OpenSSL")
+        self.cpp_info.set_property("cmake_target_name", "OpenSSL::OpenSSL")
         self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
@@ -748,11 +748,13 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
 
-        self.cpp_info.components["crypto"].set_property("cmake_target_name", "Crypto")
+        self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
         self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
-        self.cpp_info.components["ssl"].set_property("cmake_target_name", "SSL")
+        self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
+        self.cpp_info.components["crypto"].set_property("cmake_file_name", "Crypto")
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
+        self.cpp_info.components["crypto"].set_property("cmake_file_name", "SSL")
         self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
         self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
