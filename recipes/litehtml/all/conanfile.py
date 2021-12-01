@@ -3,7 +3,7 @@ import textwrap
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LitehtmlConan(ConanFile):
@@ -129,7 +129,7 @@ class LitehtmlConan(ConanFile):
         return os.path.join(self._module_subfolder,
                             "conan-official-{}-targets.cmake".format(self.name))
     def package_info(self):
-        self.cpp_info.components["litehtml_litehtml"].set_property("cmake_target_name", "litehtml")
+        self.cpp_info.components["litehtml_litehtml"].set_property("cmake_target_name", "litehtml::litehtml")
 
         self.cpp_info.components["litehtml_litehtml"].names["cmake_find_package"] = "litehtml"
         self.cpp_info.components["litehtml_litehtml"].names["cmake_find_package_multi"] = "litehtml"
@@ -146,7 +146,7 @@ class LitehtmlConan(ConanFile):
             self.cpp_info.components["litehtml_litehtml"].requires.append("icu::icu")
 
         if True: # FIXME: remove once we use a vendored gumbo library
-            self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
+            self.cpp_info.components["gumbo"].set_property("cmake_target_name", "litehtml::gumbo")
             self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
             self.cpp_info.components["gumbo"].names["cmake_find_package"] = "gumbo"
