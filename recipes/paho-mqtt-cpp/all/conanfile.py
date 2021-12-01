@@ -33,12 +33,12 @@ class PahoMqttCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
-
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{} can not be built as shared on Windows.".format(self.name))
 
         self.options["paho-mqtt-c"].shared = self.options.shared
         self.options["paho-mqtt-c"].ssl = self.options.ssl
