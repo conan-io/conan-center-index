@@ -408,7 +408,7 @@ class QtConan(ConanFile):
                                "enable_testing()")
 
         tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtFindPackageHelpers.cmake"),
-                                            "                    qt_find_package_promote_targets_to_global_scope("\
+                                            "                    qt_find_package_promote_targets_to_global_scope(\n"\
                                             "                        \"${qt_find_package_target_name}\")",
                                             "")                                            
 
