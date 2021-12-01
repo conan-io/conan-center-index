@@ -13,7 +13,7 @@ class PangoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Internationalized text layout and rendering library"
     homepage = "https://www.pango.org/"
-    topics = ("conan", "fontconfig", "fonts", "freedesktop")
+    topics = ("fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_libthai": [True, False], "with_cairo": [True, False], "with_xft": [True, False, "auto"], "with_freetype": [True, False, "auto"], "with_fontconfig": [True, False, "auto"]}
     default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": "auto", "with_fontconfig": "auto"}
