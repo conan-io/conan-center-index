@@ -4,7 +4,7 @@ import re
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibcurlConan(ConanFile):
@@ -536,9 +536,9 @@ class LibcurlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CURL")
-        self.cpp_info.set_property("cmake_target_name", "CURL")
+        self.cpp_info.set_property("cmake_target_name", "CURL::CURL")
         self.cpp_info.set_property("pkg_config_name", "libcurl")
-        self.cpp_info.components["curl"].set_property("cmake_target_name", "libcurl")
+        self.cpp_info.components["curl"].set_property("cmake_target_name", "CURL::libcurl")
         self.cpp_info.components["curl"].set_property("pkg_config_name", "libcurl")
 
         self.cpp_info.names["cmake_find_package"] = "CURL"
