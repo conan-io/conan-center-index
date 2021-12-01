@@ -2,13 +2,16 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 class TinyAlsaConan(ConanFile):
     name = "tinyalsa"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tinyalsa/tinyalsa"
-    topics = ("conan", "tiny", "alsa", "sound", "audio", "tinyalsa")
+    topics = ("tiny", "alsa", "sound", "audio", "tinyalsa")
     description = "A small library to interface with ALSA in the Linux kernel"
+    exports_sources = ["patches/*",]
     options = {"shared": [True, False], "with_utils": [True, False]}
     default_options = {'shared': False, 'with_utils': False}
     settings = "os", "compiler", "build_type", "arch"
@@ -17,17 +20,20 @@ class TinyAlsaConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
+            raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
+
+    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{name}-{version}".format(name=self.name, version=self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             env_build.make()
@@ -54,6 +60,8 @@ class TinyAlsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
+        if tools.Version(self.version) >= "2.0.0":
+            self.cpp_info.system_libs.append("dl")
         if self.options.with_utils:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info('Appending PATH environment variable: %s' % bin_path)
