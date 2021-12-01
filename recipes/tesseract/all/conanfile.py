@@ -105,12 +105,20 @@ class TesseractConan(ConanFile):
             return self._cmake
         cmake = self._cmake = CMake(self)
         cmake.definitions["BUILD_TRAINING_TOOLS"] = self.options.with_training
-        cmake.definitions["STATIC"] = not self.options.shared
+
+        # pre-5.0.0 uses custom STATIC variable instead of BUILD_SHARED_LIBS
+        if tools.Version(self.version) < "5.0.0":
+            cmake.definitions["STATIC"] = not self.options.shared
+
         # Use CMake-based package build and dependency detection, not the pkg-config, cppan or SW
         cmake.definitions["CPPAN_BUILD"] = False
         cmake.definitions["SW_BUILD"] = False
 
-        cmake.definitions["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
+        # disable autodetect of vector extensions and march=native
+        cmake.definitions["ENABLE_OPTIMIZATIONS"] = self.options.with_auto_optimize
+
+        if tools.Version(self.version) < "5.0.0":
+            cmake.definitions["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
         cmake.definitions["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
