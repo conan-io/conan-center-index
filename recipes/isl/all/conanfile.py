@@ -7,9 +7,9 @@ import os
 class IslConan(ConanFile):
     name = "isl"
     description = "isl is a library for manipulating sets and relations of integer points bounded by linear constraints."
-    topics = ("conan", "isl", "integer", "set", "library")
+    topics = ("isl", "integer", "set", "library")
     license = "MIT"
-    homepage = "http://isl.gforge.inria.fr/"
+    homepage = "https://libisl.sourceforge.io"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -53,11 +53,11 @@ class IslConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     @contextmanager
     def _build_context(self):
