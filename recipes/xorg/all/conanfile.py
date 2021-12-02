@@ -88,5 +88,5 @@ class ConanXOrg(ConanFile):
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3"]:
+                     "xcb-dri3", "libdrm"]:
             self._fill_cppinfo_from_pkgconfig(name)
