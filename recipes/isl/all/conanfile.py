@@ -39,8 +39,11 @@ class IslConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
+        if self.settings.os == "Macos" and self.settings.arch = "armv8":
+            raise ConanInvalidConfiguration("Apple M1 is not yet supported. Contributions are welcome")
 
     def requirements(self):
         if self.options.with_int == "gmp":
