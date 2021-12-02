@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class IslConan(ConanFile):
     name = "isl"
@@ -44,17 +46,17 @@ class IslConan(ConanFile):
             raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("Apple M1 is not yet supported. Contributions are welcome")
+        if self.options.with_int != "gmp":
+            # FIXME: missing imath recipe
+            raise ConanInvalidConfiguration("imath is not (yet) available on cci")
 
     def requirements(self):
         if self.options.with_int == "gmp":
             self.requires("gmp/6.2.1")
-        else:
-            # FIXME: missing imath recipe
-            raise ConanInvalidConfiguration("imath is not (yet) available on cci")
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
