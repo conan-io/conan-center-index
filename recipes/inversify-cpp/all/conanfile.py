@@ -37,7 +37,7 @@ class InversifyCppConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -50,4 +50,6 @@ class InversifyCppConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include']
+        self.cpp_info.names["cmake_find_package"] = "inversify-cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "inversify-cpp"
+        self.cpp_info.names["pkg_config"] = "inversify-cpp"
