@@ -59,7 +59,7 @@ class ConanXOrg(ConanFile):
                             "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                            "xkeyboard-config-devel", "xcb-util-devel"]
+                            "xkeyboard-config-devel", "xcb-util-devel", "libdrm-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                             "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
@@ -67,7 +67,7 @@ class ConanXOrg(ConanFile):
                             "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel"]
+                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "libdrm-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
         
@@ -75,7 +75,7 @@ class ConanXOrg(ConanFile):
             packages = ["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                         "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                         "libXScrnSaver", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                        "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
+                        "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "libdrm"]
         if packages:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             package_tool.install_packages(update=True, packages=packages)
