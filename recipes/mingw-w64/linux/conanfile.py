@@ -20,47 +20,32 @@ class MingwConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
-        valid_os = self.conan_data["sources"][self.version]["url"].keys()
+        valid_os = ["Linux"]
         if str(self.settings.os) not in valid_os:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following operating systems: {}"
                                             .format(self.version, valid_os))
-        valid_arch = self.conan_data["sources"][self.version]["url"][str(self.settings.os)].keys()
+        valid_arch = ["x86_64"]
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
-        if self._settings_build.os == "Linux":
-            if "gcc" in self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]:
-                valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
-                if str(self.options.gcc) not in valid_gcc:
-                    raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
-                                                    .format(str(self.options.gcc), valid_gcc))
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.build_requires("7zip/19.00")
-        # else:
-        #     self.build_requires("gmp/6.2.1")
-        #     self.build_requires("mpfr/4.1.0")
-        #     self.build_requires("mpc/1.2.0")
+        if "gcc" in self.conan_data["sources"][self.version]:
+            valid_gcc = self.conan_data["sources"][self.version]["gcc"].keys()
+            if str(self.options.gcc) not in valid_gcc:
+                raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
+                                                .format(str(self.options.gcc), valid_gcc))
 
     def _download_source(self):
-        arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+        arch_data = self.conan_data["sources"][self.version]
 
-        if self.settings.os == "Windows":
-            url = arch_data[str(self.options.threads)][str(self.options.exception)]
-            self.output.info("Downloading: %s" % url["url"])
-            tools.download(url["url"], "file.7z", sha256=url["sha256"])
-            self.run("7z x file.7z")
-            os.remove('file.7z')
-        else:
-            for package in arch_data:
-                if package == "gcc":
-                    continue
-                self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
-                tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, "sources", package))
-            # Download gcc version
-            gcc_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"][str(self.options.gcc)]
-            tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "sources", "gcc"))
+        for package in arch_data:
+            if package == "gcc":
+                continue
+            self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
+            tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, "sources", package))
+        # Download gcc version
+        gcc_data = arch_data["gcc"][str(self.options.gcc)]
+        tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "sources", "gcc"))
 
     @property
     def _target_tag(self):
@@ -69,9 +54,6 @@ class MingwConan(ConanFile):
     def build(self):
         # Source should be downloaded in the build step since it depends on specific options
         self._download_source()
-
-        if self.settings.os == "Windows":
-            return
 
         target_tag = self._target_tag
         host_tag = "x86_64-linux-gnu"
@@ -282,23 +264,17 @@ class MingwConan(ConanFile):
         self.output.info("Building done!")
 
     def package(self):
-        if self.settings.os == "Windows":
-            target = "mingw64" if self.settings.arch == "x86_64" else "mingw32"
-            self.copy("*", dst="", src=target)
-            tools.rmdir(target)
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-        else:
-            self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib32"), "*.la")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "gcc", "x86_64-w64-mingw32", "10.3.0"), "*.la")
-            tools.rmdir(os.path.join(self.package_folder, "share", "man"))
-            tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            # Remove symlinks, we need to create them in the package_info step
-            os.unlink(os.path.join(self.package_folder, 'mingw'))
-            os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))
+        self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib"), "*.la")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib32"), "*.la")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "gcc", "x86_64-w64-mingw32", "10.3.0"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "share", "man"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # Remove symlinks, we need to create them in the package_info step
+        os.unlink(os.path.join(self.package_folder, 'mingw'))
+        os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))
 
     def package_info(self):
         if getattr(self, "settings_target", None):
@@ -322,41 +298,27 @@ class MingwConan(ConanFile):
         self.env_info.PATH.append(bin_path)
         self.env_info.MINGW_HOME = str(self.package_folder)
 
-        if self.settings.os == "Windows":
-            self.env_info.CONAN_CMAKE_GENERATOR = "MinGW Makefiles"
-            self.env_info.CXX = os.path.join(self.package_folder, "bin", "g++.exe").replace("\\", "/")
-            self.env_info.CC = os.path.join(self.package_folder, "bin", "gcc.exe").replace("\\", "/")
-            self.env_info.LD = os.path.join(self.package_folder, "bin", "ld.exe").replace("\\", "/")
-            self.env_info.NM = os.path.join(self.package_folder, "bin", "nm.exe").replace("\\", "/")
-            self.env_info.AR = os.path.join(self.package_folder, "bin", "ar.exe").replace("\\", "/")
-            self.env_info.AS = os.path.join(self.package_folder, "bin", "as.exe").replace("\\", "/")
-            self.env_info.STRIP = os.path.join(self.package_folder, "bin", "strip.exe").replace("\\", "/")
-            self.env_info.RANLIB = os.path.join(self.package_folder, "bin", "ranlib.exe").replace("\\", "/")
-            self.env_info.STRINGS = os.path.join(self.package_folder, "bin", "strings.exe").replace("\\", "/")
-            self.env_info.OBJDUMP = os.path.join(self.package_folder, "bin", "objdump.exe").replace("\\", "/")
-            self.env_info.GCOV = os.path.join(self.package_folder, "bin", "gcov.exe").replace("\\", "/")
-        else:
-            prefix = os.path.join(self.package_folder, "bin", self._target_tag + "-")
-            self.env_info.CC = prefix + "gcc"
-            self.env_info.CXX = prefix + "g++"
-            self.env_info.CPP = prefix + "cpp"
-            self.env_info.AR = prefix + "ar"
-            self.env_info.AS = prefix + "as"
-            self.env_info.GDB = prefix + "gdb"
-            self.env_info.LD = prefix + "ld"
-            self.env_info.NM = prefix + "nm"
-            self.env_info.OBJCOPY = prefix + "objcopy"
-            self.env_info.OBJDUMP = prefix + "objdump"
-            self.env_info.RANLIB = prefix + "ranlib"
-            self.env_info.SIZE = prefix + "size"
-            self.env_info.STRINGS = prefix + "strings"
-            self.env_info.STRIP = prefix + "strip"
-            self.env_info.GCOV = prefix + "gcov"
-            self.env_info.RC = prefix + "windres"
-            # Symlinks cannot be created in package step, otherwise the link target is wrong.
-            if not os.path.exists(os.path.join(self.package_folder, 'mingw')):
-                self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag),
-                                              os.path.join(self.package_folder, 'mingw')))
-            if not os.path.exists(os.path.join(self.package_folder, self._target_tag, 'lib64')):
-                self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag, 'lib'),
-                                              os.path.join(self.package_folder, self._target_tag, 'lib64')))
+        prefix = os.path.join(self.package_folder, "bin", self._target_tag + "-")
+        self.env_info.CC = prefix + "gcc"
+        self.env_info.CXX = prefix + "g++"
+        self.env_info.CPP = prefix + "cpp"
+        self.env_info.AR = prefix + "ar"
+        self.env_info.AS = prefix + "as"
+        self.env_info.GDB = prefix + "gdb"
+        self.env_info.LD = prefix + "ld"
+        self.env_info.NM = prefix + "nm"
+        self.env_info.OBJCOPY = prefix + "objcopy"
+        self.env_info.OBJDUMP = prefix + "objdump"
+        self.env_info.RANLIB = prefix + "ranlib"
+        self.env_info.SIZE = prefix + "size"
+        self.env_info.STRINGS = prefix + "strings"
+        self.env_info.STRIP = prefix + "strip"
+        self.env_info.GCOV = prefix + "gcov"
+        self.env_info.RC = prefix + "windres"
+        # Symlinks cannot be created in package step, otherwise the link target is wrong.
+        if not os.path.exists(os.path.join(self.package_folder, 'mingw')):
+            self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag),
+                                            os.path.join(self.package_folder, 'mingw')))
+        if not os.path.exists(os.path.join(self.package_folder, self._target_tag, 'lib64')):
+            self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag, 'lib'),
+                                            os.path.join(self.package_folder, self._target_tag, 'lib64')))
