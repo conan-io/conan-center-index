@@ -1,0 +1,12 @@
+index 71bf1ce6..345dfbf8 100644
+--- a/util/BUILD.gn
++++ b/util/BUILD.gn
+@@ -132,7 +132,7 @@ if (crashpad_is_mac || crashpad_is_ios) {
+         "--arch",
+         "armv7",
+       ]
+-    } else if (current_cpu == "arm64") {
++    } else if (current_cpu == "arm64" || current_cpu == "aarch64") {
+       args += [
+         "--arch",
+         "arm64",

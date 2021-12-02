@@ -23,3 +23,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0008-allow-aarch64-arch.patch"
+      base_path: "source_subfolder"
