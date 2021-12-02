@@ -2,6 +2,7 @@
 cmake_find_package
 virtualrunenv
 virtualenv
+json
 
 [requires]
 axtls/1.5.3.dssl4
