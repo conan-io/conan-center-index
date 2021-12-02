@@ -1076,8 +1076,8 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if (self.options.get_safe("qtlocation") && tools.Version(self.version) < "6.2.2") ||
-            (self.options.get_safe("qtpositioning") && tools.Version(self.version) >= "6.2.2"):
+        if (self.options.get_safe("qtlocation") and tools.Version(self.version) < "6.2.2") or \
+            (self.options.get_safe("qtpositioning") and tools.Version(self.version) >= "6.2.2"):
                 _create_module("Positioning")
                 _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
                 _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
