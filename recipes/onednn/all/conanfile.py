@@ -23,7 +23,7 @@ class OneDNNConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "cpu_runtime": "OMP"
+        "cpu_runtime": "TBB"  # The default in oneDNN's CMakeLists is OMP but this necessitates having OpenMP on the system
     }
 
     _cmake = None
@@ -96,5 +96,7 @@ class OneDNNConan(ConanFile):
             self.cpp_info.components["dnnl"].exelinkflags = openmp_flags
             self.cpp_info.components["dnnl"].sharedlinkflags = openmp_flags
         self.cpp_info.components["dnnl"].libs = ["dnnl"]
+        if self.options.cpu_runtime == "TBB":
+            self.cpp_info.components["dnnl"].requires = ["onetbb::libtbb"]
         if self.settings.os == "Linux":
             self.cpp_info.components["dnnl"].system_libs = ["dl"]
