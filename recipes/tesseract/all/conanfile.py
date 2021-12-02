@@ -66,7 +66,7 @@ class TesseractConan(ConanFile):
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
             self.requires("libarchive/3.5.2")
-        # libarchive is not required for 4.x
+        # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
             self.requires("libcurl/7.79.1")
 
