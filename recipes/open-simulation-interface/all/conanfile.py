@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import re
 import sys
@@ -45,6 +46,9 @@ class OpenSimulationInterfaceConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if self.options.shared:
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Shared Libraries are not supported on windows because of the missing symbol export in the library.")
 
     def configure(self):
         del self.settings.compiler.cstd
@@ -62,6 +66,7 @@ class OpenSimulationInterfaceConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+            
 
     def build(self):
         cmake = self._configure_cmake()
@@ -75,7 +80,7 @@ class OpenSimulationInterfaceConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)        
         cmake = self._configure_cmake()
         cmake.install()
         try:
