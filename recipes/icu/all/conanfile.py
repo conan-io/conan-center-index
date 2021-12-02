@@ -117,14 +117,16 @@ class ICUBase(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        if self.options.dat_package_file:
-            dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
-            if dat_package_file:
-                shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        
+        if self.options.dat_package_file:
+            dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
+            if dat_package_file:
+                shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
+        
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
 
