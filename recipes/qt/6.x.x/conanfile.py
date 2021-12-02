@@ -1076,18 +1076,11 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if self.options.get_safe("qtlocation"):
-            _create_module("Positioning")
-            _create_plugin("QGeoServiceProviderFactoryMapbox", "qtgeoservices_mapbox", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryMapboxGL", "qtgeoservices_mapboxgl", "geoservices", [])
-            _create_plugin("GeoServiceProviderFactoryEsri", "qtgeoservices_esri", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryItemsOverlay", "qtgeoservices_itemsoverlay", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryNokia", "qtgeoservices_nokia", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryOsm", "qtgeoservices_osm", "geoservices", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue", "qtposition_geoclue", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactorySerialNmea", "qtposition_serialnmea", "position", [])
+        if (self.options.get_safe("qtlocation") && tools.Version(self.version) < "6.2.2") ||
+            (self.options.get_safe("qtpositioning") && tools.Version(self.version) >= "6.2.2"):
+                _create_module("Positioning")
+                _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
+                _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
 
         if self.options.get_safe("qtsensors"):
             _create_module("Sensors")
