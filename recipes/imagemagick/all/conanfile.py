@@ -61,6 +61,7 @@ class ImageMagicConan(ConanFile):
         "with_webp": False,
         "with_xml2": True,
         "with_freetype": True,
+        "with_djvu": False,
         "utilities": True,
     }
     exports_sources = "patches/*"
@@ -366,8 +367,8 @@ class ImageMagicConan(ConanFile):
             "--with-webp={}".format(yes_no(self.options.with_webp)),
             "--with-xml={}".format(yes_no(self.options.with_xml2)),
             "--with-freetype={}".format(yes_no(self.options.with_freetype)),
-            "--with-utilities={}".format(yes_no(self.options.utilities)),
             "--with-djvu={}".format(yes_no(self.options.with_djvu)),
+            "--with-utilities={}".format(yes_no(self.options.utilities)),
         ]
         self._autotools.configure(args=args)
 
