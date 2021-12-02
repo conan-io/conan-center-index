@@ -14,9 +14,12 @@ class OneDplConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
-    settings = "os", "arch", "build_type", "compiler"
-    options = {"backend": ["tbb", "serial"]}
-    default_options = {"backend": "tbb"}
+    options = {
+        "backend": ["tbb", "serial"]
+    }
+    default_options = {
+        "backend": "tbb"
+    }
     generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
     no_copy_source = True
@@ -28,6 +31,9 @@ class OneDplConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if self.options.backend == "tbb":
+            # Listed as an OPTIONAL_COMPONENT but optional components not supported by conan
+            self.options["tbb"].tbbmalloc = True
 
     def requirements(self):
         if self.options.backend == "tbb":
@@ -62,4 +68,4 @@ class OneDplConan(ConanFile):
         self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = "ParallelSTL"
         self.cpp_info.components["_onedpl"].includedirs = ["include", os.path.join("lib", "stdlib")]
         if self.options.backend == "tbb":
-            self.cpp_info.components["_onedpl"].requires = ["tbb::tbb"]
+            self.cpp_info.components["_onedpl"].requires = ["tbb::libtbb", "tbb::tbbmalloc"]
