@@ -78,8 +78,10 @@ class Iir1Conan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libiir_static.*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "iir_static.*")
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libiir.*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "iir.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "iir.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libiir.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "libiir.*")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "iir"
