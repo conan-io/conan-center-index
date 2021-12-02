@@ -13,10 +13,12 @@ class DiligentCoreConan(ConanFile):
     options = {"shared": [True, False], 
     "fPIC":         [True, False],
     "with_glslang": [True, False],
+    "spirv_cross_namespace": "ANY",
     }
     default_options = {"shared": False, 
     "fPIC": True,
-    "with_glslang" : True
+    "with_glslang" : True,
+    "spirv_cross_namespace": "spirv_cross",
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
@@ -41,10 +43,6 @@ class DiligentCoreConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
-    def validate(self):
-        if self.options["spirv-cross"].namespace != 'diligent_spirv_cross':
-            raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross. To do so, add [-o spirv-cross:namespace=diligent_spirv_cross]")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,7 +65,7 @@ class DiligentCoreConan(ConanFile):
 
         self.requires("spirv-cross/cci.20210930")
         # commented out due to conan-center CI limitations
-        #self.options["spirv-cross"].namespace = "diligent_spirv_cross"
+        self.options["spirv-cross"].namespace = self.options.spirv_cross_namespace
         self.requires("spirv-headers/1.2.198.0")
         self.requires("spirv-tools/2021.4")
         self.requires("glslang/11.7.0")
@@ -106,6 +104,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_DIRECT3D11"] = True
         self._cmake.definitions["DILIGENT_NO_DIRECT3D12"] = True
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
+        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options.spirv_cross_namespace
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
@@ -138,7 +137,7 @@ class DiligentCoreConan(ConanFile):
         # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE=diligent_spirv_cross")
+        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options.spirv_cross_namespace))
         self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
