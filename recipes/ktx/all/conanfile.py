@@ -117,7 +117,7 @@ class KtxConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ktx")
         self.cpp_info.set_property("cmake_target_name", "KTX::KTX")
-        self.cpp_info.components["libktx"].set_property("cmake_target_name", "ktx::ktx")
+        self.cpp_info.components["libktx"].set_property("cmake_target_name", "KTX::ktx")
 
         self.cpp_info.filenames["cmake_find_package"] = "Ktx"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Ktx"
