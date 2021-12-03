@@ -60,7 +60,7 @@
                precompiled
                EXTRA_INCLUDES
 -              $<TARGET_PROPERTY:LLVM::LLVM_INTERFACE,INTERFACE_INCLUDE_DIRECTORIES>
-+              ${llvm-core_INCLUDE_DIRS}
++              $<TARGET_PROPERTY:llvm-core::core,INTERFACE_INCLUDE_DIRECTORIES>
                SHARED_LINK_FLAGS
                ${GANDIVA_SHARED_LINK_FLAGS}
                SHARED_LINK_LIBS
@@ -72,7 +72,7 @@
 +                 llvm-core::llvm-core
                   EXTRA_INCLUDES
 -                 $<TARGET_PROPERTY:LLVM::LLVM_INTERFACE,INTERFACE_INCLUDE_DIRECTORIES>
-+                 ${llvm-core_INCLUDE_DIRS}
++                 $<TARGET_PROPERTY:llvm-core::core,INTERFACE_INCLUDE_DIRECTORIES>
                   ${GANDIVA_INTERNALS_TEST_ARGUMENTS})
  
  if(ARROW_GANDIVA_JAVA)
