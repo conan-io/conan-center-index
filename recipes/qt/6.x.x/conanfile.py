@@ -18,15 +18,14 @@ class qt(Generator):
             HostData = {1}/archdatadir
             Data = {1}/datadir
             Sysconf = {1}/sysconfdir
-            LibraryExecutables = {1}/archdatadir/{3}
-            HostLibraryExecutables = {2}
+            LibraryExecutables = {1}/archdatadir/{2}
+            HostLibraryExecutables = bin
             Plugins = {1}/archdatadir/plugins
             Imports = {1}/archdatadir/imports
             Qml2Imports = {1}/archdatadir/qml
             Translations = {1}/datadir/translations
             Documentation = {1}/datadir/doc
             Examples = {1}/datadir/examples""").format(path, folder,
-                "bin" if os_ == "Windows" else "lib",
                 "bin" if os_ == "Windows" else "libexec")
 
     @property
@@ -519,7 +518,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
         self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "lib")
+        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
         self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
         self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
 
