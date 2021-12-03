@@ -1,5 +1,4 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e88f728..2bc6f77 100644
+Add install destination for runtime
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -24,6 +24,7 @@ endif(UNIX)
