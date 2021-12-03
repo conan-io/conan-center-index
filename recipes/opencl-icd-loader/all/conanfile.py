@@ -70,6 +70,7 @@ class OpenclIcdLoaderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libs = ["OpenCL"]
         if not self.options.shared:
             if self.settings.os == "Linux":
