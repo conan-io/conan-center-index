@@ -8,7 +8,7 @@ required_conan_version = ">=1.42.2"
 
 
 class GKlibConan(ConanFile):
-    name = "GKlib"
+    name = "gklib"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/KarypisLab/GKlib"
@@ -72,6 +72,8 @@ class GKlibConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GKlib"
+        self.cpp_info.names["cmake_find_package_multi"] = "GKlib"
         self.cpp_info.libs = tools.collect_libs(self)
         if self._is_msvc or self._is_mingw:
             self.cpp_info.defines.append("USE_GKREGEX")

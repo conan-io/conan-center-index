@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        assert os.path.isfile(os.path.join(self.deps_cpp_info["GKlib"].rootpath, "licenses", "LICENSE.txt"))
+        assert os.path.isfile(os.path.join(self.deps_cpp_info["gklib"].rootpath, "licenses", "LICENSE.txt"))
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
