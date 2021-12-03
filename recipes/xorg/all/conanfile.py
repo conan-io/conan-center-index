@@ -64,7 +64,7 @@ class ConanXOrg(ConanFile):
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                             "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                             "libxss", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image","xcb-util-keysyms", "xcb-util-renderutil",
-                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
+                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "libdrm"]
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "libdrm-devel"]
