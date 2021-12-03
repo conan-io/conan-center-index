@@ -59,6 +59,8 @@ class GKlibConan(ConanFile):
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        toolchain.variables["ASSERT"] = self.settings.build_type == "Debug"
+        toolchain.variables["ASSERT2"] = self.settings.build_type == "Debug"
         toolchain.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         toolchain.generate()
 
