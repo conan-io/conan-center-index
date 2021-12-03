@@ -69,6 +69,8 @@ class LibdrmConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.intel:
