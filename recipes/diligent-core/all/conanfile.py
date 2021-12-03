@@ -154,6 +154,7 @@ class DiligentCoreConan(ConanFile):
                      dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
