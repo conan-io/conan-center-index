@@ -106,6 +106,7 @@ class LibdrmConan(ConanFile):
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.mkdir(os.path.join(self.package_folder, "licenses"))
+        tools.save(os.path.join(self.package_folder, "licenses", "TBD"), "TO BE DONE")
 
     def package_info(self):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
