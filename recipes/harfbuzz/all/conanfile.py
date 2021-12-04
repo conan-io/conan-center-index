@@ -23,6 +23,7 @@ class HarfbuzzConan(ConanFile):
         "with_gdi": [True, False],
         "with_uniscribe": [True, False],
         "with_directwrite": [True, False],
+        "with_subset": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,7 @@ class HarfbuzzConan(ConanFile):
         "with_gdi": True,
         "with_uniscribe": True,
         "with_directwrite": False,
+        "with_subset": False,
     }
 
     short_paths = True
@@ -86,7 +88,7 @@ class HarfbuzzConan(ConanFile):
             cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
             cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
         cmake.definitions["HB_BUILD_UTILS"] = False
-        cmake.definitions["HB_BUILD_SUBSET"] = False
+        cmake.definitions["HB_BUILD_SUBSET"] = self.options.with_subset
         cmake.definitions["HB_HAVE_GOBJECT"] = False
         cmake.definitions["HB_HAVE_INTROSPECTION"] = False
         # fix for MinGW debug build
@@ -114,6 +116,8 @@ class HarfbuzzConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "harfbuzz"
         if self.options.with_icu:
             self.cpp_info.libs.append("harfbuzz-icu")
+        if self.options.with_subset:
+            self.cpp_info.libs.append("harfbuzz-subset")
         self.cpp_info.libs.append("harfbuzz")
         self.cpp_info.includedirs.append(os.path.join("include", "harfbuzz"))
         if self.settings.os == "Linux":
