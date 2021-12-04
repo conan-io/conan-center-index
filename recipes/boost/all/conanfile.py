@@ -1273,22 +1273,26 @@ class BoostConan(ConanFile):
 
     @property
     def _toolset_tag(self):
-        # compiler       | compiler.version | os          | toolset_tag
-        # ---------------+------------------+-------------+------------------
-        # apple-clang    | 12               | Macos       | darwin12
-        # clang          | 12               | Macos       | clang-darwin12
-        # Visual Studio  | 17               | Windows     | vc142
+        # compiler       | compiler.version | os          | toolset_tag    | remark
+        # ---------------+------------------+-------------+----------------+-----------------------------
+        # apple-clang    | 12               | Macos       | darwin12       |
+        # clang          | 12               | Macos       | clang-darwin12 |
+        # gcc            | 11               | Linux       | gcc8           |
+        # gcc            | 8                | Windows     | mgw8           |
+        # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
         compiler = {
             "apple-clang": "",
             "msvc": "vc",
             "Visual Studio": "vc",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
+        if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
+            compiler = "mgw"
         os_ = ""
         if self.settings.os == "Macos":
             os_ = "darwin"
         toolset_version = str(tools.Version(self.settings.compiler.version).major)
         if self.settings.compiler in ("msvc", "Visual Studio"):
-            toolset_version = self._toolset_version.replace(".","")
+            toolset_version = self._toolset_version.replace(".", "")
 
         toolset_parts = [compiler, os_]
         toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
