@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 class CoinLemonConan(ConanFile):
     name = "coin-lemon"
@@ -75,8 +75,16 @@ class CoinLemonConan(ConanFile):
             self.cpp_info.libs = ["lemon"]
         else:
             self.cpp_info.libs = ["emon"]
-        self.cpp_info.names["pkg_config"] = "lemon"
+
+        self.cpp_info.names["pkg_config"] = "LEMON"
+        self.cpp_info.set_property("pkg_config_name", "LEMON")
+
         self.cpp_info.names["cmake_find_package"] = "LEMON"
         self.cpp_info.names["cmake_find_package_multi"] = "LEMON"
+        self.cpp_info.set_property("cmake_target_name", "LEMON")
+
         self.cpp_info.filenames["cmake_find_package"] = "LEMON"
         self.cpp_info.filenames["cmake_find_package_multi"] = "LEMON"
+        self.cpp_info.set_property("cmake_file_name", "LEMON")
+
+        self.cpp_info.defines.append("LEMON_ONLY_TEMPLATES")
