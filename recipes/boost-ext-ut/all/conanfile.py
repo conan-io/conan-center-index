@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class UTConan(ConanFile):
@@ -69,8 +69,7 @@ class UTConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ut")
-        self.cpp_info.set_property("cmake_target_name", "boost")
-        self.cpp_info.components["ut"].set_property("cmake_target_name", "ut")
+        self.cpp_info.components["ut"].set_property("cmake_target_name", "boost::ut")
 
         self.cpp_info.names["cmake_find_package"] = "boost"
         self.cpp_info.names["cmake_find_package_multi"] = "boost"
