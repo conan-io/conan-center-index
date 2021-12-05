@@ -185,6 +185,10 @@ class MimallocConan(ConanFile):
         return name
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "mimalloc" if self.options.shared else "mimalloc-static"
+        self.cpp_info.names["cmake_find_package_multi"] = "mimalloc" if self.options.shared else "mimalloc-static"
+        self.cpp_info.set_property("cmake_target_name", "mimalloc" if self.options.shared else "mimalloc-static")
+
         if self.options.get_safe("inject"):
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
