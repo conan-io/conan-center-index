@@ -44,6 +44,11 @@ class GKlibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.name} {self.version} couldn't be built in shared configuration")
+
     def layout(self):
         cmake_layout(self)
         self.folders.source = "{}-{}".format(self.name, self.version)

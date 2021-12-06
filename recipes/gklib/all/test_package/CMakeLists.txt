@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(GKlib REQUIRED)
 
-add_executable(${PROJECT_NAME} strings.c)
+add_executable(${PROJECT_NAME} test.c)
 target_link_libraries(${PROJECT_NAME} GKlib::GKlib)
