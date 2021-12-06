@@ -121,6 +121,8 @@ class LibdrmConan(ConanFile):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
         self.cpp_info.components["libdrm_libdrm"].includedirs.append(os.path.join('include', 'libdrm'))
         self.cpp_info.components["libdrm_libdrm"].set_property("pkg_config_name", "libdrm")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libdrm_libdrm"].requires = ["linux-headers-generic::linux-headers-generic"]
 
         if self.options.libkms:
             self.cpp_info.components["libdrm_libkms"].libs = ["kms"]
