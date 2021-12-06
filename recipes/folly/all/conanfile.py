@@ -47,22 +47,6 @@ class FollyConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-
-        if self.settings.os == "Windows" and self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
-
-        if self.settings.os in ["Macos", "Windows"] and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built on {} as shared library".format(self.settings.os))
-
-        if self.version == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
     # Freeze max. CMake version at 3.16.2 to fix the Linux build
     def build_requirements(self):
@@ -101,11 +85,27 @@ class FollyConan(ConanFile):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if miss_boost_required_comp:
             raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
+            
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+
+        if self.settings.os == "Windows" and self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
+
+        if self.settings.os in ["Macos", "Windows"] and self.options.shared:
+            raise ConanInvalidConfiguration("Folly could not be built on {} as shared library".format(self.settings.os))
+
+        if self.version == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
+            raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
