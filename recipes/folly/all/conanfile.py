@@ -60,7 +60,7 @@ class FollyConan(ConanFile):
         self.requires("glog/0.4.0")
         self.requires("libevent/2.1.12")
         self.requires("lz4/1.9.3")
-        self.requires("openssl/1.1.1k")
+        self.requires("openssl/1.1.1l")
         self.requires("snappy/1.1.8")
         self.requires("zlib/1.2.11")
         self.requires("zstd/1.4.9")
