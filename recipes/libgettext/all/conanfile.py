@@ -96,11 +96,11 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            args.extend(["CC=%s cl -nologo" % tools.unix_path(self.deps_user_info_build["automake"].compile),
+            args.extend(["CC=%s cl -nologo" % tools.unix_path(self.user_info_build["automake"].compile),
                          "LD=link",
                          "NM=dumpbin -symbols",
                          "STRIP=:",
-                         "AR=%s lib" % tools.unix_path(self.deps_user_info_build["automake"].ar_lib),
+                         "AR=%s lib" % tools.unix_path(self.user_info_build["automake"].ar_lib),
                          "RANLIB=:"])
             if rc:
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
