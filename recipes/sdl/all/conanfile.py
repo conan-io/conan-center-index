@@ -335,6 +335,8 @@ class SDLConan(ConanFile):
             ]
             if self.settings.os == "Macos":
                 self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
+                if tools.Version(self.version) >= "2.0.18":
+                    self.cpp_info.components["libsdl2"].frameworks.append("GameController")
             elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["libsdl2"].frameworks.extend([
                     "UIKit", "OpenGLES", "GameController", "CoreMotion",
@@ -342,6 +344,8 @@ class SDLConan(ConanFile):
                 ])
             if tools.Version(self.version) >= "2.0.14":
                 self.cpp_info.components["libsdl2"].frameworks.append("Metal")
+            if tools.Version(self.version) >= "2.0.18":
+                self.cpp_info.components["libsdl2"].frameworks.append("CoreHaptics")
         elif self.settings.os == "Windows":
             self.cpp_info.components["libsdl2"].system_libs = ["user32", "gdi32", "winmm", "imm32", "ole32", "oleaut32", "version", "uuid", "advapi32", "setupapi", "shell32"]
             if self.settings.compiler == "gcc":
