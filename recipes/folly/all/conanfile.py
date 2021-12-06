@@ -79,6 +79,9 @@ class FollyConan(ConanFile):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
     def validate(self):
+        if tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-compilation not yet supported. Contributions are welcome")
+            
         if self.options["boost"].header_only:
             raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
 
