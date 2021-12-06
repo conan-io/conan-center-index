@@ -53,6 +53,11 @@ class GetTextConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
     
+    
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+    
     def build_requirements(self):
         if self._settings_build.os == 'Windows' and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -96,11 +101,11 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            args.extend(["CC=%s cl -nologo" % tools.unix_path(self.user_info_build["automake"].compile),
+            args.extend(["CC=%s cl -nologo" % tools.unix_path(self._user_info_build["automake"].compile),
                          "LD=link",
                          "NM=dumpbin -symbols",
                          "STRIP=:",
-                         "AR=%s lib" % tools.unix_path(self.user_info_build["automake"].ar_lib),
+                         "AR=%s lib" % tools.unix_path(self._user_info_build["automake"].ar_lib),
                          "RANLIB=:"])
             if rc:
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
