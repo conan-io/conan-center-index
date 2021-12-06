@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -75,6 +76,12 @@ class LibdrmConan(ConanFile):
     def requirements(self):
         if self.options.intel:
             self.requires("xorg/system")
+        if self.settings.os == "Linux":
+            self.requires("linux-headers-generic/5.14.9")
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
