@@ -150,6 +150,10 @@ class SDLConan(ConanFile):
         if self.settings.os == "Macos" and not self.options.iconv:
             raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
 
+        # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
+        if tools.Version(self.version) >= "2.0.18" and tools.is_apple_os(self.settings.os) and tools.Version(self.settings.compiler.version) < "12":
+            raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
+
     def package_id(self):
         del self.info.options.sdl2main
 
