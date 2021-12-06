@@ -74,8 +74,9 @@ class GKlibConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "GKlib"
-        self.cpp_info.names["cmake_find_package_multi"] = "GKlib"
+        self.cpp_info.set_property("cmake_file_name", "GKlib")
+        self.cpp_info.set_property("cmake_target_name", "GKlib")
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.libs = tools.collect_libs(self)
         if self._is_msvc or self._is_mingw:
             self.cpp_info.defines.append("USE_GKREGEX")
