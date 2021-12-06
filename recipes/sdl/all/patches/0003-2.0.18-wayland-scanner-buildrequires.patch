@@ -1,0 +1,33 @@
+diff --git a/cmake/sdlchecks.cmake b/cmake/sdlchecks.cmake
+index 32be19c..fd8ed94 100644
+--- a/cmake/sdlchecks.cmake
++++ b/cmake/sdlchecks.cmake
+@@ -624,25 +624,9 @@ macro(CheckWayland)
+     pkg_check_modules(WAYLAND wayland-client wayland-egl wayland-cursor egl "xkbcommon>=0.5.0")
+ 
+     if(WAYLAND_FOUND)
+-      find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)
+-      execute_process(
+-        COMMAND ${WAYLAND_SCANNER} --version
+-        RESULT_VARIABLE WAYLAND_SCANNER_VERSION_RC
+-        ERROR_VARIABLE WAYLAND_SCANNER_VERSION
+-        ERROR_STRIP_TRAILING_WHITESPACE
+-      )
+-      if(NOT WAYLAND_SCANNER_VERSION_RC EQUAL 0)
+-        message(FATAL "Failed to get wayland-scanner version")
+-        set(WAYLAND_FOUND FALSE)
+-      endif()
+-      string(REPLACE "wayland-scanner " "" WAYLAND_SCANNER_VERSION ${WAYLAND_SCANNER_VERSION})
+-
+-      string(COMPARE GREATER_EQUAL ${WAYLAND_SCANNER_VERSION} "1.15.0" WAYLAND_SCANNER_1_15_FOUND)
+-      if(WAYLAND_SCANNER_1_15_FOUND)
+-        set(WAYLAND_SCANNER_CODE_MODE "private-code")
+-      else()
+-        set(WAYLAND_SCANNER_CODE_MODE "code")
+-      endif()
++      set(WAYLAND_SCANNER "wayland-scanner")
++      message("Force WAYLAND_SCANNER to '${WAYLAND_SCANNER}', it's provided by Conan as build-requires")
++      set(WAYLAND_SCANNER_CODE_MODE "private-code")
+     endif()
+ 
+     if(WAYLAND_FOUND)

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class SDLConan(ConanFile):
@@ -280,13 +280,16 @@ class SDLConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SDL2"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2"
+        self.cpp_info.set_property("cmake_target_name", "SDL2")
 
         postfix = "d" if self.settings.build_type == "Debug" else ""
         # SDL2
         sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
         self.cpp_info.components["libsdl2"].names["cmake_find_package"] = sdl2_cmake_target
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
+        self.cpp_info.components["libsdl2"].set_property("cmake_target_name", sdl2_cmake_target)
         self.cpp_info.components["libsdl2"].names["pkg_config"] = "sdl2"
+        self.cpp_info.components["libsdl2"].set_property("pkg_config_name", "sdl2")
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
         if self.options.get_safe("iconv", False):
@@ -347,5 +350,6 @@ class SDLConan(ConanFile):
         if self.options.sdl2main:
             self.cpp_info.components["sdl2main"].names["cmake_find_package"] = "SDL2main"
             self.cpp_info.components["sdl2main"].names["cmake_find_package_multi"] = "SDL2main"
+            self.cpp_info.components["sdl2main"].set_property("cmake_target_name", "SDL2main")
             self.cpp_info.components["sdl2main"].libs = ["SDL2main" + postfix]
             self.cpp_info.components["sdl2main"].requires = ["libsdl2"]
