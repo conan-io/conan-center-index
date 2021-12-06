@@ -2,7 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.36.0"
 
 class OneDplConan(ConanFile):
     name = "onedpl"
@@ -14,6 +14,7 @@ class OneDplConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
+    settings = "os", "arch", "build_type", "compiler"
     options = {
         "backend": ["tbb", "serial"]
     }
@@ -60,12 +61,16 @@ class OneDplConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "ParallelSTL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "ParallelSTL"
-        self.cpp_info.names["cmake_find_package"] = "pstl"
-        self.cpp_info.names["cmake_find_package_multi"] = "pstl"
-        self.cpp_info.components["_onedpl"].names["cmake_find_package"] = "ParallelSTL"
-        self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = "ParallelSTL"
+        target_name = "ParallelSTL"
+        namespace = "pstl"
+        self.cpp_info.filenames["cmake_find_package"] = target_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = target_name
+        self.cpp_info.names["cmake_find_package"] = namespace
+        self.cpp_info.names["cmake_find_package_multi"] = namespace
+        self.cpp_info.set_property("cmake_file_name", target_name)
+        self.cpp_info.set_property("cmake_target_name", f"{namespace}::{target_name}")
+        self.cpp_info.components["_onedpl"].names["cmake_find_package"] = target_name
+        self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = target_name
         self.cpp_info.components["_onedpl"].includedirs = ["include", os.path.join("lib", "stdlib")]
         if self.options.backend == "tbb":
             self.cpp_info.components["_onedpl"].requires = ["tbb::libtbb", "tbb::tbbmalloc"]
