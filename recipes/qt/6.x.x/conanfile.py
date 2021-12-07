@@ -844,7 +844,6 @@ class QtConan(ConanFile):
 
         _create_module("Core", core_reqs)
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
             if tools.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
@@ -1124,6 +1123,10 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
+
+        if self.settings.os == "Windows":
+            _create_module("EntryPoint")
+            self.cpp_info.components["qtEntryPoint"].system_libs.append("shell32")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
