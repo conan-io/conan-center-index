@@ -75,7 +75,7 @@ class LibdrmConan(ConanFile):
 
     def requirements(self):
         if self.options.intel:
-            self.requires("xorg/system")
+            self.requires("libpciaccess/0.16")
         if self.settings.os == "Linux":
             self.requires("linux-headers-generic/5.14.9")
 
