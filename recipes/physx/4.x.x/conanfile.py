@@ -4,6 +4,8 @@ import shutil
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 
 class PhysXConan(ConanFile):
     name = "physx"
@@ -54,17 +56,16 @@ class PhysXConan(ConanFile):
         if self.settings.os not in ["Windows", "Android"]:
             del self.options.enable_simd
 
-    def validate(self):
-        if self.settings.os == "Macos" and not (self.settings.arch == "x86" or self.settings.arch == "x86_64"):
-            raise ConanInvalidConfiguration(
-                "{} only supports x86 and x86_64 on macOS".format(self.name))
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
             raise ConanInvalidConfiguration("Current os is not supported")
+
+        if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
 
         build_type = self.settings.build_type
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
