@@ -9,9 +9,8 @@ class Assimp(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
-    topics = ("conan", "assimp", "3d")
+    topics = ("assimp", "3d", "game development", "3mf", "collada")
     license = "BSD-3-Clause"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -130,7 +129,7 @@ class Assimp(ConanFile):
 
     @property
     def _depends_on_draco(self):
-        if tools.Version(self.version) < tools.Version("5.1.0"):
+        if tools.Version(self.version) < "5.1.0":
             return False
         return self.options.with_gltf or self.options.with_gltf_exporter
 
@@ -146,7 +145,7 @@ class Assimp(ConanFile):
         #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
         # - openddlparser
-        if tools.Version(self.version) < tools.Version("5.1.0"):
+        if tools.Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
             self.requires("pugixml/1.11")
@@ -194,15 +193,14 @@ class Assimp(ConanFile):
         else:
             vendors.extend(["pugixml", "draco"])
         for vendor in vendors:
-            tools.rmdir(os.path.join(
-                self._source_subfolder, "contrib", vendor))
+            tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         self._cmake = CMake(self)
-        if tools.Version(self.version) >= tools.Version("5.1.0"):
+        if tools.Version(self.version) >= "5.1.0":
             self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
             self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
             self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
