@@ -12,7 +12,7 @@ class LibsystemdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/systemd/"
     description = "System and Service Manager API library"
-    topics = ("conan", "systemd", "libsystemd")
+    topics = ("systemd", "libsystemd", "service", "manager")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
