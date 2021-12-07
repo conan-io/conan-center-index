@@ -11,6 +11,7 @@ class LibdrmConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/mesa/drm"
     license = "MIT"
+    generators = "PkgConfigDeps"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -115,7 +116,10 @@ class LibdrmConan(ConanFile):
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.mkdir(os.path.join(self.package_folder, "licenses"))
-        tools.save(os.path.join(self.package_folder, "licenses", "TBD"), "TO BE DONE")
+        # Extract the License/s from the header to a file
+        tmp = tools.load(os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
+        license_contents = re.search("\*\/.*(\/\*(\*(?!\/)|[^*])*\*\/)", tmp, re.DOTALL)[1]
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
