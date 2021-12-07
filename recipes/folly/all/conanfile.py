@@ -50,7 +50,7 @@ class FollyConan(ConanFile):
 
     # Freeze max. CMake version at 3.16.2 to fix the Linux build
     def build_requirements(self):
-        self.build_requires("cmake/3.20.6")
+        self.build_requires("cmake/3.16.9")
 
     def requirements(self):
         self.requires("boost/1.75.0")
