@@ -31,7 +31,7 @@ class VerilatorConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 self.build_requires("msys2/cci.latest")
                 self.build_requires("automake/1.16.4")
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
             self.build_requires("strawberryperl/5.30.0.1")
         else:
             self.build_requires("flex/2.6.4")
