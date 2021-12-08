@@ -42,7 +42,7 @@ class VerilatorConan(ConanFile):
             if self._needs_old_bison:
                 # don't upgrade to bison 3.7.0 or above, or it fails to build
                 # because of https://github.com/verilator/verilator/pull/2505
-                self.build_requires("winflexbison/2.5.22")
+                self.build_requires("winflexbison/2.5.24")
             else:
                 self.build_requires("winflexbison/2.5.24")
             self.build_requires("strawberryperl/5.30.0.1")
