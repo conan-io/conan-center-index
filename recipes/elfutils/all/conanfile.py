@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
 
 class ElfutilsConan(ConanFile):
     name = "elfutils"
