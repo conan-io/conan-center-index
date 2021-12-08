@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
+
 class MpirConan(ConanFile):
     name = "mpir"
     description = "MPIR is a highly optimised library for bignum arithmetic" \
