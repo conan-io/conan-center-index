@@ -8,14 +8,14 @@ required_conan_version = ">=1.33.0"
 class LibNlConan(ConanFile):
     name = "libnl"
     description = "A collection of libraries providing APIs to netlink protocol based Linux kernel interfaces."
-    topics = ("conan", "netlink")
+    topics = ("netlink")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.infradead.org/~tgr/libnl/"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
-    build_requires = ( "flex/2.6.4", "bison/3.5.3" )
+    build_requires = ( "flex/2.6.4", "bison/3.7.6" )
 
     _autotools = None
 
