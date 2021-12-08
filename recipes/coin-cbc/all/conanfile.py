@@ -7,7 +7,7 @@ import os
 class CoinCbcConan(ConanFile):
     name = "coin-cbc"
     description = "COIN-OR Branch-and-Cut solver"
-    topics = ("conan", "clp", "simplex", "solver", "linear", "programming")
+    topics = ("clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Clp"
     license = ("EPL-2.0",)
@@ -20,7 +20,6 @@ class CoinCbcConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**.patch"
     generators = "pkg_config"
 
     _autotools = None
@@ -32,6 +31,10 @@ class CoinCbcConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
