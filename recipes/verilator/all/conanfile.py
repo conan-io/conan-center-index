@@ -29,18 +29,27 @@ class VerilatorConan(ConanFile):
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
+            
+    @property
+    def _needs_old_bison(self):
+        return tools.Version(self.version) < "4.100"
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             if self.settings.compiler == "Visual Studio":
                 self.build_requires("msys2/cci.latest")
                 self.build_requires("automake/1.16.4")
-            self.build_requires("winflexbison/2.5.24")
+            if self._needs_old_bison:
+                # don't upgrade to bison 3.7.0 or above, or it fails to build
+                # because of https://github.com/verilator/verilator/pull/2505
+                self.build_requires("winflexbison/2.5.22")
+            else:
+                self.build_requires("winflexbison/2.5.24")
             self.build_requires("strawberryperl/5.30.0.1")
         else:
             self.build_requires("flex/2.6.4")
-            if tools.Version(self.version) < "4.100":
-                #don't upgrade to bison 3.7.0 or above, or it fails to build
+            if self._needs_old_bison:
+                # don't upgrade to bison 3.7.0 or above, or it fails to build
                 # because of https://github.com/verilator/verilator/pull/2505
                 self.build_requires("bison/3.5.3")
             else:
