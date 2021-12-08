@@ -18,16 +18,20 @@ class GenieConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("cccl/1.1")
 
-        if self.settings.os == "Windows" and tools.os_info.is_windows:
+        if self._settings_build.os == "Windows"
             if "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
                 self.build_requires("make/4.2.1")
 
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20200517")
+            if not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
