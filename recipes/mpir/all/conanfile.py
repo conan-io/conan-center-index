@@ -49,12 +49,11 @@ class MpirConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.build_requires("yasm/1.3.0")
         if self.settings.compiler != "Visual Studio":
             self.build_requires("m4/1.4.19")
-        self.build_requires("yasm/1.3.0")
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/cci.latest")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
