@@ -47,6 +47,8 @@ class CoinCbcConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-cbc does not support shared builds on Windows")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def requirements(self):
         self.requires("coin-utils/2.11.4")
