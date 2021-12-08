@@ -10,7 +10,7 @@ class LibIdn(ConanFile):
     name = "libidn2"
     description = "GNU Libidn is a fully documented implementation of the Stringprep, Punycode and IDNA 2003 specifications."
     homepage = "https://www.gnu.org/software/libidn/"
-    topics = ("conan", "libidn", "encode", "decode", "internationalized", "domain", "name")
+    topics = ("libidn", "encode", "decode", "internationalized", "domain", "name")
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     options = {
@@ -22,13 +22,16 @@ class LibIdn(ConanFile):
         "fPIC": True,
     }
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
 
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
