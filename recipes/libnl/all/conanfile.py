@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class LibNlConan(ConanFile):
     name = "libnl"
     description = "A collection of libraries providing APIs to netlink protocol based Linux kernel interfaces."
-    topics = "conan", "netlink"
+    topics = ("conan", "netlink")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.infradead.org/~tgr/libnl/"
     license = "LGPL-2.1-only"
