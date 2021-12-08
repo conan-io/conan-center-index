@@ -27,13 +27,14 @@ class LibNlConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Libnl is only supported on Linux")
-
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Libnl is only supported on Linux")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -63,10 +64,14 @@ class LibNlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def package_info(self):
         self.cpp_info.components["nl"].libs = ["nl-3"]
         self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
-        if not tools.os_info.is_windows:
+        if self._settings_build.os != "Windows":
             self.cpp_info.components["nl"].system_libs = ["pthread", "m"]
         self.cpp_info.components["nl-route"].libs = ["nl-route-3"]
         self.cpp_info.components["nl-route"].requires = ["nl"]
