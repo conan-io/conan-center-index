@@ -7,7 +7,7 @@ import os
 class CoinCglConan(ConanFile):
     name = "coin-cgl"
     description = "COIN-OR Cut Generator Library"
-    topics = ("conan", "clp", "simplex", "solver", "linear", "programming")
+    topics = ("clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Cgl"
     license = ("EPL-2.0",)
@@ -44,6 +44,8 @@ class CoinCglConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def requirements(self):
         self.requires("coin-utils/2.11.4")
