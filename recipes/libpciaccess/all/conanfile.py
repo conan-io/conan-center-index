@@ -21,7 +21,6 @@ class LibPciAccessConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    _autotools = None
 
     def validate(self):
         def is_supported(settings):
@@ -41,9 +40,6 @@ class LibPciAccessConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def requirements(self):
-        pass
-
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("xorg-macros/1.19.3")
@@ -58,26 +54,20 @@ class LibPciAccessConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = Autotools(self)
-        self._autotools.configure(build_script_folder=self._source_subfolder)
-        return self._autotools
-
     def build(self):
         # autoreconf
         self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
                  win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self._source_subfolder)
         autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses",
                   src=self._source_subfolder)
 
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
