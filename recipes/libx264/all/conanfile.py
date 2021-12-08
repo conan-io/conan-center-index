@@ -2,7 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.38.0"
 
 
 class LibX264Conan(ConanFile):
