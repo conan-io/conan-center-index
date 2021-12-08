@@ -7,7 +7,7 @@ class MpirConan(ConanFile):
     name = "mpir"
     description = "MPIR is a highly optimised library for bignum arithmetic" \
                   "forked from the GMP bignum library."
-    topics = ("conan", "mpir", "multiprecision", "math", "mathematics")
+    topics = ("mpir", "multiprecision", "math", "mathematics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpir.org/"
     license = "LGPL-3.0-or-later"
@@ -50,7 +50,7 @@ class MpirConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            self.build_requires("m4/1.4.18")
+            self.build_requires("m4/1.4.19")
         self.build_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
            "CONAN_BASH_PATH" not in os.environ:
@@ -147,9 +147,7 @@ class MpirConan(ConanFile):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for filename in glob.glob("*.la"):
-                    os.unlink(filename)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         if self.options.get_safe("enable_cxx"):
