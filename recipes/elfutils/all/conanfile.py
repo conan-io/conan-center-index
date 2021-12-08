@@ -10,7 +10,6 @@ class ElfutilsConan(ConanFile):
     homepage = "https://sourceware.org/elfutils"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("elfutils", "libelf", "libdw", "libasm")
-    exports = "patches/**"
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-2.0-or-later"]
     
     settings = "os", "arch", "compiler", "build_type"
@@ -37,6 +36,10 @@ class ElfutilsConan(ConanFile):
 
     _autotools = None
     _source_subfolder = "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
