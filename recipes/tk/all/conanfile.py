@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanException, ConanInvalidConfiguration, ConanExceptionInUserConanfileMethod
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 class TkConan(ConanFile):
     name = "tk"
