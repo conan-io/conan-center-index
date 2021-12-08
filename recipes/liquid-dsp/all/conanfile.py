@@ -8,12 +8,12 @@ class LiquidDspConan(ConanFile):
     description = (
         "Digital signal processing library for software-defined radios (and more)"
     )
-    topics = ("conan", "dsp", "sdr", "liquid-dsp")
+    topics = ("dsp", "sdr", "liquid-dsp")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jgaeddert/liquid-dsp"
     license = ("MIT",)
     settings = "os", "arch", "build_type", "compiler"
-    exports_sources = ["generate_link_library.bat", "patches/**"]
+    exports_sources = ["generate_link_library.bat"]
     options = {
         "shared": [True, False],
         "simdoverride": [True, False],
@@ -66,8 +66,12 @@ class LiquidDspConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("mingw-w64/8.1")
-            self.build_requires("automake/1.16.3")
-
+            self.build_requires("automake/1.16.4")
+            
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+            
     def source(self):
         tools.get(
             **self.conan_data["sources"][self.version],
