@@ -74,7 +74,7 @@ class ElfutilsConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("automake/1.16.4")
-        self.build_requires("m4/1.4.18")
+        self.build_requires("m4/1.4.19")
         self.build_requires("flex/2.6.4")
         self.build_requires("bison/3.5.3")
         self.build_requires("pkgconf/1.7.4")
