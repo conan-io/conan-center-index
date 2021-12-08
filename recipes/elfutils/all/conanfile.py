@@ -9,7 +9,7 @@ class ElfutilsConan(ConanFile):
     description = "A dwarf, dwfl and dwelf functions to read DWARF, find separate debuginfo, symbols and inspect process state."
     homepage = "https://sourceware.org/elfutils"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "elfutils", "libelf", "libdw", "libasm")
+    topics = ("elfutils", "libelf", "libdw", "libasm")
     exports = "patches/**"
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-2.0-or-later"]
     
@@ -57,9 +57,9 @@ class ElfutilsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.37.0")
         if self.options.with_bzlib:
-            self.requires("bzip2/1.0.6")
+            self.requires("bzip2/1.0.8")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_lzma:
@@ -76,7 +76,7 @@ class ElfutilsConan(ConanFile):
         self.build_requires("automake/1.16.4")
         self.build_requires("m4/1.4.19")
         self.build_requires("flex/2.6.4")
-        self.build_requires("bison/3.5.3")
+        self.build_requires("bison/3.7.6")
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -117,13 +117,10 @@ class ElfutilsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                os.remove(f)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
         else:
-            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so")):
-                os.remove(f)
-            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so.1")):
-                os.remove(f)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so.1")
         
     def package_info(self):
         # library components
