@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import glob
 import os
@@ -11,8 +12,7 @@ class VerilatorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.veripool.org/wiki/verilator"
     description = "Verilator compiles synthesizable Verilog and Synthesis assertions into single- or multithreaded C++ or SystemC code"
-    topics = ("conan", "verilog", "HDL", "EDA", "simulator", "hardware", "fpga")
-    exports_sources = "patches/**"
+    topics = ("verilog", "HDL", "EDA", "simulator", "hardware", "fpga")
 
     settings = "os", "arch", "compiler", "build_type"
 
@@ -26,6 +26,10 @@ class VerilatorConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             if self.settings.compiler == "Visual Studio":
@@ -35,7 +39,7 @@ class VerilatorConan(ConanFile):
             self.build_requires("strawberryperl/5.30.0.1")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.6")
 
     def requirements(self):
         if self.settings.os == "Windows":
@@ -46,6 +50,10 @@ class VerilatorConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
+
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     @contextmanager
     def _build_context(self):
