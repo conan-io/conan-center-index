@@ -134,8 +134,8 @@ class VerilatorConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "examples"))
 
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
-        os.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
-                  os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
+        tools.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
+                     os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
 
         if self.settings.build_type == "Debug":
             tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"),
@@ -144,9 +144,7 @@ class VerilatorConan(ConanFile):
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"),
                     os.path.join(self.package_folder))
 
-        for fn in glob.glob(os.path.join(self.package_folder, "bin", "share", "verilator", "bin", "*")):
-            print(fn, "->", "..")
-            os.rename(fn, os.path.join(self.package_folder, "bin", os.path.basename(fn)))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"), "*")
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
     def package_id(self):
