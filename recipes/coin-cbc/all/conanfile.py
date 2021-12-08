@@ -1,7 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -45,12 +45,6 @@ class CoinCbcConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-cbc does not support shared builds on Windows")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
-
     def requirements(self):
         self.requires("coin-utils/2.11.4")
         self.requires("coin-osi/0.108.6")
@@ -61,7 +55,12 @@ class CoinCbcConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -77,10 +76,10 @@ class CoinCbcConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
@@ -109,6 +108,10 @@ class CoinCbcConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
