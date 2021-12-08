@@ -44,22 +44,25 @@ class MpirConan(ConanFile):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("m4/1.4.18")
         self.build_requires("yasm/1.3.0")
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def source(self):
-        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version]),
+                    stirp_root=True, destination=self._source_subfolder)
 
     @property
     def _platforms(self):
