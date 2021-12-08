@@ -20,7 +20,6 @@ class CoinCglConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**.patch"
     generators = "pkg_config"
 
     _autotools = None
@@ -32,6 +31,10 @@ class CoinCglConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -94,6 +97,8 @@ class CoinCglConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
+            if tools.Version(self.settings.compiler.version) >= 12:
+                self._autotools.flags.append("-FS")
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
         return self._autotools
 
