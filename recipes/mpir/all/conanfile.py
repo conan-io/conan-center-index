@@ -61,8 +61,8 @@ class MpirConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def source(self):
-        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version]),
-                    stirp_root=True, destination=self._source_subfolder)
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     @property
     def _platforms(self):
