@@ -47,11 +47,15 @@ class LibIdn(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
