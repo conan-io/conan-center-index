@@ -22,12 +22,15 @@ class VerilatorConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
+        if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             if self.settings.compiler == "Visual Studio":
-                self.build_requires("msys2/20190524")
-                self.build_requires("automake/1.16.2")
+                self.build_requires("msys2/cci.latest")
+                self.build_requires("automake/1.16.4")
             self.build_requires("winflexbison/2.5.22")
             self.build_requires("strawberryperl/5.30.0.1")
         else:
@@ -41,8 +44,8 @@ class VerilatorConan(ConanFile):
             self.requires("dirent/1.23.2", private=True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("verilator-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     @contextmanager
     def _build_context(self):
