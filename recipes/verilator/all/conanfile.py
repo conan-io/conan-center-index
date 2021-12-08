@@ -39,7 +39,12 @@ class VerilatorConan(ConanFile):
             self.build_requires("strawberryperl/5.30.0.1")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.7.6")
+            if tools.Version(self.version) < "4.100":
+                #don't upgrade to bison 3.7.0 or above, or it fails to build
+                # because of https://github.com/verilator/verilator/pull/2505
+                self.build_requires("bison/3.5.3")
+            else:
+                self.build_requires("bison/3.7.6")
 
     def requirements(self):
         if self.settings.os == "Windows":
