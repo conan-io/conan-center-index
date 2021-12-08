@@ -64,6 +64,8 @@ class CoinCglConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.4")
             
     def validate(self):
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
