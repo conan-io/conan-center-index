@@ -34,15 +34,16 @@ class DoubleConversionConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.os == "Windows" and \
             self.settings.compiler == "Visual Studio" and \
             Version(self.settings.compiler.version.value) < "14":
             raise ConanInvalidConfiguration("Double Convertion could not be built by MSVC <14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

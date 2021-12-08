@@ -49,11 +49,20 @@ class GetTextConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.16")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+    
+    
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+    
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == 'Windows' and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self._is_msvc:
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -92,12 +101,11 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "bin", "share", "automake-1.16"))
-            args.extend(["CC=%s/compile cl -nologo" % automake_perldir,
+            args.extend(["CC=%s cl -nologo" % tools.unix_path(self._user_info_build["automake"].compile),
                          "LD=link",
                          "NM=dumpbin -symbols",
                          "STRIP=:",
-                         "AR=%s/ar-lib lib" % automake_perldir,
+                         "AR=%s lib" % tools.unix_path(self._user_info_build["automake"].ar_lib),
                          "RANLIB=:"])
             if rc:
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
