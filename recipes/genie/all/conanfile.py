@@ -26,7 +26,7 @@ class GenieConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("cccl/1.1")
 
-        if self._settings_build.os == "Windows"
+        if self.settings.os == "Windows" and self._settings_build.os == "Windows":
             if "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
                 self.build_requires("make/4.2.1")
 
