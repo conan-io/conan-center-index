@@ -47,6 +47,8 @@ class ElfutilsConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration("Compiler %s not supported. "
                           "elfutils only supports gcc" % self.settings.compiler)
@@ -66,20 +68,22 @@ class ElfutilsConan(ConanFile):
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        self.build_requires("automake/1.16.2")
+        self.build_requires("automake/1.16.4")
         self.build_requires("m4/1.4.18")
         self.build_requires("flex/2.6.4")
         self.build_requires("bison/3.5.3")
-        self.build_requires("pkgconf/1.7.3")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
     
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "elfutils" + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
