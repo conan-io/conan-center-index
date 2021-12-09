@@ -74,7 +74,7 @@ class AwsCMQTT(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["aws-c-mqtt-lib"].names["cmake_find_package"] = "aws-c-mqtt"
         self.cpp_info.components["aws-c-mqtt-lib"].names["cmake_find_package_multi"] = "aws-c-mqtt"
-        self.cpp_info.components["aws-c-mqtt-lib"].set_property("cmake_target_name", "aws-c-mqtt")
+        self.cpp_info.components["aws-c-mqtt-lib"].set_property("cmake_target_name", "AWS::aws-c-mqtt")
         self.cpp_info.components["aws-c-mqtt-lib"].libs = ["aws-c-mqtt"]
         self.cpp_info.components["aws-c-mqtt-lib"].requires = [
             "aws-c-common::aws-c-common-lib",
