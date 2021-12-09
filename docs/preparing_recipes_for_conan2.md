@@ -78,12 +78,31 @@ class GdalConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "GDAL::GDAL")
 ```
 
-### Translating .names information
+### Translating .names information to cmake_target_name and cmake_file_name
 
-The ``.names`` attribute can affect both the generated CMake target names and the
-filenames of the ``Find<pkg>.cmake`` or ``<pkg>-config.cmake`` files that store the
-dependencies information. That is because if the ``.filenames`` attribute is not set it
-will fall back on the ``.names`` value to generate the files.
+Before knowing how to translate the ``.names`` information to the new model we have to
+understand how this attribute affects the generators (``cmake``, ``cmake_multi``,
+``cmake_find_package``, ``cmake_find_package_multi``, ``cmake_paths`` and ``pkg_config``
+generators read this attribute). There are two important things:
+
+* The ``.names`` attribute value is only a part of the final target name...
+
+* The ``.names`` attribute can affect both the generated CMake target names and the
+  filenames of the ``Find<pkg>.cmake`` or ``<pkg>-config.cmake`` files that store the
+  dependencies information. That is because if the ``.filenames`` attribute is not set it
+  will fall back on the ``.names`` value to generate the files. Let's see an example:
+
+```python
+class Re2Conan(ConanFile):
+    name = "re2"
+    ...
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "re2"
+        self.cpp_info.names["cmake_find_package_multi"] = "re2"
+        ...
+```
+
+
 
 ### Translating .filenames information
 
