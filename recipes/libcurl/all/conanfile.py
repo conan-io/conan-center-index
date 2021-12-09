@@ -11,7 +11,7 @@ class LibcurlConan(ConanFile):
     name = "libcurl"
 
     description = "command line tool and library for transferring data with URLs"
-    topics = ("conan", "curl", "libcurl", "data-transfer")
+    topics = ("curl", "libcurl", "data-transfer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
@@ -136,7 +136,7 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if tools.os_info.detect_windows_subsystem() == None:
+            if self.settings.os.subsystem == None:
                 del self.options.with_unix_sockets
         if not self._has_zstd_option:
             del self.options.with_zstd
@@ -150,9 +150,6 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-        if self.settings.os == "Windows" and tools.os_info.detect_windows_subsystem() == None:
-            self.options.with_unix_sockets = False
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
@@ -321,7 +318,7 @@ class LibcurlConan(ConanFile):
             "--enable-manual={}".format(yes_no(self.options.with_docs)),
             "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
             "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
-            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
+            "--enable-unix-sockets={}".format(yes_no(self.options.get_safe("with_unix_sockets", False))),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
