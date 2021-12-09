@@ -136,6 +136,8 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            if tools.os_info.detect_windows_subsystem() == None:
+                del self.options.with_unix_sockets
         if not self._has_zstd_option:
             del self.options.with_zstd
         if not self._has_metalink_option:
@@ -323,7 +325,7 @@ class LibcurlConan(ConanFile):
             "--enable-manual={}".format(yes_no(self.options.with_docs)),
             "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
             "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
-            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
+            "--enable-unix-sockets={}".format(yes_no(self.options.get_safe("with_unix_sockets", False))),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
