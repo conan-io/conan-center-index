@@ -6,4 +6,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run("gperf --version")
+            self.run("gperf --version", run_environment=True)
