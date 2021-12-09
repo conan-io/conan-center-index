@@ -57,6 +57,9 @@ class AravisConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.gst_plugin:
+            self.options["gstreamer"].shared = self.options.shared
+            self.options["gst-plugins-base"].shared = self.options.shared
 
     def validate(self):
         if not self.options["glib"].shared and self.options.shared:
