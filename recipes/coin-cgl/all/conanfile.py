@@ -33,7 +33,7 @@ class CoinCglConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -132,7 +132,7 @@ class CoinCglConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libCgl.la"))
 
         if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libCgl.lib"),
+            os.rename(os.path.join(self.package_folder, "lib", "libCgl.a"),
                       os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
