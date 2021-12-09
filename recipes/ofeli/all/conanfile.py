@@ -31,6 +31,8 @@ class OfeliConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "Ofeli is just supported for Linux")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -40,6 +42,8 @@ class OfeliConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        if not self.settings.compiler.cppstd:
+            self._autotools.cppstd_flag = "-std=c++11"
         self._autotools.configure(args=["--enable-release"])
         return self._autotools
 
