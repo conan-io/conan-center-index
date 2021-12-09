@@ -3,11 +3,13 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
+
 class MpirConan(ConanFile):
     name = "mpir"
     description = "MPIR is a highly optimised library for bignum arithmetic" \
                   "forked from the GMP bignum library."
-    topics = ("conan", "mpir", "multiprecision", "math", "mathematics")
+    topics = ("mpir", "multiprecision", "math", "mathematics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpir.org/"
     license = "LGPL-3.0-or-later"
@@ -44,22 +46,24 @@ class MpirConan(ConanFile):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("m4/1.4.18")
         self.build_requires("yasm/1.3.0")
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("m4/1.4.19")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def source(self):
-        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     @property
     def _platforms(self):
@@ -144,9 +148,7 @@ class MpirConan(ConanFile):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for filename in glob.glob("*.la"):
-                    os.unlink(filename)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         if self.options.get_safe("enable_cxx"):
