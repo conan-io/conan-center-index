@@ -162,7 +162,7 @@ class LibdrmConan(ConanFile):
         if self.options.intel:
             self.cpp_info.components["libdrm_intel"].libs = ["drm_intel"]
             self.cpp_info.components["libdrm_intel"].includedirs.append(os.path.join('include', 'libdrm'))
-            self.cpp_info.components["libdrm_intel"].requires = ["libdrm_libdrm", "xorg::xorg"]
+            self.cpp_info.components["libdrm_intel"].requires = ["libdrm_libdrm", "libpciaccess::libpciaccess"]
             self.cpp_info.components["libdrm_intel"].set_property("pkg_config_name", "libdrm_intel")
 
         if self.options.radeon:
