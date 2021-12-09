@@ -2,6 +2,7 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
+import re
 
 
 class LibdrmConan(ConanFile):
