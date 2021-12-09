@@ -2,7 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 class OneDplConan(ConanFile):
     name = "onedpl"
