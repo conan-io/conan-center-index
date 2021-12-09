@@ -31,6 +31,9 @@ class OfeliConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "Ofeli is just supported for Linux")
+        if self.settings.compiler != "gcc":
+            raise ConanInvalidConfiguration(
+                "Ofeli is just supported for GCC")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
