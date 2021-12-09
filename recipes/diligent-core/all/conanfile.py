@@ -10,12 +10,12 @@ class DiligentCoreConan(ConanFile):
     license = ("Apache 2.0")
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], 
+    options = {
     "fPIC":         [True, False],
     "with_glslang": [True, False],
     "spirv_cross_namespace": "ANY",
     }
-    default_options = {"shared": False, 
+    default_options = {
     "fPIC": True,
     "with_glslang" : True,
     "spirv_cross_namespace": "spirv_cross",
@@ -76,10 +76,6 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
@@ -97,9 +93,11 @@ class DiligentCoreConan(ConanFile):
         self.options["spirv-cross"].namespace = self.options.spirv_cross_namespace
         self.requires("spirv-headers/1.2.198.0")
         self.requires("spirv-tools/2021.4")
-        self.requires("glslang/11.7.0")
         self.requires("vulkan-headers/1.2.198")
         self.requires("volk/1.2.198")
+
+        if self.options.with_glslang:
+            self.requires("glslang/11.7.0")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
