@@ -129,6 +129,9 @@ class AravisConan(ConanFile):
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
+        if self.options.gst_plugin:
+            self.info.requires["gstreamer"].full_package_mode()
+            self.info.requires["gst-plugins-base"].full_package_mode()
 
     def package_info(self):
         aravis_name = "aravis-{}".format(self._aravis_api_version)
