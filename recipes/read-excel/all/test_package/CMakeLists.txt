@@ -10,7 +10,7 @@ find_package(read-excel REQUIRED)
 
 add_executable(${PROJECT_NAME} example.cpp)
 
-target_link_libraries(${PROJECT_NAME} read-excel)
+target_link_libraries(${PROJECT_NAME} read-excel::read-excel)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 14
