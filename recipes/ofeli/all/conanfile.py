@@ -51,7 +51,8 @@ class OfeliConan(ConanFile):
         return self._autotools
 
     def configure(self):
-        self.settings.compiler.libcxx = "libstdc++11"
+        if self.settings.os == "Linux":
+            self.settings.compiler.libcxx = "libstdc++11"
 
     def build(self):
         with tools.chdir(self._source_subfolder):
