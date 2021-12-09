@@ -151,12 +151,8 @@ class LibcurlConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
-        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
-            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
+        if self.settings.os == "Windows" and tools.os_info.detect_windows_subsystem() == None:
+            self.options.with_unix_sockets = False
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
@@ -325,7 +321,7 @@ class LibcurlConan(ConanFile):
             "--enable-manual={}".format(yes_no(self.options.with_docs)),
             "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
             "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
-            "--enable-unix-sockets={}".format(yes_no(self.options.get_safe("with_unix_sockets", False))),
+            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
@@ -605,3 +601,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             if self.options.with_ntlm and self.options["openssl"].no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("schannel only suppported on Windows.")
+        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
+        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
+            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
