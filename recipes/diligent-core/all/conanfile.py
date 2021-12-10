@@ -1,6 +1,9 @@
-import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
+
 
 class DiligentCoreConan(ConanFile):
     name = "diligent-core"
@@ -11,14 +14,14 @@ class DiligentCoreConan(ConanFile):
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-    "fPIC":         [True, False],
-    "with_glslang": [True, False],
-    "spirv_cross_namespace": "ANY",
+        "fPIC": [True, False],
+        "with_glslang": [True, False],
+        "spirv_cross_namespace": "ANY",
     }
     default_options = {
-    "fPIC": True,
-    "with_glslang" : True,
-    "spirv_cross_namespace": "spirv_cross",
+        "fPIC": True,
+        "with_glslang" : True,
+        "spirv_cross_namespace": "spirv_cross",
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
