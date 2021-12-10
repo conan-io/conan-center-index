@@ -60,6 +60,7 @@ class AravisConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        self.options["glib"].shared = True
 
     def validate(self):
         if self._is_msvc and self.settings.get_safe("compiler.runtime", "").startswith("MT"):
