@@ -13,7 +13,6 @@ class AravisConan(ConanFile):
     description = "A vision library for genicam based cameras."
     topics = ("usb", "camera")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -84,6 +83,10 @@ class AravisConan(ConanFile):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -95,10 +98,10 @@ class AravisConan(ConanFile):
         if self._meson:
             return self._meson
         defs = dict()
+        defs["wrap_mode"] = "nofallback"
         defs["usb"] = "enabled" if self.options.usb else "disabled"
         defs["gst-plugin"] = "enabled" if self.options.gst_plugin else "disabled"
-        if self.options.get_safe("packet_socket"):
-            defs["packet-socket"] = "enabled" if self.options.packet_socket else "disabled"
+        defs["packet-socket"] = "enabled" if self.options.get_safe("packet_socket") else "disabled"
         defs["introspection"] = "enabled" if self.options.introspection else "disabled"
         defs["viewer"] = "disabled"
         defs["tests"] = "false"
