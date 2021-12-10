@@ -244,12 +244,104 @@ the ``::`` namespace) or for setting a custom namespace. These workarounds can n
 undone with the ``set_property`` model because it allows setting arbitrary names for CMake
 targets. Let's see some examples of these workarounds in recipes:
 
-* Use of components to get arbitrary target names in recipes. Some recipes add a component
+* **Use of components to get arbitrary target names in recipes**. Some recipes add a component
   whose only role is to get a target name that is not limited by the namespaces added by
-  the legacy generators automatically. 
+  the legacy generators automatically. For example, the [ktx
+  recipe](https://github.com/conan-io/conan-center-index/blob/5753f954027d9d04b6d05e326f2757ab6b1ac69c/recipes/ktx/all/conanfile.py)
+  uses this workaround to get a target with name ``KTX::ktx``.
 
-* Use build modules to create aliases for targets. 
+```python
+class KtxConan(ConanFile):
+    name = "ktx"
+    ...
 
+    def package_info(self):
+        # changes namespace to KTX::
+        self.cpp_info.names["cmake_find_package"] = "KTX" 
+        ...
+        # the target inherits the KTX:: namespace and sets the target KTX::ktx
+        self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
+        ...
+        # all the information is set via this "fake root" component
+        self.cpp_info.components["libktx"].libs = ["ktx"]
+        self.cpp_info.components["libktx"].defines = [
+            "KTX_FEATURE_KTX1", "KTX_FEATURE_KTX2", "KTX_FEATURE_WRITE"
+        ]
+        ...
+```
+
+To add this information with the new model, just add the desired root cpp_info name with
+``cmake_target_name``. The target will inherit all the properties from the "fake root"
+component, so there's no need to redefine, but please note that when the migration to
+Conan 2.0 is done, there will be no need for that component any more and it should
+dissapear.
+
+```python
+class KtxConan(ConanFile):
+    name = "ktx"
+    ...
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "KTX" 
+        ...
+        # FIXME: Remove the libktx component in Conan 2.0, this is just needed for
+        # compatibility with legacy generators
+        self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
+        ...
+        self.cpp_info.components["libktx"].libs = ["ktx"]
+        self.cpp_info.components["libktx"].defines = [
+            "KTX_FEATURE_KTX1", "KTX_FEATURE_KTX2", "KTX_FEATURE_WRITE"
+        ]
+
+        # Set the root cpp_info target name as KTX::ktx
+        # it will inherit all the libbrary properties (libs, defines, etc.) 
+        # from the defined component. In Conan 2.0 the component should be removed
+        # and those properties should be added to the root cpp_info instead
+        self.cpp_info.set_property("cmake_target_name", "KTX::ktx")
+        ...
+```
+
+
+* **Use build modules to create aliases with arbitray names for targets**. Similar to the
+  previous example, some recipes use a build module with an alias to set an arbitray
+  target name. Let's see the example of the [tensorflow-lite
+  recipe](https://github.com/conan-io/conan-center-index/blob/03b24bf128cbf15d23ed988b8d8ca0c0ba87d307/recipes/tensorflow-lite/all/conanfile.py),
+  that uses this workaround to define a ``tensorflow::tensorflowlite`` target.
+  
+```python
+class TensorflowLiteConan(ConanFile):
+    name = "tensorflow-lite"
+    ...
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
+        self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
+        # this build module defines an alias tensorflow::tensorflowlite to the tensorflowlite::tensorflowlite generated target
+        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
+        ...
+```
+
+To translate this information to the new model, just check which aliases are defined in the
+build modules and define those for the new model, in this case it should be enough with
+adding the ``tensorflow::tensorflowlite`` target with ``cmake_target_name`` to the root
+cpp_info (besides the ``cmake_file_name``property).
+
+```python
+class TensorflowLiteConan(ConanFile):
+    name = "tensorflow-lite"
+    ...
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
+        self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
+        # this build module defines an alias tensorflow::tensorflowlite to the tensorflowlite::tensorflowlite generated target
+        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
+
+        # set the tensorflowlite::tensorflowlite target name directly for CMakeDeps with no need for aliases
+        self.cpp_info.set_property("cmake_target_name", "tensorflow::tensorflowlite")
+        self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
+        ...
+```
 
 ### PkgConfigDeps
 
