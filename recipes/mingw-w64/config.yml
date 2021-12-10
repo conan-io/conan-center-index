@@ -2,5 +2,5 @@ versions:
     "8.1":
       folder: "8.1"
     "8.0.2":
-      folder: "all"
+      folder: "linux"
 

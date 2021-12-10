@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class ICUBase(ConanFile):
@@ -14,7 +14,7 @@ class ICUBase(ConanFile):
     description = "ICU is a mature, widely used set of C/C++ and Java libraries " \
                   "providing Unicode and Globalization support for software applications."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "icu", "icu4c", "i see you", "unicode")
+    topics = ("icu", "icu4c", "i see you", "unicode")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -34,7 +34,6 @@ class ICUBase(ConanFile):
         "with_dyload": True,
     }
 
-    exports_sources = "patches/*.patch"
     _env_build = None
 
     @property
@@ -56,6 +55,10 @@ class ICUBase(ConanFile):
     @property
     def _enable_icu_tools(self):
         return self.settings.os not in ["iOS", "tvOS", "watchOS"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -337,7 +340,9 @@ class ICUBase(ConanFile):
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
-            self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
+            self.output.info("Prepending to ICU_DATA runtime environment variable: {}".format(data_path))
+            self.runenv_info.prepend_path("ICU_DATA", data_path)
+            # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.ICU_DATA.append(data_path)
 
         if self._enable_icu_tools:

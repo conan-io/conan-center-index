@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class PdalConan(ConanFile):
     name = "pdal"
     description = "PDAL is Point Data Abstraction Library. GDAL for point cloud data."
-    topics = ("conan", "pdal", "gdal", "point-cloud-data", "lidar")
+    topics = ("pdal", "gdal", "point-cloud-data", "lidar")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdal.io"
     license = "BSD-3-Clause"
@@ -26,7 +26,7 @@ class PdalConan(ConanFile):
         "with_zstd": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_unwind": False,
         "with_xml": True,
@@ -37,13 +37,17 @@ class PdalConan(ConanFile):
         "with_zstd": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,23 +58,19 @@ class PdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-            raise ConanInvalidConfiguration ("This compiler version is unsupported")
 
     def requirements(self):
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
-        self.requires("boost/1.76.0")
-        self.requires("eigen/3.3.9")
-        self.requires("gdal/3.2.1")
-        self.requires("libcurl/7.77.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
-        self.requires("libgeotiff/1.6.0")
+        self.requires("boost/1.77.0")
+        self.requires("eigen/3.4.0")
+        self.requires("gdal/3.3.3")
+        self.requires("libcurl/7.79.1.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
+        self.requires("libgeotiff/1.7.0")
         self.requires("nanoflann/1.3.2")
         if self.options.with_xml:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         if self.options.with_zstd:
             self.requires("zstd/1.5.0")
         if self.options.with_lazperf:
@@ -89,11 +89,17 @@ class PdalConan(ConanFile):
         return ["filesystem"]
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            raise ConanInvalidConfiguration ("This compiler version is unsupported")
+        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
+            raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
-        if self.settings.arch not in ("x86_64", ):
-            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("pdal doesn't support cross-build yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -183,8 +189,11 @@ class PdalConan(ConanFile):
         self.cpp_info.libs = [pdal_base_name, "pdal_util"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["pdal_arbiter", "pdal_kazhdan"])
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "m"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.extend(["dl", "m"])
+            elif self.settings.os == "Windows":
+                # dependency of pdal_arbiter
+                self.cpp_info.system_libs.append("shlwapi")
         self.cpp_info.requires = [
             "boost::filesystem", "eigen::eigen", "gdal::gdal",
             "libcurl::libcurl", "libgeotiff::libgeotiff", "nanoflann::nanoflann"

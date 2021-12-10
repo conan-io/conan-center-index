@@ -879,6 +879,8 @@ class BoostConan(ConanFile):
             return "mips64"
         elif str(self.settings.arch).startswith("mips"):
             return "mips1"
+        elif str(self.settings.arch).startswith("s390"):
+            return "s390x"
         else:
             return None
 

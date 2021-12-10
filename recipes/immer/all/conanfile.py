@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, errors
 
+required_conan_version = ">=1.33.0"
 
 class ImmerConan(ConanFile):
     name = "immer"

@@ -1,0 +1,32 @@
+From 0ddff567ef8f513462f0846bcdd481774a01da95 Mon Sep 17 00:00:00 2001
+From: Wouter Zirkzee <wouter.zirkzee@gmail.com>
+Date: Thu, 25 Nov 2021 23:25:17 +0100
+Subject: [PATCH 1/2] Different export headers for shared and static lib
+
+---
+ iir/Common.h | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/iir/Common.h b/iir/Common.h
+index 71c24d6..8d66155 100644
+--- a/iir/Common.h
++++ b/iir/Common.h
+@@ -46,8 +46,14 @@
+ 
+ // This exports the classes/structures to the windows DLL
+ #ifdef _WIN32
+-#define DllExport   __declspec( dllexport )
+ #define _CRT_SECURE_NO_WARNINGS
++#ifdef iir_EXPORTS
++#define DllExport   __declspec( dllexport )
++#elif iir_SHARED
++#define DllExport   __declspec( dllimport )
++#else
++#define DllExport
++#endif
+ #else
+ #define DllExport
+ #endif
+-- 
+2.25.1
+
