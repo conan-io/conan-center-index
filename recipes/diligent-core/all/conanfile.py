@@ -15,12 +15,10 @@ class DiligentCoreConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
-        "with_glslang": [True, False],
         "spirv_cross_namespace": "ANY",
     }
     default_options = {
         "fPIC": True,
-        "with_glslang" : True,
         "spirv_cross_namespace": "spirv_cross",
     }
     generators = "cmake_find_package", "cmake"
@@ -95,9 +93,8 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-tools/2021.4")
         self.requires("vulkan-headers/1.2.198")
         self.requires("volk/1.2.198")
-
-        if self.options.with_glslang:
-            self.requires("glslang/11.7.0")
+        self.requires("glslang/11.7.0")
+        if self.settings.compiler == "apple-clang":
             self.options["glslang"].shared = True
 
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -105,7 +102,7 @@ class DiligentCoreConan(ConanFile):
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.3.0")        
 
-    def diligent_platform(self):
+    def _diligent_platform(self):
         if self.settings.os == "Windows":
             return "PLATFORM_WIN32"
         elif self.settings.os == "Macos":
@@ -128,16 +125,13 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D11"] = True
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D12"] = True
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options.spirv_cross_namespace
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
 
-        self._cmake.definitions[self.diligent_platform()] = True
+        self._cmake.definitions[self._diligent_platform()] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
