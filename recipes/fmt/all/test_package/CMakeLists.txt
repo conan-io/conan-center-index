@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.1.2)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+endif()
 
 find_package(fmt REQUIRED)
 
