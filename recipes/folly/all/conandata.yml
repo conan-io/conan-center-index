@@ -23,6 +23,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0013-include-bit.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0020-include-ssizet.patch"
+      base_path: "source_subfolder"
   "2020.08.10.00":
     - patch_file: "patches/0008-find-packages.patch"
       base_path: "source_subfolder"
