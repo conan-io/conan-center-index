@@ -53,6 +53,7 @@ class AdeConan(ConanFile):
         return self._cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "    if(UNIX)", "    if(UNIX OR CYGWIN OR MINGW OR MSYS)")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -103,3 +104,4 @@ class AdeConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = ["ade"]
+        self.cpp_info.system_libs = ["ssp"]
