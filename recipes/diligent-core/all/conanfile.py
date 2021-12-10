@@ -89,7 +89,6 @@ class DiligentCoreConan(ConanFile):
         self.requires("libpng/1.6.37")
 
         self.requires("spirv-cross/cci.20210930")
-        # commented out due to conan-center CI limitations
         self.options["spirv-cross"].namespace = self.options.spirv_cross_namespace
         self.requires("spirv-headers/1.2.198.0")
         self.requires("spirv-tools/2021.4")
@@ -98,6 +97,7 @@ class DiligentCoreConan(ConanFile):
 
         if self.options.with_glslang:
             self.requires("glslang/11.7.0")
+            self.options["glslang"].shared = True
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
