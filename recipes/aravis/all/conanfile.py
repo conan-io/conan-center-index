@@ -48,6 +48,10 @@ class AravisConan(ConanFile):
     def _aravis_api_version(self):
         return ".".join(self.version.split(".")[0:2])
 
+    @property
+    def _is_msvc(self):
+        return self.settings.compiler == "Visual Studio"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -57,13 +61,12 @@ class AravisConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.gst_plugin:
-            self.options["gstreamer"].shared = self.options.shared
-            self.options["gst-plugins-base"].shared = self.options.shared
 
     def validate(self):
+        if self._is_msvc and self.settings.get_safe("compiler.runtime", "").startswith("MT"):
+            raise ConanInvalidConfiguration("Static MT/MTd runtime is not supported on Windows due to GLib issues")
         if not self.options["glib"].shared and self.options.shared:
-            raise ConanInvalidConfiguration("shared Aravis cannot link to static GLib")
+            raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
 
     def build_requirements(self):
         self.build_requires("meson/0.60.2")
@@ -100,6 +103,8 @@ class AravisConan(ConanFile):
         defs["viewer"] = "disabled"
         defs["tests"] = "false"
         defs["documentation"] = "disabled"
+        if self.settings.get_safe("compiler.runtime"):
+            defs["b_vscrt"] = str(self.settings.compiler.runtime).lower()
         self._meson = Meson(self)
         self._meson.configure(defs=defs, source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._meson
@@ -111,7 +116,7 @@ class AravisConan(ConanFile):
 
     def _fix_library_names(self, path):
         # https://github.com/mesonbuild/meson/issues/1412
-        if not self.options.shared and self.settings.compiler == "Visual Studio":
+        if not self.options.shared and self._is_msvc:
             with tools.chdir(path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
@@ -124,7 +129,8 @@ class AravisConan(ConanFile):
         meson.install()
 
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
-        self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+        if self.options.gst_plugin:
+            self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
         if not self.options.tools:
