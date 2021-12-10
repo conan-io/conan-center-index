@@ -28,7 +28,7 @@ class AravisConan(ConanFile):
         "fPIC": True,
         "usb": True,
         "packet_socket": True,
-        "gst_plugin": True,
+        "gst_plugin": False,
         "tools": True,
         "introspection": False
     }
