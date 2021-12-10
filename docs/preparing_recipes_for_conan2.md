@@ -46,6 +46,8 @@ documentation](https://docs.conan.io/en/latest/conan_v2.html#editables-don-t-use
 > not affect legacy generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
 > ``cmake_find_package_multi``) at all.
 
+### CMakeDeps
+
 ### Update required_conan_version to ">=1.43.0"
 
 If you are setting the property ``cmake_target_name`` in the recipe, the Conan minimum
@@ -78,7 +80,7 @@ class GdalConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "GDAL::GDAL")
 ```
 
-### Translating .names information to cmake_target_name and cmake_file_name
+### Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name
 
 To understand how to translate the ``.names`` information to the new model there are two
 important things to take into account:
@@ -141,11 +143,116 @@ class SomePkgConan(ConanFile):
         ...
 ```
 
-Please note that if we hadn't set the ``cmake_file_name`` property, the ``CMakeDeps`` generator would have taken the package name to generate the filename for the config file and the generated file would have been ``somepkg-config.cmake`` instead of ``some-pkg-config.cmake``.
+Please note that if we hadn't set the ``cmake_file_name`` property, the ``CMakeDeps``
+generator would have taken the package name to generate the filename for the config file
+and the generated file would have been ``somepkg-config.cmake`` instead of
+``some-pkg-config.cmake``.
 
-### Translating .filenames information
+* Some recipes in Conan Center Index define different ``.names`` values for ``cmake_find_package``
+  and ``cmake_find_package_multi``. For these cases, besides ``cmake_target_name`` you should also set
+  the ``cmake_module_target_name`` and ``cmake_find_mode`` properties. Let's see an example:
 
-### Set cmake_find_mode to both
+```python
+class ExpatConan(ConanFile):
+    name = "expat"
+    ...
+    def package_info(self):
+        # creates EXPAT::EXPAT target for module files FindEXPAT.cmake
+        self.cpp_info.names["cmake_find_package"] = "EXPAT"
+        # creates expat::expat target for config files expat-config.cmake
+        self.cpp_info.names["cmake_find_package_multi"] = "expat"
+        ...
+```
+
+Should translate to the code above. Please note we add the ``cmake_find_mode`` property for the
+[CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html#properties)
+generator with value ``both``.
+
+```python
+class ExpatConan(ConanFile):
+    name = "expat"
+    ...
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "EXPAT"
+        self.cpp_info.names["cmake_find_package_multi"] = "expat"
+
+        # creates EXPAT::EXPAT target for module files FindEXPAT.cmake
+        self.cpp_info.set_property("cmake_target_name", "EXPAT::EXPAT")
+        # creates expat::expat target for config files expat-config.cmake 
+        self.cpp_info.set_property("cmake_module_target_name", "expat::expat") 
+
+        # generates module file FindEXPAT.cmake
+        self.cpp_info.set_property("cmake_file_name", "EXPAT") 
+        # generates config file expat-config.cmake
+        self.cpp_info.set_property("cmake_module_file_name", "expat") 
+
+        # config is the default for CMakeDeps
+        # we set cmake_find_mode to both to generate both module and config files
+        self.cpp_info.set_property("cmake_find_mode", "both") 
+        ...
+```
+
+### Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode
+
+There are some cases in Conan Center Index of recipes that set different filenames for
+``cmake_find_package`` and ``cmake_find_package_multi`` generators. To translate that
+information to the ``set_property`` model we have to set the ``cmake_file_name`` and
+``cmake_find_mode`` properties. Let's see an example:
+
+```python
+class GlewConan(ConanFile):
+    name = "glew"
+    ...
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GLEW"
+        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
+        self.cpp_info.filenames["cmake_find_package"] = "GLEW" # generates FindGLEW.cmake
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glew" # generates glew-config.cmake
+        ...
+```
+
+In this case we would add the ``cmake_find_mode`` property for the
+[CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html#properties)
+generator with value ``both``. That will make CMakeDeps generator create both module and
+config files for consumers (by default it generates just config files).
+
+```python
+class GlewConan(ConanFile):
+    name = "glew"
+    ...
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GLEW"
+        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
+        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
+
+        self.cpp_info.set_property("cmake_target_name", "GLEW::GLEW")
+
+        self.cpp_info.set_property("cmake_file_name", "GLEW") # generates FindGLEW.cmake
+        self.cpp_info.set_property("cmake_module_file_name", "glew") # generates glew-config.cmake
+
+        # generate both modules and config files
+        self.cpp_info.set_property("cmake_find_mode", "both") 
+        ...
+```
+
+### Understanding some workarounds from the .names attribute model in recipes
+
+The ``.names`` model has some limitations, and because of this there are some recurrent
+workarounds in recipes to achieve things like setting absolute names for targets (without
+the ``::`` namespace) or for setting a custom namespace. These workarounds can now be
+undone with the ``set_property`` model because it allows setting arbitrary names for CMake
+targets. Let's see some examples of these workarounds in recipes:
+
+* Use of components to get arbitrary target names in recipes. Some recipes add a component
+  whose only role is to get a target name that is not limited by the namespaces added by
+  the legacy generators automatically. 
+
+* Use build modules to create aliases for targets. 
+
+
+### PkgConfigDeps
+
 
 ### Testing CMakeDeps and PkgConfigDeps in Conan Center Index recipes
 
