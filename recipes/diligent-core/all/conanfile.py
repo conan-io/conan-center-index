@@ -161,7 +161,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options.spirv_cross_namespace))
-        self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
+        self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
