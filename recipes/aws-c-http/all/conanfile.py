@@ -66,15 +66,16 @@ class AwsCHttp(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-http"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-http")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-http")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-http"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-http"
-        self.cpp_info.set_property("cmake_file_name", "aws-c-http")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.set_property("cmake_target_name", "AWS::AWS")
+
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
-        self.cpp_info.components["aws-c-http-lib"].set_property("cmake_target_name", "AWS::aws-c-http")
         self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
         self.cpp_info.components["aws-c-http-lib"].requires = [
             "aws-c-common::aws-c-common-lib",
