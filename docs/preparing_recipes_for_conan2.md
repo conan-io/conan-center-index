@@ -80,29 +80,68 @@ class GdalConan(ConanFile):
 
 ### Translating .names information to cmake_target_name and cmake_file_name
 
-Before knowing how to translate the ``.names`` information to the new model we have to
-understand how this attribute affects the generators (``cmake``, ``cmake_multi``,
-``cmake_find_package``, ``cmake_find_package_multi``, ``cmake_paths`` and ``pkg_config``
-generators read this attribute). There are two important things:
+To understand how to translate the ``.names`` information to the new model there are two
+important things to take into account:
 
-* The ``.names`` attribute value is only a part of the final target name...
-
-* The ``.names`` attribute can affect both the generated CMake target names and the
-  filenames of the ``Find<pkg>.cmake`` or ``<pkg>-config.cmake`` files that store the
-  dependencies information. That is because if the ``.filenames`` attribute is not set it
-  will fall back on the ``.names`` value to generate the files. Let's see an example:
+* The value of the ``.names`` attribute value in recipes is just a part of the final
+  target name for CMake generators. Conan will complete the rest of the target name by
+  pre-pending a namespace ending with ``::`` to the ``.names`` value. This namespace takes
+  the same value as the ``.names`` value. Let's see an example: 
 
 ```python
-class Re2Conan(ConanFile):
-    name = "re2"
+class SomePkgConan(ConanFile):
+    name = "somepkg"
     ...
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "re2"
-        self.cpp_info.names["cmake_find_package_multi"] = "re2"
+        self.cpp_info.names["cmake_find_package"] = "some-pkg"
+        self.cpp_info.names["cmake_find_package_multi"] = "some-pkg"
         ...
 ```
 
+This recipe generates the target ``some-pkg::some-pkg`` for both the
+``cmake_find_package`` and the ``cmake_find_package_multi`` generators. Also, please
+remember that if no ``.names`` attribute were set, Conan would create the target
+``somepkg::somepkg`` for both generators by default.
 
+As we explained before, the ``cmake_target_name`` sets the **complete target name**, so, 
+to translate this information to the new model we should add the following lines:
+
+```python
+class SomePkgConan(ConanFile):
+    name = "somepkg"
+    ...
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "some-pkg"
+        self.cpp_info.names["cmake_find_package_multi"] = "some-pkg"
+        # CMakeDeps does NOT add any namespace automatically
+        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg") 
+        ...
+```
+
+* Also, please bear in mind that the ``.names`` attribute can affect both the generated
+  CMake target names and the filenames of the ``Find<pkg>.cmake`` or
+  ``<pkg>-config.cmake`` files that store the dependencies information. That is because if
+  the ``.filenames`` attribute is not set it will fall back on the ``.names`` value to
+  generate the files. For the previous example, in order to translate all the information
+  from the legacy model to the new one, we should have added one more line setting the
+  ``cmake_file_name`` value.
+
+```python
+class SomePkgConan(ConanFile):
+    name = "somepkg"
+    ...
+    def package_info(self):
+        # Legacy generators fallback the filenames for the .cmake files
+        # in the .names attribute value and generate 
+        self.cpp_info.names["cmake_find_package"] = "some-pkg" # generates module file Findsome-pkg.cmake
+        self.cpp_info.names["cmake_find_package_multi"] = "some-pkg" # generates config file some-pkg-config.cmake
+
+        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg") 
+        self.cpp_info.set_property("cmake_file_name", "some-pkg") # generates config file some-pkg-config.cmake
+        ...
+```
+
+Please note that if we hadn't set the ``cmake_file_name`` property, the ``CMakeDeps`` generator would have taken the package name to generate the filename for the config file and the generated file would have been ``somepkg-config.cmake`` instead of ``some-pkg-config.cmake``.
 
 ### Translating .filenames information
 
