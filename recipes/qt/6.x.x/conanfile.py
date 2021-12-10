@@ -18,15 +18,14 @@ class qt(Generator):
             HostData = {1}/archdatadir
             Data = {1}/datadir
             Sysconf = {1}/sysconfdir
-            LibraryExecutables = {1}/archdatadir/{3}
-            HostLibraryExecutables = {2}
+            LibraryExecutables = {1}/archdatadir/{2}
+            HostLibraryExecutables = bin
             Plugins = {1}/archdatadir/plugins
             Imports = {1}/archdatadir/imports
             Qml2Imports = {1}/archdatadir/qml
             Translations = {1}/datadir/translations
             Documentation = {1}/datadir/doc
             Examples = {1}/datadir/examples""").format(path, folder,
-                "bin" if os_ == "Windows" else "lib",
                 "bin" if os_ == "Windows" else "libexec")
 
     @property
@@ -48,7 +47,7 @@ class QtConan(ConanFile):
                    "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
                    "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
-                   "qtremoteobjects"]
+                   "qtremoteobjects", "qtpositioning"]
 
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
@@ -330,6 +329,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
+            self.requires("nss/3.72")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -518,7 +518,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
         self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "lib")
+        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
         self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
         self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
 
@@ -646,6 +646,9 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
+            tools.replace_in_file(f,
+                " IMPORTED)\n",
+                " IMPORTED GLOBAL)\n", strict=False)
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
             build_env = tools.RunEnvironment(self).vars if self.settings.compiler == "Visual Studio" else {}
@@ -1072,18 +1075,11 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if self.options.get_safe("qtlocation"):
-            _create_module("Positioning")
-            _create_plugin("QGeoServiceProviderFactoryMapbox", "qtgeoservices_mapbox", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryMapboxGL", "qtgeoservices_mapboxgl", "geoservices", [])
-            _create_plugin("GeoServiceProviderFactoryEsri", "qtgeoservices_esri", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryItemsOverlay", "qtgeoservices_itemsoverlay", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryNokia", "qtgeoservices_nokia", "geoservices", [])
-            _create_plugin("QGeoServiceProviderFactoryOsm", "qtgeoservices_osm", "geoservices", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue", "qtposition_geoclue", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
-            _create_plugin("QGeoPositionInfoSourceFactorySerialNmea", "qtposition_serialnmea", "position", [])
+        if (self.options.get_safe("qtlocation") and tools.Version(self.version) < "6.2.2") or \
+            (self.options.get_safe("qtpositioning") and tools.Version(self.version) >= "6.2.2"):
+                _create_module("Positioning")
+                _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
+                _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
 
         if self.options.get_safe("qtsensors"):
             _create_module("Sensors")
@@ -1118,7 +1114,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine"):
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
-                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", "nss::nss"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngineQuick", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
@@ -1141,6 +1137,7 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
+                self.cpp_info.components["qtNetwork"].system_libs.extend(["winhttp", "secur32"])
 
 
             if self.settings.os == "Macos":
