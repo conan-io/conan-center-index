@@ -1,4 +1,4 @@
-from conans import ConanFile, Meson, tools
+from conans import ConanFile, Meson, RunEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import glob
@@ -115,8 +115,9 @@ class AravisConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
-        meson.build()
+        with tools.environment_append(RunEnvironment(self).vars):
+            meson = self._configure_meson()
+            meson.build()
 
     def _fix_library_names(self, path):
         # https://github.com/mesonbuild/meson/issues/1412
@@ -129,8 +130,9 @@ class AravisConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        meson = self._configure_meson()
-        meson.install()
+        with tools.environment_append(RunEnvironment(self).vars):
+            meson = self._configure_meson()
+            meson.install()
 
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         if self.options.gst_plugin:
