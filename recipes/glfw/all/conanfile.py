@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
+# TODO: bump to 1.43.0 due to set_property()
 required_conan_version = ">=1.36.0"
 
 
@@ -131,12 +132,6 @@ class GlfwConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "glfw3")
         self.cpp_info.set_property("cmake_target_name", "glfw")
         self.cpp_info.set_property("pkg_config_name", "glfw3")
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
@@ -150,8 +145,11 @@ class GlfwConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
 
+        # backward support of cmake_find_package & cmake_find_package_multi
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
         self.cpp_info.names["cmake_find_package"] = "glfw"
         self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
