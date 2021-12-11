@@ -137,7 +137,12 @@ class GlfwConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        libname = "glfw"
+        if self.settings.os == "Windows" or not self.options.shared:
+            libname += "3"
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            libname += "dll"
+        self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
