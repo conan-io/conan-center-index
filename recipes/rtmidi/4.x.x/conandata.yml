@@ -1,7 +1,7 @@
 sources:
   "4.0.0":
-    url: "https://github.com/thestk/rtmidi/archive/refs/tags/4.0.0.zip"
-    sha256: "83d794ca20e154244b1830ebb6df77653d6b0da968aba9e72d9c9d2557f0d2a1"
+    url: "http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-4.0.0.tar.gz"
+    sha256: "370cfe710f43fbeba8d2b8c8bc310f314338c519c2cf2865e2d2737b251526cd"
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-add-a-separate-licence-file-0b5d67c.patch"
