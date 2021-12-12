@@ -50,7 +50,7 @@ class AwsCrtCpp(ConanFile):
         self.requires("aws-c-auth/0.6.8")
         self.requires("aws-c-mqtt/0.7.9")
         self.requires("aws-c-s3/0.1.29")
-        self.requires("aws-checksums/0.1.11")
+        self.requires("aws-checksums/0.1.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
