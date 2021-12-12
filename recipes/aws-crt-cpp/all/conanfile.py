@@ -1,25 +1,27 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 class AwsCrtCpp(ConanFile):
     name = "aws-crt-cpp"
     description = "C++ wrapper around the aws-c-* libraries. Provides Cross-Platform Transport Protocols and SSL/TLS implementations for C++."
-    topics = ("conan", "aws")
+    topics = ("aws", "amazon", "cloud", "wrapper")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-crt-cpp"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openssl": False,
     }
 
     _cmake = None
@@ -42,12 +44,12 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-event-stream/0.2.7")
-        self.requires("aws-c-common/0.6.9")
-        self.requires("aws-c-io/0.10.9")
-        self.requires("aws-c-http/0.6.7")
-        self.requires("aws-c-auth/0.6.4")
-        self.requires("aws-c-mqtt/0.7.6")
-        self.requires("aws-c-s3/0.1.19")
+        self.requires("aws-c-common/0.6.15")
+        self.requires("aws-c-io/0.10.13")
+        self.requires("aws-c-http/0.6.10")
+        self.requires("aws-c-auth/0.6.8")
+        self.requires("aws-c-mqtt/0.7.9")
+        self.requires("aws-c-s3/0.1.29")
         self.requires("aws-checksums/0.1.11")
 
     def source(self):
@@ -60,6 +62,7 @@ class AwsCrtCpp(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_DEPS"] = False
+        self._cmake.definitions["USE_OPENSSL"] = self.options.with_openssl
         self._cmake.configure()
         return self._cmake
 
@@ -78,10 +81,13 @@ class AwsCrtCpp(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
+        self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.set_property("cmake_target_name", "AWS")
         self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package_multi"] = "aws-crt-cpp"
+        self.cpp_info.components["aws-crt-cpp-lib"].set_property("cmake_target_name", "aws-crt-cpp")
         self.cpp_info.components["aws-crt-cpp-lib"].libs = ["aws-crt-cpp"]
         self.cpp_info.components["aws-crt-cpp-lib"].requires = [
             "aws-c-event-stream::aws-c-event-stream-lib",
