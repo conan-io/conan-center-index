@@ -21,12 +21,15 @@ class MsgpackCXXConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
-        self.options["boost"].header_only = False
-        self.options["boost"].without_chrono = False
-        self.options["boost"].without_context = False
-        self.options["boost"].without_system = False
-        self.options["boost"].without_timer = False
+    def validate(self):
+        if self.options["boost"].header_only == True:
+            raise ConanInvalidConfiguration("{} requires boost with header_only = False".format(self.name))
+
+        if self.options["boost"].without_chrono == True or \
+            self.options["boost"].without_context == True or \
+            self.options["boost"].without_system == True or \
+            self.options["boost"].without_timer == True:
+            raise ConanInvalidConfiguration("{} requires boost with chrono, context, system, timer enabled".format(self.name))
 
     def requirements(self):
         self.requires("boost/1.77.0")
