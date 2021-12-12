@@ -11,7 +11,6 @@ class MsgpackCXXConan(ConanFile):
     homepage = "https://github.com/msgpack/msgpack-c"
     topics = ("msgpack", "message-pack", "serialization")
     license = "BSL-1.0"
-    generators = "cmake"
     no_copy_source = True
 
     @property
