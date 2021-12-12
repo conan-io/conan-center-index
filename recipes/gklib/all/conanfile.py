@@ -25,7 +25,6 @@ class GKlibConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = ["patches/**"]
 
     @property
     def _is_msvc(self):
@@ -53,6 +52,10 @@ class GKlibConan(ConanFile):
     def layout(self):
         cmake_layout(self)
         self.folders.source = "{}-{}".format(self.name, self.version)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(
