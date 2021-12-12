@@ -15,11 +15,9 @@ class DiligentCoreConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
-        "spirv_cross_namespace": "ANY",
     }
     default_options = {
         "fPIC": True,
-        "spirv_cross_namespace": "spirv_cross",
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
@@ -88,7 +86,6 @@ class DiligentCoreConan(ConanFile):
         self.requires("libpng/1.6.37")
 
         self.requires("spirv-cross/cci.20210930")
-        self.options["spirv-cross"].namespace = self.options.spirv_cross_namespace
         self.requires("spirv-headers/1.2.198.0")
         self.requires("spirv-tools/2021.4")
         self.requires("vulkan-headers/1.2.198")
@@ -126,7 +123,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
-        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options.spirv_cross_namespace
+        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
@@ -160,7 +157,7 @@ class DiligentCoreConan(ConanFile):
         # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options.spirv_cross_namespace))
+        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
