@@ -14,9 +14,8 @@ class TestPackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        cwd = os.path.dirname(__file__)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(cwd, "..", "test_package"))
+        cmake.configure(build_script_folder=os.path.join("..", "test_package"))
         cmake.build()
 
     def test(self):
