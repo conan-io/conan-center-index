@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import shutil
@@ -66,6 +67,11 @@ class CoinCbcConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.4")
+    
+    def validate(self):
+        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+            raise ConanInvalidConfiguration("coin-cbc shared not supported yet when cross-building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
