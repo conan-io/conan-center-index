@@ -1,0 +1,4 @@
+sources:
+  "1.3.2":
+    url: "https://github.com/peter-winter/ctpg/archive/refs/tags/v1.3.2.tar.gz"
+    sha256: "76977cd51530b5c59fa7b5e2693bad14324f013fec846035809ec5648869c1f3"
