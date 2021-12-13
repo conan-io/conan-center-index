@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
+import itertools
 import os
 import textwrap
 
@@ -149,7 +150,7 @@ class Libxml2Conan(ConanFile):
             def fix_library(option, package, old_libname):
                 if option:
                     libs = []
-                    for lib in self.deps_cpp_info[package].libs:
+                    for lib in itertools.chain(self.deps_cpp_info[package].libs, self.deps_cpp_info[package].system_libs):
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
