@@ -1,17 +1,17 @@
 # Preparing recipes for Conan 2.0
 
 As you may know, [Conan 2.0-alpha is already
-released](https://github.com/conan-io/conan/releases/tag/2.0.0-alpha1). Although Conan
-Center Index will keep on running with Conan 1.X for a long time, we want to anticipate to
-the migration and start making changes in recipes so that they are as much compatible as
-possible with Conan 2.0 and make the change easier when the time comes. 
+released](https://github.com/conan-io/conan/releases/tag/2.0.0-alpha1). Conan Center Index
+will run Conan 1.X for a long time, but it's time to start preparing recipes to make them
+as compatible as possible with Conan 2.0. Then, when the time comes that we update to 2.0
+in Conan Center, the transition will be smooth.
 
-For more information about Conan 2.0 and things that change to respect to Conan 1.X,
-please read the [migration guide](https://docs.conan.io/en/latest/conan_v2.html) in the
-Conan documentation.
+For more information about Conan 2.0 breaking changes and how to prepare the migration
+from Conan 1.X to 2.0, please read the [migration
+guide](https://docs.conan.io/en/latest/conan_v2.html) in the Conan documentation.
 
-This document is a practical guide covering the necessary changes to Conan Center Index
-recipes to be ready to upgrade to Conan 2.0:
+This document is a practical guide, offering extended information particular to Conan
+Center Index recipes to get them ready to upgrade to Conan 2.0.
 
 <!-- toc -->
 ## Contents
@@ -21,36 +21,36 @@ recipes to be ready to upgrade to Conan 2.0:
 
 ## New cpp_info set_property model
 
-New Conan generators, like
+New Conan generators like
 [CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html)
 and
-[PkgConfigDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/gnu/pkgconfigdeps.html)
+[PkgConfigDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/gnu/pkgconfigdeps.html),
 don't listen to *cpp_info* ``.names``, ``.filenames`` or ``.build_modules`` attributes.
-There is a new way of setting the *cpp_info* information for consumers that use these
-generators via the ``set_property(property_name, value)`` method.
+There is a new way of setting the *cpp_info* information with these
+generators using the ``set_property(property_name, value)`` method.
 
-This means that all the information in the recipes that was set with the legacy model
-should be translated to the new model. These two models **will live together in recipes** to
-make recipes compatible **with both new and legacy generators** for some time. After an stable Conan 2.0
-version is released and when the moment arrives that we don't support legacy generators
-any more in Conan Center Index, the ``.names``, ``.filenames`` or ``.build_modules``
-attributes will be removed and only ``set_property`` methods will remain.
+All the information in the recipes, already set with the legacy model, should be
+translated to the new model. These two models **will live together in recipes** to make
+recipes compatible **with both new and legacy generators** for some time. After a stable
+Conan 2.0 version is released, and when the moment arrives that we don't support the
+legacy generators anymore in Conan Center Index, those attributes (``.names``,
+``.filenames`` etc.) will disappear from recipes, and only ``set_property`` methods will
+stay.
 
-We will cover different practical cases of porting all the information set with legacy
-model to the new one. If you want to read more about the properties available for each
-generator and how the new properties model work, please check the [Conan
-documentation](https://docs.conan.io/en/latest/conan_v2.html#editables-don-t-use-external-templates-any-more-new-layout-model).
+We will cover some cases of porting all the information set with the legacy model to the
+new one. To read more about the properties available for each generator and how the
+properties model work, please check the [Conan documentation](https://docs.conan.io/en/latest/conan_v2.html#editables-don-t-use-external-templates-any-more-new-layout-model).
 
 > ⚠️ **Note**: Please, remember that the **new** ``set_property`` and the **legacy** attributes
 > model are *completely independent since Conan 1.43*. Setting ``set_property`` in recipes will
-> not affect legacy generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
+> not affect CMake legacy generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
 > ``cmake_find_package_multi``) at all.
 
 ### CMakeDeps
 
 ### Update required_conan_version to ">=1.43.0"
 
-If you are setting the property ``cmake_target_name`` in the recipe, the Conan minimum
+If you set the property ``cmake_target_name`` in the recipe, the Conan minimum
 required version should be updated to 1.43. 
 
 ```python
@@ -62,11 +62,11 @@ class GdalConan(ConanFile):
     ...
 ```
 
-The reason is that before Conan 1.43 the
-``cmake_target_name`` values were interpreted as a part of the names of the targets for
-CMake and Conan added namespaces automatically to these target names. After 1.43
-``cmake_target_name`` sets the **complete target name** that is added to the ``.cmake`` files
-generated by Conan. Let's see an example:
+The reason for this change is that in Conan versions previous to 1.43 the
+``cmake_target_name`` values were not the final CMake target names. Those values were
+completed by Conan, adding namespaces automatically the final target names. After 1.43
+``cmake_target_name`` sets the **complete target name** that is added to the ``.cmake``
+files generated by Conan. Let's see an example:
 
 ```python
 class GdalConan(ConanFile):
@@ -82,12 +82,12 @@ class GdalConan(ConanFile):
 
 ### Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name
 
-To understand how to translate the ``.names`` information to the new model there are two
-important things to take into account:
+To translate the ``.names`` information to the new model there are some important things to
+take into account:
 
 * The value of the ``.names`` attribute value in recipes is just a part of the final
   target name for CMake generators. Conan will complete the rest of the target name by
-  pre-pending a namespace ending with ``::`` to the ``.names`` value. This namespace takes
+  pre-pending a namespace (with ``::`` separator) to the ``.names`` value. This namespace takes
   the same value as the ``.names`` value. Let's see an example: 
 
 ```python
@@ -120,13 +120,11 @@ class SomePkgConan(ConanFile):
         ...
 ```
 
-* Also, please bear in mind that the ``.names`` attribute can affect both the generated
-  CMake target names and the filenames of the ``Find<pkg>.cmake`` or
-  ``<pkg>-config.cmake`` files that store the dependencies information. That is because if
-  the ``.filenames`` attribute is not set it will fall back on the ``.names`` value to
-  generate the files. For the previous example, in order to translate all the information
-  from the legacy model to the new one, we should have added one more line setting the
-  ``cmake_file_name`` value.
+* If ``.filenames`` attribute is not set, it will fall back on the ``.names`` value to
+  generate the files. Both the ``Find<pkg>.cmake`` and ``<pkg>-config.cmake`` files that
+  store the dependencies will take the ``.names`` value to create the complete filename.
+  For the previous example, to translate all the information from the legacy model to the
+  new one, we should have added one more line setting the ``cmake_file_name`` value.
 
 ```python
 class SomePkgConan(ConanFile):
@@ -145,7 +143,7 @@ class SomePkgConan(ConanFile):
 
 Please note that if we hadn't set the ``cmake_file_name`` property, the ``CMakeDeps``
 generator would have taken the package name to generate the filename for the config file
-and the generated file would have been ``somepkg-config.cmake`` instead of
+and the generated filename would have resulted ``somepkg-config.cmake`` instead of
 ``some-pkg-config.cmake``.
 
 * Some recipes in Conan Center Index define different ``.names`` values for ``cmake_find_package``
@@ -164,7 +162,8 @@ class ExpatConan(ConanFile):
         ...
 ```
 
-Should translate to the code above. Please note we add the ``cmake_find_mode`` property for the
+Should translate to the code above. Please note we have added the ``cmake_find_mode``
+property for the
 [CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html#properties)
 generator with value ``both``.
 
@@ -194,10 +193,10 @@ class ExpatConan(ConanFile):
 
 ### Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode
 
-There are some cases in Conan Center Index of recipes that set different filenames for
-``cmake_find_package`` and ``cmake_find_package_multi`` generators. To translate that
-information to the ``set_property`` model we have to set the ``cmake_file_name`` and
-``cmake_find_mode`` properties. Let's see an example:
+Like in the ``.names`` case, there are some cases in Conan Center Index of recipes that
+set different filenames for ``cmake_find_package`` and ``cmake_find_package_multi``
+generators. To translate that information to the ``set_property`` model we have to set the
+``cmake_file_name`` and ``cmake_find_mode`` properties. Let's see an example:
 
 ```python
 class GlewConan(ConanFile):
@@ -211,7 +210,7 @@ class GlewConan(ConanFile):
         ...
 ```
 
-In this case we would add the ``cmake_find_mode`` property for the
+In this case we have to set the ``cmake_find_mode`` property for the
 [CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html#properties)
 generator with value ``both``. That will make CMakeDeps generator create both module and
 config files for consumers (by default it generates just config files).
@@ -236,11 +235,11 @@ class GlewConan(ConanFile):
         ...
 ```
 
-### Understanding some workarounds from the .names attribute model in recipes
+### Understanding some workarounds with the .names attribute model in recipes
 
-The ``.names`` model has some limitations, and because of this there are some recurrent
+The ``.names`` model has some limitationsBecause of this, there are some recurrent
 workarounds in recipes to achieve things like setting absolute names for targets (without
-the ``::`` namespace) or for setting a custom namespace. These workarounds can now be
+the ``::`` namespace), or for setting a custom namespace. These workarounds can now be
 undone with the ``set_property`` model because it allows setting arbitrary names for CMake
 targets. Let's see some examples of these workarounds in recipes:
 
@@ -270,10 +269,10 @@ class KtxConan(ConanFile):
         ...
 ```
 
-To add this information with the new model, just add the desired root cpp_info name with
-``cmake_target_name``. The target will inherit all the properties from the "fake root"
-component, so there's no need to redefine, but please note that when the migration to
-Conan 2.0 is done, there will be no need for that component any more and it should
+To add this information with the new model, just add the desired root ``cpp_info`` target
+name with ``cmake_target_name``. The target will inherit all the properties from the "fake
+root" component, so there's no need to redefine those. Please note that when the migration
+to Conan 2.0 is done, there will be no need for that component anymore and it should
 dissapear.
 
 ```python
@@ -301,7 +300,6 @@ class KtxConan(ConanFile):
         ...
 ```
 
-
 * **Use build modules to create aliases with arbitray names for targets**. Similar to the
   previous example, some recipes use a build module with an alias to set an arbitray
   target name. Let's see the example of the [tensorflow-lite
@@ -314,6 +312,7 @@ class TensorflowLiteConan(ConanFile):
     ...
 
     def package_info(self):
+        # generate the target tensorflowlite::tensorflowlite
         self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
         self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
         # this build module defines an alias tensorflow::tensorflowlite to the tensorflowlite::tensorflowlite generated target
@@ -322,7 +321,7 @@ class TensorflowLiteConan(ConanFile):
 ```
 
 To translate this information to the new model, just check which aliases are defined in the
-build modules and define those for the new model, in this case it should be enough with
+build modules and define those for the new model. In this case it should be enough with
 adding the ``tensorflow::tensorflowlite`` target with ``cmake_target_name`` to the root
 cpp_info (besides the ``cmake_file_name``property).
 
@@ -334,7 +333,6 @@ class TensorflowLiteConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "tensorflowlite"
         self.cpp_info.filenames["cmake_find_package"] = "tensorflowlite"
-        # this build module defines an alias tensorflow::tensorflowlite to the tensorflowlite::tensorflowlite generated target
         self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
 
         # set the tensorflowlite::tensorflowlite target name directly for CMakeDeps with no need for aliases
@@ -345,6 +343,33 @@ class TensorflowLiteConan(ConanFile):
 
 ### PkgConfigDeps
 
+The case of ``PkgConfigDeps`` is much more straight forward than the ``CMakeDeps`` case.
+This is because the legacy
+[pkg_config](https://docs.conan.io/en/latest/reference/generators/pkg_config.html)
+generator suports the new ``set_property`` model for most of the properties. Then, the legacy
+model can be translated to the new one without having to leave the old attributes in the
+recipes. Let's see an example:
 
-### Testing CMakeDeps and PkgConfigDeps in Conan Center Index recipes
+```python
+class AprConan(ConanFile):
+    name = "apr"
+    ...
+    def package_info(self):
+        self.cpp_info.names["pkg_config"] = "apr-1"
+    ...
+```
 
+In this case, you can remove the ``.names`` attribute and just leave:
+
+```python
+class AprConan(ConanFile):
+    name = "apr"
+    ...
+    def package_info(self):
+        self.cpp_info.set_property("pkg_config_name",  "apr-1")
+    ...
+```
+
+For more information about properties supported by ``PkgConfigDeps`` generator, please go
+to the [Conan
+documentation](https://docs.conan.io/en/latest/reference/conanfile/tools/gnu/pkgconfigdeps.html#properties).
