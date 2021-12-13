@@ -23,21 +23,21 @@ don't listen to *cpp_info* ``.names``, ``.filenames`` or ``.build_modules`` attr
 There is a new way of setting the *cpp_info* information with these
 generators using the ``set_property(property_name, value)`` method.
 
-All the information in the recipes, already set with the legacy model, should be
+All the information in the recipes, already set with the current model, should be
 translated to the new model. These two models **will live together in recipes** to make
-recipes compatible **with both new and legacy generators** for some time. After a stable
+recipes compatible **with both new and current generators** for some time. After a stable
 Conan 2.0 version is released, and when the moment arrives that we don't support the
-legacy generators anymore in Conan Center Index, those attributes (``.names``,
+current generators anymore in Conan Center Index, those attributes (``.names``,
 ``.filenames`` etc.) will disappear from recipes, and only ``set_property`` methods will
 stay.
 
-We will cover some cases of porting all the information set with the legacy model to the
+We will cover some cases of porting all the information set with the current model to the
 new one. To read more about the properties available for each generator and how the
 properties model work, please check the [Conan documentation](https://docs.conan.io/en/latest/conan_v2.html#editables-don-t-use-external-templates-any-more-new-layout-model).
 
-> ⚠️ **Note**: Please, remember that the **new** ``set_property`` and the **legacy** attributes
+> ⚠️ **Note**: Please, remember that the **new** ``set_property`` and the **current** attributes
 > model are *completely independent since Conan 1.43*. Setting ``set_property`` in recipes will
-> not affect CMake legacy generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
+> not affect current CMake 1.X generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
 > ``cmake_find_package_multi``) at all.
 
 ### CMakeDeps
@@ -117,7 +117,7 @@ class SomePkgConan(ConanFile):
 * If ``.filenames`` attribute is not set, it will fall back on the ``.names`` value to
   generate the files. Both the ``Find<pkg>.cmake`` and ``<pkg>-config.cmake`` files that
   store the dependencies will take the ``.names`` value to create the complete filename.
-  For the previous example, to translate all the information from the legacy model to the
+  For the previous example, to translate all the information from the current model to the
   new one, we should have added one more line setting the ``cmake_file_name`` value.
 
 ```python
@@ -125,7 +125,7 @@ class SomePkgConan(ConanFile):
     name = "somepkg"
     ...
     def package_info(self):
-        # Legacy generators fallback the filenames for the .cmake files
+        # These generators fallback the filenames for the .cmake files
         # in the .names attribute value and generate 
         self.cpp_info.names["cmake_find_package"] = "some-pkg" # generates module file Findsome-pkg.cmake
         self.cpp_info.names["cmake_find_package_multi"] = "some-pkg" # generates config file some-pkg-config.cmake
@@ -239,7 +239,7 @@ targets. Let's see some examples of these workarounds in recipes:
 
 * **Use of components to get arbitrary target names in recipes**. Some recipes add a component
   whose only role is to get a target name that is not limited by the namespaces added by
-  the legacy generators automatically. For example, the [ktx
+  the current generators automatically. For example, the [ktx
   recipe](https://github.com/conan-io/conan-center-index/blob/5753f954027d9d04b6d05e326f2757ab6b1ac69c/recipes/ktx/all/conanfile.py)
   uses this workaround to get a target with name ``KTX::ktx``.
 
@@ -278,7 +278,7 @@ class KtxConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "KTX" 
         ...
         # FIXME: Remove the libktx component in Conan 2.0, this is just needed for
-        # compatibility with legacy generators
+        # compatibility with current generators
         self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
         ...
         self.cpp_info.components["libktx"].libs = ["ktx"]
@@ -338,9 +338,9 @@ class TensorflowLiteConan(ConanFile):
 ### PkgConfigDeps
 
 The case of ``PkgConfigDeps`` is much more straight forward than the ``CMakeDeps`` case.
-This is because the legacy
+This is because the current
 [pkg_config](https://docs.conan.io/en/latest/reference/generators/pkg_config.html)
-generator suports the new ``set_property`` model for most of the properties. Then, the legacy
+generator suports the new ``set_property`` model for most of the properties. Then, the current
 model can be translated to the new one without having to leave the old attributes in the
 recipes. Let's see an example:
 
