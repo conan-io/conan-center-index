@@ -231,7 +231,7 @@ class GlewConan(ConanFile):
 
 ### Understanding some workarounds with the .names attribute model in recipes
 
-The ``.names`` model has some limitationsBecause of this, there are some recurrent
+The ``.names`` model has some limitations. Because of this, there are some recurrent
 workarounds in recipes to achieve things like setting absolute names for targets (without
 the ``::`` namespace), or for setting a custom namespace. These workarounds can now be
 undone with the ``set_property`` model because it allows setting arbitrary names for CMake
