@@ -1,4 +1,7 @@
 sources:
+  "0.4.0":
+    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.4.0.tar.gz"
+    sha256: "061fe713391d7f3f85f13e8bb2752a4cdeb8e70ce20d68e1e9e4332bd0bf64fa"
   "0.3.0":
     url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.3.0.tar.gz"
     sha256: "f5ad3e3be40f0307a732c2b8aff9a1ba6014a6b346f3ec0b128459607748e990"
