@@ -364,6 +364,5 @@ class AprConan(ConanFile):
     ...
 ```
 
-For more information about properties supported by ``PkgConfigDeps`` generator, please go
-to the [Conan
+For more information about properties supported by ``PkgConfigDeps`` generator, please check the [Conan
 documentation](https://docs.conan.io/en/latest/reference/conanfile/tools/gnu/pkgconfigdeps.html#properties).
