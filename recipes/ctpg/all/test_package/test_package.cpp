@@ -1,6 +1,5 @@
 #include "ctpg.hpp"
 #include <iostream>
-#include <charconv>
 
 constexpr ctpg::nterm<int> list("list");
 constexpr char number_pattern[] = "[1-9][0-9]*";
@@ -8,7 +7,9 @@ constexpr ctpg::regex_term<number_pattern> number("number");
 
 int to_int(std::string_view sv) {
     int i = 0;
-    std::from_chars(sv.data(), sv.data() + sv.size(), i);
+    for (auto c : sv) {
+        i = i * 10 + (c - '0');
+    }
     return i;
 }
 
