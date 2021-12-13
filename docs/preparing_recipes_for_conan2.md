@@ -13,12 +13,6 @@ guide](https://docs.conan.io/en/latest/conan_v2.html) in the Conan documentation
 This document is a practical guide, offering extended information particular to Conan
 Center Index recipes to get them ready to upgrade to Conan 2.0.
 
-<!-- toc -->
-## Contents
-
-  * [Adding cpp_info set_property](#new-cpp_info-set_property-model)
-    * [The Build Service](#the-build-service)<!-- endToc -->
-
 ## New cpp_info set_property model
 
 New Conan generators like
