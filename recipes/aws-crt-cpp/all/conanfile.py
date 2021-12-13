@@ -81,13 +81,10 @@ class AwsCrtCpp(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
-        self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.set_property("cmake_target_name", "AWS")
         self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package_multi"] = "aws-crt-cpp"
-        self.cpp_info.components["aws-crt-cpp-lib"].set_property("cmake_target_name", "aws-crt-cpp")
         self.cpp_info.components["aws-crt-cpp-lib"].libs = ["aws-crt-cpp"]
         self.cpp_info.components["aws-crt-cpp-lib"].requires = [
             "aws-c-event-stream::aws-c-event-stream-lib",
