@@ -68,7 +68,7 @@ class GdalConan(ConanFile):
     ...
     def package_info(self):
         # Before 1.43 -> Conan adds GDAL:: namespace -> Creates target with name GDAL::GDAL
-        self.cpp_info.set_property("cmake_target_name", "GDAL")
+        # self.cpp_info.set_property("cmake_target_name", "GDAL")
 
         # After 1.43 -> Conan creates target with name GDAL::GDAL
         self.cpp_info.set_property("cmake_target_name", "GDAL::GDAL")
