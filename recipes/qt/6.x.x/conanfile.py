@@ -91,6 +91,7 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "multiconfiguration": [True, False],
+        "no_entrypoint": [True, False],
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -130,6 +131,7 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "multiconfiguration": False,
+        "no_entrypoint": False,
     }
     default_options.update({module: False for module in _submodules})
 
@@ -1124,9 +1126,30 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
 
-        if self.settings.os == "Windows":
-            _create_module("EntryPoint")
-            self.cpp_info.components["qtEntryPoint"].system_libs.append("shell32")
+        if not self.options.no_entrypoint:
+            if self.settings.os == "Windows":
+                self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package"] = "EntryPointImplementation"
+                self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package_multi"] = "EntryPointImplementation"
+                self.cpp_info.components["qtEntryPointImplementation"].libs = ["Qt6EntryPoint%s" % libsuffix]
+                self.cpp_info.components["qtEntryPointImplementation"].system_libs = ["shell32"]
+
+                if self.settings.compiler == "gcc":
+                    self.cpp_info.components["qtEntryPointMinGW32"].names["cmake_find_package"] = "EntryPointMinGW32"
+                    self.cpp_info.components["qtEntryPointMinGW32"].names["cmake_find_package_multi"] = "EntryPointMinGW32"
+                    self.cpp_info.components["qtEntryPointMinGW32"].system_libs = ["mingw32"]
+                    self.cpp_info.components["qtEntryPointMinGW32"].requires = ["qtEntryPointImplementation"]
+
+            self.cpp_info.components["qtEntryPointPrivate"].names["cmake_find_package"] = "EntryPointPrivate"
+            self.cpp_info.components["qtEntryPointPrivate"].names["cmake_find_package_multi"] = "EntryPointPrivate"
+            if self.settings.os == "Windows":
+                if self.settings.compiler == "gcc":
+                    self.cpp_info.components["qtEntryPointPrivate"].defines.append("QT_NEEDS_QMAIN")
+                    self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointMinGW32")
+                else:
+                    self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
+            if self.settings.os == "iOS":
+                self.cpp_info.components["qtEntryPointPrivate"].exelinkflags.append("-Wl,-e,_qt_main_wrapper")
+            self.cpp_info.components["qtCore"].requires.append("qtEntryPointPrivate")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
