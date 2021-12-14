@@ -80,6 +80,9 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
+        if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
         if tools.Version(self.version) < "1.42.0":
