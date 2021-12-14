@@ -34,7 +34,7 @@ class ICUBase(ConanFile):
         "with_unit_tests": False,
         "silent": True,
         "with_dyload": True,
-        "dat_package_file": "None",
+        "dat_package_file": None,
         "with_icuio": True,
     }
 
