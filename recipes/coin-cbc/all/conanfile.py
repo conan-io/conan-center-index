@@ -69,6 +69,8 @@ class CoinCbcConan(ConanFile):
             self.build_requires("automake/1.16.4")
     
     def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-cbc does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-cbc shared not supported yet when cross-building")
