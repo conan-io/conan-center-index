@@ -116,7 +116,7 @@ class RedisPlusPlusConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "redis++")
         self.cpp_info.set_property("cmake_target_name", "redis++::redis++" + "_static" if not self.options.shared else "")
-        self.cpp_info.set_property("pkg_config_name", "redis++" + "_static" if not self.options.shared else "")
+        self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++" + "_static" if not self.options.shared else "")
 
         self.cpp_info.names["cmake_find_package"] = "redis++"
         self.cpp_info.names["cmake_find_package_multi"] = "redis++"
