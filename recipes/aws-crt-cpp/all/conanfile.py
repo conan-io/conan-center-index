@@ -1,7 +1,7 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class AwsCrtCpp(ConanFile):
     name = "aws-crt-cpp"
@@ -26,6 +26,11 @@ class AwsCrtCpp(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,11 +58,6 @@ class AwsCrtCpp(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -80,6 +80,9 @@ class AwsCrtCpp(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-crt-cpp"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-crt-cpp")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
         self.cpp_info.names["cmake_find_package"] = "AWS"
