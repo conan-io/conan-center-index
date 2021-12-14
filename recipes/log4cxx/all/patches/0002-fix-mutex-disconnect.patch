@@ -1,0 +1,156 @@
+diff --git a/src/main/cpp/socketappender.cpp b/src/main/cpp/socketappender.cpp
+index 57f8ade..5f9fb8b 100644
+--- a/src/main/cpp/socketappender.cpp
++++ b/src/main/cpp/socketappender.cpp
+@@ -124,7 +124,7 @@ void SocketAppender::append(const spi::LoggingEventPtr& event, log4cxx::helpers:
+ 
+ 		if (getReconnectionDelay() > 0)
+ 		{
+-			fireConnector();
++			fireConnectorInternal();
+ 		}
+ 	}
+ }
+diff --git a/src/main/cpp/socketappenderskeleton.cpp b/src/main/cpp/socketappenderskeleton.cpp
+index 122de9d..3787d1a 100644
+--- a/src/main/cpp/socketappenderskeleton.cpp
++++ b/src/main/cpp/socketappenderskeleton.cpp
+@@ -158,10 +158,20 @@ void SocketAppenderSkeleton::fireConnector()
+ {
+ 	std::unique_lock<log4cxx::shared_mutex> lock(mutex);
+ 
++	fireConnectorInternal();
++}
++
++void SocketAppenderSkeleton::fireConnectorInternal()
++{
+ 	if ( !thread.joinable() )
+ 	{
+ 		LogLog::debug(LOG4CXX_STR("Connector thread not alive: starting monitor."));
+-
++		thread = std::thread( &SocketAppenderSkeleton::monitor, this );
++	}
++	else
++	{
++		interrupt.notify_all();
++		thread.join();
+ 		thread = std::thread( &SocketAppenderSkeleton::monitor, this );
+ 	}
+ }
+@@ -175,8 +185,6 @@ void SocketAppenderSkeleton::monitor()
+ 	{
+ 		try
+ 		{
+-			std::this_thread::sleep_for( std::chrono::milliseconds( reconnectionDelay ) );
+-
+ 			std::unique_lock<std::mutex> lock( interrupt_mutex );
+ 			interrupt.wait_for( lock, std::chrono::milliseconds( reconnectionDelay ),
+ 				std::bind(&SocketAppenderSkeleton::is_closed, this) );
+diff --git a/src/main/cpp/xmlsocketappender.cpp b/src/main/cpp/xmlsocketappender.cpp
+index d5b9942..4c1c70d 100644
+--- a/src/main/cpp/xmlsocketappender.cpp
++++ b/src/main/cpp/xmlsocketappender.cpp
+@@ -122,7 +122,7 @@ void XMLSocketAppender::append(const spi::LoggingEventPtr& event, log4cxx::helpe
+ 
+ 			if (getReconnectionDelay() > 0)
+ 			{
+-				fireConnector();
++				fireConnectorInternal();
+ 			}
+ 		}
+ 	}
+diff --git a/src/main/include/log4cxx/net/socketappenderskeleton.h b/src/main/include/log4cxx/net/socketappenderskeleton.h
+index 88d2a15..8020613 100644
+--- a/src/main/include/log4cxx/net/socketappenderskeleton.h
++++ b/src/main/include/log4cxx/net/socketappenderskeleton.h
+@@ -178,6 +178,11 @@ class LOG4CXX_EXPORT SocketAppenderSkeleton : public AppenderSkeleton
+ 
+ 		virtual int getDefaultPort() const = 0;
+ 
++		/**
++		 * Fire the connector.  Caller must have mutex locked.
++		 */
++		void fireConnectorInternal();
++
+ 	private:
+ 		void connect(log4cxx::helpers::Pool& p);
+ 		/**
+diff --git a/src/test/cpp/net/socketappendertestcase.cpp b/src/test/cpp/net/socketappendertestcase.cpp
+index fe3753c..4496888 100644
+--- a/src/test/cpp/net/socketappendertestcase.cpp
++++ b/src/test/cpp/net/socketappendertestcase.cpp
+@@ -16,6 +16,9 @@
+  */
+ 
+ #include <log4cxx/net/socketappender.h>
++#include <log4cxx/patternlayout.h>
++#include <log4cxx/basicconfigurator.h>
++#include <log4cxx/helpers/serversocket.h>
+ #include "../appenderskeletontestcase.h"
+ #include "apr.h"
+ 
+@@ -34,17 +37,64 @@ class SocketAppenderTestCase : public AppenderSkeletonTestCase
+ 		//
+ 		LOGUNIT_TEST(testDefaultThreshold);
+ 		LOGUNIT_TEST(testSetOptionThreshold);
++		LOGUNIT_TEST(testInvalidHost);
+ 
+ 		LOGUNIT_TEST_SUITE_END();
+ 
+ 
+ 	public:
+ 
++		void setUp()
++		{
++		}
++
++		void tearDown()
++		{
++			BasicConfigurator::resetConfiguration();
++		}
++
+ 		AppenderSkeleton* createAppenderSkeleton() const
+ 		{
+ 			return new log4cxx::net::SocketAppender();
+ 		}
++
++		void testInvalidHost(){
++			log4cxx::net::SocketAppenderPtr appender = std::make_shared<log4cxx::net::SocketAppender>();
++			log4cxx::PatternLayoutPtr layout = std::make_shared<log4cxx::PatternLayout>(LOG4CXX_STR("%m%n"));
++
++			log4cxx::helpers::ServerSocket serverSocket(4445);
++
++			appender->setLayout(layout);
++			appender->setRemoteHost(LOG4CXX_STR("localhost"));
++			appender->setReconnectionDelay(1);
++			appender->setPort(4445);
++			log4cxx::helpers::Pool pool;
++			appender->activateOptions(pool);
++
++			BasicConfigurator::configure(appender);
++
++			log4cxx::Logger::getRootLogger()->setLevel(log4cxx::Level::getAll());
++
++			std::thread th1( [](){
++				for( int x = 0; x < 3000; x++ ){
++					LOG4CXX_INFO(Logger::getLogger(LOG4CXX_STR("test")), "Some message" );
++				}
++			});
++			std::thread th2( [](){
++				for( int x = 0; x < 3000; x++ ){
++					LOG4CXX_INFO(Logger::getLogger(LOG4CXX_STR("test")), "Some message" );
++				}
++			});
++
++			SocketPtr incomingSocket = serverSocket.accept();
++			incomingSocket->close();
++			serverSocket.close();
++			// If we do not get here, we have deadlocked
++			th1.join();
++			th2.join();
++		}
+ };
+ 
+ LOGUNIT_TEST_SUITE_REGISTRATION(SocketAppenderTestCase);
+ #endif
++
