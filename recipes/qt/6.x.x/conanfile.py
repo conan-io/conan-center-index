@@ -968,7 +968,8 @@ class QtConan(ConanFile):
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.get_safe("qtquickcontrols2") and self.options.gui:
+        if (self.options.get_safe("qtquickcontrols2") or \
+            (self.options.qtdeclarative and tools.Version(self.version) >= "6.2.0")) and self.options.gui:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
