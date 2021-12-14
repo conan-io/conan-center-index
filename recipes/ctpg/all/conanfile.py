@@ -5,7 +5,7 @@ required_conan_version = ">=1.33.0"
 
 class DawHeaderLibrariesConan(ConanFile):
     name = "ctpg"
-    license = "BSL-1.0"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Parser Generator is a C++ single header library which takes a language description as a C++ code and turns it into a LR1 table parser with a deterministic finite automaton lexical analyzer, all in compile time."
     topics = ("regex", "parser", "grammar", "compile-time")
@@ -25,6 +25,9 @@ class DawHeaderLibrariesConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
+        if self.settings.compiler != "gcc":
+            raise ConanInvalidConfiguration("{} supports only gcc and support other compilers soon.".format(self.name))
+
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
 
@@ -37,7 +40,6 @@ class DawHeaderLibrariesConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
 
     def package(self):
         self.copy("LICENSE*", "licenses", self._source_subfolder)
