@@ -21,7 +21,6 @@ class AwsCrtCpp(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": False,
     }
 
     _cmake = None
