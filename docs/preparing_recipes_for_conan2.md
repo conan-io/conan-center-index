@@ -185,6 +185,11 @@ class ExpatConan(ConanFile):
         ...
 ```
 
+> ⚠️ **Note**: There are more cases in which you probably want to set the
+> ``cmake_find_mode`` property to ``both``. For example, for the libraries which [find
+> modules files are included in the CMake
+> distribution](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules).
+
 ### Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode
 
 Like in the ``.names`` case, there are some cases in Conan Center Index of recipes that
