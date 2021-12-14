@@ -17,12 +17,10 @@ class ZlibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "minizip": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "minizip": "deprecated",
     }
 
     generators = "cmake"
@@ -45,17 +43,10 @@ class ZlibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
         if self.options.shared:
             del self.options.fPIC
-
-        if self.options.minizip != "deprecated":
-            self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
-
-    def package_id(self):
-        del self.info.options.minizip
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
