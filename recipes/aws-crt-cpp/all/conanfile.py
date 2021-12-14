@@ -1,7 +1,7 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.33.0"
 
 class AwsCrtCpp(ConanFile):
     name = "aws-crt-cpp"
