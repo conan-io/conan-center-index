@@ -84,7 +84,7 @@ class OsgearthConan(ConanFile):
             del self.options.fPIC
 
     def config_options(self):
-        if not os_info.is_windows:
+        if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
 
         if self.settings.os == "Windows":
