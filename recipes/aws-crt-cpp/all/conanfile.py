@@ -62,7 +62,6 @@ class AwsCrtCpp(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_DEPS"] = False
-        self._cmake.definitions["USE_OPENSSL"] = self.options.with_openssl
         self._cmake.configure()
         return self._cmake
 
