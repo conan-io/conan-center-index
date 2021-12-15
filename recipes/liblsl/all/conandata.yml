@@ -2,4 +2,3 @@ sources:
   "1.16.0":
     url: "https://github.com/sccn/liblsl/archive/refs/heads/master.zip"
     sha256: "1e3676001405338eea6f05dc78e2acb0dc767d03938d12a19c43262891c9f0db"
-    revision: "v1.16.0"

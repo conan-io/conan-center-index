@@ -37,16 +37,12 @@ class LiblslConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _data(self):
-        return self.conan_data["sources"][self.version]
-
     def requirements(self):
         self.requires("boost/1.77.0")
         self.requires("pugixml/1.11")
 
     def source(self):
-        tools.get(url=self._data["url"], sha256=self._data["sha256"], 
+        tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -64,7 +60,7 @@ class LiblslConan(ConanFile):
         self._cmake.definitions["LSL_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["LSL_BUNDLED_BOOST"] = False
         self._cmake.definitions["LSL_BUNDLED_PUGIXML"] = False
-        self._cmake.definitions["lslgitrevision"] = self._data["revision"]
+        self._cmake.definitions["lslgitrevision"] = "v" + self.version
         self._cmake.definitions["lslgitbranch"] = "master"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
