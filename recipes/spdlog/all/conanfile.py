@@ -2,7 +2,7 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SpdlogConan(ConanFile):
@@ -127,23 +127,26 @@ class SpdlogConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_info(self):
-        if self.options.header_only:
-            component_name = "spdlog_header_only"
-        else:
-            component_name = "libspdlog"
+        target = "spdlog_header_only" if self.options.header_only else "spdlog"
+        self.cpp_info.set_property("cmake_file_name", "spdlog")
+        self.cpp_info.set_property("cmake_target_name", "spdlog::{}".format(target))
+        self.cpp_info.set_property("pkg_config_name", "spdlog")
+
+        self.cpp_info.names["cmake_find_package"] = "spdlog"
+        self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
+        self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
+        self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target
+
+        self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
+        self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
+        if not self.options.header_only:
             self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
-
-        self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
-        if self.options["fmt"].header_only:
-            self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
-        else:
-            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
         if self.options.wchar_support:
-            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
-            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_FILENAMES")
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_FILENAMES")
         if self.options.no_exceptions:
-            self.cpp_info.components[component_name].defines.append("SPDLOG_NO_EXCEPTIONS")
-        if self.settings.os == "Linux":
-            self.cpp_info.components[component_name].system_libs = ["pthread"]
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_EXCEPTIONS")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libspdlog"].system_libs = ["pthread"]
