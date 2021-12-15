@@ -683,8 +683,16 @@ class QtConan(ConanFile):
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
+    @property
+    def _cmake_entry_point_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_entry_point.cmake")
+
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", "Qt6{0}".format(module), "conan_qt_qt6_{0}private.cmake".format(module.lower()))
+
+    @property
+    def _create_entry_point_targets(self):
+        return not self.options.no_entrypoint and self.settings.os in ["Windows", "iOS"]
 
     def package(self):
         cmake = self._configure_cmake()
@@ -1126,7 +1134,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
 
-        if not self.options.no_entrypoint:
+        if self._create_entry_point_targets:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package"] = "EntryPointImplementation"
                 self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package_multi"] = "EntryPointImplementation"
@@ -1149,7 +1157,20 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
             if self.settings.os == "iOS":
                 self.cpp_info.components["qtEntryPointPrivate"].exelinkflags.append("-Wl,-e,_qt_main_wrapper")
-            self.cpp_info.components["qtCore"].requires.append("qtEntryPointPrivate")
+
+            contents = textwrap.dedent("""\
+                set(entrypoint_conditions "$<NOT:$<BOOL:$<TARGET_PROPERTY:qt_no_entrypoint>>>")
+                list(APPEND entrypoint_conditions "$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>")
+                if(WIN32)
+                    list(APPEND entrypoint_conditions "$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>")
+                endif()
+                list(JOIN entrypoint_conditions "," entrypoint_conditions)
+                set(entrypoint_conditions "$<AND:${entrypoint_conditions}>")
+                set_property(
+                    TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::Core
+                    APPEND PROPERTY INTERFACE_LINK_LIBRARIES "$<${entrypoint_conditions}:${QT_CMAKE_EXPORT_NAMESPACE}::EntryPointPrivate>"
+                )""")
+            tools.save(os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
@@ -1180,6 +1201,9 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Core"))
+        if self._create_entry_point_targets:
+            self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_entry_point_file)
+            self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_entry_point_file)
 
         self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
         self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
