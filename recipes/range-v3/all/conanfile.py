@@ -19,6 +19,12 @@ class Rangev3Conan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if self.version.startswith('cci.'):
+            return {
+                "gcc": "6.5",
+                "Visual Studio": "16",
+                "clang": "5.0"
+            }
         rangev3_version = tools.Version(self.version)
         return {
             "gcc": "5" if rangev3_version < "0.10.0" else "6.5",
@@ -51,9 +57,7 @@ class Rangev3Conan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))

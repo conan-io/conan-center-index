@@ -9,5 +9,5 @@ sources:
     url: https://github.com/ericniebler/range-v3/archive/0.11.0.tar.gz
     sha256: 376376615dbba43d3bef75aa590931431ecb49eb36d07bb726a19f680c75e20c
   "cci.20211210":
-    url: https://github.com/ericniebler/range-v3/archieve/9aa032ccd0eb4bd77f58e5b181168f1038c222c6.tar.gz
+    url: https://github.com/ericniebler/range-v3/archive/9aa032ccd0eb4bd77f58e5b181168f1038c222c6.tar.gz
     sha256: 9118c039e2f25e457c000fba53bacbcac1926da193ff53698b23320deb7fa901
