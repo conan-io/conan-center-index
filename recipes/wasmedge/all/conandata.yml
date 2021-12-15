@@ -1,0 +1,30 @@
+sources:
+  "0.9.0":
+    Windows:
+      "x86_64":
+        Visual Studio:
+          url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-windows.zip"
+          sha256: ""
+    Linux:
+      "x86_64":
+        "gcc":
+          url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-manylinux2014_x86_64.tar.gz"
+          sha256: ""
+      "armv8":
+        "gcc":
+          url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-manylinux2014_aarch64.tar.gz"
+          sha256: ""
+    Macos:
+      "x86_64":
+        "gcc":
+          url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-darwin_x86_64.tar.gz"
+          sha256: ""
+      "armv8":
+        "gcc":
+          url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-darwin_arm64.tar.gz"
+          sha256: ""
+
+patches:
+  "0.9.0":
+    - patch_file: "patches/add_license.patch"
+      base_path: "source_subfolder"
