@@ -15,8 +15,7 @@ class CprConan(ConanFile):
     homepage = "https://docs.libcpr.org/"
     license = "MIT"
     topics = ("cpr", "requests", "web", "curl")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,6 +30,7 @@ class CprConan(ConanFile):
         "signal": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -82,6 +82,11 @@ class CprConan(ConanFile):
             and tools.Version(self.settings.compiler.version) < "9"
         )
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -99,11 +104,39 @@ class CprConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("libcurl/7.80.0")
+
+    def validate(self):
+        SSL_FAILURE_MESSAGES = {
+            "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
+            "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
+            "winssl": "WinSSL is only on Windows and on CPR versions >= 1.5.1",
+            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0 (and only >= 1.6.2 on macOS)"
+        }
+
+        if not self._uses_valid_abi_and_compiler:
+            raise ConanInvalidConfiguration("Cannot compile cpr/1.6.0 with libstdc++ on clang < 9")
+
+        ssl_library = str(self.options.get_safe("with_ssl"))
+        if not self._supports_ssl_library(ssl_library):
+            raise ConanInvalidConfiguration(
+                "Invalid SSL selection for the given configuration: {}".format(SSL_FAILURE_MESSAGES[ssl_library])
+                if ssl_library in SSL_FAILURE_MESSAGES
+                else "Invalid value of ssl option, {}".format(ssl_library)
+            )
+
+        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('with_ssl')))
+
+        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
+
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def requirements(self):
-        self.requires("libcurl/{}".format("7.67.0" if not self._supports_openssl else "7.79.0"))
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -179,34 +212,6 @@ class CprConan(ConanFile):
         # A KeyError should never happen, as the options are validated by conan.
         return validators[library]
 
-    def validate(self):
-        SSL_FAILURE_MESSAGES = {
-            "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
-            "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
-            "winssl": "WinSSL is only on Windows and on CPR versions >= 1.5.1",
-            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0 (and only >= 1.6.2 on macOS)"
-        }
-
-        if not self._uses_valid_abi_and_compiler:
-            raise ConanInvalidConfiguration("Cannot compile cpr/1.6.0 with libstdc++ on clang < 9")
-
-        ssl_library = str(self.options.get_safe("with_ssl"))
-        if not self._supports_ssl_library(ssl_library):
-            raise ConanInvalidConfiguration(
-                "Invalid SSL selection for the given configuration: {}".format(SSL_FAILURE_MESSAGES[ssl_library])
-                if ssl_library in SSL_FAILURE_MESSAGES
-                else "Invalid value of ssl option, {}".format(ssl_library)
-            )
-
-        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
-            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('with_ssl')))
-
-        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
-            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -216,6 +221,9 @@ class CprConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "cpr"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpr"
         self.cpp_info.libs = ["cpr"]
