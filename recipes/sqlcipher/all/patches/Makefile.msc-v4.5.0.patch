@@ -1,5 +1,5 @@
 diff --git a/Makefile.msc b/Makefile.msc
-index 5e95d84..c37550e 100644
+index 5e95d84..42d9c69 100644
 --- a/Makefile.msc
 +++ b/Makefile.msc
 @@ -285,9 +285,9 @@ SQLITE3H = sqlite3.h
@@ -105,10 +105,11 @@ index 5e95d84..c37550e 100644
  
  # Targets that require the Tcl library.
  #
-@@ -1752,10 +1756,12 @@ shell:	$(SQLITE3EXE)
+@@ -1751,11 +1755,12 @@ dll:	$(SQLITE3DLL)
+ shell:	$(SQLITE3EXE)
  
  # <<mark>>
- libsqlite3.lib:	$(LIBOBJ)
+-libsqlite3.lib:	$(LIBOBJ)
 -	$(LTLIB) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
 +# LTLIBPATHS is required to find the openssl/libressl libs
 +sqlcipher.lib:	$(LIBOBJ)
@@ -121,7 +122,7 @@ index 5e95d84..c37550e 100644
  
  tclsqlite3.def:	tclsqlite.lo
  	echo EXPORTS > tclsqlite3.def
-@@ -1777,9 +1783,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
+@@ -1777,9 +1782,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
  	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
  
  # <<block2>>
@@ -133,7 +134,7 @@ index 5e95d84..c37550e 100644
  		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
  		| sort >> sqlite3.def
  # <</block2>>
-@@ -1959,6 +1965,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+@@ -1959,6 +1964,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
  complete.lo:	$(TOP)\src\complete.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
  
@@ -149,7 +150,7 @@ index 5e95d84..c37550e 100644
  ctime.lo:	$(TOP)\src\ctime.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
  
-@@ -2385,7 +2400,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+@@ -2385,7 +2399,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
  # Rules to build the 'testfixture' application.
  #
  # If using the amalgamation, use sqlite3.c directly to build the test
