@@ -54,12 +54,13 @@ class LiblslConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        # Do not force PIC
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
-            ""
-        )
+        if not self.options.shared:
+            # Do not force PIC
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+                ""
+            )
 
     def _configure_cmake(self):
         if self._cmake:
