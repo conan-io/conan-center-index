@@ -95,6 +95,11 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
         if self.settings.os in ("iOS", "tvOS", "watchOS"):
             self._cmake.definitions["SPDLOG_NO_TLS"] = True
+        if tools.cross_building(self):
+            # Workaround to find CMake config files in some cross-build scenario
+            # TODO: to remove if something like https://github.com/conan-io/conan/issues/9427#issuecomment-993685376
+            # is implemented
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
         self._cmake.configure()
         return self._cmake
 
