@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
 import os
+
+from conans import ConanFile, tools
+from conan.tools import files
 
 required_conan_version = ">=1.43.0"
 
@@ -34,14 +36,14 @@ class ThrustConan(ConanFile):
                              .format(str(self.options.device_system).upper()))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("*", src=os.path.join(self._source_subfolder, "thrust"),
                   dst=os.path.join("include", "thrust"))
+        tools.rmdir(os.path.join(self.package_folder, "include", "thrust", "cmake"))
+
 
     def package_id(self):
         self.info.header_only()

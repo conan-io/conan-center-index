@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
+from conan.tools.cross_building import cross_building
 
 
 class ThrustTestConan(ConanFile):
@@ -13,6 +14,6 @@ class ThrustTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
