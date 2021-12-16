@@ -43,10 +43,12 @@ that have future-proof scalability"""
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os == "Macos" and \
-           self.settings.compiler == "apple-clang" and \
-           tools.Version(self.settings.compiler.version) < "8.0":
-            raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
+        if self.settings.os == "Macos":
+            if tools.cross_building(self):
+                # See logs from https://github.com/conan-io/conan-center-index/pull/8454
+                raise ConanInvalidConfiguration("Cross building on Macos is not yet supported. Contributions are welcome")
+            if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "8.0":
+                raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
         if not self.options.shared:
             self.output.warn("Intel-TBB strongly discourages usage of static linkage")
         if self.options.tbbproxy and \
