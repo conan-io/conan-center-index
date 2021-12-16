@@ -1,17 +1,25 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.43.0"
+
+
 class ThrustConan(ConanFile):
     name = "thrust"
     license = "Apache-2.0"
     description = ("Thrust is a parallel algorithms library which resembles"
                    "the C++ Standard Template Library (STL).")
-    topics = ("parallel", "stl", "header-only")
+    topics = ("parallel", "stl", "gpu", "header-only")
     homepage = "https://thrust.github.io/"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "build_type", "compiler"
     no_copy_source = True
-    options = {"device_system": ["cuda", "cpp", "omp", "tbb"]}
-    default_options = {"device_system": "cuda"}
+    options = {
+        "device_system": ["cuda", "cpp", "omp", "tbb"]
+    }
+    default_options = {
+        "device_system": "cuda"
+    }
 
     @property
     def _source_subfolder(self):
@@ -39,5 +47,15 @@ class ThrustConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        target_name = "Thrust"
+
+        self.cpp_info.filenames["cmake_find_package"] = target_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = target_name
+        self.cpp_info.names["cmake_find_package"] = target_name
+        self.cpp_info.names["cmake_find_package_multi"] = target_name
+
+        self.cpp_info.set_property("cmake_file_name", target_name)
+        self.cpp_info.set_property("cmake_target_name", f"{target_name}::{target_name}")
+
         self.cpp_info.defines = ["THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{}".format(
             str(self.options.device_system).upper())]

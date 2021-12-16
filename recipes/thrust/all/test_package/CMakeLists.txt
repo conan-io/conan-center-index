@@ -5,5 +5,6 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
+find_package(Thrust REQUIRED)
+target_link_libraries(test_package PRIVATE Thrust::Thrust)
 set_target_properties(test_package PROPERTIES CXX_STANDARD 11)

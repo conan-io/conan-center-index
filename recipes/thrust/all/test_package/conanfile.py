@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class ThrustTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     default_options = {"thrust:device_system": "tbb"}
 
     def build(self):
