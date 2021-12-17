@@ -209,6 +209,8 @@ class SqlcipherConan(ConanFile):
         self.cpp_info.libs = ["sqlcipher"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
+            if tools.Version(self.version) >= "4.5.0":
+                self.cpp_info.system_libs.extend(["m"])
         self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLITE_TEMP_STORE=%s' % self._temp_store_nmake_value]
         if self._use_commoncrypto():
             self.cpp_info.frameworks = ["Security", "CoreFoundation"]
