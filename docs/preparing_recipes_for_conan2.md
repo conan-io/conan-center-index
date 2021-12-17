@@ -268,11 +268,13 @@ class KtxConan(ConanFile):
         ...
 ```
 
-To add this information with the new model, just add the desired root ``cpp_info`` target
-name with ``cmake_target_name``. The target will inherit all the properties from the "fake
-root" component, so there's no need to redefine those. Please note that when the migration
-to Conan 2.0 is done, there will be no need for that component anymore and it should
-dissapear.
+In these cases, the recommendation is to add the ``cmake_target_name`` property for both
+the root and component ``cpp_info``. In the end the target that the consumer will get is
+the one created for the component, but it will avoid creating an "unwanted" target if we
+add the property just to the component or to the root ``cpp_info``. Please note that when
+the migration to Conan 2.0 is done, there will be no need for that component anymore and
+it should dissapear. At that moment, the information from the component will be set in the
+root ``cpp_info`` and the ``self.cpp_info.components[]`` lines removed.
 
 ```python
 class KtxConan(ConanFile):
@@ -291,11 +293,11 @@ class KtxConan(ConanFile):
             "KTX_FEATURE_KTX1", "KTX_FEATURE_KTX2", "KTX_FEATURE_WRITE"
         ]
 
-        # Set the root cpp_info target name as KTX::ktx
-        # it will inherit all the libbrary properties (libs, defines, etc.) 
-        # from the defined component. In Conan 2.0 the component should be removed
+        # Set the root cpp_info target name as KTX::ktx for the root and the component
+        # In Conan 2.0 the component should be removed
         # and those properties should be added to the root cpp_info instead
         self.cpp_info.set_property("cmake_target_name", "KTX::ktx")
+        self.cpp_info.components["libktx"].set_property("cmake_target_name", "KTX::ktx")
         ...
 ```
 
