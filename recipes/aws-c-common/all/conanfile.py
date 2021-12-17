@@ -17,7 +17,7 @@ class AwsCCommon(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "cpu_extensions": [True, False]
+        "cpu_extensions": [True, False],
     }
     default_options = {
         "shared": False,
