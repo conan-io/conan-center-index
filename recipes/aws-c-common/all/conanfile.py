@@ -88,6 +88,7 @@ class AwsCCommon(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-common"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-c-common-lib"].set_property("cmake_target_name", "AWS::aws-c-common")
         self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package"] = "aws-c-common"
         self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package_multi"] = "aws-c-common"
 
