@@ -14,15 +14,14 @@ class LibnsgifConan(ConanFile):
     description = "GIF decoding library by NetSurf Browser. <http://source.netsurf-browser.org/libnsgif.git/>"
     topics = ("gifs", "decoding")
     homepage = "http://source.netsurf-browser.org/libnsgif.git/"
+    # Sources are located in the same place as this recipe, copy them to the recipe
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
     def config_options(self):
         if self.settings.os == "Windows":
