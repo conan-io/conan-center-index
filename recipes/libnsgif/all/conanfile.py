@@ -22,7 +22,7 @@ class LibnsgifConan(ConanFile):
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def config_options(self):
         if self.settings.os == "Windows":
