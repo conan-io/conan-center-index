@@ -11,7 +11,7 @@ class ZziplibConan(ConanFile):
     license = "GPL-2.0-or-later"
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = ["cmake", "cmake_find_package"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
