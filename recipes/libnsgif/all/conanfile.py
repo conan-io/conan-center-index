@@ -21,7 +21,7 @@ class LibnsgifConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
 
     def config_options(self):
