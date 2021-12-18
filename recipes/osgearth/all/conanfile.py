@@ -142,17 +142,6 @@ class OsgearthConan(ConanFile):
             # Prefer conan's find package scripts over osgEarth's
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
-        if os_info.is_windows:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "PROJECT(OSGEARTH)",
-                                  "PROJECT(OSGEARTH)\n add_compile_definitions(NOGDI)")
-
-        if os_info.detect_windows_subsystem() == "MSYS2":
-            tools.replace_in_file(os.path.join(self._source_subfolder,
-                                               "osgEarth", "src", "osgEarthDrivers", "fastdxt", "dxt.cpp"),
-                                  "tmpBuf = (byte*)memalign(16, width*height*4);",
-                                  "tmpBuf = (byte*)__mingw_aligned_malloc(width*height*4,16);")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -163,11 +152,7 @@ class OsgearthConan(ConanFile):
         if hasattr(self, "_cmake"):
             return self._cmake
 
-        generator_ = None
-        if os_info.detect_windows_subsystem() == "MSYS2":
-            generator_ = "MinGW Makefiles"
-
-        self._cmake = cmake = CMake(self, generator=generator_)
+        self._cmake = cmake = CMake(self)
         cmake.definitions["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["OSGEARTH_BUILD_TOOLS"] = False
         cmake.definitions["OSGEARTH_BUILD_EXAMPLES"] = False
@@ -306,9 +291,9 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_viewpoints")
         setup_plugin("fastdxt")
 
-        if os_info.is_windows:
+        if self.settings.os == "Windows":
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin/osgPlugins-{}"
                                                    .format(self.deps_cpp_info["openscenegraph"].version)))
-        elif os_info.is_linux:
+        elif self.settings.os == "Linux":
             self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))

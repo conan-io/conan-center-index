@@ -4,6 +4,10 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+if(WIN32)
+    add_compile_definitions(NOGDI)
+endif()
+
 # find_package and set the expected variables
 
 # OSG
