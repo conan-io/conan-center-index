@@ -10,7 +10,7 @@ class LibnsgifConan(ConanFile):
     # Optional metadata
     license = "MIT License"
     #author = ["Richard Wilson <richard.wilson@netsurf-browser.org>", "Sean Fox <dyntryx@gmail.com>", "Michael Drake <tlsa@netsurf-browser.org>"]
-    url = "https://github.com/somedevfox/libnsgif-conan"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "GIF decoding library by NetSurf Browser. <http://source.netsurf-browser.org/libnsgif.git/>"
     topics = ("gifs", "decoding")
     homepage = "http://source.netsurf-browser.org/libnsgif.git/"
