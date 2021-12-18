@@ -26,6 +26,9 @@ class LibnsgifConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def layout(self):
         cmake_layout(self)
