@@ -2,16 +2,17 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.43.0"
 
 class OatppConan(ConanFile):
     name = "oatpp"
     description = "Modern Web Framework for C++"
     homepage = "https://github.com/oatpp/oatpp"
     license = "Apache-2.0"
-    topics = ("conan", "oat++", "oatpp", "web-framework")
+    topics = ("oat++", "oatpp", "web-framework")
     url = "https://github.com/conan-io/conan-center-index"
     generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type",
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
@@ -35,6 +36,7 @@ class OatppConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
+    def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
 
@@ -42,8 +44,7 @@ class OatppConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp requires GCC >=5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("oatpp-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,6 +72,7 @@ class OatppConan(ConanFile):
         # oatpp
         self.cpp_info.components["_oatpp"].names["cmake_find_package"] = "oatpp"
         self.cpp_info.components["_oatpp"].names["cmake_find_package_multi"] = "oatpp"
+        self.cpp_info.components["_oatpp"].set_property("cmake_target_name", "oatpp::oatpp")
         self.cpp_info.components["_oatpp"].includedirs = [include_dir]
         self.cpp_info.components["_oatpp"].libdirs = [lib_dir]
         self.cpp_info.components["_oatpp"].libs = ["oatpp"]
@@ -81,6 +83,7 @@ class OatppConan(ConanFile):
         # oatpp-test
         self.cpp_info.components["oatpp-test"].names["cmake_find_package"] = "oatpp-test"
         self.cpp_info.components["oatpp-test"].names["cmake_find_package_multi"] = "oatpp-test"
+        self.cpp_info.components["oatpp-test"].set_property("cmake_target_name", "oatpp-test::oatpp-test")
         self.cpp_info.components["oatpp-test"].includedirs = [include_dir]
         self.cpp_info.components["oatpp-test"].libdirs = [lib_dir]
         self.cpp_info.components["oatpp-test"].libs = ["oatpp-test"]
