@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class XtlConan(ConanFile):
@@ -26,6 +26,7 @@ class XtlConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
@@ -79,6 +80,7 @@ class XtlConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "xtl"
         self.cpp_info.names["cmake_find_package_multi"] = "xtl"
+        self.cpp_info.set_property("cmake_target_name", "xtl::xtl")
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
