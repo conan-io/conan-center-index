@@ -2,6 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools import files
 
 required_conan_version = ">=1.43.0"
 
@@ -49,8 +50,7 @@ class OneDplConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("oneDPL-" + self.version, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
