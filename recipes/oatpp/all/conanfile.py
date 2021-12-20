@@ -33,10 +33,10 @@ class OatppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
 
@@ -53,6 +53,8 @@ class OatppConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
         self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if tools.Version(self.version) >= "1.3.0":
+            self._cmake.definitions["OATPP_MSVC_LINK_STATIC_RUNTIME"] = not self.option.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
