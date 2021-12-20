@@ -17,11 +17,13 @@ class TinysplineConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "cxx": [True, False],
+        "floating_point_precision": ["double", "single"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "cxx": True,
+        "floating_point_precision": "double"
     }
 
     _cmake = None
@@ -49,11 +51,9 @@ class TinysplineConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["TINYSPLINE_BUILD_DOCS"] = False
         self._cmake.definitions["TINYSPLINE_BUILD_EXAMPLES"] = False
         self._cmake.definitions["TINYSPLINE_BUILD_TESTS"] = False
-        self._cmake.definitions["TINYSPLINE_BUILD_DOCS"] = False
-        self._cmake.definitions["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
-        self._cmake.definitions["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
         self._cmake.definitions["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
         self._cmake.definitions["TINYSPLINE_DISABLE_CSHARP"] = True
         self._cmake.definitions["TINYSPLINE_DISABLE_D"] = True
@@ -65,6 +65,9 @@ class TinysplineConan(ConanFile):
         self._cmake.definitions["TINYSPLINE_DISABLE_PYTHON"] = True
         self._cmake.definitions["TINYSPLINE_DISABLE_R"] = True
         self._cmake.definitions["TINYSPLINE_DISABLE_RUBY"] = True
+        self._cmake.definitions["TINYSPLINE_FLOAT_PRECISION"] = self.options.floating_point_precision == "single"
+        self._cmake.definitions["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
+        self._cmake.definitions["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
         self._cmake.configure()
         return self._cmake
 
