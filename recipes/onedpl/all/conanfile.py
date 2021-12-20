@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -28,6 +29,10 @@ class OneDplConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.options.backend == "tbb" and not self.options["tbb"].tbbmalloc:
+            raise ConanInvalidConfiguration(f"recipe {self.name}/{self.version} with backend=tbb requires tbb:malloc")
 
     def configure(self):
         if self.settings.compiler.cppstd:
