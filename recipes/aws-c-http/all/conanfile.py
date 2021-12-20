@@ -74,6 +74,7 @@ class AwsCHttp(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
 
+        self.cpp_info.components["aws-c-http-lib"].set_property("cmake_target_name", "AWS::aws-c-http")
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
