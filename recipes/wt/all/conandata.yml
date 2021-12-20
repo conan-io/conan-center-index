@@ -12,7 +12,10 @@ sources:
     url: "https://github.com/emweb/wt/archive/4.5.1.tar.gz"
     sha256: "c2820646095af5618fc235705c0108797e3898225fb1826f2c6185c405c21a17"
 
+  "4.6.0":
+    url: "https://github.com/emweb/wt/archive/4.6.0.tar.gz"
+    sha256: "7f709e132d32c4925e6db0a590c7ccc5613344e8b9052676ef891a25ccb550e6"
 patches:
-    "4.5.0":
-      - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-        base_path: "source_subfolder"
+  "4.5.0":
+    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
+      base_path: "source_subfolder"
