@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanException
+
+required_conan_version = ">=1.43.0"
 
 
 class ZlibConan(ConanFile):
@@ -122,5 +123,9 @@ class ZlibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
+
+        self.cpp_info.set_property("cmake_file_name", "ZLIB")
+        self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"

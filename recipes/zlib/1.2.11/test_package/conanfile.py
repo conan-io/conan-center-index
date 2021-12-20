@@ -1,9 +1,10 @@
 import os
 from conans import ConanFile, CMake, tools
 
+
 class TestZlibConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "pkg_config", "cmake_find_package"
 
     def configure(self):
         del self.settings.compiler.libcxx
