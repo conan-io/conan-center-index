@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class AsyncplusplusConan(ConanFile):
@@ -95,7 +95,6 @@ class AsyncplusplusConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Async++"
         self.cpp_info.names["cmake_find_package_multi"] = "Async++"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
