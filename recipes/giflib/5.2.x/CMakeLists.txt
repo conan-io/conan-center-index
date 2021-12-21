@@ -33,7 +33,7 @@ target_link_libraries(giflib_util PRIVATE ${PROJECT_NAME})
 
 set(INSTALL_TARGETS ${PROJECT_NAME})
 
-if (ENABLE_UTILS)
+if (UTILS)
     set(GIF_UTILS
         gif2rgb
         gifbuild
