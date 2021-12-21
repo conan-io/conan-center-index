@@ -993,8 +993,9 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtquick3d and self.options.gui:
             _create_module("Quick3DUtils", ["Gui"])
-            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
-            _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
+            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
+            _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
+            _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
         if self.options.qtquickcontrols2 and self.options.gui:
@@ -1074,7 +1075,7 @@ Examples = bin/datadir/examples""")
             _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
 
             _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
-            _create_module("3DInput", ["3DCore", "GamePad", "Gui"])
+            _create_module("3DInput", ["3DCore", "Gamepad", "Gui"])
             _create_module("3DLogic", ["3DCore", "Gui"])
             _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
             _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])
