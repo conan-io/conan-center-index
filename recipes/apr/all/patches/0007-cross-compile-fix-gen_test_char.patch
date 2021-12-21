@@ -1,33 +1,12 @@
 --- Makefile.in
 +++ Makefile.in
-@@ -45,8 +45,8 @@ 
- @INCLUDE_OUTPUTS@
- 
- CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
--	build/apr_rules.out tools/gen_test_char@EXEEXT@ \
--	tools/gen_test_char.o tools/gen_test_char.lo \
-+	build/apr_rules.out tools/gen_test_char \
-+	tools/gen_test_char.o \
- 	include/private/apr_escape_test_char.h
- DISTCLEAN_TARGETS = config.cache config.log config.status \
- 	include/apr.h include/arch/unix/apr_private.h \
-@@ -134,14 +134,14 @@ etags:
+@@ -134,7 +134,7 @@ 
  OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
  tools/gen_test_char.lo: tools/gen_test_char.c
  	$(APR_MKDIR) tools
 -	$(LT_COMPILE)
 +	gcc -c $< -o $@
  
--tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+ tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
 -	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
-+tools/gen_test_char: $(OBJECTS_gen_test_char)
-+	gcc $(OBJECTS_gen_test_char) -o $@
- 
--include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
-+include/private/apr_escape_test_char.h: tools/gen_test_char
- 	$(APR_MKDIR) include/private
--	tools/gen_test_char@EXEEXT@ > $@
-+	tools/gen_test_char > $@
- 
- LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
- 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
++	gcc $(OBJECTS_gen_test_char@EXEEXT@) -o $@
