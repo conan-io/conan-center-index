@@ -1,0 +1,40 @@
+--- a/cmake/unwind.cmake
++++ b/cmake/unwind.cmake
+@@ -3,6 +3,6 @@
+ #
+ 
+ set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
+-find_package(Libunwind QUIET)
++find_package(libunwind QUIET)
+ set(FPHSA_NAME_MISMATCHED 0)
+ 
+--- a/cmake/zstd.cmake
++++ b/cmake/zstd.cmake
+@@ -4,10 +4,10 @@
+ option(WITH_ZSTD
+     "Build support for compression/decompression with Zstd." TRUE)
+ if (WITH_ZSTD)
+-    find_package(ZSTD QUIET)
+-    set_package_properties(ZSTD PROPERTIES TYPE
++    find_package(zstd QUIET)
++    set_package_properties(zstd PROPERTIES TYPE
+         PURPOSE "General compression support")
+-    if (ZSTD_FOUND)
++    if (zstd_FOUND)
+         set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
+             "${ZSTD_STATIC_LIB}")
+         mark_as_advanced(CLEAR ZSTD_INCLUDE_DIRS)
+--- a/pdal/util/CMakeLists.txt
++++ b/pdal/util/CMakeLists.txt
+@@ -10,9 +10,9 @@ include(${PDAL_CMAKE_DIR}/execinfo.cmake)
+ include(${PDAL_CMAKE_DIR}/threads.cmake)
+ include(${PDAL_CMAKE_DIR}/unwind.cmake)
+ 
+-if(LIBUNWIND_FOUND)
++if(libunwind_FOUND)
+     set(BACKTRACE_SOURCE BacktraceUnwind.cpp)
+-    set(BACKTRACE_LIBRARIES ${LIBUNWIND_LIBRARIES})
++    set(BACKTRACE_LIBRARIES ${libunwind_LIBRARIES})
+ elseif(LIBEXECINFO_FOUND)
+     set(BACKTRACE_SOURCE BacktraceExecinfo.cpp)
+     set(BACKTRACE_LIBRARIES ${LIBEXECINFO_LIBRARIES})

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.36.0"
 
 
 class MariadbConnectorcConan(ConanFile):
@@ -10,11 +10,10 @@ class MariadbConnectorcConan(ConanFile):
     description = "MariaDB Connector/C is used to connect applications " \
                   "developed in C/C++ to MariaDB and MySQL databases."
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "mariadb-connector-c", "mariadb", "mysql", "database")
+    topics = ("mariadb", "mysql", "database")
     homepage = "https://mariadb.com/kb/en/mariadb-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,7 +21,7 @@ class MariadbConnectorcConan(ConanFile):
         "dyncol": [True, False],
         "with_iconv": [True, False],
         "with_curl": [True, False],
-        "with_ssl": [False, "openssl", "gnutls", "schannel"]
+        "with_ssl": [False, "openssl", "gnutls", "schannel"],
     }
     default_options = {
         "shared": False,
@@ -30,14 +29,20 @@ class MariadbConnectorcConan(ConanFile):
         "dyncol": True,
         "with_iconv": False,
         "with_curl": True,
-        "with_ssl": "openssl"
+        "with_ssl": "openssl",
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,24 +55,25 @@ class MariadbConnectorcConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
-            raise ConanInvalidConfiguration("schannel only supported on Windows")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.16")
         if self.options.with_curl:
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.79.1")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
-        elif self.options.with_ssl == "gnutls":
+            self.requires("openssl/1.1.1l")
+
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
+            raise ConanInvalidConfiguration("schannel only supported on Windows")
+        if self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "mariadb-connector-c-{}-src".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -117,10 +123,10 @@ class MariadbConnectorcConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libmariadb"
+        self.cpp_info.set_property("pkg_config_name", "libmariadb")
         self.cpp_info.includedirs.append(os.path.join("include", "mariadb"))
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "shlwapi"]
@@ -128,5 +134,7 @@ class MariadbConnectorcConan(ConanFile):
                 self.cpp_info.system_libs.append("secur32")
 
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
-        self.output.info("Creating MARIADB_PLUGIN_DIR environment variable: {}".format(plugin_dir))
-        self.env_info.MARIADB_PLUGIN_DIR = plugin_dir
+        self.output.info("Prepending to MARIADB_PLUGIN_DIR runtime environment variable: {}".format(plugin_dir))
+        self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+        self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

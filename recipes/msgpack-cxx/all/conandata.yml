@@ -1,0 +1,4 @@
+sources:
+  "4.0.3":
+    url: "https://github.com/msgpack/msgpack-c/archive/cpp-4.0.3.tar.gz"
+    sha256: "23d737b1e959dfb6ca420564563f098e758adacc0b18003c56abf1b945bd1d4a"

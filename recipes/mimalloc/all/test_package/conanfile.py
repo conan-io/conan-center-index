@@ -4,7 +4,7 @@ import os
 
 class MimallocTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         # No override:
@@ -39,6 +39,7 @@ class MimallocTestConan(ConanFile):
         cmake.definitions["BUILD_NO_CHANGES"] = "no_changes" in self._test_files
         cmake.definitions["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files
         cmake.definitions["BUILD_MI_API"] = "mi_api" in self._test_files
+        cmake.definitions["MIMALLOC_SHARED"] = self.options["mimalloc"].shared
         cmake.configure()
         cmake.build()
 
@@ -75,7 +76,7 @@ class MimallocTestConan(ConanFile):
         return environment
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             return
 
         self.output.info("Environment append: {}".format(self._environment))

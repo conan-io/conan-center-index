@@ -9,9 +9,8 @@ class Assimp(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
-    topics = ("conan", "assimp", "3d")
+    topics = ("assimp", "3d", "game development", "3mf", "collada")
     license = "BSD-3-Clause"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -129,6 +128,12 @@ class Assimp(ConanFile):
         return self.options.with_gltf or self.options.with_gltf_exporter
 
     @property
+    def _depends_on_draco(self):
+        if tools.Version(self.version) < "5.1.0":
+            return False
+        return self.options.with_gltf or self.options.with_gltf_exporter
+
+    @property
     def _depends_on_zlib(self):
         return self.options.with_assbin or self.options.with_assbin_exporter or \
             self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
@@ -140,8 +145,10 @@ class Assimp(ConanFile):
         #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
         # - openddlparser
-        if tools.Version(self.version) <= tools.Version("5.0.1"):
+        if tools.Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
+        else:
+            self.requires("pugixml/1.11")
 
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
@@ -153,6 +160,8 @@ class Assimp(ConanFile):
             self.requires("rapidjson/cci.20200410")
         if self._depends_on_zlib:
             self.requires("zlib/1.2.11")
+        if self._depends_on_draco:
+            self.requires("draco/1.4.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -178,16 +187,20 @@ class Assimp(ConanFile):
             tools.replace_in_file(os.path.join(
                 self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        for vendor in ["irrXML", "poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]:
-            tools.rmdir(os.path.join(
-                self._source_subfolder, "contrib", vendor))
+        vendors = ["poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]
+        if tools.Version(self.version) < "5.1.0":
+            vendors.append("irrXML")
+        else:
+            vendors.extend(["pugixml", "draco"])
+        for vendor in vendors:
+            tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         self._cmake = CMake(self)
-        if tools.Version(self.version) >= tools.Version("5.1.0"):
+        if tools.Version(self.version) >= "5.1.0":
             self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
             self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
             self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False

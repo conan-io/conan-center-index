@@ -20,3 +20,19 @@ sources:
   "0.21.2":
     sha256: a32490bc8499f59f8e30c288e178ff41c9511cf4959dc59c9628b29b77049a4a
     url: https://github.com/xtensor-stack/xtensor/archive/0.21.2.tar.gz
+patches:
+  "0.24.0":
+    - patch_file: "patches/0.24.0-cxx11-abi.patch"
+      base_path: "source_subfolder"
+  "0.23.10":
+    - patch_file: "patches/0.23.9-cxx11-abi.patch"
+      base_path: "source_subfolder"
+  "0.23.9":
+    - patch_file: "patches/0.23.9-cxx11-abi.patch"
+      base_path: "source_subfolder"
+  "0.21.5":
+    - patch_file: "patches/0.21.5-cxx11-abi.patch"
+      base_path: "source_subfolder"
+  "0.21.4":
+    - patch_file: "patches/0.21.4-cxx11-abi.patch"
+      base_path: "source_subfolder"

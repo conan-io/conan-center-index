@@ -19,11 +19,13 @@ class SQLiteCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "lint": [True, False, "deprecated"],
+        "stack_protection": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "lint": "deprecated",
+        "stack_protection": True
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -86,6 +88,7 @@ class SQLiteCppConan(ConanFile):
         self._cmake.definitions["SQLITECPP_RUN_DOXYGEN"] = False
         self._cmake.definitions["SQLITECPP_BUILD_EXAMPLES"] = False
         self._cmake.definitions["SQLITECPP_BUILD_TESTS"] = False
+        self._cmake.definitions["SQLITECPP_USE_STACK_PROTECTION"] = self.options.stack_protection
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
