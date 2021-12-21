@@ -1,22 +1,29 @@
-import os
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanException
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class ZlibConan(ConanFile):
     name = "zlib"
-    version = "1.2.11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
+    topics = ("zlib", "compression")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False, "deprecated"]}
-    default_options = {"shared": False, "fPIC": True, "minizip": "deprecated"}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     generators = "cmake"
-    topics = ("conan", "zlib", "compression")
 
     @property
     def _source_subfolder(self):
@@ -26,28 +33,26 @@ class ZlibConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
         if self.options.shared:
             del self.options.fPIC
-
-        if self.options.minizip != "deprecated":
-            self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
-
-    def package_id(self):
-        del self.info.options.minizip
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         with tools.chdir(self._source_subfolder):
@@ -121,6 +126,10 @@ class ZlibConan(ConanFile):
         self._rename_libraries()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ZLIB")
+        self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
+
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
