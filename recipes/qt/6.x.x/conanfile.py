@@ -330,6 +330,7 @@ class QtConan(ConanFile):
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.72")
+            self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -986,7 +987,8 @@ class QtConan(ConanFile):
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.get_safe("qtquickcontrols2") and self.options.gui:
+        if (self.options.get_safe("qtquickcontrols2") or \
+            (self.options.qtdeclarative and tools.Version(self.version) >= "6.2.0")) and self.options.gui:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
@@ -1132,7 +1134,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine"):
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
-                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", "nss::nss"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
+                                      "nss::nss", "libdrm::libdrm"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngineQuick", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
