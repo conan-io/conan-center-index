@@ -1,0 +1,12 @@
+--- Makefile.in
++++ Makefile.in
+@@ -134,7 +134,7 @@ 
+ OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
+ tools/gen_test_char.lo: tools/gen_test_char.c
+ 	$(APR_MKDIR) tools
+-	$(LT_COMPILE)
++	gcc -c $< -o $@
+ 
+ tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+-	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
++	gcc $(OBJECTS_gen_test_char@EXEEXT@) -o $@
