@@ -48,7 +48,9 @@ class XLntConan(ConanFile):
         pass
 
     def validate(self):
-        pass
+        if self.options.get_safe("shared") and self.settings.compiler == "Visual Studio" and \
+                "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def package_id(self):
         pass
@@ -113,6 +115,7 @@ class XLntConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.libs = ["xlnt"]
+        postfix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["xlnt" + postfix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
