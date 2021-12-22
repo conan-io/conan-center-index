@@ -1,0 +1,26 @@
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+--- a/source/CMakeLists.txt	(revision 568ac85346bc37757b0cd16464e7e1ea7656df91)
++++ b/source/CMakeLists.txt	(date 1640214594063)
+@@ -292,22 +292,6 @@
+       ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+ endif()
+ 
+-if(NOT MSVC)
+-  # Set pkg-config variables
+-  set(PKG_CONFIG_LIBDIR ${XLNT_LIB_DEST_DIR})
+-  set(PKG_CONFIG_INCLUDEDIR ${XLNT_INC_DEST_DIR})
+-  set(PKG_CONFIG_LIBS "-L\${libdir} -lxlnt")
+-  set(PKG_CONFIG_CFLAGS "-I\${includedir}")
+-
+-  # Replace variables in pkg-config template
+-  configure_file("${XLNT_ROOT_DIR}/cmake/pkg-config.pc.cmake"
+-    "${CMAKE_CURRENT_BINARY_DIR}/xlnt.pc")
+-
+-  # pkg-config install
+-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/xlnt.pc"
+-    DESTINATION ${XLNT_LIB_DEST_DIR}/pkgconfig)
+-endif()
+-
+ if(RELEASE)
+   set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+   set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
