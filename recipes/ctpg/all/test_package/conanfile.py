@@ -1,7 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
-class DawHeaderLibrariesTestConan(ConanFile):
+
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
