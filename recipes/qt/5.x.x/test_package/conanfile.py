@@ -9,18 +9,22 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "qt", "cmake", "cmake_find_package_multi", "qmake"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+        if self._settings_build.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
-            self.build_requires("meson/0.57.1")
+            self.build_requires("meson/0.59.0")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
-            not tools.cross_building(self.settings) and\
+            not tools.cross_building(self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 

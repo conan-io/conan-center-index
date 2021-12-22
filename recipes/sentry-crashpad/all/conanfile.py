@@ -54,7 +54,7 @@ class SentryCrashpadConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.get_safe("with_tls"):
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -68,6 +68,8 @@ class SentryCrashpadConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
+        if tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
@@ -127,6 +129,8 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["util"].requires = ["compat", "mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["util"].system_libs.append("winhttp")
         if self.options.get_safe("with_tls") == "openssl":
             self.cpp_info.components["util"].requires.append("openssl::openssl")
 
@@ -139,13 +143,20 @@ class SentryCrashpadConan(ConanFile):
 
         self.cpp_info.components["snapshot"].libs = ["crashpad_snapshot"]
         self.cpp_info.components["snapshot"].requires = ["client", "compat", "util", "mini_chromium"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["snapshot"].system_libs.append("powrprof")
 
         self.cpp_info.components["minidump"].libs = ["crashpad_minidump"]
         self.cpp_info.components["minidump"].requires = ["compat", "snapshot", "util", "mini_chromium"]
 
         if tools.Version(self.version) > "0.3":
+            if self.settings.os == "Windows":
+                self.cpp_info.components["getopt"].libs = ["crashpad_getopt"]
+
             self.cpp_info.components["handler"].libs = ["crashpad_handler_lib"]
             self.cpp_info.components["handler"].requires = ["compat", "minidump", "snapshot", "util", "mini_chromium"]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["handler"].requires.append("getopt")
 
         self.cpp_info.components["tools"].libs = ["crashpad_tools"]
 

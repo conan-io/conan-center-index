@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f00e9a9..61961da 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 3.15)
+ project (crow_all)
+ 
++if(BUILD_TESTING)
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+ 
+ find_package(Tcmalloc)
+@@ -43,15 +44,17 @@ include_directories("${PROJECT_INCLUDE_DIR}")
+ include_directories("${PROJECT_SOURCE_DIR}")
+ 
+ add_subdirectory(examples)
++endif()
+ 
+ if (MSVC)
+ else()
++	if (BUILD_TESTING)
+ 	add_subdirectory(tests)
+ 
+ 	enable_testing()
+ 	add_test(NAME crow_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/unittest)
+ 	add_test(NAME template_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/template/test.py WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests/template)
+-
++	endif()
+ 
+ 	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/crow_all.h
+ 		COMMAND python ${PROJECT_SOURCE_DIR}/scripts/merge_all.py

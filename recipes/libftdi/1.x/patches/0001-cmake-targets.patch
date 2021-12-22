@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5aecafc..aa69995 100644
+index 5aecafc..abb133f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,36 +1,54 @@
@@ -53,7 +53,7 @@ index 5aecafc..aa69995 100644
 -# find libusb
 -find_package ( USB1 REQUIRED )
 -include_directories ( ${LIBUSB_INCLUDE_DIR} )
-+find_package (LibUSB REQUIRED)
++find_package (libusb REQUIRED)
 +
 +if (FTDIPP)
 +  find_package(Boost REQUIRED)
@@ -167,7 +167,7 @@ index 5aecafc..aa69995 100644
    Build Python bindings: ${PYTHON_BINDINGS}
    Build ftdi_eeprom: ${FTDI_EEPROM}
 diff --git a/CMakeOptions.txt b/CMakeOptions.txt
-index 07b5887..4d68f89 100644
+index 07b5887..1088090 100644
 --- a/CMakeOptions.txt
 +++ b/CMakeOptions.txt
 @@ -1,4 +1,4 @@
@@ -176,6 +176,12 @@ index 07b5887..4d68f89 100644
  option ( BUILD_TESTS "Build unit tests with Boost Unit Test framework" OFF )
  option ( DOCUMENTATION "Generate API documentation with Doxygen" OFF )
  option ( EXAMPLES "Build example programs" ON )
+@@ -6,3 +6,4 @@ option ( FTDIPP "Build C++ binding library libftdi1++" OFF )
+ option ( FTDI_EEPROM "Build ftdi_eeprom" ON )
+ option ( PYTHON_BINDINGS "Build python bindings via swig" OFF )
+ option ( LINK_PYTHON_LIBRARY "Link against python libraries" OFF )
++option ( ENABLE_STREAMING "Enable data streaming" OFF )
+\ No newline at end of file
 diff --git a/cmake/FindConfuse.cmake b/cmake/FindConfuse.cmake
 deleted file mode 100644
 index f6af7d5..0000000
@@ -283,39 +289,6 @@ index 0000000..19e63c5
 +endif()
 +
 +mark_as_advanced(LibConfuse_INCLUDE_DIR LibConfuse_LIBRARY)
-diff --git a/cmake/FindLibUSB.cmake b/cmake/FindLibUSB.cmake
-new file mode 100644
-index 0000000..fd3a0e8
---- /dev/null
-+++ b/cmake/FindLibUSB.cmake
-@@ -0,0 +1,27 @@
-+find_package(PkgConfig)
-+pkg_check_modules(PC_LibUSB libusb-1.0)
-+
-+find_path(LibUSB_INCLUDE_DIR libusb.h PATH_SUFFIXES libusb-1.0 PATHS ${PC_LibUSB_INCLUDE_DIRS})
-+find_library(LibUSB_LIBRARY NAMES usb-1.0 PATHS ${PC_LibUSB_LIBRARY_DIRS})
-+mark_as_advanced(LibUSB_INCLUDE_DIR LibUSB_LIBRARY)
-+
-+include(FindPackageHandleStandardArgs)
-+find_package_handle_standard_args(LibUSB DEFAULT_MSG LibUSB_LIBRARY LibUSB_INCLUDE_DIR)
-+
-+if (LibUSB_FOUND AND NOT TARGET LibUSB::LibUSB)
-+    add_library(LibUSB::LibUSB INTERFACE IMPORTED)
-+    set(_libusb_libraries ${LibUSB_LIBRARY})
-+    if (UNIX)
-+        find_package(Threads)
-+        list(APPEND _libusb_libraries Threads::Threads)
-+        if (NOT APPLE)
-+            list(APPEND _libusb_libraries udev)
-+        endif()
-+    endif()
-+    set_target_properties(LibUSB::LibUSB PROPERTIES
-+            INTERFACE_LINK_LIBRARIES "${_libusb_libraries}"
-+            INTERFACE_INCLUDE_DIRECTORIES "${LibUSB_INCLUDE_DIR}"
-+    )
-+
-+endif()
-+
 diff --git a/cmake/FindLibintl.cmake b/cmake/FindLibintl.cmake
 deleted file mode 100644
 index 65ed91c..0000000
@@ -519,7 +492,7 @@ index fe203ed..99571a0 100644
 +install ( TARGETS example DESTINATION bin )
            
 diff --git a/ftdi_eeprom/CMakeLists.txt b/ftdi_eeprom/CMakeLists.txt
-index 8737c4b..45db010 100644
+index 8737c4b..e83a0fc 100644
 --- a/ftdi_eeprom/CMakeLists.txt
 +++ b/ftdi_eeprom/CMakeLists.txt
 @@ -1,5 +1,5 @@
@@ -565,7 +538,7 @@ index 8737c4b..45db010 100644
 +        PRIVATE
 +        LibFTDI::ftdi1
 +        LibConfuse::LibConfuse
-+        LibUSB::LibUSB
++        libusb::libusb
 +        )
 +target_include_directories(ftdi_eeprom PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 +
@@ -577,10 +550,10 @@ index 8737c4b..45db010 100644
  install ( TARGETS ftdi_eeprom DESTINATION bin )
  install ( FILES example.conf DESTINATION ${CMAKE_INSTALL_DOCDIR} )
 diff --git a/ftdipp/CMakeLists.txt b/ftdipp/CMakeLists.txt
-index fac5bcc..11e46b4 100644
+index fac5bcc..cde211b 100644
 --- a/ftdipp/CMakeLists.txt
 +++ b/ftdipp/CMakeLists.txt
-@@ -4,15 +4,9 @@
+@@ -4,24 +4,29 @@
  set(cpp_sources ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.cpp CACHE INTERNAL "List of cpp sources" )
  set(cpp_headers ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.hpp CACHE INTERNAL "List of cpp headers" )
  
@@ -598,14 +571,16 @@ index fac5bcc..11e46b4 100644
  
  math(EXPR VERSION_FIXUP "${MAJOR_VERSION} + 1")    # Compatibility with previous releases
  set_target_properties(ftdipp1 PROPERTIES VERSION ${VERSION_FIXUP}.${MINOR_VERSION}.0 SOVERSION 3)
-@@ -21,7 +15,17 @@ set_target_properties(ftdipp1 PROPERTIES VERSION ${VERSION_FIXUP}.${MINOR_VERSIO
+ 
+ # Prevent clobbering each other during the build
  set_target_properties(ftdipp1 PROPERTIES CLEAN_DIRECT_OUTPUT 1)
++set_target_properties(ftdipp1 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
  
  # Dependencies
 -target_link_libraries(ftdipp1 ftdi1 ${LIBUSB_LIBRARIES} ${BOOST_LIBRARIES})
 +target_link_libraries(ftdipp1
 +	PRIVATE
-+		LibUSB::LibUSB
++		libusb::libusb
 +	PUBLIC
 +		LibFTDI::ftdi1
 +		Boost::headers
@@ -617,7 +592,7 @@ index fac5bcc..11e46b4 100644
  
  install ( TARGETS ftdipp1
  					RUNTIME DESTINATION bin
-@@ -29,18 +33,6 @@ install ( TARGETS ftdipp1
+@@ -29,18 +34,6 @@ install ( TARGETS ftdipp1
  					ARCHIVE DESTINATION lib${LIB_SUFFIX}
  				)
  
@@ -637,10 +612,10 @@ index fac5bcc..11e46b4 100644
  					DESTINATION include/${PROJECT_NAME}
  					COMPONENT headers
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 17b3617..3db9729 100644
+index 17b3617..3148e02 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,36 +1,47 @@
+@@ -1,36 +1,57 @@
 -# Includes
 -include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}
 -                     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -665,13 +640,17 @@ index 17b3617..3db9729 100644
  # Targets
 -set(c_sources     ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.c ${CMAKE_CURRENT_SOURCE_DIR}/ftdi_stream.c CACHE INTERNAL "List of c sources" )
 -set(c_headers     ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.h CACHE INTERNAL "List of c headers" )
--
--add_library(ftdi1 SHARED ${c_sources})
 +set(c_sources
 +  ftdi.c
-+  ftdi_stream.c
 +)
-+
++if(ENABLE_STREAMING)
++  set(c_sources
++    ftdi_stream.c
++    ${c_sources}
++  )
++endif()
+ 
+-add_library(ftdi1 SHARED ${c_sources})
 +set(c_headers
 +  ftdi.h
 +  "${CMAKE_CURRENT_BINARY_DIR}/ftdi_version_i.h"
@@ -689,18 +668,22 @@ index 17b3617..3db9729 100644
  set_target_properties(ftdi1 PROPERTIES VERSION ${VERSION_FIXUP}.${MINOR_VERSION}.0 SOVERSION 2)
  # Prevent clobbering each other during the build
  set_target_properties ( ftdi1 PROPERTIES CLEAN_DIRECT_OUTPUT 1 )
++set_target_properties ( ftdi1 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
  
--
--# Dependencies
--target_link_libraries(ftdi1 ${LIBUSB_LIBRARIES})
-+target_link_libraries(ftdi1 PRIVATE LibUSB::LibUSB)
++target_link_libraries(ftdi1 PRIVATE libusb::libusb)
 +if (APPLE)
 +    target_link_libraries(ftdi1 PRIVATE ${APPLE_CF} ${APPLE_IOK})
 +endif()
  
+-# Dependencies
+-target_link_libraries(ftdi1 ${LIBUSB_LIBRARIES})
++if(ENABLE_STREAMING)
++target_compile_definitions(ftdi1 PUBLIC ENABLE_STREAMING)
++endif()
+ 
  install ( TARGETS ftdi1
            RUNTIME DESTINATION bin
-@@ -38,17 +49,6 @@ install ( TARGETS ftdi1
+@@ -38,17 +59,6 @@ install ( TARGETS ftdi1
            ARCHIVE DESTINATION lib${LIB_SUFFIX}
          )
  
@@ -766,6 +749,62 @@ index f5b7018..03d7b07 100644
          case TYPE_AM:
          case TYPE_BM:
              free_start += 0x14;
+diff --git a/src/ftdi.h b/src/ftdi.h
+index fb45008..d2eed07 100644
+--- a/src/ftdi.h
++++ b/src/ftdi.h
+@@ -19,6 +19,7 @@
+ #define __libftdi_h__
+ 
+ #include <stdint.h>
++#include <libusb.h>
+ #ifndef _WIN32
+ #include <sys/time.h>
+ #endif
+@@ -475,6 +476,7 @@ enum ftdi_cbusx_func
+ /**
+     \brief Progress Info for streaming read
+ */
++#ifdef ENABLE_STREAMING
+ struct size_and_time
+ {
+     uint64_t totalBytes;
+@@ -483,17 +485,17 @@ struct size_and_time
+ 
+ typedef struct
+ {
+-    struct size_and_time first;
+-    struct size_and_time prev;
+-    struct size_and_time current;
+-    double totalTime;
+-    double totalRate;
+-    double currentRate;
++  struct size_and_time first;
++  struct size_and_time prev;
++  struct size_and_time current;
++  double totalTime;
++  double totalRate;
++  double currentRate;
+ } FTDIProgressInfo;
+ 
+ typedef int (FTDIStreamCallback)(uint8_t *buffer, int length,
+                                  FTDIProgressInfo *progress, void *userdata);
+-
++#endif
+ /**
+  * Provide libftdi version information
+  * major: Library major version
+@@ -580,8 +582,8 @@ extern "C"
+     int ftdi_write_data_set_chunksize(struct ftdi_context *ftdi, unsigned int chunksize);
+     int ftdi_write_data_get_chunksize(struct ftdi_context *ftdi, unsigned int *chunksize);
+ 
+-    int ftdi_readstream(struct ftdi_context *ftdi, FTDIStreamCallback *callback,
+-                        void *userdata, int packetsPerTransfer, int numTransfers);
++    //int ftdi_readstream(struct ftdi_context *ftdi, FTDIStreamCallback *callback,
++    //                    void *userdata, int packetsPerTransfer, int numTransfers);
+     struct ftdi_transfer_control *ftdi_write_data_submit(struct ftdi_context *ftdi, unsigned char *buf, int size);
+ 
+     struct ftdi_transfer_control *ftdi_read_data_submit(struct ftdi_context *ftdi, unsigned char *buf, int size);
 diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
 index 392c910..6e7ecaa 100644
 --- a/test/CMakeLists.txt
@@ -785,3 +824,6 @@ index 392c910..6e7ecaa 100644
  
  add_test(test_libftdi1 test_libftdi1)
  
+-- 
+2.31.0.windows.1
+

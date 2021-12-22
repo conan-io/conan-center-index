@@ -1,0 +1,8 @@
+sources:
+  "0.6.23":
+    url: "https://github.com/libexif/libexif/releases/download/v0.6.23/libexif-0.6.23.tar.gz"
+    sha256: "9271cf58cb46b00f9e2e9b968c7d81c008a69e5457f7d1a50dbf1786eac61b52"
+patches:
+  "0.6.23":
+    - patch_file: patches/replace_ssize_t_windows.diff
+      base_path: source_subfolder

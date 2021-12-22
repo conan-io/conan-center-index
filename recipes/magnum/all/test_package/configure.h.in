@@ -1,0 +1,3 @@
+
+#cmakedefine IMPORTER_PLUGINS_FOLDER "${IMPORTER_PLUGINS_FOLDER}"
+#cmakedefine OBJ_FILE "${OBJ_FILE}"

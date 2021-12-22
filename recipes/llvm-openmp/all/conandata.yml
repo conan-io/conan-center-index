@@ -1,4 +1,7 @@
 sources:
+  "12.0.1":
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/openmp-12.0.1.src.tar.xz
+    sha256: 60fe79440eaa9ebf583a6ea7f81501310388c02754dbe7dc210776014d06b091
   "10.0.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/openmp-10.0.0.src.tar.xz
     sha256: 3b9ff29a45d0509a1e9667a0feb43538ef402ea8cfc7df3758a01f20df08adfa
@@ -12,6 +15,12 @@ sources:
     sha256: 3e85dd3cad41117b7c89a41de72f2e6aa756ea7b4ef63bb10dcddf8561a7722c
 
 patches:
+  "12.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-disable-build-testing_12.0.1.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-disable-omp-target_12.0.1.patch"
+
   "10.0.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-disable-build-testing_10.0.0.patch"

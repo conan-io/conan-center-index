@@ -1,0 +1,15 @@
+sources:
+  "10.7.0":
+    url: "http://sourceforge.net/projects/arma/files/armadillo-10.7.0.tar.xz"
+    sha256: "9bf60db6fd237721908747a0e56797b97b7ceae3603f2cca0b012a3b88265d3f"
+  "10.7.3":
+    url: "http://sourceforge.net/projects/arma/files/armadillo-10.7.3.tar.xz"
+    sha256: "aac930d5fbc23dca9453ff3647d03f7d90d9584a4556719ad7bc7adab7db6ff5"
+
+patches:
+  "10.7.0":
+    - patch_file: "patches/0001-Guard-dependency-discovery-10.7.x.patch"
+      base_path: "source_subfolder"
+  "10.7.3":
+    - patch_file: "patches/0001-Guard-dependency-discovery-10.7.x.patch"
+      base_path: "source_subfolder"

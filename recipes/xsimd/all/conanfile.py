@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -15,6 +16,7 @@ class XsimdConan(ConanFile):
     options = {"xtl_complex": [True, False]}
     default_options = {"xtl_complex": False}
     no_copy_source = True
+    settings = "os", "arch"
 
     @property
     def _source_subfolder(self):
@@ -26,6 +28,11 @@ class XsimdConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def validate(self):
+        # TODO: check supported version (probably >= 8.0.0)
+        if tools.Version(self.version) < "8.0.0" and self.settings.os == "Macos" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            raise ConanInvalidConfiguration(f"{self.name} doesn't support macOS M1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

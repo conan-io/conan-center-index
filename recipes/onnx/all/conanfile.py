@@ -10,7 +10,7 @@ class OnnxConan(ConanFile):
     name = "onnx"
     description = "Open standard for machine learning interoperability."
     license = "Apache-2.0"
-    topics = ("conan", "onnx", "machine-learning", "deep-learning", "neural-network")
+    topics = ("machine-learning", "deep-learning", "neural-network")
     homepage = "https://github.com/onnx/onnx"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -24,9 +24,13 @@ class OnnxConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -43,13 +47,15 @@ class OnnxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("protobuf/3.17.1")
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
-
-    def requirements(self):
-        self.requires("protobuf/3.17.1")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
@@ -58,12 +64,6 @@ class OnnxConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # No warnings as errors for Visual Studio also
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/WX", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -87,7 +87,8 @@ class OnnxConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

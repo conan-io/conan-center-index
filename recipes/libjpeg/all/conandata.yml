@@ -1,9 +1,13 @@
 sources:
   "9c":
-    url: "http://ijg.org/files/jpegsrc.v9c.tar.gz"
+    url:
+      - "http://ijg.org/files/jpegsrc.v9c.tar.gz"
+      - "https://opticode.ch/mirror/jpegsrc.v9c.tar.gz"
     sha256: "1e9793e1c6ba66e7e0b6e5fe7fd0f9e935cc697854d5737adec54d93e5b3f730"
   "9d":
-    url: "http://ijg.org/files/jpegsrc.v9d.tar.gz"
+    url:
+      - "http://ijg.org/files/jpegsrc.v9d.tar.gz"
+      - "https://opticode.ch/mirror/jpegsrc.v9d.tar.gz"
     sha256: "6c434a3be59f8f62425b2e3c077e785c9ce30ee5874ea1c270e843f273ba71ee"
 patches:
   "9c":

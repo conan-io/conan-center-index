@@ -41,7 +41,7 @@ class BisonConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("m4/1.4.18")
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -90,6 +90,8 @@ class BisonConan(ConanFile):
         host, build = None, None
         if self.settings.os == "Windows":
             self._autotools.defines.append("_WINDOWS")
+        if self.settings.compiler == "apple-clang":
+            args.append("gl_cv_compiler_check_decl_option=")
         if self.settings.compiler == "Visual Studio":
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:

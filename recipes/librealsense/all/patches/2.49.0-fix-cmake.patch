@@ -1,0 +1,54 @@
+diff --git a/CMake/install_config.cmake b/CMake/install_config.cmake
+index 9f5666611..2ca5625ce 100644
+--- a/CMake/install_config.cmake
++++ b/CMake/install_config.cmake
+@@ -48,4 +48,4 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+ )
+ 
+-install(CODE "execute_process(COMMAND ldconfig)")
++# install(CODE "execute_process(COMMAND ldconfig)")
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0c15d9510..2c55dbe7b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1.0)
+ project(librealsense2 LANGUAGES CXX C)
+ 
+ include(CMake/lrs_options.cmake)
+-include(CMake/connectivity_check.cmake)
++set(INTERNET_CONNECTION ON)
+ 
+ #Deprecation message, should be removed in future releases
+ if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
+diff --git a/common/fw/CMakeLists.txt b/common/fw/CMakeLists.txt
+index 2772f59d8..8214145fc 100644
+--- a/common/fw/CMakeLists.txt
++++ b/common/fw/CMakeLists.txt
+@@ -57,16 +57,16 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Resources)
+ 
+ function(target_binary url version sha1 symbol ext)
+   set(binary "${CMAKE_CURRENT_BINARY_DIR}/${symbol}-${version}${ext}")
+-  message(STATUS "${url}/${symbol}-${version}${ext}")
+-  file(DOWNLOAD "${url}/${symbol}-${version}${ext}" "${binary}"
+-       EXPECTED_HASH SHA1=${sha1}
+-       STATUS status)
+-  list(GET status 0 error_code)
+-  if (NOT ${error_code} EQUAL 0)
+-    message(FATAL_ERROR "Download firmwnare (${status}) - ${url}")
+-  else()
+-    message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
+-  endif()
++  # message(STATUS "${url}/${symbol}-${version}${ext}")
++  file(COPY "${CMAKE_SOURCE_DIR}/${symbol}-${version}${ext}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
++  #      EXPECTED_HASH SHA1=${sha1}
++  #      STATUS status)
++  # list(GET status 0 error_code)
++  # if (NOT ${error_code} EQUAL 0)
++  #   message(FATAL_ERROR "Download firmwnare (${status}) - ${url}")
++  # else()
++  #   message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
++  # endif()
+   string(TOUPPER ${symbol} SYMBOL)
+   string(REPLACE "." "," version_commas ${version})
+   string(REPLACE "\\" "\\\\" binary_escaped "${binary}")

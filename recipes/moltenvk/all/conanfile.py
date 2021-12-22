@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class MoltenVKConan(ConanFile):
@@ -31,13 +31,17 @@ class MoltenVKConan(ConanFile):
         "tools": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.shared:
@@ -45,11 +49,11 @@ class MoltenVKConan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.0")
-        self.requires("glslang/11.5.0")
+        self.requires("glslang/11.7.0")
         self.requires("spirv-cross/{}".format(self._spirv_cross_version))
         self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2021.2")
+            self.requires("spirv-tools/2021.4")
         if tools.Version(self.version) < "1.1.0":
             raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
             self.requires("vulkan-portability/0.2")
@@ -57,6 +61,8 @@ class MoltenVKConan(ConanFile):
     @property
     def _spirv_cross_version(self):
         return {
+            "1.1.6": "cci.20211113",
+            "1.1.5": "cci.20210823",
             "1.1.4": "cci.20210621",
             "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
             "1.1.0": "20200917", # compiles only with spirv-cross 20200917
@@ -71,6 +77,8 @@ class MoltenVKConan(ConanFile):
     @property
     def _vulkan_headers_version(self):
         return {
+            "1.1.6": "1.2.198.0",
+            "1.1.5": "1.2.189",
             "1.1.4": "1.2.182",
             "1.1.1": "1.2.162.0",
             "1.1.0": "1.2.154.0",
@@ -151,15 +159,17 @@ class MoltenVKConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["MoltenVK"]
-        self.cpp_info.frameworks = ["Metal", "Foundation", "QuartzCore", "AppKit", "IOSurface"]
+        self.cpp_info.frameworks = ["Metal", "Foundation", "QuartzCore", "IOSurface", "CoreGraphics"]
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks.append("IOKit")
+            self.cpp_info.frameworks.extend(["AppKit", "IOKit"])
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
 
         if self.options.shared:
             moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
-            self.output.info("Appending VK_ICD_FILENAMES environment variable: {}".format(moltenvk_icd_path))
+            self.output.info("Prepending to VK_ICD_FILENAMES runtime environment variable: {}".format(moltenvk_icd_path))
+            self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)
+            # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:

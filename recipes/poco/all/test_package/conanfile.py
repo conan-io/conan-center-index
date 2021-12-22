@@ -1,10 +1,10 @@
-import os
 from conans import CMake, ConanFile, tools
+import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _with_netssl(self):
@@ -34,7 +34,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self.run(os.path.join("bin", "core"), run_environment=True)
             if self.options["poco"].enable_util:
                 self.run(os.path.join("bin", "util"), run_environment=True)
@@ -42,7 +42,8 @@ class TestPackageConan(ConanFile):
                 self.run("{} {}".format(os.path.join("bin", "crypto"), os.path.join(self.source_folder, "conanfile.py")), run_environment=True)
             if self.options["poco"].enable_net:
                 self.run(os.path.join("bin", "net"), run_environment=True)
-                self.run(os.path.join("bin", "net_2"), run_environment=True)
+                if self.options["poco"].enable_util:
+                    self.run(os.path.join("bin", "net_2"), run_environment=True)
             if self._with_netssl:
                 self.run(os.path.join("bin", "netssl"), run_environment=True)
             if self.options["poco"].enable_data_sqlite:

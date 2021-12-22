@@ -1,0 +1,8 @@
+sources:
+  "4.9.3":
+    url: "https://github.com/antlr/antlr4/archive/refs/tags/4.9.3.tar.gz"
+    sha256: "efe4057d75ab48145d4683100fec7f77d7f87fa258707330cadd1f8e6f7eecae"
+patches:
+  "4.9.3":
+    - patch_file: "patches/0001-update-cmakelist.patch"
+      base_path: "source_subfolder"

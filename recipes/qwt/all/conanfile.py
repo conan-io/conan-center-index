@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.40.1" # For https://github.com/conan-io/conan/pull/9568
 
 class QwtConan(ConanFile):
     name = "qwt"

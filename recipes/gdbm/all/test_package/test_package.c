@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     gdbm_count_t count;
     datum key, content, fetch;
 
-    file = gdbm_open("test.db", 512, GDBM_WRCREAT, O_RDWR | O_CREAT, NULL);
+    file = gdbm_open("test.db", 512, GDBM_WRCREAT, 0644, NULL);
     if (file == NULL) {
         puts("gdbm_open failed\n");
         return EXIT_FAILURE;

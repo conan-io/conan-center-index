@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
-    test_type = "build_requires"
+    test_type = "build_requires", "requires"
 
     @property
     def _settings_build(self):
@@ -42,11 +42,15 @@ class TestPackageConan(ConanFile):
         if not system_cc:
             system_cc = self._default_cc.get(str(self.settings.compiler))
         return system_cc
+    
+    @property
+    def _user_info(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def _build_scripts(self):
         """Test compile script of automake"""
-        compile_script = self.deps_user_info["automake"].compile
-        ar_script = self.deps_user_info["automake"].ar_lib
+        compile_script = self._user_info["automake"].compile
+        ar_script = self._user_info["automake"].ar_lib
         assert os.path.isfile(ar_script)
         assert os.path.isfile(compile_script)
 

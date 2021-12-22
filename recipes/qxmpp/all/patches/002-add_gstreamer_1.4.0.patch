@@ -1,0 +1,26 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d376cf45..d46a4b4d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -187,9 +187,9 @@ set(SOURCE_FILES
+ )
+ 
+ if(WITH_GSTREAMER)
+-    find_package(GStreamer REQUIRED)
+-    find_package(GLIB2 REQUIRED)
+-    find_package(GObject REQUIRED)
++    find_package(gstreamer REQUIRED)
++    find_package(glib COMPONENTS gobject REQUIRED)
++    #find_package(gobject REQUIRED)
+ 
+     set(INSTALL_HEADER_FILES
+         ${INSTALL_HEADER_FILES}
+@@ -242,7 +242,7 @@ if(WITH_GSTREAMER)
+         PRIVATE
+         ${GLIB2_LIBRARIES}
+         ${GOBJECT_LIBRARIES}
+-        ${GSTREAMER_LIBRARY}
++        gstreamer::gstreamer
+     )
+ endif()
+ 

@@ -1,11 +1,12 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
 class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
-    topics = ("conan", "atk", "accessibility")
+    topics = "atk", "accessibility"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core/"
     license = "LGPL-2.1-or-later"
@@ -30,6 +31,8 @@ class AtSpi2CoreConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    _meson = None
 
     def configure(self):
         if self.options.shared:
@@ -38,22 +41,27 @@ class AtSpi2CoreConan(ConanFile):
         del self.settings.compiler.cppstd
     
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.59.1")
+        self.build_requires("pkgconf/1.7.4")
     
     def requirements(self):
-        self.requires("glib/2.67.6")
+        self.requires("glib/2.70.0")
         if self.options.with_x11:
             self.requires("xorg/system")
         self.requires("dbus/1.12.20")
 
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("only linux is supported by this recipe")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                    strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
-        meson = Meson(self)
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
         defs = {}
         defs["introspection"] = "no"
         defs["docs"] = "false"
@@ -62,10 +70,14 @@ class AtSpi2CoreConan(ConanFile):
         args.append("--datadir=%s" % os.path.join(self.package_folder, "res"))
         args.append("--localedir=%s" % os.path.join(self.package_folder, "res"))
         args.append("--wrap-mode=nofallback")
-        meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
-        return meson
+        self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
+        return self._meson
 
     def build(self):
+        if tools.Version(self.version) >= "2.42.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "bus", "meson.build"),
+                                  "if x11_dep.found()",
+                                  "if x11_option == 'yes'")
         meson = self._configure_meson()
         meson.build()
 

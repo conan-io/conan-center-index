@@ -14,6 +14,9 @@ sources:
   "2.25.0":
     url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.25.0.tar.gz"
     sha256: "ea2049c2dd4868693998d5a9780e198194be5aea1706ff4a9d4f882f18c0a101"
+  "3.0.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.0.0.tar.gz"
+    sha256: "377d376919be19f07c7e7adeeded088a525be40353f6d938a78e4f986bce2ae0"
 patches:
   "2.16.3-apache":
     - patch_file: "patches/0001-visual-studio-shared-apache.patch"

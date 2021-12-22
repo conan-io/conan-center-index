@@ -107,8 +107,17 @@ class CapnprotoConan(ConanFile):
         ]
         if tools.Version(self.version) >= "0.8.0":
             args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
+
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(args=args, configure_dir=os.path.join(self._source_subfolder, "c++"))
+
+        # Fix rpath on macOS
+        configure_dir = os.path.join(self._source_subfolder, "c++")
+        configure_path = os.path.join(configure_dir, "configure")
+        if self.settings.os == "Macos":
+            tools.replace_in_file(configure_path, r"-install_name \$rpath/", "-install_name @rpath/")
+            self._autotools.link_flags.append("-Wl,-rpath,@loader_path/../lib")
+
+        self._autotools.configure(args=args, configure_dir=configure_dir)
         return self._autotools
 
     def build(self):

@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class GtkConan(ConanFile):
     name = "gtk"
     description = "libraries used for creating graphical user interfaces for applications."
-    topics = ("conan", "gtk", "widgets")
+    topics = ("gtk", "widgets")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gtk.org"
     license = "LGPL-2.1-or-later"
@@ -20,14 +20,23 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
-        "with_pango": [True, False]
+        "with_pango": [True, False],
+        "with_ffmpeg": [True, False],
+        "with_gstreamer": [True, False],
+        "with_cups": [True, False],
+        "with_cloudprint": [True, False]
         }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_wayland": False,
         "with_x11": True,
-        "with_pango": True}
+        "with_pango": True,
+        "with_ffmpeg": False,
+        "with_gstreamer": False,
+        "with_cups": False,
+        "with_cloudprint": False
+    }
 
     @property
     def _source_subfolder(self):
@@ -69,34 +78,38 @@ class GtkConan(ConanFile):
             raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.59.1")
+        self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
-            self.build_requires("sassc/3.6.1")
+            self.build_requires("sassc/3.6.2")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.4")
-        self.requires("glib/2.68.0")
+        self.requires("glib/2.69.3")
         if self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
-            self.requires("graphene/1.10.4")
+            self.requires("graphene/1.10.6")
         if self.settings.os == "Linux":
             if self._gtk4:
-                self.requires("xkbcommon/1.1.0")
+                self.requires("xkbcommon/1.3.1")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
-                    self.requires("xkbcommon/1.1.0")
+                    self.requires("xkbcommon/1.3.1")
                 self.requires("wayland/1.19.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
-        self.requires("libepoxy/1.5.5")
+        self.requires("libepoxy/1.5.9")
         if self.options.with_pango:
-            self.requires("pango/1.48.3")
+            self.requires("pango/1.49.1")
+        if self.options.with_ffmpeg:
+            self.requires("ffmpeg/4.2.1")
+        if self.options.with_gstreamer:
+            self.requires("gstreamer/1.19.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -116,6 +129,13 @@ class GtkConan(ConanFile):
         defs["datadir"] = os.path.join(self.package_folder, "res", "share")
         defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
         defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
+        
+        if self._gtk4:
+            enabled_disabled = lambda opt : "enabled" if opt else "disabled" 
+            defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
+            defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
+            defs["print-cups"] = enabled_disabled(self.options.with_cups)
+            defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
@@ -124,6 +144,10 @@ class GtkConan(ConanFile):
     def build(self):
         if self._gtk3:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+        if tools.Version(self.version) >= "4.2.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                  "gtk_update_icon_cache: true",
+                                  "gtk_update_icon_cache: false")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()

@@ -3,14 +3,14 @@
 /* This small program shows how to print a rotated string with the */
 /* FreeType 2 library.                                             */
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
 
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
 
 
 #define WIDTH   640
@@ -69,9 +69,13 @@ main( int     argc,
   int           target_height;
   size_t        n, num_chars;
 
+  if (argv < 2) {
+    fprintf(stderr, "Usage: %s FONT\n", argv[0]);
+    return EXIT_FAILURE;
+  }
 
-  filename      = "OpenSans-Bold.ttf";
-  text          = "Bincrafters";
+  filename      = argv[1];
+  text          = "conan-center-index";
   num_chars     = strlen( text );
   angle         = ( 25.0 / 360 ) * 3.14159 * 2;      /* use 25 degrees     */
   target_height = HEIGHT;

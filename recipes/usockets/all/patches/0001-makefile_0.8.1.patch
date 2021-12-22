@@ -1,0 +1,26 @@
+diff --git a/Makefile b/Makefile
+index b809ac0..454301b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -46,17 +46,17 @@ override LDFLAGS += uSockets.a
+ # By default we build the uSockets.a static library
+ default:
+ 	rm -f *.o
+-	$(CC) $(CFLAGS) -flto -O3 -c src/*.c src/eventing/*.c src/crypto/*.c
++	$(CC) $(CFLAGS) $(CPPFLAGS) -O3 -c src/*.c src/eventing/*.c src/crypto/*.c
+ # Also link in Boost Asio support
+ ifeq ($(WITH_ASIO),1)
+-	$(CXX) $(CXXFLAGS) -Isrc -std=c++14 -flto -O3 -c src/eventing/asio.cpp
++	$(CXX) $(CXXFLAGS) -Isrc -std=c++14 $(CPPFLAGS) -O3 -c src/eventing/asio.cpp
+ endif
+
+ # For now we do rely on C++17 for OpenSSL support but we will be porting this work to C11
+ ifeq ($(WITH_OPENSSL),1)
+-	$(CXX) $(CXXFLAGS) -std=c++17 -flto -O3 -c src/crypto/*.cpp
++	$(CXX) $(CXXFLAGS) -std=c++17 $(CPPFLAGS) -O3 -c src/crypto/*.cpp
+ endif
+-	$(AR) rvs uSockets.a *.o
++	$(AR) rvs libuSockets.a *.o
+
+ # Builds all examples
+ .PHONY: examples

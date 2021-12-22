@@ -134,7 +134,7 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--disable-pc-files",
         ]
         build = None
@@ -149,22 +149,27 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
+            build = host = "{}-w64-mingw32-msvc".format(self.settings.arch)
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
                 "ac_cv_func_setvbuf_reversed=no",
             ])
-            build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
             autotools.cxx_flags.append("-EHsc")
             if tools.Version(self.settings.compiler.version) >= 12:
                 autotools.flags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
-            autotools.libs.append("ssp")
+            autotools.libs.extend(["mingwex", "ssp"])
+        if build:
+            conf_args.append(f"ac_cv_build={build}")
+        if host:
+            conf_args.append(f"ac_cv_host={host}")
+            conf_args.append(f"ac_cv_target={host}")
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
         return autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     @contextlib.contextmanager
@@ -315,7 +320,7 @@ class NCursesConan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
 
-        terminfo = os.path.join(self.package_folder, "bin", "share", "terminfo")
+        terminfo = os.path.join(self.package_folder, "res", "terminfo")
         self.output.info("Setting TERMINFO environment variable: {}".format(terminfo))
         self.env_info.TERMINFO = terminfo
 

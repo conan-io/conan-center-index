@@ -12,7 +12,7 @@ class AutoconfConan(ConanFile):
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
     topics = ("autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
 
@@ -27,11 +27,11 @@ class AutoconfConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("m4/1.4.18")
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("m4/1.4.18")
+            self.build_requires("m4/1.4.19")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 

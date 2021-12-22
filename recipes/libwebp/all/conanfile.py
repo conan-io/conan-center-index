@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibwebpConan(ConanFile):
@@ -9,16 +11,25 @@ class LibwebpConan(ConanFile):
     homepage = "https://github.com/webmproject/libwebp"
     topics = ("image", "libwebp", "webp", "decoding", "encoding")
     license = "BSD-3-Clause"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_simd": [True, False],
+        "near_lossless": [True, False],
+        "swap_16bit_csp": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_simd": True,
+        "near_lossless": True,
+        "swap_16bit_csp": False,
+    }
+
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "with_simd": [True, False], "near_lossless": [True, False],
-               "swap_16bit_csp": [True, False]}
-    default_options = {"shared": False, "fPIC": True,
-                       "with_simd": True, "near_lossless": True,
-                       "swap_16bit_csp": False}
-
     _cmake = None
 
     @property
@@ -36,9 +47,8 @@ class LibwebpConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _version_components(self):
@@ -68,6 +78,8 @@ class LibwebpConan(ConanFile):
         self._cmake.definitions["WEBP_BUILD_VWEBP"] = False
         self._cmake.definitions["WEBP_BUILD_EXTRAS"] = False
         self._cmake.definitions["WEBP_BUILD_WEBPINFO"] = False
+        if tools.Version(self.version) >= "1.2.1":
+            self._cmake.definitions["WEBP_BUILD_LIBWEBPMUX"] = True
         self._cmake.definitions["WEBP_BUILD_WEBPMUX"] = False
 
         self._cmake.configure()
@@ -75,12 +87,8 @@ class LibwebpConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # build libwebpmux (not in patch file to avoid one patch per version)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(WEBP_BUILD_GIF2WEBP OR WEBP_BUILD_IMG2WEBP)",
-                              "if(TRUE)")
         cmake = self._configure_cmake()
         cmake.build()
 

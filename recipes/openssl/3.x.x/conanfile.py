@@ -6,7 +6,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -404,6 +404,9 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
+
+        args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
+
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
 
@@ -431,7 +434,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.options.values.fields:
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -650,6 +653,16 @@ class OpenSSLConan(ConanFile):
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
 
+
+        if not self.options.no_fips:
+            provdir = os.path.join(self._source_subfolder, "providers")
+            if self.settings.os == "Macos":
+                self.copy("fips.dylib", src=provdir,dst="lib/ossl-modules")
+            elif self.settings.os == "Windows":
+                self.copy("fips.dll", src=provdir,dst="lib/ossl-modules")
+            else:
+                self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
@@ -698,13 +711,18 @@ class OpenSSLConan(ConanFile):
                             "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "OpenSSL")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
-        self.cpp_info.names["pkg_config"] = "openssl"
         self.cpp_info.components["ssl"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["ssl"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
+
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
@@ -730,9 +748,11 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
 
+        self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
+        self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
+        self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
+        self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
-        self.cpp_info.components["crypto"].names["pkg_config"] = "libcrypto"
         self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
         self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
-        self.cpp_info.components["ssl"].names["pkg_config"] = "libssl"

@@ -1,7 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+required_conan_version = ">=1.33.0"
+
 
 class Hdf4Conan(ConanFile):
     name = "hdf4"
@@ -10,24 +11,25 @@ class Hdf4Conan(ConanFile):
     topics = ("conan", "hdf4", "hdf", "data")
     homepage = "https://portal.hdfgroup.org/display/HDF4/HDF4"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "jpegturbo": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
-        "szip_encoding": [True, False]
+        "szip_encoding": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "jpegturbo": False,
         "szip_support": None,
-        "szip_encoding": False
+        "szip_encoding": False,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -53,7 +55,7 @@ class Hdf4Conan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.1.0")
         else:
             self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
@@ -61,14 +63,9 @@ class Hdf4Conan(ConanFile):
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
 
-    def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.shared:
-            # FIXME: Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            raise ConanInvalidConfiguration("shared M1 builds aren't supported right away!")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hdf-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

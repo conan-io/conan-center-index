@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
 import os
+import re
 import shutil
 
 required_conan_version = ">=1.33.0"
@@ -58,6 +59,10 @@ class LcmsConan(ConanFile):
             # since VS2015 vsnprintf is built-in
             path = os.path.join(self._source_subfolder, "src", "lcms2_internal.h")
             tools.replace_in_file(path, "#       define vsnprintf  _vsnprintf", "")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "16":
+            # since VS2019, don't need to specify the WindowsTargetPlatformVersion
+            path = os.path.join(self._source_subfolder, "Projects", "VC2015", "lcms2_static", "lcms2_static.vcxproj")
+            tools.replace_in_file(path, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
         if self.settings.os == "Android" and tools.os_info.is_windows:
             # remove escape for quotation marks, to make ndk on windows happy
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
@@ -72,9 +77,13 @@ class LcmsConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "12"
+            properties = {
+                # Enable LTO when CFLAGS contains -GL
+                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+            }
             # run build
             msbuild = MSBuild(self)
-            msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
+            msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project, properties=properties)
 
     def _configure_autotools(self):
         if self._autotools:

@@ -14,8 +14,18 @@ class ConanRecipe(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False], "with_main": [True, False]}
-    default_options = {"fPIC": True, "with_main": False}
+    options = {
+        "fPIC": [True, False],
+        "with_main": [True, False],
+        "with_benchmark": [True, False],
+        "with_prefix": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "with_main": False,
+        "with_benchmark": False,
+        "with_prefix": False,
+    }
     _cmake = None
 
     @property
@@ -27,17 +37,22 @@ class ConanRecipe(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or not self.options.with_main:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if not self.options.with_main:
+            del self.options.fPIC
+            del self.options.with_benchmark
+
+    def validate(self):
+        if tools.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("ARMv8 is supported by 2.13.1+ only! give up!")
         if self.options.with_main and tools.Version(self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported with versions < 2.13.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "Catch2-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -47,6 +62,8 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
         self._cmake.definitions["CATCH_BUILD_STATIC_LIBRARY"] = self.options.with_main
+        self._cmake.definitions["enable_benchmark"] = self.options.get_safe("with_benchmark", False)
+        self._cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -95,6 +112,12 @@ class ConanRecipe(ConanFile):
             self.cpp_info.components["Catch2WithMain"].system_libs = ["log"] if self.settings.os == "Android" else []
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
+            if self.options.get_safe("with_benchmark", False):
+                self.cpp_info.components["Catch2WithMain"].defines.append("CATCH_CONFIG_ENABLE_BENCHMARKING")
+            if self.options.with_prefix:
+                self.cpp_info.components["Catch2WithMain"].defines.append("CATCH_CONFIG_PREFIX_ALL")
         else:
             self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
             self.cpp_info.system_libs = ["log"] if self.settings.os == "Android" else []
+            if self.options.with_prefix:
+                self.cpp_info.defines.append("CATCH_CONFIG_PREFIX_ALL")

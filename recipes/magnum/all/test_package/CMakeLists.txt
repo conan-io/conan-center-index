@@ -4,10 +4,21 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(Magnum REQUIRED)
+if(SHARED_PLUGINS)
+    find_package(Magnum REQUIRED)
+else()
+    find_package(Magnum REQUIRED ObjImporter)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} Magnum::Magnum)
+target_link_libraries(${PROJECT_NAME} PRIVATE Magnum::Magnum Magnum::Trade)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+if(NOT SHARED_PLUGINS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Magnum::ObjImporter)
+endif()
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         CXX_STANDARD 11

@@ -10,6 +10,8 @@
 #include <QDomText>
 #include <QSqlDatabase>
 
+#include <qplatformdefs.h>
+
 void f()
 {
     qDebug() << "inside f";
@@ -34,6 +36,8 @@ int main(int argc, char *argv[]){
         qFatal("Could not open resource file");
     qDebug() << "Resource content:" << f.readAll();
     f.close();
+
+    qDebug() << W_OK;
 
     QNetworkAccessManager networkTester;
 

@@ -1,9 +1,13 @@
 sources:
   "2.3.7":
-    url: "http://www.unixodbc.org/unixODBC-2.3.7.tar.gz"
+    url: 
+      - "http://www.unixodbc.org/unixODBC-2.3.7.tar.gz"
+      - "http://www.unixodbc.net/unixODBC-2.3.7.tar.gz"
     sha256: "45f169ba1f454a72b8fcbb82abd832630a3bf93baa84731cf2949f449e1e3e77"
   "2.3.9":
-    url: "http://www.unixodbc.org/unixODBC-2.3.9.tar.gz"
+    url: 
+      - "http://www.unixodbc.org/unixODBC-2.3.9.tar.gz"
+      - "http://www.unixodbc.net/unixODBC-2.3.9.tar.gz"
     sha256: "52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207"
 patches:
   "2.3.7":

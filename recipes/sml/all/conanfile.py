@@ -1,5 +1,4 @@
 from conans import ConanFile, tools
-from conans.tools import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -31,9 +30,9 @@ class SMLConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, "14")
+            tools.check_min_cppstd(self, "14")
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:

@@ -55,7 +55,7 @@ class SiConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "SI-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.rename(extracted_folder, self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SI"

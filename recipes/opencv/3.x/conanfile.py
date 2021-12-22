@@ -25,7 +25,9 @@ class OpenCVConan(ConanFile):
                "with_openexr": [True, False],
                "with_eigen": [True, False],
                "with_webp": [True, False],
-               "with_gtk": [True, False]}
+               "with_gtk": [True, False],
+               "nonfree": [True, False],
+               }
     default_options = {"shared": False,
                        "fPIC": True,
                        "parallel": False,
@@ -37,7 +39,9 @@ class OpenCVConan(ConanFile):
                        "with_openexr": True,
                        "with_eigen": True,
                        "with_webp": True,
-                       "with_gtk": True}
+                       "with_gtk": True,
+                       "nonfree": False,
+                       }
 
     short_paths = True
 
@@ -234,6 +238,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_GTK_2_X"] = self.options.get_safe("with_gtk", False)
 
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        self._cmake.definitions["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
         if self.options.parallel:
             self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"

@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.32.0"
 
+
 class LibsecretConan(ConanFile):
     name = "libsecret"
     description = "A library for storing and retrieving passwords and other secrets"
@@ -14,8 +15,16 @@ class LibsecretConan(ConanFile):
     generators = "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libgcrypt": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libgcrypt": True,
+    }
 
     @property
     def _source_subfolder(self):
@@ -24,6 +33,10 @@ class LibsecretConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _use_gcrypt(self):
+        return self.options.get_safe("with_libgcrypt", False)
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -38,11 +51,19 @@ class LibsecretConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+        if self.settings.os != "Linux":
+            # libgcrypt recipe is currently only available on Linux
+            del self.options.with_libgcrypt
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+
     def requirements(self):
         self.requires("glib/2.67.2")
+        if self._use_gcrypt:
+            self.requires("libgcrypt/1.8.4")
 
     def build_requirements(self):
         self.build_requires("meson/0.56.2")
@@ -55,10 +76,10 @@ class LibsecretConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        defs["introspection"] = "false"
-        defs["manpage"] = "false"
-        defs["gtk_doc"] = "false"
-        defs["gcrypt"] = "false"
+        defs["introspection"] = False
+        defs["manpage"] = False
+        defs["gtk_doc"] = False
+        defs["gcrypt"] = self._use_gcrypt
         meson.configure(
             defs=defs,
             build_folder=self._build_subfolder,
@@ -83,5 +104,7 @@ class LibsecretConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libsecret-1"
         self.cpp_info.requires = ["glib::glib-2.0", "glib::gobject-2.0"]
+        if self._use_gcrypt:
+            self.cpp_info.requires.append("libgcrypt::gcrypt")
         self.cpp_info.includedirs = [os.path.join("include", "libsecret-1")]
         self.cpp_info.libs = ["secret-1"]

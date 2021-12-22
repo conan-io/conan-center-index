@@ -1,0 +1,4 @@
+sources:
+  "cci.20211008":
+    url: https://github.com/DiligentGraphics/SPIRV-Tools/archive/7308083707a4bffb62bcfbc721851033e5534bb7.zip
+    sha256: bfe9d6f1c2cfc354c0eda3c2139485cae4483d8b12fa994d1f0f1f3624645fcd

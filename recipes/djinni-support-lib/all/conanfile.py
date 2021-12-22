@@ -39,11 +39,6 @@ class DjinniSuppotLib(ConanFile):
         else:
             return self.options.target == "jni"
 
-
-    def configure(self):
-        if self.settings.compiler == 'Visual Studio':
-            del self.options.fPIC
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -61,8 +56,8 @@ class DjinniSuppotLib(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

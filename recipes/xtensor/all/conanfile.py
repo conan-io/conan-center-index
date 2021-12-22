@@ -12,7 +12,7 @@ class XtensorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtensor"
     description = "C++ tensors with broadcasting and lazy computing"
-    topics = ("conan", "numpy", "multidimensional-arrays", "tensors")
+    topics = ("numpy", "multidimensional-arrays", "tensors", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xsimd": [True, False],
@@ -24,11 +24,14 @@ class XtensorConan(ConanFile):
         "tbb": False,
         "openmp": False,
     }
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.tbb and self.options.openmp:
@@ -52,9 +55,12 @@ class XtensorConan(ConanFile):
 
     def requirements(self):
         self.requires("xtl/0.7.2")
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.4")
         if self.options.xsimd:
-            self.requires("xsimd/7.4.10")
+            if tools.Version(self.version) < "0.24.0":
+                self.requires("xsimd/7.5.0")
+            else:
+                self.requires("xsimd/8.0.3")
         if self.options.tbb:
             self.requires("tbb/2020.3")
 
@@ -64,6 +70,10 @@ class XtensorConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

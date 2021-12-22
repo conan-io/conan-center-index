@@ -2,3 +2,6 @@ sources:
   "1.2.0":
     sha256: "751852BCB1871AA2CA9F30B34614D028BC44379BBD6F91327744724C652E7CE8"
     url: "https://github.com/palacaze/sigslot/archive/v1.2.0.tar.gz"
+  "1.2.1":
+    sha256: "180B45E41676A730220E3A9AF6EE71B761F23B8F6ADE73C8F2AA20B677504934"
+    url: "https://github.com/palacaze/sigslot/archive/v1.2.1.tar.gz"

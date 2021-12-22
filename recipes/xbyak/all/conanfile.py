@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class XbyakConan(ConanFile):
@@ -9,7 +9,7 @@ class XbyakConan(ConanFile):
     description = "Xbyak is a C++ header library that enables dynamically to " \
                   "assemble x86(IA32), x64(AMD64, x86-64) mnemonic."
     license = "BSD-3-Clause"
-    topics = ("conan", "xbyak", "jit", "assembler")
+    topics = ("xbyak", "jit", "assembler")
     homepage = "https://github.com/herumi/xbyak"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
@@ -32,3 +32,4 @@ class XbyakConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "xbyak"
         self.cpp_info.names["cmake_find_package_multi"] = "xbyak"
+        self.cpp_info.set_property("cmake_file_name", "xbyak")

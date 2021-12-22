@@ -15,10 +15,12 @@ class GiflibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "utils" : [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "utils" : True,
     }
 
     exports_sources = "CMakeLists.txt", "patches/*"
@@ -52,6 +54,7 @@ class GiflibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["UTILS"] = self.options.utils
         self._cmake.configure()
         return self._cmake
 

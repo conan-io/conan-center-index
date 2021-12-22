@@ -7,13 +7,15 @@ class TestPackageConan(ConanFile):
     generators = "pkg_config"
 
     def build(self):
-        meson = Meson(self)
-        meson.configure(build_folder="build")
-        meson.build()
+        if not tools.cross_building(self):
+            with tools.environment_append(tools.RunEnvironment(self).vars):
+                meson = Meson(self)
+                meson.configure(build_folder="build")
+                meson.build()
 
     def test(self):
-        bin_path = os.path.join("build", "test_package")
-        self.run(bin_path, run_environment=True)
+        if not tools.cross_building(self):
+            bin_path = os.path.join("build", "test_package")
+            self.run(bin_path, run_environment=True)
 
-        self.run("meson --version")
-
+            self.run("meson --version", run_environment=True)

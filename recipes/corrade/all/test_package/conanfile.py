@@ -22,3 +22,7 @@ class TestPackageConan(ConanFile):
             if self.options["corrade"].with_utility:
                 # Run corrade-rc
                 self.run("corrade-rc --help", run_environment=True)
+
+        if self.settings.os == "Emscripten":
+            bin_path = os.path.join("bin", "test_package.js")
+            self.run("node {}".format(bin_path), run_environment=True)

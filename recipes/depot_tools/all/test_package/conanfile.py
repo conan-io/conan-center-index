@@ -3,4 +3,5 @@ from conans import ConanFile
 
 class TestPackageConan(ConanFile):
     def test(self):
-        self.run("gclient --version", run_environment=True)
+        # cit: Chrome Infrastructure CLI
+        self.run("cit --help", run_environment=True)

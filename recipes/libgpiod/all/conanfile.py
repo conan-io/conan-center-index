@@ -84,3 +84,4 @@ class LibgpiodConan(ConanFile):
         if self.options.enable_bindings_cxx:
             self.cpp_info.components["gpiodcxx"].libs = ["gpiodcxx"]
             self.cpp_info.components["gpiodcxx"].names["pkg_config"] = "gpiodcxx"
+            self.cpp_info.components["gpiodcxx"].requires = ["gpiod"]

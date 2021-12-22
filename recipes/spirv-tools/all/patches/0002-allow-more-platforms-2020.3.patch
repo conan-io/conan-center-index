@@ -1,0 +1,24 @@
+from https://github.com/KhronosGroup/SPIRV-Tools/pull/4329
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,6 +48,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+   add_definitions(-DSPIRV_MAC)
+ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
+   add_definitions(-DSPIRV_IOS)
++elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "tvOS")
++  add_definitions(-DSPIRV_TVOS)
+ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+   add_definitions(-DSPIRV_ANDROID)
+   set(SPIRV_TIMER_ENABLED ${SPIRV_ALLOW_TIMERS})
+--- a/source/print.cpp
++++ b/source/print.cpp
+@@ -15,7 +15,7 @@
+ #include "source/print.h"
+ 
+ #if defined(SPIRV_ANDROID) || defined(SPIRV_LINUX) || defined(SPIRV_MAC) || \
+-    defined(SPIRV_IOS) || defined(SPIRV_FREEBSD) ||                         \
++    defined(SPIRV_IOS) || defined(SPIRV_TVOS) || defined(SPIRV_FREEBSD) || \
+     defined(SPIRV_EMSCRIPTEN) || defined(SPIRV_FUCHSIA)
+ namespace spvtools {
+ 

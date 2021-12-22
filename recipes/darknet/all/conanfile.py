@@ -10,7 +10,7 @@ class DarknetConan(ConanFile):
     homepage = "http://pjreddie.com/darknet/"
     description = "Darknet is a neural network frameworks written in C"
     topics = ("darknet", "neural network", "deep learning")
-    settings = "os", "compiler", "build_type", "arch", "arch_build"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,15 +22,11 @@ class DarknetConan(ConanFile):
         "with_opencv": False,
     }
     exports_sources = ['patches/*']
+    generators = "pkg_config"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _commit(self):
-        url = self.conan_data["sources"][self.version]["url"]
-        return url[url.rfind("/")+1:url.rfind(".")]
 
     @property
     def _lib_to_compile(self):
@@ -49,7 +45,6 @@ class DarknetConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "OPENCV=0", "OPENCV={}".format("1" if self.options.with_opencv else "0"))
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "Makefile"),
             "SLIB=libdarknet.so",
@@ -62,26 +57,31 @@ class DarknetConan(ConanFile):
         )
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("This library is not compatible with Windows")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("This library is not compatible with Windows")
+
     def requirements(self):
         if self.options.with_opencv:
-            # FIXME: opencv recipe is missing on CCI
-            raise ConanInvalidConfiguration("opencv recipe is not (yet) available on CCI")
+            self.requires("opencv/2.4.13.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self._commit
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
+                  strip_root=True)
 
     def build(self):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.make()
+            with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
+                args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
+                env_build = AutoToolsBuildEnvironment(self)
+                env_build.fpic = self.options.get_safe("fPIC", True)
+                env_build.make(args=args)
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)

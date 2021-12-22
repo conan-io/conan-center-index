@@ -79,6 +79,8 @@ class SentryNativeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
 
@@ -99,6 +101,8 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
         if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
+        if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def build_requirements(self):
         if self.options.backend == "breakpad":
@@ -106,7 +110,7 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.78.0")
         if self.options.backend == "crashpad":
             if self.options.with_crashpad == "sentry":
                 self.requires("sentry-crashpad/{}".format(self.version))
@@ -119,7 +123,7 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
             self.requires("qt/5.15.2")
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 

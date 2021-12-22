@@ -12,13 +12,24 @@ class Ezc3dConan(ConanFile):
     topics = ("conan", "ezc3d", "c3d")
     homepage = "https://github.com/pyomeca/ezc3d"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -48,14 +59,14 @@ class Ezc3dConan(ConanFile):
                               "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         # fix install
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER Lib)",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib)")
+                              "set(${PROJECT_NAME}_LIB_FOLDER Lib",
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME})",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib)")
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME}",
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME})",
-                              "set(${PROJECT_NAME}_BIN_FOLDER bin)")
+                              "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME}",
+                              "set(${PROJECT_NAME}_BIN_FOLDER bin")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -80,6 +91,7 @@ class Ezc3dConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "CMake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -116,5 +128,5 @@ class Ezc3dConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "ezc3d"))
         lib_suffix = {"Debug": "_debug"}.get(str(self.settings.build_type), "")
         self.cpp_info.libs = ["ezc3d" + lib_suffix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

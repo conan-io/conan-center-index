@@ -61,7 +61,7 @@ class JasperConan(ConanFile):
             self.requires("libjpeg/9d")
 
     def package_id(self):
-        del self.options.jpegturbo
+        del self.info.options.jpegturbo
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

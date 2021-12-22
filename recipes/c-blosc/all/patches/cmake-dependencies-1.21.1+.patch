@@ -1,0 +1,76 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f5eff9e..92b35f2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -121,12 +121,12 @@ option(PREFER_EXTERNAL_ZLIB
+ option(PREFER_EXTERNAL_ZSTD
+     "Find and use external Zstd library instead of included sources." OFF)
+ 
+-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
+ 
+ if(NOT DEACTIVATE_LZ4)
+     if(PREFER_EXTERNAL_LZ4)
+-        find_package(LZ4)
++        ### find_package(LZ4)
++        set(LZ4_FOUND TRUE)
+     else()
+         message(STATUS "Using LZ4 internal sources.")
+     endif(PREFER_EXTERNAL_LZ4)
+@@ -148,7 +148,6 @@ endif(NOT DEACTIVATE_SNAPPY)
+ if(NOT DEACTIVATE_ZLIB)
+     # import the ZLIB_ROOT environment variable to help finding the zlib library
+     if(PREFER_EXTERNAL_ZLIB)
+-        set(ZLIB_ROOT $ENV{ZLIB_ROOT})
+         find_package(ZLIB)
+         if (NOT ZLIB_FOUND )
+             message(STATUS "No zlib found.  Using internal sources.")
+@@ -163,7 +162,7 @@ endif(NOT DEACTIVATE_ZLIB)
+ 
+ if (NOT DEACTIVATE_ZSTD)
+     if (PREFER_EXTERNAL_ZSTD)
+-        find_package(Zstd)
++        find_package(zstd)
+     else ()
+         message(STATUS "Using ZSTD internal sources.")
+     endif (PREFER_EXTERNAL_ZSTD)
+diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
+index 84b72e5..20b94e0 100644
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -91,7 +91,7 @@ endif(WIN32)
+ 
+ if(NOT DEACTIVATE_LZ4)
+     if(LZ4_FOUND)
+-        set(LIBS ${LIBS} ${LZ4_LIBRARY})
++        set(LIBS ${LIBS} "CONAN_PKG::lz4")
+     else(LZ4_FOUND)
+         file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
+         set(SOURCES ${SOURCES} ${LZ4_FILES})
+@@ -101,7 +101,7 @@ endif(NOT DEACTIVATE_LZ4)
+ 
+ if(NOT DEACTIVATE_SNAPPY)
+     if(SNAPPY_FOUND)
+-        set(LIBS ${LIBS} ${SNAPPY_LIBRARY})
++        set(LIBS ${LIBS} "Snappy::snappy")
+     else(SNAPPY_FOUND)
+         file(GLOB SNAPPY_FILES ${SNAPPY_LOCAL_DIR}/*.cc)
+         set(SOURCES ${SOURCES} ${SNAPPY_FILES})
+@@ -111,7 +111,7 @@ endif(NOT DEACTIVATE_SNAPPY)
+ 
+ if(NOT DEACTIVATE_ZLIB)
+     if(ZLIB_FOUND)
+-        set(LIBS ${LIBS} ${ZLIB_LIBRARY})
++        set(LIBS ${LIBS} "ZLIB::ZLIB")
+     else(ZLIB_FOUND)
+         file(GLOB ZLIB_FILES ${ZLIB_LOCAL_DIR}/*.c)
+         set(SOURCES ${SOURCES} ${ZLIB_FILES})
+@@ -121,7 +121,7 @@ endif(NOT DEACTIVATE_ZLIB)
+ 
+ if (NOT DEACTIVATE_ZSTD)
+     if (ZSTD_FOUND)
+-        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
++        set(LIBS ${LIBS} "zstd::zstd")
+     else (ZSTD_FOUND)
+       file(GLOB ZSTD_FILES
+         ${ZSTD_LOCAL_DIR}/common/*.c

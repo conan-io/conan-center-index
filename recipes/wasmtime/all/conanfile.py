@@ -69,9 +69,10 @@ class WasmtimeConan(ConanFile):
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os are not available")
 
-        if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
-            # FIXME: https://github.com/bytecodealliance/wasmtime/issues/3168
-            raise ConanInvalidConfiguration("Shared mingw is currently not possible")
+        if tools.Version(self.version) <= "0.29.0":
+            if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
+                # https://github.com/bytecodealliance/wasmtime/issues/3168
+                raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
     def package_id(self):
         del self.info.settings.compiler.version

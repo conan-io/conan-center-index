@@ -1,4 +1,7 @@
 sources:
+  "0.6":
+    url: "https://github.com/tristanpenman/valijson/archive/v0.6.zip"
+    sha256: d655dd7ca502978238e72a4febcd064cb1ffaece18cd5d78c7f17df420387b59
   "0.3":
     url: "https://github.com/tristanpenman/valijson/archive/v0.3.zip"
     sha256: 76f1ad4800fb730b258a6272dfe738b0695101cbbb4e72f9ab75e33b2a90262e

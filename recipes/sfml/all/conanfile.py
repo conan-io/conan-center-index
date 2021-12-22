@@ -57,11 +57,10 @@ class SfmlConan(ConanFile):
             if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
                 self.requires("opengl/system")
             if self.settings.os == "Linux":
+                self.requires("libudev/system")
                 self.requires("xorg/system")
-                # TODO: add libudev recipe
-                # self.requires("libudev/xxx")
         if self.options.graphics:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
             self.requires("stb/cci.20210713")
         if self.options.audio:
             self.requires("flac/1.3.3")
@@ -73,8 +72,6 @@ class SfmlConan(ConanFile):
             raise ConanInvalidConfiguration("SFML not supported on {}".format(self.settings.os))
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet (missing libudev recipe)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

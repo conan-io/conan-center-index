@@ -1,0 +1,13 @@
+diff --git a/cmake/sdks.cmake b/cmake/sdks.cmake
+index 0ec9981ddf..d86a9f4874 100644
+--- a/cmake/sdks.cmake
++++ b/cmake/sdks.cmake
+@@ -250,7 +250,7 @@ function(add_sdks)
+ 
+     # the catch-all config needs to list all the targets in a dependency-sorted order
+     include(dependencies)
+-    sort_links(EXPORTS)
++    #sort_links(EXPORTS)
+ 
+     # make an everything config by just including all the individual configs
+     file(WRITE ${CMAKE_BINARY_DIR}/aws-sdk-cpp-config.cmake "")

@@ -1,6 +1,7 @@
 import os
-
 from conans import CMake, ConanFile, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -20,7 +21,6 @@ class LibrdkafkaConan(ConanFile):
         "plugins": [True, False],
         "ssl": [True, False],
         "sasl": [True, False],
-        "lz4": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
@@ -30,7 +30,6 @@ class LibrdkafkaConan(ConanFile):
         "plugins": False,
         "ssl": False,
         "sasl": False,
-        "lz4": "deprecated",
     }
     generators = "cmake", "cmake_find_package", "pkg_config"
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -47,8 +46,6 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.lz4 != "deprecated":
-            self.output.warn("lz4 option is deprecated. Actually, librdkafka always depends on lz4.")
 
     def requirements(self):
         self.requires("lz4/1.9.3")
@@ -57,21 +54,17 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zstd:
             self.requires("zstd/1.5.0")
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
-
-    def package_id(self):
-        del self.info.options.lz4
 
     def build_requirements(self):
         if self.options.sasl and self.settings.os != "Windows":
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

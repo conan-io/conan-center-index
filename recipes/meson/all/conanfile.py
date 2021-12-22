@@ -1,24 +1,20 @@
 from conans import ConanFile, tools
 import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class MesonInstallerConan(ConanFile):
     name = "meson"
     description = "Meson is a project to create the best possible next-generation build system"
-    topics = ("conan", "meson", "mesonbuild", "build-system")
+    topics = ("meson", "mesonbuild", "build-system")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
     no_copy_source = True
 
     _source_subfolder = "source_subfolder"
-    _meson_cmd = """@echo off
-CALL python %~dp0/meson.py %*
-"""
-    _meson_sh = """#!/usr/bin/env bash
-meson_dir=$(dirname "$0")
-exec "$meson_dir/meson.py" "$@"
-"""
 
     def requirements(self):
         self.requires("ninja/1.10.2")
@@ -27,19 +23,22 @@ exec "$meson_dir/meson.py" "$@"
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "meson-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # create wrapper scripts
-        with open(os.path.join(self._source_subfolder, "meson.cmd"), "w") as f:
-            f.write(self._meson_cmd)
-        with open(os.path.join(self._source_subfolder, "meson"), "w") as f:
-            f.write(self._meson_sh)
+        tools.save(os.path.join(self._source_subfolder, "meson.cmd"), textwrap.dedent("""\
+            @echo off
+            CALL python %~dp0/meson.py %*
+        """))
+        tools.save(os.path.join(self._source_subfolder, "meson"), textwrap.dedent("""\
+            #!/usr/bin/env bash
+            meson_dir=$(dirname "$0")
+            exec "$meson_dir/meson.py" "$@"
+        """))
 
     @staticmethod
     def _chmod_plus_x(filename):
-        if os.name == 'posix':
+        if os.name == "posix":
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package(self):
@@ -49,7 +48,7 @@ exec "$meson_dir/meson.py" "$@"
 
     def package_info(self):
         meson_root = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % meson_root)
+        self.output.info("Appending PATH environment variable: {}".format(meson_root))
         self.env_info.PATH.append(meson_root)
 
         self._chmod_plus_x(os.path.join(meson_root, "meson"))

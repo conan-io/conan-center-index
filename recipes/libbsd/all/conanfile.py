@@ -37,12 +37,14 @@ class LibBsdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+    
+    def validate(self):
         if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("libbsd-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -86,9 +88,11 @@ class LibBsdConan(ConanFile):
         self.cpp_info.components["libbsd-overlay"].defines = ["LIBBSD_OVERLAY"]
         self.cpp_info.components["libbsd-overlay"].names["pkg_config"] = "libbsd-overlay"
 
-        self.cpp_info.components["libbsd-ctor"].libs = ["bsd-ctor"]
-        self.cpp_info.components["libbsd-ctor"].requires = ["bsd"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["libbsd-ctor"].exelinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
-            self.cpp_info.components["libbsd-ctor"].sharedlinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
-        self.cpp_info.components["libbsd-ctor"].names["pkg_config"] = "libbsd-ctor"
+        # on apple-clang, GNU .init_array section is not supported
+        if self.settings.compiler != "apple-clang":
+            self.cpp_info.components["libbsd-ctor"].libs = ["bsd-ctor"]
+            self.cpp_info.components["libbsd-ctor"].requires = ["bsd"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libbsd-ctor"].exelinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
+                self.cpp_info.components["libbsd-ctor"].sharedlinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
+            self.cpp_info.components["libbsd-ctor"].names["pkg_config"] = "libbsd-ctor"

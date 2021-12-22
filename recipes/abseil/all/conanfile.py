@@ -56,9 +56,39 @@ class ConanRecipe(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    @property
+    def _abseil_abi_macros(self):
+        return [
+            "ABSL_OPTION_USE_STD_ANY",
+            "ABSL_OPTION_USE_STD_OPTIONAL",
+            "ABSL_OPTION_USE_STD_STRING_VIEW",
+            "ABSL_OPTION_USE_STD_VARIANT",
+        ]
+
+    def _abseil_abi_config(self):
+        """Determine the Abseil ABI for polyfills (absl::any, absl::optional, absl::string_view, and absl::variant)"""
+        if self.settings.compiler.get_safe("cppstd"):
+            if self.settings.compiler.get_safe("cppstd") >= "17":
+                return "1"
+            return "0"
+        # As-of 2021-09-27 only GCC-11 defaults to C++17.
+        if (
+            self.settings.compiler == "gcc"
+            and tools.Version(self.settings.compiler.version) >= "11"
+        ):
+            return "1"
+        return "0"
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        absl_option = self._abseil_abi_config()
+        for macro in self._abseil_abi_macros:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "absl", "base", "options.h"),
+                "#define {} 2".format(macro),
+                "#define {} {}".format(macro, absl_option),
+            )
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -145,5 +175,7 @@ class ConanRecipe(ConanFile):
                 self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
                 self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
                 self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
+                if self.settings.compiler == "Visual Studio" and self.settings.get_safe("compiler.cppstd") == "20":
+                    self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
 
         _register_components()

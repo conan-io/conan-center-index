@@ -1,4 +1,10 @@
 sources:
+  "6.01":
+    url: "https://github.com/herumi/xbyak/archive/v6.01.tar.gz"
+    sha256: "d28a03c0db1fe16e49572e5f6e1d825decc373022acd0f331646152aef60b550"
+  "6.00":
+    url: "https://github.com/herumi/xbyak/archive/refs/tags/v6.00.tar.gz"
+    sha256: "31f2e156b4be993fdbaa0fbb33c295d907f3752af753f76646a1ee07362590bf"
   "5.993":
     url: "https://github.com/herumi/xbyak/archive/refs/tags/v5.993.tar.gz"
     sha256: "97d596e7ca05208a0f64b225bff482ee5bcd44ebae07f1e3a50009d5e54b940b"

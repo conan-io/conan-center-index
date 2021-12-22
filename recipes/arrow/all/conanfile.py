@@ -3,6 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
+required_conan_version = ">=1.33.0"
+
+
 class ArrowConan(ConanFile):
     name = "arrow"
     description = "Apache Arrow is a cross-language development platform for in-memory data"
@@ -26,6 +29,7 @@ class ArrowConan(ConanFile):
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
+        "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
         "with_csv": [True, False],
@@ -64,6 +68,7 @@ class ArrowConan(ConanFile):
         "encryption": False,
         "filesystem_layer": False,
         "hdfs_bridgs": False,
+        "runtime_simd_level": "max",
         "with_backtrace": False,
         "with_boost": "auto",
         "with_brotli": False,
@@ -99,6 +104,8 @@ class ArrowConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "2.0.0":
+            del self.options.runtime_simd_level
 
     def configure(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
@@ -234,7 +241,7 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             raise ConanInvalidConfiguration("CCI has no llvm recipe (yet)")
         if self._with_openssl():
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1l")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.7.299")
         if self.options.with_brotli:
@@ -250,19 +257,24 @@ class ArrowConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.9")
         if self._with_re2():
             self.requires("re2/20201101")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "arrow-apache-arrow-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.cross_building(self.settings):
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
@@ -285,7 +297,6 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_JEMALLOC"] = self._with_jemalloc()
         self._cmake.definitions["ARROW_JSON"] = self.options.with_json
 
-        # self._cmake.definitions["ARROW_BOOST_VENDORED"] = False
         self._cmake.definitions["BOOST_SOURCE"] = "SYSTEM"
         self._cmake.definitions["Protobuf_SOURCE"] = "SYSTEM"
         self._cmake.definitions["gRPC_SOURCE"] = "SYSTEM"
@@ -311,6 +322,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
         if tools.Version(self.version) >= "2.0":
             self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
+            self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
@@ -376,7 +388,7 @@ class ArrowConan(ConanFile):
             return "{}".format(name)
 
     def package_id(self):
-        self.options.with_jemalloc = self._with_jemalloc()
+        self.info.options.with_jemalloc = self._with_jemalloc()
         self.info.options.with_gflags = self._with_gflags()
         self.info.options.with_protobuf = self._with_protobuf()
         self.info.options.with_re2 = self._with_re2()

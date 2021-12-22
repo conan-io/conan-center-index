@@ -1,0 +1,21 @@
+From 138a7203f16cf356e9d4dac697920a22437014b0 Mon Sep 17 00:00:00 2001
+From: Peter Varga <pvarga@inf.u-szeged.hu>
+Date: Fri, 13 Nov 2020 11:09:23 +0100
+Subject: [PATCH] Fix build with msvc2019 16.8.0
+
+Fixes: QTBUG-88708
+Change-Id: I3554ceec0437801b4861f68edd504d01fc01cf93
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+---
+
+diff --git a/chromium/third_party/blink/renderer/platform/graphics/dark_mode_lab_color_space.h b/chromium/third_party/blink/renderer/platform/graphics/dark_mode_lab_color_space.h
+index 78c316e..136c796 100644
+--- a/chromium/third_party/blink/renderer/platform/graphics/dark_mode_lab_color_space.h
++++ b/chromium/third_party/blink/renderer/platform/graphics/dark_mode_lab_color_space.h
+@@ -145,5 +145,5 @@
+   // https://en.wikipedia.org/wiki/CIELAB_color_space#Forward_transformation.
+   SkV3 ToXYZ(const SkV3& lab) const {
+     auto invf = [](float x) -> float {
+-      return x > kSigma ? pow(x, 3) : 3 * kSigma2 * (x - 4.0f / 29.0f);
++      return x > kSigma ? (float)pow(x, 3) : 3 * kSigma2 * (x - 4.0f / 29.0f);
+     };
