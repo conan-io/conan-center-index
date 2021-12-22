@@ -1,5 +1,12 @@
 # Changelog
 
+### 17-December-2021 - 09:56 CET
+
+- [feature] Introduce 'epoch' concept to build configurations as a strategy to build packages for new compilers.
+- [feature] Allow pull-requests to build packages from different recipes for the same library.
+- [feature] Profiles and logs from builds in the packages generated summary are now open in a new tab.
+- [fix] Improve error reporting of mismatched revision in PRs.
+
 ### 14-December-2021 - 09:13 CET
 
 - [config] Bump Conan client version to 1.43.0.
