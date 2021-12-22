@@ -32,4 +32,7 @@ sources:
 patches:
   "1.4.5":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-cmake-install-dll.patch"
+      patch_file: "patches/1.4.5-cmake-install-dll.patch"
+  "1.5.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
