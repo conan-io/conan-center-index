@@ -6,9 +6,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def config_options(self):
-        self.settings.compiler.libcxx = "libstdc++11"
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
