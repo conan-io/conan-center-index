@@ -16,7 +16,8 @@ class CTPGConan(ConanFile):
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
         "gcc": "8",
-        "clang": "9",
+        # TODO: clang<=11 in conan CI environment can't compile ctpg. But clang in several environments can.
+        "clang": "12",
         "apple-clang": "12.0",
     }
 
