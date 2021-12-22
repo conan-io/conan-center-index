@@ -25,9 +25,6 @@ class DawHeaderLibrariesConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        if self.settings.compiler != "gcc":
-            raise ConanInvalidConfiguration("{} supports only gcc and support other compilers soon.".format(self.name))
-
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
 
