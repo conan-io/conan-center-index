@@ -10,6 +10,6 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ctpg::ctpg)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     target_compile_options(${PROJECT_NAME} PUBLIC -fconstexpr-steps=10000000)
 endif()

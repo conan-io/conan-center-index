@@ -3,7 +3,7 @@ from conans import ConanFile, tools
 
 required_conan_version = ">=1.33.0"
 
-class DawHeaderLibrariesConan(ConanFile):
+class CTPGConan(ConanFile):
     name = "ctpg"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
