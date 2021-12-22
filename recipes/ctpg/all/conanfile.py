@@ -16,7 +16,7 @@ class DawHeaderLibrariesConan(ConanFile):
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
         "gcc": "8",
-        "clang": "7",
+        "clang": "9",
         "apple-clang": "12.0",
     }
 
