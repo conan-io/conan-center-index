@@ -75,7 +75,10 @@ class ZstdConan(ConanFile):
 
     def package_info(self):
         zstd_cmake = "libzstd_shared" if self.options.shared else "libzstd_static"
-        self.cpp_info.components["zstdlib"].names["pkg_config"] = "libzstd"
+        self.cpp_info.set_property("cmake_file_name", "zstd")
+        self.cpp_info.set_property("cmake_target_name", "zstd::{}".format(zstd_cmake))
+        self.cpp_info.set_property("pkg_config_name", "libzstd")
+        self.cpp_info.components["zstdlib"].set_property("pkg_config_name", "libzstd")
         self.cpp_info.components["zstdlib"].names["cmake_find_package"] = zstd_cmake
         self.cpp_info.components["zstdlib"].names["cmake_find_package_multi"] = zstd_cmake
         self.cpp_info.components["zstdlib"].set_property("cmake_target_name", f"{zstd_cmake}::{zstd_cmake}")
