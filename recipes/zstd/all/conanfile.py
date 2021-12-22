@@ -65,7 +65,7 @@ class ZstdConan(ConanFile):
         if tools.Version(self.version) >= "1.5.1" and self.settings.arch != "x86_64":
             tools.replace_in_file(os.path.join(self._source_subfolder, "build", "cmake", "lib", "CMakeLists.txt"),
                                   "file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c ${LIBRARY_DIR}/decompress/*.S)",
-                                  "file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c")
+                                  "file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c)")
 
     def build(self):
         self._patch_sources()
