@@ -23,15 +23,6 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     set_property(TARGET ${PROJECT_NAME} PROPERTY PREFIX "")
 endif()
 
-set(GIF_UTILS
-    gif2rgb
-    gifbuild
-    giffix
-    giftext
-    giftool
-    gifclrmp
-)
-
 add_library(giflib_util STATIC
     "source_subfolder/qprintf.c"
     "source_subfolder/quantize.c"
@@ -39,16 +30,30 @@ add_library(giflib_util STATIC
 )
 target_link_libraries(giflib_util PRIVATE ${PROJECT_NAME})
 
-foreach(GIF_UTIL ${GIF_UTILS})
-    add_executable(${GIF_UTIL} "source_subfolder/${GIF_UTIL}.c")
-    target_link_libraries(${GIF_UTIL} PRIVATE ${PROJECT_NAME} giflib_util)
-endforeach()
-find_library(M_LIBRARY NAMES m)
-if(M_LIBRARY)
-    target_link_libraries(gifclrmp PRIVATE ${M_LIBRARY})
+
+set(INSTALL_TARGETS ${PROJECT_NAME})
+
+if (UTILS)
+    set(GIF_UTILS
+        gif2rgb
+        gifbuild
+        giffix
+        giftext
+        giftool
+        gifclrmp
+    )
+    foreach(GIF_UTIL ${GIF_UTILS})
+        add_executable(${GIF_UTIL} "source_subfolder/${GIF_UTIL}.c")
+        target_link_libraries(${GIF_UTIL} PRIVATE ${PROJECT_NAME} giflib_util)
+    endforeach()
+    set(INSTALL_TARGETS ${PROJECT_NAME} ${GIF_UTILS})
+    find_library(M_LIBRARY NAMES m)
+    if(M_LIBRARY)
+        target_link_libraries(gifclrmp PRIVATE ${M_LIBRARY})
+    endif()
 endif()
 
-install(TARGETS ${PROJECT_NAME} ${GIF_UTILS}
+install(TARGETS ${INSTALL_TARGETS}
         ARCHIVE DESTINATION "lib"
         LIBRARY DESTINATION "lib"
         RUNTIME DESTINATION "bin"
