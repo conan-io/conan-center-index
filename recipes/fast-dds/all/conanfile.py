@@ -119,7 +119,7 @@ class FastDDSConan(ConanFile):
         self.requires("foonathan-memory/0.7.0")
         self.requires("boost/1.73.0")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
