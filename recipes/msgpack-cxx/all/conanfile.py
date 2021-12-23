@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
@@ -23,6 +23,9 @@ class MsgpackCXXConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def requirements(self):
+        self.requires("boost/1.78.0")
+
     def validate(self):
         if self.options["boost"].header_only == True:
             raise ConanInvalidConfiguration("{} requires boost with header_only = False".format(self.name))
@@ -32,9 +35,6 @@ class MsgpackCXXConan(ConanFile):
             self.options["boost"].without_system == True or \
             self.options["boost"].without_timer == True:
             raise ConanInvalidConfiguration("{} requires boost with chrono, context, system, timer enabled".format(self.name))
-
-    def requirements(self):
-        self.requires("boost/1.77.0")
 
     def package_id(self):
         self.info.header_only()
