@@ -172,10 +172,10 @@ class FastDDSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fastdds"
-        self.cpp_info.names["cmake_find_multi_package"] = "fastdds"
+        self.cpp_info.names["cmake_find_package_multi"] = "fastdds"
         # component fastrtps
         self.cpp_info.components["fastrtps"].names["cmake_find_package"]  = "fastrtps"
-        self.cpp_info.components["fastrtps"].names["cmake_find_multi_package"] = "fastrtps"
+        self.cpp_info.components["fastrtps"].names["cmake_find_package_multi"] = "fastrtps"
         self.cpp_info.components["fastrtps"].libs = tools.collect_libs(self)
         self.cpp_info.components["fastrtps"].requires = [
             "fast-cdr::fast-cdr",
@@ -199,14 +199,14 @@ class FastDDSConan(ConanFile):
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         # component fast-discovery
         self.cpp_info.components["fast-discovery-server"].names["cmake_find_package"] = "fast-discovery-server"
-        self.cpp_info.components["fast-discovery-server"].names["cmake_find_multi_package"] = "fast-discovery-server"
+        self.cpp_info.components["fast-discovery-server"].names["cmake_find_package_multi"] = "fast-discovery-server"
         self.cpp_info.components["fast-discovery-server"].bindirs = ["bin"]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var for fast-dds::fast-discovery-server with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
         # component tools
         self.cpp_info.components["tools"].names["cmake_find_package"] = "tools"
-        self.cpp_info.components["tools"].names["cmake_find_multi_package"] = "tools"
+        self.cpp_info.components["tools"].names["cmake_find_package_multi"] = "tools"
         self.cpp_info.components["tools"].bindirs = [os.path.join("bin","tools")]
         bin_path = os.path.join(self._pkg_bin, "tools")
         self.output.info("Appending PATH env var for fast-dds::tools with : {}".format(bin_path)),
