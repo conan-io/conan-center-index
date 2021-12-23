@@ -12,4 +12,5 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_options(${PROJECT_NAME} PUBLIC -constexpr:depth3000000)
+    target_compile_options(${PROJECT_NAME} PUBLIC -constexpr:steps3000000)
 endif()
