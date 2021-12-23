@@ -284,8 +284,8 @@ class SDLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SDL2")
 
-        self.cpp_info.filenames["cmake_find_package"] = "SDL2"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "SDL2"
+        self.cpp_info.names["cmake_find_package"] = "SDL2"
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2"
 
         postfix = "d" if self.settings.build_type == "Debug" else ""
 
