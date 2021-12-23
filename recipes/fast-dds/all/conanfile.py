@@ -24,7 +24,6 @@ class FastDDSConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
     _cmake = None
-    exports_sources = ["patches/**", "CMakeLists.txt"]
 
     @property
     def _pkg_share(self):
@@ -120,6 +119,11 @@ class FastDDSConan(ConanFile):
         self.requires("boost/1.73.0")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
