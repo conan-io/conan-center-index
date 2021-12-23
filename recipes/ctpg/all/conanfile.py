@@ -1,5 +1,6 @@
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, tools
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -15,7 +16,7 @@ class CTPGConan(ConanFile):
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
-        "gcc": "8",
+        "gcc": "10",
         # TODO: clang<=11 in conan CI environment can't compile ctpg. But clang in several environments can.
         "clang": "12",
         "apple-clang": "12.0",
@@ -41,7 +42,7 @@ class CTPGConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE*", "licenses", self._source_subfolder)
-        self.copy("ctpg.hpp", "include", self._source_subfolder)
+        self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
         self.info.header_only()
