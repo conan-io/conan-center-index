@@ -12,7 +12,6 @@ class GDCMConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     description = "C++ library for DICOM medical files"
-    exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,6 +53,11 @@ class GDCMConan(ConanFile):
         self.requires("expat/2.4.1")
         self.requires("openjpeg/2.4.0")
         self.requires("zlib/1.2.11")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
