@@ -54,7 +54,7 @@ class AwsCCal(ConanFile):
         else:
             self.requires("aws-c-common/0.6.15")
         if self._needs_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
