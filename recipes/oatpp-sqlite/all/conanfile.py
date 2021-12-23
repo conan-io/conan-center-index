@@ -82,7 +82,7 @@ class OatppsqliteConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-sqlite")
         self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package"] = "oatpp-sqlite"
         self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package_multi"] = "oatpp-sqlite"
-        self.cpp_info.components["_oatpp-openssl"].set_property("cmake_target_name", "oatpp::oatpp-sqlite")
+        self.cpp_info.components["_oatpp-sqlite"].set_property("cmake_target_name", "oatpp::oatpp-sqlite")
         self.cpp_info.components["_oatpp-sqlite"].includedirs = [
             os.path.join("include", "oatpp-{}".format(self.version), "oatpp-sqlite")
         ]
