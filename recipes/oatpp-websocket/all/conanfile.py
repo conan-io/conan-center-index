@@ -59,6 +59,7 @@ class OatppWebSocketConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
         self._cmake.definitions["OATPP_MODULES_LOCATION"] = "INSTALLED"
+        self._cmake.definitions["OATPP_MSVC_LINK_STATIC_RUNTIME"] = self.settings.compiler.runtime in ["MT", "MTd"]
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
