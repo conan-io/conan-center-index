@@ -1291,7 +1291,7 @@ class BoostConan(ConanFile):
         if self.settings.os == "Macos":
             os_ = "darwin"
         toolset_version = str(tools.Version(self.settings.compiler.version).major)
-        if self.settings.compiler in ("msvc", "Visual Studio"):
+        if str(self.settings.compiler) in ("msvc", "Visual Studio"):
             toolset_version = self._toolset_version.replace(".", "")
 
         toolset_parts = [compiler, os_]
