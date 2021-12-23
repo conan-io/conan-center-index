@@ -39,7 +39,6 @@ class MimallocTestConan(ConanFile):
         cmake.definitions["BUILD_NO_CHANGES"] = "no_changes" in self._test_files
         cmake.definitions["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files
         cmake.definitions["BUILD_MI_API"] = "mi_api" in self._test_files
-        cmake.definitions["MIMALLOC_SHARED"] = self.options["mimalloc"].shared
         cmake.configure()
         cmake.build()
 
