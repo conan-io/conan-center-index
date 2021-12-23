@@ -214,7 +214,7 @@ class IceoryxConan(ConanFile):
         #        iceoryx_utilsConfig.cmake, iceoryx_poshConfig.cmake and iceoryx_binding_cConfig.cmake
         #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
-        self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
+        self.cpp_info.names["cmake_find_package_multi"] = "iceoryx"
 
         def _register_components(components):
             for cmake_lib_name, values in components.items():
