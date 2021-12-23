@@ -11,7 +11,6 @@ class grpcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/**"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     short_paths = True
 
@@ -141,6 +140,12 @@ class grpcConan(ConanFile):
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy(pattern="cmake/*")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
