@@ -99,7 +99,7 @@ class ICCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "icc"
-        self.cpp_info.names["cmake_find_multi_package"] = "icc"
+        self.cpp_info.names["cmake_find_package_multi"] = "icc"
         if self.options.shared:
             self.cpp_info.libs = ["ICC"]
         else:
