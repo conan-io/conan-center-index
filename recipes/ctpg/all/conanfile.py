@@ -16,8 +16,7 @@ class CTPGConan(ConanFile):
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
-        "gcc": "10",
-        # TODO: clang<=11 in conan CI environment can't compile ctpg. But clang in several environments can.
+        "gcc": "8",
         "clang": "12",
         "apple-clang": "12.0",
     }
@@ -27,6 +26,10 @@ class CTPGConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
+        ## TODO: In ctpg<=1.3.5, Visual Studio C++ failed to compile ctpg with "error MSB6006: "CL.exe" exited with code -1073741571."
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("{} does not support Visual Studio currently.".format(self.name))
+
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
 
