@@ -5,6 +5,7 @@ import shutil
 
 required_conan_version = ">=1.33.0"
 
+
 class MimallocConan(ConanFile):
     name = "mimalloc"
     license = "MIT"
@@ -12,14 +13,15 @@ class MimallocConan(ConanFile):
     homepage = "https://github.com/microsoft/mimalloc"
     description = "mimalloc is a compact general purpose allocator with excellent performance."
     topics = ("mimalloc", "allocator", "performance", "microsoft")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "secure": [True, False],
         "override": [True, False],
         "inject": [True, False],
-        "single_object": [True, False]
+        "single_object": [True, False],
     }
     default_options = {
         "shared": False,
@@ -27,11 +29,10 @@ class MimallocConan(ConanFile):
         "secure": False,
         "override": False,
         "inject": False,
-        "single_object": False
+        "single_object": False,
     }
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/*"
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -50,6 +51,21 @@ class MimallocConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+        # single_object and inject are options
+        # only when overriding on Unix-like platforms:
+        if self.settings.compiler == "Visual Studio":
+            del self.options.single_object
+            del self.options.inject
 
     def configure(self):
         if self.options.shared:
@@ -72,6 +88,7 @@ class MimallocConan(ConanFile):
             if self.options.get_safe("inject"):
                 del self.options.inject
 
+    def validate(self):
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
            self.options.shared and \
@@ -98,16 +115,6 @@ class MimallocConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-        # single_object and inject are options
-        # only when overriding on Unix-like platforms:
-        if self.settings.compiler == "Visual Studio":
-            del self.options.single_object
-            del self.options.inject
 
     def _configure_cmake(self):
         if self._cmake:
