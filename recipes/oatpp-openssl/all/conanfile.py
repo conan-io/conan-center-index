@@ -88,5 +88,5 @@ class OatppOpenSSLConan(ConanFile):
         self.cpp_info.components["_oatpp-openssl"].libdirs = [os.path.join("lib", "oatpp-{}".format(self.version))]
         self.cpp_info.components["_oatpp-openssl"].libs = ["oatpp-openssl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["_oatpp-openssl"].system_libs = ["pthread"]
+            self.cpp_info.components["_oatpp-openssl"].system_libs = ["pthread"]
         self.cpp_info.components["_oatpp-openssl"].requires = ["oatpp::oatpp", "openssl::openssl"]
