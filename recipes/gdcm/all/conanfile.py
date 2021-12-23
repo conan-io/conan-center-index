@@ -190,7 +190,7 @@ class GDCMConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GDCM"
-        self.cpp_info.names["cmake_find_multi_package"] = "GDCM"
+        self.cpp_info.names["cmake_find_package_multi"] = "GDCM"
         gdcm_libs = self._gdcm_libraries
         for lib in gdcm_libs:
             self.cpp_info.components[lib].libs = [lib]
@@ -198,7 +198,7 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].builddirs = [self._gdcm_builddir] 
             self.cpp_info.components[lib].build_modules["cmake"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
-            self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = self._gdcm_build_modules
+            self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._gdcm_build_modules
 
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
