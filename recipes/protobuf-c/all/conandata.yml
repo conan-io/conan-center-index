@@ -1,0 +1,12 @@
+sources:
+  "1.4.0":
+    url: https://github.com/protobuf-c/protobuf-c/archive/v1.4.0.tar.gz
+    sha256: 1068bca1e9870e9492096f97c409cd15f10c5019c183e52ec6d53e8d18630cbf
+patches:
+  "1.4.0":
+    - patch_file: "patches/1.4.0-cmake-remove-pkgconfig.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.4.0-msvc-build-type.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.4.0-cmake-protobuf-target.patch"
+      base_path: "source_subfolder"

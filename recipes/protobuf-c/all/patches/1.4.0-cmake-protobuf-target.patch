@@ -1,0 +1,37 @@
+diff --git a/build-cmake/CMakeLists.txt b/build-cmake/CMakeLists.txt
+index 1df8b53..753b803 100644
+--- a/build-cmake/CMakeLists.txt
++++ b/build-cmake/CMakeLists.txt
+@@ -40,7 +40,7 @@ ENDIF()
+ get_filename_component(MAIN_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
+ SET(TEST_DIR ${MAIN_DIR}/t)
+ 
+-MESSAGE(${MAIN_DIR})
++MESSAGE(STATUS "MAIN_DIR: ${MAIN_DIR}")
+ 
+ SET (PC_SOURCES
+         ${MAIN_DIR}/protobuf-c/protobuf-c.c
+@@ -63,7 +63,7 @@ if (MSVC AND NOT BUILD_SHARED_LIBS)
+ endif (MSVC AND NOT BUILD_SHARED_LIBS)
+ 
+ FIND_PACKAGE(Protobuf REQUIRED)
+-INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
++INCLUDE_DIRECTORIES(${protobuf_INCLUDE_DIR})
+ 
+ if (BUILD_PROTO3)
+ 	ADD_DEFINITIONS(-DHAVE_PROTO3)
+@@ -93,11 +93,12 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ SET(CMAKE_CXX_EXTENSIONS OFF)
+ ADD_CUSTOM_COMMAND(OUTPUT protobuf-c/protobuf-c.pb.cc protobuf-c/protobuf-c.pb.h
+                    COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+-                   ARGS --cpp_out ${CMAKE_BINARY_DIR} -I${MAIN_DIR} ${MAIN_DIR}/protobuf-c/protobuf-c.proto)
++                   ARGS --cpp_out ${CMAKE_BINARY_DIR} -I${MAIN_DIR} -I${protobuf_INCLUDE_DIR} ${MAIN_DIR}/protobuf-c/protobuf-c.proto)
+ FILE(GLOB PROTOC_GEN_C_SRC ${MAIN_DIR}/protoc-c/*.h ${MAIN_DIR}/protoc-c/*.cc )
+ ADD_EXECUTABLE(protoc-gen-c ${PROTOC_GEN_C_SRC} protobuf-c/protobuf-c.pb.cc protobuf-c/protobuf-c.pb.h)
+ 
+-TARGET_LINK_LIBRARIES(protoc-gen-c ${PROTOBUF_PROTOC_LIBRARY} ${PROTOBUF_LIBRARY})
++TARGET_LINK_DIRECTORIES(protoc-gen-c PRIVATE ${protobuf_LIB_DIRS})
++TARGET_LINK_LIBRARIES(protoc-gen-c ${protobuf_LIBRARIES})
+ 
+ IF (MSVC AND BUILD_SHARED_LIBS)
+ 	TARGET_COMPILE_DEFINITIONS(protoc-gen-c PRIVATE -DPROTOBUF_USE_DLLS)

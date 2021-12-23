@@ -1,0 +1,13 @@
+diff --git a/build-cmake/CMakeLists.txt b/build-cmake/CMakeLists.txt
+index d4d015c..f0e6df0 100644
+--- a/build-cmake/CMakeLists.txt
++++ b/build-cmake/CMakeLists.txt
+@@ -199,8 +199,6 @@ SET(exec_prefix \${prefix})
+ SET(bindir \${exec_prefix}/${CMAKE_INSTALL_BINDIR})
+ SET(libdir \${exec_prefix}/${CMAKE_INSTALL_LIBDIR})
+ SET(includedir \${prefix}/${CMAKE_INSTALL_INCLUDEDIR})
+-CONFIGURE_FILE(${MAIN_DIR}/protobuf-c/libprotobuf-c.pc.in libprotobuf-c.pc @ONLY)
+-INSTALL(FILES ${CMAKE_BINARY_DIR}/libprotobuf-c.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ 
+ IF(BUILD_TESTS)
+ INCLUDE(Dart)
