@@ -80,8 +80,13 @@ class ProtobufConan(ConanFile):
                                                 "Visual Studio 2015 or higher.")
 
         if self.settings.compiler == "clang":
-           if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
+            if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
+
+        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+           self.settings.os == "Macos" and self.options.shared:
+            # FIXME: should be allowed, actually build succeeds but it fails at build time of test package due to SIP
+            raise ConanInvalidConfiguration("protobuf shared not supported yet in CCI while cross-building on Macos")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
