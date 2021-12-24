@@ -138,6 +138,11 @@ class grpcConan(ConanFile):
         if not tools.valid_min_cppstd(self, 11):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
+        if tools.cross_building(self):
+            # otherwise find_package() can't find config files since
+            # conan doesn't populate CMAKE_FIND_ROOT_PATH
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
