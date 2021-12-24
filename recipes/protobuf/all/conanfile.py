@@ -241,7 +241,6 @@ class ProtobufConan(ConanFile):
 
         # libprotoc
         self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
-        self.cpp_info.components["libprotoc"].set_property("pkg_config_name", "libprotoc")
         self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
         self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
