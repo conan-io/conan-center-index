@@ -91,8 +91,8 @@ sources:
     sha256: "40dcce66ec002e2631ef918e1b3bfc9ec1662d02007291ea4743e17ac9c7d43f"
 patches:
   "0.7.7":
-    - patch_file: "patches/0001-0.7.7-fix-tolower-msvc2015.patch"
+    - patch_file: "patches/0001-0.7.7-fix-tolower-msvc.patch"
       base_path: "source_subfolder"
   "0.7.6":
-    - patch_file: "patches/0001-0.7.6-fix-tolower-msvc2015.patch"
+    - patch_file: "patches/0001-0.7.6-fix-tolower-msvc.patch"
       base_path: "source_subfolder"
