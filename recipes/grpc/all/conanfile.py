@@ -83,11 +83,11 @@ class grpcConan(ConanFile):
             raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
 
     def build_requirements(self):
-        self.build_requires('protobuf/3.17.1')
-
-        #when cross compiling we need pre compiled grpc plugins for protoc
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            self.build_requires('grpc/{}'.format(self.version))
+        if hasattr(self, "settings_build"):
+            self.build_requires('protobuf/3.17.1')
+            # when cross compiling we need pre compiled grpc plugins for protoc
+            if tools.cross_building(self):
+                self.build_requires('grpc/{}'.format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
