@@ -214,9 +214,18 @@ class ProtobufConan(ConanFile):
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
+        build_modules = [
+            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
+        ]
+
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
         self.cpp_info.components["libprotobuf"].set_property("pkg_config_name", "protobuf")
+        self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
+        self.cpp_info.components["libprotobuf"].set_property("cmake_build_modules", build_modules)
+        self.cpp_info.components["libprotobuf"].build_modules = build_modules
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
@@ -229,12 +238,6 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
-        self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
-        self.cpp_info.components["libprotobuf"].build_modules = [
-            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
-        ]
 
         # libprotoc
         self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
@@ -246,6 +249,9 @@ class ProtobufConan(ConanFile):
         if self.options.lite:
             self.cpp_info.components["libprotobuf-lite"].set_property("cmake_target_name", "protobuf::libprotobuf-lite")
             self.cpp_info.components["libprotobuf-lite"].set_property("pkg_config_name", "protobuf-lite")
+            self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
+            self.cpp_info.components["libprotobuf-lite"].set_property("cmake_build_modules", build_modules)
+            self.cpp_info.components["libprotobuf-lite"].build_modules = build_modules
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
@@ -256,13 +262,6 @@ class ProtobufConan(ConanFile):
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
             if self.settings.os == "Android":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
-
-            self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
-            self.cpp_info.components["libprotobuf-lite"].build_modules = [
-                os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
-                os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
-                os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
-            ]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
