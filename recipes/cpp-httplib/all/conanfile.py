@@ -24,13 +24,11 @@ class CpphttplibConan(ConanFile):
         "with_brotli": False,
     }
 
+    no_copy_source = True
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def config_options(self):
         if tools.Version(self.version) < "0.7.2":
@@ -54,10 +52,6 @@ class CpphttplibConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
