@@ -106,7 +106,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.set_property("cmake_module_target_name", "EXPAT::EXPAT")
         self.cpp_info.set_property("cmake_file_name", "expat")
         self.cpp_info.set_property("cmake_target_name", "expat::expat")
-        self.cpp_info.set_property("set_property", "expat")
+        self.cpp_info.set_property("pkg_config_name", "expat")
 
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
