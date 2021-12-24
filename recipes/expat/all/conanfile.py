@@ -80,6 +80,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+        if tools.Version(self.version) >= "2.2.10":
+            self._cmake.definitions["EXPAT_BUILD_PKGCONFIG"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -104,6 +106,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.set_property("cmake_module_target_name", "EXPAT::EXPAT")
         self.cpp_info.set_property("cmake_file_name", "expat")
         self.cpp_info.set_property("cmake_target_name", "expat::expat")
+        self.cpp_info.set_property("set_property", "expat")
 
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
