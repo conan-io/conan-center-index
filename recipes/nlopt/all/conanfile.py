@@ -116,7 +116,7 @@ class NloptConan(ConanFile):
         self.cpp_info.components["nloptlib"].set_property("cmake_target_name", "NLopt::nlopt")
         self.cpp_info.components["nloptlib"].set_property("pkg_config_name", "nlopt")
 
-        self.cpp_info.components["nloptlib"].libs = tools.collect_libs(self)
+        self.cpp_info.components["nloptlib"].libs = ["nlopt"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["nloptlib"].system_libs.append("m")
         if not self.options.shared and self.options.enable_cxx_routines and tools.stdcpp_library(self):
