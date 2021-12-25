@@ -95,3 +95,4 @@ class OatppSwaggerConan(ConanFile):
         res_path = os.path.join(self.package_folder, "include", "oatpp-{}".format(self.version), "bin", "oatpp-swagger", "res")
         self.output.info("Creating OATPP_SWAGGER_RES_PATH environment variable: {}".format(res_path))
         self.env_info.OATPP_SWAGGER_RES_PATH = res_path
+        self.runenv_info.prepend_path("OATPP_SWAGGER_RES_PATH", res_path)
