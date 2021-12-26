@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake
+import os
+from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
@@ -13,4 +14,6 @@ class TestPackageConan(ConanFile):
         self.build_requires("cmake/3.18.0")
 
     def test(self):
-        self.cmake.test()
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)

@@ -13,7 +13,3 @@ set_target_properties(${PROJECT_NAME}
     	CXX_STANDARD_REQUIRED ON
     	CXX_EXTENSIONS OFF
 )
-
-include(CTest)
-enable_testing()
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
