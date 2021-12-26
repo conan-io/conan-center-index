@@ -11,4 +11,3 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         self.cmake.test()
-

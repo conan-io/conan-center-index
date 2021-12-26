@@ -1,14 +1,15 @@
 import os
 from conans import ConanFile, tools
 
-class SimpleYamlConan(ConanFile):
+
+class PrettyNameConan(ConanFile):
     name = "pretty-name"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Rechip/pretty-name"
     description = "An easy and consistent way how to get type names in C++"
     topics = ("cpp", "typename")
-    settings = [ "compiler" ]
+    settings = ["compiler"]
     no_copy_source = True
 
     @property
@@ -16,11 +17,14 @@ class SimpleYamlConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
+        self.copy(pattern="*", dst="include",
+                  src=os.path.join(self._source_subfolder, "include"))
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
