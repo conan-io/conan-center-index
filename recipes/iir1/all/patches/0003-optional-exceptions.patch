@@ -1,0 +1,851 @@
+diff --git a/iir/Biquad.cpp b/iir/Biquad.cpp
+index f661739..7cd23d2 100644
+--- a/iir/Biquad.cpp
++++ b/iir/Biquad.cpp
+@@ -36,7 +36,6 @@
+ #include "Common.h"
+ #include "MathSupplement.h"
+ #include "Biquad.h"
+-#include <stdexcept>
+ 
+ namespace Iir {
+ 
+@@ -64,7 +63,7 @@ namespace Iir {
+ 				double d = 2. * a0;
+ 				poles.first = -(a1 + c) / d;
+ 				poles.second =  (c - a1) / d;
+-				if (poles.is_nan()) throw std::invalid_argument("poles are NaN");
++				if (poles.is_nan()) throw_invalid_argument("poles are NaN");
+ 			}
+ 
+ 			{
+@@ -73,7 +72,7 @@ namespace Iir {
+ 				double d = 2. * b0;
+ 				zeros.first = -(b1 + c) / d;
+ 				zeros.second =  (c - b1) / d;
+-				if (zeros.is_nan()) throw std::invalid_argument("zeros are NaN");
++				if (zeros.is_nan()) throw_invalid_argument("zeros are NaN");
+ 			}
+ 		}
+ 
+@@ -124,12 +123,12 @@ namespace Iir {
+ 	void Biquad::setCoefficients (double a0, double a1, double a2,
+ 					  double b0, double b1, double b2)
+ 	{
+-		if (Iir::is_nan (a0)) throw std::invalid_argument("a0 is NaN");
+-		if (Iir::is_nan (a1)) throw std::invalid_argument("a1 is NaN");
+-		if (Iir::is_nan (a2)) throw std::invalid_argument("a2 is NaN");
+-		if (Iir::is_nan (b0)) throw std::invalid_argument("b0 is NaN");
+-		if (Iir::is_nan (b1)) throw std::invalid_argument("b1 is NaN");
+-		if (Iir::is_nan (b2)) throw std::invalid_argument("b2 is NaN");
++		if (Iir::is_nan (a0)) throw_invalid_argument("a0 is NaN");
++		if (Iir::is_nan (a1)) throw_invalid_argument("a1 is NaN");
++		if (Iir::is_nan (a2)) throw_invalid_argument("a2 is NaN");
++		if (Iir::is_nan (b0)) throw_invalid_argument("b0 is NaN");
++		if (Iir::is_nan (b1)) throw_invalid_argument("b1 is NaN");
++		if (Iir::is_nan (b2)) throw_invalid_argument("b2 is NaN");
+ 
+ 		m_a0 = a0;
+ 		m_a1 = a1/a0;
+@@ -141,8 +140,8 @@ namespace Iir {
+ 
+ 	void Biquad::setOnePole (complex_t pole, complex_t zero)
+ 	{
+-		if (pole.imag() != 0) throw std::invalid_argument("Imaginary part of pole is non-zero.");
+-		if (zero.imag() != 0) throw std::invalid_argument("Imaginary part of zero is non-zero.");
++		if (pole.imag() != 0) throw_invalid_argument("Imaginary part of pole is non-zero.");
++		if (zero.imag() != 0) throw_invalid_argument("Imaginary part of zero is non-zero.");
+ 
+ 		const double a0 = 1;
+ 		const double a1 = -pole.real();
+@@ -166,14 +165,14 @@ namespace Iir {
+ 		if (pole1.imag() != 0)
+ 		{
+ 			if (pole2 != std::conj (pole1))
+-				throw std::invalid_argument(errMsgPole);
++				throw_invalid_argument(errMsgPole);
+ 			a1 = -2 * pole1.real();
+ 			a2 = std::norm (pole1);
+ 		}
+ 		else
+ 		{
+ 			if (pole2.imag() != 0)
+-				throw std::invalid_argument(errMsgPole);
++				throw_invalid_argument(errMsgPole);
+ 			a1 = -(pole1.real() + pole2.real());
+ 			a2 =   pole1.real() * pole2.real();
+ 		}
+@@ -185,14 +184,14 @@ namespace Iir {
+ 		if (zero1.imag() != 0)
+ 		{
+ 			if (zero2 != std::conj (zero1))
+-				throw std::invalid_argument(errMsgZero);
++				throw_invalid_argument(errMsgZero);
+ 			b1 = -2 * zero1.real();
+ 			b2 = std::norm (zero1);
+ 		}
+ 		else
+ 		{
+ 			if (zero2.imag() != 0)
+-				throw std::invalid_argument(errMsgZero);
++				throw_invalid_argument(errMsgZero);
+ 
+ 			b1 = -(zero1.real() + zero2.real());
+ 			b2 =   zero1.real() * zero2.real();
+diff --git a/iir/Butterworth.h b/iir/Butterworth.h
+index a21728f..4267207 100644
+--- a/iir/Butterworth.h
++++ b/iir/Butterworth.h
+@@ -166,7 +166,7 @@ struct DllExport LowPass : PoleFilter <LowPassBase, StateType, FilterOrder>
+ 	void setup (int reqOrder,
+ 		    double sampleRate,
+ 		    double cutoffFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowPassBase::setup (reqOrder,
+ 				    cutoffFrequency / sampleRate);
+ 	}
+@@ -188,7 +188,7 @@ struct DllExport LowPass : PoleFilter <LowPassBase, StateType, FilterOrder>
+          **/
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowPassBase::setup (reqOrder,
+ 				    cutoffFrequency);
+ 	}
+@@ -221,7 +221,7 @@ struct DllExport HighPass : PoleFilter <HighPassBase, StateType, FilterOrder>
+ 	void setup (int reqOrder,
+ 		    double sampleRate,
+ 		    double cutoffFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighPassBase::setup (reqOrder,
+ 				     cutoffFrequency / sampleRate);
+ 	}
+@@ -242,7 +242,7 @@ struct DllExport HighPass : PoleFilter <HighPassBase, StateType, FilterOrder>
+          **/
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighPassBase::setup (reqOrder,
+ 				     cutoffFrequency);
+ 	}
+@@ -281,7 +281,7 @@ struct DllExport BandPass : PoleFilter <BandPassBase, StateType, FilterOrder, Fi
+ 		    double sampleRate,
+ 		    double centerFrequency,
+ 		    double widthFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandPassBase::setup(reqOrder,
+ 				    centerFrequency / sampleRate,
+ 				    widthFrequency / sampleRate);
+@@ -310,7 +310,7 @@ struct DllExport BandPass : PoleFilter <BandPassBase, StateType, FilterOrder, Fi
+ 	void setupN(int reqOrder,
+ 		    double centerFrequency,
+ 		    double widthFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandPassBase::setup(reqOrder,
+ 				    centerFrequency,
+ 				    widthFrequency);
+@@ -351,7 +351,7 @@ struct DllExport BandStop : PoleFilter <BandStopBase, StateType, FilterOrder, Fi
+ 		    double sampleRate,
+ 		    double centerFrequency,
+ 		    double widthFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandStopBase::setup (reqOrder,
+ 				     centerFrequency / sampleRate,
+ 				     widthFrequency / sampleRate);
+@@ -380,7 +380,7 @@ struct DllExport BandStop : PoleFilter <BandStopBase, StateType, FilterOrder, Fi
+ 	void setupN(int reqOrder,
+ 		    double centerFrequency,
+ 		    double widthFrequency) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandStopBase::setup (reqOrder,
+ 				     centerFrequency,
+ 				     widthFrequency);
+@@ -422,7 +422,7 @@ struct DllExport LowShelf : PoleFilter <LowShelfBase, StateType, FilterOrder>
+ 		    double sampleRate,
+ 		    double cutoffFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowShelfBase::setup (reqOrder,
+ 				     cutoffFrequency / sampleRate,
+ 				     gainDb);
+@@ -452,7 +452,7 @@ struct DllExport LowShelf : PoleFilter <LowShelfBase, StateType, FilterOrder>
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowShelfBase::setup (reqOrder,
+ 				     cutoffFrequency,
+ 				     gainDb);
+@@ -495,7 +495,7 @@ struct DllExport HighShelf : PoleFilter <HighShelfBase, StateType, FilterOrder>
+ 		    double sampleRate,
+ 		    double cutoffFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighShelfBase::setup (reqOrder,
+ 				      cutoffFrequency / sampleRate,
+ 				      gainDb);
+@@ -524,7 +524,7 @@ struct DllExport HighShelf : PoleFilter <HighShelfBase, StateType, FilterOrder>
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighShelfBase::setup (reqOrder,
+ 				      cutoffFrequency,
+ 				      gainDb);
+@@ -571,7 +571,7 @@ struct DllExport BandShelf : PoleFilter <BandShelfBase, StateType, FilterOrder,
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandShelfBase::setup (reqOrder,
+ 				      centerFrequency / sampleRate,
+ 				      widthFrequency / sampleRate,
+@@ -606,7 +606,7 @@ struct DllExport BandShelf : PoleFilter <BandShelfBase, StateType, FilterOrder,
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double gainDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandShelfBase::setup (reqOrder,
+ 				      centerFrequency,
+ 				      widthFrequency,
+diff --git a/iir/Cascade.cpp b/iir/Cascade.cpp
+index cee8580..a347d49 100644
+--- a/iir/Cascade.cpp
++++ b/iir/Cascade.cpp
+@@ -103,7 +103,7 @@ namespace Iir {
+ 		const int numPoles = proto.getNumPoles();
+ 		m_numStages = (numPoles + 1)/ 2;
+ 		if (m_numStages > m_maxStages)
+-			throw std::invalid_argument("Number of stages is larger than the max stages.");
++			throw_invalid_argument("Number of stages is larger than the max stages.");
+ 
+ 		Biquad* stage = m_stageArray;
+ 		for (int i = 0; i < m_maxStages; ++i, ++stage)
+diff --git a/iir/Cascade.h b/iir/Cascade.h
+index d02727a..9fb4c46 100644
+--- a/iir/Cascade.h
++++ b/iir/Cascade.h
+@@ -40,7 +40,6 @@
+ #include "Biquad.h"
+ #include "Layout.h"
+ #include "MathSupplement.h"
+-#include <stdexcept>
+ 
+ namespace Iir {
+ 
+@@ -85,7 +84,7 @@ namespace Iir {
+         const Biquad& operator[] (int index)
+         {
+                 if ((index < 0) || (index >= m_numStages))
+-                        throw std::invalid_argument("Index out of bounds.");
++                        throw_invalid_argument("Index out of bounds.");
+                 return m_stageArray[index];
+         }
+ 
+diff --git a/iir/ChebyshevI.h b/iir/ChebyshevI.h
+index 70335f6..9428d02 100644
+--- a/iir/ChebyshevI.h
++++ b/iir/ChebyshevI.h
+@@ -179,7 +179,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double sampleRate,
+ 			    double cutoffFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			LowPassBase::setup (reqOrder,
+ 					    cutoffFrequency / sampleRate,
+ 					    rippleDb);
+@@ -208,7 +208,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 		void setupN(int reqOrder,
+ 			    double cutoffFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			LowPassBase::setup (reqOrder,
+ 					    cutoffFrequency,
+ 					    rippleDb);
+@@ -248,7 +248,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double sampleRate,
+ 			    double cutoffFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			HighPassBase::setup (reqOrder,
+ 					     cutoffFrequency / sampleRate,
+ 					     rippleDb);
+@@ -277,7 +277,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 		void setupN(int reqOrder,
+ 			    double cutoffFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			HighPassBase::setup (reqOrder,
+ 					     cutoffFrequency,
+ 					     rippleDb);
+@@ -322,7 +322,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double centerFrequency,
+ 			    double widthFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandPassBase::setup (reqOrder,
+ 			       centerFrequency / sampleRate,
+ 			       widthFrequency / sampleRate,
+@@ -357,7 +357,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double centerFrequency,
+ 			    double widthFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandPassBase::setup (reqOrder,
+ 			       centerFrequency,
+ 			       widthFrequency,
+@@ -403,7 +403,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double centerFrequency,
+ 			    double widthFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandStopBase::setup (reqOrder,
+ 					     centerFrequency / sampleRate,
+ 					     widthFrequency / sampleRate,
+@@ -438,7 +438,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double centerFrequency,
+ 			    double widthFrequency,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandStopBase::setup (reqOrder,
+ 					     centerFrequency,
+ 					     widthFrequency,
+@@ -485,7 +485,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double cutoffFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			LowShelfBase::setup (reqOrder,
+ 					     cutoffFrequency / sampleRate,
+ 					     gainDb,
+@@ -520,7 +520,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double cutoffFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			LowShelfBase::setup (reqOrder,
+ 					     cutoffFrequency,
+ 					     gainDb,
+@@ -566,7 +566,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double cutoffFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			HighShelfBase::setup (reqOrder,
+ 			       cutoffFrequency / sampleRate,
+ 			       gainDb,
+@@ -602,7 +602,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double cutoffFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			HighShelfBase::setup (reqOrder,
+ 			       cutoffFrequency,
+ 			       gainDb,
+@@ -655,7 +655,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double widthFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandShelfBase::setup (reqOrder,
+ 					      centerFrequency / sampleRate,
+ 					      widthFrequency / sampleRate,
+@@ -699,7 +699,7 @@ template <int FilterOrder = DEFAULT_FILTER_ORDER, class StateType = DEFAULT_STAT
+ 			    double widthFrequency,
+ 			    double gainDb,
+ 			    double rippleDb) {
+-			if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++			if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 			BandShelfBase::setup (reqOrder,
+ 					      centerFrequency,
+ 					      widthFrequency,
+diff --git a/iir/ChebyshevII.h b/iir/ChebyshevII.h
+index aa1d873..a3031cd 100644
+--- a/iir/ChebyshevII.h
++++ b/iir/ChebyshevII.h
+@@ -183,7 +183,7 @@ struct DllExport LowPass : PoleFilter <LowPassBase, StateType, FilterOrder>
+ 		    double sampleRate,
+ 		    double cutoffFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowPassBase::setup (reqOrder,
+ 				    cutoffFrequency / sampleRate,
+ 				    stopBandDb);
+@@ -214,7 +214,7 @@ struct DllExport LowPass : PoleFilter <LowPassBase, StateType, FilterOrder>
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowPassBase::setup (reqOrder,
+ 				    cutoffFrequency,
+ 				    stopBandDb);
+@@ -255,7 +255,7 @@ struct DllExport HighPass : PoleFilter <HighPassBase, StateType, FilterOrder>
+ 		    double sampleRate,
+ 		    double cutoffFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighPassBase::setup (reqOrder,
+ 				     cutoffFrequency / sampleRate,
+ 				     stopBandDb);
+@@ -285,7 +285,7 @@ struct DllExport HighPass : PoleFilter <HighPassBase, StateType, FilterOrder>
+ 	void setupN(int reqOrder,
+ 		    double cutoffFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighPassBase::setup (reqOrder,
+ 				     cutoffFrequency,
+ 				     stopBandDb);
+@@ -331,7 +331,7 @@ struct DllExport BandPass : PoleFilter <BandPassBase, StateType, FilterOrder, Fi
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandPassBase::setup (reqOrder,
+ 				     centerFrequency / sampleRate,
+ 				     widthFrequency / sampleRate,
+@@ -367,7 +367,7 @@ struct DllExport BandPass : PoleFilter <BandPassBase, StateType, FilterOrder, Fi
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandPassBase::setup (reqOrder,
+ 				     centerFrequency,
+ 				     widthFrequency,
+@@ -413,7 +413,7 @@ struct DllExport BandStop : PoleFilter <BandStopBase, StateType, FilterOrder, Fi
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandStopBase::setup (reqOrder,
+ 				     centerFrequency / sampleRate,
+ 				     widthFrequency / sampleRate,
+@@ -449,7 +449,7 @@ struct DllExport BandStop : PoleFilter <BandStopBase, StateType, FilterOrder, Fi
+ 		    double centerFrequency,
+ 		    double widthFrequency,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandStopBase::setup (reqOrder,
+ 				     centerFrequency,
+ 				     widthFrequency,
+@@ -495,7 +495,7 @@ struct DllExport LowShelf : PoleFilter <LowShelfBase, StateType, FilterOrder>
+ 		    double cutoffFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowShelfBase::setup (reqOrder,
+ 				     cutoffFrequency / sampleRate,
+ 				     gainDb,
+@@ -532,7 +532,7 @@ struct DllExport LowShelf : PoleFilter <LowShelfBase, StateType, FilterOrder>
+ 		    double cutoffFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		LowShelfBase::setup (reqOrder,
+ 				     cutoffFrequency,
+ 				     gainDb,
+@@ -579,7 +579,7 @@ struct DllExport HighShelf : PoleFilter <HighShelfBase, StateType, FilterOrder>
+ 		    double cutoffFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighShelfBase::setup (reqOrder,
+ 				      cutoffFrequency / sampleRate,
+ 				      gainDb,
+@@ -617,7 +617,7 @@ struct DllExport HighShelf : PoleFilter <HighShelfBase, StateType, FilterOrder>
+ 		    double cutoffFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		HighShelfBase::setup (reqOrder,
+ 				      cutoffFrequency,
+ 				      gainDb,
+@@ -670,7 +670,7 @@ struct DllExport BandShelf : PoleFilter <BandShelfBase, StateType, FilterOrder,
+ 		    double widthFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandShelfBase::setup (reqOrder,
+ 				      centerFrequency / sampleRate,
+ 				      widthFrequency / sampleRate,
+@@ -716,7 +716,7 @@ struct DllExport BandShelf : PoleFilter <BandShelfBase, StateType, FilterOrder,
+ 		    double widthFrequency,
+ 		    double gainDb,
+ 		    double stopBandDb) {
+-		if (reqOrder > FilterOrder) throw std::invalid_argument(orderTooHigh);
++		if (reqOrder > FilterOrder) throw_invalid_argument(orderTooHigh);
+ 		BandShelfBase::setup (reqOrder,
+ 				      centerFrequency,
+ 				      widthFrequency,
+diff --git a/iir/Common.h b/iir/Common.h
+index 71c24d6..56890b9 100644
+--- a/iir/Common.h
++++ b/iir/Common.h
+@@ -62,9 +62,26 @@
+ #include <string>
+ #include <limits>
+ #include <vector>
++#include <stdexcept> // for invalid_argument
+ 
+ static const char orderTooHigh[] = "Requested order is too high. Provide a higher order for the template.";
+ 
+ #define DEFAULT_FILTER_ORDER 4
+ 
++/**
++ * @brief Throw invalid argument exception if exceptions are enabled, otherwise abort.
++ *
++ * @param msg Error message
++ */
++inline void throw_invalid_argument(const char* msg) {
++
++#ifndef IIR1_NO_EXCEPTIONS
++    throw std::invalid_argument(msg);
++#else
++    (void) msg; // Discard parameter
++    abort();
++#endif
++
++}
++
+ #endif
+diff --git a/iir/Layout.h b/iir/Layout.h
+index 3a22086..8a1b9d5 100644
+--- a/iir/Layout.h
++++ b/iir/Layout.h
+@@ -38,7 +38,6 @@
+ 
+ #include "Common.h"
+ #include "MathSupplement.h"
+-#include <stdexcept>
+ 
+ /**
+  * Describes a filter as a collection of poles and zeros along with
+@@ -101,11 +100,11 @@ namespace Iir {
+ 		void add (const complex_t& pole, const complex_t& zero)
+ 		{
+ 			if (m_numPoles&1)
+-				throw std::invalid_argument(errCantAdd2ndOrder);
++				throw_invalid_argument(errCantAdd2ndOrder);
+ 			if (Iir::is_nan(pole))
+-				throw std::invalid_argument(errPoleisNaN);
++				throw_invalid_argument(errPoleisNaN);
+ 			if (Iir::is_nan(zero))
+-				throw std::invalid_argument(errZeroisNaN);
++				throw_invalid_argument(errZeroisNaN);
+ 			m_pair[m_numPoles/2] = PoleZeroPair (pole, zero);
+ 			++m_numPoles;
+ 		}
+@@ -114,11 +113,11 @@ namespace Iir {
+ 						const complex_t zero)
+ 		{
+ 			if (m_numPoles&1)
+-				throw std::invalid_argument(errCantAdd2ndOrder);
++				throw_invalid_argument(errCantAdd2ndOrder);
+ 			if (Iir::is_nan(pole))
+-				throw std::invalid_argument(errPoleisNaN);
++				throw_invalid_argument(errPoleisNaN);
+ 			if (Iir::is_nan(zero))
+-				throw std::invalid_argument(errZeroisNaN);
++				throw_invalid_argument(errZeroisNaN);
+ 			m_pair[m_numPoles/2] = PoleZeroPair (
+ 				pole, zero, std::conj (pole), std::conj (zero));
+ 			m_numPoles += 2;
+@@ -127,11 +126,11 @@ namespace Iir {
+ 		void add (const ComplexPair& poles, const ComplexPair& zeros)
+ 		{
+ 			if (m_numPoles&1)
+-				throw std::invalid_argument(errCantAdd2ndOrder);
++				throw_invalid_argument(errCantAdd2ndOrder);
+ 			if (!poles.isMatchedPair ())
+-				throw std::invalid_argument(errPolesNotComplexConj);
++				throw_invalid_argument(errPolesNotComplexConj);
+ 			if (!zeros.isMatchedPair ())
+-				throw std::invalid_argument(errZerosNotComplexConj);
++				throw_invalid_argument(errZerosNotComplexConj);
+ 			m_pair[m_numPoles/2] = PoleZeroPair (poles.first, zeros.first,
+ 							     poles.second, zeros.second);
+ 			m_numPoles += 2;
+@@ -140,7 +139,7 @@ namespace Iir {
+ 		const PoleZeroPair& getPair (int pairIndex) const
+ 		{
+ 			if ((pairIndex < 0) || (pairIndex >= (m_numPoles+1)/2))
+-				throw std::invalid_argument(pairIndexOutOfBounds);
++				throw_invalid_argument(pairIndexOutOfBounds);
+ 			return m_pair[pairIndex];
+ 		}
+ 
+diff --git a/iir/PoleFilter.cpp b/iir/PoleFilter.cpp
+index 4eb6e61..d54a5eb 100644
+--- a/iir/PoleFilter.cpp
++++ b/iir/PoleFilter.cpp
+@@ -61,8 +61,8 @@ LowPassTransform::LowPassTransform (double fc,
+                                     LayoutBase const& analog)
+ {
+ 
+-	if (!(fc < 0.5)) throw std::invalid_argument(cutoffError);
+-	if (fc < 0.0) throw std::invalid_argument(cutoffNeg);
++	if (!(fc < 0.5)) throw_invalid_argument(cutoffError);
++	if (fc < 0.0) throw_invalid_argument(cutoffNeg);
+ 	
+ 	digital.reset ();
+ 
+@@ -107,8 +107,8 @@ HighPassTransform::HighPassTransform (double fc,
+                                       LayoutBase& digital,
+                                       LayoutBase const& analog)
+ {
+-	if (!(fc < 0.5)) throw std::invalid_argument(cutoffError);
+-	if (fc < 0.0) throw std::invalid_argument(cutoffNeg);
++	if (!(fc < 0.5)) throw_invalid_argument(cutoffError);
++	if (fc < 0.0) throw_invalid_argument(cutoffNeg);
+ 	
+ 	digital.reset ();
+ 	
+@@ -142,8 +142,8 @@ BandPassTransform::BandPassTransform (double fc,
+                                       LayoutBase& digital,
+                                       LayoutBase const& analog)
+ {
+-	if (!(fc < 0.5)) throw std::invalid_argument(cutoffError);
+-	if (fc < 0.0) throw std::invalid_argument(cutoffNeg);
++	if (!(fc < 0.5)) throw_invalid_argument(cutoffError);
++	if (fc < 0.0) throw_invalid_argument(cutoffNeg);
+ 
+ 	digital.reset ();
+ 	
+@@ -226,8 +226,8 @@ BandStopTransform::BandStopTransform (double fc,
+                                       LayoutBase& digital,
+                                       LayoutBase const& analog)
+ {
+-	if (!(fc < 0.5)) throw std::invalid_argument(cutoffError);
+-	if (fc < 0.0) throw std::invalid_argument(cutoffNeg);
++	if (!(fc < 0.5)) throw_invalid_argument(cutoffError);
++	if (fc < 0.0) throw_invalid_argument(cutoffNeg);
+ 
+ 	digital.reset ();
+ 	
+diff --git a/iir/RBJ.cpp b/iir/RBJ.cpp
+index 543c997..b1b80eb 100644
+--- a/iir/RBJ.cpp
++++ b/iir/RBJ.cpp
+@@ -185,7 +185,7 @@ namespace RBJ {
+ 		double sn = sin(w0);
+ 		double AL = sn * sinh( doubleLn2/2 * bandWidth * w0/sn );
+ 		if (Iir::is_nan (AL))
+-			throw std::invalid_argument("No solution available for these parameters.\n");
++			throw_invalid_argument("No solution available for these parameters.\n");
+ 		double b0 =  1 + AL * A;
+ 		double b1 = -2 * cs;
+ 		double b2 =  1 - AL * A;
+diff --git a/iir/RBJ.h b/iir/RBJ.h
+index b63e969..2529a81 100644
+--- a/iir/RBJ.h
++++ b/iir/RBJ.h
+@@ -95,7 +95,7 @@ namespace RBJ {
+                  **/
+ 		void setupN(double cutoffFrequency,
+ 			    double q = ONESQRT2);
+-		
++
+ 		/**
+                  * Calculates the coefficients
+                  * \param sampleRate Sampling rate
+@@ -342,7 +342,7 @@ namespace RBJ {
+ 		 **/
+ 		void setupN(double phaseFrequency,
+ 			    double q  = ONESQRT2);
+-		
++
+ 		/**
+ 		 * Calculates the coefficients
+ 		 * \param sampleRate Sampling rate
+@@ -355,7 +355,7 @@ namespace RBJ {
+ 			setupN(	phaseFrequency / sampleRate, q);
+ 		}
+ 	};
+-	
++
+ }
+ 
+ }
+diff --git a/iir/State.h b/iir/State.h
+index 29b0f95..86a692e 100644
+--- a/iir/State.h
++++ b/iir/State.h
+@@ -39,7 +39,6 @@
+ #include "Common.h"
+ #include "Biquad.h"
+ 
+-#include <stdexcept>
+ 
+ #define DEFAULT_STATE DirectFormII
+ 
+@@ -51,7 +50,7 @@ namespace Iir {
+  * Difference equation:
+  *
+  *  y[n] = (b0/a0)*x[n] + (b1/a0)*x[n-1] + (b2/a0)*x[n-2]
+- *                      - (a1/a0)*y[n-1] - (a2/a0)*y[n-2]  
++ *                      - (a1/a0)*y[n-1] - (a2/a0)*y[n-2]
+  **/
+ 	class DllExport DirectFormI
+ 	{
+@@ -60,7 +59,7 @@ namespace Iir {
+ 	{
+ 		reset();
+ 	}
+-	
++
+ 	void reset ()
+ 	{
+ 		m_x1 = 0;
+@@ -68,7 +67,7 @@ namespace Iir {
+ 		m_y1 = 0;
+ 		m_y2 = 0;
+ 	}
+-	
++
+ 	inline double filter(const double in,
+ 			     const Biquad& s)
+ 	{
+@@ -78,10 +77,10 @@ namespace Iir {
+ 		m_y2 = m_y1;
+ 		m_x1 = in;
+ 		m_y1 = out;
+-		
++
+ 		return out;
+ 	}
+-	
++
+ 	protected:
+ 	double m_x2 = 0; // x[n-2]
+ 	double m_y2 = 0; // y[n-2]
+@@ -107,25 +106,25 @@ namespace Iir {
+ 	{
+ 		reset ();
+ 	}
+-	
++
+ 	void reset ()
+ 	{
+ 		m_v1 = 0;
+ 		m_v2 = 0;
+ 	}
+-	
++
+ 	inline double filter(const double in,
+ 			     const Biquad& s)
+ 	{
+ 		const double w   = in - s.m_a1*m_v1 - s.m_a2*m_v2;
+ 		const double out =      s.m_b0*w    + s.m_b1*m_v1 + s.m_b2*m_v2;
+-		
++
+ 		m_v2 = m_v1;
+ 		m_v1 = w;
+-		
++
+ 		return out;
+ 	}
+-	
++
+ 	private:
+ 	double m_v1 = 0; // v[-1]
+ 	double m_v2 = 0; // v[-2]
+@@ -133,7 +132,7 @@ namespace Iir {
+ 
+ 
+ //------------------------------------------------------------------------------
+-	
++
+ 	class DllExport TransposedDirectFormII
+ 	{
+ 	public:
+@@ -141,7 +140,7 @@ namespace Iir {
+ 	{
+ 		reset ();
+ 	}
+-	
++
+ 	void reset ()
+ 	{
+ 		m_s1 = 0;
+@@ -149,7 +148,7 @@ namespace Iir {
+ 		m_s2 = 0;
+ 		m_s2_1 = 0;
+ 	}
+-	
++
+ 	inline double filter(const double in,
+ 			     const Biquad& s)
+ 	{
+@@ -158,10 +157,10 @@ namespace Iir {
+ 		m_s2 = s.m_b2*in - s.m_a2*out;
+ 		m_s1_1 = m_s1;
+ 		m_s2_1 = m_s2;
+-		
++
+ 		return out;
+ 	}
+-	
++
+ 	private:
+ 	double m_s1 = 0;
+ 	double m_s1_1 = 0;
+diff --git a/iir/Types.h b/iir/Types.h
+index 251a6c8..df56b7c 100644
+--- a/iir/Types.h
++++ b/iir/Types.h
+@@ -38,7 +38,6 @@
+ 
+ #include "Common.h"
+ #include "MathSupplement.h"
+-#include <stdexcept>
+ 
+ namespace Iir {
+ 
+@@ -54,7 +53,7 @@ namespace Iir {
+ 		explicit ComplexPair (const complex_t& c1)
+ 			: complex_pair_t (c1, 0.)
+ 		{
+-			if (!isReal()) throw std::invalid_argument("A single complex number needs to be real.");
++			if (!isReal()) throw_invalid_argument("A single complex number needs to be real.");
+ 		}
+ 
+ 		ComplexPair (const complex_t& c1,
