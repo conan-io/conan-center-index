@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class PrettyNameConan(ConanFile):
     name = "pretty-name"
@@ -26,9 +28,23 @@ class PrettyNameConan(ConanFile):
         self.copy(pattern="*", dst="include",
                   src=os.path.join(self._source_subfolder, "include"))
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1",
+        }
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("pretty-name requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("pretty-name requires C++14, which your compiler does not support.")
 
     def package_id(self):
         self.info.header_only()
