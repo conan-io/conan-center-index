@@ -1,6 +1,6 @@
-import os
 from conans import CMake, ConanFile, tools
 
+required_conan_version = ">=1.33.0"
 
 class Utf8ProcConan(ConanFile):
     name = "utf8proc"
@@ -11,7 +11,7 @@ class Utf8ProcConan(ConanFile):
     license = "MIT expat"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "compiler", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -42,8 +42,7 @@ class Utf8ProcConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
