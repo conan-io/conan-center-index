@@ -1,4 +1,7 @@
 sources:
+  "3.0.3":
+    url: "https://github.com/k06a/boolinq/archive/refs/tags/3.0.3.tar.gz"
+    sha256: "29e9233c07d234f442d58fa5c78a8187b5c28bbb938e38dd805a87ba0e762ed3"
   "3.0.2":
     url: "https://github.com/k06a/boolinq/archive/3.0.2.tar.gz"
     sha256: "ad4c1bac9f4897262564e183d60adb784b86c8d407d7444ce8ac07b5db898356"
