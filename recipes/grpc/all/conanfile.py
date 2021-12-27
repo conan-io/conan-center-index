@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class grpcConan(ConanFile):
@@ -11,8 +12,6 @@ class grpcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     # TODO: Add shared option
@@ -26,7 +25,7 @@ class grpcConan(ConanFile):
         "objective_c_plugin": [True, False],
         "php_plugin": [True, False],
         "python_plugin": [True, False],
-        "ruby_plugin": [True, False]
+        "ruby_plugin": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -41,6 +40,8 @@ class grpcConan(ConanFile):
         "ruby_plugin": True,
     }
 
+    short_paths = True
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -51,24 +52,23 @@ class grpcConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        self.requires('zlib/1.2.11')
-        self.requires('openssl/1.1.1l')
-        self.requires('protobuf/3.17.1')
-        self.requires('c-ares/1.17.1')
-        self.requires('abseil/20210324.2')
-        self.requires('re2/20210601')
-
-    def build_requirements(self):
-        self.build_requires('protobuf/3.17.1')
-
-        #when cross compiling we need pre compiled grpc plugins for protoc
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            self.build_requires('grpc/{}'.format(self.version))
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy(pattern="cmake/*")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires('zlib/1.2.11')
+        self.requires('openssl/1.1.1m')
+        self.requires('protobuf/3.17.1')
+        self.requires('c-ares/1.17.2')
+        self.requires('abseil/20211102.0')
+        self.requires('re2/20211101')
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -81,6 +81,13 @@ class grpcConan(ConanFile):
 
         if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
             raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires('protobuf/3.17.1')
+            # when cross compiling we need pre compiled grpc plugins for protoc
+            if tools.cross_building(self):
+                self.build_requires('grpc/{}'.format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -138,14 +145,13 @@ class grpcConan(ConanFile):
         if not tools.valid_min_cppstd(self, 11):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
+        if tools.cross_building(self):
+            # otherwise find_package() can't find config files since
+            # conan doesn't populate CMAKE_FIND_ROOT_PATH
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        self.copy(pattern="cmake/*")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
