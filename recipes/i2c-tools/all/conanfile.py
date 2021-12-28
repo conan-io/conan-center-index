@@ -8,7 +8,7 @@ class I2cConan(ConanFile):
     name = "i2c-tools"
     license = "GPL-2.0-or-later", "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/"
+    homepage = "https://i2c.wiki.kernel.org/index.php/I2C_Tools"
     description = "I2C tools for the linux kernel as well as an I2C library."
     topics = ("i2c")
     os = "linux"
