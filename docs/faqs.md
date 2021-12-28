@@ -28,7 +28,8 @@ This section gathers the most common questions from the community related to pac
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
-  * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)<!-- endToc -->
+  * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
+  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -314,3 +315,22 @@ For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`,
 [requires]
 intel-mkl/2021@mycompany/stable
 ```
+
+## How to _protect_ my project from breaking changes in recipes?
+
+This repository and the CI building recipes is continuosly pushing to new Conan versions,
+sometimes adopting new features as soon as they are released 
+([Conan client changelog](https://docs.conan.io/en/latest/changelog.html)).
+
+You should expect that latest revision of recipes can introduce breaking changes and new
+features that will be broken unless you also upgrade Conan client (and sometimes you will
+need to modify your project if the recipe changes the binaries, flags,... it provides).
+
+To isolate from this changes there are different strategies you can follow:
+ * **Cache recipes in your own Artifactory**: your project should use only this remote and
+   new recipe revisions are only pushed to your Artifactory after they have been validated
+   in your project.
+ * **Pin the version of every reference you consume in your project** using recipe revisions
+   and lockfiles. 
+
+Keep reading in the [consuming recipes section](consuming_recipes.md).

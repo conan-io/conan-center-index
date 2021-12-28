@@ -65,10 +65,12 @@ class GStPluginsBaseConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     def validate(self):
-        if self.options.shared != self.options["gstreamer"].shared or \
-            self.options.shared != self.options["glib"].shared:
-                # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
-                raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
+        if not self.options["glib"].shared and self.options.shared:
+            # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
+            raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
+        if self.options.shared != self.options["gstreamer"].shared:
+            # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
+            raise ConanInvalidConfiguration("GStreamer and GstPlugins must be either all shared, or all static")
         if tools.Version(self.version) >= "1.18.2" and\
            self.settings.compiler == "gcc" and\
            tools.Version(self.settings.compiler.version) < "5":
@@ -269,6 +271,10 @@ class GStPluginsBaseConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()
+        self.info.requires["gstreamer"].full_package_mode()
 
     def package_info(self):
         gst_plugins = []

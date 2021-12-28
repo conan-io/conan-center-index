@@ -1,4 +1,10 @@
 sources:
+  "r23b":
+    url:
+      "Windows":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r23b-windows.zip"
+          sha256: "36270f8b2cfdd940f410bd8ffe6ce86ffaa8e87ff1c4fd4a8be5130268357778"
   "r23":
     url:
       "Windows":

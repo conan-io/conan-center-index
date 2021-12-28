@@ -14,3 +14,6 @@ sources:
   "3.11.3":
     url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.3.tar.gz"
     sha256: "dcf2b7fa9ef9dd0c67102d94c28e8df3effbe1845e0ed1f31f4772ca5e857fc4"
+  "3.11.4":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.4.tar.gz"
+    sha256: "99d3624069a0b06df2675b4ba9d2ebac1a1236dbc52326cd6f31ca056c24eb89"

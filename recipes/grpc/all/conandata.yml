@@ -1,4 +1,19 @@
 sources:
+  "1.43.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.43.0.tar.gz"
+    sha256: "9647220c699cea4dafa92ec0917c25c7812be51a18143af047e20f3fb05adddc"
+  "1.42.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.42.0.tar.gz"
+    sha256: "b2f2620c762427bfeeef96a68c1924319f384e877bc0e084487601e4cc6e434c"
+  "1.41.1":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.41.1.tar.gz"
+    sha256: "12a4a6f8c06b96e38f8576ded76d0b79bce13efd7560ed22134c2f433bc496ad"
+  "1.41.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.41.0.tar.gz"
+    sha256: "e5fb30aae1fa1cffa4ce00aa0bbfab908c0b899fcf0bbc30e268367d660d8656"
+  "1.40.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.40.0.tar.gz"
+    sha256: "13e7c6460cd979726e5b3b129bb01c34532f115883ac696a75eb7f1d6a9765ed"
   "1.39.1":
     url: "https://github.com/grpc/grpc/archive/refs/tags/v1.39.1.tar.gz"
     sha256: "024118069912358e60722a2b7e507e9c3b51eeaeee06e2dd9d95d9c16f6639ec"
@@ -15,6 +30,21 @@ sources:
     url: https://github.com/grpc/grpc/archive/refs/tags/v1.37.0.tar.gz
     sha256: "c2dc8e876ea12052d6dd16704492fd8921df8c6d38c70c4708da332cf116df22"
 patches:
+  "1.43.0":
+    - patch_file: "patches/v1.43.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+  "1.42.0":
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+  "1.41.1":
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+  "1.41.0":
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+  "1.40.0":
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
   "1.39.1":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"

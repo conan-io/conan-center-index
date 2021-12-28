@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 import os
+import re
 import shutil
 
 required_conan_version = ">=1.33.0"
@@ -36,7 +37,7 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23']:
+        if self.version in ['r23', 'r23b']:
             data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
@@ -93,9 +94,20 @@ class AndroidNDKConan(ConanFile):
         return f"{arch}-linux-{abi}"
 
     @property
-    def _ndk_version(self):
-        assert self.version[0] == "r"
-        return self.version[1:]
+    def _ndk_major_minor(self):
+        match = re.search(r"r(\d+)(\w?)", self.version)
+        assert match
+        major, minor = match.groups()
+        assert major
+        return int(major), minor if minor else "a"
+
+    @property
+    def _ndk_version_major(self):
+        return self._ndk_major_minor[0]
+
+    @property
+    def _ndk_version_minor(self):
+        return self._ndk_major_minor[1]
 
     def _fix_permissions(self):
         if os.name != "posix":
@@ -132,16 +144,20 @@ class AndroidNDKConan(ConanFile):
     def _ndk_root(self):
         return os.path.join(self.package_folder, "toolchains", "llvm", "prebuilt", self._host)
 
+    def _wrap_executable(self, tool):
+        suffix = ".exe" if self.settings_build.os == "Windows" else ""
+        return f"{tool}{suffix}"
+
     def _tool_name(self, tool, bare=False):
         prefix = ""
-        suffix = ""
         if "clang" in tool:
             suffix = ".cmd" if self.settings_build.os == "Windows" else ""
             prefix = "llvm" if bare else f"{self._clang_triplet}{self.settings_target.os.api_level}"
+            return f"{prefix}-{tool}{suffix}"
         else:
-            suffix = ".exe" if self.settings_build.os == "Windows" else ""
             prefix = "llvm" if bare else f"{self._llvm_triplet}"
-        return f"{prefix}-{tool}{suffix}"
+            executable = f"{prefix}-{tool}"
+            return self._wrap_executable(executable)
 
     @property
     def _cmake_system_processor(self):
@@ -165,16 +181,17 @@ class AndroidNDKConan(ConanFile):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, self._tool_name(value, bare))
         if not os.path.isfile(path):
-            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
+            self.output.error(f"'Environment variable {name} could not be created: '{path}'")
+            return "UNKNOWN"
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
     def _define_tool_var_naked(self, name, value):
         ndk_bin = os.path.join(self._ndk_root, "bin")
-        suffix = ".exe" if self.settings_build.os == "Windows" else ""
-        path = os.path.join(ndk_bin, value + suffix)
+        path = os.path.join(ndk_bin, self._wrap_executable(value))
         if not os.path.isfile(path):
-            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
+            self.output.error(f"'Environment variable {name} could not be created: '{path}'")
+            return "UNKNOWN"
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
@@ -249,10 +266,9 @@ class AndroidNDKConan(ConanFile):
 
         self.env_info.CC = self._define_tool_var("CC", "clang")
         self.env_info.CXX = self._define_tool_var("CXX", "clang++")
-        if tools.Version(self._ndk_version) >= 23:
+        if self._ndk_version_major >= 23:
             # Versions greater than 23 had the naming convention
             # changed to no longer include the triplet.
-            self.env_info.LD = self._define_tool_var_naked("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar", True)
             self.env_info.AS = self._define_tool_var("AS", "as", True)
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", True)
@@ -264,11 +280,6 @@ class AndroidNDKConan(ConanFile):
             self.env_info.READELF = self._define_tool_var("READELF", "readelf", True)
             # there doesn't seem to be an 'elfedit' included anymore.
         else:
-            if tools.Version(self._ndk_version) >= 22:
-                # Special handling for LD in r22 required: ld has no prefix
-                self.env_info.LD = self._define_tool_var_naked("LD", "ld")
-            else:
-                self.env_info.LD = self._define_tool_var("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar")
             self.env_info.AS = self._define_tool_var("AS", "as")
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
@@ -279,6 +290,12 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
+        
+        # The `ld` tool changed naming conventions earlier than others
+        if self._ndk_version_major >= 22:
+            self.env_info.LD = self._define_tool_var_naked("LD", "ld")
+        else:
+            self.env_info.LD = self._define_tool_var("LD", "ld")
 
         self.env_info.ANDROID_PLATFORM = f"android-{self.settings_target.os.api_level}"
         self.env_info.ANDROID_TOOLCHAIN = "clang"
@@ -297,8 +314,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
 
     filename = "android_sdk.zip"
-    tools.download(url, filename)
-    tools.check_sha256(filename, sha256)
+    tools.download(url, filename, sha256=sha256)
     tools.unzip(filename, destination=target_folder, strip_root=True)
 
     def is_symlink_zipinfo(zi):

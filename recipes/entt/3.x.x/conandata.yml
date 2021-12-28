@@ -1,40 +1,43 @@
 sources:
-  "3.2.2":
-    url: https://github.com/skypjack/entt/archive/v3.2.2.tar.gz
-    sha256: 94592270b6750dd0b057a4af9d2c1ea8798369b3bb127927a8f70db232808f93
-  "3.3.0":
-    url: https://github.com/skypjack/entt/archive/v3.3.0.tar.gz
-    sha256: d21a45df4960adc86a8f23a8c3c0cea6d2cecc4ef6946a8040e336d8e5266ab3
-  "3.3.1":
-    url: https://github.com/skypjack/entt/archive/v3.3.1.tar.gz
-    sha256: 432f31a80fb0463960dfd36e103c206dd67f1bfa91fc48408594c28aa790a3f5
-  "3.3.2":
-    url: https://github.com/skypjack/entt/archive/v3.3.2.tar.gz
-    sha256: 150cd89b45bffbcd7643d39bbce282e8fa38307bb5ed25567b79e337376ba1c7
-  "3.4.0":
-    url: https://github.com/skypjack/entt/archive/v3.4.0.tar.gz
-    sha256: 07086b8c5b1d84a1b76b39b0ce257c36c4f1521b77e664368b3d5ca7c00264e2
-  "3.5.0":
-    url: https://github.com/skypjack/entt/archive/v3.5.0.tar.gz
-    sha256: 89cba5ddf90bcec0dcf8d9554d9acf5ad86f5ce305e3acacf795007ee65c93f8
-  "3.5.1":
-    url: https://github.com/skypjack/entt/archive/v3.5.1.tar.gz
-    sha256: f442ece6881ec24863e7f0fbdc4bf641e01b0f87955f49dc4687b2fa564e9c83
-  "3.5.2":
-    url: https://github.com/skypjack/entt/archive/v3.5.2.tar.gz
-    sha256: f9271293c44518386c402c9a2188627819748f66302df48af4f6d08e30661036
-  "3.6.0":
-    url: https://github.com/skypjack/entt/archive/v3.6.0.tar.gz
-    sha256: 94b7dc874acd0961cfc28cf6b0342eeb0b7c58250ddde8bdc6c101e84b74c190
-  "3.7.0":
-    url: https://github.com/skypjack/entt/archive/refs/tags/v3.7.0.tar.gz
-    sha256: 39ad5c42acf3434f8c37e0baa18a8cb562c0845383a6b4da17fdbacc9f0a7695
-  "3.7.1":
-    url: https://github.com/skypjack/entt/archive/refs/tags/v3.7.1.tar.gz
-    sha256: fe3ce773c17797c0c57ffa97f73902854fcc8e7afc7e09bea373e0c64fa24a23
-  "3.8.0":
-    url: https://github.com/skypjack/entt/archive/refs/tags/v3.8.0.tar.gz
-    sha256: 71c8ff5a604e8e214571a8b2218dfeaf61be59e2fe2ff5b550b4810c37d4da3c
+  "3.9.0":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.9.0.tar.gz"
+    sha256: "1b06f1f6627c3702486855877bdeab6885f5d821d3dd78862126d4308c627c23"
   "3.8.1":
     url: "https://github.com/skypjack/entt/archive/v3.8.1.tar.gz"
     sha256: "a2b767f06bca67a73a4d71fb9ebb6ed823bb5146faad3c282b9dbbbdae1aa01b"
+  "3.8.0":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.8.0.tar.gz"
+    sha256: "71c8ff5a604e8e214571a8b2218dfeaf61be59e2fe2ff5b550b4810c37d4da3c"
+  "3.7.1":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.7.1.tar.gz"
+    sha256: "fe3ce773c17797c0c57ffa97f73902854fcc8e7afc7e09bea373e0c64fa24a23"
+  "3.7.0":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.7.0.tar.gz"
+    sha256: "39ad5c42acf3434f8c37e0baa18a8cb562c0845383a6b4da17fdbacc9f0a7695"
+  "3.6.0":
+    url: "https://github.com/skypjack/entt/archive/v3.6.0.tar.gz"
+    sha256: "94b7dc874acd0961cfc28cf6b0342eeb0b7c58250ddde8bdc6c101e84b74c190"
+  "3.5.2":
+    url: "https://github.com/skypjack/entt/archive/v3.5.2.tar.gz"
+    sha256: "f9271293c44518386c402c9a2188627819748f66302df48af4f6d08e30661036"
+  "3.5.1":
+    url: "https://github.com/skypjack/entt/archive/v3.5.1.tar.gz"
+    sha256: "f442ece6881ec24863e7f0fbdc4bf641e01b0f87955f49dc4687b2fa564e9c83"
+  "3.5.0":
+    url: "https://github.com/skypjack/entt/archive/v3.5.0.tar.gz"
+    sha256: "89cba5ddf90bcec0dcf8d9554d9acf5ad86f5ce305e3acacf795007ee65c93f8"
+  "3.4.0":
+    url: "https://github.com/skypjack/entt/archive/v3.4.0.tar.gz"
+    sha256: "07086b8c5b1d84a1b76b39b0ce257c36c4f1521b77e664368b3d5ca7c00264e2"
+  "3.3.2":
+    url: "https://github.com/skypjack/entt/archive/v3.3.2.tar.gz"
+    sha256: "150cd89b45bffbcd7643d39bbce282e8fa38307bb5ed25567b79e337376ba1c7"
+  "3.3.1":
+    url: "https://github.com/skypjack/entt/archive/v3.3.1.tar.gz"
+    sha256: "432f31a80fb0463960dfd36e103c206dd67f1bfa91fc48408594c28aa790a3f5"
+  "3.3.0":
+    url: "https://github.com/skypjack/entt/archive/v3.3.0.tar.gz"
+    sha256: "d21a45df4960adc86a8f23a8c3c0cea6d2cecc4ef6946a8040e336d8e5266ab3"
+  "3.2.2":
+    url: "https://github.com/skypjack/entt/archive/v3.2.2.tar.gz"
+    sha256: "94592270b6750dd0b057a4af9d2c1ea8798369b3bb127927a8f70db232808f93"

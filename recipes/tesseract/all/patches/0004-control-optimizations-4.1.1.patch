@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -265,7 +265,7 @@
+    set(MARCH_NATIVE_FLAGS "${MARCH_NATIVE_FLAGS} -O3 -ffast-math")
+ endif()
+ CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+-if(COMPILER_SUPPORTS_MARCH_NATIVE)
++if(ENABLE_OPTIMIZATIONS AND COMPILER_SUPPORTS_MARCH_NATIVE)
+     set(MARCH_NATIVE_FLAGS "${MARCH_NATIVE_FLAGS} -march=native -mtune=native")
+     set(MARCH_NATIVE_OPT ON)
+ endif()

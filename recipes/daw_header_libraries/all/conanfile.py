@@ -3,7 +3,7 @@ import os
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class DawHeaderLibrariesConan(ConanFile):
     name = "daw_header_libraries"
@@ -12,8 +12,8 @@ class DawHeaderLibrariesConan(ConanFile):
     description = "Various header libraries mostly future std lib, replacements for(e.g. visit), or some misc"
     topics = ("algorithms", "helpers", "data-structures")
     homepage = "https://github.com/beached/header_libraries"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
+    settings = "compiler",
+    generators = "cmake",
     no_copy_source = True
 
     _compiler_required_cpp17 = {
@@ -60,7 +60,12 @@ class DawHeaderLibrariesConan(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "daw-header-libraries"
         self.cpp_info.filenames["cmake_find_package_multi"] = "daw-header-libraries"
+        self.cpp_info.set_property("cmake_file_name", "daw-header-libraries")
+
         self.cpp_info.names["cmake_find_package"] = "daw"
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
+        self.cpp_info.set_property("cmake_target_name", "daw::daw-header-libraries")
+
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-header-libraries"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-header-libraries"
+        self.cpp_info.components["daw"].set_property("cmake_target_name", "daw::daw-header-libraries")
