@@ -1,0 +1,26 @@
+diff --git a/a/src/app_sysenv/Makefile.am b/b/src/app_sysenv/Makefile.am
+index 4377284..cdf47a6 100644
+--- a/a/src/app_sysenv/Makefile.am
++++ b/b/src/app_sysenv/Makefile.am
+@@ -12,7 +12,7 @@ endif
+ 
+ 
+ AM_CFLAGS = -Wall 
+-AM_CFLAGS += -Werror
++# AM_CFLAGS += -Werror
+ # AM_CFLAGS += -Wpedantic
+ 
+ if ENABLE_CALLGRAPH_COND
+diff --git a/a/src/i2c/Makefile.am b/b/src/i2c/Makefile.am
+index 5bd2e1d..7889c96 100644
+--- a/a/src/i2c/Makefile.am
++++ b/b/src/i2c/Makefile.am
+@@ -4,7 +4,7 @@ AM_CPPFLAGS =        \
+   -I$(top_srcdir)/src/public
+ 
+ AM_CFLAGS = -Wall 
+-AM_CFLAGS += -Werror
++# AM_CFLAGS += -Werror
+ # AM_CFLAGS += -Wpedantic
+ 
+ if ENABLE_CALLGRAPH_COND
