@@ -24,6 +24,7 @@ class FastDDSConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
     _cmake = None
+    exports_sources = ["patches/**", "CMakeLists.txt"]
 
     @property
     def _pkg_share(self):
@@ -93,6 +94,12 @@ class FastDDSConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def validate(self):
+        # FIXME: Foonathan dependency currently not proper working with cross compile 
+        # see https://github.com/conan-io/conan-center-index/pull/7632#discussion_r730445887
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome.")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -118,12 +125,7 @@ class FastDDSConan(ConanFile):
         self.requires("foonathan-memory/0.7.0")
         self.requires("boost/1.73.0")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1m")
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -176,10 +178,10 @@ class FastDDSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fastdds"
-        self.cpp_info.names["cmake_find_package_multi"] = "fastdds"
+        self.cpp_info.names["cmake_find_multi_package"] = "fastdds"
         # component fastrtps
         self.cpp_info.components["fastrtps"].names["cmake_find_package"]  = "fastrtps"
-        self.cpp_info.components["fastrtps"].names["cmake_find_package_multi"] = "fastrtps"
+        self.cpp_info.components["fastrtps"].names["cmake_find_multi_package"] = "fastrtps"
         self.cpp_info.components["fastrtps"].libs = tools.collect_libs(self)
         self.cpp_info.components["fastrtps"].requires = [
             "fast-cdr::fast-cdr",
@@ -203,14 +205,14 @@ class FastDDSConan(ConanFile):
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         # component fast-discovery
         self.cpp_info.components["fast-discovery-server"].names["cmake_find_package"] = "fast-discovery-server"
-        self.cpp_info.components["fast-discovery-server"].names["cmake_find_package_multi"] = "fast-discovery-server"
+        self.cpp_info.components["fast-discovery-server"].names["cmake_find_multi_package"] = "fast-discovery-server"
         self.cpp_info.components["fast-discovery-server"].bindirs = ["bin"]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var for fast-dds::fast-discovery-server with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
         # component tools
         self.cpp_info.components["tools"].names["cmake_find_package"] = "tools"
-        self.cpp_info.components["tools"].names["cmake_find_package_multi"] = "tools"
+        self.cpp_info.components["tools"].names["cmake_find_multi_package"] = "tools"
         self.cpp_info.components["tools"].bindirs = [os.path.join("bin","tools")]
         bin_path = os.path.join(self._pkg_bin, "tools")
         self.output.info("Appending PATH env var for fast-dds::tools with : {}".format(bin_path)),
