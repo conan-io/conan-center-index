@@ -145,7 +145,7 @@ class FastDDSConan(ConanFile):
                 # This combination leads to an fast-dds error when linking
                 # linking dynamic '*.dll' and static MT runtime
                 raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
-        elif self.settings.os == "MacoS":
+        elif self.settings.os == "Macos":
                 # FIXME: Testing currently fails with MacOS - see https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/8561/1-configs/macos-clang/fast-dds/2.3.2//summary.json
                 # dyld: Library not loaded: libfastrtps.2.3.dylib --> Reason: image not found
                 raise ConanInvalidConfiguration("Macos currently not supported")
