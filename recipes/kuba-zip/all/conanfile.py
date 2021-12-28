@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ZipConan(ConanFile):
@@ -10,7 +10,7 @@ class ZipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kuba--/zip"
     description = "A portable, simple zip library written in C"
-    topics = ("conan", "zip", "compression", "c", "miniz", "portable", "hacking")
+    topics = ("zip", "compression", "c", "miniz", "portable", "hacking")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -70,8 +70,12 @@ class ZipConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "zip")
+        self.cpp_info.set_property("cmake_target_name", "zip::zip")
+
         self.cpp_info.names["cmake_find_package"] = "zip"
         self.cpp_info.names["cmake_find_package_multi"] = "zip"
+
         self.cpp_info.libs = ["zip"]
         if self.options.shared:
             self.cpp_info.defines.append("ZIP_SHARED")
