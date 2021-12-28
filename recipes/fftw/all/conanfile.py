@@ -107,12 +107,12 @@ class FFTWConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_name
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
-        self.cpp_info.names["pkg_config"] = pkgconfig_name
         
         self.cpp_info.components["fftwlib"].set_property("cmake_target_name", "{}::{}".format(cmake_namespace, cmake_target_name))
+        self.cpp_info.components["fftwlib"].set_property("pkg_config_name", pkgconfig_name)
+        
         self.cpp_info.components["fftwlib"].names["cmake_find_package"] = cmake_target_name
         self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = cmake_target_name
-        self.cpp_info.components["fftwlib"].names["pkg_config"] = pkgconfig_name
         if self.options.openmp:
             self.cpp_info.components["fftwlib"].libs.append(lib_name + "_omp")
         if self.options.threads and not self.options.combinedthreads:
