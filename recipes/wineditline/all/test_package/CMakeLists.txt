@@ -4,7 +4,7 @@ project(test_package C)
 find_package(wineditline REQUIRED CONFIG)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 add_executable(test_package test_package.c)
 target_link_libraries(test_package PRIVATE wineditline::wineditline)
