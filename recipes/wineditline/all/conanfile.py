@@ -41,10 +41,6 @@ class WineditlineConan(ConanFile):
         root = self._source_subfolder
         get_args = self.conan_data["sources"][self.version]
         tools.get(**get_args, destination=root, strip_root=True)
-        for dir in ["bin32", "bin64", "include", "lib32", "lib64"]:
-            tools.rmdir(os.path.join(root, dir))
-        os.remove(os.path.join(root, "CMakeLists.txt"))
-        os.remove(os.path.join(root, "src", "CMakeLists.txt"))
 
     def configure(self):
         del self.settings.compiler.libcxx
