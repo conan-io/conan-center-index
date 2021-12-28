@@ -79,9 +79,6 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
-        if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
-            raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
-
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.build_requires('protobuf/3.17.1')
@@ -91,12 +88,11 @@ class grpcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        if tools.Version(self.version) < "1.42.0":
-            # Fix the protoc search path for cross compiling
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
-                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
-                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
-            )
+        # Fix the protoc search path for cross compiling
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
+                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
+                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
+        )
         if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
             # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
             #   executable when cross-building
