@@ -11,8 +11,8 @@ class I2cConan(ConanFile):
     homepage = "https://i2c.wiki.kernel.org/index.php/I2C_Tools"
     description = "I2C tools for the linux kernel as well as an I2C library."
     topics = ("i2c")
-    os = "linux"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,7 +21,6 @@ class I2cConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
 
     @property
     def _source_subfolder(self):
