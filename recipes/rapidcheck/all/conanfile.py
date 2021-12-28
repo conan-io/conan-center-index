@@ -146,9 +146,11 @@ class RapidcheckConan(ConanFile):
                 self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
 
         if self.options.enable_catch:
+            self.cpp_info.components["rapidcheck_catch"].set_property("cmake_target_name", "rapidcheck_catch")
             self.cpp_info.components["rapidcheck_catch"].requires = ["rapidcheck_rapidcheck", "catch2::catch2"]
         if self.options.enable_gmock:
+            self.cpp_info.components["rapidcheck_gmock"].set_property("cmake_target_name", "rapidcheck_gmock")
             self.cpp_info.components["rapidcheck_gmock"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
         if self.options.enable_gtest:
+            self.cpp_info.components["rapidcheck_gtest"].set_property("cmake_target_name", "rapidcheck_gtest")
             self.cpp_info.components["rapidcheck_gtest"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
-
