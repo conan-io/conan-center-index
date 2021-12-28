@@ -52,6 +52,7 @@ class I2cConan(ConanFile):
     @property
     def _make_args(self):
         return [
+            "PREFIX={}".format(self.package_folder),
             "BUILD_DYNAMIC_LIB={}".format("1" if self.options.shared else "0"),
             "BUILD_STATIC_LIB={}".format("0" if self.options.shared else "1"),
             "USE_STATIC_LIB={}".format("0" if self.options.shared else "1"),
