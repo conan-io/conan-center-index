@@ -30,7 +30,7 @@ class MpdecimalConan(ConanFile):
     _autotools = None
 
     def configure(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self.settings.os != "Macos" and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd

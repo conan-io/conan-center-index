@@ -55,7 +55,7 @@ class MpdecimalConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self.settings.os != "Macos" and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
         if self.options.cxx:
             if self.options.shared and self.settings.os == "Windows":
