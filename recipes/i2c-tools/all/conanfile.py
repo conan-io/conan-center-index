@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 requires_conan_version = ">=1.33.0"
 
@@ -43,19 +44,33 @@ class I2cConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"),
+                              "SRCDIRS	:= include lib eeprom stub tools $(EXTRA)",
+                              "SRCDIRS	:= include lib $(EXTRA)")
+
+    @property
+    def _make_args(self):
+        return [
+            "BUILD_DYNAMIC_LIB={}".format("1" if self.options.shared else "0"),
+            "BUILD_STATIC_LIB={}".format("0" if self.options.shared else "1"),
+            "USE_STATIC_LIB={}".format("0" if self.options.shared else "1"),
+        ]
+
     def build(self):
+        self._patch_sources()
         autotools = AutoToolsBuildEnvironment(self)
         autotools.flags += [f"-I{path}" for path in autotools.include_paths]
         with tools.chdir(self._source_subfolder):
-            autotools.make(target="lib/libi2c.so" if self.options.shared else "lib/libi2c.a")
+            autotools.make(args=self._make_args)
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         self.copy("COPYING.LGPL", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", src=self._source_subfolder, dst="include", keep_path=False)
-        self.copy("*.h", src=self._source_subfolder, dst="include/i2c", keep_path=False)
-        self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.a", dst="lib", keep_path=False)
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.flags += [f"-I{path}" for path in autotools.include_paths]
+        with tools.chdir(self._source_subfolder):
+            autotools.install(args=self._make_args)
 
     def package_info(self):
         self.cpp_info.libs = ["i2c"]
