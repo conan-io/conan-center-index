@@ -18,8 +18,8 @@ class TestPackageConan(ConanFile):
             bin_pub_cmd = os.path.join("bin", "test_pub")
             sub_process = Popen([bin_sub_cmd],stdout=subprocess.PIPE) 
             pub_process = Popen([bin_pub_cmd],stdout=subprocess.PIPE)
-            sub_process.wait(5)
-            pub_process.wait(5)
+            sub_process.wait(30)
+            pub_process.wait(30)
             msg_send = 'Message: HelloWorld with index: 5 SENT' in str(pub_process.stdout.read())
             msg_received = 'HelloWorld 5 RECEIVED' in str(sub_process.stdout.read())
             assert msg_send
