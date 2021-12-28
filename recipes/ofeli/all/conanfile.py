@@ -10,7 +10,7 @@ class OfeliConan(ConanFile):
     description = "An Object Finite Element Library"
     topics = ("ofeli", "finite element", "finite element library",
               "finite element analysis", "finite element solver")
-    license = "GNU Lesser General Public License (LGPL)."
+    license = "LGPL-3.0-or-later"
     homepage = "http://ofeli.org/index.html"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -45,8 +45,6 @@ class OfeliConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        if not self.settings.compiler.cppstd:
-            self._autotools.cppstd_flag = "-std=c++11"
         self._autotools.configure(args=["--enable-%s" % ("release"
                                   if self.settings.build_type == "Release"
                                   else "debug")])
