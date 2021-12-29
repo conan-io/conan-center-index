@@ -33,7 +33,6 @@ class VulkanHeadersConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VulkanHeaders")
-        self.cpp_info.set_property("cmake_target_name", "Vulkan::Vulkan")
         self.cpp_info.components["vulkanheaders"].set_property("cmake_target_name", "Vulkan::Headers")
         self.cpp_info.components["vulkanheaders"].bindirs = []
         self.cpp_info.components["vulkanheaders"].libdirs = []
