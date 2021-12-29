@@ -1,0 +1,4 @@
+sources:
+  "cci.20210831":
+    url: "https://github.com/google/libprotobuf-mutator/archive/ffd86a32874e5c08a143019aad1aaf0907294c9f.zip"
+    sha256: "14f595863452808483776ce1964209db00cdac79e649b31eb4d4b06ca72912d8"
