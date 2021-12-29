@@ -11,7 +11,7 @@ class LibopingConan(ConanFile):
     topics = ("conan", "oping", "liboping", "ping", "icmp")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://noping.cc"
-    license = ["LGPL-2.1", "GPL-2.0" ]
+    license = ["LGPL-2.1", "GPL-2.0"]
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/**"]
     options = {
@@ -76,7 +76,7 @@ class LibopingConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
- 
+
     def build(self):
         self._patch_sources()
         autotools = self._configure_autotools()
