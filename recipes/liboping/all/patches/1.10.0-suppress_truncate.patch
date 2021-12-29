@@ -1,0 +1,14 @@
+--- a/src/liboping.c	2017-05-11 01:32:27.000000000 -0600
++++ b/src/liboping.c	2021-12-29 09:51:28.209136769 -0700
+@@ -203,8 +203,11 @@
+ static void ping_set_error (pingobj_t *obj, const char *function,
+ 	       	const char *message)
+ {
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wformat-truncation"
+ 	snprintf (obj->errmsg, sizeof (obj->errmsg),
+ 			"%s: %s", function, message);
++#pragma GCC diagnostic pop
+ 	obj->errmsg[sizeof (obj->errmsg) - 1] = 0;
+ }
+ 
