@@ -2,6 +2,17 @@ import subprocess
 from conans import ConanFile, CMake, tools
 import os
 from subprocess import Popen
+from conans.client.tools.oss import OSInfo
+
+# from conan run method conanfile 
+# required for Macos
+def command_adaption(command):
+    if OSInfo().is_macos:
+        command =   'DYLD_LIBRARY_PATH="%s" DYLD_FRAMEWORK_PATH="%s" %s' % \
+                    (os.environ.get('DYLD_LIBRARY_PATH', ''),
+                    os.environ.get("DYLD_FRAMEWORK_PATH", ''),
+                    command)
+    return command
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -14,8 +25,9 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_sub_cmd = os.path.join("bin", "test_sub")
-            bin_pub_cmd = os.path.join("bin", "test_pub")
+            bin_sub_cmd = command_adaption(os.path.join("bin", "test_sub"))
+            bin_pub_cmd = command_adaption(os.path.join("bin", "test_pub"))
+            # Popen must be used to detect blocking process
             sub_process = Popen([bin_sub_cmd],stdout=subprocess.PIPE) 
             pub_process = Popen([bin_pub_cmd],stdout=subprocess.PIPE)
             sub_process.wait(30)
@@ -24,4 +36,3 @@ class TestPackageConan(ConanFile):
             msg_received = 'HelloWorld 5 RECEIVED' in str(sub_process.stdout.read())
             assert msg_send
             assert msg_received
-            
