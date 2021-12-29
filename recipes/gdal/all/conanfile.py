@@ -866,10 +866,13 @@ class GdalConan(ConanFile):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
-        self.output.info("Creating GDAL_DATA environment variable: {}".format(gdal_data_path))
+        self.output.info("Prepending to GDAL_DATA environment variable: {}".format(gdal_data_path))
+        self.runenv_info.prepend_path("GDAL_DATA", gdal_data_path)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.GDAL_DATA = gdal_data_path
 
         if self.options.tools:
+            self.buildenv_info.prepend_path("GDAL_DATA", gdal_data_path)
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
