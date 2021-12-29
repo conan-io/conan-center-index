@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class CvPlotConan(ConanFile):
     name = "cvplot"
     description = "fast modular opencv plotting library"
-    license = "MIT License"
+    license = "MIT"
     topics = ("plot", "opencv")
     homepage = "https://github.com/Profactor/cv-plot"
     url = "https://github.com/conan-io/conan-center-index"
