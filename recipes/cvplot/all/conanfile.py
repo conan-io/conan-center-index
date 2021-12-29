@@ -8,7 +8,7 @@ class CvPlotConan(ConanFile):
     name = "cvplot"
     description = "fast modular opencv plotting library"
     license = "MIT"
-    topics = ("plot", "opencv")
+    topics = ("plot", "opencv", "diagram", "plotting")
     homepage = "https://github.com/Profactor/cv-plot"
     url = "https://github.com/conan-io/conan-center-index"
     generators = "cmake"
