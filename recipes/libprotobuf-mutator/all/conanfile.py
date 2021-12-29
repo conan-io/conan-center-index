@@ -44,6 +44,10 @@ class LibProtobufMutatorConan(ConanFile):
             """add_subdirectory(examples EXCLUDE_FROM_ALL)""",
             """# (disabled by conan) add_subdirectory(examples EXCLUDE_FROM_ALL)""")
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
