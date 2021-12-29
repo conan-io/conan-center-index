@@ -45,6 +45,9 @@ class LibProtobufMutatorConan(ConanFile):
             """# (disabled by conan) add_subdirectory(examples EXCLUDE_FROM_ALL)""")
 
     def validate(self):
+        if self.settings.compiler != "clang":
+            raise ConanInvalidConfiguration("Only clang allowed")
+
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
