@@ -47,8 +47,8 @@ class LibProtobufMutatorConan(ConanFile):
     def validate(self):
         if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Only clang allowed")
-        if self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration("Requires either compiler.libcxx=libstdc++11 or compiler.libcxx=libc++")
+        if self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("Requires either compiler.libcxx=libstdc++11")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
