@@ -2,12 +2,12 @@ import subprocess
 from conans import ConanFile, CMake, tools
 import os
 from subprocess import Popen
-from conans.client.tools.oss import OSInfo
+import platform
 
 # from conan run method conanfile 
 # required for Macos
 def command_adaption(command):
-    if OSInfo().is_macos:
+    if platform.system() == "Darwin":
         command =   'DYLD_LIBRARY_PATH="%s" DYLD_FRAMEWORK_PATH="%s" %s' % \
                     (os.environ.get('DYLD_LIBRARY_PATH', ''),
                     os.environ.get("DYLD_FRAMEWORK_PATH", ''),
