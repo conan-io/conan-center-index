@@ -1,0 +1,102 @@
+Index: google/cloud/internal/pagination_range.h
+===================================================================
+--- google/cloud/internal/pagination_range.h	(revision 183372)
++++ google/cloud/internal/pagination_range.h	(revision 183980)
+@@ -82,4 +82,5 @@
+         loader_(std::move(loader)),
+         extractor_(std::move(extractor)),
++        token_(request_.page_token()),
+         last_page_(false) {
+     current_ = page_.begin();
+Index: google/cloud/storage/CMakeLists.txt
+===================================================================
+--- google/cloud/storage/CMakeLists.txt	(revision 183372)
++++ google/cloud/storage/CMakeLists.txt	(revision 183980)
+@@ -37,4 +37,11 @@
+     "*/google/cloud/storage/*_test.cc")
+ set(DOXYGEN_EXCLUDE_SYMBOLS "internal" "storage_benchmarks")
++
++if (WIN32)
++  add_definitions(
++    -DCURL_STATICLIB
++    -D_SCL_SECURE_NO_WARNINGS # disable security-paranoia warning
++  )
++endif ()
+ 
+ include(GoogleCloudCppCommon)
+@@ -277,5 +284,6 @@
+     PROPERTIES EXPORT_NAME "google-cloud-cpp::storage" VERSION
+                                                        ${PROJECT_VERSION}
+-               SOVERSION ${PROJECT_VERSION_MAJOR})
++               SOVERSION ${PROJECT_VERSION_MAJOR}
++    POSITION_INDEPENDENT_CODE ON)
+ add_library(google-cloud-cpp::storage ALIAS google_cloud_cpp_storage)
+ 
+Index: google/cloud/storage/client_options.h
+===================================================================
+--- google/cloud/storage/client_options.h	(revision 183372)
++++ google/cloud/storage/client_options.h	(revision 183980)
+@@ -48,4 +48,6 @@
+  public:
+   std::string ssl_root_path() const { return ssl_root_path_; }
++  std::string ssl_dir_path() const { return ssl_dir_path_; }
++  bool verify_ssl() const { return verify_ssl_; }
+ 
+   ChannelOptions& set_ssl_root_path(std::string ssl_root_path) {
+@@ -54,6 +56,18 @@
+   }
+ 
++  ChannelOptions& set_ssl_dir_path(std::string ssl_dir_path) {
++    ssl_dir_path_ = std::move(ssl_dir_path);
++    return *this;
++  }
++
++  ChannelOptions& set_verify_ssl(bool verify_ssl) {
++    verify_ssl_ = verify_ssl;
++    return *this;
++  }
++
+  private:
+   std::string ssl_root_path_;
++  std::string ssl_dir_path_;
++  bool verify_ssl_;
+ };
+ 
+Index: google/cloud/storage/internal/bucket_requests.cc
+===================================================================
+--- google/cloud/storage/internal/bucket_requests.cc	(revision 183372)
++++ google/cloud/storage/internal/bucket_requests.cc	(revision 183980)
+@@ -35,5 +35,5 @@
+ 
+ std::ostream& operator<<(std::ostream& os, ListBucketsRequest const& r) {
+-  os << "ListBucketsRequest={project_id=" << r.project_id();
++  os << "ListBucketsRequest={project_id=" << r.project_id() << ", pageToken=" << r.page_token();
+   r.DumpOptions(os, ", ");
+   return os << "}";
+Index: google/cloud/storage/internal/curl_client.cc
+===================================================================
+--- google/cloud/storage/internal/curl_client.cc	(revision 183372)
++++ google/cloud/storage/internal/curl_client.cc	(revision 183980)
+@@ -315,4 +315,6 @@
+   }
+   builder.AddQueryParameter("project", request.project_id());
++  if (!request.page_token().empty())
++      builder.AddQueryParameter("pageToken", request.page_token());
+   return ParseFromHttpResponse<ListBucketsResponse>(
+       builder.BuildRequest().MakeRequest(std::string{}));
+Index: google/cloud/storage/internal/curl_handle_factory.cc
+===================================================================
+--- google/cloud/storage/internal/curl_handle_factory.cc	(revision 183372)
++++ google/cloud/storage/internal/curl_handle_factory.cc	(revision 183980)
+@@ -30,4 +30,11 @@
+ void CurlHandleFactory::SetCurlOptions(CURL* handle,
+                                        ChannelOptions const& options) {
++  curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, options.verify_ssl() ? 1L : 0L);
++  curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, options.verify_ssl() ? 1L : 0L);
++
++  if (!options.ssl_dir_path().empty()) {
++    SetCurlStringOption(handle, CURLOPT_CAPATH,
++                        options.ssl_dir_path().c_str());
++  }
+   if (!options.ssl_root_path().empty()) {
+     SetCurlStringOption(handle, CURLOPT_CAINFO,

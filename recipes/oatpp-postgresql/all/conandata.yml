@@ -1,11 +1,17 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/oatpp/oatpp-postgresql/archive/1.2.0.tar.gz"
-    sha256: "bece5e298c1e6a312939fd77ad7230792bd9993c6c5ca75def696a3ed0c4f07f"
+  "1.3.0":
+    url: "https://github.com/oatpp/oatpp-postgresql/archive/1.3.0.tar.gz"
+    sha256: "6013b1d9756b15105fc6f4ccc7217f16871cb8da61d977b17cb9bf1ea6547dba"
   "1.2.5":
     url: "https://github.com/oatpp/oatpp-postgresql/archive/1.2.5.tar.gz"
     sha256: "861d9948dea42199832e4133996d3af9caa4e30e6d8093c0729c8fec1f5c7aea"
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp-postgresql/archive/1.2.0.tar.gz"
+    sha256: "bece5e298c1e6a312939fd77ad7230792bd9993c6c5ca75def696a3ed0c4f07f"
 patches:
+  "1.3.0":
+    - patch_file: "patches/1.3.0/01-add-bigobj.patch"
+      base_path: "source_subfolder"
   "1.2.5":
     - patch_file: "patches/1.2.5/01-fix-windows-build.patch"
       base_path: "source_subfolder"

@@ -2,7 +2,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class DawJsonLinkConan(ConanFile):
     name = "daw_json_link"
@@ -27,7 +27,10 @@ class DawJsonLinkConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("daw_header_libraries/1.29.7")
+        if tools.Version(self.version) <= "2.10.2":
+            self.requires("daw_header_libraries/1.29.7")
+        else:
+            self.requires("daw_header_libraries/2.5.3")
         self.requires("daw_utf_range/2.2.0")
 
     def validate(self):
@@ -65,8 +68,11 @@ class DawJsonLinkConan(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "daw-json-link"
         self.cpp_info.filenames["cmake_find_package_multi"] = "daw-json-link"
+        self.cpp_info.set_property("cmake_file_name", "daw-json-link")
         self.cpp_info.names["cmake_find_package"] = "daw"
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
+        self.cpp_info.set_property("cmake_target_name", "daw::daw-json-link")
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-json-link"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-json-link"
+        self.cpp_info.components["daw"].set_property("cmake_target_name", "daw::daw-json-link")
         self.cpp_info.components["daw"].requires = ["daw_header_libraries::daw", "daw_utf_range::daw"]

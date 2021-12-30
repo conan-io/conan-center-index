@@ -24,6 +24,8 @@ class ICUBase(ConanFile):
         "with_unit_tests": [True, False],
         "silent": [True, False],
         "with_dyload": [True, False],
+        "dat_package_file": "ANY",
+        "with_icuio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +34,8 @@ class ICUBase(ConanFile):
         "with_unit_tests": False,
         "silent": True,
         "with_dyload": True,
+        "dat_package_file": None,
+        "with_icuio": True,
     }
 
     _env_build = None
@@ -99,6 +103,9 @@ class ICUBase(ConanFile):
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
         del self.info.options.silent  # Verbosity doesn't affect package's ID
+        if self.info.options.dat_package_file:
+            dat_package_file_sha256 = tools.sha256sum(str(self.info.options.dat_package_file))
+            self.info.options.dat_package_file = dat_package_file_sha256
 
     @property
     def _settings_build(self):
@@ -117,6 +124,12 @@ class ICUBase(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        
+        if self.options.dat_package_file:
+            dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
+            if dat_package_file:
+                shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
+        
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
 
@@ -187,6 +200,9 @@ class ICUBase(ConanFile):
 
         if not self._enable_icu_tools:
             args.append("--disable-tools")
+        
+        if not self.options.with_icuio:
+            args.append("--disable-icuio")
 
         env_build = self._configure_autotools()
         if tools.cross_building(self, skip_x64_x86=True):
@@ -332,11 +348,12 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-i18n-alias"].requires = ["icu-i18n"]
 
         # icuio
-        self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
-        self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
-        self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
-        self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
-        self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
+        if self.options.with_icuio:
+            self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
+            self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
+            self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
+            self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
+            self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
