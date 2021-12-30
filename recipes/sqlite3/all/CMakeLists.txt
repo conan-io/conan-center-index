@@ -150,7 +150,6 @@ install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 if(SQLITE3_BUILD_EXECUTABLE)
     add_executable(sqlite3-bin source_subfolder/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
-    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
     include(CheckSymbolExists)
     check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
     if(NOT HAVE_SYSTEM)
