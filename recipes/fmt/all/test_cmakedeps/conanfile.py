@@ -20,6 +20,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools_cross_building(self):
-            folder = self.settings.build_type if self.settings.os == "Windows" else ""
+            folder = str(self.settings.build_type) if self.settings.os == "Windows" else ""
             self.run(os.path.join(folder, "test_package"), run_environment=True)
             self.run(os.path.join(folder, "test_ranges"), run_environment=True)
