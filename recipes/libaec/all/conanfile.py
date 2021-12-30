@@ -10,7 +10,7 @@ class LibaecConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.dkrz.de/k202009/libaec"
     description = "Adaptive Entropy Coding library"
-    topics = ("conan", "dsp", "libaec", "encoding", "decoding")
+    topics = ("dsp", "libaec", "encoding", "decoding",)
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -66,10 +66,14 @@ class LibaecConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="Copyright.txt", dst="licenses", src=self._source_subfolder)
+        if tools.Version(self.version) < "1.0.6":
+            self.copy(pattern="Copyright.txt", dst="licenses", src=self._source_subfolder)
+        else:
+            self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         if self.settings.os == "Windows" and self.options.shared:
