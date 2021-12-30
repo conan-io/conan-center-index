@@ -1,5 +1,12 @@
 # Changelog
 
+### 29-December-2021 - 16:41 CET
+
+- [config] Add Linux GCC 11, Clang 12 & 13 configurations with new epoch feature.
+- [config] Drop Linux GCC 6 and clang 10 configurations.
+- [fix] Fixed some unexpected errors.
+- [feature] Prepare pipeline to work with ansible provisioned machines.
+
 ### 17-December-2021 - 09:56 CET
 
 - [feature] Introduce 'epoch' concept to build configurations as a strategy to build packages for new compilers.
