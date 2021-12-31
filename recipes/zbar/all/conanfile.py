@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class ZbarConan(ConanFile):
@@ -65,21 +65,28 @@ class ZbarConan(ConanFile):
     def requirements(self):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
+        if self.options.with_imagemagick:
+            self.requires("imagemagick/7.0.11-14")
+        if self.options.with_gtk:
+            self.requires("gtk/4.4.0")
+        if self.options.with_qt:
+            self.requires("qt/5.15.2")
+        if tools.Version(self.version) >= "0.22":
+            self.requires("libiconv/1.16")
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
+        self.build_requires("gnu-config/cci.20210814")
+        if tools.Version(self.version) >= "0.22":
+            self.build_requires("automake/1.16.3")
+            self.build_requires("gettext/0.21")
+            self.build_requires("pkgconf/1.7.4")
+            self.build_requires("libtool/2.4.6")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
         if tools.is_apple_os(self.settings.os) and not self.options.shared:
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
-        if self.options.with_imagemagick:   #TODO add when available
-            self.output.warn("There is no imagemagick package available on Conan (yet). This recipe will use the one present on the system (if available).")
-        if self.options.with_gtk:           #TODO add when available
-            self.output.warn("There is no gtk package available on Conan (yet). This recipe will use the one present on the system (if available).")
-        if self.options.with_qt:            #TODO add when available
-            self.output.warn("There is no qt package available on Conan (yet). This recipe will use the one present on the system (if available).")
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
 
@@ -89,6 +96,9 @@ class ZbarConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
+            if tools.Version(self.version) >= "0.22":
+                with tools.chdir(self._source_subfolder):
+                    self.run("autoreconf -fiv")
             self._autotools = AutoToolsBuildEnvironment(self)
             yes_no = lambda v: "yes" if v else "no"
             args = [
@@ -130,6 +140,7 @@ class ZbarConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "zbar"
+        self.cpp_info.set_property("pkg_config_name", "zbar")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux") and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
