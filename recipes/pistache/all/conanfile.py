@@ -48,7 +48,7 @@ class PistacheConan(ConanFile):
     def requirements(self):
         self.requires("rapidjson/1.1.0")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1m")
 
     def validate(self):
         compilers = {
