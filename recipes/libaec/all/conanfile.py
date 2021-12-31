@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -42,6 +43,12 @@ class LibaecConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        # libaec/1.0.6 uses "restrict" keyword which seems to be supported since Visual Studio 16.
+        if tools.Version(self.version) >= "1.0.6" and  \
+            self.settings.compiler == "Visual Studio" and self.settings.compiler.version < "16":
+            raise ConanInvalidConfiguration("{} does not support Visual Studio {}".format(self.name, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
