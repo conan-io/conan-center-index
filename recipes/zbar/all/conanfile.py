@@ -131,7 +131,10 @@ class ZbarConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        if tools.Version(self.version) < "0.23":
+            self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        else:
+            self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
