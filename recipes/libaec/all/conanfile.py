@@ -47,7 +47,8 @@ class LibaecConan(ConanFile):
     def validate(self):
         # libaec/1.0.6 uses "restrict" keyword which seems to be supported since Visual Studio 16.
         if tools.Version(self.version) >= "1.0.6" and  \
-            self.settings.compiler == "Visual Studio" and self.settings.compiler.version < "16":
+            self.settings.compiler == "Visual Studio" and \
+            tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("{} does not support Visual Studio {}".format(self.name, self.settings.compiler.version))
 
     def source(self):
