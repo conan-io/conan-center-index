@@ -116,7 +116,7 @@ class FastDDSConan(ConanFile):
         self.requires("asio/1.21.0")
         self.requires("fast-cdr/1.0.22")
         self.requires("foonathan-memory/0.7.1")
-        self.requires("boost/1.76.0")  # boost/1.76 is required by version 2.3.2
+        self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
 
