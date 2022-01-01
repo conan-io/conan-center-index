@@ -4,7 +4,7 @@ project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
-find_package(libprotobuf-mutator REQUIRED)
+find_package(libprotobuf-mutator REQUIRED CONFIG)
 
 
 protobuf_generate_cpp(

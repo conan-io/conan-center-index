@@ -13,7 +13,8 @@ class LibProtobufMutatorConan(ConanFile):
     description = "A library to randomly mutate protobuffers."
     topics = ("test", "fuzzing", "protobuf")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
 
     _cmake = None
 
@@ -64,10 +65,7 @@ class LibProtobufMutatorConan(ConanFile):
         self._cmake.definitions["LIB_PROTO_MUTATOR_WITH_ASAN"] = "OFF"
         self._cmake.definitions["LIB_PROTO_MUTATOR_FUZZER_LIBRARIES"] = ""
         # todo: check option(LIB_PROTO_MUTATOR_MSVC_STATIC_RUNTIME "Link static runtime libraries" ON)
-        self._cmake.configure(
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder
-        )
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
