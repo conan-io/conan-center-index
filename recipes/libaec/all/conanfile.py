@@ -88,11 +88,11 @@ class LibaecConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["szip", "aec"]
-        else:
-            self.cpp_info.libs = ["sz", "aec"]
-
+        szip_name = "sz"
+        if self.settings.os == "Windows" and (tools.Version(self.version) >= "1.0.6" or self.options.shared):
+            szip_name = "szip"
+        self.cpp_info.libs = [szip_name, "aec"]
+            
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
