@@ -34,6 +34,8 @@ class MpdecimalConan(ConanFile):
             raise ConanInvalidConfiguration("Arch is unsupported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def config_options(self):
         if self.settings.os == "Windows":
