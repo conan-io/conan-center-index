@@ -74,3 +74,6 @@ class TinkerforgeBindingsConan(ConanFile):
         self.cpp_info.components["_bindings"].names["cmake_find_package"] = "bindings"
         self.cpp_info.components["_bindings"].names["cmake_find_package_multi"] = "bindings"
         self.cpp_info.components["_bindings"].libs = ["tinkerforge_bindings"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_bindings"].system_libs = ["pthread"]
