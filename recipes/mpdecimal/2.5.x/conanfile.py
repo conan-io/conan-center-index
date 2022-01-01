@@ -123,12 +123,14 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        conf_vars = self._autotools.vars
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            self._autotools.link_flags.append("-arch arm64")
+            conf_vars["LDFLAGS"] += " -arch arm64"
+            conf_vars["LDXXFLAGS"] = "-arch arm64"
         conf_args = [
             "--enable-cxx" if self.options.cxx else "--disable-cxx"
         ]
-        self._autotools.configure(args=conf_args)
+        self._autotools.configure(args=conf_args, vars=conf_vars)
         return self._autotools
 
     @property
