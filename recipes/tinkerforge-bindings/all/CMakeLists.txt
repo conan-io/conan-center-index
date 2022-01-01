@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(tinkerforge_bindings)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.c)
 file(GLOB HEADERS ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.h)

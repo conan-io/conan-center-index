@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
 
 class TinkerforgeBindingsConan(ConanFile):
     name = "tinkerforge-bindings"
