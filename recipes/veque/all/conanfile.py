@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+
 required_conan_version = ">=1.33.0"
 
 class VequeConan(ConanFile):
@@ -18,6 +19,29 @@ class VequeConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15.7",
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+
     def package_id(self):
         self.info.header_only()
 
@@ -25,19 +49,6 @@ class VequeConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _supports_cpp17(self):
-        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
-        compiler = self.settings.compiler
-        version = tools.Version(compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
-
-    def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
-        elif not self._supports_cpp17():
-            raise ConanInvalidConfiguration("C++17 support is required")
-
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
