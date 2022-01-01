@@ -78,3 +78,5 @@ class TinkerforgeBindingsConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_bindings"].system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
