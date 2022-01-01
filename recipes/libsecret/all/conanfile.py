@@ -105,6 +105,6 @@ class LibsecretConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libsecret-1"
         self.cpp_info.requires = ["glib::glib-2.0", "glib::gobject-2.0"]
         if self._use_gcrypt:
-            self.cpp_info.requires.append("libgcrypt::gcrypt")
+            self.cpp_info.requires.append("libgcrypt::libgcrypt")
         self.cpp_info.includedirs = [os.path.join("include", "libsecret-1")]
         self.cpp_info.libs = ["secret-1"]
