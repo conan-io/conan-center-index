@@ -54,7 +54,7 @@ class LibsecretConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("glib/2.67.2")
+        self.requires("glib/2.70.1")
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -65,8 +65,8 @@ class LibsecretConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.60.2")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
