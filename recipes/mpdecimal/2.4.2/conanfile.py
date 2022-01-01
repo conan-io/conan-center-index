@@ -163,6 +163,8 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            self._autotools.link_flags.append("-arch arm64")
         self._autotools .configure()
         return self._autotools
 
