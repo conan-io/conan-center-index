@@ -1,0 +1,7 @@
+sources:
+  "1.2.198":
+    url: https://github.com/KhronosGroup/Vulkan-Hpp/archive/refs/tags/v1.2.198.tar.gz
+    sha256: 91670b4d57717cfb45139e9055f73533a65ae0ab8eb8875c350b824a88f9977c
+  "1.2.202":
+    url: https://github.com/KhronosGroup/Vulkan-Hpp/archive/refs/tags/v1.2.202.tar.gz
+    sha256: 90c0d27fa252e30cdbfc9b730a857de7395a5c1775905550a5074f5fb199c6ba
