@@ -88,7 +88,7 @@ class LibaecConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows":
             self.cpp_info.libs = ["szip", "aec"]
         else:
             self.cpp_info.libs = ["sz", "aec"]
