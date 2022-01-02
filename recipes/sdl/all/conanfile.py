@@ -88,7 +88,7 @@ class SDLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler in ["Visual Studio", "msvc"]:
                 del self.options.iconv
         if self.settings.os != "Linux":
             del self.options.alsa
@@ -185,7 +185,7 @@ class SDLConan(ConanFile):
         self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
         if self.settings.os != "Windows" and not self.options.shared:
             self._cmake.definitions["SDL_STATIC_PIC"] = self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if self.settings.compiler in ["Visual Studio", "msvc"] and not self.options.shared:
             self._cmake.definitions["HAVE_LIBC"] = True
         self._cmake.definitions["SDL_SHARED"] = self.options.shared
         self._cmake.definitions["SDL_STATIC"] = not self.options.shared
