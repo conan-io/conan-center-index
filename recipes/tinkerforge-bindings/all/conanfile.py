@@ -45,6 +45,10 @@ class TinkerforgeBindingsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Static runtime + shared is failing to link")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=False)
 
@@ -79,4 +83,4 @@ class TinkerforgeBindingsConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_bindings"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["_bindings"].system_libs = ["wsock32", "ws2_32", "Iphlpapi"]
+            self.cpp_info.components["_bindings"].system_libs = ["wsock32", "ws2_32"]
