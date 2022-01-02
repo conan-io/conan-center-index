@@ -13,6 +13,7 @@ class VequeConan(ConanFile):
     license = "BSL-1.0"
 
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["patches/**",]
     no_copy_source = True
 
     @property
@@ -45,9 +46,14 @@ class VequeConan(ConanFile):
     def package_id(self):
         self.info.header_only()
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        self._patch_sources()
 
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
