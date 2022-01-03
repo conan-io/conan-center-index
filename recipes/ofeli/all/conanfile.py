@@ -36,6 +36,9 @@ class OfeliConan(ConanFile):
                 "Ofeli is just supported for GCC")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration(
+                "Ofeli supports only libstdc++'s new ABI")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
