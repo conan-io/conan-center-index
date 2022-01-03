@@ -7,3 +7,4 @@ conan test $DIR $1 --build=catch2 -o catch2:with_main=True -o catch2:with_benchm
 conan test $DIR $1 --build=catch2 -o catch2:with_prefix=True 
 conan test $DIR $1 --build=catch2 -o catch2:with_main=True -o catch2:with_prefix=True 
 conan test $DIR $1 --build=catch2 -o catch2:default_reporter=xml
+conan test $DIR $1 --build=catch2 -o catch2:with_main=True -o catch2:default_reporter=xml
