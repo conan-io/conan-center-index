@@ -67,17 +67,7 @@ class ConanRecipe(ConanFile):
 
     def _abseil_abi_config(self):
         """Determine the Abseil ABI for polyfills (absl::any, absl::optional, absl::string_view, and absl::variant)"""
-        if self.settings.compiler.get_safe("cppstd"):
-            if self.settings.compiler.get_safe("cppstd") >= "17":
-                return "1"
-            return "0"
-        # As-of 2021-09-27 only GCC-11 defaults to C++17.
-        if (
-            self.settings.compiler == "gcc"
-            and tools.Version(self.settings.compiler.version) >= "11"
-        ):
-            return "1"
-        return "0"
+        return "1" if tools.valid_min_cppstd(self, 17) else "0"
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
