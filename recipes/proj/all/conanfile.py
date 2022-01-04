@@ -168,9 +168,13 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info("Creating PROJ_LIB environment variable: {}".format(res_path))
+        self.output.info("Prepending to PROJ_LIB environment variable: {}".format(res_path))
+        self.runenv_info.prepend_path("PROJ_LIB", res_path)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.PROJ_LIB = res_path
+
         if self.options.build_executables:
+            self.buildenv_info.prepend_path("PROJ_LIB", res_path)
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
