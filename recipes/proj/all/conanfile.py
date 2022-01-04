@@ -161,7 +161,7 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if tools.Version(self.version) < "8.2.0":
-            if self.options.shared and self.settings.compiler == "Visual Studio":
+            if self.options.shared and self.settings.compiler in ["Visual Studio", "msvc"]:
                 self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
         else:
             if not self.options.shared:
