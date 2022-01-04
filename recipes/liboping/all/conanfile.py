@@ -49,6 +49,9 @@ class LibopingConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             # libtool:   error: can't build i686-pc-mingw32 shared library unless -no-undefined is specified
             raise ConanInvalidConfiguration("liboping can't be built as shared on Windows")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.shared:
+            # for now? Cannot build shared libraries on MacOS/M1
+            raise ConanInvalidConfiguration("liboping cannot be build as shared on M1 MacOS")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
