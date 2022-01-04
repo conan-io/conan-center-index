@@ -64,6 +64,10 @@ class LibaecConan(ConanFile):
         if tools.Version(self.version) >= "1.0.6":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "set(CMAKE_C_STANDARD 99)", "set(CMAKE_C_STANDARD 11)")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                  "target_link_libraries(aec_static PUBLIC aec)", "")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                  "target_link_libraries(aec_shared PUBLIC aec)", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -92,7 +96,6 @@ class LibaecConan(ConanFile):
         if self.settings.os == "Windows" and (tools.Version(self.version) >= "1.0.6" or self.options.shared):
             szip_name = "szip"
         self.cpp_info.libs = [szip_name, "aec"]
-            
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
