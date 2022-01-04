@@ -41,7 +41,7 @@ class OpenclHeadersConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "OpenCL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenCL"
-        self.cpp_info.set_property("cmake_target_name", "OpenCL::OpenCL")
+        self.cpp_info.set_property("cmake_target_name", "OpenCL::Headers")
         self.cpp_info.set_property("pkg_config_name", "OpenCL")
         self.cpp_info.components["_opencl-headers"].names["cmake_find_package"] = "Headers"
         self.cpp_info.components["_opencl-headers"].names["cmake_find_package_multi"] = "Headers"
