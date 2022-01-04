@@ -9,7 +9,7 @@ class LibopingConan(ConanFile):
     name = "liboping"
     description = "A multi server ping library"
     topics = ("conan", "oping", "liboping", "ping", "icmp")
-    url = "https://github.com/conan-io/conan-center-index"
+    url = "https://github.com/octo/liboping/"
     homepage = "https://noping.cc"
     license = ["LGPL-2.1", "GPL-2.0"]
     settings = "os", "arch", "compiler", "build_type"
