@@ -45,13 +45,13 @@ class LibopingConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("libev is not supported by Visual Studio")
+            raise ConanInvalidConfiguration("liboping is not supported by Visual Studio")
         if self.settings.os == "Windows" and self.options.shared:
             # libtool:   error: can't build i686-pc-mingw32 shared library unless -no-undefined is specified
-            raise ConanInvalidConfiguration("libev can't be built as shared on Windows")
+            raise ConanInvalidConfiguration("liboping can't be built as shared on Windows")
 
-    def build_requirements(self):
-        self.build_requires("libev/4.33")
+
+    def requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -82,6 +82,7 @@ class LibopingConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.make()
 
+
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
@@ -91,7 +92,7 @@ class LibopingConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = ["ev"]
+        # self.cpp_info.libs = ["liboping"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows":
