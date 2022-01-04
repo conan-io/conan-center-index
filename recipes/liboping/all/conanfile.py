@@ -50,7 +50,6 @@ class LibopingConan(ConanFile):
             # libtool:   error: can't build i686-pc-mingw32 shared library unless -no-undefined is specified
             raise ConanInvalidConfiguration("liboping can't be built as shared on Windows")
 
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -81,7 +80,6 @@ class LibopingConan(ConanFile):
         self._patch_sources()
         autotools = self._configure_autotools()
         autotools.make()
-
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
