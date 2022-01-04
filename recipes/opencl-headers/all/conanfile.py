@@ -37,9 +37,12 @@ class OpenclHeadersConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenCLHeaders"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCLHeaders"
+        self.cpp_info.set_property("cmake_file_name", "OpenCLHeaders")
+
         self.cpp_info.names["cmake_find_package"] = "OpenCL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenCL"
-        self.cpp_info.names["pkg_config"] = "OpenCL"
+        self.cpp_info.set_property("cmake_target_name", "OpenCL")
+        self.cpp_info.set_property("pkg_config_name", "OpenCL")
         self.cpp_info.components["_opencl-headers"].names["cmake_find_package"] = "Headers"
         self.cpp_info.components["_opencl-headers"].names["cmake_find_package_multi"] = "Headers"
         self.cpp_info.components["_opencl-headers"].set_property("cmake_target_name", "OpenCL::Headers")
