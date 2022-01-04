@@ -133,18 +133,17 @@ class ProjConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
         self.cpp_info.set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.set_property("pkg_config_name", "proj")
+        self.cpp_info.components["projlib"].set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
-        self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
 
         self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
-        self.cpp_info.names["pkg_config"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
-        self.cpp_info.components["projlib"].names["pkg_config"] = "proj"
 
+        self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:
