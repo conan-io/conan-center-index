@@ -67,6 +67,8 @@ class AravisConan(ConanFile):
             raise ConanInvalidConfiguration("Static MT/MTd runtime is not supported on Windows due to GLib issues")
         if not self.options["glib"].shared and self.options.shared:
             raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("macOS builds are disabled until conan-io/conan#7324 gets merged to fix macOS SIP issue #8443")
 
     def build_requirements(self):
         self.build_requires("meson/0.60.2")
