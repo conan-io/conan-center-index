@@ -90,6 +90,7 @@ class LibopingConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
