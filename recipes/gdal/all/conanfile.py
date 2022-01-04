@@ -26,6 +26,8 @@ class GdalConan(ConanFile):
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_zstd": [True, False],
+        "with_blosc": [True, False],
+        "with_lz4": [True, False],
         "with_pg": [True, False],
         # "with_libgrass": [True, False],
         "with_cfitsio": [True, False],
@@ -60,6 +62,7 @@ class GdalConan(ConanFile):
         "with_sqlite3": [True, False],
         # "with_rasterlite2": [True, False],
         "with_pcre": [True, False],
+        "with_pcre2": [True, False],
         "with_webp": [True, False],
         "with_geos": [True, False],
         # "with_sfcgal": [True, False],
@@ -72,6 +75,7 @@ class GdalConan(ConanFile):
         # "with_pdfium": [True, False],
         # "with_tiledb": [True, False],
         # "with_rasdaman": [True, False],
+        "with_brunsli": [True, False],
         # "with_armadillo": [True, False],
         "with_cryptopp": [True, False],
         "with_crypto": [True, False],
@@ -90,6 +94,8 @@ class GdalConan(ConanFile):
         "with_libdeflate": True,
         "with_libiconv": True,
         "with_zstd": False,
+        "with_blosc": False,
+        "with_lz4": False,
         "with_pg": False,
         # "with_libgrass": False,
         "with_cfitsio": False,
@@ -124,6 +130,7 @@ class GdalConan(ConanFile):
         "with_sqlite3": True,
         # "with_rasterlite2": False,
         "with_pcre": False,
+        "with_pcre2": False,
         "with_webp": False,
         "with_geos": True,
         # "with_sfcgal": False,
@@ -136,6 +143,7 @@ class GdalConan(ConanFile):
         # "with_pdfium": False,
         # "with_tiledb": False,
         # "with_rasdaman": False,
+        "with_brunsli": False,
         # "with_armadillo": False,
         "with_cryptopp": False,
         "with_crypto": False,
@@ -169,6 +177,26 @@ class GdalConan(ConanFile):
     def _has_with_heif_option(self):
         return tools.Version(self.version) >= "3.2.0"
 
+    @property
+    def _has_with_blosc_option(self):
+        return tools.Version(self.version) >= "3.4.0"
+
+    @property
+    def _has_with_lz4_option(self):
+        return tools.Version(self.version) >= "3.4.0"
+
+    @property
+    def _has_with_brunsli_option(self):
+        return tools.Version(self.version) >= "3.4.0"
+
+    @property
+    def _has_with_pcre2_option(self):
+        return tools.Version(self.version) >= "3.4.1"
+
+    @property
+    def _has_reentrant_qhull_support(self):
+        return tools.Version(self.version) >= "3.4.1"
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -184,6 +212,14 @@ class GdalConan(ConanFile):
             del self.options.with_libdeflate
         if not self._has_with_heif_option:
             del self.options.with_heif
+        if not self._has_with_blosc_option:
+            del self.options.with_blosc
+        if not self._has_with_lz4_option:
+            del self.options.with_lz4
+        if not self._has_with_brunsli_option:
+            del self.options.with_brunsli
+        if not self._has_with_pcre2_option:
+            del self.options.with_pcre2
 
     def configure(self):
         if self.options.shared:
@@ -196,6 +232,7 @@ class GdalConan(ConanFile):
         #     del self.options.with_sqlite3
         if not self.options.get_safe("with_sqlite3", False):
             del self.options.with_pcre
+            del self.options.with_pcre2
         if self._is_msvc:
             del self.options.threadsafe
             del self.options.with_null
@@ -205,7 +242,7 @@ class GdalConan(ConanFile):
 
     def _strict_options_requirements(self):
         if self.options.with_qhull:
-            self.options["qhull"].reentrant = False
+            self.options["qhull"].reentrant = self._has_reentrant_qhull_support
 
     def requirements(self):
         self.requires("json-c/0.15")
@@ -223,6 +260,10 @@ class GdalConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.1")
+        if self.options.get_safe("with_blosc"):
+            self.requires("c-blosc/1.21.1")
+        if self.options.get_safe("with_lz4"):
+            self.requires("lz4/1.9.3")
         if self.options.with_pg:
             self.requires("libpq/13.4")
         # if self.options.with_libgrass:
@@ -293,6 +334,8 @@ class GdalConan(ConanFile):
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
             self.requires("pcre/8.45")
+        if self.options.get_safe("with_pcre2"):
+            self.requires("pcre2/10.37")
         if self.options.with_webp:
             self.requires("libwebp/1.2.1")
         if self.options.with_geos:
@@ -333,10 +376,19 @@ class GdalConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             min_cppstd = 14 if self.options.with_charls else 11
             tools.check_min_cppstd(self, min_cppstd)
+        if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
+            raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
+        if self.options.get_safe("with_pcre2") and not self.options["pcre2"].build_pcre2_8:
+            raise ConanInvalidConfiguration("gdal:with_pcre2=True requires pcre2:build_pcre2_8=True")
+        if self.options.get_safe("with_brunsli"):
+            raise ConanInvalidConfiguration("brunsli not available in conan-center yet")
         if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
-        if self.options.with_qhull and self.options["qhull"].reentrant:
-            raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+        if self.options.with_qhull:
+            if self._has_reentrant_qhull_support and not self.options["qhull"].reentrant:
+                raise ConanInvalidConfiguration("gdal {} depends on reentrant qhull.".format(self.version))
+            elif not self._has_reentrant_qhull_support and self.options["qhull"].reentrant:
+                raise ConanInvalidConfiguration("gdal {} depends on non-reentrant qhull.".format(self.version))
         if hasattr(self, "settings_build") and tools.cross_building(self):
             if self.options.shared:
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
@@ -425,8 +477,12 @@ class GdalConan(ConanFile):
             tools.replace_in_file(gnumakefile_apps,
                                   "default:	gdal-config-inst gdal-config $(BIN_LIST)",
                                   "default:	gdal-config-inst gdal-config")
+            if tools.Version(self.version) < "3.4.0":
+                clean_pattern = "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst"
+            else:
+                clean_pattern = "$(RM) *.o $(BIN_LIST) $(NON_DEFAULT_LIST) core gdal-config gdal-config-inst"
             tools.replace_in_file(gnumakefile_apps,
-                                  "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst",
+                                  clean_pattern,
                                   "$(RM) *.o core gdal-config gdal-config-inst")
             tools.replace_in_file(gnumakefile_apps,
                                   "for f in $(BIN_LIST) ; do $(INSTALL) $$f $(DESTDIR)$(INST_BIN) ; done",
@@ -542,6 +598,8 @@ class GdalConan(ConanFile):
             args.append("MYSQL_INC_DIR=\"{}\"".format(include_paths("mariadb-connector-c")))
         if self.options.get_safe("with_sqlite3"):
             args.append("SQLITE_INC=\"-I{}\"".format(include_paths("sqlite3")))
+        if self.options.get_safe("with_pcre2"):
+            args.append("PCRE2_INC=\"-I{}\"".format(include_paths("pcre2")))
         if self.options.get_safe("with_pcre"):
             args.append("PCRE_INC=\"-I{}\"".format(include_paths("pcre")))
         if self.options.with_cfitsio:
@@ -578,6 +636,10 @@ class GdalConan(ConanFile):
             args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
             args.append("ZSTD_CFLAGS=\"-I{}\"".format(include_paths("zstd")))
+        if self.options.get_safe("with_blosc"):
+            args.append("BLOSC_CFLAGS=\"-I{}\"".format(include_paths("c-blosc")))
+        if self.options.get_safe("with_lz4"):
+            args.append("LZ4_CFLAGS=\"-I{}\"".format(include_paths("lz4")))
         if self.options.with_webp:
             args.append("WEBP_ENABLED=YES")
             args.append("WEBP_CFLAGS=\"-I{}\"".format(include_paths("libwebp")))
@@ -588,6 +650,8 @@ class GdalConan(ConanFile):
         if self.options.with_mongocxx:
             args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(include_paths("mongo-cxx-driver")))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
+        if self.options.with_qhull and self.options["qhull"].reentrant:
+            args.append("QHULL_IS_LIBQHULL_R=1")
         if self.options.with_cryptopp:
             args.append("CRYPTOPP_INC=\"-I{}\"".format(include_paths("cryptopp")))
             if self.options["cryptopp"].shared:
@@ -596,6 +660,11 @@ class GdalConan(ConanFile):
             args.append("OPENSSL_INC=\"-I{}\"".format(include_paths("openssl")))
         if self.options.without_lerc:
             args.append("HAVE_LERC=0")
+        if self.options.get_safe("with_brunsli"):
+            args.extend([
+                "BRUNSLI_DIR=\"{}\"".format(rootpath("brunsli")),
+                "BRUNSLI_INC=\"{}\"".format(include_paths("brunsli")),
+            ])
         if self.options.with_charls:
             charls_version = version("charls")
             if charls_version >= "2.1.0":
@@ -670,6 +739,10 @@ class GdalConan(ConanFile):
         args.append("--with-libiconv-prefix={}".format(rootpath_no(self.options.with_libiconv, "libiconv")))
         args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
         args.append("--with-zstd={}".format(yes_no(self.options.get_safe("with_zstd")))) # Optional direct dependency of gdal only if lerc lib enabled
+        if self._has_with_blosc_option:
+            args.append("--with-blosc={}".format(yes_no(self.options.with_blosc)))
+        if self._has_with_lz4_option:
+            args.append("--with-lz4={}".format(yes_no(self.options.with_lz4)))
         # Drivers:
         if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
             # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
@@ -730,6 +803,8 @@ class GdalConan(ConanFile):
         args.append("--without-spatialite") # TODO: to implement when libspatialite lib available
         args.append("--with-sqlite3={}".format(yes_no(self.options.get_safe("with_sqlite3"))))
         args.append("--without-rasterlite2") # TODO: to implement when rasterlite2 lib available
+        if self._has_with_pcre2_option:
+            args.append("--with-pcre2={}".format(yes_no(self.options.with_pcre2)))
         args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
         args.append("--without-teigha") # commercial library
         args.append("--without-idb") # commercial library
@@ -766,6 +841,8 @@ class GdalConan(ConanFile):
             args.append("--without-tiledb") # TODO: to implement when tiledb lib available
         args.append("--without-mdb")
         args.append("--without-rasdaman") # TODO: to implement when rasdaman lib available
+        if self._has_with_brunsli_option:
+            args.append("--with-brunsli={}".format(yes_no(self.options.with_brunsli)))
         if tools.Version(self.version) >= "3.1.0":
             args.append("--without-rdb") # commercial library
         args.append("--without-armadillo") # TODO: to implement when armadillo lib available
