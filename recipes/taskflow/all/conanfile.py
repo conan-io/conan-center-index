@@ -13,13 +13,15 @@ class TaskflowConan(ConanFile):
     homepage = "https://github.com/taskflow/taskflow"
     license = "MIT"
 
-    no_copy_source = True
-
     settings = "os", "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def validate(self):
         minimal_cpp_standard = "17" if tools.Version(self.version) <= "2.2.0" or tools.Version(self.version) >= "3.0.0"  else "14"
@@ -56,6 +58,11 @@ class TaskflowConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            print(patch)
+            tools.patch(**patch)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
