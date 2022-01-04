@@ -46,8 +46,10 @@ class LibopingConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("liboping is not supported by Visual Studio")
-        if self.settings.os in ["Macos", "Windows"] and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Liboping could not be built on {} as shared library".format(self.settings.os))
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Liboping cannot be built on a Mac/M1 at this time")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
