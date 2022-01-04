@@ -49,13 +49,7 @@ class LibopingConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Liboping could not be built on {} as shared library".format(self.settings.os))
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # Build error - NO Access to a Mac/M1 - please fix when possible
-            # Undefined symbols for architecture arm64:
-            #  "_rpl_malloc", referenced from:
-            # _ping_construct in liboping.a(liboping_la-liboping.o)
-            # _ping_setopt in liboping.a(liboping_la-liboping.o)
-            # ping_host_add in liboping.a(liboping_la-liboping.o)
-            # ld: symbol(s) not found for architecture arm64
+            # Build error - NO Access to a Mac/M1 - please fix when possible - see issue 8634
             raise ConanInvalidConfiguration("Liboping cannot be built on a Mac/M1 at this time")
 
     def build_requirements(self):
