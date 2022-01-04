@@ -51,7 +51,7 @@ class LibopingConan(ConanFile):
             raise ConanInvalidConfiguration("liboping can't be built as shared on Windows")
 
 
-    def requirements(self):
+    def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
