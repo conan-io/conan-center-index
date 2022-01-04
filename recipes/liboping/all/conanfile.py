@@ -92,7 +92,6 @@ class LibopingConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        # self.cpp_info.libs = ["liboping"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows":
