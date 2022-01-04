@@ -7,7 +7,7 @@ import os
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
-    license = "OSGEARTH SOFTWARE LICENSE"
+    license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     description = "osgEarth is a C++ geospatial SDK and terrain engine. \
                    Just create a simple XML file, point it at your map data, \
@@ -124,7 +124,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.36.0")
         if self.options.with_draco:
-            self.requires("draco/[>1.3.6]")
+            self.requires("draco")
         # if self.options.with_basisu:
         #     self.requires("basisu")
         # if self.options.with_glew:
