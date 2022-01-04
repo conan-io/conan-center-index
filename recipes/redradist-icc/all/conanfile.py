@@ -22,7 +22,6 @@ class ICCConan(ConanFile):
         'fPIC': True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
 
     _cmake = None
 
@@ -86,6 +85,11 @@ class ICCConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -99,7 +103,7 @@ class ICCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "icc"
-        self.cpp_info.names["cmake_find_multi_package"] = "icc"
+        self.cpp_info.names["cmake_find_package_multi"] = "icc"
         if self.options.shared:
             self.cpp_info.libs = ["ICC"]
         else:

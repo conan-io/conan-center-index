@@ -1,0 +1,15 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index b538d15..7c811a8 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -47,6 +47,10 @@ target_link_libraries(${OATPP_THIS_MODULE_NAME}
+         PUBLIC ${PostgreSQL_LIBRARIES}
+ )
+ 
++if(MSVC)
++    target_compile_options(${OATPP_THIS_MODULE_NAME} PRIVATE "/bigobj")
++endif()
++
+ #######################################################################################################
+ ## install targets
+ 

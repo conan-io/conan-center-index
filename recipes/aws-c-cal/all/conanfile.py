@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
+
 
 class AwsCCal(ConanFile):
     name = "aws-c-cal"
@@ -53,7 +54,7 @@ class AwsCCal(ConanFile):
         else:
             self.requires("aws-c-common/0.6.15")
         if self._needs_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -81,15 +82,17 @@ class AwsCCal(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-cal"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-cal")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-cal")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-cal"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-cal"
-        self.cpp_info.set_property("cmake_file_name", "aws-c-cal")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.set_property("cmake_target_name", "AWS")
         self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package"] = "aws-c-cal"
         self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
-        self.cpp_info.components["aws-c-cal-lib"].set_property("cmake_target_name", "aws-c-cal")
+        self.cpp_info.components["aws-c-cal-lib"].set_property("cmake_target_name", "AWS::aws-c-cal")
+
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
         if self.settings.os == "Windows":

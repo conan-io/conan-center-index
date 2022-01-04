@@ -2,8 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-# TODO: bump to 1.43.0 due to set_property()
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class GlfwConan(ConanFile):

@@ -26,7 +26,6 @@ class IceoryxConan(ConanFile):
         "toml_config": True,
     }
     generators = ["cmake", "cmake_find_package"]
-    exports_sources = ["patches/**","CMakeLists.txt"]
     _cmake = None
 
     @property
@@ -73,6 +72,11 @@ class IceoryxConan(ConanFile):
             if version == "7.0" and compiler.get_safe("libcxx") == "libc++" and \
                self.options.shared and self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration("shared Debug with clang 7.0 and libc++ not supported")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -214,7 +218,7 @@ class IceoryxConan(ConanFile):
         #        iceoryx_utilsConfig.cmake, iceoryx_poshConfig.cmake and iceoryx_binding_cConfig.cmake
         #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
-        self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
+        self.cpp_info.names["cmake_find_package_multi"] = "iceoryx"
 
         def _register_components(components):
             for cmake_lib_name, values in components.items():

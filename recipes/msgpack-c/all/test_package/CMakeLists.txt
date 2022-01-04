@@ -4,7 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(msgpack-c REQUIRED CONFIG)
+find_package(msgpack REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} msgpack::msgpack-c)
+target_link_libraries(${PROJECT_NAME} msgpackc)
