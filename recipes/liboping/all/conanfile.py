@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class LibopingConan(ConanFile):
     name = "liboping"
     description = "A multi server ping library"
-    topics = ("conan", "oping", "liboping", "ping", "icmp")
+    topics = ("oping", "ping", "icmp")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://noping.cc"
     license = ["LGPL-2.1", "GPL-2.0"]
