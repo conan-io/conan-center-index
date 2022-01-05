@@ -17,11 +17,13 @@ class GeosConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "inline": [True, False],
+        "utils": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "inline": True,
+        "utils": True,
     }
 
     generators = "cmake"
@@ -35,6 +37,10 @@ class GeosConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_utils_option(self):
+        return tools.Version(self.version) >= "3.10.0"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -43,6 +49,8 @@ class GeosConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_utils_option:
+            del self.options.utils
 
     def configure(self):
         if self.options.shared:
@@ -76,6 +84,11 @@ class GeosConan(ConanFile):
             self._cmake.definitions["BUILD_BENCHMARKS"] = False
         self._cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
+        if tools.Version(self.version) >= "3.10.0":
+            self._cmake.definitions["BUILD_ASTYLE"] = False
+        if self._has_utils_option:
+            self._cmake.definitions["BUILD_GEOSOP"] = self.options.utils
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -85,6 +98,7 @@ class GeosConan(ConanFile):
         cmake.install()
         self.copy("geos.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geos")
@@ -118,3 +132,8 @@ class GeosConan(ConanFile):
         self.cpp_info.components["geos_c"].set_property("cmake_target_name", "GEOS::geos_c")
         self.cpp_info.components["geos_c"].libs = ["geos_c"]
         self.cpp_info.components["geos_c"].requires = ["geos_cpp"]
+
+        if self.options.get_safe("utils"):
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
