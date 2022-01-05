@@ -63,7 +63,7 @@ class LibtoolConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        with with tools.run_environment(self):
+        with tools.run_environment(self):
             with tools.environment_append(self._libtool_relocatable_env):
                 if self.settings.compiler == "Visual Studio":
                     with tools.vcvars(self.settings):
