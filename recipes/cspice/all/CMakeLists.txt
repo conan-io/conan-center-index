@@ -50,7 +50,7 @@ install(FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(BUILD_UTILITIES)
   # csupport is common to all utilities
   file(GLOB CSUPPORT_SRC_FILES "${SRC_DIR}/csupport/*.c")
-  add_library(csupport OBJECT ${CSUPPORT_SRC_FILES})
+  add_library(csupport STATIC ${CSUPPORT_SRC_FILES})
 
   # Walk into all utilities subfolders and build them (except cook_c which only contains examples)
   file(GLOB CSPICE_UTILITIES_SUBDIRS RELATIVE ${SRC_DIR} "${SRC_DIR}/*_c")
