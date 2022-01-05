@@ -38,6 +38,10 @@ class ConanRecipe(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _default_reporter_str(self):
+        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,9 +50,6 @@ class ConanRecipe(ConanFile):
         if not self.options.with_main:
             del self.options.fPIC
             del self.options.with_benchmark
-        if self.options.default_reporter:
-            if '"' not in str(self.options.default_reporter):
-                self.options.default_reporter = '"{}"'.format(self.options.default_reporter)
 
     def validate(self):
         if tools.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
@@ -70,7 +71,7 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["enable_benchmark"] = self.options.get_safe("with_benchmark", False)
         self._cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         if self.options.default_reporter:
-            self._cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self.options.default_reporter
+            self._cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -130,4 +131,4 @@ class ConanRecipe(ConanFile):
         if self.options.with_prefix:
             defines.append("CATCH_CONFIG_PREFIX_ALL")
         if self.options.default_reporter:
-            defines.append("CATCH_CONFIG_DEFAULT_REPORTER={}".format(self.options.default_reporter))
+            defines.append("CATCH_CONFIG_DEFAULT_REPORTER={}".format(self._default_reporter_str))
