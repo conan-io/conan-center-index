@@ -13,10 +13,6 @@ class FlatbushConan(ConanFile):
     settings = "os", "compiler"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
