@@ -4,6 +4,8 @@ project(cspice C)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+include(GNUInstallDirs)
+
 option(BUILD_UTILITIES "Build cspice utilities" ON)
 
 add_compile_options(
@@ -43,7 +45,7 @@ install(
 )
 
 file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/*.h)
-install(FILES ${INCLUDE_FILES} DESTINATION include)
+install(FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 if(BUILD_UTILITIES)
   # csupport is common to all utilities
