@@ -11,7 +11,6 @@ class CvPlotConan(ConanFile):
     topics = ("plot", "opencv", "diagram", "plotting")
     homepage = "https://github.com/Profactor/cv-plot"
     url = "https://github.com/conan-io/conan-center-index"
-    generators = "cmake"
     requires = "opencv/4.5.3"
     no_copy_source = True
 
