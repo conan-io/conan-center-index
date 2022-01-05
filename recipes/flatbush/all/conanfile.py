@@ -11,7 +11,6 @@ class FlatbushConan(ConanFile):
     topics = ("header-only", "flatbush", "r-tree", "hilbert", "zero-copy", "spatial-index")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler"
-    #exports_sources = "flatbush.h", "test.cpp", "CMakeLists.txt"
     no_copy_source = True
 
     @property
