@@ -17,6 +17,7 @@ class OpenCascadeConan(ConanFile):
     topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
 
     settings = "os", "arch", "compiler", "build_type"
+    # TODO: Add Optional TK
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,6 +25,7 @@ class OpenCascadeConan(ConanFile):
         "with_freeimage": [True, False],
         "with_openvr": [True, False],
         "with_rapidjson": [True, False],
+        "with_draco": [True, False],
         "with_tbb": [True, False],
         "extended_debug_messages": [True, False],
     }
@@ -34,6 +36,7 @@ class OpenCascadeConan(ConanFile):
         "with_freeimage": False,
         "with_openvr": False,
         "with_rapidjson": False,
+        "with_draco": False,
         "with_tbb": False,
         "extended_debug_messages": False,
     }
@@ -81,10 +84,15 @@ class OpenCascadeConan(ConanFile):
             self.requires("openvr/1.14.15")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
+        # TODO: add draco support
+        if self.options.with_draco:
+            raise ConanInvalidConfiguration("draco not yet supported")
         if self.options.with_tbb:
             self.requires("tbb/2020.3")
 
     def validate(self):
+        if tools.Version(self.version) < "7.6.0" and self.options.with_draco:
+            raise ConanInvalidConfiguration("Draco is available on 7.6.0 or higher.")
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration("OpenCASCADE {} doesn't support Clang 6.0 if Release build type".format(self.version))
@@ -141,14 +149,20 @@ class OpenCascadeConan(ConanFile):
         csf_tcl_libs = "set (CSF_TclLibs \"{}\")".format(" ".join(self.deps_cpp_info["tcl"].libs))
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
+        if tools.Version(self.version) >= "7.6.0":
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+        else:
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
         ## tk
         conan_targets.append("CONAN_PKG::tk")
         tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "")
         csf_tk_libs = "set (CSF_TclTkLibs \"{}\")".format(" ".join(self.deps_cpp_info["tk"].libs))
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
         tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
+        if tools.Version(self.version) >= "7.6.0":
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+        else:
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
         ## fontconfig
         if self._is_linux:
             conan_targets.append("CONAN_PKG::fontconfig")
@@ -200,12 +214,20 @@ class OpenCascadeConan(ConanFile):
             "${{USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}} {}".format(" ".join(conan_targets)))
 
         # Do not install pdb files
-        tools.replace_in_file(
-            occt_toolkit_cmake,
-            """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
+        if tools.Version(self.version) >= "7.6.0":
+            tools.replace_in_file(
+                occt_toolkit_cmake,
+                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
+             CONFIGURATIONS Debug ${aReleasePdbConf} RelWithDebInfo
+             DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
+                "")
+        else:
+            tools.replace_in_file(
+                occt_toolkit_cmake,
+                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug RelWithDebInfo
              DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
-            "")
+                "")
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         tools.replace_in_file(occt_defs_flags_cmake, "-fPIC", "")
@@ -217,16 +239,17 @@ class OpenCascadeConan(ConanFile):
                               "set (CSF_ThreadLibs  \"pthread rt\")")
 
         # No hardcoded link through #pragma
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "src", "Font", "Font_FontMgr.cxx"),
-            "#pragma comment (lib, \"freetype.lib\")",
-            "")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "src", "Draw", "Draw.cxx"),
-            """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
+        if tools.Version(self.version) < "7.6.0":
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "Font", "Font_FontMgr.cxx"),
+                "#pragma comment (lib, \"freetype.lib\")",
+                "")
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "Draw", "Draw.cxx"),
+                """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
 #pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
-            ""
-        )
+                ""
+            )
 
     def _configure_cmake(self):
         if self._cmake:
@@ -350,6 +373,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
+            "CSF_Draco": {"externals": ["draco::draco"] if self.options.with_draco else []},
             "CSF_TBB": {"externals": ["tbb::tbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
             # Android system libs
