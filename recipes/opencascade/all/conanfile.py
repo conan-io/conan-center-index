@@ -309,6 +309,7 @@ class OpenCascadeConan(ConanFile):
         self._cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
         if tools.Version(self.version) >= "7.6.0":
             self._cmake.definitions["USE_DRACO"] = self.options.with_draco
+            self._cmake.definitions["USE_TK"] = self.options.with_tk
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
