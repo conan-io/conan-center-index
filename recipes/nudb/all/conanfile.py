@@ -1,5 +1,5 @@
+from conans import ConanFile, CMake, tools
 import os
-from conans import ConanFile, tools
 
 required_conan_version = ">=1.33.0"
 
@@ -24,9 +24,9 @@ class NudbConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "NuDB", "include"), dst="include")
-        self.copy("*.ipp", src=os.path.join(self._source_subfolder, "NuDB", "include"), dst="include")
-        self.copy("LICENSE_1_0.txt ", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE*", "licenses", self._source_subfolder)
+        self.copy("*.hpp", "include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("*.ipp", "include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
         self.info.header_only()
