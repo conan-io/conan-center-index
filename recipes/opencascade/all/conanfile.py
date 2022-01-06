@@ -17,7 +17,6 @@ class OpenCascadeConan(ConanFile):
     topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
 
     settings = "os", "arch", "compiler", "build_type"
-    # TODO: Add Optional TK
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,6 +25,7 @@ class OpenCascadeConan(ConanFile):
         "with_openvr": [True, False],
         "with_rapidjson": [True, False],
         "with_draco": [True, False],
+        "with_tk": [True, False],
         "with_tbb": [True, False],
         "extended_debug_messages": [True, False],
     }
@@ -37,6 +37,7 @@ class OpenCascadeConan(ConanFile):
         "with_openvr": False,
         "with_rapidjson": False,
         "with_draco": False,
+        "with_tk": False,
         "with_tbb": False,
         "extended_debug_messages": False,
     }
@@ -55,7 +56,17 @@ class OpenCascadeConan(ConanFile):
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
 
+    @property
+    def _link_tk(self):
+        if tools.Version(self.version) >= "7.6.0":
+            return self.options.with_tk
+        else:
+            return True
+
     def config_options(self):
+        if tools.Version(self.version) < "7.6.0":
+            del self.options.with_tk
+            del self.options.with_draco
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.build_type != "Debug":
@@ -69,7 +80,8 @@ class OpenCascadeConan(ConanFile):
 
     def requirements(self):
         self.requires("tcl/8.6.10")
-        self.requires("tk/8.6.10")
+        if self._link_tk:
+            self.requires("tk/8.6.10")
         self.requires("freetype/2.10.4")
         self.requires("opengl/system")
         if self._is_linux:
@@ -84,14 +96,12 @@ class OpenCascadeConan(ConanFile):
             self.requires("openvr/1.14.15")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
-        if self.options.with_draco:
+        if self.options.get_safe("with_draco"):
             self.requires("draco/1.4.3")
         if self.options.with_tbb:
             self.requires("tbb/2020.3")
 
     def validate(self):
-        if tools.Version(self.version) < "7.6.0" and self.options.with_draco:
-            raise ConanInvalidConfiguration("Draco is available on 7.6.0 or higher.")
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration("OpenCASCADE {} doesn't support Clang 6.0 if Release build type".format(self.version))
@@ -153,15 +163,16 @@ class OpenCascadeConan(ConanFile):
         else:
             tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
         ## tk
-        conan_targets.append("CONAN_PKG::tk")
-        tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "")
-        csf_tk_libs = "set (CSF_TclTkLibs \"{}\")".format(" ".join(self.deps_cpp_info["tk"].libs))
-        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
-        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-        if tools.Version(self.version) >= "7.6.0":
-            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
-        else:
-            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
+        if self._link_tk:
+            conan_targets.append("CONAN_PKG::tk")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "")
+            csf_tk_libs = "set (CSF_TclTkLibs \"{}\")".format(" ".join(self.deps_cpp_info["tk"].libs))
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
+            tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
+            if tools.Version(self.version) >= "7.6.0":
+                tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+            else:
+                tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
         ## fontconfig
         if self._is_linux:
             conan_targets.append("CONAN_PKG::fontconfig")
@@ -206,7 +217,7 @@ class OpenCascadeConan(ConanFile):
             conan_targets.append("CONAN_PKG::rapidjson")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/rapidjson\")", "")
         ## draco
-        if self.options.with_draco:
+        if self.options.get_safe("with_draco"):
             conan_targets.append("CONAN_PKG::draco")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/draco\")", "")
 
@@ -370,7 +381,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"]},
             "CSF_TclLibs": {"externals": ["tcl::tcl"]},
-            "CSF_TclTkLibs": {"externals": ["tk::tk"]},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
@@ -378,7 +389,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
-            "CSF_Draco": {"externals": ["draco::draco"] if self.options.with_draco else []},
+            "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
             "CSF_TBB": {"externals": ["tbb::tbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
             # Android system libs
