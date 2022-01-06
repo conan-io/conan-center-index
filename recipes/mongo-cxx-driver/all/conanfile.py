@@ -190,7 +190,7 @@ class MongoCxxConan(ConanFile):
 
         # mongocxx
         self.cpp_info.components["mongocxx"].set_property("cmake_target_name", "mongo::{}".format(mongocxx_target))
-        self.cpp_info.components["mongocxx"].set_property("pkg_config_name", "libmongocxx")
+        self.cpp_info.components["mongocxx"].set_property("pkg_config_name", "libmongocxx" if self.options.shared else "libmongocxx-static")
 
         self.cpp_info.components["mongocxx"].names["cmake_find_package"] = mongocxx_target
         self.cpp_info.components["mongocxx"].names["cmake_find_package_multi"] = mongocxx_target
