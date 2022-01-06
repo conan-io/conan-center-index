@@ -1,4 +1,7 @@
 sources:
+  "0.9.6":
+    url: "https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.6/uriparser-0.9.6.tar.xz"
+    sha256: "a288a06668528c19e85e38c508335938e1de6fdd4b8f2072401b4533fcebf644"
   "0.9.5":
     url: "https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.tar.xz"
     sha256: "9af8f87ed762ebac333fd42b6c38b62d217be8ba290d050f40aef43b9267651e"
