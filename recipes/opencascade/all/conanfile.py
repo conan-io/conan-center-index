@@ -176,10 +176,16 @@ class OpenCascadeConan(ConanFile):
         ## fontconfig
         if self._is_linux:
             conan_targets.append("CONAN_PKG::fontconfig")
-            tools.replace_in_file(
-                occt_csf_cmake,
-                "set (CSF_fontconfig  \"fontconfig\")",
-                "set (CSF_fontconfig  \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
+            if tools.Version(self.version) >= "7.6.0":
+                tools.replace_in_file(
+                    occt_csf_cmake,
+                    "set (CSF_fontconfig \"fontconfig\")",
+                    "set (CSF_fontconfig \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
+            else:
+                tools.replace_in_file(
+                    occt_csf_cmake,
+                    "set (CSF_fontconfig  \"fontconfig\")",
+                    "set (CSF_fontconfig  \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
         ## tbb
         if self.options.with_tbb:
             conan_targets.append("CONAN_PKG::tbb")
