@@ -123,7 +123,7 @@ class LibjpegTurboConan(ConanFile):
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            self._cmake.definitions["CONAN_LIBJPEG_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake

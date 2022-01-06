@@ -146,7 +146,6 @@ class FastDDSConan(ConanFile):
                 # linking dynamic '*.dll' and static MT runtime
                 raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
 
-
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
