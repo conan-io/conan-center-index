@@ -237,7 +237,7 @@ class OpenCascadeConan(ConanFile):
         if tools.Version(self.version) >= "7.6.0":
             tools.replace_in_file(
                 occt_toolkit_cmake,
-                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
+                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug ${aReleasePdbConf} RelWithDebInfo
              DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
                 "")
