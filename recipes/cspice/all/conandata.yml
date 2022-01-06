@@ -112,6 +112,9 @@ sources:
           "sparc": "463c93a54f432fa41e1733bc4ec0e584f1017f48f84e0e9fafe4adc4163064c9"
           "sparcv9": "4e86fad7e8fa947abddd3d78174efc65476a3f54627747ffc2027ee572af48b3"
 patches:
+  "0067":
+    - patch_file: "patches/isatty.patch"
+      base_path: "source_subfolder"
   "0066":
     - patch_file: "patches/isatty.patch"
       base_path: "source_subfolder"
