@@ -77,7 +77,8 @@ class CspiceConan(ConanFile):
 
     def build(self):
         self._get_sources()
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -96,15 +97,6 @@ class CspiceConan(ConanFile):
         else:
             tools.get(url, sha256=sha256)
         tools.rename(self.name, self._source_subfolder)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # TODO: find a more elegant patch, there is likely some conflict between
-        #       fio.h and io.h in 0067 but the diff with 0066 is not obvious.
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and self.version == "0067":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "cspice", "fio.h"),
-                                  "extern int isatty(int);", "")
 
     def _configure_cmake(self):
         if self._cmake:
