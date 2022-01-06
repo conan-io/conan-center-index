@@ -10,7 +10,7 @@ class FlatbushConan(ConanFile):
     description = "Flatbush for C++"
     topics = ("header-only", "flatbush", "r-tree", "hilbert", "zero-copy", "spatial-index")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     def source(self):
@@ -28,4 +28,3 @@ class FlatbushConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
