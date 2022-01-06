@@ -14,7 +14,7 @@ class OpenCascadeConan(ConanFile):
     homepage = "https://dev.opencascade.org"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
+    topics = ("opencascade", "occt", "3d", "modeling", "cad")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
