@@ -75,18 +75,17 @@ class OpenCascadeConan(ConanFile):
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
-        # TODO: add ffmpeg & freeimage support (also vtk?)
+        # TODO: add freeimage support (also vtk?)
         if self.options.with_ffmpeg:
-            raise ConanInvalidConfiguration("ffmpeg recipe not yet available in CCI")
+            self.requires("ffmpeg/4.4")
         if self.options.with_freeimage:
             raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
         if self.options.with_openvr:
             self.requires("openvr/1.14.15")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
-        # TODO: add draco support
         if self.options.with_draco:
-            raise ConanInvalidConfiguration("draco not yet supported")
+            self.requires("draco/1.4.3")
         if self.options.with_tbb:
             self.requires("tbb/2020.3")
 
@@ -206,6 +205,10 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_rapidjson:
             conan_targets.append("CONAN_PKG::rapidjson")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/rapidjson\")", "")
+        ## draco
+        if self.options.with_draco:
+            conan_targets.append("CONAN_PKG::draco")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/draco\")", "")
 
         ## Inject conan targets
         tools.replace_in_file(
@@ -293,6 +296,8 @@ class OpenCascadeConan(ConanFile):
         self._cmake.definitions["USE_FFMPEG"] = self.options.with_ffmpeg
         self._cmake.definitions["USE_TBB"] = self.options.with_tbb
         self._cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
+        if tools.Version(self.version) >= "7.6.0":
+            self._cmake.definitions["USE_DRACO"] = self.options.with_draco
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
