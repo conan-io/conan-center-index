@@ -1,5 +1,4 @@
 sources:
   0.0.1:
-    # TODO: replace with tag
-    url: https://github.com/foxglove/ws-protocol/archive/4b30ea2a835865636e70130c001b1f54bcb693cb.zip
-    sha256: 5dcbd9d19f695d3bceb03d2d97ef8049d99e4d31fa1686eedd01d2111841bff1
+    url: https://github.com/foxglove/ws-protocol/archive/refs/tags/releases/cpp/v0.0.1.tar.gz
+    sha256: 94766f44973f0c0ce7e87039b9ef9d5b4a8bc73727047568170ac61262625c9b

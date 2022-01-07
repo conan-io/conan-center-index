@@ -14,7 +14,7 @@ class FoxgloveWebSocketConan(ConanFile):
     generators = "cmake"
 
     _source_root = "source_root"
-    _source_package_path = os.path.join(_source_root, "cpp", "foxglove_websocket")
+    _source_package_path = os.path.join(_source_root, "cpp", "foxglove-websocket")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_root)
