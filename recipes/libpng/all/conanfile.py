@@ -1,8 +1,7 @@
 from conans import ConanFile, CMake, tools
-import glob
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibpngConan(ConanFile):
@@ -11,7 +10,7 @@ class LibpngConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
-    topics = ("conan", "png", "libpng")
+    topics = ("png", "libpng")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -33,7 +32,6 @@ class LibpngConan(ConanFile):
         "api_prefix": "",
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake", "cmake_find_package"]
     _cmake = None
 
@@ -56,6 +54,11 @@ class LibpngConan(ConanFile):
     @property
     def _has_vsx_support(self):
         return "ppc" in self.settings.arch
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -126,8 +129,8 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
-        if tools.cross_building(self.settings):
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = self._libpng_cmake_system_processor
+        if tools.cross_building(self):
+            self._cmake.definitions["CONAN_LIBPNG_SYSTEM_PROCESSOR"] = self._libpng_cmake_system_processor
         if self._has_neon_support:
             self._cmake.definitions["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
         if self._has_msa_support:
@@ -149,9 +152,7 @@ class LibpngConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            for binfile in glob.glob(os.path.join(self.package_folder, "bin", "*")):
-                if not binfile.endswith(".dll"):
-                    os.remove(binfile)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
         else:
             tools.rmdir(os.path.join(self.package_folder, "bin"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
@@ -159,9 +160,13 @@ class LibpngConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "PNG")
+        self.cpp_info.set_property("cmake_target_name", "PNG::PNG")
+        self.cpp_info.set_property("pkg_config_name", "libpng") # TODO: we should also create libpng16.pc file
+
         self.cpp_info.names["cmake_find_package"] = "PNG"
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
-        self.cpp_info.names["pkg_config"] = "libpng" # TODO: we should also create libpng16.pc file
 
         prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
