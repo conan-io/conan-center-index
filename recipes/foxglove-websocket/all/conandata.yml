@@ -1,0 +1,5 @@
+sources:
+  0.0.1:
+    # TODO: replace with tag
+    url: https://github.com/foxglove/ws-protocol/archive/4b30ea2a835865636e70130c001b1f54bcb693cb.zip
+    sha256: 5dcbd9d19f695d3bceb03d2d97ef8049d99e4d31fa1686eedd01d2111841bff1
