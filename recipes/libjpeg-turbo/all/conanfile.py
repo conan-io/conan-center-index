@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibjpegTurboConan(ConanFile):
@@ -162,19 +162,20 @@ class LibjpegTurboConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), pattern_to_remove)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"
-        self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
+        self.cpp_info.set_property("cmake_file_name", "libjpeg-turbo")
 
         cmake_target_suffix = "-static" if not self.options.shared else ""
         lib_suffix = "-static" if self._is_msvc and not self.options.shared else ""
 
+        self.cpp_info.components["jpeg"].set_property("cmake_target_name", "libjpeg-turbo::jpeg{}".format(cmake_target_suffix))
+        self.cpp_info.components["jpeg"].set_property("pkg_config_name", "libjpeg")
         self.cpp_info.components["jpeg"].names["cmake_find_package"] = "jpeg" + cmake_target_suffix
         self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = "jpeg" + cmake_target_suffix
-        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
         self.cpp_info.components["jpeg"].libs = ["jpeg" + lib_suffix]
 
         if self.options.get_safe("turbojpeg"):
+            self.cpp_info.components["turbojpeg"].set_property("cmake_target_name", "libjpeg-turbo::turbojpeg{}".format(cmake_target_suffix))
+            self.cpp_info.components["turbojpeg"].set_property("pkg_config_name", "libturbojpeg")
             self.cpp_info.components["turbojpeg"].names["cmake_find_package"] = "turbojpeg" + cmake_target_suffix
             self.cpp_info.components["turbojpeg"].names["cmake_find_package_multi"] = "turbojpeg" + cmake_target_suffix
-            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
             self.cpp_info.components["turbojpeg"].libs = ["turbojpeg" + lib_suffix]
