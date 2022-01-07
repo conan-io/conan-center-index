@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class XercesCConan(ConanFile):
@@ -10,7 +10,7 @@ class XercesCConan(ConanFile):
     description = (
         "Xerces-C++ is a validating XML parser written in a portable subset of C++"
     )
-    topics = ("conan", "xerces", "XML", "validation", "DOM", "SAX", "SAX2")
+    topics = ("xerces", "XML", "validation", "DOM", "SAX", "SAX2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
     license = "Apache-2.0"
@@ -36,7 +36,6 @@ class XercesCConan(ConanFile):
         "mutex_manager": "standard",
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -47,6 +46,11 @@ class XercesCConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -142,10 +146,15 @@ class XercesCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "XercesC")
+        self.cpp_info.set_property("cmake_target_name", "XercesC::XercesC")
+        self.cpp_info.set_property("pkg_config_name", "xerces-c")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
