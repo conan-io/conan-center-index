@@ -5,7 +5,7 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(NO_OUTPUT_DIRS)
 
-if(NOT CMAKE_SYSTEM_PROCESSOR)
+if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR STREQUAL "")
     set(CMAKE_SYSTEM_PROCESSOR ${CONAN_LIBJPEG_SYSTEM_PROCESSOR})
 endif()
 
