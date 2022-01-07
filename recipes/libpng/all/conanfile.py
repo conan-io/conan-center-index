@@ -40,6 +40,10 @@ class LibpngConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _has_neon_support(self):
         return "arm" in self.settings.arch
 
@@ -93,7 +97,7 @@ class LibpngConan(ConanFile):
                               "set(M_LIBRARY m)")
 
         if tools.os_info.is_windows:
-            if self.settings.compiler == "Visual Studio":
+            if self._is_msvc:
                 tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                      'OUTPUT_NAME "${PNG_LIB_NAME}_static',
                                      'OUTPUT_NAME "${PNG_LIB_NAME}')
@@ -168,7 +172,7 @@ class LibpngConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PNG"
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
 
-        prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["{}png16{}".format(prefix, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD"]:
