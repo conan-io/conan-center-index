@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+
 class FoxgloveWebSocketConan(ConanFile):
     name = "foxglove-websocket"
     url = "https://github.com/conan-io/conan-center-index"
@@ -31,4 +32,3 @@ class FoxgloveWebSocketConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
