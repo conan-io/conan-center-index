@@ -75,6 +75,7 @@ class LibjpegTurboConan(ConanFile):
         if self.options.libjpeg8_compatibility:
             del self.options.mem_src_dst
 
+    def validate(self):
         if self.options.enable12bit and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
         if self.options.get_safe("java", False) and not self.options.shared:
