@@ -50,6 +50,10 @@ class LibjpegTurboConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -75,7 +79,7 @@ class LibjpegTurboConan(ConanFile):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
         if self.options.get_safe("java", False) and not self.options.shared:
             raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and str(self.settings.compiler.runtime).startswith("MT"):
+        if self._is_msvc and self.options.shared and str(self.settings.compiler.runtime).startswith("MT"):
             raise ConanInvalidConfiguration("shared libjpeg-turbo can't be built with MT or MTd")
 
     @property
@@ -111,7 +115,7 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         self._cmake.definitions["WITH_JAVA"] = self.options.get_safe("java", False)
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
         if tools.Version(self.version) <= "2.1.0":
@@ -161,7 +165,7 @@ class LibjpegTurboConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
 
         cmake_target_suffix = "-static" if not self.options.shared else ""
-        lib_suffix = "-static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
+        lib_suffix = "-static" if self._is_msvc and not self.options.shared else ""
 
         self.cpp_info.components["jpeg"].names["cmake_find_package"] = "jpeg" + cmake_target_suffix
         self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = "jpeg" + cmake_target_suffix
