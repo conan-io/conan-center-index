@@ -4,7 +4,7 @@ project(cmake_wrapper)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
+if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR STREQUAL "")
     set(CMAKE_SYSTEM_PROCESSOR ${CONAN_LIBPNG_SYSTEM_PROCESSOR})
 endif()
 
