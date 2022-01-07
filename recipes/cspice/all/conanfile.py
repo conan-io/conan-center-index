@@ -1,34 +1,41 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
+
 
 class CspiceConan(ConanFile):
     name = "cspice"
     description = "NASA C SPICE library"
     license = "TSPA"
-    topics = ("conan", "spice", "naif", "kernels", "space", "nasa", "jpl", "spacecraft", "planet", "robotics")
+    topics = ("spice", "naif", "kernels", "space", "nasa", "jpl", "spacecraft", "planet", "robotics")
     homepage = "https://naif.jpl.nasa.gov/naif/toolkit.html"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "utilities": [True, False]
+        "utilities": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "utilities": True
+        "utilities": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,19 +46,24 @@ class CspiceConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        self._raise_if_not_supported_triplet()
 
-    def _raise_if_not_supported_triplet(self):
+    def validate(self):
         sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
         the_os = self._get_os_or_subsystem()
         if the_os not in sources_url_per_triplet:
-            raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
+            raise ConanInvalidConfiguration(
+                "cspice N{0} does not support {1}".format(self.version, the_os)
+            )
         compiler = str(self.settings.compiler)
         if compiler not in sources_url_per_triplet[the_os]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1}".format(compiler, the_os))
+            raise ConanInvalidConfiguration(
+                "cspice N{0} does not support {1} on {2}".format(self.version, compiler, the_os)
+            )
         arch = str(self.settings.arch)
         if arch not in sources_url_per_triplet[the_os][compiler]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
+            raise ConanInvalidConfiguration(
+                "cspice N{0} does not support {1} on {2} {3}".format(self.version, compiler, the_os, arch)
+            )
 
     def _get_os_or_subsystem(self):
         if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
@@ -65,7 +77,7 @@ class CspiceConan(ConanFile):
 
     def build(self):
         self._get_sources()
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -84,7 +96,7 @@ class CspiceConan(ConanFile):
             os.remove(filename)
         else:
             tools.get(url, sha256=sha256)
-        os.rename(self.name, self._source_subfolder)
+        tools.rename(self.name, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
