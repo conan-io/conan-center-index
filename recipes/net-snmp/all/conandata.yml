@@ -8,3 +8,5 @@ patches:
       base_path: ""
     - patch_file: patches/0002-install-only-libnetsnmp.patch
       base_path: ""
+    - patch_file: patches/0003-fix-perl-scripts-msvc.patch
+      base_path: ""

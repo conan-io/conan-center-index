@@ -103,45 +103,37 @@ class NetSnmpConan(ConanFile):
         with self._replace_in_file("win32\\build.pl") as replacer:
             replacer("$openssl = false", "$openssl = true")
             replacer(
-                r'''$default_openssldir . "\\include"''',
+                r'$default_openssldir . "\\include"',
                 f'"{openssl_root}/include"'
             )
             replacer(
-                r'''$default_openssldir . "\\lib\\VC"''',
+                r'$default_openssldir . "\\lib\\VC"',
                 f'"{openssl_root}/lib"'
             )
-            replacer("$install = true", "$install = false")
-            replacer("$logging = true", "$logging = false")
             if self._is_debug:
                 replacer("$debug = false", "$debug = true")
             if self.options.shared:
                 replacer("$link_dynamic = false", "$link_dynamic = true")
             if self.options.with_ipv6:
                 replacer("$b_ipv6 = false", "$b_ipv6 = true")
-                replacer("$sdk = false", "$sdk = true")
-            replacer("while (1) {", "while (0) {")
-            replacer('print "Cleaning...\\n";', "exit;")
         tools.replace_in_file(
             "win32\\Configure",
             '"/MDd' if self._is_debug else '"/MD',
-            f'" /{self.settings.compiler.runtime}'
+            f'"/{self.settings.compiler.runtime}'
         )
         link_lines = "\n".join(
             f'#    pragma comment(lib, "{lib}.lib")'
             for lib in ssl_info.libs + ssl_info.system_libs
         )
-        tools.replace_in_file(
-            r"win32\net-snmp\net-snmp-config.h.in",
-            '#    pragma comment(lib, "gdi32.lib")',
-            f'{link_lines}\n #   pragma comment(lib, "gdi32.lib")'
-        )
+        config = r"win32\net-snmp\net-snmp-config.h.in"
+        tools.replace_in_file(config, "/* Conan: system_libs */", link_lines)
 
     def _build_msvc(self):
-        with tools.vcvars(self):
-            if self.should_configure:
-                self._patch_msvc()
-                self.run("perl build.pl", cwd="win32")
-            if self.should_build:
+        if self.should_configure:
+            self._patch_msvc()
+            self.run("perl build.pl", cwd="win32")
+        if self.should_build:
+            with tools.vcvars(self):
                 self.run("nmake /nologo libsnmp", cwd="win32")
 
     @functools.lru_cache(1)
@@ -199,19 +191,20 @@ class NetSnmpConan(ConanFile):
             self.copy(f"net-snmp/{dir}*.h", "include", "win32")
         self.copy("COPYING", "licenses")
 
+    def _remove(self, path):
+        if os.path.isdir(path):
+            tools.rmdir(path)
+        else:
+            os.remove(path)
+
     def _package_unix(self):
         self._configure_autotools().install(args=["NOAUTODEPS=1"])
         tools.remove_files_by_mask(self.package_folder, "README")
         tools.rmdir(os.path.join(self.package_folder, "bin"))
         lib_dir = os.path.join(self.package_folder, "lib")
         for entry in os.listdir(lib_dir):
-            if entry.startswith("libnetsnmp.") and not entry.endswith(".la"):
-                continue
-            entry = os.path.join(lib_dir, entry)
-            if os.path.isdir(entry):
-                tools.rmdir(entry)
-            else:
-                os.remove(entry)
+            if not entry.startswith("libnetsnmp.") or entry.endswith(".la"):
+                self._remove(os.path.join(lib_dir, entry))
         self.copy("COPYING", "licenses")
 
     def package(self):

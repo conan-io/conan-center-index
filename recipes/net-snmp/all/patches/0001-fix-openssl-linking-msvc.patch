@@ -1,6 +1,6 @@
 --- win32/net-snmp/net-snmp-config.h.in
 +++ win32/net-snmp/net-snmp-config.h.in
-@@ -1777,59 +1777,6 @@
+@@ -1777,59 +1777,7 @@
  /* MSVC OpenSSL linker settings. */
  #if defined(_MSC_VER)
  #  if defined(NETSNMP_USE_OPENSSL)
@@ -57,6 +57,7 @@
 -#        endif
 -#      endif
 -#    endif
++/* Conan: system_libs */
  #    pragma comment(lib, "gdi32.lib")
  #    pragma comment(lib, "user32.lib")
  #  endif
