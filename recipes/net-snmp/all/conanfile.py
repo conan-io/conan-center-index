@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.44.0"
+required_conan_version = ">=1.43.0"
 
 
 class NetSnmpConan(ConanFile):
@@ -68,7 +68,7 @@ class NetSnmpConan(ConanFile):
 
     def build_requirements(self):
         if self._is_msvc:
-            self.tool_requires("strawberryperl/5.30.0.1")
+            self.build_requires("strawberryperl/5.30.0.1")
 
     @contextmanager
     def _add_write_permissions(self, file):
