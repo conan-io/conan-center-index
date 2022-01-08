@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.43.0"
@@ -61,6 +62,10 @@ class LibxsltConan(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/2.9.12")
+
+    def validate(self):
+        if self.options.plugins and not self.options.shared:
+            raise ConanInvalidConfiguration("plugins require shared")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and \
