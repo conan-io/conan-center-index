@@ -9,7 +9,7 @@ class FlatbushConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
-    
+
     def source(self):
        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
@@ -19,7 +19,7 @@ class FlatbushConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-        
+
     def package_info(self):
         if not tools.valid_min_cppstd(self, "20"):
             self.cpp_info.defines = ["MINIMAL_SPAN"]

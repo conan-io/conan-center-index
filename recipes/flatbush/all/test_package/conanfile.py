@@ -5,7 +5,7 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
-    
+
     def build(self):
         cmake = CMake(self)
         cmake.verbose = True
@@ -14,10 +14,10 @@ class TestPackageConan(ConanFile):
 
     def configure(self):
         compiler = self.settings.compiler
-        
+
         if compiler.cppstd:
             tools.check_min_cppstd(self, 11)
-        
+
         if compiler == "gcc" and Version(compiler.version) < 6:
             compiler.cppstd = "11"
 
