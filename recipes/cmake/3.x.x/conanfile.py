@@ -2,7 +2,7 @@ import os
 from conans import tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -111,8 +111,10 @@ class CMakeConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
+        self.buildenv_info.prepend_path("CMAKE_ROOT", self.package_folder)
         self.env_info.CMAKE_ROOT = self.package_folder
         mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % minor, "Modules")
+        self.buildenv_info.prepend_path("CMAKE_MODULE_PATH", mod_path)
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
