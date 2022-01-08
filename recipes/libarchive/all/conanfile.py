@@ -2,18 +2,17 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
     description = "Multi-format archive and compression library"
-    topics = ("conan", "libarchive", "tar", "data-compressor", "file-compression")
+    topics = ("libarchive", "tar", "data-compressor", "file-compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,7 +31,7 @@ class LibarchiveConan(ConanFile):
         "with_lz4": [True, False],
         "with_lzo": [True, False],
         "with_lzma": [True, False],
-        "with_zstd": [True, False]
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -51,9 +50,10 @@ class LibarchiveConan(ConanFile):
         "with_lz4": False,
         "with_lzo": False,
         "with_lzma": False,
-        "with_zstd": False
+        "with_zstd": False,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -63,6 +63,11 @@ class LibarchiveConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -110,9 +115,8 @@ class LibarchiveConan(ConanFile):
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -213,8 +217,14 @@ class LibarchiveConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "LibArchive")
+        self.cpp_info.set_property("cmake_target_name", "LibArchive::LibArchive")
+        self.cpp_info.set_property("pkg_config_name", "libarchive")
+
         self.cpp_info.names["cmake_find_package"] = "LibArchive"
         self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+
+        self.cpp_info.libs = tools.collect_libs(self)
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]
