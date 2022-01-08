@@ -1,6 +1,7 @@
-import glob
-import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibxsltConan(ConanFile):
@@ -10,33 +11,42 @@ class LibxsltConan(ConanFile):
     topics = ("XSLT", "processor")
     homepage = "https://xmlsoft.org"
     license = "MIT"
+
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "debugger": [True, False],
+        "crypto": [True, False],
+        "profiler": [True, False],
+        "plugins": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "debugger": False,
+        "crypto": False,
+        "profiler": False,
+        "plugins": False,
+    }
 
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       "debugger": False,
-                       "crypto": False,
-                       "profiler": False,
-                       "plugins": False}
-    options = {name: [True, False] for name in default_options.keys()}
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
-    _source_subfolder = "source_subfolder"
-    exports_sources = "patches/**"
 
-    def requirements(self):
-        self.requires("libxml2/2.9.12")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _full_source_subfolder(self):
         return os.path.join(self.source_folder, self._source_subfolder)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxslt-{0}".format(self.version), self._source_subfolder)
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,9 +58,12 @@ class LibxsltConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+    def requirements(self):
+        self.requires("libxml2/2.9.12")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
@@ -58,6 +71,10 @@ class LibxsltConan(ConanFile):
             self._build_windows()
         else:
             self._build_with_configure()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _build_windows(self):
         with tools.chdir(os.path.join(self._full_source_subfolder, 'win32')):
@@ -145,13 +162,10 @@ class LibxsltConan(ConanFile):
         if self.settings.os == "Windows":
             # There is no way to avoid building the tests, but at least we don't want them in the package
             for prefix in ["run", "test"]:
-                for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
-                    os.remove(test)
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.build_type == "Debug":
-                os.unlink(os.path.join(self.package_folder, "bin", "libexslt.pdb"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libxslt.pdb"))
-                os.unlink(os.path.join(self.package_folder, "bin", "xsltproc.pdb"))
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
+                                           "{}*".format(prefix))
+        if self._is_msvc:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
             if self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "lib", "libxslt_a.lib"))
                 os.unlink(os.path.join(self.package_folder, "lib", "libexslt_a.lib"))
@@ -160,22 +174,19 @@ class LibxsltConan(ConanFile):
                 os.unlink(os.path.join(self.package_folder, "lib", "libexslt.lib"))
                 os.unlink(os.path.join(self.package_folder, "bin", "libxslt.dll"))
                 os.unlink(os.path.join(self.package_folder, "bin", "libexslt.dll"))
-        for f in "libxslt.la", "libexslt.la":
-            la = os.path.join(self.package_folder, 'lib', f)
-            if os.path.isfile(la):
-                os.unlink(la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = ['exslt', 'xslt']
-        if self._is_msvc:
-            if self.options.shared:
-                self.cpp_info.libs = ['lib%s' % l for l in self.cpp_info.libs]
-            else:
-                self.cpp_info.libs = ['lib%s_a' % l for l in self.cpp_info.libs]
+        prefix = "lib" if self._is_msvc else ""
+        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.libs = [
+            "{}exslt{}".format(prefix, suffix),
+            "{}xslt{}".format(prefix, suffix),
+        ]
         self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXSLT_STATIC"]
-        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
-            self.cpp_info.system_libs.append('m')
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append('ws2_32')
+            self.cpp_info.system_libs.append("ws2_32")
