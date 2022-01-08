@@ -41,6 +41,10 @@ class LibxsltConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -57,6 +61,11 @@ class LibxsltConan(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/2.9.12")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not self._is_msvc and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
