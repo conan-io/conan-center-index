@@ -31,6 +31,7 @@ class RubyConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
+        self.requires("gmp/6.2.1")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
@@ -51,6 +52,7 @@ class RubyConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.default_configure_install_args = True
+        tc.configure_args = ["--disable-install-doc"]
         if self.settings.os != "Linux":
             zlib = self.deps_cpp_info["zlib"]
             tc.cflags = ["-I{}".format(os.path.join(zlib.rootpath, dir)) for dir in zlib.includedirs]
@@ -84,11 +86,13 @@ class RubyConan(ConanFile):
             os.path.join(self.package_folder, "include", "ruby-{}".format(version), "{}-{}".format(self.settings.arch, str(self.settings.os).lower()))
         ]
         rubylib.libs = tools.collect_libs(self)
-        rubylib.requires.append("zlib::zlib")
+        rubylib.requires.extend(["zlib::zlib", "gmp::gmp"])
         if self.settings.os in ("FreeBSD", "Linux"):
-            rubylib.system_libs = ["dl", "pthread", "rt", "m", "gmp", "crypt"]
+            rubylib.system_libs = ["dl", "pthread", "rt", "m", "crypt"]
         elif self.settings.os == "Windows":
             rubylib.system_libs = ["shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
+        if self.settings.compiler == "clang":
+            rubylib.cxxflags = ["-fdeclspec"]
 
         rubylib.filenames["cmake_find_package"] = "Ruby"
         rubylib.filenames["cmake_find_package_multi"] = "Ruby"
