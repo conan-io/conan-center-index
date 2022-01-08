@@ -18,9 +18,9 @@ macro(find_package_if condition name)
   endif()
 endmacro()
 
-foreach(tuple MYICONV\;Iconv\;CONFIG MYZLIB\;ZLIB\;CONFIG MYPTHREAD\;Threads)
-  find_package_if(${tuple})
-endforeach()
+find_package_if(MYICONV Iconv CONFIG)
+find_package_if(MYZLIB ZLIB CONFIG)
+find_package_if(MYPTHREAD Threads)
 
 # ---- Library ----
 
