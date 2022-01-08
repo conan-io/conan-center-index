@@ -164,20 +164,14 @@ class LibarchiveConan(ConanFile):
         tools.replace_in_file(cmakelists_path,
                               "SET(CMAKE_MODULE_PATH",
                               "LIST(APPEND CMAKE_MODULE_PATH")
-        # workaround due to case sensitivity and limitations in cmake_find_package
-        # see https://github.com/conan-io/conan/issues/7691
-        if self.options.with_bzip2:
-            tools.replace_in_file(cmakelists_path, "BZIP2_FOUND", "BZip2_FOUND")
-            tools.replace_in_file(cmakelists_path, "BZIP2_INCLUDE_DIR", "BZip2_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "BZIP2_LIBRARIES", "BZip2_LIBRARIES")
+        # allow openssl on macOS
         if self.options.with_openssl:
             tools.replace_in_file(cmakelists_path,
                                   "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
                                   "IF(ENABLE_OPENSSL)")
+        # wrong lzma cmake var name
         if self.options.with_lzma:
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_FOUND", "LibLZMA_FOUND")
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LibLZMA_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
+            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
         # add possible names for lz4 library
         if not self.options.shared:
             tools.replace_in_file(cmakelists_path,
