@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):
-        if tools.cross_building(self.settings):
+        if hasattr(self, "settings_build"):
             self.build_requires(str(self.requires["capnproto"]))
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # Workaround for CMake bug with error message:
@@ -23,6 +23,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "addressbook")
             self.run("{} write".format(bin_path), run_environment=True)
