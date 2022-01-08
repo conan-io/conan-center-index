@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.43.0"
 
 
 class ICUBase(ConanFile):
@@ -46,7 +46,7 @@ class ICUBase(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_mingw(self):
@@ -83,6 +83,7 @@ class ICUBase(ConanFile):
     def _platform(self):
         return {
             ("Windows", "Visual Studio"): "Cygwin/MSVC",
+            ("Windows", "msvc"): "Cygwin/MSVC",
             ("Windows", "gcc"): "MinGW",
             ("AIX", "gcc"): "AIX/GCC",
             ("AIX", "xlc"): "AIX",
@@ -124,17 +125,24 @@ class ICUBase(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        
+
         if self.options.dat_package_file:
             dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
             if dat_package_file:
                 shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
-        
+
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
 
-            flags = "-%s" % self.settings.compiler.runtime
-            if self.settings.build_type in ["Debug", "RelWithDebInfo"] and tools.Version(self.settings.compiler.version) >= "12":
+            if self.settings.compiler == "Visual Studio":
+                flags = "-{}".format(self.settings.compiler.runtime)
+                if tools.Version(self.settings.compiler.version) >= "12":
+                    flags += " -FS"
+            else:
+                flags = "-{}{}".format(
+                    "MT" if self.settings.runtime == "static" else "MD",
+                    "d" if self.settings.runtime_type == "Debug" else "",
+                )
                 flags += " -FS"
             tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
@@ -200,7 +208,7 @@ class ICUBase(ConanFile):
 
         if not self._enable_icu_tools:
             args.append("--disable-tools")
-        
+
         if not self.options.with_icuio:
             args.append("--disable-icuio")
 
@@ -301,10 +309,14 @@ class ICUBase(ConanFile):
         return "icudt{}l.dat".format(vtag)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "ICU")
+
         self.cpp_info.names["cmake_find_package"] = "ICU"
         self.cpp_info.names["cmake_find_package_multi"] = "ICU"
 
         # icudata
+        self.cpp_info.components["icu-data"].set_property("cmake_target_name", "ICU::data")
         self.cpp_info.components["icu-data"].names["cmake_find_package"] = "data"
         self.cpp_info.components["icu-data"].names["cmake_find_package_multi"] = "data"
         self.cpp_info.components["icu-data"].libs = [self._lib_name("icudt" if self.settings.os == "Windows" else "icudata")]
@@ -316,14 +328,16 @@ class ICUBase(ConanFile):
             self.cpp_info.components["icu-data"].system_libs.append(tools.stdcpp_library(self))
 
         # Alias of data CMake component
+        self.cpp_info.components["icu-data-alias"].set_property("cmake_target_name", "ICU::dt")
         self.cpp_info.components["icu-data-alias"].names["cmake_find_package"] = "dt"
         self.cpp_info.components["icu-data-alias"].names["cmake_find_package_multi"] = "dt"
         self.cpp_info.components["icu-data-alias"].requires = ["icu-data"]
 
         # icuuc
+        self.cpp_info.components["icu-uc"].set_property("cmake_target_name", "ICU::uc")
+        self.cpp_info.components["icu-uc"].set_property("pkg_config_name", "icu-uc")
         self.cpp_info.components["icu-uc"].names["cmake_find_package"] = "uc"
         self.cpp_info.components["icu-uc"].names["cmake_find_package_multi"] = "uc"
-        self.cpp_info.components["icu-uc"].names["pkg_config"] = "icu-uc"
         self.cpp_info.components["icu-uc"].libs = [self._lib_name("icuuc")]
         self.cpp_info.components["icu-uc"].requires = ["icu-data"]
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -334,24 +348,27 @@ class ICUBase(ConanFile):
             self.cpp_info.components["icu-uc"].system_libs = ["advapi32"]
 
         # icui18n
+        self.cpp_info.components["icu-i18n"].set_property("cmake_target_name", "ICU::i18n")
+        self.cpp_info.components["icu-i18n"].set_property("pkg_config_name", "icu-i18n")
         self.cpp_info.components["icu-i18n"].names["cmake_find_package"] = "i18n"
         self.cpp_info.components["icu-i18n"].names["cmake_find_package_multi"] = "i18n"
-        self.cpp_info.components["icu-i18n"].names["pkg_config"] = "icu-i18n"
         self.cpp_info.components["icu-i18n"].libs = [self._lib_name("icuin" if self.settings.os == "Windows" else "icui18n")]
         self.cpp_info.components["icu-i18n"].requires = ["icu-uc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["icu-i18n"].system_libs = ["m"]
 
         # Alias of i18n CMake component
+        self.cpp_info.components["icu-i18n-alias"].set_property("cmake_target_name", "ICU::in")
         self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package"] = "in"
         self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package_multi"] = "in"
         self.cpp_info.components["icu-i18n-alias"].requires = ["icu-i18n"]
 
         # icuio
         if self.options.with_icuio:
+            self.cpp_info.components["icu-io"].set_property("cmake_target_name", "ICU::io")
+            self.cpp_info.components["icu-io"].set_property("pkg_config_name", "icu-io")
             self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
             self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
-            self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
             self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
             self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
 
@@ -359,11 +376,14 @@ class ICUBase(ConanFile):
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Prepending to ICU_DATA runtime environment variable: {}".format(data_path))
             self.runenv_info.prepend_path("ICU_DATA", data_path)
+            if self._enable_icu_tools:
+                self.buildenv_info.prepend_path("ICU_DATA", data_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.ICU_DATA.append(data_path)
 
         if self._enable_icu_tools:
             # icutu
+            self.cpp_info.components["icu-tu"].set_property("cmake_target_name", "ICU::tu")
             self.cpp_info.components["icu-tu"].names["cmake_find_package"] = "tu"
             self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
             self.cpp_info.components["icu-tu"].libs = [self._lib_name("icutu")]
@@ -372,6 +392,7 @@ class ICUBase(ConanFile):
                 self.cpp_info.components["icu-tu"].system_libs = ["pthread"]
 
             # icutest
+            self.cpp_info.components["icu-test"].set_property("cmake_target_name", "ICU::test")
             self.cpp_info.components["icu-test"].names["cmake_find_package"] = "test"
             self.cpp_info.components["icu-test"].names["cmake_find_package_multi"] = "test"
             self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
