@@ -4,8 +4,8 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(nudb CONFIG REQUIRED)
+find_package(NuDB CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} nudb::nudb)
+target_link_libraries(${PROJECT_NAME} NuDB::nudb)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
