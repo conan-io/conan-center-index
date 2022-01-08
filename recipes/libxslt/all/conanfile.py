@@ -31,6 +31,7 @@ class LibxsltConan(ConanFile):
     }
 
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -39,10 +40,6 @@ class LibxsltConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _full_source_subfolder(self):
-        return os.path.join(self.source_folder, self._source_subfolder)
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -66,22 +63,20 @@ class LibxsltConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        self._patch_sources()
-        if self._is_msvc:
-            self._build_windows()
-        else:
-            self._build_with_configure()
-
-    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if self._is_msvc:
+            self._build_msvc()
+        else:
+            autotools = self._configure_autotools()
+            autotools.make()
 
-    def _build_windows(self):
-        with tools.chdir(os.path.join(self._full_source_subfolder, 'win32')):
+    def _build_msvc(self):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 args = ["cscript",
                         "configure.js",
                         "compiler=msvc",
@@ -130,51 +125,51 @@ class LibxsltConan(ConanFile):
                 tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
 
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake /f Makefile.msvc install")
+                    self.run("nmake /f Makefile.msvc")
 
-    def _build_with_configure(self):
-        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        full_install_subfolder = tools.unix_path(self.package_folder)
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._full_source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
-        if self.options.shared:
-            configure_args.extend(['--enable-shared', '--disable-static'])
-        else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
-
-        libxml_src = "--with-libxml-src=" + tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)
-        configure_args.append(libxml_src)
-
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--with-python=no",
+            "--with-libxml-src={}".format(tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)),
+        ]
         for name in self._option_names:
             value = getattr(self.options, name)
-            value = ("--with-%s" % name) if value else ("--without-%s" % name)
-            configure_args.append(value)
-
-        env_build.configure(args=configure_args, configure_dir=self._full_source_subfolder)
-        env_build.make(args=["install", "V=1"])
+            args.append("--with-{}={}".format(name, yes_no(value)))
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def package(self):
-        self.copy("COPYING", src=self._full_source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows":
-            # There is no way to avoid building the tests, but at least we don't want them in the package
-            for prefix in ["run", "test"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
-                                           "{}*".format(prefix))
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         if self._is_msvc:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-            if self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxslt_a.lib"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libexslt_a.lib"))
-            else:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxslt.lib"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libexslt.lib"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libxslt.dll"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libexslt.dll"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            self._package_msvc()
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+
+    def _package_msvc(self):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            with tools.vcvars(self):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    self.run("nmake /f Makefile.msvc install")
+        for prefix in ["run", "test"]:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
+                                       "{}*".format(prefix))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        if self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "lib*_a.lib")
+        else:
+            os.unlink(os.path.join(self.package_folder, "lib", "libxslt.lib"))
+            os.unlink(os.path.join(self.package_folder, "lib", "libexslt.lib"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "lib*.dll")
 
     def package_info(self):
         prefix = "lib" if self._is_msvc else ""
