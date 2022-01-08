@@ -45,10 +45,15 @@ class SimpleYamlConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
-            "gcc": "10",
-            "clang": "10",
-            "apple-clang": "12",
+            "Visual Studio": "16.11",
+            "gcc": "11",
+        }
+
+    @property
+    def _unsupported_compilers_version(self):
+        return {
+            "clang": "13",
+            "apple-clang": "13",
         }
 
     def validate(self):
@@ -57,8 +62,13 @@ class SimpleYamlConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:
+            unsupported_compiler = self._unsupported_compilers_version.get(
+                str(self.settings.compiler), False)
+            if unsupported_compiler:
+                raise ConanInvalidConfiguration(
+                    "simple-yaml requires C++20. Your compiler does not implement this standard fully.")
             self.output.warn(
-                "simple-yaml requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+                "simple-yaml requires C++20. Your compiler is unknown. Assuming it fully supports C++20.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "simple-yaml requires C++20, which your compiler does not support.")
