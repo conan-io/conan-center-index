@@ -134,7 +134,8 @@ class LibxsltConan(ConanFile):
                 tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
 
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake /f Makefile.msvc")
+                    targets = "libxslt{0} libexslt{0}".format("" if self.options.shared else "a")
+                    self.run("nmake /f Makefile.msvc {}".format(targets))
 
     def _configure_autotools(self):
         if self._autotools:
@@ -156,29 +157,18 @@ class LibxsltConan(ConanFile):
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         if self._is_msvc:
-            self._package_msvc()
+            self.copy("*.h", src=os.path.join(self._source_subfolder, "libxslt"),
+                             dst=os.path.join("include", "libxslt"))
+            self.copy("*.h", src=os.path.join(self._source_subfolder, "libexslt"),
+                             dst=os.path.join("include", "libexslt"))
+            self.copy("*.lib", src=os.path.join(self._source_subfolder, "win32", "bin.msvc"), dst="lib")
+            self.copy("*.dll", src=os.path.join(self._source_subfolder, "win32", "bin.msvc"), dst="bin")
         else:
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-
-    def _package_msvc(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
-            with tools.vcvars(self):
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake /f Makefile.msvc install")
-        for prefix in ["run", "test"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
-                                       "{}*".format(prefix))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "lib*_a.lib")
-        else:
-            os.unlink(os.path.join(self.package_folder, "lib", "libxslt.lib"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libexslt.lib"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "lib*.dll")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
