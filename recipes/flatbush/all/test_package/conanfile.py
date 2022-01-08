@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
         if compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-        if compiler == "gcc" and Version(compiler.version) < 6:
+        if (compiler == "gcc" and Version(compiler.version) < 6) and (compiler == "apple-clang" and compiler.version == "None"):
             compiler.cppstd = "11"
 
     def test(self):
