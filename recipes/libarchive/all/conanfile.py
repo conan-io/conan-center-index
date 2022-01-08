@@ -85,20 +85,20 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         if self.options.with_expat:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.2")
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         if self.options.with_cng:
             # TODO: add cng when available in CCI
             raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1m")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -108,7 +108,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.1")
 
     def validate(self):
         if self.options.with_expat and self.options.with_libxml2:
