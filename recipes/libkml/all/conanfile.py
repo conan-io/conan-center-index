@@ -128,7 +128,7 @@ class LibkmlConan(ConanFile):
         self._register_components({
             "kmlbase": {
                 "defines": ["LIBKML_DLL"] if self.settings.os == "Windows" and self.options.shared else [],
-                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "system_libs": ["m"] if self.settings.os in ["Linux", "FreeBSD"] else [],
                 "requires": ["boost::headers", "expat::expat", "minizip::minizip",
                              "uriparser::uriparser", "zlib::zlib"],
             },
@@ -139,7 +139,7 @@ class LibkmlConan(ConanFile):
                 "requires": ["boost::headers", "kmlbase"],
             },
             "kmlengine": {
-                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "system_libs": ["m"] if self.settings.os in ["Linux", "FreeBSD"] else [],
                 "requires": ["boost::headers", "kmldom", "kmlbase"],
             },
             "kmlconvenience": {
