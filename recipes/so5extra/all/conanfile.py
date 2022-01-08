@@ -9,7 +9,7 @@ class So5extraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A collection of various SObjectizer's extensions."
     topics = ("concurrency", "actor-framework", "actors", "agents", "sobjectizer")
-    settings = "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     @property
