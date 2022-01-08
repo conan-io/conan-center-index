@@ -198,6 +198,11 @@ class CapnprotoConan(ConanFile):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
+        if tools.Version(self.version) >= "0.9.0":
+            components.append({
+                "name": "capnp-websocket",
+                "requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"],
+            })
 
         for component in components:
             self._register_component(component)
