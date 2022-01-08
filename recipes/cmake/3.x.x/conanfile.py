@@ -31,6 +31,10 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
 
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1m")
+
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
@@ -58,10 +62,6 @@ class CMakeConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-
-    def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
