@@ -22,4 +22,4 @@ class FlatbushConan(ConanFile):
 
     def package_info(self):
         if not tools.valid_min_cppstd(self, "20"):
-            self.cpp_info.defines = ["MINIMAL_SPAN"]
+            self.cpp_info.defines = ["FLATBUSH_SPAN"]
