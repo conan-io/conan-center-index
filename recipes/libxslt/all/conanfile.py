@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibxsltConan(ConanFile):
@@ -172,16 +172,34 @@ class LibxsltConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "lib*.dll")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "LibXslt")
+        self.cpp_info.set_property("pkg_config_name", "libxslt_full_package") # unofficial, avoid conflicts in conan generators
+
+        self.cpp_info.names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXslt"
+
         prefix = "lib" if self._is_msvc else ""
         suffix = "_a" if self._is_msvc and not self.options.shared else ""
-        self.cpp_info.libs = [
-            "{}exslt{}".format(prefix, suffix),
-            "{}xslt{}".format(prefix, suffix),
-        ]
-        self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
+
+        # xslt
+        self.cpp_info.components["xslt"].set_property("cmake_target_name", "LibXslt::LibXslt")
+        self.cpp_info.components["xslt"].set_property("pkg_config_name", "libxslt")
+        self.cpp_info.components["xslt"].names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.components["xslt"].names["cmake_find_package_multi"] = "LibXslt"
+        self.cpp_info.components["xslt"].libs = ["{}xslt{}".format(prefix, suffix)]
         if not self.options.shared:
-            self.cpp_info.defines = ["LIBXSLT_STATIC"]
+            self.cpp_info.components["xslt"].defines = ["LIBXSLT_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.system_libs.append("m")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.components["xslt"].system_libs.append("m")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["xslt"].system_libs.append("ws2_32")
+        self.cpp_info.components["xslt"].requires = ["libxml2::libxml2"]
+
+        # exslt
+        self.cpp_info.components["exslt"].set_property("cmake_target_name", "LibXslt::LibExslt")
+        self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
+        self.cpp_info.components["exslt"].names["cmake_find_package"] = "LibExslt"
+        self.cpp_info.components["exslt"].names["cmake_find_package_multi"] = "LibExslt"
+        self.cpp_info.components["exslt"].libs = ["{}exslt{}".format(prefix, suffix)]
+        self.cpp_info.components["exslt"].requires = ["xslt"]
