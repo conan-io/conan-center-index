@@ -166,14 +166,17 @@ class LibxsltConan(ConanFile):
                              dst=os.path.join("include", "libxslt"))
             self.copy("*.h", src=os.path.join(self._source_subfolder, "libexslt"),
                              dst=os.path.join("include", "libexslt"))
-            self.copy("*.lib", src=os.path.join(self._source_subfolder, "win32", "bin.msvc"), dst="lib")
-            self.copy("*.dll", src=os.path.join(self._source_subfolder, "win32", "bin.msvc"), dst="bin")
+            build_dir = os.path.join(self._source_subfolder, "win32", "bin.msvc")
+            self.copy("*.lib", src=build_dir, dst="lib")
+            self.copy("*.dll", src=build_dir, dst="bin")
         else:
             autotools = self._configure_autotools()
             autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
