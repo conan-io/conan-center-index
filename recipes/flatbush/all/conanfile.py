@@ -1,10 +1,7 @@
-from conans import ConanFile, CMake, tools
-import os
+from conans import ConanFile, tools
 
 class FlatbushConan(ConanFile):
     name = "flatbush"
-    version = "1.0.0"
-    # Optional metadata
     license = "MIT"
     homepage = "https://github.com/chusitoo/flatbush"
     description = "Flatbush for C++"
@@ -12,15 +9,9 @@ class FlatbushConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
-
+    
     def source(self):
        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-        cmake.test()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses")
@@ -28,3 +19,7 @@ class FlatbushConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+        
+    def package_info(self):
+        if not tools.valid_min_cppstd(self, "20"):
+            self.cpp_info.defines = ["MINIMAL_SPAN"]

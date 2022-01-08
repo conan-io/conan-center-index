@@ -26,8 +26,8 @@ SOFTWARE.
 
 int main(int argc, char** argv)
 {
-  auto wIndex = flatbush::start<int>(1);
-  wIndex.add({ 0, 0, 0, 0 });
-  wIndex.finish();
+  flatbush::FlatbushBuilder<int> wBuilder;
+  wBuilder.add({ 0, 0, 0, 0 });
+  auto wIndex = wBuilder.finish();
   auto wIds = wIndex.search({ 0, 0, 1, 1 });
 }
