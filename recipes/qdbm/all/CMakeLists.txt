@@ -7,17 +7,19 @@ conan_basic_setup(TARGETS)
 
 # ---- Dependencies ----
 
+option(THREADS_PREFER_PTHREAD_FLAG "" ON)
+
 macro(find_package_if condition name)
   option("${condition}" "Enable ${condition}" OFF)
   if(${condition})
-    find_package("${name}" REQUIRED CONFIG)
+    find_package("${name}" REQUIRED ${ARGN})
     link_libraries("${name}::${name}")
     add_definitions("-D${condition}")
   endif()
 endmacro()
 
-foreach(pair MYICONV\;Iconv MYZLIB\;ZLIB)
-  find_package_if(${pair})
+foreach(tuple MYICONV\;Iconv\;CONFIG MYZLIB\;ZLIB\;CONFIG MYPTHREAD\;Threads)
+  find_package_if(${tuple})
 endforeach()
 
 # ---- Library ----

@@ -59,6 +59,8 @@ class QDBMConan(ConanFile):
         cmake.definitions["CONAN_qdbm_VERSION"] = self.version
         cmake.definitions["MYICONV"] = self.options.with_iconv
         cmake.definitions["MYZLIB"] = self.options.with_zlib
+        cmake.definitions["MYPTHREAD"] = self.options\
+            .get_safe("with_pthread", False)
         cmake.configure()
         return cmake
 
