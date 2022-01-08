@@ -59,7 +59,7 @@ class OpenALConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
 
     @property
     def _supports_cxx14(self):
