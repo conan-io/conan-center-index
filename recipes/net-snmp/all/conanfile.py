@@ -40,17 +40,16 @@ class NetSnmpConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self._settings_build.compiler == "Visual Studio"
+        return self._settings_build.compiler in ("Visual Studio", "msvc")
 
     @property
     def _is_debug(self):
         return self.settings.build_type == "Debug"
 
     def validate(self):
-        if self._settings_build.os == "Windows" \
-                and self._settings_build.compiler == "gcc":
+        if self._settings_build.os == "Windows" and not self._is_msvc:
             raise ConanInvalidConfiguration(
-                "net-snmp is not setup to build with gcc on Windows yet"
+                "net-snmp is setup to build only with MSVC on Windows"
             )
 
     def source(self):
