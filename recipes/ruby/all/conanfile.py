@@ -95,9 +95,10 @@ class RubyConan(ConanFile):
         rubylib = self.cpp_info.components["rubylib"]
         arch_buf = StringIO()
         self.run([os.path.join(self.package_folder, 'bin', 'ruby'), "-e", "require 'mkmf'; puts(CONFIG['arch'])"], output=arch_buf)
+        arch = arch_buf.getvalue().splitlines()[-1].strip()
         rubylib.includedirs = [
             os.path.join(self.package_folder, "include", "ruby-{}".format(version)),
-            os.path.join(self.package_folder, "include", "ruby-{}".format(version), arch_buf.getvalue().strip())
+            os.path.join(self.package_folder, "include", "ruby-{}".format(version), arch)
         ]
         rubylib.libs = tools.collect_libs(self)
         rubylib.requires.extend(["zlib::zlib", "gmp::gmp"])
