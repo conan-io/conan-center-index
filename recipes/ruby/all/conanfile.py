@@ -21,12 +21,10 @@ class RubyConan(ConanFile):
     exports_sources = "patches/**"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
         "with_openssl": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
         "with_openssl": True
     }
 
@@ -43,13 +41,7 @@ class RubyConan(ConanFile):
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -67,6 +59,8 @@ class RubyConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.default_configure_install_args = True
         tc.configure_args = ["--disable-install-doc"]
+        if self.options.shared:
+            tc.configure_args.append("--enable-shared")
         tc.generate()
 
     def build(self):
