@@ -38,6 +38,9 @@ sources:
   "7.3.1":
     url: "https://github.com/jtv/libpqxx/archive/7.3.1.tar.gz"
     sha256: "c794e7e5c4f1ef078463ecafe747a6508a0272d83b32a8cdcfb84bb37218a78b"
+  "7.3.2":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.3.2.tar.gz"
+    sha256: "493991345de5cbddfed8836917a333add2cd00ecbfd21b1acbc9345ce784225f"
   "7.4.0":
     url: "https://github.com/jtv/libpqxx/archive/7.4.0.tar.gz"
     sha256: "930e95d0c709905f9d842081cd33b5226f5803ed1fc6ef5b6e3b131ddaeddecb"
@@ -102,6 +105,11 @@ patches:
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
   "7.3.1":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-msvc-compilation-7.3.1.patch"
+      base_path: "source_subfolder"
+  "7.3.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-msvc-compilation-7.3.1.patch"
