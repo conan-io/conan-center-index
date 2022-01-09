@@ -27,6 +27,10 @@ class HiredisConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -41,12 +45,16 @@ class HiredisConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build(self):
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # Do not force PIC if static
         if not self.options.shared:
             makefile = os.path.join(self._source_subfolder, "Makefile")
             tools.replace_in_file(makefile, "-fPIC ", "")
 
+    def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             autoTools.make()
