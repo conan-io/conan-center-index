@@ -54,9 +54,9 @@ class MsdfgenConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         self.requires("lodepng/cci.20200615")
-        self.requires("tinyxml2/8.0.0")
+        self.requires("tinyxml2/9.0.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
