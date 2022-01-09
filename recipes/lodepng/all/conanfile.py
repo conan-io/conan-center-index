@@ -1,17 +1,16 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class LodepngConan(ConanFile):
     name = "lodepng"
     description = "PNG encoder and decoder in C and C++, without dependencies."
     license = "Zlib"
-    topics = ("conan", "png", "encoder", "decoder")
+    topics = ("png", "encoder", "decoder")
     homepage = "https://github.com/lvandeve/lodepng"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,6 +21,8 @@ class LodepngConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -41,9 +42,8 @@ class LodepngConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('lodepng-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
