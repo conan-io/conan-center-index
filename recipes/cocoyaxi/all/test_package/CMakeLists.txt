@@ -8,4 +8,4 @@ conan_basic_setup(TARGETS)
 find_package(cocoyaxi REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cc)
-target_link_libraries(${PROJECT_NAME} cocoyaxi::co)
+target_link_libraries(${PROJECT_NAME} cocoyaxi::cocoyaxi)
