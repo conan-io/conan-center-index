@@ -49,7 +49,7 @@ class OctomapConan(ConanFile):
     def validate(self):
         if self.options.shared and \
            ((self.settings.compiler == "Visual Studio" and "MTd" in self.settings.compiler.runtime) or \
-            (str(self.settings.compiler == "msvc") and self.settings.compiler.runtime == "static" and self.settings.compiler.runtime_type == "Debug")):
+            (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static" and self.settings.compiler.runtime_type == "Debug")):
             raise ConanInvalidConfiguration("shared octomap doesn't support MTd runtime")
 
     def source(self):
