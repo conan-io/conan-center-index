@@ -59,7 +59,7 @@ class TensorpipeConan(ConanFile):
 
     def requirements(self):
         self.requires("libnop/cci.20200728")
-        self.requires("libuv/1.41.0")
+        self.requires("libuv/1.42.0")
         if self.options.cuda:
             raise ConanInvalidConfiguration("cuda recipe not yet available in CCI")
             self.requires("cuda/11.2")
@@ -71,7 +71,7 @@ class TensorpipeConan(ConanFile):
             raise ConanInvalidConfiguration("tensorpipe doesn't support Windows")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
