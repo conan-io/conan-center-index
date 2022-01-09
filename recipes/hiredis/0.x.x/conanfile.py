@@ -42,9 +42,10 @@ class HiredisConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        # Do not force PIC
-        makefile = os.path.join(self.source_folder, self._source_subfolder, "Makefile")
-        tools.replace_in_file(makefile, "-fPIC ", "")
+        # Do not force PIC if static
+        if not self.options.shared:
+            makefile = os.path.join(self._source_subfolder, "Makefile")
+            tools.replace_in_file(makefile, "-fPIC ", "")
 
         with tools.chdir(self._source_subfolder):
             autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
