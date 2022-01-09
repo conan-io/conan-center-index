@@ -53,7 +53,7 @@ class OnnxConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("protobuf/3.19.1")
+        self.requires("protobuf/3.17.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -63,7 +63,7 @@ class OnnxConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("protobuf/3.19.1")
+            self.build_requires("protobuf/3.17.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
