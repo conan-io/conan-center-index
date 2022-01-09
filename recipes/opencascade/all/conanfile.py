@@ -27,6 +27,7 @@ class OpenCascadeConan(ConanFile):
         "with_draco": [True, False],
         "with_tk": [True, False],
         "with_tbb": [True, False],
+        "with_opengl": [True, False],
         "extended_debug_messages": [True, False],
     }
     default_options = {
@@ -39,6 +40,7 @@ class OpenCascadeConan(ConanFile):
         "with_draco": False,
         "with_tk": False,
         "with_tbb": False,
+        "with_opengl": False,
         "extended_debug_messages": False,
     }
 
@@ -63,10 +65,18 @@ class OpenCascadeConan(ConanFile):
         else:
             return True
 
+    @property
+    def _link_opengl(self):
+        if tools.Version(self.version) >= "7.6.0":
+            return self.options.with_opengl
+        else:
+            return True
+
     def config_options(self):
         if tools.Version(self.version) < "7.6.0":
             del self.options.with_tk
             del self.options.with_draco
+            del self.options.with_opengl
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.build_type != "Debug":
@@ -83,7 +93,8 @@ class OpenCascadeConan(ConanFile):
         if self._link_tk:
             self.requires("tk/8.6.10")
         self.requires("freetype/2.10.4")
-        self.requires("opengl/system")
+        if self._link_opengl:
+            self.requires("opengl/system")
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
@@ -316,6 +327,7 @@ class OpenCascadeConan(ConanFile):
         if tools.Version(self.version) >= "7.6.0":
             self._cmake.definitions["USE_DRACO"] = self.options.with_draco
             self._cmake.definitions["USE_TK"] = self.options.with_tk
+            self._cmake.definitions["USE_OPENGL"] = self.options.with_opengl
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
@@ -386,12 +398,12 @@ class OpenCascadeConan(ConanFile):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
-            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"]},
             "CSF_TclLibs": {"externals": ["tcl::tcl"]},
-            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
+            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self._link_opengl else []},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
