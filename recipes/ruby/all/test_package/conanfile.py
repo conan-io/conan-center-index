@@ -1,22 +1,12 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.cmake import CMake
 from conans import tools
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-
-    def generate(self):
-        pc = PkgConfigDeps(self)
-        pkgconfig_dir = os.path.join('lib', 'pkgconfig')
-        tools.mkdir(pkgconfig_dir)
-        with tools.chdir(pkgconfig_dir):
-            pc.generate()
-
-        tc = CMakeToolchain(self)
-        tc.generate()
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def build(self):
         cmake = CMake(self)
