@@ -103,10 +103,10 @@ class HiredisConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.components["hiredis_ssl"].requires.append("hiredislib")
 
-        # These cmake_target_name and pkg_config_name are unofficial. It avoids conflicts
-        # in conan generators between global target/pkg-config and hiredislib component.
-        # TODO: eventually remove the cmake_target_name trick if conan can implement smarter logic
-        # in CMakeDeps when a downstream recipe requires another recipe globally
-        # (link to all components directly instead of global target)
-        self.cpp_info.set_property("cmake_target_name", "hiredis::hiredis_all")
-        self.cpp_info.set_property("pkg_config_name", "hiredis_all")
+            # These cmake_target_name and pkg_config_name are unofficial. It avoids conflicts
+            # in conan generators between global target/pkg-config and hiredislib component.
+            # TODO: eventually remove the cmake_target_name trick if conan can implement smarter logic
+            # in CMakeDeps when a downstream recipe requires another recipe globally
+            # (link to all components directly instead of global target)
+            self.cpp_info.set_property("cmake_target_name", "hiredis::hiredis_all_unofficial")
+            self.cpp_info.set_property("pkg_config_name", "hiredis_all_unofficial")
