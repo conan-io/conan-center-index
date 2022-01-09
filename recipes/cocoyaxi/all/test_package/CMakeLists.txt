@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(co REQUIRED)
+find_package(cocoyaxi REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cc)
-target_link_libraries(${PROJECT_NAME} co::co)
+target_link_libraries(${PROJECT_NAME} cocoyaxi::co)

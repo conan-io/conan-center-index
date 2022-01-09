@@ -6,12 +6,12 @@ required_conan_version = ">=1.33.0"
 
 
 class CoConan(ConanFile):
-    name = "co"
+    name = "cocoyaxi"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/idealvin/co"
+    homepage = "https://github.com/idealvin/cocoyaxi"
     license = "MIT"
     description = "A go-style coroutine library in C++11 and more."
-    topics = ("co", "coroutine", "c++11")
+    topics = ("cocoyaxi", "coroutine", "c++11")
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
@@ -89,8 +89,8 @@ class CoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["co"]
-        self.cpp_info.names["cmake_find_package"] = "co"
-        self.cpp_info.names["cmake_find_package_multi"] = "co"
+        self.cpp_info.names["cmake_find_package"] = "cocoyaxi"
+        self.cpp_info.names["cmake_find_package_multi"] = "cocoyaxi"
 
     def validate(self):
         if self.options.with_libcurl:
