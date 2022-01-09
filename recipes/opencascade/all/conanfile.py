@@ -237,6 +237,11 @@ class OpenCascadeConan(ConanFile):
         if self.options.get_safe("with_draco"):
             conan_targets.append("CONAN_PKG::draco")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/draco\")", "")
+        ## opengl
+        tools.replace_in_file(
+            occt_csf_cmake,
+            "set (CSF_OpenGlLibs ",
+            "# set (CSF_OpenGlLibs ")
 
         ## Inject conan targets
         tools.replace_in_file(
