@@ -1,10 +1,12 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+cmake_minimum_required(VERSION 3.12)
 
-PROJECT(test_package VERSION 1.0.0 LANGUAGES CXX)
-INCLUDE(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+project(test_package VERSION 1.0.0 LANGUAGES CXX)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 find_package(flatbush CONFIG REQUIRED)
 
-ADD_EXECUTABLE(${PROJECT_NAME} "test_package.cpp")
+add_executable(${PROJECT_NAME} "test_package.cpp")
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} flatbush::flatbush)
+target_link_libraries(${PROJECT_NAME} flatbush::flatbush)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
