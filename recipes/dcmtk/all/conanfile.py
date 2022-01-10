@@ -89,9 +89,11 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_openssl:
-            # Library uses opaque type 'ssl_ctx_st' from openssl. Not available in >=1.1.0.
-            #   and it fails to build only in Windows
-            self.requires("openssl/1.0.2u")
+            if self.settings.os == "Windows":
+                # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
+                self.requires("openssl/1.0.2u")
+            else:
+                self.requires("openssl/1.1.1m")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
