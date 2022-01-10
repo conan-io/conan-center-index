@@ -61,8 +61,8 @@ class BackwardCppConan(ConanFile):
             del self.options.fPIC
             del self.options.stack_details
         # default option
-        # FIXME: if Macos, default value of stack_details should be
-        #        "backtrace_symbol" in order to not raise by default
+        if self.settings.os == "Macos":
+            self.options.stack_details = "backtrace_symbol"
 
     def configure(self):
         if self.options.shared:
@@ -107,8 +107,6 @@ class BackwardCppConan(ConanFile):
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 5:
-            raise ConanInvalidConfiguration("Compiler version is not supported")
         if self.settings.os == "Macos" and \
                 not self._has_stack_details("backtrace_symbol"):
             raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
@@ -122,6 +120,8 @@ class BackwardCppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
         self._cmake.definitions["STACK_WALKING_BACKTRACE"] = self._has_stack_walking("backtrace")
         self._cmake.definitions["STACK_DETAILS_AUTO_DETECT"] = False
