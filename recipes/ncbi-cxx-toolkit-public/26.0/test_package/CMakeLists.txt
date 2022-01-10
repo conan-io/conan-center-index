@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.7)
+project(PackageTest)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+if(OFF)
+  add_executable(basic_sample basic_sample.cpp)
+  target_link_libraries(basic_sample ${CONAN_LIBS})
+else()
+  NCBI_begin_app(basic_sample)
+    NCBI_sources(basic_sample)
+    NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_end_app()
+endif()
