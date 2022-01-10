@@ -15,10 +15,12 @@ class CppKafkaConan(ConanFile):
 
     options = {
        "shared": [True, False],
-       "multithreaded": [True, False]
+       "fPIC": [True, False],
+       "multithreaded": [True, False],
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "multithreaded": True,
     }
 
@@ -37,10 +39,18 @@ class CppKafkaConan(ConanFile):
         self.requires("boost/1.78.0")
         self.requires("librdkafka/1.8.2")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
-        del self.settings.compiler.libcxx
+        if self.options.shared:
+            del self.options.fPIC
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise Exception("cppkafka could not be built by MSVC <14")
 
@@ -71,5 +81,5 @@ class CppKafkaConan(ConanFile):
                 self.cpp_info.system_libs = ['mswsock', 'ws2_32']
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ['pthread']
-        if not self.options.shared:
+        if not self.deps_cpp_info["librdkafka"].shared:
             self.cpp_info.defines.append("CPPKAFKA_RDKAFKA_STATIC_LIB")
