@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class BackwardCppConan(ConanFile):
@@ -10,7 +10,7 @@ class BackwardCppConan(ConanFile):
     description = "A beautiful stack trace pretty printer for C++"
     homepage = "https://github.com/bombela/backward-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "backward-cpp", "stack-trace")
+    topics = ("backward-cpp", "stack-trace")
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -27,10 +27,9 @@ class BackwardCppConan(ConanFile):
         "stack_details": "dwarf",
     }
 
-    exports_sources = "CMakeLists.txt", "patches/backward-cpp-*.patch"
     generators = "cmake"
-
     _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -39,15 +38,23 @@ class BackwardCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _supported_os(self):
+        supported_os = ["Linux", "Macos", "Android"]
+        if tools.Version(self.version) >= "1.5":
+            supported_os.append("Windows")
+        return supported_os
+
     def _has_stack_walking(self, type):
         return self.options.stack_walking == type
 
     def _has_stack_details(self, type):
         return False if self.settings.os == "Windows" else self.options.stack_details == type
 
-    def _supported_os(self):
-        return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) >= "1.5" \
-               else ["Linux", "Macos", "Android"]
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,7 +99,7 @@ class BackwardCppConan(ConanFile):
                 raise ConanInvalidConfiguration("backward-cpp requires {}.".format(required_package))
 
     def validate(self):
-        if self.settings.os not in self._supported_os():
+        if self.settings.os not in self._supported_os:
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not"
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
@@ -137,11 +144,11 @@ class BackwardCppConan(ConanFile):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        os.remove(os.path.join(self.package_folder, "lib", "backward", "BackwardConfig.cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "backward"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Backward"
-        self.cpp_info.names["cmake_find_package_multi"] = "Backward"
+        self.cpp_info.set_property("cmake_file_name", "Backward")
+        self.cpp_info.set_property("cmake_target_name", "Backward::Backward")
 
         self.cpp_info.defines.append("BACKWARD_HAS_UNWIND={}".format(int(self._has_stack_walking("unwind"))))
         self.cpp_info.defines.append("BACKWARD_HAS_BACKTRACE={}".format(int(self._has_stack_walking("backtrace"))))
@@ -161,3 +168,7 @@ class BackwardCppConan(ConanFile):
                 self.cpp_info.system_libs.extend(["bfd"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Backward"
+        self.cpp_info.names["cmake_find_package_multi"] = "Backward"
