@@ -15,14 +15,12 @@ class CppKafkaConan(ConanFile):
 
     options = {
        "shared": [True, False],
-       "static": [True, False],
        "multithreaded": [True, False]
     }
-    default_options = (
-        "shared=False",
-        "static=True",
-        "multithreaded=True",
-    )
+    default_options = {
+        "shared": False,
+        "multithreaded": True,
+    }
 
     @property
     def _source_subfolder(self):
@@ -41,8 +39,10 @@ class CppKafkaConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        if self.settings.compiler == "Visual Studio" and float(self.settings.compiler.version.value) < 14:
-            raise Exception("ngg could not be built by MSVC <14")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
+            raise Exception("cppkafka could not be built by MSVC <14")
 
     def configure_cmake(self):
         cmake = CMake(self)
@@ -51,7 +51,7 @@ class CppKafkaConan(ConanFile):
         opts["RDKAFKA_INCLUDE_DIR"] = self.deps_cpp_info["librdkafka"].rootpath + "/include"
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
-        cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = self.options.static
+        cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = not self.deps_cpp_info["librdkafka"].shared
         cmake.configure(defs=opts, source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
@@ -60,7 +60,7 @@ class CppKafkaConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="license", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
 
@@ -68,9 +68,8 @@ class CppKafkaConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             if not self.options.shared:
-                self.cpp_info.libs.append('mswsock')
-                self.cpp_info.libs.append('ws2_32')
+                self.cpp_info.system_libs = ['mswsock', 'ws2_32']
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs = ['pthread']
         if not self.options.shared:
             self.cpp_info.defines.append("CPPKAFKA_RDKAFKA_STATIC_LIB")
