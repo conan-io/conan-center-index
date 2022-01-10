@@ -90,8 +90,9 @@ class FastDDSConan(ConanFile):
         return "source_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if self.version.startswith("2.3."):
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def configure(self):
         if self.options.shared:
@@ -122,7 +123,7 @@ class FastDDSConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        if self.version.startswith("2.3."):
+        if self.version.startswith("2.3."):           
             for patch in self.conan_data.get("patches", {}).get(self.version, []):
                 self.copy(patch["patch_file"])
 
