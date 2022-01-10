@@ -16,13 +16,13 @@ class CImgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     _cimg_options = (
-        ("enable_fftw",         "cimg_use_fftw",       "fftw/3.3.8"),
+        ("enable_fftw",         "cimg_use_fftw",       "fftw/3.3.9"),
         ("enable_jpeg",         "cimg_use_jpeg",       "libjpeg/9d"),
-        ("enable_openexr",      "cimg_use_openexr",    "openexr/2.5.4"),
+        ("enable_openexr",      "cimg_use_openexr",    "openexr/2.5.7"),
         ("enable_png",          "cimg_use_png",        "libpng/1.6.37"),
-        ("enable_tiff",         "cimg_use_tiff",       "libtiff/4.2.0"),
+        ("enable_tiff",         "cimg_use_tiff",       "libtiff/4.3.0"),
         # ("enable_ffmpeg",       "cimg_use_ffmpeg",     "ffmpeg/???"),
-        ("enable_opencv",        "cimg_use_opencv",     "opencv/4.5.1"),
+        ("enable_opencv",        "cimg_use_opencv",     "opencv/4.5.3"),
         # ("enable_magick",        "cimg_use_magick",     "magick/???"),
         # ("enable_xrandr",       "cimg_use_xrandr",     "xrandr/???"),
         # ("enable_xshm",         "cimg_use_xshm",       "xshm/???"),
