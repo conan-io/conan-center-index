@@ -60,6 +60,9 @@ class BackwardCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.stack_details
+        # default option
+        # FIXME: if Macos, default value of stack_details should be
+        #        "backtrace_symbol" in order to not raise by default
 
     def configure(self):
         if self.options.shared:
