@@ -21,10 +21,12 @@ class RubyConan(ConanFile):
     exports_sources = "patches/**"
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "with_openssl": [True, False]
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "with_openssl": True
     }
 
@@ -34,14 +36,20 @@ class RubyConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        self.requires("gmp/6.2.1")
+        self.requires("gmp/6.1.2")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1m")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -61,10 +69,15 @@ class RubyConan(ConanFile):
         tc.configure_args = ["--disable-install-doc"]
         if self.options.shared:
             tc.configure_args.append("--enable-shared")
+            tc.fpic = True
         tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
+
+        # autoreconf
+        self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
+                 win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
         at = Autotools(self)
         at.configure(build_script_folder=self._source_subfolder)
