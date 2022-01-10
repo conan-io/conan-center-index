@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -51,9 +52,9 @@ class CppKafkaConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 6:
-            raise Exception("cppkafka could not be built by gcc <6")
+            raise ConanInvalidConfiguration("cppkafka could not be built by gcc <6")
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
-            raise Exception("cppkafka could not be built by MSVC <14")
+            raise ConanInvalidConfiguration("cppkafka could not be built by MSVC <14")
 
     def configure_cmake(self):
         cmake = CMake(self)
