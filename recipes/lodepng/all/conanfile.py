@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -33,6 +34,11 @@ class LodepngConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_vc_static_runtime(self):
+        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -40,6 +46,10 @@ class LodepngConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if self.options.shared and self._is_vc_static_runtime:
+            return ConanInvalidConfiguration("lodepng shared doesn't support Visual Studio with static runtime")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
