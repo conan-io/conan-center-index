@@ -102,7 +102,7 @@ class CImgConan(ConanFile):
                         os.path.join(self.package_folder, "include", "plugins"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_file", "CImg")
+        self.cpp_info.set_property("pkg_config_name", "CImg")
         for option, define in self._cimg_defines:
             if getattr(self.options, option):
                 self.cpp_info.defines.append(define)
