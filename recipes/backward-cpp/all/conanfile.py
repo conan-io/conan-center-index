@@ -107,10 +107,12 @@ class BackwardCppConan(ConanFile):
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if self.settings.os == "Macos" and \
-                not self._has_stack_details("backtrace_symbol"):
-            raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
-                                            " is supported on Macos")
+        if self.settings.os == "Macos":
+            if self.settings.arch == "armv8":
+                raise ConanInvalidConfiguration("Macos M1 not supported yet")
+            if not self._has_stack_details("backtrace_symbol"):
+                raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
+                                                " is supported on Macos")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
