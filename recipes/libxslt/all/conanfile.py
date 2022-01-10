@@ -186,17 +186,12 @@ class LibxsltConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LibXslt")
         self.cpp_info.set_property("pkg_config_name", "libxslt_full_package") # unofficial, avoid conflicts in conan generators
 
-        self.cpp_info.names["cmake_find_package"] = "LibXslt"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibXslt"
-
         prefix = "lib" if self._is_msvc else ""
         suffix = "_a" if self._is_msvc and not self.options.shared else ""
 
         # xslt
         self.cpp_info.components["xslt"].set_property("cmake_target_name", "LibXslt::LibXslt")
         self.cpp_info.components["xslt"].set_property("pkg_config_name", "libxslt")
-        self.cpp_info.components["xslt"].names["cmake_find_package"] = "LibXslt"
-        self.cpp_info.components["xslt"].names["cmake_find_package_multi"] = "LibXslt"
         self.cpp_info.components["xslt"].libs = ["{}xslt{}".format(prefix, suffix)]
         if not self.options.shared:
             self.cpp_info.components["xslt"].defines = ["LIBXSLT_STATIC"]
@@ -209,7 +204,16 @@ class LibxsltConan(ConanFile):
         # exslt
         self.cpp_info.components["exslt"].set_property("cmake_target_name", "LibXslt::LibExslt")
         self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
-        self.cpp_info.components["exslt"].names["cmake_find_package"] = "LibExslt"
-        self.cpp_info.components["exslt"].names["cmake_find_package_multi"] = "LibExslt"
         self.cpp_info.components["exslt"].libs = ["{}exslt{}".format(prefix, suffix)]
         self.cpp_info.components["exslt"].requires = ["xslt"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXslt"
+        self.cpp_info.names["pkg_config"] = "libxslt_full_package"
+        self.cpp_info.components["xslt"].names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.components["xslt"].names["cmake_find_package_multi"] = "LibXslt"
+        self.cpp_info.components["xslt"].names["pkg_config"] = "libxslt"
+        self.cpp_info.components["exslt"].names["cmake_find_package"] = "LibExslt"
+        self.cpp_info.components["exslt"].names["cmake_find_package_multi"] = "LibExslt"
+        self.cpp_info.components["exslt"].names["pkg_config"] = "libexslt"
