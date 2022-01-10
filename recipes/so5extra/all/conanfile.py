@@ -9,7 +9,7 @@ class So5extraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A collection of various SObjectizer's extensions."
     topics = ("concurrency", "actor-framework", "actors", "agents", "sobjectizer")
-    settings = "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     @property
@@ -17,7 +17,10 @@ class So5extraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("sobjectizer/5.7.2.3")
+        if tools.Version(self.version) >= "1.5.0":
+            self.requires("sobjectizer/5.7.3")
+        else:
+            self.requires("sobjectizer/5.7.2.3")
 
     def configure(self):
         minimal_cpp_standard = "17"
