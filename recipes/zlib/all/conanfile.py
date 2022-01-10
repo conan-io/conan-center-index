@@ -86,11 +86,11 @@ class ZlibConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
-                if self.settings.compiler == "Visual Studio" and suffix:
+                if self.settings.compiler in ("Visual Studio", "msvc") and suffix:
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
-                if self.settings.compiler == "Visual Studio":
+                if self.settings.compiler in ("Visual Studio", "msvc"):
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler in ("clang", "gcc", ):
