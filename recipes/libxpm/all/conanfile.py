@@ -1,0 +1,81 @@
+import functools
+import os
+
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.43.0"
+
+
+class LibXPMConan(ConanFile):
+    name = "libxpm"
+    description = "X Pixmap (XPM) image file format library"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://gitlab.freedesktop.org/xorg/lib/libxpm"
+    topics = ("xpm",)
+    license = "MIT-open-group"
+    settings = ("os", "arch", "compiler", "build_type")
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    generators = ("cmake",)
+    exports_sources = ("CMakeLists.txt", "patches/*", "windows/*")
+
+    def validate(self):
+        if self.settings.os not in ("Windows", "Linux", "FreeBSD"):
+            raise ConanInvalidConfiguration(
+                "libxpm is supported only on Windows, Linux and FreeBSD"
+            )
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.settings.os != "Windows":
+            self.requires("xorg/system")
+
+    @functools.lru_cache(1)
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["CONAN_libxpm_VERSION"] = self.version
+        cmake.configure()
+        return cmake
+
+    def build(self):
+        self._configure_cmake().build()
+
+    def package(self):
+        self.copy("COPYING", "licenses")
+        self.copy("COPYRIGHT", "licenses")
+        self._configure_cmake().install()
+
+    def package_info(self):
+        name = "Xpm"
+        info = self.cpp_info
+
+        info.set_property("cmake_file_name", name)
+        info.set_property("cmake_target_name", f"{name}::{name}")
+
+        info.names.update({
+            "cmake_find_package": name,
+            "cmake_find_package_multi": name,
+        })
+
+        info.libs = ["xpm"]
+        if self.settings.os == "Windows":
+            info.defines = ["FOR_MSW"]
