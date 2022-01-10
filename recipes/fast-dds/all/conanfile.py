@@ -70,7 +70,12 @@ class FastDDSConan(ConanFile):
             "Visual Studio": "16",
             "gcc": "5",
             "clang": "3.9",
-            "apple-clang": "8",
+            "apple-clang": "8"
+        } if self.version.startswith("2.3.") else {
+            "Visual Studio": "16",
+            "gcc": "8",
+            "clang": "6.0",
+            "apple-clang": "8"
         }
 
     @staticmethod
