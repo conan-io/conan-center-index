@@ -242,6 +242,8 @@ class OpenCascadeConan(ConanFile):
             occt_csf_cmake,
             "set (CSF_OpenGlLibs ",
             "# set (CSF_OpenGlLibs ")
+        if self._link_opengl:
+            conan_targets.append("CONAN_PKG::opengl")
 
         ## Inject conan targets
         tools.replace_in_file(
