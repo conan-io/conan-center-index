@@ -7,7 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.43.0"
 
 
-class LibXPMConan(ConanFile):
+class LibXpmConan(ConanFile):
     name = "libxpm"
     description = "X Pixmap (XPM) image file format library"
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,7 +29,7 @@ class LibXPMConan(ConanFile):
     def validate(self):
         if self.settings.os not in ("Windows", "Linux", "FreeBSD"):
             raise ConanInvalidConfiguration(
-                "libxpm is supported only on Windows, Linux and FreeBSD"
+                "libXpm is supported only on Windows, Linux and FreeBSD"
             )
 
     def source(self):
@@ -52,7 +52,7 @@ class LibXPMConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["CONAN_libxpm_VERSION"] = self.version
+        cmake.definitions["CONAN_libXpm_VERSION"] = self.version
         cmake.configure()
         return cmake
 
@@ -76,6 +76,6 @@ class LibXPMConan(ConanFile):
             "cmake_find_package_multi": name,
         })
 
-        info.libs = ["xpm"]
+        info.libs = [name]
         if self.settings.os == "Windows":
             info.defines = ["FOR_MSW"]

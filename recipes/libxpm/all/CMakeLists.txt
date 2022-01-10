@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(libxpm_wrapper VERSION "${CONAN_libxpm_VERSION}" LANGUAGES C)
+project(libXpm VERSION "${CONAN_libXpm_VERSION}" LANGUAGES C)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
@@ -20,7 +20,7 @@ endif()
 # ---- Library ----
 
 add_library(
-    xpm
+    Xpm
     src/Attrib.c
     src/CrBufFrI.c
     src/CrDatFrI.c
@@ -45,34 +45,34 @@ add_library(
 )
 
 if(WIN32)
-  target_sources(xpm PRIVATE windows/libxpm.def)
-  target_compile_definitions(xpm PRIVATE FOR_MSW)
+  target_sources(Xpm PRIVATE windows/libXpm.def)
+  target_compile_definitions(Xpm PRIVATE FOR_MSW)
 else()
   target_sources(
-      xpm PRIVATE
+      Xpm PRIVATE
       src/CrBufFrP.c
       src/CrDatFrP.c
       src/CrIFrP.c
       src/RdFToP.c
       src/WrFFrP.c
   )
-  target_include_directories(xpm PRIVATE "${X11_INCLUDE_DIR}")
-  target_link_libraries(xpm PRIVATE "${X11_LIBRARY}")
+  target_include_directories(Xpm PRIVATE "${X11_INCLUDE_DIR}")
+  target_link_libraries(Xpm PRIVATE "${X11_LIBRARY}")
 endif()
 
 if(MSVC)
   target_compile_definitions(
-      xpm PRIVATE
+      Xpm PRIVATE
       _CRT_SECURE_NO_WARNINGS
       _CRT_NONSTDC_NO_DEPRECATE
   )
-  target_compile_options(xpm PRIVATE /wd4267 /wd4244 /wd4018)
+  target_compile_options(Xpm PRIVATE /wd4267 /wd4244 /wd4018)
 endif()
 
-target_include_directories(xpm PRIVATE include/X11)
+target_include_directories(Xpm PRIVATE include/X11)
 
 set_target_properties(
-    xpm PROPERTIES
+    Xpm PROPERTIES
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
 )
@@ -82,7 +82,7 @@ set_target_properties(
 include(GNUInstallDirs)
 
 install(
-    TARGETS xpm
+    TARGETS Xpm
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
