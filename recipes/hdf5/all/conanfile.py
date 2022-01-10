@@ -26,7 +26,12 @@ class Hdf5Conan(ConanFile):
         "with_zlib": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
-        "parallel": [True, False]
+        "parallel": [True, False],
+        "dimension_scales_with_new_ref": [True, False],
+        "msvc_naming_convention": [True, False],
+        "mingw_static_gcc_libs": [True, False],
+        "with_file_locking": [True, False],
+        "ignore_disabled_file_locks": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,7 +42,12 @@ class Hdf5Conan(ConanFile):
         "with_zlib": True,
         "szip_support": None,
         "szip_encoding": False,
-        "parallel": False
+        "parallel": False,
+        "dimension_scales_with_new_ref": True,
+        "msvc_naming_convention": False,
+        "mingw_static_gcc_libs": False,
+        "with_file_locking": True,
+        "ignore_disabled_file_locks": False,
     }
 
     _cmake = None
@@ -72,12 +82,17 @@ class Hdf5Conan(ConanFile):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
-        elif self.options.szip_support == "with_szip" and \
+        if tools.Version(self.version) < "1.13.0":
+            del self.options.dimension_scales_with_new_ref
+        if tools.Version(self.version) < "1.13.0" or self.settings.os != "Windows":
+            del self.options.msvc_naming_convention
+            del self.options.mingw_static_gcc_libs
+
+    def validate(self):
+        if self.options.szip_support == "with_szip" and \
              self.options.szip_encoding and \
              not self.options["szip"].enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
-
-    def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             # While building it runs some executables like H5detect
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
@@ -153,6 +168,9 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if tools.Version(self.version) >= "1.10.0":
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
+        if tools.Version(self.version) >= "1.13.0":
+            self._cmake.definitions["HDF5_TEST_SERIAL"] = False
+            self._cmake.definitions["HDF5_TEST_PARALLEL"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

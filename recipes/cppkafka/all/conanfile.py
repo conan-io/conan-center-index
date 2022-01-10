@@ -36,8 +36,8 @@ class CppKafkaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
-        self.requires.add("boost/1.78.0")
-        self.requires.add("librdkafka/1.8.2")
+        self.requires("boost/1.78.0")
+        self.requires("librdkafka/1.8.2")
 
     def configure(self):
         del self.settings.compiler.libcxx
