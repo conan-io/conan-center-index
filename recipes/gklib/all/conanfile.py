@@ -63,7 +63,6 @@ class GKlibConan(ConanFile):
             strip_root=True,
             destination=self.folders.source
         )
-        apply_conandata_patches(self)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -74,6 +73,7 @@ class GKlibConan(ConanFile):
         toolchain.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -83,6 +83,8 @@ class GKlibConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GKlib"
+        self.cpp_info.names["cmake_find_package_multi"] = "GKlib"
         self.cpp_info.set_property("cmake_file_name", "GKlib")
         self.cpp_info.set_property("cmake_target_name", "GKlib")
         self.cpp_info.set_property("cmake_find_mode", "both")
