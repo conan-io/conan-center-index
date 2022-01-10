@@ -24,7 +24,7 @@ class LibXpmConan(ConanFile):
         "fPIC": True,
     }
     generators = ("cmake",)
-    exports_sources = ("CMakeLists.txt", "patches/*", "windows/*")
+    exports_sources = ("CMakeLists.txt", "windows/*")
 
     def validate(self):
         if self.settings.os not in ("Windows", "Linux", "FreeBSD"):
