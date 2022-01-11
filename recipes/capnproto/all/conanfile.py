@@ -180,6 +180,8 @@ class CapnprotoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CapnProto")
+        capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [capnprotomacros])
 
         components = [
             {"name": "capnp", "requires": ["kj"]},
@@ -211,9 +213,6 @@ class CapnprotoConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
         self.cpp_info.components["kj"].builddirs.append(self._cmake_folder)
-        capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
-        self.cpp_info.components["kj"].set_property("cmake_build_modules", [capnprotomacros])
-        self.cpp_info.components["kj"].build_modules = [capnprotomacros]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
@@ -222,11 +221,11 @@ class CapnprotoConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "CapnProto"
         self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
+        self.cpp_info.components["kj"].build_modules = [capnprotomacros]
 
     def _register_component(self, component):
         name = component["name"]
         self.cpp_info.components[name].set_property("cmake_target_name", "CapnProto::{}".format(name))
         self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].names["pkg_config"] = name
         self.cpp_info.components[name].libs = [name]
         self.cpp_info.components[name].requires = component["requires"]
