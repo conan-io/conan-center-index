@@ -346,25 +346,19 @@ class Libxml2Conan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
         self.cpp_info.set_property("cmake_file_name", "LibXml2")
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
         if self._is_msvc:
-            self.cpp_info.libs = ['libxml2' if self.options.shared else 'libxml2_a']
+            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
         else:
-            self.cpp_info.libs = ['xml2']
+            self.cpp_info.libs = ["xml2"]
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
