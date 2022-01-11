@@ -103,11 +103,13 @@ class QhullConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "Qhull"
         self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
+        self.cpp_info.names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
         self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
+        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].set_property("cmake_target_name", "Qhull::{}".format(self._qhull_cmake_name))
         self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
 
