@@ -153,9 +153,10 @@ class CryptoPPConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libcryptopp"].system_libs = ["ws2_32"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "cryptopp"
         self.cpp_info.names["cmake_find_package_multi"] = "cryptopp"
+        self.cpp_info.names["pkg_config"] = "libcryptopp"
         self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
         self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
         self.cpp_info.components["libcryptopp"].builddirs.append(self._module_subfolder)
