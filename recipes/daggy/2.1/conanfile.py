@@ -9,7 +9,7 @@ class DaggyConan(ConanFile):
     license = "MIT"
     homepage = "https://daggy.dev"
     description = "Data Aggregation Utility and C/C++ developer library for data streams catching"
-    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "crossplatform")
+    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "crossplatform", "ssh-client")
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
