@@ -140,7 +140,7 @@ class CjsonConan(ConanFile):
             self.cpp_info.components["cjson_utils"].libs = ["cjson_utils"]
             self.cpp_info.components["cjson_utils"].requires = ["_cjson"]
 
-        # TODO: remove in conan v2
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "cJSON"
         self.cpp_info.names["cmake_find_package_multi"] = "cJSON"
         module_target_rel_path = os.path.join(self._module_subfolder, self._module_file)
@@ -149,9 +149,11 @@ class CjsonConan(ConanFile):
         self.cpp_info.components["_cjson"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["_cjson"].build_modules["cmake_find_package"] = [module_target_rel_path]
         self.cpp_info.components["_cjson"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+        self.cpp_info.components["_cjson"].names["pkg_config"] = "libcjson"
         if self.options.utils:
             self.cpp_info.components["cjson_utils"].names["cmake_find_package"] = "cjson_utils"
             self.cpp_info.components["cjson_utils"].names["cmake_find_package_multi"] = "cjson_utils"
             self.cpp_info.components["cjson_utils"].builddirs.append(self._module_subfolder)
             self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package"] = [module_target_rel_path]
             self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+            self.cpp_info.components["cjson_utils"].names["pkg_config"] = "libcjson_utils"
