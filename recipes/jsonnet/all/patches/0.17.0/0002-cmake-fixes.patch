@@ -1,0 +1,87 @@
+- install headers
+- optionally disable shared build
+- add md5 objects to c library
+- allow MSVC
+--- core/CMakeLists.txt
++++ core/CMakeLists.txt
+@@ -16,8 +16,8 @@ set(LIBJSONNET_HEADERS
+     string_utils.h
+     unicode.h
+     vm.h)
+-
+-set(LIBJSONNET_SOURCE
++install(FILES ../include/libjsonnet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++set(LIBJSONNET_SOURCE $<TARGET_OBJECTS:md5>
+     desugarer.cpp
+     formatter.cpp
+     lexer.cpp
+@@ -27,7 +27,7 @@ set(LIBJSONNET_SOURCE
+     static_analysis.cpp
+     string_utils.cpp
+     vm.cpp)
+-
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet SHARED ${LIBJSONNET_HEADERS} ${LIBJSONNET_SOURCE})
+ add_dependencies(libjsonnet md5 stdlib)
+ target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json)
+@@ -50,7 +50,7 @@ install(TARGETS libjsonnet
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ target_include_directories(libjsonnet INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet_static STATIC ${LIBJSONNET_SOURCE})
+--- cpp/CMakeLists.txt
++++ cpp/CMakeLists.txt
+@@ -3,11 +3,11 @@
+ set(LIBJSONNETPP_HEADERS
+     ../include/libjsonnet++.h
+ )
+-
++install(FILES ${LIBJSONNETPP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ set(LIBJSONNETPP_SOURCE
+     libjsonnet++.cpp
+ )
+-
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
+ add_dependencies(libjsonnet++ jsonnet)
+-# target_link_libraries(libjsonnet libjsonnet)
++target_link_libraries(libjsonnet++ libjsonnet)
+@@ -24,7 +24,7 @@
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ target_include_directories(libjsonnet++ INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet++_static STATIC ${LIBJSONNETPP_SOURCE})
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -40,7 +40,7 @@
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wextra -Woverloaded-virtual -pedantic -std=c++11 -fPIC ${OPT}")
+ else()
+     # TODO: Windows support.
+-    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
++    message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
+ endif()
+ 
+ set(CMAKE_CXX_STANDARD 11)
+--- stdlib/CMakeLists.txt
++++ stdlib/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ # Custom command that will only build stdlib when it changes.
+ add_custom_command(
+ 	OUTPUT ${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+-	COMMAND ${GLOBAL_OUTPUT_PATH}/to_c_array
++	COMMAND to_c_array
+ 			    ${PROJECT_SOURCE_DIR}/stdlib/std.jsonnet
+ 					${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+ 	DEPENDS to_c_array std.jsonnet)
+
+

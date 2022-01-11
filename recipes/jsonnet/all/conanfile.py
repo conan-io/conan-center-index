@@ -21,7 +21,6 @@ class JsonnetConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
     @property
@@ -41,7 +40,7 @@ class JsonnetConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.5")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
@@ -49,6 +48,11 @@ class JsonnetConan(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
