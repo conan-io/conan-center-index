@@ -115,11 +115,8 @@ class NetSnmpConan(ConanFile):
                 replacer("$link_dynamic = false", "$link_dynamic = true")
             if self.options.with_ipv6:
                 replacer("$b_ipv6 = false", "$b_ipv6 = true")
-        tools.replace_in_file(
-            "win32\\Configure",
-            '"/MDd' if self._is_debug else '"/MD',
-            f'"/{self.settings.compiler.runtime}'
-        )
+        runtime = self.settings.compiler.runtime
+        tools.replace_in_file("win32\\Configure", '"/runtime', f'"/{runtime}')
         link_lines = "\n".join(
             f'#    pragma comment(lib, "{lib}.lib")'
             for lib in ssl_info.libs + ssl_info.system_libs

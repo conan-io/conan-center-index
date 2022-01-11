@@ -54,7 +54,7 @@
  my %makefile_subs = (
      "app" => [ "^APPS=",       "APPS=" . join(" ", @apps)	    ],
      "apc" => [ "^APPS_CLEAN=", "APPS_CLEAN=" . join(" ", @apps_clean)],
-@@ -205,7 +202,7 @@
+@@ -205,29 +202,23 @@
      "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
      "pin" => [ "^PERL_DEFINE=","PERL_DEFINE=$perl_define"           ],
      "pdf" => [ "^PERL_INC=",   "PERL_INC=$perl_inc"                 ],
@@ -62,19 +62,24 @@
 +    "pcf" => [ "^PERL_CFLAGS=","PERL_CFLAGS="           ],
      "cfl" => [ "^CFLAGS=",     "CFLAGS=$perl_define " .
                                 "/D WIN32_LEAN_AND_MEAN " .
-                                "/EHsc " .
-@@ -214,9 +211,8 @@
+-                               "/EHsc " .
+-                               "/FD " .
+-                               "/FR\$(INTDIR)\\ " .
                                 "/Fd\$(INTDIR)\\\$(PROGNAME).pdb " .
                                 "/Fo\$(INTDIR)\\ " .
                                 "$perl_inc " .
 -                               "$perl_cflags " .
                                 "/c " .
 -                               "/W3 " .
-+                               "/W3 /wd4267 /wd4244 " .
-                                "/Zi " .
+-                               "/Zi " .
++                               "/W3 /wd4267 /wd4244 /GS " .
                                 "/nologo " .
                 ($config eq "release" ?
-@@ -226,8 +224,7 @@
+-                "/MD  /D NDEBUG /O2 " :
+-                "/MDd /D _DEBUG /Od /Gm ")
++                "/runtime /O2 /Ob2 /DNDEBUG " :
++                "/runtime /Zi /Ob0 /Od /RTC1 ")
+              ],
      "lfl" => [ "^LDFLAGS=",    "LDFLAGS=" .
                                 ($config eq "debug" ? "/debug " : "") .
                                 ($openssllibdir ? "/libpath:$openssllibdir" :
@@ -84,7 +89,7 @@
               ],
      "rsc" => [ "^RSCFLAGS=",   "RSCFLAGS=/l 0x409 " .
                                 ($config eq "release" ? "/d NDEBUG" :
-@@ -308,9 +303,3 @@
+@@ -308,9 +299,3 @@
  print "  Blumenthal AES:             " . ($blumenthal_aes ? "enabled" : "disabled") . "\n";
  print "  IPv6 transport:             " . ($b_ipv6 == 1 ? "enabled" : "disabled") . "\n";
  print "  winExtDLL agent:            " . ($b_winextdll == 1 ? "enabled" : "disabled") . "\n";
