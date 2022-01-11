@@ -97,11 +97,12 @@ class CjsonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         targets = {"cjson": "cJSON::cjson"}
         if self.options.utils:
             targets.update({"cjson_utils": "cJSON::cjson_utils"})
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            os.path.join(self.package_folder, self._module_file_rel_path),
             targets
         )
 
@@ -118,12 +119,8 @@ class CjsonConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
-    def _module_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cJSON")
@@ -143,17 +140,14 @@ class CjsonConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "cJSON"
         self.cpp_info.names["cmake_find_package_multi"] = "cJSON"
-        module_target_rel_path = os.path.join(self._module_subfolder, self._module_file)
         self.cpp_info.components["_cjson"].names["cmake_find_package"] = "cjson"
         self.cpp_info.components["_cjson"].names["cmake_find_package_multi"] = "cjson"
-        self.cpp_info.components["_cjson"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["_cjson"].build_modules["cmake_find_package"] = [module_target_rel_path]
-        self.cpp_info.components["_cjson"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+        self.cpp_info.components["_cjson"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["_cjson"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["_cjson"].names["pkg_config"] = "libcjson"
         if self.options.utils:
             self.cpp_info.components["cjson_utils"].names["cmake_find_package"] = "cjson_utils"
             self.cpp_info.components["cjson_utils"].names["cmake_find_package_multi"] = "cjson_utils"
-            self.cpp_info.components["cjson_utils"].builddirs.append(self._module_subfolder)
-            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package"] = [module_target_rel_path]
-            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components["cjson_utils"].names["pkg_config"] = "libcjson_utils"
