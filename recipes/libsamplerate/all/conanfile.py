@@ -77,13 +77,15 @@ class LibsamplerateConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SampleRate")
         self.cpp_info.set_property("cmake_target_name", "SampleRate::samplerate")
         self.cpp_info.set_property("pkg_config_name", "samplerate")
-
-        self.cpp_info.names["cmake_find_package"] = "SampleRate"
-        self.cpp_info.names["cmake_find_package_multi"] = "SampleRate"
-        self.cpp_info.components["samplerate"].names["cmake_find_package"] = "samplerate"
-        self.cpp_info.components["samplerate"].names["cmake_find_package_multi"] = "samplerate"
-        self.cpp_info.components["samplerate"].set_property("cmake_target_name", "SampleRate::samplerate")
-
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["samplerate"].libs = ["samplerate"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["samplerate"].system_libs.append("m")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "SampleRate"
+        self.cpp_info.names["cmake_find_package_multi"] = "SampleRate"
+        self.cpp_info.names["pkg_config"] = "samplerate"
+        self.cpp_info.components["samplerate"].names["cmake_find_package"] = "samplerate"
+        self.cpp_info.components["samplerate"].names["cmake_find_package_multi"] = "samplerate"
+        self.cpp_info.components["samplerate"].set_property("cmake_target_name", "SampleRate::samplerate")
