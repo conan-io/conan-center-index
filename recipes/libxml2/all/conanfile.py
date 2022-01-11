@@ -380,6 +380,8 @@ class Libxml2Conan(ConanFile):
             if self.options.ftp or self.options.http:
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "libxml-2.0"
