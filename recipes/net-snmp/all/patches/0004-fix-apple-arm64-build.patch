@@ -1,0 +1,17 @@
+Upstream suggests the just hardcode this value:
+https://github.com/net-snmp/net-snmp/issues/295#issuecomment-1002631231
+
+--- config.sub
++++ config.sub
+@@ -120,6 +120,11 @@
+     exit 1;;
+ esac
+ 
++if [ "$1" = aarch64-apple-darwin ]; then
++  echo arm-apple-darwin
++  exit 0
++fi
++
+ # Separate what the user gave into CPU-COMPANY and OS or KERNEL-OS (if any).
+ # Here we must recognize all the valid KERNEL-OS combinations.
+ maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
