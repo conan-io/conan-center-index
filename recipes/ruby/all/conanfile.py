@@ -36,6 +36,10 @@ class RubyConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("gmp/6.1.2")
@@ -44,6 +48,8 @@ class RubyConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def config_options(self):
         if self.settings.os == "Windows":
