@@ -17,15 +17,15 @@ sources:
   "11.2.0":
     posix:
       seh:
-        url: "https://github.com/ericLemanissier/mingw-builds/releases/download/v9/x86_64-11.2.0-release-posix-seh-rt_v9-rev0.7z"
-        sha256: "0d47985245f709a0804df2b6a9001b6f4cbc9c9990df656bc7a4c99c48ac8697"
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/11.2.0-rt_v9-rev1/x86_64-11.2.0-release-posix-seh-rt_v9-rev1.7z"
+        sha256: "2c943b1a9231ce09f227b0c8fc6cabc61da3581f4ef2f7682f9393f5a1d70ae8"
       sjlj:
-        url: "https://github.com/ericLemanissier/mingw-builds/releases/download/v9/x86_64-11.2.0-release-posix-sjlj-rt_v9-rev0.7z"
-        sha256: "01fbd6703bccca108097074f7b0a3d60e0f0ac6cf3ef9a443c86948d7dfc81f3"
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/11.2.0-rt_v9-rev1/x86_64-11.2.0-release-posix-sjlj-rt_v9-rev1.7z"
+        sha256: "b943ae149c727d0dc91c4671d4e83585c087dca60b19752c9abd4b6ff7917b74"
     win32:
       seh:
-        url: "https://github.com/ericLemanissier/mingw-builds/releases/download/v9/x86_64-11.2.0-release-win32-seh-rt_v9-rev0.7z"
-        sha256: "b0dd9fe495c07dac0faae5502abbbe39d96a36f18d419a02af4e5b20d4271438"
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/11.2.0-rt_v9-rev1/x86_64-11.2.0-release-win32-seh-rt_v9-rev1.7z"
+        sha256: "becaf3c2d036ae1cdfb50b1b807ecc4ae8c70a78f411cf3e1ccc3b7d4f6bb9d8"
       sjlj:
-        url: "https://github.com/ericLemanissier/mingw-builds/releases/download/v9/x86_64-11.2.0-release-win32-sjlj-rt_v9-rev0.7z"
-        sha256: "e5ad69ead7490fc211734f6a704f068ef037dc92dbcedeec22d4688fcc8c4712"
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/11.2.0-rt_v9-rev1/x86_64-11.2.0-release-win32-sjlj-rt_v9-rev1.7z"
+        sha256: "25a2ef169342219717e0fab794170ee58eb62879cd05f3bd8eb466bb9be59ed1"
