@@ -181,9 +181,6 @@ class CapnprotoConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CapnProto")
 
-        self.cpp_info.names["cmake_find_package"] = "CapnProto"
-        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
-
         components = [
             {"name": "capnp", "requires": ["kj"]},
             {"name": "capnp-json", "requires": ["capnp", "kj"]},
@@ -222,11 +219,14 @@ class CapnprotoConan(ConanFile):
         self.output.info("Appending PATH env var with: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "CapnProto"
+        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
+
     def _register_component(self, component):
         name = component["name"]
         self.cpp_info.components[name].set_property("cmake_target_name", "CapnProto::{}".format(name))
         self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].names["cmake_find_package"] = name
-        self.cpp_info.components[name].names["cmake_find_package_multi"] = name
+        self.cpp_info.components[name].names["pkg_config"] = name
         self.cpp_info.components[name].libs = [name]
         self.cpp_info.components[name].requires = component["requires"]
