@@ -102,8 +102,10 @@ class CAresConan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
         self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].set_property("cmake_target_name", "c-ares::cares")
         self.cpp_info.components["cares"].set_property("pkg_config_name", "libcares")
