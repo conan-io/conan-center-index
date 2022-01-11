@@ -164,7 +164,7 @@ class SDLConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Linux":
             self.build_requires("pkgconf/1.7.4")
-        if self.options.get_safe("wayland", False):
+        if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
             self.build_requires("wayland/1.19.0")  # Provides wayland-scanner
 
     def source(self):
