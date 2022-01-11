@@ -20,7 +20,7 @@ class XpropertyConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("xtl/0.7.2")
+        self.requires("xtl/0.7.4")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
