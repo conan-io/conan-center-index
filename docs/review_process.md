@@ -63,7 +63,7 @@ Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-
 
 Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts.
 Obviously, PRs that have merge conflicts are never merged, and all the conflicts have to be resolved first.
-It's recommended to [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to solve avoid conflicts.
+Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch.
 
 ## Draft
 
