@@ -89,6 +89,8 @@ class OctomapConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators are removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {
@@ -110,13 +112,8 @@ class OctomapConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     @property
     def _octomath_target(self):
@@ -143,11 +140,9 @@ class OctomapConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators are removed
         self.cpp_info.components["octomath"].names["cmake_find_package"] = self._octomath_target
         self.cpp_info.components["octomath"].names["cmake_find_package_multi"] = self._octomath_target
-        self.cpp_info.components["octomath"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["octomath"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["octomath"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["octomaplib"].names["cmake_find_package"] = self._octomap_target
         self.cpp_info.components["octomaplib"].names["cmake_find_package_multi"] = self._octomap_target
-        self.cpp_info.components["octomaplib"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["octomaplib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["octomaplib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
