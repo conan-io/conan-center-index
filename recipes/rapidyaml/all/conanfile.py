@@ -81,11 +81,13 @@ class RapidYAMLConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
-        self.cpp_info.libs = ["ryml"]
+        # TODO: create c4core recipe
+        self.cpp_info.libs = ["ryml", "c4core"]
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"
