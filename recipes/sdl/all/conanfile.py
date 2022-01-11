@@ -321,7 +321,7 @@ class SDLConan(ConanFile):
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
                     cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
                     self._cmake.definitions["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
-                    self._cmake.definitions["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
+                    self._cmake.definitions["WAYLAND_SCANNER_VERSION"] = "1.19.0"  # FIXME: Check actual build-requires version
 
                 self._cmake.definitions["SDL_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["SDL_RPI"] = self.options.video_rpi
