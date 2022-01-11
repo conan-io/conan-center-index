@@ -28,7 +28,7 @@ class CajunJsonApiConan(ConanFile):
 
     def package(self):
         package_version = tools.Version(self.version)
-        if packageVersion < "2.1.0":
+        if package_version < "2.1.0":
             # No dedicated LICENSE file in older versions, extracting license text from comments
             tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
             # Prior to v2.1.0 there was no "cajun" subfolder in sources but it was present in RPM packages
