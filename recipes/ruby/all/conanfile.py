@@ -1,8 +1,10 @@
+import glob
 import os
 import re
-from io import StringIO
 
 from conan import ConanFile
+from conan.tools.apple.apple import is_apple_os, to_apple_arch
+from conan.tools.cross_building import cross_building
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conans import tools
@@ -70,6 +72,10 @@ class RubyConan(ConanFile):
         if self.options.shared:
             tc.configure_args.append("--enable-shared")
             tc.fpic = True
+        if cross_building(self) and is_apple_os(self.settings.os):
+            apple_arch = to_apple_arch(self.settings.arch)
+            if apple_arch:
+                tc.configure_args.append("--with-arch={}".format(apple_arch))
         tc.generate()
 
     def build(self):
@@ -88,7 +94,11 @@ class RubyConan(ConanFile):
             self.copy(file, dst="licenses", src=self._source_subfolder)
 
         at = Autotools(self)
-        at.install()
+        if cross_building(self):
+            at.make(target="install-local")
+            at.make(target="install-arch")
+        else:
+            at.install()
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -100,12 +110,10 @@ class RubyConan(ConanFile):
 
         version = tools.Version(self.version)
         rubylib = self.cpp_info.components["rubylib"]
-        arch_buf = StringIO()
-        self.run([os.path.join(self.package_folder, 'bin', 'ruby'), "-e", "require 'mkmf'; puts(CONFIG['arch'])"], output=arch_buf)
-        arch = arch_buf.getvalue().splitlines()[-1].strip()
+        config_file = glob.glob(os.path.join(self.package_folder, "include", "**", "ruby", "config.h"), recursive=True)[0]
         rubylib.includedirs = [
             os.path.join(self.package_folder, "include", "ruby-{}".format(version)),
-            os.path.join(self.package_folder, "include", "ruby-{}".format(version), arch)
+            os.path.dirname(os.path.dirname(config_file))
         ]
         rubylib.libs = tools.collect_libs(self)
         rubylib.requires.extend(["zlib::zlib", "gmp::gmp"])

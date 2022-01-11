@@ -14,7 +14,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        self.run("ruby --version", run_environment=True)
-
         if not tools.cross_building(self.settings):
+            self.run("ruby --version", run_environment=True)
             CMake(self).test(output_on_failure=True)
