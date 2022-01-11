@@ -125,9 +125,10 @@ class OpenjpegConan(ConanFile):
         elif self.settings.os == "Android":
             self.cpp_info.system_libs = ["m"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "libopenjp2"
