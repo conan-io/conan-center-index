@@ -38,6 +38,8 @@ class GtkConan(ConanFile):
         "with_cloudprint": False
     }
 
+    short_paths = True
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -57,6 +59,10 @@ class GtkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # Fix duplicate definitions of DllMain
+            self.options["gdk-pixbuf"].shared = True
+            # Fix segmentation fault
+            self.options["cairo"].shared = True
         if self.settings.os != "Linux":
             del self.options.with_wayland
             del self.options.with_x11
@@ -64,6 +70,8 @@ class GtkConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and tools.Version(self.version) < "4.3":
+            raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.3")
 
     def configure(self):
         if self.options.shared:
@@ -74,8 +82,6 @@ class GtkConan(ConanFile):
             if self.options.with_wayland or self.options.with_x11:
                 if not self.options.with_pango:
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
 
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
@@ -86,7 +92,7 @@ class GtkConan(ConanFile):
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.4")
         self.requires("glib/2.69.3")
-        if self.settings.compiler != "Visual Studio":
+        if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
             self.requires("graphene/1.10.6")
