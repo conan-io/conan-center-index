@@ -3,13 +3,13 @@ project(PackageTest)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+find_package(ncbi-cxx-toolkit-public REQUIRED)
 
-if(OFF)
-  add_executable(basic_sample basic_sample.cpp)
-  target_link_libraries(basic_sample ${CONAN_LIBS})
-else()
-  NCBI_begin_app(basic_sample)
-    NCBI_sources(basic_sample)
-    NCBI_uses_toolkit_libraries(xncbi)
-  NCBI_end_app()
-endif()
+NCBI_begin_app(basic_sample)
+  NCBI_sources(basic_sample)
+  NCBI_uses_toolkit_libraries(xncbi)
+NCBI_end_app()
+
+add_executable(basic_sample2 basic_sample.cpp)
+target_link_libraries(basic_sample2 ${CONAN_LIBS})
+
