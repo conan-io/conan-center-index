@@ -144,7 +144,7 @@ class GlfwConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
 
-        # backward support of cmake_find_package & cmake_find_package_multi
+        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
         self.cpp_info.names["cmake_find_package"] = "glfw"
@@ -152,3 +152,4 @@ class GlfwConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "glfw3"
