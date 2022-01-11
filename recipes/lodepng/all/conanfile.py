@@ -36,7 +36,7 @@ class LodepngConan(ConanFile):
 
     @property
     def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+        return (self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime)) or \
                (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
 
     def config_options(self):
