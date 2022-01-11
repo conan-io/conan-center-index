@@ -782,13 +782,13 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _runtime(self):
-        if self.settings.compiler == "msvc":
-            return "M{}{}".format(
-                    "T" if self.settings.compiler.runtime == "static" else "D",
-                    "d" if self.settings.compiler.runtime_type == "Debug" else "",
-                )
-        else:
+        if self.settings.compiler == "Visual Studio":
             return self.settings.compiler.runtime
+        else:
+            return "M{}{}".format(
+                "T" if self.settings.compiler.runtime == "static" else "D",
+                "d" if self.settings.compiler.runtime_type == "Debug" else "",
+            )
 
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
