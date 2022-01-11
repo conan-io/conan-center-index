@@ -110,13 +110,8 @@ class OpenmeshConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenMesh")
@@ -141,11 +136,9 @@ class OpenmeshConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMesh"
         self.cpp_info.components["openmeshcore"].names["cmake_find_package"] = "OpenMeshCore"
         self.cpp_info.components["openmeshcore"].names["cmake_find_package_multi"] = "OpenMeshCore"
-        self.cpp_info.components["openmeshcore"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["openmeshcore"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["openmeshcore"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["openmeshtools"].names["cmake_find_package"] = "OpenMeshTools"
         self.cpp_info.components["openmeshtools"].names["cmake_find_package_multi"] = "OpenMeshTools"
-        self.cpp_info.components["openmeshtools"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["openmeshtools"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["openmeshtools"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
