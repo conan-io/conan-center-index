@@ -4,8 +4,8 @@ project(test_package LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(rapidyaml REQUIRED CONFIG)
+find_package(ryml REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} rapidyaml::rapidyaml)
+target_link_libraries(${PROJECT_NAME} ryml::ryml)
 set(CMAKE_CXX_STANDARD 11)
