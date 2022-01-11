@@ -131,22 +131,14 @@ class SDLConan(ConanFile):
                 self.requires("libalsa/1.2.5.1")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
-            if self.options.sndio:
-                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
                 self.requires("nas/1.9.4")
-            if self.options.jack:
-                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
-            if self.options.esd:
-                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
             if self.options.wayland:
                 self.requires("wayland/1.19.0")
                 self.requires("xkbcommon/1.3.1")
                 self.requires("egl/system")
-            if self.options.directfb:
-                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
             if self.options.libunwind:
                 self.requires("libunwind/1.5.0")
 
@@ -157,6 +149,16 @@ class SDLConan(ConanFile):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
         if tools.Version(self.version) >= "2.0.18" and tools.is_apple_os(self.settings.os) and tools.Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
+
+        if self.settings.os == "Linux":
+            if self.options.sndio:
+                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
+            if self.options.jack:
+                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
+            if self.options.esd:
+                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
+            if self.options.directfb:
+                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
     def package_id(self):
         del self.info.options.sdl2main
