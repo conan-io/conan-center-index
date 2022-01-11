@@ -100,11 +100,12 @@ class MsgpackCConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "msgpack")
         self.cpp_info.set_property("cmake_target_name", "msgpackc")
         self.cpp_info.set_property("pkg_config_name", "msgpack")
+        self.cpp_info.libs = ["msgpackc"]
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "msgpack"
         self.cpp_info.names["cmake_find_package_multi"] = "msgpack"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
-        self.cpp_info.libs = ["msgpackc"]
+        self.cpp_info.names["pkg_config"] = "msgpack"
