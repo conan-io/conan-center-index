@@ -73,7 +73,6 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake", "pkg_config"]
     _cmake = None
 
@@ -84,6 +83,11 @@ class SDLConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
