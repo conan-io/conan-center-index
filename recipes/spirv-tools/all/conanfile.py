@@ -249,9 +249,10 @@ class SpirvtoolsConan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.path.append(bin_path)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "SPIRV-Tools"
         self.cpp_info.filenames["cmake_find_package_multi"] = "SPIRV-Tools"
+        self.cpp_info.names["pkg_config"] = "SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools"
         self.cpp_info.components["spirv-tools-core"].names["cmake_find_package"] = "SPIRV-Tools"
         self.cpp_info.components["spirv-tools-core"].names["cmake_find_package_multi"] = "SPIRV-Tools"
         self.cpp_info.components["spirv-tools-core"].builddirs.append(self._module_subfolder)
