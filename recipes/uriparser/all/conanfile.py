@@ -99,3 +99,6 @@ class UriparserConan(ConanFile):
             self.cpp_info.defines.append("URI_NO_ANSI")
         if not self.options.with_wchar:
             self.cpp_info.defines.append("URI_NO_UNICODE")
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "liburiparser"
