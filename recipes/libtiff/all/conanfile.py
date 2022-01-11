@@ -203,5 +203,7 @@ class LibtiffConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
+        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(tools.Version(self.version).major)
