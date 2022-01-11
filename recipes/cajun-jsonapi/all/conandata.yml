@@ -2,3 +2,6 @@ sources:
   "2.0.3":
     url: https://github.com/cajun-jsonapi/cajun-jsonapi/archive/2.0.3.tar.gz
     sha256: b47f9338f1fbaee5ffc7247a94219e767d22d02fb6cdd37a51a9367700b72f34
+  "2.1.1":
+    url: https://github.com/cajun-jsonapi/cajun-jsonapi/archive/refs/tags/2.1.1.tar.gz
+    sha256: 88f1eecf105e7ea337cd4142d1ea1bd165e84b0fa91cdaa098437b2e153a234c
