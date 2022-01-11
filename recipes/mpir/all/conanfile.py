@@ -58,10 +58,6 @@ class MpirConan(ConanFile):
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
-    def validate2(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
-
     def source(self):
         tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
