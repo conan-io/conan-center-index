@@ -74,11 +74,6 @@ class BrotliConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # TODO: do not set this target in CMakeDeps, it was a mistake,
-        #       there is no official brotil config file, nor Find module file
-        self.cpp_info.names["cmake_find_package"] = "Brotli"
-        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
-
         includedir = os.path.join("include", "brotli")
         # brotlicommon
         self.cpp_info.components["brotlicommon"].set_property("pkg_config_name", "libbrotlicommon")
@@ -98,6 +93,14 @@ class BrotliConan(ConanFile):
         self.cpp_info.components["brotlienc"].requires = ["brotlicommon"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["brotlienc"].system_libs = ["m"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed.
+        #       do not set this target in CMakeDeps, it was a mistake, there is no official brotil config file, nor Find module file
+        self.cpp_info.names["cmake_find_package"] = "Brotli"
+        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
+        self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
+        self.cpp_info.components["brotlidec"].names["pkg_config"] = "libbrotlidec"
+        self.cpp_info.components["brotlienc"].names["pkg_config"] = "libbrotlienc"
 
     def _get_decorated_lib(self, name):
         libname = name
