@@ -21,12 +21,12 @@ class Iir1Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        # "noexceptions": [True, False],
+        "noexceptions": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        # "noexceptions": True,
+        "noexceptions": False,
     }
 
     generators = "cmake"
@@ -52,8 +52,8 @@ class Iir1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # if self.version != "cci.20211227":
-        #     del self.options.noexceptions
+        if self.version == "1.9.0" and self.options.noexceptions:
+            raise ConanInvalidConfiguration("1.9.0 does not the option to disable exceptions")
 
     def configure(self):
         if self.options.shared:
@@ -76,8 +76,7 @@ class Iir1Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        # if self.options.noexceptions:
-            # self._cmake.definitions['IIR1_NO_EXCEPTIONS'] = self.options.noexceptions
+        self._cmake.definitions['IIR1_NO_EXCEPTIONS'] = self.options.noexceptions
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -85,7 +84,7 @@ class Iir1Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
-        
+
         cmake.build()
 
     def package(self):
