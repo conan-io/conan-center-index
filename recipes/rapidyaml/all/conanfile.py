@@ -28,7 +28,7 @@ class RapidYAMLConan(ConanFile):
 
     _compiler_required_cpp11 = {
         "Visual Studio": "13",
-        "gcc": "5",
+        "gcc": "6",
         "clang": "4",
     }
 
