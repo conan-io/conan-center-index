@@ -89,6 +89,8 @@ class CeleroConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"celero": "celero::celero"}
@@ -107,26 +109,12 @@ class CeleroConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Celero")
         self.cpp_info.set_property("cmake_target_name", "celero")
-
-        self.cpp_info.filenames["cmake_find_package"] = "Celero"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
-        self.cpp_info.names["cmake_find_package"] = "celero"
-        self.cpp_info.names["cmake_find_package_multi"] = "celero"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["CELERO_STATIC"]
@@ -134,3 +122,11 @@ class CeleroConan(ConanFile):
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["powrprof", "psapi"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Celero"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
+        self.cpp_info.names["cmake_find_package"] = "celero"
+        self.cpp_info.names["cmake_find_package_multi"] = "celero"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
