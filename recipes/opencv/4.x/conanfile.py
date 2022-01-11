@@ -44,7 +44,8 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
-        "detect_cpu_baseline": [True, False],
+        "cpu_baseline": "ANY",
+        "cpu_dispatch": "ANY",
         "nonfree": [True, False],
     }
     default_options = {
@@ -77,7 +78,8 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
-        "detect_cpu_baseline": False,
+        "cpu_baseline": None,
+        "cpu_dispatch": None,
         "nonfree": False,
     }
 
@@ -382,8 +384,11 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
         self._cmake.definitions["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
-        if self.options.detect_cpu_baseline:
-            self._cmake.definitions["CPU_BASELINE"] = "DETECT"
+        if self.options.cpu_baseline:
+            self._cmake.definitions["CPU_BASELINE"] = self.options.cpu_baseline
+
+        if self.options.cpu_dispatch:
+            self._cmake.definitions["CPU_DISPATCH"] = self.options.cpu_dispatch
 
         if self.options.get_safe("neon") is not None:
             self._cmake.definitions["ENABLE_NEON"] = self.options.get_safe("neon")
