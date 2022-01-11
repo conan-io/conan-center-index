@@ -105,14 +105,16 @@ class LibccdConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ccd")
         self.cpp_info.set_property("pkg_config_name", "ccd")
 
-        self.cpp_info.names["cmake_find_package"] = "ccd"
-        self.cpp_info.names["cmake_find_package_multi"] = "ccd"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append("CCD_STATIC_DEFINE")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "ccd"
+        self.cpp_info.names["cmake_find_package_multi"] = "ccd"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "ccd"
