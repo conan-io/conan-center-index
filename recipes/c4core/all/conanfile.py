@@ -1,0 +1,71 @@
+from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
+
+class C4CoreConan(ConanFile):
+    name = "c4core"
+    description = "a library of low-level C++ utilities, written with low-latency projects in mind."
+    topics = ("utilities", "low-latency", )
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mutouyun/cpp-ipc"
+    license = "MIT",
+    settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["CMakeLists.txt"]
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package_multi"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("fast_float/3.4.0")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
+
+    def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4/ext/fast_float_all.h", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "c4", "ext", "fast_float.hpp"),
+            '#include "c4/ext/fast_float_all.h"',
+            '#include "fast_float/fast_float.h"')
+
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
+
+    def package_info(self):
+        self.cpp_info.libs = ["c4core"]
