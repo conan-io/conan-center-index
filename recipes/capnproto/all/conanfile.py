@@ -212,7 +212,6 @@ class CapnprotoConan(ConanFile):
             self.cpp_info.components["kj-async"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
-        self.cpp_info.components["kj"].builddirs.append(self._cmake_folder)
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
@@ -226,6 +225,7 @@ class CapnprotoConan(ConanFile):
     def _register_component(self, component):
         name = component["name"]
         self.cpp_info.components[name].set_property("cmake_target_name", "CapnProto::{}".format(name))
+        self.cpp_info.components[name].builddirs.append(self._cmake_folder)
         self.cpp_info.components[name].set_property("pkg_config_name", name)
         self.cpp_info.components[name].libs = [name]
         self.cpp_info.components[name].requires = component["requires"]
