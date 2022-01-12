@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(tinkerforge-bindings REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} tinkerforge::bindings)
+target_link_libraries(${PROJECT_NAME} tinkerforge-bindings::tinkerforge-bindings)
