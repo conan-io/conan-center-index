@@ -55,7 +55,7 @@ class NcbiCxxToolkit(ConanFile):
         "NGHTTP2":      "libnghttp2/1.45.1@#cef166f78349143079e1c667d823b25a",
         "PCRE":         "pcre/8.45@#b6bae758d36ca2050bb8527ea408eb75",
         "PNG":          "libpng/1.6.37@#8b23717a9884a2b06884c599072955f4",
-        "SQLITE3":      "sqlite3/3.36.0@#8e14ebced9bdce6d57fc9048c5f42ffe",
+        "SQLITE3":      "sqlite3/3.36.0@#567836d4f4b7b58a4e834bf98288d609",
         "TIFF":         "libtiff/4.3.0@#28ac662980826ae8ffe8d6236cdd9735",
         "XML":          "libxml2/2.9.12@#9817dd585ffc6de1479da6d5bcf01fc0",
         "XSLT":         "libxslt/1.1.34@#47946f5c7abe03d18179b55be67bbabe",
