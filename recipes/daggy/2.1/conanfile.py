@@ -97,7 +97,6 @@ class DaggyConan(ConanFile):
         
         cmake = self._configure()
         cmake.build()
-        cmake.test(output_on_failure=True)
 
     def package(self):
         cmake = self._configure()
