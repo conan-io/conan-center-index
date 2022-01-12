@@ -65,6 +65,7 @@ class opengvConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python_bindings
+        self._cmake.definitions["BUILD_POSITION_INDEPENDENT_CODE"] = self.settings.os != "Windows" and self.options.get_safe("fPIC", True)
         if tools.cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
