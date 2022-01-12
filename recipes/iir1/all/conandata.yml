@@ -5,3 +5,8 @@ sources:
   "cci.20211227":
     url: "https://github.com/berndporr/iir1/archive/70b39cc329994a54f49719decce90ae5dea1c051.zip"
     sha256: "5A3543BAD7E44FF76E7FD6B2F3FEAC6D9E8693D06AF7E2A1DF168084D6276B43"
+patches:
+  "1.9.0":
+    - patch_file: "patches/0002-Add-runtime-export-to-install.patch"
+      base_path: "source_subfolder"
+
