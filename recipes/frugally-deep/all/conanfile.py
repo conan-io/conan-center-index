@@ -47,7 +47,7 @@ class FrugallyDeepConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.3.9")
-        self.requires("functionalplus/0.2.13-p0")
+        self.requires("functionalplus/0.2.18-p0")
         self.requires("nlohmann_json/3.9.1")
 
     def package_id(self):

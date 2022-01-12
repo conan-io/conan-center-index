@@ -94,7 +94,7 @@ class TesseractConan(ConanFile):
             self.output.warn(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
         elif compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
+            raise ConanInvalidConfiguration("{} requires a {} version >= {}, but {} was found".format(self.name, compiler, minimal_version[compiler], compiler_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
