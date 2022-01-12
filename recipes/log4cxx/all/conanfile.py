@@ -51,7 +51,7 @@ class Log4cxxConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.0")
         self.requires("apr-util/1.6.1")
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.4.2")
         if self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
 
