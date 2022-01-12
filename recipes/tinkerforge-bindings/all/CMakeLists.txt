@@ -11,6 +11,10 @@ add_library(${PROJECT_NAME} ${SOURCES})
 if(MSVC)
         target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32)
 endif()
+if(WIN32 AND BUILD_SHARED_LIBS)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
