@@ -1,11 +1,11 @@
---- tmp/CMakeLists.txt	2022-01-12 07:24:03.720545504 -0500
-+++ source_subfolder/CMakeLists.txt	2021-09-20 10:27:26.000000000 -0400
+--- source_subfolder/CMakeLists.txt	2021-09-20 10:27:26.000000000 -0400
++++ tmp/CMakeLists.txt	2022-01-12 09:45:05.615613089 -0500
 @@ -141,7 +141,7 @@
  endif()
  
  eprosima_find_package(fastcdr REQUIRED)
--eprosima_find_thirdparty(Asio asio)
-+eprosima_find_thirdparty(Asio asio VERSION 1.10.8)
+-eprosima_find_thirdparty(Asio asio VERSION 1.10.8)
++find_package(Asio)
  eprosima_find_thirdparty(TinyXML2 tinyxml2)
  
  find_package(foonathan_memory REQUIRED)
