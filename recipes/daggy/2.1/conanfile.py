@@ -21,8 +21,8 @@ class DaggyConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "ssh2_support": True,
-        "yaml_support": True,
+        "with_ssh2": True,
+        "with_yaml": True,
         "console": True,
         "package_deps": False,
         "shared": False,
@@ -34,10 +34,6 @@ class DaggyConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -55,21 +51,24 @@ class DaggyConan(ConanFile):
     def build_requirements(self):
         self.build_requires("cmake/3.22.0")
 
+    def config_options(self):
+        self.options["qt"].shared = True
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
-    def configure(self):
-        self.options["qt"].shared = True
+        if not self.options["qt"].shared: 
+            raise ConanInvalidConfiguration("Daggy work with static Qt libraries linking") 
 
     def requirements(self):
         self.requires("qt/6.2.2")
         self.requires("kainjow-mustache/4.1")
 
-        if self.options.yaml_support:
+        if self.options.with_yaml:
             self.requires("yaml-cpp/0.7.0")
 
-        if self.options.ssh2_support:
+        if self.options.with_ssh2:
             self.requires("libssh2/1.10.0")
 
     def _configure(self):
@@ -77,8 +76,8 @@ class DaggyConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["SSH2_SUPPORT"] = self.options.ssh2_support
-        self._cmake.definitions["YAML_SUPPORT"] = self.options.yaml_support
+        self._cmake.definitions["SSH2_SUPPORT"] = self.options.with_ssh2
+        self._cmake.definitions["YAML_SUPPORT"] = self.options.with_yaml
         self._cmake.definitions["CONSOLE"] = self.options.console
         self._cmake.definitions["PACKAGE_DEPS"] = self.options.package_deps
         self._cmake.definitions["VERSION"] = self.version
