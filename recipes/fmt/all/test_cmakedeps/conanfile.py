@@ -16,10 +16,11 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+        self.folders.source = os.path.join("..", "test_package")
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join("..", "test_package"))
+        cmake.configure()
         cmake.build()
 
     def test(self):
