@@ -76,9 +76,10 @@ class CoinLemonConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LEMON")
         self.cpp_info.set_property("cmake_target_name", "LEMON::LEMON") # no official target name actually
         self.cpp_info.set_property("pkg_config_name", "lemon")
-
-        self.cpp_info.names["cmake_find_package"] = "LEMON"
-        self.cpp_info.names["cmake_find_package_multi"] = "LEMON"
-
         self.cpp_info.libs = ["lemon" if self.settings.os == "Windows" else "emon"]
         self.cpp_info.defines.append("LEMON_ONLY_TEMPLATES")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "LEMON"
+        self.cpp_info.names["cmake_find_package_multi"] = "LEMON"
+        self.cpp_info.names["pkg_config"] = "lemon"
