@@ -11,6 +11,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["FMT_HEADER_ONLY"] = self.dependencies["fmt"].options.header_only
+        tc.variables["CMAKE_RUNTIME_OUTPUT_DIRECTORY"] = "bin"
         tc.generate()
 
     def build(self):
@@ -20,6 +21,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools_cross_building(self):
-            folder = str(self.settings.build_type) if self.settings.os == "Windows" else ""
-            self.run(os.path.join(folder, "test_package"), run_environment=True)
-            self.run(os.path.join(folder, "test_ranges"), run_environment=True)
+            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            self.run(os.path.join("bin", "test_ranges"), run_environment=True)
