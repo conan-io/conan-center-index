@@ -71,6 +71,10 @@ class QCoroConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
+        #Special check for clang that can only be linked to libc++
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
+
         compiler_version = str(self.settings.compiler.version)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -109,7 +113,7 @@ class QCoroConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+        for mask in ["Find*.cmake", "*Config*.cmake", "*-config.cmake", "*Targets*.cmake"]:
             tools.remove_files_by_mask(self.package_folder, mask)
 
     def package_info(self):
@@ -127,6 +131,7 @@ class QCoroConan(ConanFile):
         self.cpp_info.components["qcoro-core"].requires = ["qt::qtCore"]
         self.cpp_info.components["qcoro-core"].build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "QCoro6Coro", "QCoroMacros.cmake"))
         self.cpp_info.components["qcoro-core"].build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "QCoro6Coro", "QCoroMacros.cmake"))
+        self.cpp_info.components["qcoro-core"].builddirs.append(os.path.join("lib", "cmake", "QCoro6Coro"))
 
         self.cpp_info.components["qcoro-network"].set_property("cmake_target_name", "QCoro::Network")
         self.cpp_info.components["qcoro-network"].names["cmake_find_package"] = "Network"
