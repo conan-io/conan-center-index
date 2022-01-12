@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -23,6 +24,8 @@ class FoxgloveWebSocketConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
+        if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 5:
+            raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
     def configure(self):
         self.options["websocketpp"].asio = "standalone"
