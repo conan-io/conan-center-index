@@ -10,7 +10,7 @@ class ReadExcelConan(ConanFile):
     homepage = "https://github.com/igormironchik/read-excel"
     license = "MIT"
     description = "This is very simple implementation of the Excel 97-2003 format (BIFF8) written in C++. Supported reading only."
-    topics = ("read-excel", "excel")
+    topics = ("read", "excel", "biff8")
     settings = "compiler"
     no_copy_source = True
 

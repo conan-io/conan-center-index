@@ -11,9 +11,8 @@ class CivetwebConan(ConanFile):
     homepage = "https://github.com/civetweb/civetweb"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
-    topics = ("conan", "civetweb", "web-server", "embedded")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    topics = ("civetweb", "web-server", "embedded")
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared"            : [True, False],
@@ -44,6 +43,11 @@ class CivetwebConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,7 +63,7 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
@@ -107,8 +111,10 @@ class CivetwebConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "civetweb"
         self.cpp_info.names["cmake_find_package_multi"] = "civetweb"
+        self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
+        self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
         if self.settings.os == "Linux":
             self.cpp_info.components["_civetweb"].system_libs.extend(["rt", "pthread"])
@@ -126,6 +132,7 @@ class CivetwebConan(ConanFile):
         if self.options.with_cxx:
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
+            self.cpp_info.components["civetweb-cpp"].set_property("cmake_target_name", "civetweb::civetweb-cpp")
             self.cpp_info.components["civetweb-cpp"].libs = ["civetweb-cpp"]
             self.cpp_info.components["civetweb-cpp"].requires = ["_civetweb"]
             if self.settings.os == "Linux":

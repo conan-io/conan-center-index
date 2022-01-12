@@ -1,4 +1,7 @@
 sources:
+  "3.10.1":
+    url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.1.tar.gz"
+    sha256: "15180d727df60ea2e61ece6273feaa3b2a4554db0a447bf6923054df676c78c0"
   "3.9.1":
     url: "https://git.osgeo.org/gitea/geos/geos/archive/3.9.1.tar.gz"
     sha256: "f1103d9efd2d563be93c85cc7342414f39610d3e97070ae119fcfc73a668141f"
@@ -12,6 +15,9 @@ sources:
     url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.0.tar.gz"
     sha256: "90e2ea9db689f5ca8c0bd61e671ac47c749e85998a867b777c3ded8a6399a695"
 patches:
+  "3.10.1":
+    - patch_file: "patches/fix-cmake-3.10.1.patch"
+      base_path: "source_subfolder"
   "3.9.1":
     - patch_file: "patches/fix-cmake-3.9.1.patch"
       base_path: "source_subfolder"

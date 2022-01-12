@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class RapidcheckConan(ConanFile):
@@ -123,6 +123,7 @@ class RapidcheckConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "rapidcheck")
         self.cpp_info.names["cmake_find_package"] = "rapidcheck"
         self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
 
@@ -131,7 +132,6 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.components["rapidcheck_rapidcheck"].names["cmake_find_package_multi"] = "rapidcheck"
 
         self.cpp_info.components["rapidcheck_rapidcheck"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
         self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
@@ -146,9 +146,11 @@ class RapidcheckConan(ConanFile):
                 self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
 
         if self.options.enable_catch:
+            self.cpp_info.components["rapidcheck_catch"].set_property("cmake_target_name", "rapidcheck_catch")
             self.cpp_info.components["rapidcheck_catch"].requires = ["rapidcheck_rapidcheck", "catch2::catch2"]
         if self.options.enable_gmock:
+            self.cpp_info.components["rapidcheck_gmock"].set_property("cmake_target_name", "rapidcheck_gmock")
             self.cpp_info.components["rapidcheck_gmock"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
         if self.options.enable_gtest:
+            self.cpp_info.components["rapidcheck_gtest"].set_property("cmake_target_name", "rapidcheck_gtest")
             self.cpp_info.components["rapidcheck_gtest"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
-

@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-set_property(TARGET example PROPERTY CXX_STANDARD 14)
+find_package(rmlui REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} example.cpp)
+target_compile_Features(${PROJECT_NAME} PRIVATE cxx_std_14)
+target_link_libraries(${PROJECT_NAME} rmlui::rmlui)

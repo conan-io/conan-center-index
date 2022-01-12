@@ -8,6 +8,26 @@ This repository includes a Continuous Integration system that will build automat
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
 
+### How to consume recipes
+
+ConanCenter is added as a remote by default to Conan client, so starting to use recipes from this repository is as easy as running
+one simple command after installing Conan:
+
+```
+conan install name/version@ [-g <generator>]
+```
+
+Of course, we really encourage you to use a `conanfile.txt` or `conanfile.py`
+to list all the requirements or your project and install them all together
+(Conan will build a single graph and ensure congruency).
+
+:warning: It is very important to notice that recipes will evolve over time
+and, while they are fixing some issues, they might introduce new features and
+improvements, and your project can break if you upgrade them
+([How to prevent these breaking changes in my project?](docs/consuming_recipes.md)).
+
+
+
 ### Documentation
 
 All the documentation is available in this same repository in the [`docs/` subfolder](docs/README.md).
@@ -19,6 +39,7 @@ This is a list of shortcuts to some interesting topics:
 * :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 * :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
+* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/preparing_recipes_for_conan2.md](docs/preparing_recipes_for_conan2.md).
 
 ### Reporting Issues
 

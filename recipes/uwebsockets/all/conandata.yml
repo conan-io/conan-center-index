@@ -14,3 +14,6 @@ sources:
   "20.8.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v20.8.0.tar.gz"
     sha256: "6ab4bc0207f44eacbb9c82fd0dc59a49ef84e13698ccdbfb44b92c6a0eaa951a"
+  "20.9.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.9.0.tar.gz"
+    sha256: "91897568291a2081ffc1ae27c354446cc130c168a25892b2289f25e185af8676"

@@ -1,4 +1,7 @@
 sources:
+  "8.2.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/8.2.1/proj-8.2.1.tar.gz"
+    sha256: "76ed3d0c3a348a6693dfae535e5658bbfd47f71cb7ff7eb96d9f12f7e068b1cf"
   "8.2.0":
     url: "https://github.com/OSGeo/PROJ/releases/download/8.2.0/proj-8.2.0.tar.gz"
     sha256: "de93df9a4aa88d09459ead791f2dbc874b897bf67a5bbb3e4b68de7b1bdef13c"
@@ -17,25 +20,13 @@ sources:
   "7.2.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/7.2.1/proj-7.2.1.tar.gz"
     sha256: "b384f42e5fb9c6d01fe5fa4d31da2e91329668863a684f97be5d4760dbbf0a14"
-  "7.2.0":
-    url: "https://github.com/OSGeo/PROJ/releases/download/7.2.0/proj-7.2.0.tar.gz"
-    sha256: "2957798e5fe295ff96a2af1889d0428e486363d210889422f76dd744f7885763"
-  "7.1.1":
-    url: "https://github.com/OSGeo/PROJ/releases/download/7.1.1/proj-7.1.1.tar.gz"
-    sha256: "324e7abb5569fb5f787dadf1d4474766915c485a188cf48cf07153b99156b5f9"
-  "7.1.0":
-    url: "https://github.com/OSGeo/PROJ/releases/download/7.1.0/proj-7.1.0.tar.gz"
-    sha256: "876151e2279346f6bdbc63bd59790b48733496a957bccd5e51b640fdd26eaa8d"
-  "7.0.1":
-    url: "https://github.com/OSGeo/PROJ/releases/download/7.0.1/proj-7.0.1.tar.gz"
-    sha256: "a7026d39c9c80d51565cfc4b33d22631c11e491004e19020b3ff5a0791e1779f"
-  "7.0.0":
-    url: "https://github.com/OSGeo/PROJ/releases/download/7.0.0/proj-7.0.0.tar.gz"
-    sha256: "ee0e14c1bd2f9429b1a28999240304c0342ed739ebaea3d4ff44c585b1097be8"
   "6.3.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
+  "8.2.1":
+    - patch_file: "patches/use-cmake-targets-8.2.0.patch"
+      base_path: "source_subfolder"
   "8.2.0":
     - patch_file: "patches/use-cmake-targets-8.2.0.patch"
       base_path: "source_subfolder"
@@ -53,29 +44,6 @@ patches:
       base_path: "source_subfolder"
   "7.2.1":
     - patch_file: "patches/use-cmake-targets-7.2.1.patch"
-      base_path: "source_subfolder"
-  "7.2.0":
-    - patch_file: "patches/use-cmake-targets-7.2.0.patch"
-      base_path: "source_subfolder"
-  "7.1.1":
-    - patch_file: "patches/use-cmake-targets-7.1.1.patch"
-      base_path: "source_subfolder"
-  "7.1.0":
-    - patch_file: "patches/use-cmake-targets-7.1.0.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-mingw-target-clones.patch"
-      base_path: "source_subfolder"
-  "7.0.1":
-    - patch_file: "patches/use-cmake-targets-7.0.x.patch"
-      base_path: "source_subfolder"
-  "7.0.0":
-    - patch_file: "patches/fix-build-gcc-lessthan-5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/support-libtiff-gt-410.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake-include-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/use-cmake-targets-7.0.x.patch"
       base_path: "source_subfolder"
   "6.3.1":
     - patch_file: "patches/use-cmake-targets-6.x.x.patch"

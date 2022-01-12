@@ -52,8 +52,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 ## Linux
 
 - Compilers:
-  - GCC versions: 5, 6, 7, 8, 9, 10
-  - Clang versions: 10, 11
+  - GCC versions: 5, 7, 8, 9, 10, 11
+  - Clang versions: 11, 12, 13
 - C++ Standard Library (`libcxx`):
   - GCC compiler: `libstdc++`, `libstdc++11`
   - Clang compiler: `libstdc++`, `libc++`

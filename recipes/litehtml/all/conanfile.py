@@ -3,7 +3,7 @@ import textwrap
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LitehtmlConan(ConanFile):
@@ -135,7 +135,6 @@ class LitehtmlConan(ConanFile):
         self.cpp_info.components["litehtml_litehtml"].names["cmake_find_package_multi"] = "litehtml"
 
         self.cpp_info.components["litehtml_litehtml"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["litehtml_litehtml"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
         self.cpp_info.components["litehtml_litehtml"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["litehtml_litehtml"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

@@ -1,7 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CpuFeaturesConan(ConanFile):
@@ -10,17 +10,29 @@ class CpuFeaturesConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/cpu_features"
     description = "A cross platform C99 library to get cpu features at runtime."
-    topics = ("conan", "cpu", "features", "cpuid")
+    topics = ("cpu", "features", "cpuid")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     generators = "cmake",
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,14 +72,21 @@ class CpuFeaturesConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "CpuFeatures")
+        self.cpp_info.set_property("cmake_target_name", "CpuFeatures::cpu_features")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
+        self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
+        self.cpp_info.components["libcpu_features"].includedirs = [os.path.join("include", "cpu_features")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libcpu_features"].system_libs = ["dl"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "CpuFeatures"
         self.cpp_info.names["cmake_find_package_multi"] = "CpuFeatures"
         self.cpp_info.components["libcpu_features"].names["cmake_find_package"] = "cpu_features"
         self.cpp_info.components["libcpu_features"].names["cmake_find_package_multi"] = "cpu_features"
-        self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
-        self.cpp_info.components["libcpu_features"].includedirs = [os.path.join("include", "cpu_features")]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["libcpu_features"].system_libs = ["dl"]
+        self.cpp_info.components["libcpu_features"].set_property("cmake_target_name", "CpuFeatures::cpu_features")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))

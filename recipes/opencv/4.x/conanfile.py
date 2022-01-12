@@ -34,6 +34,7 @@ class OpenCVConan(ConanFile):
         "with_cuda": [True, False],
         "with_cublas": [True, False],
         "with_cufft": [True, False],
+        "with_cudnn": [True, False],
         "with_v4l": [True, False],
         "with_ffmpeg": [True, False],
         "with_imgcodec_hdr": [True, False],
@@ -42,6 +43,7 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
+        "dnn_cuda": [True, False],
         "detect_cpu_baseline": [True, False],
         "nonfree": [True, False],
     }
@@ -65,6 +67,7 @@ class OpenCVConan(ConanFile):
         "with_cuda": False,
         "with_cublas": False,
         "with_cufft": False,
+        "with_cudnn": False,
         "with_v4l": False,
         "with_ffmpeg": True,
         "with_imgcodec_hdr": False,
@@ -73,6 +76,7 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": False,
         "neon": True,
         "dnn": True,
+        "dnn_cuda": False,
         "detect_cpu_baseline": False,
         "nonfree": False,
     }
@@ -139,9 +143,13 @@ class OpenCVConan(ConanFile):
         if not self.options.contrib:
             del self.options.contrib_freetype
             del self.options.contrib_sfm
+        if not self.options.dnn:
+            del self.options.dnn_cuda
         if not self.options.with_cuda:
             del self.options.with_cublas
+            del self.options.with_cudnn
             del self.options.with_cufft
+            del self.options.dnn_cuda
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
@@ -198,6 +206,9 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
         if self.options.with_cuda and not self.options.contrib:
             raise ConanInvalidConfiguration("contrib must be enabled for cuda")
+        if self.options.get_safe("dnn_cuda", False) and \
+            (not self.options.with_cuda or not self.options.contrib or not self.options.with_cublas or not self.options.with_cudnn):
+            raise ConanInvalidConfiguration("with_cublas, with_cudnn and contrib must be enabled for dnn_cuda")
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):
@@ -381,6 +392,7 @@ class OpenCVConan(ConanFile):
         if self.options.dnn:
             self._cmake.definitions["PROTOBUF_UPDATE_FILES"] = True
             self._cmake.definitions["BUILD_opencv_dnn"] = True
+        self._cmake.definitions["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         if self.options.contrib:
             self._cmake.definitions['OPENCV_EXTRA_MODULES_PATH'] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
@@ -405,6 +417,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
+        self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
@@ -560,21 +573,18 @@ class OpenCVConan(ConanFile):
             ])
         if self.options.contrib:
             opencv_components.extend([
-                {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_phase_unwrapping",    "lib": "phase_unwrapping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_plot",                "lib": "plot",                "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_quality",             "lib": "quality",             "requires": ["opencv_core", "opencv_imgproc", "opencv_ml"] + eigen()},
                 {"target": "opencv_reg",                 "lib": "reg",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_surface_matching",    "lib": "surface_matching",    "requires": ["opencv_core", "opencv_flann"] + eigen()},
                 {"target": "opencv_xphoto",              "lib": "xphoto",              "requires": ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen()},
-                {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_fuzzy",               "lib": "fuzzy",               "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_hfs",                 "lib": "hfs",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_img_hash",            "lib": "img_hash",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_line_descriptor",     "lib": "line_descriptor",     "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen()},
                 {"target": "opencv_saliency",            "lib": "saliency",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen()},
                 {"target": "opencv_datasets",            "lib": "datasets",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_imgcodecs"] + eigen()},
-                {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
                 {"target": "opencv_rgbd",                "lib": "rgbd",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
                 {"target": "opencv_shape",               "lib": "shape",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
                 {"target": "opencv_structured_light",    "lib": "structured_light",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_phase_unwrapping", "opencv_features2d", "opencv_calib3d"] + eigen()},
@@ -593,6 +603,12 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen()},
             ])
+            if self.version >= "4.3.0":
+                opencv_components.extend([
+                    {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                    {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                    {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+                ])
 
             if self.options.get_safe("contrib_freetype"):
                 opencv_components.extend([
