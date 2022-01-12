@@ -13,8 +13,8 @@ class DaggyConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "ssh2_support": [True, False],
-        "yaml_support": [True, False],
+        "with_ssh2": [True, False],
+        "with_yaml": [True, False],
         "console": [True, False],
         "package_deps": [True, False],
         "shared": [True, False],
