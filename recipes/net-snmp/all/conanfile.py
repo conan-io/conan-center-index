@@ -210,15 +210,4 @@ class NetSnmpConan(ConanFile):
             self._package_unix()
 
     def package_info(self):
-        name = "netsnmp"
-        info = self.cpp_info
-
-        info.set_property("cmake_file_name", name)
-        info.set_property("cmake_target_name", f"{name}::{name}")
-
-        info.names.update({
-            "cmake_find_package": name,
-            "cmake_find_package_multi": name,
-        })
-
-        info.libs = [name]
+        self.cpp_info.libs = ["netsnmp"]
