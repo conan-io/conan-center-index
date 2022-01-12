@@ -55,7 +55,7 @@ class mFASTConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
-        self.requires("tinyxml2/8.0.0")
+        self.requires("tinyxml2/9.0.0")
 
     def validate(self):
         if self.version != "1.2.1" and self.settings.compiler.get_safe("cppstd"):
