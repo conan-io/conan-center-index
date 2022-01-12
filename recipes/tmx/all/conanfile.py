@@ -46,11 +46,11 @@ class TmxConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.10")
+        self.requires("libxml2/2.9.12")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
