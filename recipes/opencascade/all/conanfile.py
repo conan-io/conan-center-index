@@ -71,7 +71,7 @@ class OpenCascadeConan(ConanFile):
     def requirements(self):
         self.requires("tcl/8.6.10")
         self.requires("tk/8.6.10")
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         self.requires("opengl/system")
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
@@ -82,7 +82,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_freeimage:
             raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
         if self.options.with_openvr:
-            self.requires("openvr/1.14.15")
+            self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.with_tbb:
