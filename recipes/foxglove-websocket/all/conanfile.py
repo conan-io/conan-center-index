@@ -11,7 +11,7 @@ class FoxgloveWebSocketConan(ConanFile):
     topics = ("foxglove", "websocket")
 
     settings = ("os", "compiler", "build_type", "arch")
-    requires = ("nlohmann_json/[^3.10.4]", "websocketpp/[^0.8.2]")
+    requires = ("nlohmann_json/3.10.5", "websocketpp/0.8.2")
     generators = "cmake"
 
     _source_root = "source_root"
@@ -21,7 +21,8 @@ class FoxgloveWebSocketConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_root)
 
     def validate(self):
-        tools.check_min_cppstd(self, "17")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
 
     def configure(self):
         self.options["websocketpp"].asio = "standalone"
