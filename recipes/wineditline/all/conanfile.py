@@ -53,13 +53,11 @@ class WineditlineConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        self._configure_cmake().build()
 
     def package(self):
         self.copy("COPYING", "licenses", self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        self._configure_cmake().install()
 
     def package_info(self):
         self.cpp_info.libs = ["edit"]
