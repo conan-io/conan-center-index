@@ -2,6 +2,7 @@ import os
 from conans import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.cross_building import cross_building as tools_cross_building
+from conan.tools.layout import cmake_layout
 
 
 class TestPackageConan(ConanFile):
@@ -12,6 +13,9 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["FMT_HEADER_ONLY"] = self.dependencies["fmt"].options.header_only
         tc.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
