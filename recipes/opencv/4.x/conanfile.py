@@ -179,9 +179,9 @@ class OpenCVConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.2")
         if self.options.get_safe("with_jpeg2000") == "jasper":
-            self.requires("jasper/2.0.32")
+            self.requires("jasper/2.0.33")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.4.0")
         if self.options.with_png:
@@ -191,16 +191,16 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         if self.options.get_safe("contrib_freetype"):
-            self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.8.2")
+            self.requires("freetype/2.11.1")
+            self.requires("harfbuzz/3.2.0")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.5.0")
