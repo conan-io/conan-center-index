@@ -30,7 +30,7 @@ class XsimdConan(ConanFile):
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.7.2")
+            self.requires("xtl/0.7.4")
 
     def validate(self):
         # TODO: check supported version (probably >= 8.0.0)
