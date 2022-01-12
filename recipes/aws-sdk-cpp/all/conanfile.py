@@ -353,7 +353,7 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
             self.requires("libcurl/7.78.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
