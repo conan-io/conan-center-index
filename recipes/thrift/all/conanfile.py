@@ -81,9 +81,9 @@ class ThriftConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.77.0")
+        self.requires("boost/1.78.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_libevent:
