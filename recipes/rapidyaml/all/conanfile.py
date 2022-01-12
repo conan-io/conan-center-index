@@ -80,6 +80,7 @@ class RapidYAMLConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
 
