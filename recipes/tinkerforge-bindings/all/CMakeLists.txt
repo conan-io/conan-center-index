@@ -8,6 +8,9 @@ file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.c)
 file(GLOB HEADERS ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCES})
+if(MSVC)
+        target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32)
+endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
