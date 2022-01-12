@@ -52,10 +52,10 @@ class FclConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("eigen/3.3.9")
+        self.requires("eigen/3.4.0")
         self.requires("libccd/2.1")
         if self.options.with_octomap:
-            self.requires("octomap/1.9.6")
+            self.requires("octomap/1.9.7")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
