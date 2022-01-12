@@ -52,8 +52,8 @@ class opengvConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows builds are not supported by this recipe.")
         #FIXME disable this one CCI has more RAM available
-        if (self.settings.compiler == "gcc" and self.options.shared):
-                raise ConanInvalidConfiguration("Shared builds not supported with gcc since CCI errors out due to excessive memory usage.")
+        if self.settings.compiler == "gcc" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared builds not supported with gcc since CCI errors out due to excessive memory usage.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
