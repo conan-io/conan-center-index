@@ -1,10 +1,9 @@
 from conans import ConanFile, CMake, tools
-import glob
 import os
 import shutil
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class mFASTConan(ConanFile):
@@ -12,9 +11,11 @@ class mFASTConan(ConanFile):
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.com/"
-    description = "mFAST is a high performance C++ encoding/decoding library for FAST (FIX Adapted for STreaming)"\
-                  " protocol"
-    topics = ("conan", "mFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange",
+    description = (
+        "mFAST is a high performance C++ encoding/decoding library for FAST "
+        "(FIX Adapted for STreaming) protocol"
+    )
+    topics = ("mFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange",
               "libraries", "cpp")
 
     settings = "os", "arch", "compiler", "build_type"
@@ -28,8 +29,6 @@ class mFASTConan(ConanFile):
     }
 
     short_paths = True
-
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -40,6 +39,11 @@ class mFASTConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,10 +57,13 @@ class mFASTConan(ConanFile):
         self.requires("boost/1.75.0")
         self.requires("tinyxml2/8.0.0")
 
+    def validate(self):
+        if self.version != "1.2.1" and self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("mFAST-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -64,11 +71,8 @@ class mFASTConan(ConanFile):
             self._cmake.definitions["BUILD_TESTS"] = False
             self._cmake.definitions["BUILD_EXAMPLES"] = False
             self._cmake.definitions["BUILD_PACKAGES"] = False
-            if self.version != "1.2.1":
-                if not self.settings.compiler.cppstd:
-                    self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
-                else:
-                    tools.check_min_cppstd(self, 14)
+            if self.version != "1.2.1" and not tools.valid_min_cppstd(self, 14):
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -102,6 +106,8 @@ class mFASTConan(ConanFile):
         #       [ ] MFAST_<component>_LIBRARY - particular component library
         #       [x] MFAST_EXECUTABLE          - the fast_type_gen executable => done in _prepend_exec_target_in_fasttypegentarget()
         self._prepend_exec_target_in_fasttypegentarget()
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._lib_targets_module_file),
             {values["target"]:"mFAST::{}".format(values["target"]) for values in self._mfast_lib_components.values()}
@@ -176,55 +182,53 @@ class mFASTConan(ConanFile):
                 "comp": "mfast",
                 "target": "mfast" + target_suffix,
                 "lib": "mfast" + lib_suffix,
-                "requires": ["boost::headers"]
+                "requires": ["boost::headers"],
             },
             "mfast_coder": {
                 "comp": "mfast_coder",
                 "target": "mfast_coder" + target_suffix,
                 "lib": "mfast_coder" + lib_suffix,
-                "requires": ["libmfast", "boost::headers"]
+                "requires": ["libmfast", "boost::headers"],
             },
             "mfast_xml_parser": {
                 "comp": "mfast_xml_parser",
                 "target": "mfast_xml_parser" + target_suffix,
                 "lib": "mfast_xml_parser" + lib_suffix,
-                "requires": ["libmfast", "boost::headers", "tinyxml2::tinyxml2"]
+                "requires": ["libmfast", "boost::headers", "tinyxml2::tinyxml2"],
             },
             "mfast_json": {
                 "comp": "mfast_json",
                 "target": "mfast_json" + target_suffix,
                 "lib": "mfast_json" + lib_suffix,
-                "requires": ["libmfast", "boost::headers"]
+                "requires": ["libmfast", "boost::headers"],
             }
         }
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "mFAST"
-        self.cpp_info.names["cmake_find_package_multi"] = "mFAST"
+        self.cpp_info.set_property("cmake_file_name", "mFAST")
+        self.cpp_info.set_property("cmake_build_modules", [self._fast_type_gen_target_file])
 
         for conan_comp, values in self._mfast_lib_components.items():
             target = values["target"]
+            comp = values["comp"]
             lib = values["lib"]
             requires = values["requires"]
-            self.cpp_info.components[conan_comp].names["cmake_find_package"] = target
-            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = target
-            self.cpp_info.components[conan_comp].builddirs.append(self._new_mfast_config_dir)
-            self.cpp_info.components[conan_comp].build_modules["cmake"] = [self._fast_type_gen_target_file]
-            self.cpp_info.components[conan_comp].build_modules["cmake_find_package"] = [
-                self._lib_targets_module_file,
-                self._fast_type_gen_target_file
-            ]
-            self.cpp_info.components[conan_comp].build_modules["cmake_find_package_multi"] = [
-                self._lib_targets_module_file,
-                self._fast_type_gen_target_file
-            ]
+            self.cpp_info.components[conan_comp].set_property("cmake_file_name", target)
+            if comp != target:
+                # Also provide alias component for find_package(mFAST COMPONENTS ...) if static
+                self.cpp_info.components[conan_comp].set_property("cmake_target_aliases", [comp])
             self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
             if self.options.shared:
                 self.cpp_info.components[conan_comp].defines = ["MFAST_DYN_LINK"]
 
-            # Also provide alias component for find_package(mFAST COMPONENTS ...) if static:
-            comp = values["comp"]
+            # TODO: to remove in conan v2 once cmake_find_package* generators removed
+            self.cpp_info.components[conan_comp].names["cmake_find_package"] = target
+            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = target
+            self.cpp_info.components[conan_comp].build_modules["cmake"] = [self._fast_type_gen_target_file]
+            build_modules = [self._lib_targets_module_file, self._fast_type_gen_target_file]
+            self.cpp_info.components[conan_comp].build_modules["cmake_find_package"] = build_modules
+            self.cpp_info.components[conan_comp].build_modules["cmake_find_package_multi"] = build_modules
             if comp != target:
                 conan_comp_alias = conan_comp + "_alias"
                 self.cpp_info.components[conan_comp_alias].names["cmake_find_package"] = comp
@@ -235,3 +239,7 @@ class mFASTConan(ConanFile):
                 self.cpp_info.components[conan_comp_alias].resdirs = []
                 self.cpp_info.components[conan_comp_alias].bindirs = []
                 self.cpp_info.components[conan_comp_alias].frameworkdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "mFAST"
+        self.cpp_info.names["cmake_find_package_multi"] = "mFAST"
