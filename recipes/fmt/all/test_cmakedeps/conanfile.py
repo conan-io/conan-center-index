@@ -12,6 +12,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["FMT_HEADER_ONLY"] = self.dependencies["fmt"].options.header_only
         tc.variables["CMAKE_RUNTIME_OUTPUT_DIRECTORY"] = "bin"
+        tc.variables["CMAKE_RUNTIME_OUTPUT_DIRECTORY_{}".format(str(self.settings.build_type).upper())] = "bin"
         tc.generate()
 
     def build(self):
