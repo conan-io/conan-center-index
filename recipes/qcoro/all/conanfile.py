@@ -42,7 +42,7 @@ class QCoroConan(ConanFile):
                 "Visual Studio": "16.2",
                 "msvc": "19.22",
                 "clang": "8",
-                "apple-clang": "10"
+                "apple-clang": "12"
         }
         return minimum_versions
 
