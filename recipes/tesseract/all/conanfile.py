@@ -130,13 +130,12 @@ class TesseractConan(ConanFile):
             cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
             cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
-        if tools.cross_building(self) and not tools.get_env("CMAKE_SYSTEM_PROCESSOR"):
-            # FIXME: too specific and error prone, should be delegated to CMake helper
+        if tools.cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            self._cmake.definitions["CONAN_TESSERACT_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
