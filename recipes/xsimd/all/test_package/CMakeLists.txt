@@ -9,7 +9,7 @@ conan_basic_setup(TARGETS)
 find_package(xsimd REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} xsimd::xsimd)
+target_link_libraries(${PROJECT_NAME} xsimd)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
