@@ -73,7 +73,7 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
             self.requires("stb/cci.20210713")
         if self.options.audio:
             self.requires("flac/1.3.3")
