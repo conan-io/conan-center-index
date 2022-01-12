@@ -22,7 +22,7 @@ class opengvConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
         "with_python_bindings": False,
     }
 
