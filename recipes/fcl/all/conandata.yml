@@ -4,9 +4,9 @@ sources:
     sha256: "c8a68de8d35a4a5cd563411e7577c0dc2c626aba1eef288cb1ca88561f8d8019"
 patches:
   "0.6.1":
-    - patch_file: "patches/conanize-cmake-0.6.1.patch"
+    - patch_file: "patches/0001-fix-cmake-0.6.1.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-mingw-bigobj.patch"
+    - patch_file: "patches/0002-fix-mingw-bigobj.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-alias-type-msvc2015.patch"
+    - patch_file: "patches/0003-fix-alias-type-msvc2015.patch"
       base_path: "source_subfolder"
