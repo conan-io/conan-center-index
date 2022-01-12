@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches
 from conan.tools.layout import cmake_layout
 import os
 
-required_conan_version = ">=1.42.2"
+required_conan_version = ">=1.43.0"
 
 
 class GKlibConan(ConanFile):
@@ -28,7 +28,7 @@ class GKlibConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_mingw(self):
@@ -86,7 +86,7 @@ class GKlibConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "GKlib"
         self.cpp_info.names["cmake_find_package_multi"] = "GKlib"
         self.cpp_info.set_property("cmake_file_name", "GKlib")
-        self.cpp_info.set_property("cmake_target_name", "GKlib")
+        self.cpp_info.set_property("cmake_target_name", "GKlib::GKlib")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.libs = tools.collect_libs(self)
         if self._is_msvc or self._is_mingw:
