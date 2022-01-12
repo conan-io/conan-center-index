@@ -100,7 +100,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.4.0")
+            self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
