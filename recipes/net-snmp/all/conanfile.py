@@ -103,11 +103,11 @@ class NetSnmpConan(ConanFile):
             replacer("$openssl = false", "$openssl = true")
             replacer(
                 r'$default_openssldir . "\\include"',
-                f'"{openssl_root}/include"'
+                f"'{openssl_root}/include'"
             )
             replacer(
                 r'$default_openssldir . "\\lib\\VC"',
-                f'"{openssl_root}/lib"'
+                f"'{openssl_root}/lib'"
             )
             if self._is_debug:
                 replacer("$debug = false", "$debug = true")
