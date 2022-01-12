@@ -62,7 +62,7 @@ class RapidcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_catch:
-            self.requires("catch2/2.13.7")
+            self.requires("catch2/2.13.8")
         if self.options.enable_gmock or self.options.enable_gtest:
             self.requires("gtest/1.11.0")
 
