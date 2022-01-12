@@ -1,3 +1,4 @@
+#include <string_view>
 #include <foxglove/websocket/server.hpp>
 
 int main() {
