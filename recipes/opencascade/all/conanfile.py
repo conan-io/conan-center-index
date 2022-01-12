@@ -4,7 +4,7 @@ import json
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpenCascadeConan(ConanFile):
@@ -14,7 +14,7 @@ class OpenCascadeConan(ConanFile):
     homepage = "https://dev.opencascade.org"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
+    topics = ("opencascade", "occt", "3d", "modeling", "cad")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -39,9 +39,7 @@ class OpenCascadeConan(ConanFile):
     }
 
     short_paths = True
-
     generators = "cmake"
-    exports_sources = "patches/**"
     _cmake = None
 
     @property
@@ -49,8 +47,16 @@ class OpenCascadeConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,8 +67,6 @@ class OpenCascadeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("tcl/8.6.10")
@@ -85,14 +89,15 @@ class OpenCascadeConan(ConanFile):
             self.requires("tbb/2020.3")
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration("OpenCASCADE {} doesn't support Clang 6.0 if Release build type".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "OCCT-" + self.version.replace(".", "_")
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -234,7 +239,8 @@ class OpenCascadeConan(ConanFile):
         self._cmake = CMake(self)
 
         # Inject C++ standard from profile since we have removed hardcoded C++11 from upstream build files
-        self._cmake.definitions["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11")
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
         self._cmake.definitions["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         self._cmake.definitions["INSTALL_TEST_CASES"] = False
@@ -254,7 +260,7 @@ class OpenCascadeConan(ConanFile):
         self._cmake.definitions["INSTALL_DIR_SAMPLES"] = "res/samples"
         self._cmake.definitions["INSTALL_DIR_DOC"] = "res/doc"
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._cmake.definitions["BUILD_SAMPLES_MFC"] = False
         self._cmake.definitions["BUILD_SAMPLES_QT"] = False
         self._cmake.definitions["BUILD_Inspector"] = False
@@ -280,7 +286,6 @@ class OpenCascadeConan(ConanFile):
         cmake.build()
 
     def _replace_package_folder(self, source, target):
-        new_name = ""
         if os.path.isdir(os.path.join(self.package_folder, source)):
             tools.rmdir(os.path.join(self.package_folder, target))
             tools.rename(
@@ -310,6 +315,7 @@ class OpenCascadeConan(ConanFile):
         occt_modules = self._get_modules_from_source_code()
         self._create_modules_json_file(occt_modules)
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._cmake_module_file_rel_path),
             {target: "OpenCASCADE::{}".format(target) for module in occt_modules.values() for target in module}
@@ -328,13 +334,8 @@ class OpenCascadeConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _cmake_module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _cmake_module_file_rel_path(self):
-        return os.path.join(self._cmake_module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def _get_modules_from_source_code(self):
         csf_to_conan_dependencies = {
@@ -409,8 +410,7 @@ class OpenCascadeConan(ConanFile):
         return os.path.join(self.package_folder, "lib", "occt_modules.json")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "OpenCASCADE"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenCASCADE"
+        self.cpp_info.set_property("cmake_file_name", "OpenCASCADE")
 
         def _to_qualified_name(target):
             return "occt_{}".format(target.lower())
@@ -418,8 +418,11 @@ class OpenCascadeConan(ConanFile):
         def _register_components(modules_dict):
             for module, targets in modules_dict.items():
                 conan_component_module_name = _to_qualified_name(module)
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
+                # FIXME: in this "module" target we would like to model COMPONENTS for find_package() but
+                #       for the moment it generates in CMakeDeps some weird component name like
+                #       opencascade::FoundationClasses instead of FoundationClasses.
+                #       see https://github.com/conan-io/conan/issues/10258
+                self.cpp_info.components[conan_component_module_name].set_property("cmake_target_name", module)
 
                 for target_lib, target_deps in targets.items():
                     conan_component_target_name = _to_qualified_name(target_lib)
@@ -428,11 +431,7 @@ class OpenCascadeConan(ConanFile):
                     system_libs = target_deps.get("system_libs", [])
                     frameworks = target_deps.get("frameworks", [])
 
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].builddirs.append(self._cmake_module_subfolder)
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._cmake_module_file_rel_path]
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._cmake_module_file_rel_path]
+                    self.cpp_info.components[conan_component_target_name].set_property("cmake_target_name", target_lib)
                     self.cpp_info.components[conan_component_target_name].libs = [target_lib]
                     self.cpp_info.components[conan_component_target_name].requires = requires
                     self.cpp_info.components[conan_component_target_name].system_libs = system_libs
@@ -441,6 +440,16 @@ class OpenCascadeConan(ConanFile):
                         self.cpp_info.components[conan_component_target_name].defines.append("OCCT_STATIC_BUILD")
 
                     self.cpp_info.components[conan_component_module_name].requires.append(conan_component_target_name)
+
+                    # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
+                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
+                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._cmake_module_file_rel_path]
+                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._cmake_module_file_rel_path]
+
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
+                self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
 
         occt_modules_json_content = tools.load(self._modules_helper_filepath)
         occt_modules = json.loads(occt_modules_json_content)
@@ -451,3 +460,7 @@ class OpenCascadeConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "OpenCASCADE"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenCASCADE"
