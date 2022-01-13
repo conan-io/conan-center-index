@@ -39,8 +39,8 @@ class QCoroConan(ConanFile):
     def _compilers_minimum_version(self):
         minimum_versions = {
                 "gcc": "10",
-                "Visual Studio": "16.2",
-                "msvc": "19.22",
+                "Visual Studio": "17",
+                "msvc": "19.29",
                 "clang": "8",
                 "apple-clang": "13"
         }
