@@ -17,5 +17,5 @@ if(built_with_ffmpeg)
 endif()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} opencv_imgcodecs opencv_highgui opencv_objdetect $<TARGET_NAME_IF_EXISTS:opencv_gapi>)
+target_link_libraries(${PROJECT_NAME} opencv_imgcodecs opencv_highgui opencv_objdetect $<TARGET_NAME_IF_EXISTS:opencv_gapi> $<TARGET_NAME_IF_EXISTS:opencv_videoio>)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
