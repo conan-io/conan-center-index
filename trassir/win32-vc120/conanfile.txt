@@ -2,6 +2,7 @@
 cmake
 virtualrunenv
 virtualenv
+json
 
 [requires]
 atl/0.0@trassir/sdk120
