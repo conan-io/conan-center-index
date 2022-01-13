@@ -53,7 +53,7 @@ class CAFConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
 
     def _minimum_compilers_version(self, cppstd):
         standards = {
