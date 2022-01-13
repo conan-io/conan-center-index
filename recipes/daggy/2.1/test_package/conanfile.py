@@ -14,9 +14,7 @@ class DaggyTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            env_build = RunEnvironment(self)
-            with tools.environment_append(env_build.vars):
-                os.chdir("bin")
-                self.run(".%stestcpp" % os.sep)
-                self.run(".%stestc" % os.sep)
+        if not tools.cross_building(self):
+            os.chdir("bin")
+            self.run(".%stestcpp" % os.sep, run_environment=True)
+            self.run(".%stestc" % os.sep, run_environment=True)
