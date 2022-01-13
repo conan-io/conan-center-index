@@ -59,7 +59,7 @@ class DaggyConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
         if not self.options["qt"].shared: 
-            raise ConanInvalidConfiguration("Daggy work with static Qt libraries linking") 
+            raise ConanInvalidConfiguration("Shared Qt lib is required.") 
 
     def requirements(self):
         self.requires("qt/6.2.2")
