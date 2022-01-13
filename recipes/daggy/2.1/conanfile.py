@@ -64,7 +64,7 @@ class DaggyConan(ConanFile):
 
     def requirements(self):
         self.requires("cmake/3.22.0")
-        self.requires("openssl/1.1.1m", override=True)
+        self.requires("openssl/1.1.1m")
         self.requires("qt/6.2.2")
         self.requires("kainjow-mustache/4.1")
 
