@@ -15,8 +15,8 @@ class mFASTConan(ConanFile):
         "mFAST is a high performance C++ encoding/decoding library for FAST "
         "(FIX Adapted for STreaming) protocol"
     )
-    topics = ("mFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange",
-              "libraries", "cpp")
+    topics = ("mfast", "fast", "fix", "fix-adapted-for-streaming",
+              "financial-information-exchange", "libraries", "cpp")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
