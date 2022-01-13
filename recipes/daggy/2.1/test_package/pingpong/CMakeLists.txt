@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.22.0)
+project(pingpong LANGUAGES CXX)
 set(TARGET pingpong)
 
 find_package(Qt6 COMPONENTS Core REQUIRED)

@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.22.0)
 project(DaggyPackageTest)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)

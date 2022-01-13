@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 
 
 class DaggyTestConan(ConanFile):
@@ -13,13 +13,10 @@ class DaggyTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.dylib*", dst="bin", src="lib")
-        self.copy('*.so*', dst='bin', src='lib')
-
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
-            self.run(".%stestcpp" % os.sep)
-            self.run(".%stestc" % os.sep)
+            env_build = RunEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                os.chdir("bin")
+                self.run(".%stestcpp" % os.sep)
+                self.run(".%stestc" % os.sep)
