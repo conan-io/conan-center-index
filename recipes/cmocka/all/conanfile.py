@@ -109,7 +109,7 @@ class CmockaConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cmocka")
         self.cpp_info.set_property("pkg_config_name", "cmocka")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cmocka{}".format("" if self.options.shared else "-static")]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
