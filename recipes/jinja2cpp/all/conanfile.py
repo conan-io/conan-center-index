@@ -53,17 +53,17 @@ class Jinja2cppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.78.0")
         self.requires("expected-lite/0.5.0")
-        self.requires("optional-lite/3.4.0")
-        self.requires("rapidjson/cci.20200410")
+        self.requires("optional-lite/3.5.0")
+        self.requires("rapidjson/cci.20211112")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/2.0.0")
         if self.version == "1.1.0":
             self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
         else:
-            self.requires("nlohmann_json/3.10.2")
-            self.requires("fmt/8.0.1")
+            self.requires("nlohmann_json/3.10.5")
+            self.requires("fmt/8.1.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
