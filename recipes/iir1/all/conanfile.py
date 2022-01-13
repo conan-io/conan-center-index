@@ -53,7 +53,7 @@ class Iir1Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.version == "1.9.0" and self.options.noexceptions:
-            raise ConanInvalidConfiguration("1.9.0 does not the option to disable exceptions")
+            raise ConanInvalidConfiguration("1.9.0 does not have the option to disable exceptions")
 
     def configure(self):
         if self.options.shared:
