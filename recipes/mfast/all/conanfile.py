@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import textwrap
@@ -42,6 +43,15 @@ class mFASTConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            "Visual Studio": "14",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -62,8 +72,21 @@ class mFASTConan(ConanFile):
             self.requires("sqlite3/3.37.2")
 
     def validate(self):
-        if self.version >= "1.2.2" and self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+        if self.version >= "1.2.2":
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, 14)
+
+            def lazy_lt_semver(v1, v2):
+                lv1 = [int(v) for v in v1.split(".")]
+                lv2 = [int(v) for v in v2.split(".")]
+                min_length = min(len(lv1), len(lv2))
+                return lv1[:min_length] < lv2[:min_length]
+
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration(
+                    "mfast {} requires C++14, which your compiler does not support.".format(self.version)
+                )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
