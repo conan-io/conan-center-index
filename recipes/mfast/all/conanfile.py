@@ -22,10 +22,12 @@ class mFASTConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_sqlite3": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_sqlite3": False,
     }
 
     short_paths = True
@@ -56,6 +58,8 @@ class mFASTConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.75.0")
         self.requires("tinyxml2/9.0.0")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.37.2")
 
     def validate(self):
         if self.version >= "1.2.2" and self.settings.compiler.get_safe("cppstd"):
@@ -71,6 +75,7 @@ class mFASTConan(ConanFile):
             self._cmake.definitions["BUILD_TESTS"] = False
             self._cmake.definitions["BUILD_EXAMPLES"] = False
             self._cmake.definitions["BUILD_PACKAGES"] = False
+            self._cmake.definitions["BUILD_SQLITE3"] = self.options.with_sqlite3
             if self.version >= "1.2.2" and not tools.valid_min_cppstd(self, 14):
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             self._cmake.configure(build_folder=self._build_subfolder)
@@ -174,10 +179,9 @@ class mFASTConan(ConanFile):
 
     @property
     def _mfast_lib_components(self):
-        # TODO: improve accuracy of external requirements of each component
         target_suffix = "_static" if not self.options.shared else ""
         lib_suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
-        return {
+        components = {
             "libmfast": {
                 "comp": "mfast",
                 "target": "mfast" + target_suffix,
@@ -201,8 +205,18 @@ class mFASTConan(ConanFile):
                 "target": "mfast_json" + target_suffix,
                 "lib": "mfast_json" + lib_suffix,
                 "requires": ["libmfast", "boost::headers"],
-            }
+            },
         }
+        if self.options.with_sqlite3:
+            components.update({
+                "mfast_sqlite3": {
+                    "comp": "mfast_sqlite3",
+                    "target": "mfast_sqlite3" + target_suffix,
+                    "lib": "mfast_sqlite3" + lib_suffix,
+                    "requires": ["libmfast", "boost::headers", "sqlite3::sqlite3"],
+                },
+            })
+        return components
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mFAST")
