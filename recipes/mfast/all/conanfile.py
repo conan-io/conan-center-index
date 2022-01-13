@@ -58,7 +58,7 @@ class mFASTConan(ConanFile):
         self.requires("tinyxml2/9.0.0")
 
     def validate(self):
-        if self.version != "1.2.1" and self.settings.compiler.get_safe("cppstd"):
+        if self.version >= "1.2.2" and self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
     def source(self):
@@ -71,7 +71,7 @@ class mFASTConan(ConanFile):
             self._cmake.definitions["BUILD_TESTS"] = False
             self._cmake.definitions["BUILD_EXAMPLES"] = False
             self._cmake.definitions["BUILD_PACKAGES"] = False
-            if self.version != "1.2.1" and not tools.valid_min_cppstd(self, 14):
+            if self.version >= "1.2.2" and not tools.valid_min_cppstd(self, 14):
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -126,7 +126,7 @@ class mFASTConan(ConanFile):
         return os.path.join(self._new_mfast_config_dir, "FastTypeGenTarget.cmake")
 
     def _extract_fasttypegentarget_macro(self):
-        if self.version == "1.2.1":
+        if self.version < "1.2.2":
             config_file_content = tools.load(os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
             begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
             end = config_file_content.find("endmacro()", begin) + len("endmacro()")
