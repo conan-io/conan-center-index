@@ -90,6 +90,8 @@ class NcbiCxxToolkit(ConanFile):
                 return None
             if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
                 return None
+            if key == "NGHTTP2" and self.settings.os == "Windows":
+                return None
             return self.NCBI_to_Conan_requires[key]
         return None
 
