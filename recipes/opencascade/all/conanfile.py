@@ -38,9 +38,9 @@ class OpenCascadeConan(ConanFile):
         "with_openvr": False,
         "with_rapidjson": False,
         "with_draco": False,
-        "with_tk": False,
+        "with_tk": True,
         "with_tbb": False,
-        "with_opengl": False,
+        "with_opengl": True,
         "extended_debug_messages": False,
     }
 
@@ -89,10 +89,10 @@ class OpenCascadeConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("tcl/8.6.10")
+        self.requires("tcl/8.6.11")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -104,7 +104,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_freeimage:
             raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
         if self.options.with_openvr:
-            self.requires("openvr/1.14.15")
+            self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.get_safe("with_draco"):
