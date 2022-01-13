@@ -75,14 +75,14 @@ class ceressolverConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("eigen/3.3.8")
+        self.requires("eigen/3.4.0")
         if self.options.use_glog:
-            self.requires("glog/0.4.0")
+            self.requires("glog/0.5.0")
         if self.options.use_gflags:
             self.requires("gflags/2.2.2")
             self.options["gflags"].nothreads = False
         if self.options.use_TBB:
-            self.requires("tbb/2020.2")
+            self.requires("tbb/2020.3")
 
     def _check_cxx14_supported(self):
         min_compiler_version = {
