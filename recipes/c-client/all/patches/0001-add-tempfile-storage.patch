@@ -1,0 +1,69 @@
+--- src/osdep/nt/yunchan.c
++++ src/osdep/nt/yunchan.c
+@@ -221,6 +221,44 @@
+ 
+ #undef fclose			/* use the real fclose() in close_file() */
+ 
++#define STORAGE_SIZE 512
++
++struct tempfile_node {
++  FILE *key;
++  char *value;
++};
++
++static struct tempfile_node tempfile_storage[STORAGE_SIZE];
++
++static int tempfile_storage_index_of (FILE *key)
++{
++  int i;
++  for (i = 0; i != STORAGE_SIZE; ++i) {
++    if (tempfile_storage[i].key == key) return i;
++  }
++  return -1;
++}
++
++static void tempfile_storage_store (FILE *key, char *value)
++{
++  int i = tempfile_storage_index_of (NIL);
++  if (i == -1) fatal ("No space left in tempfile_storage");
++  tempfile_storage[i].key = key;
++  tempfile_storage[i].value = value;
++}
++
++static char *tempfile_storage_remove (FILE *key)
++{
++  char *value = NIL;
++  int i = tempfile_storage_index_of (key);
++  if (i != -1) {
++    tempfile_storage[i].key = NIL;
++    value = tempfile_storage[i].value;
++    tempfile_storage[i].value = NIL;
++  }
++  return value;
++}
++
+ /* Substitute for Microsoft's tmpfile() that uses the real temporary directory
+  * Returns: FILE structure if success, NIL if failure
+  */
+@@ -231,7 +269,7 @@
+   char *s = _tempnam (getenv ("TEMP"),"msg");
+   if (s) {			/* if got temporary name... */
+ 				/* open file, and stash name on _tmpfname */
+-    if (ret = fopen (s,"w+b")) ret->_tmpfname = s;
++    if (ret = fopen (s,"w+b")) tempfile_storage_store (ret, s);
+     else fs_give ((void **) &s);/* flush temporary string */
+   }
+   return ret;
+@@ -244,10 +282,8 @@
+ 
+ int close_file (FILE *stream)
+ {
+-  int ret;
+-  char *s = stream->_tmpfname;
+-  stream->_tmpfname = NIL;	/* just in case fclose() tries to delete it */
+-  ret = fclose (stream);	/* close the file */
++  int ret = fclose (stream);
++  char *s = tempfile_storage_remove (stream);
+   if (s) {			/* was there a _tmpfname? */
+     unlink (s);			/* yup, delete it */
+     fs_give ((void **) &s);	/* and flush the name */

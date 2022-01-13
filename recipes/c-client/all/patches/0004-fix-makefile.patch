@@ -1,0 +1,22 @@
+--- Makefile
++++ Makefile
+@@ -678,7 +678,7 @@
+ 	$(TOOLS)/$@ "$(LN)" src/tmail tmail
+ 	$(LN) $(TOOLS)/$@ .
+ 
+-build:	OSTYPE rebuild rebuildclean bundled
++build:	OSTYPE rebuild rebuildclean
+ 
+ OSTYPE:
+ 	@$(MAKE) ip$(IP)
+--- src/osdep/unix/Makefile
++++ src/osdep/unix/Makefile
+@@ -149,7 +149,7 @@
+ 
+ # Normally no need to change any of these
+ 
+-ARCHIVE=c-client.a
++ARCHIVE=libc-client.a
+ BINARIES=osdep.o mail.o misc.o newsrc.o smanager.o utf8.o utf8aux.o siglocal.o \
+  dummy.o pseudo.o netmsg.o flstring.o fdstring.o \
+  rfc822.o nntp.o smtp.o imap4r1.o pop3.o \
