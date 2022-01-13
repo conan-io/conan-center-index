@@ -1,7 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class AwsCIO(ConanFile):
     name = "aws-c-io"
@@ -10,8 +11,7 @@ class AwsCIO(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-io"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,6 +22,8 @@ class AwsCIO(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -74,18 +76,23 @@ class AwsCIO(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-io"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-io")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-io")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["aws-c-io-lib"].libs = ["aws-c-io"]
+        if self.settings.os == "Macos":
+            self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["aws-c-io-lib"].system_libs = ["crypt32", "secur32", "shlwapi"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-io"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-io"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package"] = "aws-c-io"
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package_multi"] = "aws-c-io"
-        self.cpp_info.components["aws-c-io-lib"].libs = ["aws-c-io"]
+        self.cpp_info.components["aws-c-io-lib"].set_property("cmake_target_name", "AWS::aws-c-io")
         self.cpp_info.components["aws-c-io-lib"].requires = ["aws-c-cal::aws-c-cal-lib", "aws-c-common::aws-c-common-lib"]
-
-        if self.settings.os == "Macos":
-            self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["aws-c-io-lib"].system_libs = ["crypt32", "secur32", "shlwapi"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["aws-c-io-lib"].requires.append("s2n::s2n-lib")
