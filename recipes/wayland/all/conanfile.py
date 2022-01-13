@@ -55,7 +55,7 @@ class WaylandConan(ConanFile):
         self.requires("expat/2.4.2")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.59.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
