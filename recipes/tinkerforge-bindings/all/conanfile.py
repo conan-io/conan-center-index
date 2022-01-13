@@ -2,7 +2,7 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class TinkerforgeBindingsConan(ConanFile):
     name = "tinkerforge-bindings"
