@@ -4,9 +4,7 @@ sources:
     sha256: "e6ed19e629a33068b7ab5ebdbd860831f2f2b44b3b361068fbbbe975202a4851"
 patches:
   "1.2.1":
-    - patch_file: "patches/00001-adapt-cmakelists.patch"
+    - patch_file: "patches/0001-fix-cmake.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/00002-add-conan-libs-to-targets.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/00003-remove-deprecated-boost-detail-endian.patch"
+    - patch_file: "patches/0002-remove-deprecated-boost-detail-endian.patch"
       base_path: "source_subfolder"
