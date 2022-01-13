@@ -52,7 +52,7 @@ class AmqpcppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
