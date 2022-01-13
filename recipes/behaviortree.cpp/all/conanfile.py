@@ -61,9 +61,9 @@ class BehaviorTreeCPPConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cppzmq/4.7.1")
-        self.requires("boost/1.76.0")
-        self.requires("ncurses/6.2")
+        self.requires("boost/1.78.0")
+        self.requires("cppzmq/4.8.1")
+        self.requires("ncurses/6.3")
         self.requires("zeromq/4.3.4")
 
     def validate(self):
