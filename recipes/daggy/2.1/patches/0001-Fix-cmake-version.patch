@@ -1,0 +1,33 @@
+From cefaf44f95e2213f5bb75478f0465390b1777820 Mon Sep 17 00:00:00 2001
+From: synacker <milovidovmikhail@gmail.com>
+Date: Fri, 14 Jan 2022 01:35:10 +0300
+Subject: [PATCH 1/1] Fix cmake version
+
+---
+ CMakeLists.txt     | 2 +-
+ src/CMakeLists.txt | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 28da6ae..fb296b1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.22.0)
++cmake_minimum_required(VERSION 3.21.0)
+ project(daggy
+         DESCRIPTION "Data Aggregation Utility"
+         HOMEPAGE_URL https://daggy.dev
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1bb8aa3..07367fd 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.22.0)
++cmake_minimum_required(VERSION 3.21.0)
+ project(daggy
+         DESCRIPTION "Data Aggregation Utility"
+         HOMEPAGE_URL https://daggy.dev
+-- 
+2.33.1
+

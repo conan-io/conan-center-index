@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class DaggyConan(ConanFile):
@@ -50,11 +50,10 @@ class DaggyConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.21.3")
 
     def config_options(self):
         self.options["qt"].shared = True
-        self.options["cmake"].with_openssl = False
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
