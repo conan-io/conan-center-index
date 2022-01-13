@@ -64,6 +64,7 @@ class DaggyConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/6.2.2")
+        self.requires("openssl/1.1.1l", override=True)
         self.requires("kainjow-mustache/4.1")
 
         if self.options.with_yaml:
