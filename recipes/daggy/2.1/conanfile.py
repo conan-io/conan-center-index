@@ -12,7 +12,7 @@ class DaggyConan(ConanFile):
     description = "Data Aggregation Utility and C/C++ developer library for data streams catching"
     topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "crossplatform", "ssh-client")
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "compiler", "build_type", "arch", "cppstd"
     options = {
         "with_ssh2": [True, False],
         "with_yaml": [True, False],
@@ -63,8 +63,8 @@ class DaggyConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
 
     def requirements(self):
+        self.requires("openssl/1.1.1m")
         self.requires("qt/6.2.2")
-        self.requires("openssl/1.1.1l", override=True)
         self.requires("kainjow-mustache/4.1")
 
         if self.options.with_yaml:
