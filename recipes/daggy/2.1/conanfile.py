@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, errors
 import os
 
 required_conan_version = ">=1.43.0"
@@ -74,7 +74,10 @@ class DaggyConan(ConanFile):
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                    self.name, 
+                    self._minimum_cpp_standard, 
+                    self.settings.compiler, 
+                    self.settings.compiler.version))
 
         if not self.options["qt"].shared: 
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 
