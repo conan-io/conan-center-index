@@ -22,6 +22,17 @@
  
  OSTYPE:
  	@$(MAKE) ip$(IP)
+@@ -695,8 +693,8 @@
+ 	$(TOUCH) rebuild
+ 
+ rebuild:
+-	@$(SH) -c '(test $(BUILDTYPE) = rebuild -o $(BUILDTYPE) = `$(CAT) OSTYPE`) || (echo Already built for `$(CAT) OSTYPE` -- you must do \"make clean\" first && exit 1)'
+-	@echo Rebuilding c-client for `$(CAT) OSTYPE`...
++	@$(SH) -c '(test $(BUILDTYPE) = rebuild) || (echo Already built for $(BUILDTYPE) -- you must do \"make clean\" first && exit 1)'
++	@echo Rebuilding c-client for $(BUILDTYPE)...
+ 	@$(TOUCH) SPECIALS
+ 	$(CD) c-client;$(MAKE) all CC=`$(CAT) CCTYPE` \
+ 	 CFLAGS="`$(CAT) CFLAGS`" `$(CAT) SPECIALS`
 --- src/osdep/unix/Makefile
 +++ src/osdep/unix/Makefile
 @@ -149,7 +149,7 @@
@@ -33,3 +44,12 @@
  BINARIES=osdep.o mail.o misc.o newsrc.o smanager.o utf8.o utf8aux.o siglocal.o \
   dummy.o pseudo.o netmsg.o flstring.o fdstring.o \
   rfc822.o nntp.o smtp.o imap4r1.o pop3.o \
+@@ -935,7 +935,7 @@
+ 	@echo If you get No such file error messages for files x509.h, ssl.h,
+ 	@echo pem.h, buffer.h, bio.h, and crypto.h, that means that OpenSSL
+ 	@echo is not installed on your system.  Either install OpenSSL first
+-	@echo or build with command: make `$(CAT) OSTYPE` SSLTYPE=none
++	@echo or build with command: make $(OS) SSLTYPE=none
+ 	@echo ========================================================================
+ 
+ osdep.so:	$(OSDEPS)
