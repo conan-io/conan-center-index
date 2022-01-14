@@ -6,6 +6,8 @@ conan_basic_setup()
 
 find_package(daggy REQUIRED)
 
-add_subdirectory(pingpong)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_subdirectory(testcpp)
 add_subdirectory(testc)

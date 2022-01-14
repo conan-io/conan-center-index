@@ -38,11 +38,11 @@ constexpr const char* json_data = R"JSON(
             "type": "local",
             "commands": {
                 "ping1": {
-                    "exec": "pingpong",
+                    "exec": "ping 127.0.0.1",
                     "extension": "log"
                 },
                 "ping2": {
-                    "exec": "pingpong",
+                    "exec": "ping 127.0.0.1",
                     "extension": "log"
                 }
             }
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
             app.quit();      
     });
 
-    QTimer::singleShot(3000, &core, [&]()
+    QTimer::singleShot(2000, &core, [&]()
     {
         core.stop();
     });

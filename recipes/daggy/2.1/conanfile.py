@@ -55,9 +55,26 @@ class DaggyConan(ConanFile):
     def config_options(self):
         self.options["qt"].shared = True
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "17",
+            "gcc": "10",
+            "clang": "8",
+            "apple-clang": "10",
+        }
+
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
         if not self.options["qt"].shared: 
             raise ConanInvalidConfiguration("Shared Qt lib is required.") 

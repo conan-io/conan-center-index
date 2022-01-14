@@ -38,11 +38,11 @@ const char* json_data =
             \"type\": \"local\",\
             \"commands\": {\
                 \"ping1\": {\
-                    \"exec\": \"pingpong\",\
+                    \"exec\": \"ping 127.0.0.1\",\
                     \"extension\": \"log\"\
                 },\
                 \"ping2\": {\
-                    \"exec\": \"pingpong\",\
+                    \"exec\": \"ping 127.0.0.1\",\
                     \"extension\": \"log\"\
                     }\
             }\
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
                                 on_command_stream,
                                 on_command_error);
     libdaggy_core_start(core);
-    int time = 5000;
+    int time = 2000;
     libdaggy_run_in_thread(quit_after_time, &time);
     return libdaggy_app_exec();
 }
@@ -102,6 +102,14 @@ int main(int argc, char** argv)
 void on_daggy_state_changed(DaggyCore core, DaggyStates state)
 {
     printf("Daggy state changed: %d\n", state);
+    switch (state)
+    {
+    case DaggyFinished:
+        libdaggy_app_stop();
+        break;
+    default:
+        break;
+    }
 }
 
 void on_provider_state_changed(DaggyCore core, const char* provider_id, DaggyProviderStates state)
