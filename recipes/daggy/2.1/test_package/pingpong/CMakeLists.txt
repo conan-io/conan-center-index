@@ -15,4 +15,5 @@ set(SOURCES
 
 add_executable(${TARGET} ${SOURCES})
 target_link_libraries(${TARGET} Qt6::Core)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 target_precompile_headers(${TARGET} PRIVATE Precompiled.h)
