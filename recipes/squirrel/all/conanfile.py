@@ -1,6 +1,8 @@
-import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class SquirrelConan(ConanFile):
@@ -12,10 +14,9 @@ class SquirrelConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.squirrel-lang.org/"
     license = "MIT"
-    topics = ("conan", "fruit", "injection")
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    topics = ("squirrel", "programming-language", "object-oriented", "scripting")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,29 +26,36 @@ class SquirrelConan(ConanFile):
         "fPIC": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if tools.Version(self.version) <= "3.1":
             if self.settings.os == "Macos":
                 raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Macos")
             if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
                 raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Clang 8 and earlier")
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -70,18 +78,29 @@ class SquirrelConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "squirrel")
+        # CMakeDeps generator uses the global target if a downstream recipe depends on squirrel globally,
+        # and squirrel::squirrel is stolen by libsquirrel component (if shared) which doesn't depend on all other components.
+        # So this unofficial target is created as a workaround.
+        self.cpp_info.set_property("cmake_target_name", "squirrel::squirel-all-do-not-use")
+
+        suffix = "" if self.options.shared else "_static"
+
         # squirrel
-        squirrel_name = "squirrel" if self.options.shared else "squirrel_static"
-        self.cpp_info.components["libsquirrel"].names["cmake_find_package"] = squirrel_name
-        self.cpp_info.components["libsquirrel"].names["cmake_find_package_multi"] = squirrel_name
-        self.cpp_info.components["libsquirrel"].libs = [squirrel_name]
+        self.cpp_info.components["libsquirrel"].set_property("cmake_target_name", "squirrel::squirrel{}".format(suffix))
+        self.cpp_info.components["libsquirrel"].libs = ["squirrel{}".format(suffix)]
+
         # sqstdlib
-        sqstdlib_name = "sqstdlib" if self.options.shared else "sqstdlib_static"
-        self.cpp_info.components["sqstdlib"].names["cmake_find_package"] = sqstdlib_name
-        self.cpp_info.components["sqstdlib"].names["cmake_find_package_multi"] = sqstdlib_name
-        self.cpp_info.components["sqstdlib"].libs = [sqstdlib_name]
+        self.cpp_info.components["sqstdlib"].set_property("cmake_target_name", "squirrel::sqstdlib{}".format(suffix))
+        self.cpp_info.components["sqstdlib"].libs = ["sqstdlib{}".format(suffix)]
         self.cpp_info.components["sqstdlib"].requires = ["libsquirrel"]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var : {}".format(binpath))
         self.env_info.PATH.append(binpath)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["libsquirrel"].names["cmake_find_package"] = "squirrel{}".format(suffix)
+        self.cpp_info.components["libsquirrel"].names["cmake_find_package_multi"] = "squirrel{}".format(suffix)
+        self.cpp_info.components["sqstdlib"].names["cmake_find_package"] = "sqstdlib{}".format(suffix)
+        self.cpp_info.components["sqstdlib"].names["cmake_find_package_multi"] = "sqstdlib{}".format(suffix)
