@@ -53,7 +53,7 @@ class CzmqConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             # libuuid is not available on Windows
-            del self.options.with_uuid
+            del self.options.with_libuuid
 
     def configure(self):
         if self.options.shared:
