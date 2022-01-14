@@ -82,7 +82,9 @@ class CclientConan(ConanFile):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     def _build_unix(self):
+        target = "osx" if self.settings.os == "Macos" else "slx"
         with open("ip6", "a"): pass
+        with open("OSTYPE", "w") as f: f.write(f"{target}\n")
         self._chmod_x("tools/an")
         self._chmod_x("tools/ua")
         unix = "src/osdep/unix"
@@ -91,8 +93,8 @@ class CclientConan(ConanFile):
         search = "SSLDIR=/usr/local/ssl"
         ssldir = self.deps_cpp_info["openssl"].rootpath
         tools.replace_in_file(f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
-        AutoToolsBuildEnvironment(self)\
-            .make(target="slx", args=["IP=6", "-j1"])
+        args = ["IP=6", "-j1"]
+        AutoToolsBuildEnvironment(self).make(target=target, args=args)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
