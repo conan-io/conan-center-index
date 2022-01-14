@@ -1,3 +1,4 @@
+Fix clang compile error 7.7.0 (https://github.com/jtv/libpqxx/pull/519)
 diff --git a/src/strconv.cxx b/src/strconv.cxx
 index 36758307..824d0d28 100644
 --- a/src/strconv.cxx
