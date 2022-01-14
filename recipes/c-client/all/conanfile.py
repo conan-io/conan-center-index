@@ -38,6 +38,12 @@ class CclientConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "c-client is setup to build only with MSVC on Windows"
             )
+        # FIXME: need krb5 recipe
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(
+                "c-client depends on krb5 on MacOS and it's not packaged by "
+                "Conan yet"
+            )
 
     def config_options(self):
         if self.settings.os == "Windows":
