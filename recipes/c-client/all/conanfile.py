@@ -91,6 +91,12 @@ class CclientConan(ConanFile):
         search = "SSLDIR=/usr/local/ssl"
         ssldir = self.deps_cpp_info["openssl"].rootpath
         tools.replace_in_file(f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
+        # This is from the Homebrew Formula
+        tools.replace_in_file(
+            "src/osdep/unix/ssl_unix.c",
+            "#include <x509v3.h>\n#include <ssl.h>",
+            "#include <ssl.h>\n#include <x509v3.h>"
+        )
         target = "osx" if self.settings.os == "Macos" else "slx"
         args = ["IP=6", "-j1"]
         AutoToolsBuildEnvironment(self).make(target=target, args=args)

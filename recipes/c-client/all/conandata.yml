@@ -12,3 +12,5 @@ patches:
       base_path: ""
     - patch_file: patches/0004-fix-makefile.patch
       base_path: ""
+    - patch_file: patches/2014_openssl1.1.1_sni.patch
+      base_path: ""
