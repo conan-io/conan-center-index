@@ -123,6 +123,8 @@ class DaggyConan(ConanFile):
         cmake = self._configure()
         cmake.install()
 
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
+
     def package_info(self):
         self.cpp_info.libs = ["DaggyCore"]
 
