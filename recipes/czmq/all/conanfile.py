@@ -137,6 +137,10 @@ class CzmqConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "m"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("rpcrt4")
+        if not self.options.shared:
+            stdcpp_library = tools.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.system_libs.append(stdcpp_library)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
