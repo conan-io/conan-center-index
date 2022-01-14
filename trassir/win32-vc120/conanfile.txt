@@ -24,7 +24,6 @@ grdapi/0.0@trassir/sdk120
 hdf5/0.0@trassir/sdk120
 hidapi/0.8.0-rcl@trassir/sdk120
 hikvision-pacs-sdk/6.1.4.42@trassir/sdk120
-intellivision/0.0@trassir/sdk120
 jansson/2.7@trassir/sdk120
 jsoncpp/1.8.3@trassir/sdk120
 libpq/9.4.4-3@trassir/sdk120
@@ -57,7 +56,6 @@ gflags:shared=False
 glog:shared=True
 hdf5:shared=True
 hidapi:shared=True
-intellivision:shared=True
 jansson:shared=True
 jsoncpp:shared=False
 libpq:shared=True
