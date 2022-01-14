@@ -9,6 +9,15 @@
  
  OSTYPE:
  	@$(MAKE) ip$(IP)
+@@ -695,7 +695,7 @@
+ 	$(TOUCH) rebuild
+ 
+ rebuild:
+-	@$(SH) -c '(test $(BUILDTYPE) = rebuild -o $(BUILDTYPE) = `$(CAT) OSTYPE`) || (echo Already built for `$(CAT) OSTYPE` -- you must do \"make clean\" first && exit 1)'
++	@$(SH) -c '(test $(BUILDTYPE) = rebuild || test $(BUILDTYPE) = `$(CAT) OSTYPE`) || (echo Already built for `$(CAT) OSTYPE` -- you must do \"make clean\" first && exit 1)'
+ 	@echo Rebuilding c-client for `$(CAT) OSTYPE`...
+ 	@$(TOUCH) SPECIALS
+ 	$(CD) c-client;$(MAKE) all CC=`$(CAT) CCTYPE` \
 --- src/osdep/unix/Makefile
 +++ src/osdep/unix/Makefile
 @@ -149,7 +149,7 @@
@@ -20,3 +29,12 @@
  BINARIES=osdep.o mail.o misc.o newsrc.o smanager.o utf8.o utf8aux.o siglocal.o \
   dummy.o pseudo.o netmsg.o flstring.o fdstring.o \
   rfc822.o nntp.o smtp.o imap4r1.o pop3.o \
+@@ -1003,7 +1003,7 @@
+ 	$(LN) sig_$(SIGTYPE).c siglocal.c
+ 	$(LN) crx_$(CRXTYPE).c crexcl.c
+ 	$(LN) ip$(IP)_unix.c ip_unix.c
+-	sh -c '(test $(OS) = sc5 -o $(OS) = sco -o ! -f /usr/include/sys/statvfs.h) && echo -DNOFSTATVFS >> OSCFLAGS || fgrep statvfs64 /usr/include/sys/statvfs.h > /dev/null || echo -DNOFSTATVFS64 >> OSCFLAGS'
++	sh -c '(test $(OS) = sc5 || test $(OS) = sco || test ! -f /usr/include/sys/statvfs.h) && echo -DNOFSTATVFS >> OSCFLAGS || fgrep statvfs64 /usr/include/sys/statvfs.h > /dev/null || echo -DNOFSTATVFS64 >> OSCFLAGS'
+ 
+ 
+ # Password checkers
