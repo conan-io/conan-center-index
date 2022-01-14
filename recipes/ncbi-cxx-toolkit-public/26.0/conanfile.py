@@ -143,6 +143,10 @@ class NcbiCxxToolkit(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
 #----------------------------------------------------------------------------
     def requirements(self):
         if not self.version in self.conan_data["sources"].keys():
