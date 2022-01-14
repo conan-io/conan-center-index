@@ -1,6 +1,6 @@
 --- Makefile
 +++ Makefile
-@@ -422,11 +422,10 @@
+@@ -422,10 +422,8 @@
  	EXTRACFLAGS="$(EXTRACFLAGS) -DMAC_OSX_KLUDGE=1" \
  	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib PAMDLFLAGS=-lpam"
  
@@ -13,8 +13,7 @@
  
  osxok:
  	@$(SH) -c '(test ! -f /usr/include/pam/pam_appl.h ) || make osxwarn'
- 	@$(TOUCH) osxok
-@@ -678,7 +677,7 @@
+@@ -678,7 +676,7 @@
  	$(TOOLS)/$@ "$(LN)" src/tmail tmail
  	$(LN) $(TOOLS)/$@ .
  
