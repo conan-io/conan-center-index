@@ -1,17 +1,17 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
 
 
 class LodepngConan(ConanFile):
     name = "lodepng"
     description = "PNG encoder and decoder in C and C++, without dependencies."
     license = "Zlib"
-    topics = ("conan", "png", "encoder", "decoder")
+    topics = ("png", "encoder", "decoder")
     homepage = "https://github.com/lvandeve/lodepng"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,6 +22,8 @@ class LodepngConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -32,6 +34,11 @@ class LodepngConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_vc_static_runtime(self):
+        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -40,10 +47,13 @@ class LodepngConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        if self.options.shared and self._is_vc_static_runtime:
+            raise ConanInvalidConfiguration("lodepng shared doesn't support Visual Studio with static runtime")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('lodepng-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
