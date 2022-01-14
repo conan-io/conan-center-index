@@ -76,8 +76,10 @@ class DataFrameConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self._is_msvc and self.options.shared:
-            raise ConanInvalidConfiguration("dataframe shared not supported with Visual Studio")
+        if self._is_msvc and self.options.shared and tools.Version(self.version) <= "1.19.0":
+            raise ConanInvalidConfiguration(
+                "dataframe {} doesn't support shared lib with Visual Studio".format(self.version)
+            )
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
@@ -125,9 +127,12 @@ class DataFrameConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "DataFrame")
         self.cpp_info.set_property("cmake_target_name", "DataFrame::DataFrame")
         self.cpp_info.set_property("pkg_config_name", "DataFrame")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["DataFrame"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
+        if tools.Version(self.version) <= "1.19.0" and self._is_msvc and not self.options.shared:
+            # weird but required in those versions of dataframe
+            self.cpp_info.defines.append("LIBRARY_EXPORTS")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "DataFrame"
