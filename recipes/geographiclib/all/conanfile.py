@@ -27,7 +27,6 @@ class GeographiclibConan(ConanFile):
         "tools": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
 
@@ -38,6 +37,11 @@ class GeographiclibConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -84,6 +88,8 @@ class GeographiclibConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # it does not work on Windows but is not needed
         tools.replace_in_file(cmakelists, "add_subdirectory (js)", "")
