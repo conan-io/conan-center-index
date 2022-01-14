@@ -91,7 +91,8 @@ class CclientConan(ConanFile):
         search = "SSLDIR=/usr/local/ssl"
         ssldir = self.deps_cpp_info["openssl"].rootpath
         tools.replace_in_file(f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
-        AutoToolsBuildEnvironment(self).make(target="slx", args=["IP=6"])
+        AutoToolsBuildEnvironment(self)\
+            .make(target="slx", args=["IP=6", "-j1"])
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
