@@ -46,7 +46,8 @@ class FlacConan(ConanFile):
         self.requires("ogg/1.3.4")
 
     def build_requirements(self):
-        self.build_requires("nasm/2.14")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.build_requires("nasm/2.15.05")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
