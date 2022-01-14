@@ -8,7 +8,7 @@ required_conan_version = ">=1.43.0"
 class CzmqConan(ConanFile):
     name = "czmq"
     homepage = "https://github.com/zeromq/czmq"
-    description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
+    description = "High-level C binding for ZeroMQ"
     topics = ("zmq", "libzmq", "message-queue", "asynchronous")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
