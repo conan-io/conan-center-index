@@ -20,8 +20,6 @@ class SourceLocationConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        print(self.version)
-        print(self.conan_data)
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
