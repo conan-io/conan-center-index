@@ -5,7 +5,7 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class CoConan(ConanFile):
+class CocoyaxiConan(ConanFile):
     name = "cocoyaxi"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/idealvin/cocoyaxi"
