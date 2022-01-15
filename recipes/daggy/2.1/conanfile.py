@@ -39,7 +39,7 @@ class DaggyConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 20
+        return 17
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -59,15 +59,14 @@ class DaggyConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17",
-            "gcc": "10",
+            "Visual Studio": "16",
+            "gcc": "9",
             "clang": "8",
             "apple-clang": "10",
         }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
@@ -104,6 +103,7 @@ class DaggyConan(ConanFile):
         self._cmake.definitions["PACKAGE_DEPS"] = self.options.package_deps
         self._cmake.definitions["VERSION"] = self.version
         self._cmake.definitions["CONAN_BUILD"] = True
+        self._cmake.definitions["BUILD_TESTING"] = False
 
         if self.options.shared:
             self._cmake.definitions["CMAKE_C_VISIBILITY_PRESET"] = "hidden"
