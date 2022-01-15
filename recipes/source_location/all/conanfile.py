@@ -35,6 +35,7 @@ class SourceLocationConan(ConanFile):
             "Visual Studio": "16.6",
             "gcc": "7.1",
             "clang": "9",
+            "apple-clang": "12",
         }
 
     def validate(self):
