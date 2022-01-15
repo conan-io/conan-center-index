@@ -94,9 +94,7 @@ class ArmadilloConan(ConanFile):
         # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
         # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
         # Therefore, in these cases we remove the `use_extern_rng` option in conan
-        from conans.client.tools.win import CYGWIN, MSYS2, MSYS
-        windows_subsystem = tools.os_info.detect_windows_subsystem()
-        if windows_subsystem in [MSYS, MSYS2, CYGWIN] or self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             del self.options.use_extern_rng
 
     def configure(self):
