@@ -130,7 +130,7 @@ class DataFrameConan(ConanFile):
         self.cpp_info.libs = ["DataFrame"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "rt"])
-        if self.self._is_msvc:
+        if self._is_msvc:
             self.cpp_info.definitions.append("_USE_MATH_DEFINES")
             if tools.Version(self.version) <= "1.19.0" and not self.options.shared:
                 # weird but required in those versions of dataframe
