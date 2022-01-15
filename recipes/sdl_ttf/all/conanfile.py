@@ -23,7 +23,6 @@ class SdlttfConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -34,6 +33,11 @@ class SdlttfConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,10 +63,9 @@ class SdlttfConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        # Handle sdl2 static target
-        if tools.Version(self.version) < "2.0.18" and not self.options["sdl"].shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "SDL2::SDL2", "SDL2::SDL2-static")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         # missing from distribution (only in 2.0.15?)
         tools.save(os.path.join(self._source_subfolder, "SDL2_ttfConfig.cmake"), "")
 
