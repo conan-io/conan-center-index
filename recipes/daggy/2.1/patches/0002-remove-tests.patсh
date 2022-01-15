@@ -1,0 +1,15 @@
+diff --git a/src/DaggyCore/CMakeLists.txt b/src/DaggyCore/CMakeLists.txt
+index a13a010..9a1ef09 100644
+--- a/src/DaggyCore/CMakeLists.txt
++++ b/src/DaggyCore/CMakeLists.txt
+@@ -50,10 +50,6 @@ set(LINK_LIBRARIES
+     Qt6::Core Qt6::Network
+ )
+ 
+-add_subdirectory(tests/local)
+-add_subdirectory(tests/pingpong)
+-add_subdirectory(tests/interface)
+-
+ if (SSH2_SUPPORT)
+     if(CONAN_BUILD)
+         find_package(Libssh2 REQUIRED)
