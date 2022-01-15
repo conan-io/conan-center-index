@@ -6,7 +6,9 @@ conan_basic_setup()
 
 find_package(daggy REQUIRED)
 
-set(CMAKE_CXX_STANDARD 20)
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(testcpp)

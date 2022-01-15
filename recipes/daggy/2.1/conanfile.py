@@ -60,7 +60,7 @@ class DaggyConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "gcc": "9",
+            "gcc": "8",
             "clang": "8",
             "apple-clang": "10",
         }
