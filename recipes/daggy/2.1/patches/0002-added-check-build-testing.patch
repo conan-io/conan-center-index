@@ -1,0 +1,31 @@
+From 92f4c7c53bf7a51b25cc0ff4fd5c4dfc079cfe40 Mon Sep 17 00:00:00 2001
+From: synacker <milovidovmikhail@gmail.com>
+Date: Sat, 15 Jan 2022 19:42:18 +0300
+Subject: [PATCH 1/1] added check build testing
+
+---
+ src/DaggyCore/CMakeLists.txt | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/src/DaggyCore/CMakeLists.txt b/src/DaggyCore/CMakeLists.txt
+index a13a010..612e782 100644
+--- a/src/DaggyCore/CMakeLists.txt
++++ b/src/DaggyCore/CMakeLists.txt
+@@ -50,9 +50,11 @@ set(LINK_LIBRARIES
+     Qt6::Core Qt6::Network
+ )
+ 
+-add_subdirectory(tests/local)
+-add_subdirectory(tests/pingpong)
+-add_subdirectory(tests/interface)
++if (BUILD_TESTING)
++    add_subdirectory(tests/local)
++    add_subdirectory(tests/pingpong)
++    add_subdirectory(tests/interface)
++endif()
+ 
+ if (SSH2_SUPPORT)
+     if(CONAN_BUILD)
+-- 
+2.33.1
+
