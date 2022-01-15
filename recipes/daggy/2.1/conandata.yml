@@ -6,5 +6,5 @@ patches:
   "2.1.1":
     - patch_file: "patches/0001-Fix-cmake-version.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-remove-tests.patсh"
+    - patch_file: "patches/0002-remove-tests.patch"
       base_path: "source_subfolder"
