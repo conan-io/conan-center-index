@@ -129,10 +129,12 @@ class DataFrameConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "DataFrame")
         self.cpp_info.libs = ["DataFrame"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
-        if tools.Version(self.version) <= "1.19.0" and self._is_msvc and not self.options.shared:
-            # weird but required in those versions of dataframe
-            self.cpp_info.defines.append("LIBRARY_EXPORTS")
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
+        if self.self._is_msvc:
+            self.cpp_info.definitions.append("_USE_MATH_DEFINES")
+            if tools.Version(self.version) <= "1.19.0" and not self.options.shared:
+                # weird but required in those versions of dataframe
+                self.cpp_info.defines.append("LIBRARY_EXPORTS")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "DataFrame"
