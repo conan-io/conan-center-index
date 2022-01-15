@@ -1,5 +1,5 @@
---- src/osdep/nt/yunchan.c.orig	2022-01-14 16:19:16.081167300 +0100
-+++ src/osdep/nt/yunchan.c	2022-01-14 17:03:45.176487500 +0100
+--- src/osdep/nt/yunchan.c
++++ src/osdep/nt/yunchan.c
 @@ -219,6 +219,34 @@
   * I would be delighted to have a better alternative.
   */
