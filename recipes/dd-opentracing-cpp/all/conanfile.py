@@ -58,9 +58,9 @@ class DatadogOpenTracingConan(ConanFile):
     def requirements(self):
         self.requires("opentracing-cpp/1.6.0")
         self.requires("zlib/1.2.11")
-        self.requires("libcurl/7.73.0")
+        self.requires("libcurl/7.80.0")
         self.requires("msgpack/3.3.0")
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.5")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
