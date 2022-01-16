@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 86e9eef..b4511be 100644
+index 86e9eef..be3c79b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -16,18 +16,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,3 +21,12 @@ index 86e9eef..b4511be 100644
  message("Current Path of QXlsx")
  message(${QXLSX_PARENTPATH})
  message(${QXLSX_HEADERPATH})
+@@ -39,7 +27,7 @@ file(GLOB QXLSX_H "${QXLSX_HEADERPATH}/*.h")
+ set(SRC_FILES ${QXLSX_CPP})
+ list(APPEND SRC_FILES ${QXLSX_H})
+ 
+-add_library(QXlsx STATIC
++add_library(QXlsx
+  ${SRC_FILES} )
+ 
+ target_include_directories(QXlsx PRIVATE ${QXLSX_HEADERPATH})
