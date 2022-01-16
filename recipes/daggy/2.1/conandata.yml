@@ -1,14 +1,4 @@
 sources:
-  "2.1.1":
-    sha256: c50146eb9a0118200484390e1eb38e46ab72a9112003a11d2a4bf7f6e53ff0cf
-    url: https://github.com/synacker/daggy/archive/refs/tags/2.1.1.tar.gz
-patches:
-  "2.1.1":
-    - patch_file: "patches/0001-Fix-cmake-version.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-added-check-build-testing.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-Set-CXX-standard-for-targets.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0004-Revert-standard-to-17-by-default.patch"
-      base_path: "source_subfolder"
+  "2.1.2":
+    sha256: d3b244fcb06cf5b749d19ca9d678aebbaa43a7e8c8208d99c15a58e140e49493
+    url: https://github.com/synacker/daggy/archive/refs/tags/2.1.2.tar.gz
