@@ -192,7 +192,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_clangcl(self):
@@ -411,7 +411,8 @@ class OpenSSLConan(ConanFile):
     def _ancestor_target(self):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
-        query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
+        compiler = "Visual Studio" if self.settings.compiler == "msvc" else self.settings.compiler
+        query = "%s-%s-%s" % (self.settings.os, self.settings.arch, compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
             raise ConanInvalidConfiguration("unsupported configuration: %s %s %s, "
@@ -779,10 +780,20 @@ class OpenSSLConan(ConanFile):
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
             tools.replace_in_file(makefile, old_str, new_str, strict=self.in_local_cache)
 
+    @property
+    def _runtime(self):
+        if self.settings.compiler == "Visual Studio":
+            return self.settings.compiler.runtime
+        else:
+            return "M{}{}".format(
+                "T" if self.settings.compiler.runtime == "static" else "D",
+                "d" if self.settings.compiler.runtime_type == "Debug" else "",
+            )
+
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
+            tools.replace_in_file(filename, "/%s " % e, "/%s " % self._runtime, strict=False)
+            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self._runtime, strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
