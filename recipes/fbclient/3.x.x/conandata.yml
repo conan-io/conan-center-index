@@ -1,0 +1,4 @@
+sources:
+  "3.0.8":
+    sha256: "ab32b81e43c2df119e1adb14de93c965e502968a9d574e4c5ea8da1e78eeacfb"
+    url: https://github.com/FirebirdSQL/firebird/releases/download/v3.0.8/Firebird-3.0.8.33535-0.tar.bz2
