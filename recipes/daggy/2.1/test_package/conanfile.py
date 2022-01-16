@@ -19,4 +19,3 @@ class DaggyTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             self.run(os.path.join("bin", "testcpp"), run_environment=True)
-            self.run(os.path.join("bin", "testc"), run_environment=True)
