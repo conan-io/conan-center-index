@@ -39,7 +39,7 @@ class SourceLocationConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False)
@@ -52,7 +52,3 @@ class SourceLocationConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "source_location"
-        self.cpp_info.names["cmake_find_package_multi"] = "source_location"
