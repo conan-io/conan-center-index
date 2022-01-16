@@ -8,7 +8,7 @@ using namespace nonstd;
 
 status_value<std::string, int> to_int( char const * const text )
 {
-    char * pos = nullptr;
+    char * pos = NULL;
     const int value = static_cast<int>( strtol( text, &pos, 0 ) );
 
     if ( pos != text ) return status_value<std::string, int>( "Excellent", value );
