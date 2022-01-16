@@ -10,3 +10,6 @@ patches:
   "2.0.18":
     - patch_file: "patches/cmake-fix-link-target-2.0.18.patch"
       base_path: "source_subfolder"
+  "2.0.15":
+    - patch_file: "patches/cmake-fix-link-target-2.0.15.patch"
+      base_path: "source_subfolder"
