@@ -2,8 +2,8 @@
 
 int main (void) {
     try {
-        RtMidiOut *midiout = new RtMidiOut();
-        delete midiout;
+        RtMidiIn *midiIn = new RtMidiIn();
+        delete midiIn;
     } catch ( RtMidiError &error ) {
         error.printMessage();
     }
