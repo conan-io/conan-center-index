@@ -74,18 +74,6 @@ class QDBMConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        name = self.name
-        info = self.cpp_info
-
-        info.set_property("cmake_file_name", name)
-        info.set_property("cmake_target_name", f"{name}::{name}")
-
-        info.names.update({
-            "cmake_find_package": name,
-            "cmake_find_package_multi": name,
-        })
-
-        info.libs = [name]
-
+        self.cpp_info.libs = ["qdbm"]
         if self.options.get_safe("with_pthread"):
-            info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
