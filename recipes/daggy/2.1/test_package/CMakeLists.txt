@@ -12,4 +12,3 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(testcpp)
-add_subdirectory(testc)
