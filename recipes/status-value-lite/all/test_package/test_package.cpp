@@ -11,8 +11,8 @@ status_value<std::string, int> to_int( char const * const text )
     char * pos = nullptr;
     const int value = static_cast<int>( strtol( text, &pos, 0 ) );
 
-    if ( pos != text ) return { "Excellent", value };
-    else               return { std::string("'") + text + "' isn't a number" };
+    if ( pos != text ) return status_value<std::string, int>( "Excellent", value );
+    else               return status_value<std::string, int>( std::string("'") + text + "' isn't a number" );
 }
 
 int main( int argc, char * argv[] )
