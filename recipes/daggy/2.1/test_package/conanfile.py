@@ -12,8 +12,7 @@ class DaggyTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if self.settings.os == "Windows":
-            cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.1.18362.1"
+        
         cmake.configure()
         cmake.build()
 

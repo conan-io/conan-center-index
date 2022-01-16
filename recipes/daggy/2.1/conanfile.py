@@ -17,16 +17,14 @@ class DaggyConan(ConanFile):
     options = {
         "with_ssh2": [True, False],
         "with_yaml": [True, False],
-        "console": [True, False],
-        "package_deps": [True, False],
+        "with_console": [True, False],
         "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
         "with_ssh2": True,
         "with_yaml": True,
-        "console": True,
-        "package_deps": False,
+        "with_console": False,
         "shared": False,
         "fPIC": False
     }
@@ -100,8 +98,8 @@ class DaggyConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SSH2_SUPPORT"] = self.options.with_ssh2
         self._cmake.definitions["YAML_SUPPORT"] = self.options.with_yaml
-        self._cmake.definitions["CONSOLE"] = self.options.console
-        self._cmake.definitions["PACKAGE_DEPS"] = self.options.package_deps
+        self._cmake.definitions["CONSOLE"] = self.options.with_console
+        self._cmake.definitions["PACKAGE_DEPS"] = False
         self._cmake.definitions["VERSION"] = self.version
         self._cmake.definitions["CONAN_BUILD"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
