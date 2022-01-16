@@ -6,7 +6,7 @@
 
 using namespace nonstd;
 
-auto to_int( char const * const text ) -> status_value<std::string, int>
+status_value<std::string, int> to_int( char const * const text )
 {
     char * pos = nullptr;
     const int value = static_cast<int>( strtol( text, &pos, 0 ) );
