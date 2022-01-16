@@ -5,22 +5,21 @@
 #include <string>
 
 using namespace nonstd;
-using namespace std::literals;
 
 auto to_int( char const * const text ) -> status_value<std::string, int>
 {
     char * pos = nullptr;
-    auto value = strtol( text, &pos, 0 );
+    const int value = static_cast<int>( strtol( text, &pos, 0 ) );
 
     if ( pos != text ) return { "Excellent", value };
-    else               return { "'"s + text + "' isn't a number" };
+    else               return { std::string("'") + text + "' isn't a number" };
 }
 
 int main( int argc, char * argv[] )
 {
-    auto text = argc > 1 ? argv[1] : "42";
+    const char * text = argc > 1 ? argv[1] : "42";
 
-    auto svi = to_int( text );
+    status_value<std::string, int> svi = to_int( text );
 
     if ( svi ) std::cout << svi.status() << ": '" << text << "' is " << *svi << ", ";
     else       std::cout << "Error: " << svi.status();
