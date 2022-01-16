@@ -51,9 +51,12 @@ class QXlsxConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "header"))
-        self.copy("*", dst="bin", src="lib")
-        self.copy("*", dst="lib", src="lib")
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "header"))
+        self.copy("*.a", dst="bin", src="lib")
+        self.copy("*.a", dst="lib", src="lib")
+        self.copy("*.dylib", dst="bin", src="lib")
+        self.copy("*.dylib", dst="lib", src="lib")
+        self.copy("*.dll", dst="bin", src="lib")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
