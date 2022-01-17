@@ -21,10 +21,12 @@ class BtyaccConan(ConanFile):
         "fPIC": True,
     }
     generators = ("cmake",)
-    # FIXME: remove these once https://github.com/ChrisDodd/btyacc/pull/27 is
-    #        merged and enable no_copy_source
-    exports_sources = ("patches/*", "CMakeLists.txt", "cmake/*.cmake")
-    # no_copy_source = True
+    exports_sources = ("CMakeLists.txt",)
+    no_copy_source = True
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,7 +37,9 @@ class BtyaccConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        root = self._source_subfolder
+        get_args = self.conan_data["sources"][self.version]
+        tools.get(**get_args, destination=root, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -44,14 +48,13 @@ class BtyaccConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         self._configure_cmake().build()
 
     def package(self):
-        self.copy("README", "licenses")
-        self.copy("README.BYACC", "licenses")
+        self.copy("README", "licenses", self._source_subfolder)
+        self.copy("README.BYACC", "licenses", self._source_subfolder)
         self._configure_cmake().install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
