@@ -2,8 +2,8 @@ from conans import ConanFile, tools, CMake
 import os
 
 
-class HttpParserConan(ConanFile):
-    name = "http_parser"
+class LlhttpParserConan(ConanFile):
+    name = "llhttp"
     description = "http request/response parser for c "
     topics = ("conan", "http", "parser")
     url = "https://github.com/conan-io/conan-center-index"
