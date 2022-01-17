@@ -42,6 +42,7 @@ class HttpParserConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
