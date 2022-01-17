@@ -12,7 +12,7 @@ class WhereamiConan(ConanFile):
               "dladdr", "executable-path", "getexecutablepath")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gpakosz/whereami"
-    license = "MIT"  # + WTFPLv2
+    license = ("MIT", "WTFPL")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -36,11 +36,8 @@ class WhereamiConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        commit = url[url.rfind("/")+1:url.find(".tar.gz")]
-        extracted_folder = self.name + "-" + commit
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -87,7 +84,6 @@ class WhereamiConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        print(self.cpp_info.libs)
         self.cpp_info.names["cmake_find_package"] = "whereami"
         self.cpp_info.names["cmake_find_package_multi"] = "whereami"
         self.cpp_info.builddirs.append(self._module_subfolder)
