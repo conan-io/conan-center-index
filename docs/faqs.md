@@ -340,7 +340,6 @@ Keep reading in the [consuming recipes section](consuming_recipes.md).
 
 ## Why are version ranges not allowed?
 
-Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However in the context of ConanCenter they pose a few key challenges, most notably "Build Reproducibility".
+Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably "Build Reproducibility".
 
-If consumers tries to download and build the recipe at a later time, it may resolve to a different package version that may not be compatable. In order to 
-prevent these types of issues we have decided to only allow exact requirements versions.
+If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may not be compatible. In order to prevent these types of issues, we have decided to only allow exact requirements versions.
