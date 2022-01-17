@@ -1,0 +1,16 @@
+Remove this once https://github.com/ChrisDodd/btyacc/pull/27 is merged.
+
+--- main.c
++++ main.c
+@@ -1,7 +1,11 @@
+ #include "defs.h"
+ #include <signal.h>
+ #include <stdio.h>
++#ifdef _WIN32
++#include <io.h>
++#else
+ #include <unistd.h>
++#endif
+ 
+ char dflag;
+ char lflag;

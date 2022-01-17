@@ -1,0 +1,8 @@
+sources:
+  "3.0":
+    sha256: "cf6ed1f9d23c5b07aeff19344427f9b16e37ba7589ca5bd79415a2773f62e324"
+    url: https://github.com/ChrisDodd/btyacc/archive/359a83496874b2e8525a457705d8db11ba1cdb99.zip
+patches:
+  "3.0":
+    - patch_file: patches/0001-include-io-h-on-windows.patch
+      base_path: ""
