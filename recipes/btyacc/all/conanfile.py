@@ -6,7 +6,7 @@ from conans import CMake, ConanFile, tools
 required_conan_version = ">=1.43.0"
 
 
-class BisonConan(ConanFile):
+class BtyaccConan(ConanFile):
     name = "btyacc"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ChrisDodd/btyacc"
