@@ -9,7 +9,7 @@ class LlhttpParserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nodejs/llhttp"
     license = ("MIT",)
-    # exports_sources = "CMakeLists.txt",
+    exports_sources = "CMakeLists.txt",
     generators = "cmake",
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -42,8 +42,7 @@ class LlhttpParserConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def source(self):
@@ -59,7 +58,6 @@ class LlhttpParserConan(ConanFile):
         self.copy("LICENSE-MIT", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["llhttp"]
