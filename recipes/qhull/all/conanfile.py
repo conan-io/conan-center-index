@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class QhullConan(ConanFile):
@@ -11,23 +11,23 @@ class QhullConan(ConanFile):
                   "furthest-site Delaunay triangulation, and furthest-site " \
                   "Voronoi diagram."
     license = "Qhull"
-    topics = ("conan", "qhull", "geometry", "convex", "triangulation", "intersection")
+    topics = ("qhull", "geometry", "convex", "triangulation", "intersection")
     homepage = "http://www.qhull.org"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "reentrant": [True, False]
+        "reentrant": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "reentrant": True
+        "reentrant": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -37,6 +37,15 @@ class QhullConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,20 +88,30 @@ class QhullConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Qhull"
-        self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
+        self.cpp_info.set_property("cmake_file_name", "Qhull")
+        self.cpp_info.set_property("cmake_target_name", "Qhull::{}".format(self._qhull_cmake_name))
+        self.cpp_info.set_property("pkg_config_name", self._qhull_pkgconfig_name)
+
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libqhull"].libs = [self._qhull_lib_name]
         if self.settings.os == "Linux":
             self.cpp_info.components["libqhull"].system_libs.append("m")
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "Qhull"
+        self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
+        self.cpp_info.names["pkg_config"] = self._qhull_pkgconfig_name
+        self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
+        self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
+        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
+        self.cpp_info.components["libqhull"].set_property("cmake_target_name", "Qhull::{}".format(self._qhull_cmake_name))
+        self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
 
     @property
     def _qhull_cmake_name(self):
