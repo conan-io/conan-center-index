@@ -1,0 +1,4 @@
+interface Disposable
+{
+    void dispose();
+}
