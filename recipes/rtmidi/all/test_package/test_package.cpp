@@ -2,8 +2,7 @@
 
 int main (void) {
     try {
-        RtMidiIn *midiIn = new RtMidiIn(RtMidi::RTMIDI_DUMMY);
-        delete midiIn;
+        RtMidiIn midiIn(RtMidi::RTMIDI_DUMMY);
     } catch ( RtMidiError &error ) {
         error.printMessage();
     }
