@@ -8,4 +8,4 @@ find_package(llhttp REQUIRED CONFIG)
 
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} llhttp::llhttp)
