@@ -50,8 +50,8 @@ class CocoyaxiConan(ConanFile):
     def requirements(self):
         if self.options.with_libcurl:
             self.requires("libcurl/7.79.1")
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+        if self.options.with_libcurl or self.options.with_openssl:
+            self.requires("openssl/1.1.1m")
 
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
