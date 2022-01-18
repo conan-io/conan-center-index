@@ -46,9 +46,8 @@ class LlhttpParserConan(ConanFile):
         return self._cmake
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "llhttp-release-v{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         cmake = self._configure_cmake()
