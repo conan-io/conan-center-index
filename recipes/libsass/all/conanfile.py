@@ -1,6 +1,7 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -13,8 +14,14 @@ class LibsassConan(ConanFile):
     description = "A C/C++ implementation of a Sass compiler"
     topics = ("Sass", "LibSass", "compiler")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
 
     _autotools = None
 
@@ -26,6 +33,10 @@ class LibsassConan(ConanFile):
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
+    @property
+    def _is_msvc(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -33,9 +44,6 @@ class LibsassConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            # TODO: add Visual Studio support
-            raise ConanInvalidConfiguration("Visual Studio not yet supported in libsass recipe")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -85,9 +93,24 @@ class LibsassConan(ConanFile):
             with tools.environment_append(env_vars):
                 self.run("{} -f Makefile".format(self._make_program))
 
+    def _build_visual_studio(self):
+        with tools.chdir(self._source_subfolder):
+            properties = {
+                "LIBSASS_STATIC_LIB": "" if self.options.shared else "true",
+                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+            }
+            platforms = {
+                "x86": "Win32",
+                "x86_64": "Win64"
+            }
+            msbuild = MSBuild(self)
+            msbuild.build(os.path.join("win", "libsass.sln"), platforms=platforms, properties=properties)
+
     def build(self):
         if self._is_mingw:
             self._build_mingw()
+        elif self._is_msvc:
+            self._build_visual_studio()
         else:
             self._build_autotools()
 
@@ -103,16 +126,23 @@ class LibsassConan(ConanFile):
         self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "lib"))
         self.copy("*.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
 
+    def _install_visual_studio(self):
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
+        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
+
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self._is_mingw:
             self._install_mingw()
+        elif self._is_msvc:
+            self._install_visual_studio()
         else:
             self._install_autotools()
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libsass"
-        self.cpp_info.libs = ["sass"]
+        self.cpp_info.libs = ["libsass" if self._is_msvc else "sass"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
         if not self.options.shared and tools.stdcpp_library(self):

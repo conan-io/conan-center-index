@@ -5,7 +5,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/logo.png
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(zstd REQUIRED)
 

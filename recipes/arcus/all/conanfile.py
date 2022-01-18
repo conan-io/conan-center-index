@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ArcusConan(ConanFile):
@@ -33,6 +33,10 @@ class ArcusConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,8 +77,12 @@ class ArcusConan(ConanFile):
         self._cmake.definitions["BUILD_PYTHON"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime).startswith("MT")
+        if self._is_msvc:
+            if self.settings.compiler == "Visual Studio":
+                is_static_runtime = str(self.settings.compiler.runtime).startswith("MT")
+            else:
+                is_static_runtime = self.settings.compiler.runtime == "static"
+            self._cmake.definitions["MSVC_STATIC_RUNTIME"] = is_static_runtime
         self._cmake.configure()
         return self._cmake
 
@@ -88,6 +96,7 @@ class ArcusConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"Arcus": "Arcus::Arcus"}
@@ -115,13 +124,17 @@ class ArcusConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Arcus"
-        self.cpp_info.names["cmake_find_package_multi"] = "Arcus"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "Arcus")
+        self.cpp_info.set_property("cmake_target_name", "Arcus")
         self.cpp_info.libs = ["Arcus"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Arcus"
+        self.cpp_info.names["cmake_find_package_multi"] = "Arcus"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

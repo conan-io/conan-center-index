@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from collections import namedtuple
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class PocoConan(ConanFile):
@@ -215,7 +215,12 @@ class PocoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Poco")
-        self.cpp_info.set_property("cmake_target_name", "Poco")
+        self.cpp_info.set_property("cmake_target_name", "Poco::Poco")
+
+        self.cpp_info.filenames["cmake_find_package"] = "Poco"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Poco"
+        self.cpp_info.names["cmake_find_package"] = "Poco"
+        self.cpp_info.names["cmake_find_package_multi"] = "Poco"
 
         suffix = str(self.settings.compiler.runtime).lower()  \
                  if self.settings.compiler == "Visual Studio" and not self.options.shared \
@@ -225,7 +230,10 @@ class PocoConan(ConanFile):
             if comp.option is None or self.options.get_safe(comp.option):
                 conan_component = "poco_{}".format(compname.lower())
                 requires = ["poco_{}".format(dependency.lower()) for dependency in comp.dependencies] + comp.external_dependencies
-                self.cpp_info.components[conan_component].set_property("cmake_target_name", compname)
+                self.cpp_info.components[conan_component].set_property("cmake_target_name", "Poco::{}".format(compname))
+                self.cpp_info.components[conan_component].set_property("cmake_file_name", compname)
+                self.cpp_info.components[conan_component].names["cmake_find_package"] = compname
+                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = compname
                 if comp.is_lib:
                     self.cpp_info.components[conan_component].libs = ["Poco{}{}".format(compname, suffix)]
                 self.cpp_info.components[conan_component].requires = requires

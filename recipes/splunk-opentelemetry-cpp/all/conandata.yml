@@ -1,0 +1,4 @@
+sources:
+  0.4.0:
+    url: "https://github.com/signalfx/splunk-otel-cpp/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "e44f3167cecfea6d1fb0fa3060cc479a0873ab6d481b9b9f57629cbc7d17bfd4"

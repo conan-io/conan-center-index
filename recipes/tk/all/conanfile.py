@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanException, ConanInvalidConfiguration, ConanExceptionInUserConanfileMethod
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 class TkConan(ConanFile):
     name = "tk"
@@ -40,21 +40,25 @@ class TkConan(ConanFile):
     def requirements(self):
         self.requires("tcl/{}".format(self.version))
         if self.settings.os == "Linux":
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if self.options["tcl"].shared != self.options.shared:
             raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("tk{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for build_system in ("unix", "win", ):

@@ -3,7 +3,7 @@ import os
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 class CSVMONEKYConan(ConanFile):
     name = "csvmonkey"
@@ -44,7 +44,13 @@ class CSVMONEKYConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
-        self.cpp_info.set_property("cmake_target_name", "csvmonkey")
+        self.cpp_info.set_property("cmake_target_name", "csvmonkey::csvmonkey")
         self.cpp_info.set_property("pkg_config_name", "csvmonkey")
+
+        self.cpp_info.filenames["cmake_find_package"] = "csvmonkey"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "csvmonkey"
+        self.cpp_info.names["cmake_find_package"] = "csvmonkey"
+        self.cpp_info.names["cmake_find_package_multi"] = "csvmonkey"
+
         if self.options.with_spirit:
             self.cpp_info.defines.append("USE_SPIRIT")

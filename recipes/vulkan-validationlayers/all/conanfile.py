@@ -1,8 +1,10 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
+import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -138,15 +140,23 @@ class VulkanValidationLayersConan(ConanFile):
             lib_dir = os.path.join(self.package_folder, "lib")
             tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
             tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
+            # move dll and json manifest files in bin folder
+            bin_dir = os.path.join(self.package_folder, "bin")
+            tools.mkdir(bin_dir)
+            for ext in ("*.dll", "*.json"):
+                for bin_file in glob.glob(os.path.join(lib_dir, ext)):
+                    shutil.move(bin_file, os.path.join(bin_dir, os.path.basename(bin_file)))
         else:
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
-            os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+            tools.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.libs = ["VkLayer_utils"]
 
         manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
-        self.output.info("Appending VK_LAYER_PATH environment variable: {}".format(vk_layer_path))
+        self.output.info("Prepending to VK_LAYER_PATH runtime environment variable: {}".format(vk_layer_path))
+        self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)

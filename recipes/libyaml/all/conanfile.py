@@ -2,27 +2,38 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibYAMLConan(ConanFile):
     name = "libyaml"
     description = "LibYAML is a YAML parser and emitter library."
-    topics = ("conan", "libyaml", "yaml", "parser", "emitter")
+    topics = ("libyaml", "yaml", "parser", "emitter")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yaml/libyaml"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -58,6 +69,8 @@ class LibYAMLConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"yaml": "yaml::yaml"}
@@ -76,23 +89,21 @@ class LibYAMLConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "yaml")
+        self.cpp_info.set_property("cmake_target_name", "yaml")
         self.cpp_info.libs = ["yaml"]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.defines = [
                 "YAML_DECLARE_EXPORT" if self.options.shared
                 else "YAML_DECLARE_STATIC"
             ]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "yaml"
         self.cpp_info.names["cmake_find_package_multi"] = "yaml"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

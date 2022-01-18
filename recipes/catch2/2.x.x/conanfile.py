@@ -19,12 +19,14 @@ class ConanRecipe(ConanFile):
         "with_main": [True, False],
         "with_benchmark": [True, False],
         "with_prefix": [True, False],
+        "default_reporter": "ANY",
     }
     default_options = {
         "fPIC": True,
         "with_main": False,
         "with_benchmark": False,
         "with_prefix": False,
+        "default_reporter": None,
     }
     _cmake = None
 
@@ -35,6 +37,10 @@ class ConanRecipe(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _default_reporter_str(self):
+        return '"{}"'.format(str(self.options.default_reporter).strip('"'))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,6 +70,8 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["CATCH_BUILD_STATIC_LIBRARY"] = self.options.with_main
         self._cmake.definitions["enable_benchmark"] = self.options.get_safe("with_benchmark", False)
         self._cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
+        if self.options.default_reporter:
+            self._cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -112,12 +120,15 @@ class ConanRecipe(ConanFile):
             self.cpp_info.components["Catch2WithMain"].system_libs = ["log"] if self.settings.os == "Android" else []
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
-            if self.options.get_safe("with_benchmark", False):
-                self.cpp_info.components["Catch2WithMain"].defines.append("CATCH_CONFIG_ENABLE_BENCHMARKING")
-            if self.options.with_prefix:
-                self.cpp_info.components["Catch2WithMain"].defines.append("CATCH_CONFIG_PREFIX_ALL")
+            defines = self.cpp_info.components["Catch2WithMain"].defines
         else:
             self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
             self.cpp_info.system_libs = ["log"] if self.settings.os == "Android" else []
-            if self.options.with_prefix:
-                self.cpp_info.defines.append("CATCH_CONFIG_PREFIX_ALL")
+            defines = self.cpp_info.defines
+
+        if self.options.get_safe("with_benchmark", False):
+            defines.append("CATCH_CONFIG_ENABLE_BENCHMARKING")
+        if self.options.with_prefix:
+            defines.append("CATCH_CONFIG_PREFIX_ALL")
+        if self.options.default_reporter:
+            defines.append("CATCH_CONFIG_DEFAULT_REPORTER={}".format(self._default_reporter_str))

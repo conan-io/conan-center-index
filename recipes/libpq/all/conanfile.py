@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.43.0"
+
 
 class ConanFile(ConanFile):
     name = "libpq"
@@ -11,37 +13,30 @@ class ConanFile(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
-    exports_sources = ["patches/*"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_zlib": [True, False, "deprecated"],
         "with_openssl": [True, False],
-        "disable_rpath": [True, False]
+        "disable_rpath": [True, False],
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_zlib': "deprecated",
-        'with_openssl': False,
-        'disable_rpath': False
+        "shared": False,
+        "fPIC": True,
+        "with_openssl": False,
+        "disable_rpath": False,
     }
+
     _autotools = None
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("strawberryperl/5.30.0.1")
-        elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_clang8_x86(self):
@@ -50,33 +45,38 @@ class ConanFile(ConanFile):
                self.settings.compiler.version == "8" and \
                self.settings.arch == "x86"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.disable_rpath
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
         if self.options.shared:
             del self.options.fPIC
-
-        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
-            if self.options.shared:
-                raise ConanInvalidConfiguration("static mingw build is not possible")
-        # Looking into source code, it appears that zlib is not used in libpq
-        if self.options.with_zlib != "deprecated":
-            self.output.warn("with_zlib option is deprecated, do not use anymore")
-        del self.options.with_zlib
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def validate(self):
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.options.shared:
+            raise ConanInvalidConfiguration("static mingw build is not possible")
+
+    def build_requirements(self):
+        if self._is_msvc:
+            self.build_requires("strawberryperl/5.30.0.1")
+        elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -111,7 +111,7 @@ class ConanFile(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
             if not self.options.shared:
@@ -122,10 +122,18 @@ class ConanFile(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",
                                   "libraries             => [{}],".format(system_libs))
-            runtime = {'MT': 'MultiThreaded',
-                       'MTd': 'MultiThreadedDebug',
-                       'MD': 'MultiThreadedDLL',
-                       'MDd': 'MultiThreadedDebugDLL'}.get(str(self.settings.compiler.runtime))
+            if self.settings.compiler == "Visual Studio":
+                runtime = {
+                    "MT": "MultiThreaded",
+                    "MTd": "MultiThreadedDebug",
+                    "MD": "MultiThreadedDLL",
+                    "MDd": "MultiThreadedDebugDLL",
+                }.get(str(self.settings.compiler.runtime))
+            else:
+                runtime = "MultiThreaded{}{}".format(
+                    "Debug" if self.settings.compiler.runtime_type == "Debug" else "",
+                    "DLL" if self.settings.compiler.runtime == "dynamic" else "",
+                )
             msbuild_project_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "MSBuildProject.pm")
             tools.replace_in_file(msbuild_project_pm, "</Link>", """</Link>
     <Lib>
@@ -190,7 +198,7 @@ class ConanFile(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.copy("*postgres_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
             self.copy("*pg_config.h", src=self._source_subfolder, dst="include", keep_path=False)
             self.copy("*pg_config_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
@@ -228,13 +236,19 @@ class ConanFile(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _construct_library_name(self, name):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             return "lib{}".format(name)
         return  name
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
+        self.cpp_info.set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
+        self.cpp_info.set_property("pkg_config_name", "libpq")
+
         self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
+
         self.env_info.PostgreSQL_ROOT = self.package_folder
 
         self.cpp_info.components["pq"].defines.append["foo"]
@@ -245,8 +259,8 @@ class ConanFile(ConanFile):
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
 
         if not self.options.shared:
-            if self.settings.compiler == "Visual Studio":
-                if tools.Version(self.version) < '12':
+            if self._is_msvc:
+                if tools.Version(self.version) < "12":
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport"])
                 else:
@@ -254,7 +268,7 @@ class ConanFile(ConanFile):
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
             else:
-                if tools.Version(self.version) < '12':
+                if tools.Version(self.version) < "12":
                     self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
                     self.cpp_info.components["pq"].requires.extend(["pgcommon"])
                 else:
@@ -262,7 +276,7 @@ class ConanFile(ConanFile):
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
                     self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]

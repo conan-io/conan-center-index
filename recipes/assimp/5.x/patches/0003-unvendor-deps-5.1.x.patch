@@ -88,6 +88,15 @@
  #include <memory>
 --- a/code/CMakeLists.txt
 +++ b/code/CMakeLists.txt
+@@ -886,7 +886,7 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(pugixml)
+   find_package(pugixml CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( Pugixml_SRCS
+     ../contrib/pugixml/src/pugiconfig.hpp
+     ../contrib/pugixml/src/pugixml.hpp
 @@ -919,7 +919,7 @@ ENDIF()
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(poly2tri)

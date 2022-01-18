@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class GdalConan(ConanFile):
@@ -834,8 +834,15 @@ class GdalConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GDAL")
-        self.cpp_info.set_property("cmake_target_name", "GDAL")
+        self.cpp_info.set_property("cmake_target_name", "GDAL::GDAL")
+        self.cpp_info.set_property("cmake_find_mode", "both") 
         self.cpp_info.set_property("pkg_config_name", "gdal")
+
+        self.cpp_info.names["cmake_find_package"] = "GDAL"
+        self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
+        self.cpp_info.filenames["cmake_find_package"] = "GDAL"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
+
         lib_suffix = ""
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:

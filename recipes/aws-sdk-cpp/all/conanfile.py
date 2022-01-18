@@ -340,11 +340,12 @@ class AwsSdkCppConan(ConanFile):
                     See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-common/0.6.15")
         if self._use_aws_crt_cpp:
             self.requires("aws-c-cal/0.5.12")
-            self.requires("aws-c-io/0.10.9")
-            self.requires("aws-crt-cpp/0.14.3")
+            self.requires("aws-c-http/0.6.10")
+            self.requires("aws-c-io/0.10.13")
+            self.requires("aws-crt-cpp/0.17.12")
         else:
             self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
@@ -379,6 +380,8 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
         self._cmake.definitions["BUILD_DEPS"] = False
+        if self.settings.os != "Windows":
+            self._cmake.definitions["ENABLE_OPENSSL_ENCRYPTION"] = True
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
         if self.settings.compiler == "Visual Studio" and not self._use_aws_crt_cpp:
@@ -421,8 +424,9 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
         if self._use_aws_crt_cpp:
             self.cpp_info.components["core"].requires.extend([
-                "aws-c-io::aws-c-io-lib",
                 "aws-c-cal::aws-c-cal-lib",
+                "aws-c-http::aws-c-http-lib",
+                "aws-c-io::aws-c-io-lib",
                 "aws-crt-cpp::aws-crt-cpp-lib",
             ])
         else:

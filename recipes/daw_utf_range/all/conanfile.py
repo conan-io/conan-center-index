@@ -3,7 +3,7 @@ import os
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class DawUtfRangeConan(ConanFile):
     name = "daw_utf_range"
@@ -39,7 +39,7 @@ class DawUtfRangeConan(ConanFile):
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def requirements(self):
-        self.requires("daw_header_libraries/1.29.7")
+        self.requires("daw_header_libraries/2.5.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -64,8 +64,11 @@ class DawUtfRangeConan(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "daw-utf-range"
         self.cpp_info.filenames["cmake_find_package_multi"] = "daw-utf-range"
+        self.cpp_info.set_property("cmake_file_name", "daw-utf-range")
         self.cpp_info.names["cmake_find_package"] = "daw"
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
+        self.cpp_info.set_property("cmake_target_name", "daw::daw-utf-range")
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-utf-range"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-utf-range"
+        self.cpp_info.components["daw"].set_property("cmake_target_name", "daw::daw-utf-range")
         self.cpp_info.components["daw"].requires = ["daw_header_libraries::daw"]

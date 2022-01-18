@@ -1,18 +1,24 @@
 sources:
-  "2.0.14":
-    url: "https://www.libsdl.org/release/SDL2-2.0.14.tar.gz"
-    sha256: d8215b571a581be1332d2106f8036fcb03d12a70bae01e20f424976d275432bc
+  "2.0.18":
+    url: "https://www.libsdl.org/release/SDL2-2.0.18.tar.gz"
+    sha256: 94d40cd73dbfa10bb6eadfbc28f355992bb2d6ef6761ad9d4074eff95ee5711c
   "2.0.16":
     url: "https://www.libsdl.org/release/SDL2-2.0.16.tar.gz"
     sha256: 65be9ff6004034b5b2ce9927b5a4db1814930f169c4b2dae0a1e4697075f287b
+  "2.0.14":
+    url: "https://www.libsdl.org/release/SDL2-2.0.14.tar.gz"
+    sha256: d8215b571a581be1332d2106f8036fcb03d12a70bae01e20f424976d275432bc
 patches:
+  "2.0.18":
+    - patch_file: "patches/0003-2.0.18-wayland-scanner-buildrequires.patch"
+      base_path: "source_subfolder"
+  "2.0.16":
+    - patch_file: "patches/0003-2.0.16-wayland-scanner-buildrequires.patch"
+      base_path: "source_subfolder"
   "2.0.14":
     - patch_file: "patches/0001-fix-cmake-ios-tvos.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-mingw-improvements.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-2.0.14-wayland-scanner-buildrequires.patch"
-      base_path: "source_subfolder"
-  "2.0.16":  
-    - patch_file: "patches/0003-2.0.16-wayland-scanner-buildrequires.patch"
       base_path: "source_subfolder"

@@ -18,6 +18,10 @@ install(
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+if (PERFETTO_DISABLE_LOGGING)
+    add_definitions(-DPERFETTO_DISABLE_LOG)
+endif (PERFETTO_DISABLE_LOGGING)
+
 if (WIN32)
   # Disable legacy features in windows.h.
   add_definitions(-DWIN32_LEAN_AND_MEAN -DNOMINMAX)

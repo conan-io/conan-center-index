@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class GlfwConan(ConanFile):
@@ -52,7 +52,7 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.2.182")
+            self.requires("vulkan-loader/1.2.198.0")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
@@ -131,12 +131,24 @@ class GlfwConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "glfw3")
         self.cpp_info.set_property("cmake_target_name", "glfw")
         self.cpp_info.set_property("pkg_config_name", "glfw3")
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-        self.cpp_info.libs = tools.collect_libs(self)
+        libname = "glfw"
+        if self.settings.os == "Windows" or not self.options.shared:
+            libname += "3"
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            libname += "dll"
+        self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+
+        # backward support of cmake_find_package & cmake_find_package_multi
+        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
+        self.cpp_info.names["cmake_find_package"] = "glfw"
+        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class SqliteOrmConan(ConanFile):
@@ -67,4 +67,9 @@ class SqliteOrmConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SqliteOrm")
-        self.cpp_info.set_property("cmake_target_name", "sqlite_orm")
+        self.cpp_info.set_property("cmake_target_name", "sqlite_orm::sqlite_orm")
+
+        self.cpp_info.filenames["cmake_find_package"] = "SqliteOrm"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SqliteOrm"
+        self.cpp_info.names["cmake_find_package"] = "sqlite_orm"
+        self.cpp_info.names["cmake_find_package_multi"] = "sqlite_orm"

@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class ProjConan(ConanFile):
@@ -55,15 +55,15 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.4")
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.37.1")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.79.1")
+            self.requires("libcurl/7.80.0")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.36.0")
+            self.build_requires("sqlite3/3.37.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -131,10 +131,18 @@ class ProjConan(ConanFile):
         cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
         cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
-        self.cpp_info.set_property("cmake_target_name", cmake_namespace)
+        self.cpp_info.set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.set_property("pkg_config_name", "proj")
-        self.cpp_info.components["projlib"].set_property("cmake_target_name", "proj")
+        self.cpp_info.components["projlib"].set_property("cmake_target_name", "{}::proj".format(cmake_namespace))
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
+
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
+        self.cpp_info.names["cmake_find_package"] = cmake_namespace
+        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
+        self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
+        self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+
         self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
@@ -153,16 +161,20 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if tools.Version(self.version) < "8.2.0":
-            if self.options.shared and self.settings.compiler == "Visual Studio":
+            if self.options.shared and self.settings.compiler in ["Visual Studio", "msvc"]:
                 self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
         else:
             if not self.options.shared:
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info("Creating PROJ_LIB environment variable: {}".format(res_path))
+        self.output.info("Prepending to PROJ_LIB environment variable: {}".format(res_path))
+        self.runenv_info.prepend_path("PROJ_LIB", res_path)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.PROJ_LIB = res_path
+
         if self.options.build_executables:
+            self.buildenv_info.prepend_path("PROJ_LIB", res_path)
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)

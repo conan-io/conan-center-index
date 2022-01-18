@@ -1,32 +1,35 @@
-import os
-import textwrap
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class CeleroConan(ConanFile):
     name = "celero"
     description = "C++ Benchmarking Library"
     license = "Apache-2.0"
-    topics = ("conan", "celero", "benchmark", "benchmark-tests", "measurements", "microbenchmarks")
+    topics = ("celero", "benchmark", "benchmark-tests", "measurements", "microbenchmarks")
     homepage = "https://github.com/DigitalInBlue/Celero"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     @property
     def _compilers_minimum_version(self):
@@ -37,9 +40,20 @@ class CeleroConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -75,6 +89,8 @@ class CeleroConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"celero": "celero::celero"}
@@ -93,26 +109,24 @@ class CeleroConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "Celero"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
-        self.cpp_info.names["cmake_find_package"] = "celero"
-        self.cpp_info.names["cmake_find_package_multi"] = "celero"
+        self.cpp_info.set_property("cmake_file_name", "Celero")
+        self.cpp_info.set_property("cmake_target_name", "celero")
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if not self.options.shared:
             self.cpp_info.defines = ["CELERO_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["powrprof", "psapi"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Celero"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
+        self.cpp_info.names["cmake_find_package"] = "celero"
+        self.cpp_info.names["cmake_find_package_multi"] = "celero"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

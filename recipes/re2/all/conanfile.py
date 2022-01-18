@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class Re2Conan(ConanFile):
@@ -70,7 +70,11 @@ class Re2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "re2")
-        self.cpp_info.set_property("cmake_target_name", "re2")
+        self.cpp_info.set_property("cmake_target_name", "re2::re2")
+
+        self.cpp_info.names["cmake_find_package"] = "re2"
+        self.cpp_info.names["cmake_find_package_multi"] = "re2"
+
         self.cpp_info.libs = ["re2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]

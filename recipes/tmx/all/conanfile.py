@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TmxConan(ConanFile):
@@ -46,11 +46,11 @@ class TmxConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.10")
+        self.requires("libxml2/2.9.12")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -81,6 +81,8 @@ class TmxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"tmx": "tmx::tmx"}
@@ -99,20 +101,16 @@ class TmxConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "tmx"
-        self.cpp_info.names["cmake_find_package_multi"] = "tmx"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "tmx")
+        self.cpp_info.set_property("cmake_target_name", "tmx")
         self.cpp_info.libs = ["tmx"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("TMXEXPORT=__declspec(dllimport)")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
