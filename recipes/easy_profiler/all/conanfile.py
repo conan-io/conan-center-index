@@ -49,7 +49,7 @@ class EasyProfilerConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime == "MTd" and \
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and \
            self.options.shared and tools.Version(self.settings.compiler.version) >= "15":
             raise ConanInvalidConfiguration(
                 "{} {} with MTd runtime not supported".format(self.settings.compiler,
