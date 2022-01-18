@@ -65,7 +65,5 @@ class rpclibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["rpc"]
-        #if self.settings.os in ("Linux", "FreeBSD"):
-        #    self.cpp_info.system_libs = ["m"]
         self.cpp_info.names["cmake_find_package"] = "rpc"
         self.cpp_info.names["cmake_find_package_multi"] = "rpc"
