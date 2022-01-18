@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class XmlSecConan(ConanFile):
@@ -14,7 +14,7 @@ class XmlSecConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("xml", "signature", "encryption")
 
-    settings = "os", "compiler", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -37,7 +37,21 @@ class XmlSecConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _vc_runtime(self):
+        if self.settings.compiler == "Visual Studio":
+            return self.settings.compiler.runtime
+        else:
+            return "M{}{}".format(
+                "T" if self.settings.compiler.runtime == "static" else "D",
+                "d" if self.settings.compiler.runtime_type == "Debug" else "",
+            )
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,10 +73,6 @@ class XmlSecConan(ConanFile):
     def validate(self):
         if not self.options.with_openssl:
             raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if not self._is_msvc:
@@ -93,7 +103,7 @@ class XmlSecConan(ConanFile):
                 "cscript",
                 "configure.js",
                 "prefix={}".format(self.package_folder),
-                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "cruntime=/{}".format(self._vc_runtime),
                 "debug={}".format(yes_no(self.settings.build_type == "Debug")),
                 "static={}".format(yes_no(not self.options.shared)),
                 "include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)),
@@ -198,7 +208,9 @@ class XmlSecConan(ConanFile):
         self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
         self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
-        self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}".format(tools.Version(self.version).major)
+        self.cpp_info.components["libxmlsec"].set_property(
+            "pkg_config_name", "xmlsec{}".format(tools.Version(self.version).major)
+        )
         if not self.options.shared:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
         if self.options.with_xslt:
@@ -215,4 +227,6 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["openssl"].libs = [get_libname("openssl")]
             self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
             self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
-            self.cpp_info.components["openssl"].names["pkg_config"] = "xmlsec{}-openssl".format(tools.Version(self.version).major)
+            self.cpp_info.components["openssl"].set_property(
+                "pkg_config_name", "xmlsec{}-openssl".format(tools.Version(self.version).major)
+            )
