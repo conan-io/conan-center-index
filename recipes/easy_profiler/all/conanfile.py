@@ -3,28 +3,28 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
     description = "Lightweight profiler library for c++"
     license = "MIT"
-    topics = ("conan", "easy_profiler")
+    topics = ("easy_profiler", "profiler")
     homepage = "https://github.com/yse/easy_profiler/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -34,6 +34,11 @@ class EasyProfilerConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -84,6 +89,8 @@ class EasyProfilerConan(ConanFile):
             for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
                                            "{}*.dll".format(dll_prefix))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"easy_profiler": "easy_profiler::easy_profiler"}
@@ -102,20 +109,12 @@ class EasyProfilerConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "easy_profiler"
-        self.cpp_info.names["cmake_find_package_multi"] = "easy_profiler"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "easy_profiler")
+        self.cpp_info.set_property("cmake_target_name", "easy_profiler")
         self.cpp_info.libs = ["easy_profiler"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
@@ -127,3 +126,7 @@ class EasyProfilerConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

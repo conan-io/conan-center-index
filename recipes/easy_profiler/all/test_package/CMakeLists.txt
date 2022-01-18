@@ -6,6 +6,6 @@ conan_basic_setup(TARGETS)
 
 find_package(easy_profiler REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} example.cpp)
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} easy_profiler)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
