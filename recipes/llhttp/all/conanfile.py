@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.43.0"
 
+
 class LlhttpParserConan(ConanFile):
     name = "llhttp"
     description = "http request/response parser for c "
@@ -11,7 +12,7 @@ class LlhttpParserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nodejs/llhttp"
     license = ("MIT",)
-    generators = "cmake",
+    generators = ("cmake",)
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -21,13 +22,17 @@ class LlhttpParserConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/*"
-    
+    exports_sources = "CMakeLists.txt", "patches/*"
+
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,21 +49,28 @@ class LlhttpParserConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True,
+        )
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE-MIT", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+        self.copy(
+            "LICENSE-MIT",
+            src=os.path.join(self.source_folder, self._source_subfolder),
+            dst="licenses",
+        )
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
@@ -67,9 +79,10 @@ class LlhttpParserConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "llhttp")
         self.cpp_info.set_property("cmake_target_name", "llhttp::llhttp")
         self.cpp_info.set_property("pkg_config_name", "libllhttp")
-        self.cpp_info.libs = ["llhttp"]
-        
-         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        suffix = "d" if self._is_msvc and self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["llhttp{}".format(suffix)]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "llhttp"
         self.cpp_info.names["cmake_find_package_multi"] = "llhttp"
         self.cpp_info.names["pkg_config"] = "libllhttp"
