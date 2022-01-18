@@ -60,4 +60,12 @@ class LlhttpParserConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "llhttp")
+        self.cpp_info.set_property("cmake_target_name", "llhttp::llhttp")
+        self.cpp_info.set_property("pkg_config_name", "libllhttp")
         self.cpp_info.libs = ["llhttp"]
+        
+         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "llhttp"
+        self.cpp_info.names["cmake_find_package_multi"] = "llhttp"
+        self.cpp_info.names["pkg_config"] = "libllhttp"
