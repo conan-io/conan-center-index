@@ -49,7 +49,7 @@ class FlannConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("lz4/1.9.2")
+        self.requires("lz4/1.9.3")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.0")
 
