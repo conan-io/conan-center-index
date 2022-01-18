@@ -63,7 +63,7 @@ class EastlConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("eabase/2.09.05")
+        self.requires("eabase/2.09.06")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
