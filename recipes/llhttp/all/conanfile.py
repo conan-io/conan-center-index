@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.43.0"
 
 class LlhttpParserConan(ConanFile):
     name = "llhttp"
