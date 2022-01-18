@@ -40,6 +40,18 @@ class RubyConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _is_win_build(self):
+        return self._settings_build.os == "Windows"
+
+    @property
+    def _is_msvc(self):
+        return self.settings.compiler in ["Visual Studio", "msvc"]
+
+    @property
+    def _windows_system_libs(self):
+        return ["user32", "advapi32", "shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("gmp/6.1.2")
@@ -48,7 +60,7 @@ class RubyConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._is_win_build and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def config_options(self):
@@ -70,6 +82,11 @@ class RubyConan(ConanFile):
         for m in re.finditer("-F (\S+)", td.vars().get("LDFLAGS")):
             if not os.path.exists(m[1]):
                 td.environment.remove("LDFLAGS", "-F {}".format(m[1]))
+        if self.settings.os == "Windows":
+            if self._is_msvc:
+                td.environment.append("LIBS", ["{}.lib".format(lib) for lib in self._windows_system_libs])
+            else:
+                td.environment.append("LDFLAGS", ["-l{}".format(lib) for lib in self._windows_system_libs])
         td.generate()
 
         tc = AutotoolsToolchain(self)
@@ -82,29 +99,36 @@ class RubyConan(ConanFile):
             apple_arch = to_apple_arch(self.settings.arch)
             if apple_arch:
                 tc.configure_args.append("--with-arch={}".format(apple_arch))
+        if self._is_msvc:
+            tc.cflags.append("-{}".format(self.settings.compiler.runtime))
+            if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
+                tc.ldflags.append("-debug")
         tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
 
-        # autoreconf
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
-                 win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
-
         at = Autotools(self)
-        at.configure(build_script_folder=self._source_subfolder)
-        at.make()
+
+        build_script_folder = self._source_subfolder
+        if self._is_win_build:
+            build_script_folder = os.path.join(build_script_folder, "win32")
+
+        with tools.vcvars(self):
+            at.configure(build_script_folder=build_script_folder)
+            at.make()
 
     def package(self):
         for file in ["COPYING", "BSDL"]:
             self.copy(file, dst="licenses", src=self._source_subfolder)
 
         at = Autotools(self)
-        if cross_building(self):
-            at.make(target="install-local")
-            at.make(target="install-arch")
-        else:
-            at.install()
+        with tools.vcvars(self):
+            if cross_building(self):
+                at.make(target="install-local")
+                at.make(target="install-arch")
+            else:
+                at.install()
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -128,7 +152,7 @@ class RubyConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             rubylib.system_libs = ["dl", "pthread", "rt", "m", "crypt"]
         elif self.settings.os == "Windows":
-            rubylib.system_libs = ["shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
+            rubylib.system_libs = self._windows_system_libs
         if str(self.settings.compiler) in ("clang", "apple-clang"):
             rubylib.cflags = ["-fdeclspec"]
             rubylib.cxxflags = ["-fdeclspec"]

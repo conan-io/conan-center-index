@@ -1,0 +1,13 @@
+diff --git a/ext/openssl/extconf.rb b/ext/openssl/extconf.rb
+--- ext/openssl/extconf.rb
++++ ext/openssl/extconf.rb
+@@ -45,8 +45,9 @@
+   if $mswin || $mingw
+     # required for static OpenSSL libraries
+     have_library("gdi32") # OpenSSL <= 1.0.2 (for RAND_screen())
+     have_library("crypt32")
++    have_library("advapi32")
+   end
+ 
+   return false unless have_header("openssl/ssl.h")
+ 
