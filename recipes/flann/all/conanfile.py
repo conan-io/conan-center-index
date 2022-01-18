@@ -16,12 +16,12 @@ class FlannConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_hdf5": [True, False],
+        "with_hdf5": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_hdf5": False,
+        "with_hdf5": "deprecated",
     }
 
     generators = "cmake", "cmake_find_package"
@@ -47,11 +47,14 @@ class FlannConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_hdf5 != "deprecated":
+            self.output.warn("with_hdf5 is a deprecated option. Do not use.")
 
     def requirements(self):
         self.requires("lz4/1.9.3")
-        if self.options.with_hdf5:
-            self.requires("hdf5/1.12.0")
+
+    def package_id(self):
+        del self.info.options.with_hdf5
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -135,8 +138,6 @@ class FlannConan(ConanFile):
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
         self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
-        if self.options.with_hdf5:
-            self.cpp_info.components["flann_cpp"].requires = ["hdf5::hdf5"]
 
         # flann
         flann_c_lib = "flann" if self.options.shared else "flann_s"
