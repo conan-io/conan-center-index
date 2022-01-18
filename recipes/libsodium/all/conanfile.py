@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibsodiumConan(ConanFile):
@@ -12,7 +12,8 @@ class LibsodiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://doc.libsodium.org/"
     topics = ("sodium", "libsodium", "encryption", "signature", "hashing")
-    settings = "os", "compiler", "arch", "build_type"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,7 +27,6 @@ class LibsodiumConan(ConanFile):
         "PIE": False,
     }
 
-    exports_sources = "patches/*"
     short_paths = True
 
     _autotools = None
@@ -40,16 +40,21 @@ class LibsodiumConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_vc_static_runtime(self):
+        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
+
+    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
-    @property
-    def _msvc_sln_folder(self):
-        return {
-            "14": "vs2015",
-            "15": "vs2017",
-            "16": "vs2019",
-        }.get(str(self.settings.compiler.version), None)
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,14 +67,11 @@ class LibsodiumConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.options.shared and "MT" in self.settings.compiler.runtime:
-                raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with MT(d) runtime")
-            if not self._msvc_sln_folder:
-                raise ConanInvalidConfiguration("Unsupported Visual Studio version: {}".format(self.settings.compiler.version))
+        if self._is_msvc and self.options.shared and self._is_vc_static_runtime:
+            raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._is_msvc:
             if self._is_mingw:
                 self.build_requires("libtool/2.4.6")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -79,14 +81,35 @@ class LibsodiumConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @property
+    def _msvc_sln_folder(self):
+        if self.settings.compiler == "Visual Studio":
+            folder = {
+                "10": "vs2010",
+                "11": "vs2012",
+                "12": "vs2013",
+                "14": "vs2015",
+                "15": "vs2017",
+                "16": "vs2019",
+            }
+        else:
+            folder = {
+                "190": "vs2015",
+                "191": "vs2017",
+                "192": "vs2019",
+            }
+        folder.get(str(self.settings.compiler.version))
+
     def _build_msvc(self):
-        sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._msvc_sln_folder, "libsodium.sln")
+        msvc_sln_folder = self._msvc_sln_folder or "vs2019"
+        upgrade_project = self._msvc_sln_folder is None
+        sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", msvc_sln_folder, "libsodium.sln")
         build_type = "{}{}".format(
             "Dyn" if self.options.shared else "Static",
             "Debug" if self.settings.build_type == "Debug" else "Release",
         )
         msbuild = MSBuild(self)
-        msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=build_type)
+        msbuild.build(sln_path, upgrade_project=upgrade_project, platforms={"x86": "Win32"}, build_type=build_type)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -115,7 +138,7 @@ class LibsodiumConan(ConanFile):
             tools.patch(**patch)
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_msvc()
         else:
             if self._is_mingw:
@@ -125,7 +148,7 @@ class LibsodiumConan(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.copy("*.lib", dst="lib", keep_path=False)
             self.copy("*.dll", dst="bin", keep_path=False)
             inc_src = os.path.join(self._source_subfolder, "src", self.name, "include")
@@ -133,13 +156,12 @@ class LibsodiumConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libsodium"
-        self.cpp_info.libs = ["{}sodium".format("lib" if self.settings.compiler == "Visual Studio" else "")]
+        self.cpp_info.set_property("pkg_config_name", "libsodium")
+        self.cpp_info.libs = ["{}sodium".format("lib" if self._is_msvc else "")]
         if not self.options.shared:
             self.cpp_info.defines = ["SODIUM_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):
