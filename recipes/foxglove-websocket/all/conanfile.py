@@ -13,7 +13,7 @@ class FoxgloveWebSocketConan(ConanFile):
 
     settings = ("os", "compiler", "build_type", "arch")
     requires = ("nlohmann_json/3.10.5", "websocketpp/0.8.2")
-    generators = "cmake"
+    generators = ("cmake", "cmake_find_package")
 
     _source_root = "source_root"
     _source_package_path = os.path.join(_source_root, "cpp", "foxglove-websocket")
