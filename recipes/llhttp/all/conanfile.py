@@ -5,7 +5,7 @@ import os
 class LlhttpParserConan(ConanFile):
     name = "llhttp"
     description = "http request/response parser for c "
-    topics = ("conan", "http", "parser")
+    topics = ("http", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nodejs/llhttp"
     license = ("MIT",)
