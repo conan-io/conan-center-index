@@ -6,7 +6,7 @@ import glob
 required_conan_version = ">=1.43.0"
 
 
-class ConanFile(ConanFile):
+class LibpqConan(ConanFile):
     name = "libpq"
     description = "The library used by all the standard PostgreSQL tools."
     topics = ("libpq", "postgresql", "database", "db")
@@ -250,8 +250,6 @@ class ConanFile(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
 
         self.env_info.PostgreSQL_ROOT = self.package_folder
-
-        self.cpp_info.components["pq"].defines.append["foo"]
 
         self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
 
