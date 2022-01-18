@@ -7,7 +7,7 @@ class rpclibConan(ConanFile):
     name = "rpclib"
     description = "A modern C++ msgpack-RPC server and client library."
     license = "MIT"
-    topics = ("conan", "rpc", "rpclib")
+    topics = ("rpc", "rpclib", "ipc")
     homepage = "https://github.com/rpclib/rpclib/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -43,8 +43,7 @@ class rpclibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = self.name + "-" + self.version
-        print(extracted_dir)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
