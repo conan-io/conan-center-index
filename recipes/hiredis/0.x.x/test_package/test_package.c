@@ -1,13 +1,11 @@
-#include <stdlib.h>
-#include <iostream>
-
 #include <hiredis/hiredis.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 
 int main()
 {
-    std::cout << "hiredis version: " << HIREDIS_MAJOR << "."
-              << HIREDIS_MINOR << "."
-              << HIREDIS_PATCH << std::endl;
+    printf("hiredis version: %i.%i.%i\n", HIREDIS_MAJOR, HIREDIS_MINOR, HIREDIS_PATCH);
 
     const char *hostname = "127.0.0.1";
     int port = 6379;
