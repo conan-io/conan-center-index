@@ -114,3 +114,6 @@ class Iir1Conan(ConanFile):
 
         self.cpp_info.components["iir"].libs = [name]
 
+        if self.options.noexceptions:
+            self.cpp_info.components["iir"].defines.append("IIR1_NO_EXCEPTIONS")
+
