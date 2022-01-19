@@ -1,15 +1,4 @@
-From a7cc2e231fb6471b2ffc57574114fe894f148455 Mon Sep 17 00:00:00 2001
-From: Marian Klymov <nekto1989@gmail.com>
-Date: Sun, 5 Dec 2021 15:11:33 +0200
-Subject: [PATCH] Add gklib system cmake
-
----
- GKlib/GKlibSystem.cmake           | 133 ++++++++++++++++++++++++++++++
- GKlib/conf/check_thread_storage.c |   5 ++
- 2 files changed, 138 insertions(+)
- create mode 100644 GKlib/GKlibSystem.cmake
- create mode 100644 GKlib/conf/check_thread_storage.c
-
+Add gklib system cmake
 diff --git a/GKlib/GKlibSystem.cmake b/GKlib/GKlibSystem.cmake
 new file mode 100644
 index 0000000..c996fad
