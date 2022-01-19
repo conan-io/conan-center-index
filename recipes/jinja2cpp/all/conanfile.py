@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -95,11 +96,8 @@ class Jinja2cppConan(ConanFile):
         self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         if self._is_msvc:
             # Runtime type configuration for Jinja2C++ should be strictly '/MT' or '/MD'
-            if self.settings.compiler == "Visual Studio":
-                runtime = "MT" if "MT" in self.settings.compiler.runtime else "MD"
-            else:
-                runtime = "MT" if self.settings.compiler.runtime == "static" else "MD"
-            self._cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = "/" + runtime
+            runtime = "/MD" if "MD" in msvc_runtime_flag(self) else "/MT"
+            self._cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = runtime
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
