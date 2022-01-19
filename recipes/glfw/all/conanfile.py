@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 import os
 import textwrap
@@ -33,6 +34,10 @@ class GlfwConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -85,8 +90,8 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             self._cmake.definitions["GLFW_INSTALL"] = True
             self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
+            if self._is_msvc:
+                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
             self._cmake.configure()
         return self._cmake
 
@@ -129,7 +134,7 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             libname += "dll"
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
