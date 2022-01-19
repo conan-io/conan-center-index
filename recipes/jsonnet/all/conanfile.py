@@ -85,10 +85,7 @@ class JsonnetConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        prefix = ""
-        # prefix = "" if self.options.shared else "_static"
-
-        self.cpp_info.components["libjsonnet"].libs = ["jsonnet{}".format(prefix)]
+        self.cpp_info.components["libjsonnet"].libs = ["jsonnet"]
         self.cpp_info.components["libjsonnet"].requires = ["nlohmann_json::nlohmann_json"]
         if tools.Version(self.version) >= "0.18.0":
             self.cpp_info.components["libjsonnet"].requires.append("rapidyaml::rapidyaml")
@@ -98,5 +95,5 @@ class JsonnetConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libjsonnet"].system_libs.append("m")
 
-        self.cpp_info.components["libjsonnetpp"].libs = ["jsonnet++{}".format(prefix)]
+        self.cpp_info.components["libjsonnetpp"].libs = ["jsonnet++"]
         self.cpp_info.components["libjsonnetpp"].requires = ["libjsonnet"]
