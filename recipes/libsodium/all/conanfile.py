@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -44,11 +45,6 @@ class LibsodiumConan(ConanFile):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
-
-    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
@@ -67,7 +63,7 @@ class LibsodiumConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self._is_msvc and self.options.shared and self._is_vc_static_runtime:
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
 
     def build_requirements(self):
