@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -52,11 +53,6 @@ class ceressolverConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -139,7 +135,7 @@ class ceressolverConan(ConanFile):
             self._cmake.definitions["CXX11"] = self.options.use_CXX11
         self._cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         if self._is_msvc:
-            self._cmake.definitions["MSVC_USE_STATIC_CRT"] = self._is_vc_static_runtime
+            self._cmake.definitions["MSVC_USE_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         self._cmake.configure()
         return self._cmake
 
