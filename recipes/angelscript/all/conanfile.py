@@ -39,6 +39,10 @@ class AngelScriptConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -82,7 +86,7 @@ class AngelScriptConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Angelscript")
         self.cpp_info.set_property("cmake_target_name", "Angelscript::angelscript")
-        postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
+        postfix = "d" if self._is_msvc and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_angelscript"].libs = ["angelscript" + postfix]
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
