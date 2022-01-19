@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -47,11 +48,6 @@ class Exiv2Conan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_vc_dynamic_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MD" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "dynamic")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -108,7 +104,7 @@ class Exiv2Conan(ConanFile):
         self._cmake.definitions["EXIV2_ENABLE_CURL"] = self.options.with_curl
         self._cmake.definitions["EXIV2_ENABLE_SSH"] = False
         if self._is_msvc:
-            self._cmake.definitions["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = self._is_vc_dynamic_runtime
+            self._cmake.definitions["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = "MD" in msvc_runtime_flag(self)
         # set PIC manually because of object target exiv2_int
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
