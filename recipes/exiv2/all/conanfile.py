@@ -75,9 +75,9 @@ class Exiv2Conan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_xmp == "bundled":
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.3")
         if self.options.with_curl:
-            self.requires("libcurl/7.64.1")
+            self.requires("libcurl/7.80.0")
 
     def validate(self):
         if self.options.with_xmp == "external":
