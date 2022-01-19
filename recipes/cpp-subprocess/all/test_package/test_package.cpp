@@ -1,4 +1,4 @@
-#include <subprocess.hpp>
+#include <cpp-subprocess/subprocess.hpp>
 
 int main() {
   using namespace subprocess;

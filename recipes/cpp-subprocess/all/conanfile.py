@@ -19,7 +19,7 @@ class CppSubprocess(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("subprocess.hpp", dst="include", src=self._source_subfolder)
+        self.copy("subprocess.hpp", dst="include/cpp-subprocess", src=self._source_subfolder)
         self.copy("LICENSE.MIT", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
