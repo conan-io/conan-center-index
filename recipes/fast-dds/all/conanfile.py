@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -36,11 +37,6 @@ class FastDDSConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
 
     @property
     def _minimum_cpp_standard(self):
@@ -88,7 +84,7 @@ class FastDDSConan(ConanFile):
                     self.settings.compiler, self.settings.compiler.version
                 )
             )
-        if self.options.shared and self._is_msvc and self._is_vc_static_runtime:
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             # This combination leads to an fast-dds error when linking
             # linking dynamic '*.dll' and static MT runtime
             raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
