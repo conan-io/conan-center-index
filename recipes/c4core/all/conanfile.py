@@ -44,7 +44,7 @@ class C4CoreConan(ConanFile):
 
         ## apple-clang <= 12.0 is not supported. It is already fixed at 2022-01-03.
         if tools.Version(self.version) <= "0.1.8":
-            if (self.settings.compiler == "clang" and self.compiler.libcxx == "libc++"):
+            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"):
                 raise ConanInvalidConfiguration(self, "{}/{} doesn't support clang with libc++".format(self.name, self.version))
             if (self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) <= "12.0"):
                 raise ConanInvalidConfiguration(self, "{}/{} doesn't support Apple clang <= 12.0".format(self.name, self.version))
