@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -57,11 +58,6 @@ class OpenCVConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -97,7 +93,7 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
 
     def validate(self):
-        if self._is_msvc and self._is_vc_static_runtime and self.options.shared:
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
 
     def source(self):
@@ -189,7 +185,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
 
         if self._is_msvc:
-            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = self._is_vc_static_runtime
+            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake

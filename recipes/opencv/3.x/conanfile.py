@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -67,11 +68,6 @@ class OpenCVConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -116,7 +112,7 @@ class OpenCVConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd") and self.options.with_openexr:
             tools.check_min_cppstd(self, 11)
-        if self._is_msvc and self._is_vc_static_runtime and self.options.shared:
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x cannot build OpenCV 3.x due an internal bug.")
@@ -257,7 +253,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
 
         if self._is_msvc:
-            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = self._is_vc_static_runtime
+            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
