@@ -123,9 +123,7 @@ class freeglutConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["freeglut_"].libs = tools.collect_libs(self)
-        self.cpp_info.components["freeglut_"].requires.extend(["opengl::opengl", "glu::glu"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
             self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])
         elif self.settings.os == "Windows":
             if not self.options.shared:
@@ -142,3 +140,6 @@ class freeglutConan(ConanFile):
         self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = config_target
         self.cpp_info.components["freeglut_"].set_property("cmake_target_name", "FreeGLUT::{}".format(config_target))
         self.cpp_info.components["freeglut_"].set_property("pkg_config_name", pkg_config)
+        self.cpp_info.components["freeglut_"].requires.extend(["opengl::opengl", "glu::glu"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
