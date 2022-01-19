@@ -39,6 +39,11 @@ class SignalrQtConan(ConanFile):
 
         tools.patch(base_path=self._source_subfolder, patch_file="patches/fix_build_deps.patch", strip=1)
 
+        # We apply this patch to set the target of this library to dll explicitly.
+        # Yet we can't use qmake *.pro -after "CONFIG += dll" for this will affect for all sub projects
+        # which are statically linked to SignalRClient.dll.
+        tools.patch(base_path=self._source_subfolder, patch_file="patches/switch_to_dll_target.patch", strip=1)
+
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
