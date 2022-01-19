@@ -88,6 +88,8 @@ class METISConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["metis"]
         self.cpp_info.requires.append("gklib::gklib")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         if self._is_msvc or self._is_mingw:
             self.cpp_info.defines.append("USE_GKREGEX")
         if self._is_msvc:
