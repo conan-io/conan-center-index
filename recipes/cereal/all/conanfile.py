@@ -34,9 +34,16 @@ class CerealConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = CMake(self)
         cmake.definitions["JUST_INSTALL_CEREAL"] = True
+        cmake.definitions["CEREAL_INSTALL"] = True
         cmake.configure()
         cmake.install()
+
+        # The "share" folder was being removed up to and including version 1.3.0.
+        # The module files were moved to lib/cmake from 1.3.1 on, so now removing both
+        # as to avoid breaking versions < 1.3.1
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_subfolder, self._module_file),
             {"cereal": "cereal::cereal"}
