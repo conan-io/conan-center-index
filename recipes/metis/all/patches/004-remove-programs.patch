@@ -1,0 +1,9 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index be082ff..4a4aef3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -44,4 +44,3 @@ endif ()
+ 
+ # Recursively look for CMakeLists.txt in subdirs.
+ add_subdirectory("libmetis")
+-add_subdirectory("programs")
