@@ -26,6 +26,7 @@ class grpcConan(ConanFile):
         "php_plugin": [True, False],
         "python_plugin": [True, False],
         "ruby_plugin": [True, False],
+        "secure": [True, False]
     }
     default_options = {
         "fPIC": True,
@@ -38,6 +39,7 @@ class grpcConan(ConanFile):
         "php_plugin": True,
         "python_plugin": True,
         "ruby_plugin": True,
+        "secure": False,
     }
 
     short_paths = True
@@ -211,13 +213,14 @@ class grpcConan(ConanFile):
         self.cpp_info.components["_grpc"].libs = ["grpc"]
 
         # gRPC::grpc_unsecure
-        self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
-        self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
-        self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
-        self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
-        self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
+        if not self.options.secure:
+            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
+            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
+            self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
+            self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
+            self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
 
         # gRPC::grpc++
         self.cpp_info.components["grpc++"].names["cmake_find_package"] = "grpc++"
@@ -250,11 +253,12 @@ class grpcConan(ConanFile):
         self.cpp_info.components["grpc++_reflection"].libs = ["grpc++_reflection"]
 
         # gRPC::grpc++_unsecure
-        self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package"] = "grpc++_unsecure"
-        self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package_multi"] = "grpc++_unsecure"
-        self.cpp_info.components["grpc++_unsecure"].requires = ["protobuf::libprotobuf", "grpc_unsecure"]
-        self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
-        self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
+        if not self.options.secure:
+            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package"] = "grpc++_unsecure"
+            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package_multi"] = "grpc++_unsecure"
+            self.cpp_info.components["grpc++_unsecure"].requires = ["protobuf::libprotobuf", "grpc_unsecure"]
+            self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
+            self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
 
         # gRPC::grpcpp_channelz
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package"] = "grpcpp_channelz"
