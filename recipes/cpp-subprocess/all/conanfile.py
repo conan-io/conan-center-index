@@ -10,8 +10,6 @@ class CppSubprocess(ConanFile):
     description = ("Subprocessing with modern C++, "
                    "The only goal was to develop something that is as close as"
                    "python subprocess module in dealing with processes.")
-    # No settings/options are necessary, this is header only
-    exports_sources = "subprocess.hpp"
     no_copy_source = True
 
     _source_subfolder = 'cpp-subprocess'
