@@ -11,6 +11,7 @@ class CppSubprocess(ConanFile):
                    "The only goal was to develop something that is as close as"
                    "python subprocess module in dealing with processes.")
     no_copy_source = True
+    settings = "os", "arch", "compiler", "build_type"
 
     _source_subfolder = 'cpp-subprocess'
 
