@@ -111,11 +111,14 @@ class freeglutConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        target = "freeglut" if self.options.shared else "freeglut_static"
+        config_target = "freeglut" if self.options.shared else "freeglut_static"
         pkg_config = "freeglut" if self.settings.os == "Windows" else "glut"
 
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "GLUT")
+        self.cpp_info.set_property("cmake_module_target_name", "GLUT::GLUT")
         self.cpp_info.set_property("cmake_file_name", "FreeGLUT")
-        self.cpp_info.set_property("cmake_target_name", "FreeGLUT::{}".format(target))
+        self.cpp_info.set_property("cmake_target_name", "FreeGLUT::{}".format(config_target))
         self.cpp_info.set_property("pkg_config_name", pkg_config)
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
@@ -131,10 +134,11 @@ class freeglutConan(ConanFile):
             self.cpp_info.components["freeglut_"].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "FreeGLUT"
+        self.cpp_info.names["cmake_find_package"] = "GLUT"
         self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
         self.cpp_info.names["pkg_config"] = pkg_config
-        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = target
-        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["freeglut_"].set_property("cmake_target_name", "FreeGLUT::{}".format(target))
+        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = "GLUT"
+        self.cpp_info.components["freeglut_"].set_property("cmake_module_target_name", "GLUT::GLUT")
+        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = config_target
+        self.cpp_info.components["freeglut_"].set_property("cmake_target_name", "FreeGLUT::{}".format(config_target))
         self.cpp_info.components["freeglut_"].set_property("pkg_config_name", pkg_config)
