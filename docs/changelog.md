@@ -1,5 +1,9 @@
 # Changelog
 
+### 18-January-2022 - 16:49 CET
+
+- [config] Bump Conan client version to 1.43.3.
+
 ### 29-December-2021 - 16:41 CET
 
 - [config] Add Linux GCC 11, Clang 12 & 13 configurations with new epoch feature.
