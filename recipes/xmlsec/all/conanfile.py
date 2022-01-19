@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
@@ -38,16 +39,6 @@ class XmlSecConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _vc_runtime(self):
-        if self.settings.compiler == "Visual Studio":
-            return self.settings.compiler.runtime
-        else:
-            return "M{}{}".format(
-                "T" if self.settings.compiler.runtime == "static" else "D",
-                "d" if self.settings.compiler.runtime_type == "Debug" else "",
-            )
 
     @property
     def _settings_build(self):
@@ -103,7 +94,7 @@ class XmlSecConan(ConanFile):
                 "cscript",
                 "configure.js",
                 "prefix={}".format(self.package_folder),
-                "cruntime=/{}".format(self._vc_runtime),
+                "cruntime=/{}".format(msvc_runtime_flag(self)),
                 "debug={}".format(yes_no(self.settings.build_type == "Debug")),
                 "static={}".format(yes_no(not self.options.shared)),
                 "include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)),
