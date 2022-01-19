@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 
 
 class CppSubprocess(ConanFile):
-    name = "cpp-subprocess"
+    name = "nextsilicon-cpp-subprocess"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nextsilicon/cpp-subprocess#readme"
