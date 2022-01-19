@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -36,11 +37,6 @@ class FastCDRConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,7 +48,7 @@ class FastCDRConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if self._is_msvc and self.options.shared and self._is_vc_static_runtime:
+        if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
             # This combination leads to an fast-cdr error when linking
             # linking dynamic '*.dll' and static MT runtime
             # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
