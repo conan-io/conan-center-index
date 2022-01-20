@@ -584,8 +584,16 @@ class BoostConan(ConanFile):
         obtain value of python variable, either by sysconfig, or by distutils.sysconfig
         :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
         :return: value of python sysconfig variable
+
+        NOTE: distutils is deprecated and breaks the recipe since Python 3.10
         """
-        return self._get_python_sc_var(name) or self._get_python_du_var(name)
+        python_version_parts = self.info.options.python_version.split('.')
+        python_major = int(python_version_parts[0])
+        python_minor = int(python_version_parts[1])
+        if(python_major >= 3 and python_minor >= 10):
+            return self._get_python_sc_var(name)
+        else:
+            return self._get_python_sc_var(name) or self._get_python_du_var(name)
 
     def _detect_python_version(self):
         """

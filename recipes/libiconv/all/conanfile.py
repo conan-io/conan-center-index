@@ -2,7 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibiconvConan(ConanFile):
@@ -12,10 +12,16 @@ class LibiconvConan(ConanFile):
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion")
     license = "LGPL-2.1"
-    exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _autotools = None
 
@@ -29,7 +35,11 @@ class LibiconvConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -107,7 +117,8 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
+        if (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12") or \
+           self.settings.compiler == "msvc":
             self._autotools.flags.append("-FS")
 
         self._autotools.configure(args=configure_args, host=host, build=build)
@@ -138,8 +149,13 @@ class LibiconvConan(ConanFile):
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Iconv")
+        self.cpp_info.set_property("cmake_target_name", "Iconv::Iconv")
+
         self.cpp_info.names["cmake_find_package"] = "Iconv"
         self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
+
         self.cpp_info.libs = ["iconv", "charset"]
 
         binpath = os.path.join(self.package_folder, "bin")

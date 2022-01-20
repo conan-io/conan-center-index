@@ -9,4 +9,3 @@ find_package(Fontconfig REQUIRED)
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} Fontconfig::Fontconfig)
 set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
-

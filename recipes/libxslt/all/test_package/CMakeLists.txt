@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(libxslt_tutorial)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+
+find_package(LibXslt REQUIRED)
 
 add_executable(${PROJECT_NAME} libxslt_tutorial.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} LibXslt::LibXslt)
