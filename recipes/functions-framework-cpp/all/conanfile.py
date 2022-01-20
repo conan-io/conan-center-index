@@ -45,9 +45,9 @@ class FunctionsFrameworkCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("abseil/20210324.2")
-        self.requires("boost/1.77.0")
-        self.requires("nlohmann_json/3.10.2")
+        self.requires("abseil/20211102.0")
+        self.requires("boost/1.78.0")
+        self.requires("nlohmann_json/3.10.5")
 
     @property
     def _compilers_minimum_version(self):
