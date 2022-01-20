@@ -124,7 +124,7 @@ class SDLConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.settings.os == "Linux":
             if self.options.alsa:
-                self.requires("libalsa/1.2.4")
+                self.requires("libalsa/1.2.5.1")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
             if self.options.sndio:
@@ -138,8 +138,8 @@ class SDLConan(ConanFile):
             if self.options.esd:
                 raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
             if self.options.wayland:
-                self.requires("wayland/1.19.0")
-                self.requires("xkbcommon/1.3.0")
+                self.requires("wayland/1.20.0")
+                self.requires("xkbcommon/1.3.1")
                 self.requires("egl/system")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
