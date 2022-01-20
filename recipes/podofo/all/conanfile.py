@@ -12,7 +12,7 @@ class PodofoConan(ConanFile):
     description = "PoDoFo is a library to work with the PDF file format."
     topics = ("PDF", "PoDoFo", "podofo")
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,7 +36,6 @@ class PodofoConan(ConanFile):
         "with_unistring": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -47,6 +46,11 @@ class PodofoConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -123,6 +127,7 @@ class PodofoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libpodofo-{}".format(tools.Version(self.version).major))
         self.cpp_info.names["pkg_config"] = "libpodofo-{}".format(tools.Version(self.version).major)
         self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Windows" and self.options.shared:
