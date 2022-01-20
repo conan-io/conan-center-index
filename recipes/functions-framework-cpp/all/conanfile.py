@@ -126,6 +126,12 @@ class FunctionsFrameworkCppConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "functions_framework_cpp")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["framework"].libs = ["functions_framework_cpp"]
+        self.cpp_info.components["framework"].requires = [
+            "abseil::absl_time",
+            "boost::headers",
+            "boost::program_options",
+            "nlohmann_json::nlohmann_json",
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["framework"].system_libs.append("pthread")
 
@@ -135,9 +141,3 @@ class FunctionsFrameworkCppConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "functions_framework_cpp"
         self.cpp_info.components["framework"].set_property("cmake_target_name", "functions-framework-cpp::framework")
         self.cpp_info.components["framework"].set_property("pkg_config_name", "functions_framework_cpp")
-        self.cpp_info.components["framework"].requires = [
-            "abseil::absl_time",
-            "boost::headers",
-            "boost::program_options",
-            "nlohmann_json::nlohmann_json",
-        ]
