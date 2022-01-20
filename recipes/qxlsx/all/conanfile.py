@@ -56,7 +56,8 @@ class QXlsxConan(ConanFile):
         self.copy("*.a", dst="lib", src="lib")
         self.copy("*.dylib", dst="bin", src="lib")
         self.copy("*.dylib", dst="lib", src="lib")
-        self.copy("*.dll", dst="bin", src="lib")
+        self.copy("*.lib", dst="lib", src="lib")
+        self.copy("*.dll", dst="bin", src="bin")
         self.copy("*.so", dst="lib", src="lib")
 
     def package_info(self):
