@@ -1,8 +1,6 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.files import apply_conandata_patches
-from conan.tools.layout import cmake_layout
 
 required_conan_version = ">=1.43.0"
 
@@ -24,6 +22,16 @@ class GKlibConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    generators = "cmake"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _is_msvc(self):
@@ -34,6 +42,7 @@ class GKlibConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
+        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -52,32 +61,30 @@ class GKlibConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} shared not supported with Visual Studio")
 
-    def layout(self):
-        cmake_layout(self)
-        self.folders.source = "{}-{}".format(self.name, self.version)
-
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.folders.source
-        )
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["ASSERT"] = self.settings.build_type == "Debug"
-        toolchain.variables["ASSERT2"] = self.settings.build_type == "Debug"
-        toolchain.generate()
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["ASSERT"] = self.settings.build_type == "Debug"
+            self._cmake.definitions["ASSERT2"] = self.settings.build_type == "Debug"
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
-        apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
+        self._patch_sources()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        CMake(self).install()
-        self.copy("LICENSE.txt", dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.libs = ["GKlib"]
