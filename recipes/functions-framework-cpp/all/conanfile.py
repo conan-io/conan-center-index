@@ -62,7 +62,25 @@ class FunctionsFrameworkCppConan(ConanFile):
             "apple-clang": "11",
         }
 
+    @property
+    def _required_boost_components(self):
+        return ["program_options"]
+
     def validate(self):
+        miss_boost_required_comp = any(
+            getattr(
+                self.options["boost"],
+                "without_{}".format(boost_comp),
+                True,
+            ) for boost_comp in self._required_boost_components,
+        )
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                "{0} requires non-header-only boost with these components: {1}".format(
+                    self.name, ", ".join(self._required_boost_components)
+                )
+            )
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
