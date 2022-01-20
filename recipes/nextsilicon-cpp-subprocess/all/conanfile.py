@@ -5,7 +5,7 @@ class CppSubprocess(ConanFile):
     name = "nextsilicon-cpp-subprocess"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/nextsilicon/cpp-subprocess#readme"
+    homepage = "https://github.com/nextsilicon/cpp-subprocess"
     topics = ("subprocess", "os", "fork")
     description = ("Subprocessing with modern C++, "
                    "The only goal was to develop something that is as close as"
