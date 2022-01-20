@@ -1,4 +1,10 @@
 sources:
   "0.3.1":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.3.1.tar.gz"
-    sha256: "ae2367d0a393be59e137ffa975f48f60b113b2a72aacc24fbc59afa0cbc3a511"
+    - url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.3.1.tar.gz"
+      sha256: "ae2367d0a393be59e137ffa975f48f60b113b2a72aacc24fbc59afa0cbc3a511"
+    - url: "https://github.com/duckdb/duckdb/releases/download/v0.3.1/libduckdb-src.zip"
+      sha256: "0a6acb62a13435fa5fe0928fba53ca1355ccf35a1d357c1a769b3d798564f17d"
+patches:
+  "0.3.1":
+    - patch_file: "patches/001-fix-cmake-targets.patch"
+      base_path: "source_subfolder"
