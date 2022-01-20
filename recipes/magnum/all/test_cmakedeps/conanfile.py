@@ -11,7 +11,7 @@ required_conan_version = ">=1.43.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "VirtualRunEnv"
 
     @property
     def _executables(self):
@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
         for exec in self._executables:
             tc.variables["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
         tc.variables["IMPORTER_PLUGINS_FOLDER"] = os.path.join(self.deps_user_info["magnum"].plugins_basepath, "importers").replace("\\", "/")
-        tc.variables["OBJ_FILE"] = os.path.join(self.folders.source, "triangleMesh.obj").replace("\\", "/")
+        tc.variables["OBJ_FILE"] =  os.path.join("..", "..", "test_package", "triangleMesh.obj").replace("\\", "/")
         tc.variables["SHARED_PLUGINS"] = self.options["magnum"].shared_plugins
         tc.generate()
 
@@ -52,7 +52,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools_cross_building(self):
             for exec in self._executables:
-                self.run("magnum-{} --help".format(exec), run_environment=True)
+                self.run("magnum-{} --help".format(exec), env="conanrun")
 
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run(bin_path, env="conanrun")
