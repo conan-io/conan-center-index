@@ -47,6 +47,10 @@ class PodofoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -55,7 +59,7 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             # libunistring recipe raises for Visual Studio
             # TODO: Enable again when fixed?
             self.options.with_unistring = False
