@@ -6,6 +6,6 @@ sources:
   "cci.20211015":
     url: "https://github.com/sony/nmos-cpp/archive/d115866f8f1d2c1c55bb64d05d34aa7d61c039e3.tar.gz"
     sha256: "74e48497d6d7cc76a97b5a6331f88a58b2c96ce2f24b78176d3631051caceb6a"
-  "cci.20220119":
-    url: "https://github.com/sony/nmos-cpp/archive/06cb14aaff000b64c872999ce7954c7b3c753c63.tar.gz"
-    sha256: "56701326884d114b087bc44d4cfc378da9aff2884c907768400ac2acafd10617"
+  "cci.20220120":
+    url: "https://github.com/sony/nmos-cpp/archive/46750381f33d19ce6b12a2f760db2f2f5faf2818.tar.gz"
+    sha256: "cd6fd81b1a5a10fd0a917fec362aae517a72f13889ec4418c29beb3ec8996df7"
