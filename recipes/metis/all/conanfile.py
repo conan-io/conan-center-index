@@ -1,7 +1,5 @@
-from conans import ConanFile, tools
-from conan.tools.cmake import CMakeToolchain, CMake
+from conans import ConanFile, CMake, tools
 from conan.tools.files import apply_conandata_patches
-from conan.tools.layout import cmake_layout
 import os
 
 required_conan_version = ">=1.43.0"
@@ -25,8 +23,16 @@ class METISConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = ["patches/**"]
-    generators = "CMakeDeps"
+    generators = "cmake", "cmake_find_package"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _is_msvc(self):
@@ -37,6 +43,7 @@ class METISConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
+        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -50,40 +57,38 @@ class METISConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def layout(self):
-        cmake_layout(self)
-        self.folders.source = "{}-{}".format(self.name, self.version)
-
     def requirements(self):
         self.requires("gklib/5.1.1")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.folders.source
-        )
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["SHARED"] = self.options.shared
-        toolchain.variables["METIS_INSTALL"] = True
-        toolchain.variables["ASSERT"] = self.settings.build_type == "Debug"
-        toolchain.variables["ASSERT2"] = self.settings.build_type == "Debug"
-        toolchain.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-        toolchain.variables["METIS_IDX64"] = True
-        toolchain.variables["METIS_REAL64"] = True
-        toolchain.generate()
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["SHARED"] = self.options.shared
+            self._cmake.definitions["METIS_INSTALL"] = True
+            self._cmake.definitions["ASSERT"] = self.settings.build_type == "Debug"
+            self._cmake.definitions["ASSERT2"] = self.settings.build_type == "Debug"
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+            self._cmake.definitions["METIS_IDX64"] = True
+            self._cmake.definitions["METIS_REAL64"] = True
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
-        apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
+        self._patch_sources()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        CMake(self).install()
-        self.copy("LICENSE", dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.libs = ["metis"]

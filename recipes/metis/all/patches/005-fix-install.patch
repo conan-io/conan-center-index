@@ -1,5 +1,4 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4a4aef3..8e28c15 100644
+Always install and fix runtime destination
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,11 +4,7 @@ project(METIS C)

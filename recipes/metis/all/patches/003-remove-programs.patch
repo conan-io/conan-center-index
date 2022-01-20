@@ -1,5 +1,4 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index be082ff..4a4aef3 100644
+Do not build programs
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -44,4 +44,3 @@ endif ()

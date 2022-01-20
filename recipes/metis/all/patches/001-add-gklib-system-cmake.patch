@@ -1,7 +1,4 @@
 Add gklib system cmake
-diff --git a/GKlib/GKlibSystem.cmake b/GKlib/GKlibSystem.cmake
-new file mode 100644
-index 0000000..c996fad
 --- /dev/null
 +++ b/GKlib/GKlibSystem.cmake
 @@ -0,0 +1,133 @@

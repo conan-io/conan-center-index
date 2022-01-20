@@ -1,3 +1,4 @@
+find gklib from conan
 --- a/libmetis/CMakeLists.txt
 +++ b/libmetis/CMakeLists.txt
 @@ -3,9 +3,11 @@ include_directories(.)
@@ -6,7 +7,7 @@
  # Build libmetis.
 -add_library(metis ${METIS_LIBRARY_TYPE} ${GKlib_sources} ${metis_sources})
 +add_library(metis ${METIS_LIBRARY_TYPE} ${metis_sources})
-+find_package(GKlib REQUIRED CONFIG)
++find_package(GKlib REQUIRED)
 +target_link_libraries(metis PRIVATE GKlib::GKlib)
  if(UNIX)
 -  target_link_libraries(metis m)
