@@ -51,6 +51,10 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
+            # libunistring recipe raises for Visual Studio
+            # TODO: Enable again when fixed?
+            self.options.with_unistring = False
 
     def configure(self):
         if self.options.shared:
