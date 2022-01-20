@@ -1,30 +1,40 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FunctionsFrameworkCppConan(ConanFile):
     name = "functions-framework-cpp"
     description = "An open source FaaS (Functions as a Service) framework"
     license = "Apache-2.0"
-    topics = "google", "cloud", "functions-as-a-service", "faas-framework"
+    topics = ("google", "cloud", "functions-as-a-service", "faas-framework")
     homepage = "https://github.com/GoogleCloudPlatform/functions-framework-cpp"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
     short_paths = True
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.os) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,6 +43,11 @@ class FunctionsFrameworkCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("abseil/20210324.2")
+        self.requires("boost/1.77.0")
+        self.requires("nlohmann_json/3.10.2")
 
     @property
     def _compilers_minimum_version(self):
@@ -44,7 +59,7 @@ class FunctionsFrameworkCppConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False
@@ -63,8 +78,8 @@ class FunctionsFrameworkCppConan(ConanFile):
                 )
             )
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("Fails to build for Visual Studio as a DLL")
 
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration(
@@ -77,11 +92,6 @@ class FunctionsFrameworkCppConan(ConanFile):
             destination=self._source_subfolder,
             strip_root=True
         )
-
-    def requirements(self):
-        self.requires("abseil/20210324.2")
-        self.requires("boost/1.77.0")
-        self.requires("nlohmann_json/3.10.2")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -118,17 +128,21 @@ class FunctionsFrameworkCppConan(ConanFile):
             )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "functions_framework_cpp")
+        self.cpp_info.set_property("cmake_target_name", "functions-framework-cpp::framework")
+        self.cpp_info.set_property("pkg_config_name", "functions_framework_cpp")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["framework"].libs = ["functions_framework_cpp"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "functions_framework_cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "functions_framework_cpp"
-        self.cpp_info.names["cmake_find_package"] = "functions-framework-cpp"
-
-        self.cpp_info.components["framework"].libs = ["functions_framework_cpp"]
+        self.cpp_info.names["pkg_config"] = "functions_framework_cpp"
+        self.cpp_info.components["framework"].set_property("cmake_target_name", "functions-framework-cpp::framework")
+        self.cpp_info.components["framework"].set_property("pkg_config_name", "functions_framework_cpp")
         self.cpp_info.components["framework"].requires = [
             "abseil::absl_time",
             "boost::headers",
             "boost::program_options",
             "nlohmann_json::nlohmann_json",
         ]
-        self.cpp_info.components["framework"].set_property(
-            "pkg_config_name", "functions_framework_cpp"
-        )
