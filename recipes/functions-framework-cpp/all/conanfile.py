@@ -126,6 +126,8 @@ class FunctionsFrameworkCppConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "functions_framework_cpp")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["framework"].libs = ["functions_framework_cpp"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["framework"].system_libs.append("pthread")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "functions_framework_cpp"
