@@ -23,7 +23,6 @@ class FunctionsFrameworkCppConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     short_paths = True
     _cmake = None
@@ -35,6 +34,11 @@ class FunctionsFrameworkCppConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.os) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -104,6 +108,8 @@ class FunctionsFrameworkCppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -113,19 +119,6 @@ class FunctionsFrameworkCppConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # The package is not installing the `*.so` file:
-        #     https://github.com/GoogleCloudPlatform/functions-framework-cpp/issues/331
-        # create this manually:
-        if self.settings.os != "Windows" and self.options.shared:
-            src, dst = (".so.1.0.0", ".so") if self.settings.os != "Macos" else (".1.0.0.dylib", ".dylib")
-            os.link(
-                os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp" + src
-                ),
-                os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp" + dst
-                ),
-            )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "functions_framework_cpp")
