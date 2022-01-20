@@ -33,7 +33,7 @@ class FunctionsFrameworkCppConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return str(self.settings.os) in ["Visual Studio", "msvc"]
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
