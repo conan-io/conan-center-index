@@ -159,5 +159,3 @@ class XercesCConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
-
-        
