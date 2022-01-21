@@ -206,7 +206,7 @@ class ArmadilloConan(ConanFile):
         )
         self._cmake.definitions["ARMA_USE_HDF5"] = self.options.use_hdf5
         self._cmake.definitions["ARMA_USE_ARPACK"] = self.options.use_arpack
-        self._cmake.definitions["ARMA_USE_EXTERN_RNG"] = self.options.use_extern_rng
+        self._cmake.definitions["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_exern_rng", default=False)
         self._cmake.definitions["ARMA_USE_SUPERLU"] = self.options.use_superlu
         self._cmake.definitions["ARMA_USE_WRAPPER"] = self.options.use_wrapper
         self._cmake.definitions["ARMA_USE_ACCELERATE"] = (
