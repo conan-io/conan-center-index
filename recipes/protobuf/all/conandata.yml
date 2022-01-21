@@ -1,4 +1,7 @@
 sources:
+  "3.19.2":
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.19.2.tar.gz"
+    sha256: "4dd35e788944b7686aac898f77df4e9a54da0ca694b8801bd6b2a9ffc1b3085e"
   "3.19.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.19.1.tar.gz"
     sha256: "87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422"
@@ -27,6 +30,9 @@ sources:
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.9.1.tar.gz"
     sha256: "98e615d592d237f94db8bf033fba78cd404d979b0b70351a9e5aaff725398357"
 patches:
+  "3.19.2":
+    - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
+      base_path: "source_subfolder"
   "3.19.1":
     - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
       base_path: "source_subfolder"
