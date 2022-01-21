@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import msvc_runtime_flag
 import glob
 import os
 import shutil
@@ -46,6 +47,8 @@ class GStPluginsGoodConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "gst-plugins-good %s does not support gcc older than 5" % self.version
             )
+        if self.options.shared and str(msvc_runtime_flag(self)).startswith("MT"):
+            raise ConanInvalidConfiguration('shared build with static runtime is not supported due to the FlsAlloc limit')
 
     def configure(self):
         if self.options.shared:
