@@ -13,15 +13,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            #os.environ["GST_DEBUG"] = "7" # TRACE
-            if self.settings.compiler == "Visual Studio" and self.options["gst-plugins-good"].shared:
-                with tools.vcvars(self):
-                    import ctypes
-                    FlsAlloc = ctypes.windll.kernel32.FlsAlloc
-                    l = list(iter(lambda: FlsAlloc(None), -1))
-                    print("FlsAlloc: ", len(l))
-                    print(os.environ["PATH"])
-                    gstwavparse = os.path.join(self.deps_cpp_info["gst-plugins-good"].rootpath, "lib", "gstreamer-1.0", "gstwavparse.dll")
-                    self.run('dumpbin /DEPENDENTS %s' % gstwavparse)
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

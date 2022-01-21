@@ -8,5 +8,4 @@ conan_basic_setup(TARGETS)
 find_package(gst-plugins-good CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-#target_link_libraries(${PROJECT_NAME} gst-plugins-good::gstreamer-plugins-good-1.0)
 target_link_libraries(${PROJECT_NAME} gst-plugins-good::gst-plugins-good)
