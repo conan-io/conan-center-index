@@ -86,13 +86,7 @@ class LibcdsConan(ConanFile):
         cmake_target = "cds" if self.options.shared else "cds-s"
         self.cpp_info.set_property("cmake_file_name", "LibCDS")
         self.cpp_info.set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))
-
-        self.cpp_info.names["cmake_find_package"] = "LibCDS"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
-        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components["_libcds"].set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))
-
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_libcds"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["_libcds"].defines = ["CDS_BUILD_STATIC_LIB"]
@@ -101,3 +95,10 @@ class LibcdsConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang", "apple-clang"] and self.settings.arch == "x86_64":
             self.cpp_info.components["_libcds"].cxxflags = ["-mcx16"]
         self.cpp_info.components["_libcds"].requires = ["boost::boost"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LibCDS"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
+        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libcds"].set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))
