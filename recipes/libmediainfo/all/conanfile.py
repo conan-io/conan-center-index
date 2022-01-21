@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibmediainfoConan(ConanFile):
@@ -14,7 +14,7 @@ class LibmediainfoConan(ConanFile):
     description = "MediaInfo is a convenient unified display of the most relevant technical and tag data for video and audio files"
     topics = ("libmediainfo", "video", "audio", "metadata", "tag")
 
-    settings = "os",  "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -27,14 +27,14 @@ class LibmediainfoConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,7 +45,7 @@ class LibmediainfoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libcurl/7.79.1")
+        self.requires("libcurl/7.80.0")
         self.requires("libzen/0.4.38")
         self.requires("tinyxml2/9.0.0")
         self.requires("zlib/1.2.11")
@@ -102,6 +102,8 @@ class LibmediainfoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"mediainfo": "MediaInfoLib::MediaInfoLib"}
@@ -120,15 +122,13 @@ class LibmediainfoConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "MediaInfoLib")
+        self.cpp_info.set_property("cmake_target_name", "mediainfo")
+        self.cpp_info.set_property("pkg_config_name", "libmediainfo")
         postfix = ""
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
@@ -136,11 +136,12 @@ class LibmediainfoConan(ConanFile):
             elif tools.is_apple_os(self.settings.os):
                 postfix += "_debug"
         self.cpp_info.libs = ["mediainfo" + postfix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "MediaInfoLib"
         self.cpp_info.names["cmake_find_package_multi"] = "MediaInfoLib"
-        self.cpp_info.names["pkg_config"] = "libmediainfo"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "libmediainfo"

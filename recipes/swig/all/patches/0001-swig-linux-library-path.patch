@@ -1,18 +1,25 @@
 --- Source/Modules/main.cxx
 +++ Source/Modules/main.cxx
-@@ -879,6 +879,23 @@
+@@ -879,6 +881,30 @@ static void getoptions(int argc, char *argv[]) {
    }
  }
- 
+
 +#if defined(HAVE_UNISTD_H) && !defined(_WIN32)
 +#include <libgen.h>
 +#include <unistd.h>
++#include <dlfcn.h>
 +
 +static String *get_exe_path(void) {
-+    char buffer[PATH_MAX];
-+    ssize_t nb = readlink("/proc/self/exe", buffer, PATH_MAX);
-+    if (nb != -1) {
-+        buffer[nb] = '\0';
++    Dl_info info;
++    if (dladdr("main", &info)) {
++        char buffer[PATH_MAX];
++        char* res = NULL;
++
++        res = realpath(info.dli_fname, buffer);
++        if (!res) {
++         return NewString(SWIG_LIB);
++        }
++
 +        dirname(buffer);
 +        strcat(buffer, "/swiglib");
 +        return NewStringWithSize(buffer, strlen(buffer));

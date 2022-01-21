@@ -92,7 +92,7 @@ class LibarchiveConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
             self.requires("pcre/8.45")
-        if self.options.with_cng:
+        if self.settings.os != "Windows" and self.options.with_cng:
             # TODO: add cng when available in CCI
             raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
         if self.options.with_nettle:
@@ -220,5 +220,7 @@ class LibarchiveConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
 
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and self.options.with_cng:
+            self.cpp_info.system_libs.append("bcrypt")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]
