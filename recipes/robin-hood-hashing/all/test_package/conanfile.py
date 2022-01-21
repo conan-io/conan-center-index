@@ -1,9 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake_find_package_multi", "cmake"
 
     def build(self):
@@ -12,5 +12,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join("bin","test_package"), run_environment=True)
