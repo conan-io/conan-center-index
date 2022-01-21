@@ -50,7 +50,7 @@ openssl/1.1.1d.dssl2
 pjsip/2.9
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
-signalr-qt/0.1.dssl2
+signalr-qt/0.1.dssl3
 #sip/4.19.3 need to port tech1scripts
 sdl/2.0.16
 qt/5.14.1.dssl3

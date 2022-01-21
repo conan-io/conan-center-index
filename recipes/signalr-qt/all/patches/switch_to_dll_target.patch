@@ -1,0 +1,11 @@
+--- a/SignalRLibraries/SignalRClient/SignalRClient.pro
++++ b/SignalRLibraries/SignalRClient/SignalRClient.pro
+@@ -12,7 +12,7 @@ CONFIG   += precompile_header
+ 
+ TARGET = SignalRClient
+ TEMPLATE = lib
+-CONFIG += staticlib
++CONFIG += dll
+ 
+ DEFINES += SIGNALR_LIBRARY
+ 
