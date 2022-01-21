@@ -46,12 +46,12 @@ class Pagmo2Conan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.78.0")
         self.requires("tbb/2020.3")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.with_nlopt:
-            self.requires("nlopt/2.7.0")
+            self.requires("nlopt/2.7.1")
 
     @property
     def _compilers_minimum_version(self):
