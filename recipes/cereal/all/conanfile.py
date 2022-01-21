@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.files import rename
 import os
 import textwrap
 
@@ -9,7 +10,7 @@ class CerealConan(ConanFile):
     name = "cereal"
     description = "Serialization header-only library for C++11."
     license = "BSD-3-Clause"
-    topics = ("conan", "cereal", "header-only", "serialization", "cpp11")
+    topics = ("cereal", "header-only", "serialization", "cpp11")
     homepage = "https://github.com/USCiLab/cereal"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
@@ -28,7 +29,7 @@ class CerealConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        rename(self, self.name + "-" + self.version, self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
