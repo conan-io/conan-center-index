@@ -13,5 +13,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
+            os.environ["GST_DEBUG"] = "7" # TRACE
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
