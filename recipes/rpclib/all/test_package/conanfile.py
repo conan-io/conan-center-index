@@ -11,5 +11,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run( os.path.join("bin", "example"), run_environment=True )
