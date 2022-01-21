@@ -16,11 +16,27 @@ class DuckdbConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_icu": [True, False],
+        "with_parquet": [True, False],
+        "with_tpch": [True, False],
+        "with_tpcds": [True, False],
+        "with_fts": [True, False],
+        "with_httpfs": [True, False],
+        "with_threads": [True, False],
+        "with_rdtsc": [True, False],
+        "query_log": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_icu": False,
+        "with_parquet": False,
+        "with_tpch": False,
+        "with_tpcds": False,
+        "with_fts": False,
+        "with_httpfs": False,
+        "query_log": False,
+        "with_threads": True,
+        "with_rdtsc": False,
     }
 
     _cmake = None
@@ -48,6 +64,14 @@ class DuckdbConan(ConanFile):
         self._cmake.definitions["BUILD_UNITTESTS"] = False
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         self._cmake.definitions["BUILD_ICU_EXTENSION"] = self.options.with_icu
+        self._cmake.definitions["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
+        self._cmake.definitions["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
+        self._cmake.definitions["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
+        self._cmake.definitions["BUILD_FTS_EXTENSION"] = self.options.with_fts
+        self._cmake.definitions["BUILD_HTTPFS_EXTENSION"] = self.options.with_httpfs
+        self._cmake.definitions["FORCE_QUERY_LOG"] = self.options.query_log
+        self._cmake.definitions["DISABLE_THREADS"] = not self.options.with_threads
+        self._cmake.definitions["BUILD_RDTSC"] = self.options.with_rdtsc
         self._cmake.configure()
         return self._cmake
 
@@ -70,5 +94,15 @@ class DuckdbConan(ConanFile):
             self.cpp_info.libs = ["duckdb_static"]
             if self.options.with_icu:
                 self.cpp_info.libs.append("icu_extension")
+            if self.options.with_parquet:
+                self.cpp_info.libs.append("parquet_extension")
+            if self.options.with_tpch:
+                self.cpp_info.libs.append("tpch_extension")
+            if self.options.with_tpcds:
+                self.cpp_info.libs.append("tpcds_extension")
+            if self.options.with_fts:
+                self.cpp_info.libs.append("fts_extension")
+            if self.options.with_httpfs:
+                self.cpp_info.libs.append("httpfs_extension")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl"]
