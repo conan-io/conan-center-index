@@ -52,6 +52,9 @@ class DaggyConan(ConanFile):
         self.build_requires("cmake/3.21.3")
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
         self.options["qt"].shared = True
 
     @property
