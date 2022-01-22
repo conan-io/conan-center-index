@@ -1,9 +1,10 @@
 import os
+import re
+from glob import glob
 
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conans import tools
-from glob import glob
 
 required_conan_version = ">=1.43.0"
 
@@ -29,6 +30,9 @@ class BinutilsConan(ConanFile):
 
     def generate(self):
         ad = AutotoolsDeps(self)
+        # this can be removed if conan >= 1.44.0 due to https://github.com/conan-io/conan/pull/10192
+        for m in re.finditer("-Wl,-rpath,\"[^\"]+\"", ad.vars()["LDFLAGS"]):
+            ad.environment.remove("LDFLAGS", m[0])
         ad.generate()
 
         ac = AutotoolsToolchain(self)
