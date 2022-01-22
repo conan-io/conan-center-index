@@ -69,19 +69,9 @@ class MiniaudioConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder)
         self.copy(
-            pattern="*",
-            dst="include/extras/nodes",
-            src=os.path.join(self._source_subfolder, "extras/nodes"),
-        )
-        self.copy(
-            pattern="stb_vorbis.c",
+            pattern="**",
             dst="include/extras",
             src=os.path.join(self._source_subfolder, "extras"),
-        )
-        self.copy(
-            pattern="miniaudio_lib*.h",
-            dst="include/extras/",
-            src=os.path.join(self._source_subfolder, "extras/"),
         )
 
         if self.options.header_only:
