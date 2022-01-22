@@ -58,7 +58,7 @@ class LibuvcConan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.24")
         if self.options.jpeg_turbo:
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.2")
         else:
             self.requires("libjpeg/9d")
 
