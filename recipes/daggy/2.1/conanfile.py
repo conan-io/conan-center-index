@@ -56,6 +56,10 @@ class DaggyConan(ConanFile):
             del self.options.fPIC
 
         self.options["qt"].shared = True
+    
+    def configure(self):
+          if self.options.shared:
+            del self.options.fPIC
 
     @property
     def _minimum_compilers_version(self):
