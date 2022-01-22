@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CwalkConan(ConanFile):
@@ -18,10 +18,15 @@ class CwalkConan(ConanFile):
               "unc", "path-parsing", "file-path")
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -32,6 +37,11 @@ class CwalkConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,6 +75,8 @@ class CwalkConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"cwalk": "cwalk::cwalk"}
@@ -83,22 +95,20 @@ class CwalkConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Cwalk")
+        self.cpp_info.set_property("cmake_target_name", "cwalk")
+        self.cpp_info.libs = ["cwalk"]
+        if self.options.shared and tools.Version(self.version) >= "1.2.5":
+            self.cpp_info.defines.append("CWK_SHARED")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Cwalk"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Cwalk"
         self.cpp_info.names["cmake_find_package"] = "cwalk"
         self.cpp_info.names["cmake_find_package_multi"] = "cwalk"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.libs = ["cwalk"]
-        if self.options.shared and tools.Version(self.version) >= "1.2.5":
-            self.cpp_info.defines.append("CWK_SHARED")
