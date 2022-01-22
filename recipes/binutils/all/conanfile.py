@@ -5,7 +5,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conans import tools
 from glob import glob
 
-required_conan_version = ">=1.44.0"
+required_conan_version = ">=1.43.0"
 
 
 class BinutilsConan(ConanFile):
