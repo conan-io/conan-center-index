@@ -369,7 +369,7 @@ class SDLConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "SDL2"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2"
 
-        postfix = "d" if self.settings.build_type == "Debug" else ""
+        postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
         sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
