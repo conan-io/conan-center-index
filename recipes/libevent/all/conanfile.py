@@ -60,7 +60,7 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
