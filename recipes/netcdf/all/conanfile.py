@@ -108,6 +108,8 @@ class NetcdfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
+            for vc_file in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), vc_file)
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
         else:
             tools.rmdir(os.path.join(self.package_folder, "bin"))
