@@ -26,7 +26,7 @@ class DaggyConan(ConanFile):
         "with_yaml": True,
         "with_console": False,
         "shared": False,
-        "fPIC": False
+        "fPIC": True
     }
     generators = "cmake", "cmake_find_package"
     _cmake = None
