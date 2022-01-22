@@ -127,7 +127,5 @@ class DaggyConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["DaggyCore"]
 
-    def imports(self):
-        self.copy("*", src="@bindirs", dst="bin")
-        self.copy("*", src="@libdirs", dst="lib")
+
         

@@ -11,4 +11,5 @@ if (NOT CMAKE_CXX_STANDARD)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(testcpp)
+add_executable(testcpp test.cpp)
+target_link_libraries(testcpp daggy::daggy)
