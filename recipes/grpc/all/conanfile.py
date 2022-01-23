@@ -148,6 +148,10 @@ class grpcConan(ConanFile):
             # conan doesn't populate CMAKE_FIND_ROOT_PATH
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
 
+        if tools.is_apple_os(self.settings.os):
+            # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
+            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
