@@ -16,6 +16,7 @@ class grpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     # TODO: Add shared option
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "codegen": [True, False],
         "csharp_ext": [True, False],
@@ -29,6 +30,7 @@ class grpcConan(ConanFile):
         "secure": [True, False]
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "codegen": True,
         "csharp_ext": False,
@@ -66,6 +68,10 @@ class grpcConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
