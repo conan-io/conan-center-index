@@ -85,9 +85,6 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
-        if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
-            raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
-
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.build_requires('protobuf/3.17.1')
@@ -96,19 +93,8 @@ class grpcConan(ConanFile):
                 self.build_requires('grpc/{}'.format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        if tools.Version(self.version) < "1.42.0":
-            # Fix the protoc search path for cross compiling
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
-                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
-                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
-            )
-        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
-            # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
-            #   executable when cross-building
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                    "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
-                    "if(gRPC_INSTALL)")
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -162,6 +148,18 @@ class grpcConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # We are fine with protobuf::protoc coming from conan generated Find/config file
+        # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
+            "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
+            "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
+        )
+        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
+            # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
+            #   executable when cross-building
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
+                    "if(gRPC_INSTALL)")
 
     def build(self):
         self._patch_sources()
