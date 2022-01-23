@@ -41,10 +41,6 @@ class RubyConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     @property
-    def _is_win_build(self):
-        return self._settings_build.os == "Windows"
-
-    @property
     def _is_msvc(self):
         return self.settings.compiler in ["Visual Studio", "msvc"]
 
@@ -52,16 +48,33 @@ class RubyConan(ConanFile):
     def _windows_system_libs(self):
         return ["user32", "advapi32", "shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
 
+    @property
+    def _msvc_runtime_flag(self):        
+        compiler = self.settings.compiler
+        runtime = self.settings.get_safe("compiler.runtime")
+        if compiler == "msvc" or compiler == "intel-cc":
+            build_type = self.settings.get_safe("build_type")
+            if build_type != "Debug":
+                return {"static": "MT",
+                        "dynamic": "MD"}.get(runtime, "")
+            else:
+                return {"static": "MTd",
+                        "dynamic": "MDd"}.get(runtime, "")
+        else:
+            return runtime
+
+    @property
+    def _msvc_optflag(self):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14":
+            return "-O2b2xg-"
+        else:
+            return "-O2sy-"
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("gmp/6.1.2")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1m")
-
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if self._is_win_build and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,28 +94,32 @@ class RubyConan(ConanFile):
         # remove non-existing frameworks dirs, otherwise clang complains
         for m in re.finditer("-F (\S+)", td.vars().get("LDFLAGS")):
             if not os.path.exists(m[1]):
-                td.environment.remove("LDFLAGS", "-F {}".format(m[1]))
+                td.environment.remove("LDFLAGS", f"-F {m[1]}")
         if self.settings.os == "Windows":
             if self._is_msvc:
-                td.environment.append("LIBS", ["{}.lib".format(lib) for lib in self._windows_system_libs])
+                td.environment.append("LIBS", [f"{lib}.lib" for lib in self._windows_system_libs])
             else:
-                td.environment.append("LDFLAGS", ["-l{}".format(lib) for lib in self._windows_system_libs])
+                td.environment.append("LDFLAGS", [f"-l{lib}" for lib in self._windows_system_libs])
         td.generate()
 
         tc = AutotoolsToolchain(self)
         tc.default_configure_install_args = True
         tc.configure_args = ["--disable-install-doc"]
-        if self.options.shared:
+        if self.options.shared and not self._is_msvc:
             tc.configure_args.append("--enable-shared")
             tc.fpic = True
         if cross_building(self) and is_apple_os(self.settings.os):
             apple_arch = to_apple_arch(self.settings.arch)
             if apple_arch:
-                tc.configure_args.append("--with-arch={}".format(apple_arch))
+                tc.configure_args.append(f"--with-arch={apple_arch}")
         if self._is_msvc:
-            tc.cflags.append("-{}".format(self.settings.compiler.runtime))
+            # this is marked as TODO in https://github.com/conan-io/conan/blob/01f4aecbfe1a49f71f00af8f1b96b9f0174c3aad/conan/tools/gnu/autotoolstoolchain.py#L23
+            tc.build_type_flags.append(f"-{self._msvc_runtime_flag}")
+            # https://github.com/conan-io/conan/issues/10338
+            # remove after conan 1.45
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 tc.ldflags.append("-debug")
+            tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
         tc.generate()
 
     def build(self):
@@ -111,7 +128,7 @@ class RubyConan(ConanFile):
         at = Autotools(self)
 
         build_script_folder = self._source_subfolder
-        if self._is_win_build:
+        if self._is_msvc:
             build_script_folder = os.path.join(build_script_folder, "win32")
 
         with tools.vcvars(self):
@@ -133,19 +150,25 @@ class RubyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
-        self.output.info("Adding to PATH: {}".format(binpath))
+        self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
 
         version = tools.Version(self.version)
         rubylib = self.cpp_info.components["rubylib"]
         config_file = glob.glob(os.path.join(self.package_folder, "include", "**", "ruby", "config.h"), recursive=True)[0]
         rubylib.includedirs = [
-            os.path.join(self.package_folder, "include", "ruby-{}".format(version)),
+            os.path.join(self.package_folder, "include", f"ruby-{version}"),
             os.path.dirname(os.path.dirname(config_file))
         ]
         rubylib.libs = tools.collect_libs(self)
+        if self._is_msvc:
+            if self.options.shared:
+                rubylib.libs = list(filter(lambda l: not l.endswith("-static"), rubylib.libs))
+            else:
+                rubylib.libs = list(filter(lambda l: l.endswith("-static"), rubylib.libs))
         rubylib.requires.extend(["zlib::zlib", "gmp::gmp"])
         if self.options.with_openssl:
             rubylib.requires.append("openssl::openssl")
@@ -166,4 +189,4 @@ class RubyConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Ruby"
         self.cpp_info.names["cmake_find_package_multi"] = "Ruby"
         self.cpp_info.set_property("cmake_target_name", "Ruby::Ruby")
-        self.cpp_info.set_property("pkg_config_aliases", ["ruby-{}.{}".format(version.major, version.minor)])
+        self.cpp_info.set_property("pkg_config_aliases", [f"ruby-{version.major}.{version.minor}"])
