@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ConanSqlite3(ConanFile):
@@ -171,10 +171,14 @@ class ConanSqlite3(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.set_property("cmake_file_name", "SQLite3")
+        self.cpp_info.set_property("cmake_target_name", "SQLite::SQLite3")
+        self.cpp_info.set_property("cmake_find_mode", "both") 
         self.cpp_info.names["cmake_find_package"] = "SQLite"
         self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
         self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
         self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite::SQLite3")
         self.cpp_info.components["sqlite"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["sqlite"].libs = ["sqlite3"]

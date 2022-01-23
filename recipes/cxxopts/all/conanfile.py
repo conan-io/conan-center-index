@@ -9,12 +9,12 @@ class CxxOptsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Lightweight C++ option parser library, supporting the standard GNU style syntax for options."
     license = "MIT"
-    topics = ("conan", "option-parser", "positional-arguments ", "header-only")
+    topics = ("option-parser", "positional-arguments ", "header-only")
     settings = "compiler"
     options = { "unicode": [True, False] }
     default_options = { "unicode": False }
     no_copy_source = True
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -46,11 +46,11 @@ class CxxOptsConan(ConanFile):
 
     def requirements(self):
         if self.options.unicode:
-            self.requires("icu/64.2")
+            self.requires("icu/70.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

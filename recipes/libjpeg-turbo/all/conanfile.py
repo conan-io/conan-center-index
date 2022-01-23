@@ -2,13 +2,13 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibjpegTurboConan(ConanFile):
     name = "libjpeg-turbo"
     description = "SIMD-accelerated libjpeg-compatible JPEG codec library"
-    topics = ("conan", "jpeg", "libjpeg", "image", "multimedia", "format", "graphics")
+    topics = ("jpeg", "libjpeg", "image", "multimedia", "format", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libjpeg-turbo.org"
     license = "BSD-3-Clause, Zlib"
@@ -50,6 +50,10 @@ class LibjpegTurboConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -71,11 +75,12 @@ class LibjpegTurboConan(ConanFile):
         if self.options.libjpeg8_compatibility:
             del self.options.mem_src_dst
 
+    def validate(self):
         if self.options.enable12bit and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
         if self.options.get_safe("java", False) and not self.options.shared:
             raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and str(self.settings.compiler.runtime).startswith("MT"):
+        if self._is_msvc and self.options.shared and str(self.settings.compiler.runtime).startswith("MT"):
             raise ConanInvalidConfiguration("shared libjpeg-turbo can't be built with MT or MTd")
 
     @property
@@ -111,19 +116,19 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         self._cmake.definitions["WITH_JAVA"] = self.options.get_safe("java", False)
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
         if tools.Version(self.version) <= "2.1.0":
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
 
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             # TODO: too specific and error prone, should be delegated to a conan helper function
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            self._cmake.definitions["CONAN_LIBJPEG_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake
@@ -157,19 +162,20 @@ class LibjpegTurboConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), pattern_to_remove)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"
-        self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
+        self.cpp_info.set_property("cmake_file_name", "libjpeg-turbo")
 
         cmake_target_suffix = "-static" if not self.options.shared else ""
-        lib_suffix = "-static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
+        lib_suffix = "-static" if self._is_msvc and not self.options.shared else ""
 
+        self.cpp_info.components["jpeg"].set_property("cmake_target_name", "libjpeg-turbo::jpeg{}".format(cmake_target_suffix))
+        self.cpp_info.components["jpeg"].set_property("pkg_config_name", "libjpeg")
         self.cpp_info.components["jpeg"].names["cmake_find_package"] = "jpeg" + cmake_target_suffix
         self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = "jpeg" + cmake_target_suffix
-        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
         self.cpp_info.components["jpeg"].libs = ["jpeg" + lib_suffix]
 
         if self.options.get_safe("turbojpeg"):
+            self.cpp_info.components["turbojpeg"].set_property("cmake_target_name", "libjpeg-turbo::turbojpeg{}".format(cmake_target_suffix))
+            self.cpp_info.components["turbojpeg"].set_property("pkg_config_name", "libturbojpeg")
             self.cpp_info.components["turbojpeg"].names["cmake_find_package"] = "turbojpeg" + cmake_target_suffix
             self.cpp_info.components["turbojpeg"].names["cmake_find_package_multi"] = "turbojpeg" + cmake_target_suffix
-            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
             self.cpp_info.components["turbojpeg"].libs = ["turbojpeg" + lib_suffix]

@@ -8,7 +8,7 @@ class ZstrConan(ConanFile):
     name = "zstr"
     description = "A C++ header-only ZLib wrapper."
     license = "MIT"
-    topics = ("conan", "zstr", "zlib", "compression")
+    topics = ("zstr", "zlib", "compression")
     homepage = "https://github.com/mateidavid/zstr"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
@@ -18,7 +18,7 @@ class ZstrConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 

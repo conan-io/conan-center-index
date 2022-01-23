@@ -11,7 +11,7 @@ class GDCMTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             input_file = os.path.join(self.source_folder, "DCMTK_JPEGExt_12Bits.dcm")
             test_dir = "test_dir"

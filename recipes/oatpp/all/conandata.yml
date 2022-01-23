@@ -1,13 +1,16 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/oatpp/oatpp/archive/1.0.0.tar.gz"
-    sha256: "9ba7c75e3ada8ec894ec10beae712e775774a835fd3de89d8c34e17740202619"
-  "1.1.0":
-    url: "https://github.com/oatpp/oatpp/archive/1.1.0.tar.gz"
-    sha256: "fcc59615e1282d51826093f95b6c0ded3240ea5c1f322bc253bc36da1f0d3c1c"
-  "1.2.0":
-    url: "https://github.com/oatpp/oatpp/archive/1.2.0.tar.gz"
-    sha256: "7f55669827ece429b6d85f4403b76da717d3fdf0e92721e9a0229cf8168e8e37"
+  "1.3.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.3.0.tar.gz"
+    sha256: "e1f80fa8fd7a74da6737e7fee1a4db68b4d7085a3f40e7d550752d6ff5714583"
   "1.2.5":
     url: "https://github.com/oatpp/oatpp/archive/1.2.5.tar.gz"
     sha256: "36276e8b23e68ece1e6093c3f06fc80e3d42a5f4e47cdeef5e7e63f36eeddaad"
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.2.0.tar.gz"
+    sha256: "7f55669827ece429b6d85f4403b76da717d3fdf0e92721e9a0229cf8168e8e37"
+  "1.1.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.1.0.tar.gz"
+    sha256: "fcc59615e1282d51826093f95b6c0ded3240ea5c1f322bc253bc36da1f0d3c1c"
+  "1.0.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.0.0.tar.gz"
+    sha256: "9ba7c75e3ada8ec894ec10beae712e775774a835fd3de89d8c34e17740202619"

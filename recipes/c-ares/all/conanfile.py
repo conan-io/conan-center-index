@@ -1,7 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.43.0"
 
 
 class CAresConan(ConanFile):
@@ -9,22 +9,22 @@ class CAresConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A C library for asynchronous DNS requests"
-    topics = ("conan", "c-ares", "dns")
+    topics = ("c-ares", "dns")
     homepage = "https://c-ares.haxx.se/"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tools": [True, False]
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "tools": True
+        "tools": True,
     }
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -34,6 +34,11 @@ class CAresConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,8 +51,8 @@ class CAresConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("c-ares-cares-{}".format(self.version.replace(".", "_")), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _cmake_configure(self):
         if self._cmake:
@@ -77,10 +82,11 @@ class CAresConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libcares"
-        self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
-        self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
-        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
+        self.cpp_info.set_property("cmake_file_name", "c-ares")
+        self.cpp_info.set_property("cmake_target_name", "c-ares::cares")
+        self.cpp_info.set_property("pkg_config_name", "libcares")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["cares"].libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
@@ -95,3 +101,11 @@ class CAresConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = "libcares"
+        self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
+        self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
+        self.cpp_info.components["cares"].set_property("cmake_target_name", "c-ares::cares")
+        self.cpp_info.components["cares"].set_property("pkg_config_name", "libcares")

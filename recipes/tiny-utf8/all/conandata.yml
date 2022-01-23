@@ -1,4 +1,7 @@
 sources:
+  "4.4.3":
+    url: "https://github.com/DuffsDevice/tiny-utf8/archive/refs/tags/v4.4.3.tar.gz"
+    sha256: "8e3f61651909c9f3105d3501932a96aa65733127fb6e7cf94cb1b0a2dff42c8f"
   "4.4.2":
     url: "https://github.com/DuffsDevice/tiny-utf8/archive/v4.4.2.tar.gz"
     sha256: "dd442b3cca93603ce940bf7adf7e8e44849e6b07a7fa2bb28c0b77bab7699082"

@@ -5,10 +5,10 @@ import os
 class NormConan(ConanFile):
     name = "norm"
     description = "A reliable multicast transport protocol"
-    topics = ("conan", "norm", "multicast", "transport protocol")
+    topics = ("norm", "multicast", "transport protocol", "nack-oriented reliable multicast")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     license = "NRL"
     settings = "os", "compiler", "build_type", "arch"
@@ -42,7 +42,13 @@ class NormConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

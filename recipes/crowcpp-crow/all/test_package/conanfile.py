@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CROW_AMALGAMATION"] = self.options["crowcpp-crow"].amalgamation
         cmake.configure()
         cmake.build()
 

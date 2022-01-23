@@ -20,6 +20,7 @@ class Libssh2Conan(ConanFile):
         "enable_crypt_none": [True, False],
         "enable_mac_none": [True, False],
         "crypto_backend": ["openssl", "mbedtls"],
+        "enable_debug_logging": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,6 +29,7 @@ class Libssh2Conan(ConanFile):
         "enable_crypt_none": False,
         "enable_mac_none": False,
         "crypto_backend": "openssl",
+        "enable_debug_logging": False,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -74,6 +76,7 @@ class Libssh2Conan(ConanFile):
         self._cmake.definitions["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_CRYPT_NONE"] = self.options.enable_crypt_none
         self._cmake.definitions["ENABLE_MAC_NONE"] = self.options.enable_mac_none
+        self._cmake.definitions["ENABLE_DEBUG_LOGGING"] = self.options.enable_debug_logging
         if self.options.crypto_backend == "openssl":
             self._cmake.definitions["CRYPTO_BACKEND"] = "OpenSSL"
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath

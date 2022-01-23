@@ -10,7 +10,7 @@ class AprUtilConan(ConanFile):
     name = "apr-util"
     description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
     license = "Apache-2.0"
-    topics = ("conan", "apr-util", "apache", "platform", "library")
+    topics = ("apr-util", "apache", "platform", "library")
     homepage = "https://apr.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"

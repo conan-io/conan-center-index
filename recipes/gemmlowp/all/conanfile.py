@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.37.0"
+required_conan_version = ">=1.33.0"
 
 class GemmlowpConan(ConanFile):
     name = "gemmlowp"
@@ -17,8 +17,8 @@ class GemmlowpConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -33,8 +33,8 @@ class GemmlowpConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("shared is not supported on Windows")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
@@ -53,6 +53,8 @@ class GemmlowpConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -61,12 +63,13 @@ class GemmlowpConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.components["eight_bit_int_gemm"].includedirs.append(os.path.join("include", "gemmlowp"))
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package_multi"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].libs = ["eight_bit_int_gemm"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["eight_bit_int_gemm"].defines = ["NOMINMAX"]
         if self.settings.os == "Linux":
             self.cpp_info.components["eight_bit_int_gemm"].system_libs.extend(["pthread"])

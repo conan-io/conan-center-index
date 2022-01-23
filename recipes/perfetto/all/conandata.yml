@@ -1,0 +1,30 @@
+sources:
+  "20.1":
+    url: https://github.com/google/perfetto/archive/refs/tags/v20.1.tar.gz
+    sha256: d681bb76e2b73e6ba46db53c1502f31f4f16c36cd6e91d4ae839a3b44272f646
+  "21.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v21.0.tar.gz
+    sha256: 8ce7d7c3dd8a2edd6d37092eb139e11bbf9c7e33a9964bab96c0505def6e1ad4
+  "22.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v22.0.tar.gz
+    sha256: c62e9059a566136665b0c69e1f9901fc747b1eca813cd59a76e941bc2772340c
+  "22.1":
+    url: https://github.com/google/perfetto/archive/refs/tags/v22.1.tar.gz
+    sha256: 013ba743019a1ca04627f7ce8bf424b60ed7f0f57e232eff719ae879be4c90fd
+  "23.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v23.0.tar.gz
+    sha256: 9d2955736ce9d234e0f5153acfefea8facfa762c9167024902ea98f9010207aa
+
+patches:
+  "20.1":
+    - patch_file: "patches/v20.1/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
+      base_path: "source_subfolder"
+  "21.0":
+    - patch_file: "patches/v21.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
+      base_path: "source_subfolder"
+  "22.0":
+    - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
+      base_path: "source_subfolder"
+  "22.1":
+    - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
+      base_path: "source_subfolder"

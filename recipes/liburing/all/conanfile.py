@@ -24,6 +24,8 @@ class LiburingConan(ConanFile):
         "shared": False,
     }
 
+    exports_sources = ["patches/*"]
+
     _autotools = None
 
     @property
@@ -45,8 +47,11 @@ class LiburingConan(ConanFile):
         self.requires("linux-headers-generic/5.13.9")
 
     def validate(self):
+        # FIXME: use kernel version of build/host machine.
+        # kernel version should be encoded in profile
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("liburing is supported only on linux")
+            raise ConanInvalidConfiguration(
+                "liburing is supported only on linux")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -61,7 +66,12 @@ class LiburingConan(ConanFile):
         self._autotools.flags.append("-std=gnu99")
         return self._autotools
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()

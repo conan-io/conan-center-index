@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 20bd474232d734ca30f3e690de6d94fc498bbbc0..9c56fd35d3d332915a5adef83626e5a5a41df1a9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -159,8 +159,9 @@ endif()
+ # ICU
+ option(USE_ICU "Use ICU to locate word boundaries in text elements" OFF)
+ if (USE_ICU)
++    find_package(ICU COMPONENTS i18n uc data)
+     target_compile_definitions(${PROJECT_NAME} PUBLIC USE_ICU)
+-    target_link_libraries(${PROJECT_NAME} PUBLIC icui18n icuuc icudata)
++    target_link_libraries(${PROJECT_NAME} PUBLIC ICU::i18n ICU::uc ICU::data)
+ endif()
+ 
+ # Gumbo

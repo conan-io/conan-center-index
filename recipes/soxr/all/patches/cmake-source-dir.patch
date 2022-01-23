@@ -1,0 +1,12 @@
+Patch required for proper resolving of CMake modules when using the CMake conan helper wrapper.
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -84,7 +84,7 @@ mark_as_advanced (WITH_HI_PREC_CLOCK WITH_FLOAT_STD_PREC_CLOCK
+ 
+ # Introspection:
+ 
+-list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
++list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+ 
+ include (CheckFunctionExists)
+ include (CheckIncludeFiles)
