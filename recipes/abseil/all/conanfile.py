@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import json
 import os
 import re
@@ -52,6 +53,9 @@ class AbseilRecipe(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
+        if self.options.shared and self._is_msvc:
+            # upstream tries its best to export symbols, but it's broken for the moment
+            raise ConanInvalidConfiguration("abseil shared not availabe for Visual Studio (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
