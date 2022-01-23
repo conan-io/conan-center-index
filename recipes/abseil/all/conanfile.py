@@ -3,10 +3,10 @@ import json
 import os
 import re
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
-class ConanRecipe(ConanFile):
+class AbseilRecipe(ConanFile):
     name = "abseil"
     description = "Abseil Common Libraries (C++) from Google"
     topics = ("algorithm", "container", "google", "common", "utility")
@@ -28,14 +28,18 @@ class ConanRecipe(ConanFile):
     generators = "cmake"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,7 +66,7 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
         if tools.cross_building(self):
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
+            self._cmake.definitions["CONAN_ABSEIL_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         self._cmake.configure()
         return self._cmake
 
@@ -169,23 +173,24 @@ class ConanRecipe(ConanFile):
         return os.path.join(self.package_folder, "lib", "components.json")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "absl")
+
+        components_json_file = tools.load(self._components_helper_filepath)
+        abseil_components = json.loads(components_json_file)
+        for pkgconfig_name, values in abseil_components.items():
+            cmake_target = values["cmake_target"]
+            self.cpp_info.components[pkgconfig_name].set_property("cmake_target_name", "absl::{}".format(cmake_target))
+            self.cpp_info.components[pkgconfig_name].set_property("pkg_config_name", pkgconfig_name)
+            self.cpp_info.components[pkgconfig_name].libs = values.get("libs", [])
+            self.cpp_info.components[pkgconfig_name].defines = values.get("defines", [])
+            self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
+            self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
+            self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
+            if self._is_msvc and self.settings.compiler.get_safe("cppstd") == "20":
+                self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
+
+            self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
+            self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
+
         self.cpp_info.names["cmake_find_package"] = "absl"
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
-
-        def _register_components():
-            components_json_file = tools.load(self._components_helper_filepath)
-            abseil_components = json.loads(components_json_file)
-            for pkgconfig_name, values in abseil_components.items():
-                cmake_target = values["cmake_target"]
-                self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[pkgconfig_name].names["pkg_config"] = pkgconfig_name
-                self.cpp_info.components[pkgconfig_name].libs = values.get("libs", [])
-                self.cpp_info.components[pkgconfig_name].defines = values.get("defines", [])
-                self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
-                self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
-                self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
-                if self.settings.compiler == "Visual Studio" and self.settings.get_safe("compiler.cppstd") == "20":
-                    self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
-
-        _register_components()
