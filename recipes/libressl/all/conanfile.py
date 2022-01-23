@@ -1,4 +1,6 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
@@ -37,6 +39,10 @@ class LibreSSLConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,6 +52,10 @@ class LibreSSLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("Static runtime linked into shared LibreSSL not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
