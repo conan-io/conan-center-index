@@ -30,22 +30,47 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20200225.2.tar.gz"
     sha256: "f41868f7a938605c92936230081175d1eae87f6ea2c248f41077c8f88316f111"
 patches:
+  "20211102.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+  "20210324.2":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+  "20210324.1":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+  "20210324.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+  "20200923.3":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
   "20200923.2":
-    - patch_file: "patches/20200205-missing-numeric_limits.h.patch"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"
   "20200923.1":
-    - patch_file: "patches/20200205-missing-numeric_limits.h.patch"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"
   "20200923":
-    - patch_file: "patches/20200205-missing-numeric_limits.h.patch"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"
   "20200225.3":
-    - patch_file: "patches/20200205-cmake-install.patch"
+    - patch_file: "patches/0001-cmake-install.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/20200205-missing-numeric_limits.h.patch"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"
   "20200225.2":
-    - patch_file: "patches/20200205-cmake-install.patch"
+    - patch_file: "patches/0001-cmake-install.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/20200205-missing-numeric_limits.h.patch"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
       base_path: "source_subfolder"

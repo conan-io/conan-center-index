@@ -149,6 +149,8 @@ class AbseilRecipe(ConanFile):
                                 if self.settings.os in ["Linux", "FreeBSD"]:
                                     if dependency == "Threads::Threads":
                                         components[potential_lib_name].setdefault("system_libs", []).append("pthread")
+                                    elif "-lm" in dependency:
+                                        components[potential_lib_name].setdefault("system_libs", []).append("m")
                                     elif "-lrt" in dependency:
                                         components[potential_lib_name].setdefault("system_libs", []).append("rt")
                                 elif self.settings.os == "Windows":
