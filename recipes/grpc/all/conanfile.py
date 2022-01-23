@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class grpcConan(ConanFile):
@@ -165,6 +165,7 @@ class grpcConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
@@ -172,129 +173,164 @@ class grpcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.cmake", dst=os.path.join("lib", "cmake"), src=os.path.join(self.source_folder, "cmake"))
+        if self.options.cpp_plugin:
+            self.copy(self._grpc_cpp_plugin_module, dst=self._module_path,
+                      src=os.path.join(self.source_folder, "cmake"))
+
+    @property
+    def _module_path(self):
+        return os.path.join("lib", "cmake", "conan_trick")
+
+    @property
+    def _grpc_cpp_plugin_module(self):
+        return os.path.join("grpc_cpp_plugin.cmake")
+
+    @property
+    def _grpc_components(self):
+        def libm():
+            return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def pthread():
+            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def crypt32():
+            return ["crypt32"] if self.settings.os == "Windows" else []
+
+        def ws2_32():
+            return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        def wsock32():
+            return ["wsock32"] if self.settings.os == "Windows" else []
+
+        def corefoundation():
+            return ["CoreFoundation"] if tools.is_apple_os(self.settings.os) else []
+
+        components = {
+            "address_sorting": {
+                "lib": "address_sorting",
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "gpr": {
+                "lib": "gpr",
+                "requires": [
+                    "upb", "abseil::absl_base", "abseil::absl_memory",
+                    "abseil::absl_status", "abseil::absl_str_format",
+                    "abseil::absl_strings", "abseil::absl_synchronization",
+                    "abseil::absl_time", "abseil::absl_optional",
+                ],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "_grpc": {
+                "lib": "grpc",
+                "requires": [
+                    "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
+                    "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
+                    "abseil::absl_statusor", "c-ares::cares", "openssl::crypto",
+                    "openssl::ssl", "re2::re2", "zlib::zlib",
+                ],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                "frameworks": corefoundation(),
+            },
+            "grpc++": {
+                "lib": "grpc++",
+                "requires": ["_grpc", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "grpc++_alts": {
+                "lib": "grpc++_alts",
+                "requires": ["grpc++", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "grpc++_error_details": {
+                "lib": "grpc++_error_details",
+                "requires": ["grpc++", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "grpc++_reflection": {
+                "lib": "grpc++_reflection",
+                "requires": ["grpc++", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "grpcpp_channelz": {
+                "lib": "grpcpp_channelz",
+                "requires": ["grpc++", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "upb": {
+                "lib": "upb",
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+            "grpc_plugin_support": {
+                "lib": "grpc_plugin_support",
+                "requires": ["protobuf::libprotoc", "protobuf::libprotobuf"],
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+            },
+        }
+
+        if not self.options.secure:
+            components.update({
+                "grpc_unsecure": {
+                    "lib": "grpc_unsecure",
+                    "requires": [
+                        "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
+                        "abseil::absl_inlined_vector", "abseil::absl_statusor",
+                        "c-ares::cares", "re2::re2", "zlib::zlib",
+                    ],
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                    "frameworks": corefoundation(),
+                },
+                "grpc++_unsecure": {
+                    "lib": "grpc++_unsecure",
+                    "requires": ["grpc_unsecure", "protobuf::libprotobuf"],
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+            })
+
+        return components
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        self.cpp_info.set_property("cmake_file_name", "gRPC")
 
-        self.cpp_info.names["cmake_find_package"] = "gRPC"
-        self.cpp_info.names["cmake_find_package_multi"] = "gRPC"
+        for component, values in self._grpc_components.items():
+            target = values.get("lib")
+            lib = values.get("lib")
+            self.cpp_info.components[component].set_property("cmake_target_name", "gRPC::{}".format(target))
+            # actually only gpr, grpc, grpc_unsecure, grpc++ and grpc++_unsecure should have a .pc file
+            self.cpp_info.components[component].set_property("pkg_config_name", target)
+            self.cpp_info.components[component].libs = [lib]
+            self.cpp_info.components[component].requires = values.get("requires", [])
+            self.cpp_info.components[component].system_libs = values.get("system_libs", [])
+            self.cpp_info.components[component].frameworks = values.get("frameworks", [])
 
-        _system_libs = []
-        if self.settings.os in ["Macos", "Linux"]:
-            _system_libs = ['m', 'pthread']
-        elif self.settings.os == 'Windows':
-            _system_libs = ['wsock32', 'ws2_32', 'crypt32']
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self.cpp_info.components[component].names["cmake_find_package"] = target
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
 
-        # gRPC::address_sorting
-        self.cpp_info.components["address_sorting"].names["cmake_find_package"] = "address_sorting"
-        self.cpp_info.components["address_sorting"].names["cmake_find_package_multi"] = "address_sorting"
-        self.cpp_info.components["address_sorting"].system_libs = _system_libs
-        self.cpp_info.components["address_sorting"].libs = ["address_sorting"]
-
-        # gRPC::gpr
-        self.cpp_info.components["gpr"].names["cmake_find_package"] = "gpr"
-        self.cpp_info.components["gpr"].names["cmake_find_package_multi"] = "gpr"
-        self.cpp_info.components["gpr"].requires = ["abseil::absl_base", "abseil::absl_memory", "abseil::absl_status", "abseil::absl_str_format", "abseil::absl_strings", "abseil::absl_synchronization", "abseil::absl_time", "abseil::absl_optional"]
-        if self.settings.os in ['Linux', 'Macos']:
-            self.cpp_info.components["gpr"].system_libs = _system_libs
-        self.cpp_info.components["gpr"].libs = ["gpr"]
-
-        # gRPC::grpc
-        self.cpp_info.components["_grpc"].names["cmake_find_package"] = "grpc"
-        self.cpp_info.components["_grpc"].names["cmake_find_package_multi"] = "grpc"
-        self.cpp_info.components["_grpc"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_bind_front", "abseil::absl_statusor", "gpr", "openssl::ssl", "openssl::crypto", "address_sorting", "upb"]
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["_grpc"].frameworks = ["CoreFoundation"]
-        self.cpp_info.components["_grpc"].system_libs = _system_libs
-        self.cpp_info.components["_grpc"].libs = ["grpc"]
-
-        # gRPC::grpc_unsecure
-        if not self.options.secure:
-            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
-            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
-            self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
-            if tools.is_apple_os(self.settings.os):
-                self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
-            self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
-            self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
-
-        # gRPC::grpc++
-        self.cpp_info.components["grpc++"].names["cmake_find_package"] = "grpc++"
-        self.cpp_info.components["grpc++"].names["cmake_find_package_multi"] = "grpc++"
-        self.cpp_info.components["grpc++"].requires = ["protobuf::libprotobuf", "_grpc"]
-        self.cpp_info.components["grpc++"].system_libs = _system_libs
-        self.cpp_info.components["grpc++"].libs = ["grpc++"]
-
-        # gRPC::grpc++_alts
-        self.cpp_info.components["grpc++_alts"].names["cmake_find_package"] = "grpc++_alts"
-        self.cpp_info.components["grpc++_alts"].names["cmake_find_package_multi"] = "grpc++_alts"
-        self.cpp_info.components["grpc++_alts"].requires = ["protobuf::libprotobuf", "grpc++"]
-        self.cpp_info.components["grpc++_alts"].system_libs = _system_libs
-        self.cpp_info.components["grpc++_alts"].libs = ["grpc++_alts"]
-
-        # gRPC::grpc++_error_details
-        self.cpp_info.components["grpc++_error_details"].names["cmake_find_package"] = "grpc++_error_details"
-        self.cpp_info.components["grpc++_error_details"].names["cmake_find_package_multi"] = "grpc++_error_details"
-        self.cpp_info.components["grpc++_error_details"].requires = ["protobuf::libprotobuf", "grpc++"]
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["grpc++_error_details"].system_libs = _system_libs
-        self.cpp_info.components["grpc++_error_details"].libs = ["grpc++_error_details"]
-
-        # gRPC::grpc++_reflection
-        self.cpp_info.components["grpc++_reflection"].names["cmake_find_package"] = "grpc++_reflection"
-        self.cpp_info.components["grpc++_reflection"].names["cmake_find_package_multi"] = "grpc++_reflection"
-        self.cpp_info.components["grpc++_reflection"].requires = ["protobuf::libprotobuf", "grpc++"]
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["grpc++_reflection"].system_libs = _system_libs
-        self.cpp_info.components["grpc++_reflection"].libs = ["grpc++_reflection"]
-
-        # gRPC::grpc++_unsecure
-        if not self.options.secure:
-            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package"] = "grpc++_unsecure"
-            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package_multi"] = "grpc++_unsecure"
-            self.cpp_info.components["grpc++_unsecure"].requires = ["protobuf::libprotobuf", "grpc_unsecure"]
-            self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
-            self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
-
-        # gRPC::grpcpp_channelz
-        self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package"] = "grpcpp_channelz"
-        self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package_multi"] = "grpcpp_channelz"
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["grpcpp_channelz"].requires = ["protobuf::libprotobuf",  "_grpc"]
-            self.cpp_info.components["grpcpp_channelz"].system_libs = _system_libs
-        elif self.settings.os in ['Windows']:
-            self.cpp_info.components["grpcpp_channelz"].requires = ["protobuf::libprotobuf",  "grpc++"]
-        self.cpp_info.components["grpcpp_channelz"].libs = ["grpcpp_channelz"]
-
-        # gRPC::upb
-        self.cpp_info.components["upb"].names["cmake_find_package"] = "upb"
-        self.cpp_info.components["upb"].names["cmake_find_package_multi"] = "upb"
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["upb"].system_libs = _system_libs
-        self.cpp_info.components["upb"].libs = ["upb"]
-
-        # Executables
-        # gRPC::grpc_plugin_support
-        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package"] = "grpc_plugin_support"
-        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package_multi"] = "grpc_plugin_support"
-        self.cpp_info.components["grpc_plugin_support"].requires = ["protobuf::libprotoc", "protobuf::libprotobuf"]
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["grpc_plugin_support"].system_libs = _system_libs
-        self.cpp_info.components["grpc_plugin_support"].libs = ["grpc_plugin_support"]
-
-        # gRPC::grpc_cpp_plugin
+        # Executable imported targets are added through custom CMake module files,
+        # since conan generators don't know how to emulate these kind of targets.
         if self.options.cpp_plugin:
-            module_target_rel_path = os.path.join("lib", "cmake", "grpc_cpp_plugin.cmake")
-            self.cpp_info.components["execs"].builddirs.append(os.path.join("lib", "cmake"))
-            self.cpp_info.components["execs"].build_modules["cmake_find_package"] = [module_target_rel_path]
-            self.cpp_info.components["execs"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+            grpc_cpp_plugin_module_path = os.path.join(self._module_path, self._grpc_cpp_plugin_module)
+            self.cpp_info.set_property("cmake_build_modules", [grpc_cpp_plugin_module_path])
+        # TODO: also add these executable imported targets (one custom module file per target)
         # gRPC::grpc_csharp_plugin
         # gRPC::grpc_node_plugin
         # gRPC::grpc_objective_c_plugin
         # gRPC::grpc_php_plugin
         # gRPC::grpc_python_plugin
         # gRPC::grpc_ruby_plugin
+
+        plugins_options = [
+            "cpp_plugin", "csharp_plugin", "node_plugin", "objective_c_plugin",
+            "php_plugin", "python_plugin", "ruby_plugin",
+        ]
+        if any(self.options.get_safe(plugin_option) for plugin_option in plugins_options):
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "gRPC"
+        self.cpp_info.names["cmake_find_package_multi"] = "gRPC"
+        if self.options.cpp_plugin:
+            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"].append(grpc_cpp_plugin_module_path)
+            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"].append(grpc_cpp_plugin_module_path)
