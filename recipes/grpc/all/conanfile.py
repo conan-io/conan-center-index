@@ -54,9 +54,13 @@ class grpcConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _grpc_plugin_template(self):
+        return "grpc_plugin_template.cmake.in"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        self.copy(pattern="cmake/*")
+        self.copy(os.path.join("cmake", self._grpc_plugin_template))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -173,17 +177,73 @@ class grpcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self.options.cpp_plugin:
-            self.copy(self._grpc_cpp_plugin_module, dst=self._module_path,
-                      src=os.path.join(self.source_folder, "cmake"))
+        # Create one custom module file per executable in order to emulate
+        # CMake executables imported targets of grpc
+        for plugin_option, values in self._grpc_plugins.items():
+            if self.options.get_safe(plugin_option):
+                target = values["target"]
+                executable = values["executable"]
+                self._create_executable_module_file(target, executable)
+
+    @property
+    def _grpc_plugins(self):
+        return {
+            "cpp_plugin": {
+                "target": "gRPC::grpc_cpp_plugin",
+                "executable": "grpc_cpp_plugin",
+            },
+            "csharp_plugin": {
+                "target": "gRPC::grpc_csharp_plugin",
+                "executable": "grpc_csharp_plugin",
+            },
+            "node_plugin": {
+                "target": "gRPC::grpc_node_plugin",
+                "executable": "grpc_node_plugin",
+            },
+            "objective_c_plugin": {
+                "target": "gRPC::grpc_objective_c_plugin",
+                "executable": "grpc_objective_c_plugin",
+            },
+            "php_plugin": {
+                "target": "gRPC::grpc_php_plugin",
+                "executable": "grpc_php_plugin",
+            },
+            "python_plugin": {
+                "target": "gRPC::grpc_python_plugin",
+                "executable": "grpc_python_plugin",
+            },
+            "ruby_plugin": {
+                "target": "gRPC::grpc_ruby_plugin",
+                "executable": "grpc_ruby_plugin",
+            },
+        }
+
+    def _create_executable_module_file(self, target, executable):
+        # Copy our CMake module template file to package folder
+        self.copy(self._grpc_plugin_template, dst=self._module_path,
+                  src=os.path.join(self.source_folder, "cmake"))
+
+        # Rename it
+        dst_file = os.path.join(self.package_folder, self._module_path,
+                                "{}.cmake".format(executable))
+        tools.rename(os.path.join(self.package_folder, self._module_path,
+                                  self._grpc_plugin_template),
+                     dst_file)
+
+        # Replace placeholders
+        tools.replace_in_file(dst_file, "@target_name@", target)
+        tools.replace_in_file(dst_file, "@executable_name@", executable)
+
+        find_program_var = "{}_PROGRAM".format(executable.upper())
+        tools.replace_in_file(dst_file, "@find_program_variable@", find_program_var)
+
+        module_folder_depth = len(os.path.normpath(self._module_path).split(os.path.sep))
+        rel_path = "".join(["../"] * module_folder_depth)
+        tools.replace_in_file(dst_file, "@relative_path@", rel_path)
 
     @property
     def _module_path(self):
         return os.path.join("lib", "cmake", "conan_trick")
-
-    @property
-    def _grpc_cpp_plugin_module(self):
-        return os.path.join("grpc_cpp_plugin.cmake")
 
     @property
     def _grpc_components(self):
@@ -308,22 +368,14 @@ class grpcConan(ConanFile):
 
         # Executable imported targets are added through custom CMake module files,
         # since conan generators don't know how to emulate these kind of targets.
-        if self.options.cpp_plugin:
-            grpc_cpp_plugin_module_path = os.path.join(self._module_path, self._grpc_cpp_plugin_module)
-            self.cpp_info.set_property("cmake_build_modules", [grpc_cpp_plugin_module_path])
-        # TODO: also add these executable imported targets (one custom module file per target)
-        # gRPC::grpc_csharp_plugin
-        # gRPC::grpc_node_plugin
-        # gRPC::grpc_objective_c_plugin
-        # gRPC::grpc_php_plugin
-        # gRPC::grpc_python_plugin
-        # gRPC::grpc_ruby_plugin
+        grpc_modules = []
+        for plugin_option, values in self._grpc_plugins.items():
+            if self.options.get_safe(plugin_option):
+                grpc_module_filename = "{}.cmake".format(values["executable"])
+                grpc_modules.append(os.path.join(self._module_path, grpc_module_filename))
+        self.cpp_info.set_property("cmake_build_modules", grpc_modules)
 
-        plugins_options = [
-            "cpp_plugin", "csharp_plugin", "node_plugin", "objective_c_plugin",
-            "php_plugin", "python_plugin", "ruby_plugin",
-        ]
-        if any(self.options.get_safe(plugin_option) for plugin_option in plugins_options):
+        if any(self.options.get_safe(plugin_option) for plugin_option in self._grpc_plugins.keys()):
             bindir = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
@@ -331,6 +383,6 @@ class grpcConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "gRPC"
         self.cpp_info.names["cmake_find_package_multi"] = "gRPC"
-        if self.options.cpp_plugin:
-            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"].append(grpc_cpp_plugin_module_path)
-            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"].append(grpc_cpp_plugin_module_path)
+        if grpc_modules:
+            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
+            self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
