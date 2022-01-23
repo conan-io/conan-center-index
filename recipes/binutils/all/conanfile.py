@@ -5,6 +5,7 @@ from glob import glob
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conans import tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -20,6 +21,10 @@ class BinutilsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     _source_subfolder = "source_subfolder"
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
 
     def package_id(self):
         del self.info.settings.compiler
