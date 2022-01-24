@@ -34,7 +34,7 @@ class PclConan(ConanFile):
         "with_tools": False,
     }
 
-    exports = ["CMakeLists.txt"]
+    exports = ["CMakeLists.txt", "eater.cpp"]
     generators = ["cmake", "cmake_find_package", "cmake_find_package_multi"]
     _cmake = None
 
@@ -80,7 +80,7 @@ class PclConan(ConanFile):
                 raise ConanInvalidConfiguration("Clang with libc++ is version %s but must be at least version %s" %
                         (version, minimum_version))
 
-    def configure(self):
+    def configure2(self):
         if self.options.shared:
             del self.options.fPIC
         self._check_msvc()
@@ -91,7 +91,7 @@ class PclConan(ConanFile):
             #       don't forget to check https://github.com/PointCloudLibrary/pcl/pull/4540 when you bump pcl version
             self.options["qhull"].reentrant = False
 
-    def requirements(self):
+    def requirements2(self):
         self.requires("boost/1.75.0")
         self.requires("eigen/3.3.9")
         self.requires("flann/1.9.1")
@@ -101,12 +101,15 @@ class PclConan(ConanFile):
             self.requires("qhull/8.0.1")
 
     def validate(self):
-        if self.options.with_qhull and self.options["qhull"].reentrant:
-            raise ConanInvalidConfiguration("pcl requires non-reentrant qhull, you must set qhull:reentrant=False")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("not interested")
+        pass
+
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
+        if False:
+            tools.get(**self.conan_data["sources"][self.version])
+            os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
 
     def _patch_sources(self):
         cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
@@ -128,7 +131,7 @@ class PclConan(ConanFile):
             return self._cmake
 
         cmake_definitions = {
-            "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
+            #"PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
         }
 
         pcl_config = {
@@ -170,16 +173,23 @@ class PclConan(ConanFile):
         }
 
         self._cmake = CMake(self)
-        self._cmake.definitions.update(cmake_definitions)
-        self._cmake.definitions.update(pcl_config)
-        self._cmake.definitions.update(pcl_features)
+        #self._cmake.definitions.update(cmake_definitions)
+        #self._cmake.definitions.update(pcl_config)
+        #self._cmake.definitions.update(pcl_features)
         self._cmake.configure()
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for limit in ["memory.max", "memory.high", "memory.low", "memory.min", "memory.swap.max"]:
+            try:
+                self.output.info("%s: %s" % (limit, tools.load("/sys/fs/cgroup/%s" % limit)))
+            except Exception:
+                pass
+
+        #self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+        self.run(os.path.join("bin", "eater"))
 
     def package(self):
         cmake = self._configure_cmake()
