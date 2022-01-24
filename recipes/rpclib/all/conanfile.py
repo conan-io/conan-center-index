@@ -69,6 +69,13 @@ class rpclibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "rpclib::rpc")
         self.cpp_info.set_property("pkg_config_name", "rpclib")
 
+        # Fix for installing dll to lib folder
+        # - Default CMAKE installs the dll to the lib folder
+        #   causing the test_package to fail
+        if self.settings.os in ["Windows"]:
+            if self.options.shared:
+                self.cpp_info.bindirs.append(os.path.join(self.package_folder, "lib"))
+
         # TODO: Remove after Conan 2.0
         self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"
         self.cpp_info.components["_rpc"].names["cmake_find_package_multi"] = "rpc"
