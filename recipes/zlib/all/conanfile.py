@@ -24,6 +24,7 @@ class ZlibConan(ConanFile):
     }
 
     generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -49,7 +50,8 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -73,12 +75,21 @@ class ZlibConan(ConanFile):
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SKIP_INSTALL_ALL"] = False
+        self._cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
+        self._cmake.definitions["SKIP_INSTALL_HEADERS"] = False
+        self._cmake.definitions["SKIP_INSTALL_FILES"] = True
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
     def build(self):
         self._patch_sources()
-        make_target = "zlib" if self.options.shared else "zlibstatic"
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        cmake.build(target=make_target)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
@@ -107,22 +118,8 @@ class ZlibConan(ConanFile):
     def package(self):
         self._extract_license()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-
-        # Copy headers
-        for header in ["*zlib.h", "*zconf.h"]:
-            self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
-
-        # Copying static and dynamic libs
-        if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=self._build_subfolder, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=self._build_subfolder, keep_path=False)
-        else:
-            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
-
+        cmake = self._configure_cmake()
+        cmake.install()
         self._rename_libraries()
 
     def package_info(self):
