@@ -46,6 +46,9 @@ class RapidYAMLConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("c4core/0.1.8")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
@@ -73,6 +76,11 @@ class RapidYAMLConan(ConanFile):
         return self._cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4_install_exports(DEPENDENCIES c4core)", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), """c4_require_subproject(c4core INCORPORATE
+    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)""", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), """    LIBS c4core
+    INCORPORATE c4core""", "")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -88,7 +96,7 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
         # TODO: create c4core recipe
-        self.cpp_info.libs = ["ryml", "c4core"]
+        self.cpp_info.libs = ["ryml"]
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"
