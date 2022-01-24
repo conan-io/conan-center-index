@@ -6,7 +6,7 @@ index 2bd57750..ca3ded62 100644
  # include "assert.h"
  #endif
  
-+#ifdef WIN32_NATIVE
++#ifdef _WIN32
 +#  include <crtdbg.h>
 +#endif
 +
@@ -17,7 +17,7 @@ index 2bd57750..ca3ded62 100644
    textdomain (PACKAGE);
    atexit (close_stdin);
  
-+#ifdef WIN32_NATIVE
++#ifdef _WIN32
 +  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 +  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 +  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
