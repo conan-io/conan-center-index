@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a75251a..605f9d6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,9 +17,6 @@ option(RYML_DBG "Enable (very verbose) ryml debug prints." OFF)
+ 
+ #-------------------------------------------------------
+ 
+-c4_require_subproject(c4core INCORPORATE
+-    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)
+-
+ c4_add_library(ryml
+     SOURCES
+         ryml.hpp
+@@ -52,8 +49,6 @@ c4_add_library(ryml
+     INC_DIRS
+         $<BUILD_INTERFACE:${RYML_SRC_DIR}>
+         $<INSTALL_INTERFACE:include>
+-    LIBS c4core
+-    INCORPORATE c4core
+     )
+ 
+ if(NOT RYML_DEFAULT_CALLBACKS)
+@@ -68,7 +63,6 @@ endif()
+ #-------------------------------------------------------
+ 
+ c4_install_target(ryml)
+-c4_install_exports(DEPENDENCIES c4core)
+ c4_pack_project()
+ 
+ 

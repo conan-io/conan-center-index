@@ -12,7 +12,6 @@ class RapidYAMLConan(ConanFile):
     homepage = "https://github.com/biojppm/rapidyaml"
     license = "MIT",
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,7 +22,6 @@ class RapidYAMLConan(ConanFile):
         "fPIC": True,
         "with_default_callbacks": True,
     }
-
     generators = "cmake"
 
     _compiler_required_cpp11 = {
@@ -37,6 +35,11 @@ class RapidYAMLConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,11 +79,8 @@ class RapidYAMLConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "c4_install_exports(DEPENDENCIES c4core)", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), """c4_require_subproject(c4core INCORPORATE
-    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)""", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), """    LIBS c4core
-    INCORPORATE c4core""", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
