@@ -415,7 +415,7 @@ class LibcurlConan(ConanFile):
 
             # fix generated autotools files on alle to have relocateable binaries
             if tools.is_apple_os(self.settings.os):
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
 
             self.run("chmod +x configure")
 
@@ -537,7 +537,7 @@ class LibcurlConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CURL")
         self.cpp_info.set_property("cmake_target_name", "CURL::libcurl")
-        self.cpp_info.set_property("cmake_find_mode", "both") 
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "libcurl")
 
         self.cpp_info.names["cmake_find_package"] = "CURL"
