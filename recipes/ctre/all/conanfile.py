@@ -20,19 +20,26 @@ class CtreConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.Version(self.settings.compiler.version)
+        ctre_version = tools.Version(self.version)
 
-        min_gcc = "7.4" if tools.Version(self.version) < "3" else "8"
+        min_gcc = "7.4" if ctre_version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        if (compiler == "Visual Studio" or compiler == "msvc") and version < "15":
-            raise ConanInvalidConfiguration("ctre doesn't support MSVC < 15")
-        elif compiler == "gcc" and version < min_gcc:
-            raise ConanInvalidConfiguration("ctre doesn't support gcc < {}".format(min_gcc))
-        elif compiler == "clang" and version < "6.0":
-            raise ConanInvalidConfiguration("ctre doesn't support clang < 6.0")
-        elif compiler == "apple-clang" and version < "10.0":
-            raise ConanInvalidConfiguration("ctre doesn't support Apple clang < 10.0")
+        if (compiler == "Visual Studio" or compiler == "msvc") and compiler_version < "15":
+            raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 15".format(self.name, self.version))
+        elif compiler == "gcc" and compiler_version < min_gcc:
+            raise ConanInvalidConfiguration("{}/{} doesn't support gcc < {}".format(self.name, self.version, min_gcc))
+        elif compiler == "clang" and compiler_version < "6.0":
+            raise ConanInvalidConfiguration("{}/{} doesn't support clang < 6.0".format(self.name, self.version))
+        elif compiler == "apple-clang":
+            if compiler_version < "10.0":
+                raise ConanInvalidConfiguration("{}/{} doesn't support Apple clang < 10.0".format(self.name, self.version))
+            # "library does not compile with (at least) Xcode 12.0-12.4"
+            # https://github.com/hanickadot/compile-time-regular-expressions/issues/188
+            # it's also occurred in Xcode 13.
+            if ctre_version.major == "3" and ctre_version.minor == "4" and compiler_version >= "12":
+                raise ConanInvalidConfiguration("{}/{} doesn't support Apple clang".format(self.name, self.version))
 
     def package_id(self):
         self.info.header_only()
