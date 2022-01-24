@@ -1,13 +1,14 @@
 from conans import ConanFile, tools, CMake
+from conan.tools.microsoft import msvc_runtime_flag
 import os
-import glob
 
+required_conan_version = ">=1.43.0"
 
 class rpclibConan(ConanFile):
     name = "rpclib"
     description = "A modern C++ msgpack-RPC server and client library."
     license = "MIT"
-    topics = ("rpc", "rpclib", "ipc")
+    topics = ("rpc", "ipc", "rpc-server")
     homepage = "https://github.com/rpclib/rpclib/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -40,10 +41,8 @@ class rpclibConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -53,6 +52,8 @@ class rpclibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if "MT" in str(msvc_runtime_flag(self)):
+            self._cmake.definitions["RPCLIB_MSVC_STATIC_RUNTIME"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -64,6 +65,14 @@ class rpclibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["rpc"]
-        self.cpp_info.names["cmake_find_package"] = "rpc"
-        self.cpp_info.names["cmake_find_package_multi"] = "rpc"
+        self.cpp_info.set_property("cmake_file_name", "rpclib")
+        self.cpp_info.set_property("cmake_target_name", "rpclib::rpc")
+        self.cpp_info.set_property("pkg_config_name", "rpclib")
+
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"
+        self.cpp_info.components["_rpc"].names["cmake_find_package_multi"] = "rpc"
+        self.cpp_info.components["_rpc"].libs = ["rpc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_rpc"].system_libs = ["pthread"]
+        self.cpp_info.names["pkg_config"] = "librpc"
