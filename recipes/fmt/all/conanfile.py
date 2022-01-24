@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FmtConan(ConanFile):
@@ -49,6 +49,8 @@ class FmtConan(ConanFile):
             del self.options.fPIC
         if not self._has_with_os_api_option:
             del self.options.with_os_api
+        elif self.settings.os == "baremetal":
+            self.options.with_os_api = False
 
     def configure(self):
         if self.options.header_only:
