@@ -21,17 +21,24 @@ class BinutilsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     _source_subfolder = "source_subfolder"
+    win_bash = True
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
+        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            raise ConanInvalidConfiguration("This recipes supports only Linux, FreeBSD and Windows")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
-        self.requires("readline/8.0")
+        if self.settings.os != "Windows":
+            self.requires("zlib/1.2.11")
+            self.requires("readline/8.0")
+
+    def build_requirements(self):
+        if self.settings.os == "Windows":
+            self.build_requires("msys2/cci.latest")
+            self.build_requires("mingw-builds/11.2.0")
 
     def generate(self):
         ad = AutotoolsDeps(self)
@@ -42,7 +49,8 @@ class BinutilsConan(ConanFile):
 
         ac = AutotoolsToolchain(self)
         ac.default_configure_install_args = True
-        ac.configure_args.extend(["--with-system-zlib", "--with-system-readline"])
+        if self.settings.os != "Windows":
+            ac.configure_args.extend(["--with-system-zlib", "--with-system-readline"])
         ac.generate()
 
     def source(self):
