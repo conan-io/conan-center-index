@@ -170,21 +170,21 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.6.0")
+            self.requires("wolfssl/4.8.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.43.0")
+            self.requires("libnghttp2/1.45.1")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
+            self.requires("libssh2/1.10.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.17.1")
+            self.requires("c-ares/1.17.2")
 
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
