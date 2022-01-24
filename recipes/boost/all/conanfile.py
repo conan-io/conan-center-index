@@ -702,7 +702,7 @@ class BoostConan(ConanFile):
                 self.output.info("checking {}".format(python_lib))
                 if os.path.isfile(python_lib):
                     self.output.info("found python library: {}".format(python_lib))
-                    return python_lib.replace("\\", "/")
+                    return libdir.replace("\\", "/")
         raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
