@@ -46,6 +46,7 @@ class LibTomCryptConan(ConanFile):
             self.build_requires("make/4.3")
         if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
             self.build_requires("libtool/2.4.6")
+        self.build_requires("libtommath/1.2.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -53,9 +54,9 @@ class LibTomCryptConan(ConanFile):
         #for patch in self.conan_data["patches"][self.version]:
         #    tools.patch(**patch)
 
-    def requirements(self):
-        for req in self.conan_data["requirements"]:
-            self.requires(req)
+    #def requirements(self):
+    #    for req in self.conan_data["requirements"]:
+    #        self.requires(req)
 
     def _run_makefile(self, target=None):
         target = target or ""
