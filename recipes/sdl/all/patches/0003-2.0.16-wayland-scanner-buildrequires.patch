@@ -1,8 +1,6 @@
-diff --git a/cmake/sdlchecks.cmake b/cmake/sdlchecks.cmake
-index 52fed5d..d87b7d9 100644
 --- a/cmake/sdlchecks.cmake
 +++ b/cmake/sdlchecks.cmake
-@@ -628,21 +628,11 @@ endmacro()
+@@ -628,10 +628,10 @@ endmacro()
  # - HAVE_DLOPEN opt
  macro(CheckWayland)
    if(VIDEO_WAYLAND)
@@ -11,19 +9,16 @@ index 52fed5d..d87b7d9 100644
 +    pkg_check_modules(WAYLAND wayland-client wayland-egl wayland-cursor egl xkbcommon)
  
      if(WAYLAND_FOUND AND HAVE_VIDEO_OPENGL_EGL)
--      execute_process(
--        COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=wayland_scanner wayland-scanner
--        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
--        RESULT_VARIABLE WAYLAND_SCANNER_RC
--        OUTPUT_VARIABLE WAYLAND_SCANNER
--        ERROR_QUIET
--        OUTPUT_STRIP_TRAILING_WHITESPACE
--      )
--      if(NOT WAYLAND_SCANNER_RC EQUAL 0)
--        set(WAYLAND_FOUND FALSE)
--      endif()
++      if(0)
+       execute_process(
+         COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=wayland_scanner wayland-scanner
+         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+@@ -643,6 +643,8 @@ macro(CheckWayland)
+       if(NOT WAYLAND_SCANNER_RC EQUAL 0)
+         set(WAYLAND_FOUND FALSE)
+       endif()
++      endif()
 +      set(WAYLAND_SCANNER "wayland-scanner")
-+      message("Force WAYLAND_SCANNER to '${WAYLAND_SCANNER}', it's provided by Conan as build-requires")
      endif()
  
      if(WAYLAND_FOUND)
