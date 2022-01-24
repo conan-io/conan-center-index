@@ -3,7 +3,6 @@ from conans.errors import ConanInvalidConfiguration
 import contextlib
 import glob
 import os
-import shutil
 
 required_conan_version = ">=1.38.0"
 
@@ -48,7 +47,6 @@ class CairoConan(ConanFile):
         "tee": True,
     }
 
-    exports_sources = "patches/*"
     generators = "pkg_config"
 
     _meson = None
@@ -64,6 +62,10 @@ class CairoConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -202,12 +204,12 @@ class CairoConan(ConanFile):
             meson.build()
 
     def _fix_library_names(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    shutil.move(filename_old, filename_new)
+                    tools.rename(filename_old, filename_new)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
