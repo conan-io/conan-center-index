@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.7)
 project(PackageTest)
 
+set(CONAN_CMAKE_CXX_STANDARD 17)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 find_package(ncbi-cxx-toolkit-public REQUIRED)
