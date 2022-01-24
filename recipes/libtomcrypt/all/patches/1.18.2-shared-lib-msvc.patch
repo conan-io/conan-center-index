@@ -1,0 +1,60 @@
+--- makefile.msvc
++++ makefile.msvc
+@@ -16,16 +16,18 @@
+ 
+ #The following can be overridden from command line e.g. make -f makefile.msvc CC=gcc ARFLAGS=rcs
+ PREFIX    = c:\devel
+-CFLAGS    = /Ox /DUSE_LTM /DLTM_DESC /I../libtommath
+-EXTRALIBS = ../libtommath/tommath.lib
++CFLAGS    = /Ox /DUSE_LTM /DLTM_DESC
++LDFLAGS   =
+ 
+ #Compilation flags
+-LTC_CFLAGS  = /nologo /Isrc/headers/ /Itests/ /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /DLTC_SOURCE /DLTC_NO_PROTOTYPES /W3 $(CFLAGS)
+-LTC_LDFLAGS = advapi32.lib $(EXTRALIBS)
++LTC_CFLAGS  = /nologo /Isrc/headers/ /Itests/ /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /DLTC_SOURCE /DLTC_NO_PROTOTYPES /W3 $(CFLAGS)
++LTC_LDFLAGS = $(LDFLAGS) advapi32.lib $(EXTRALIBS)
+ VERSION=1.18.2
+ 
+ #Libraries to be created (this makefile builds only static libraries)
+ LIBMAIN_S =tomcrypt.lib
++LIBMAIN_I =tomcrypt.dll.lib
++LIBMAIN_D =tomcrypt.dll
+ 
+ #List of objects to compile (all goes to tomcrypt.lib)
+ OBJECTS=src/ciphers/aes/aes.obj src/ciphers/aes/aes_enc.obj src/ciphers/anubis.obj src/ciphers/blowfish.obj \
+@@ -225,6 +227,10 @@
+ $(LIBMAIN_S): $(OBJECTS)
+ 	lib /out:$(LIBMAIN_S) $(OBJECTS)
+ 
++#Create DLL + import library tomcrypt.dll.lib
++$(LIBMAIN_D) $(LIBMAIN_I): $(OBJECTS) tomcrypt.def
++	link /dll /out:$(LIBMAIN_D) /implib:$(LIBMAIN_I) /def:tomcrypt.def $(LTC_LDFLAGS) $(OBJECTS)
++
+ #Demo tools/utilities
+ hashsum.exe: demos/hashsum.c tests/common.c $(LIBMAIN_S)
+ 	cl $(LTC_CFLAGS) demos/hashsum.c tests/common.c $(LIBMAIN_S) $(LTC_LDFLAGS) /Fe$@
+@@ -246,7 +252,7 @@
+ 	cl $(LTC_CFLAGS) $(TOBJECTS) $(LIBMAIN_S) $(LTC_LDFLAGS) /Fe$@
+ 	@echo NOTICE: start the tests by launching test.exe
+ 
+-all: $(LIBMAIN_S) hashsum.exe ltcrypt.exe small.exe tv_gen.exe sizes.exe constants.exe timing.exe test.exe
++all: $(LIBMAIN_S) hashsum.exe ltcrypt.exe small.exe tv_gen.exe sizes.exe constants.exe timing.exe test.exe $(LIBMAIN_D)
+ 
+ test: test.exe
+ 
+@@ -255,11 +261,13 @@
+ 	@-cmd /c del /Q /S *.OBJ *.LIB *.EXE *.DLL 2>nul
+ 
+ #Install the library + headers
+-install: $(LIBMAIN_S)
++install: $(LIBMAIN_S) $(LIBMAIN_I) $(LIBMAIN_D)
+ 	cmd /c if not exist "$(PREFIX)\bin" mkdir "$(PREFIX)\bin"
+ 	cmd /c if not exist "$(PREFIX)\lib" mkdir "$(PREFIX)\lib"
+ 	cmd /c if not exist "$(PREFIX)\include" mkdir "$(PREFIX)\include"
+ 	copy /Y $(LIBMAIN_S) "$(PREFIX)\lib"
++	copy /Y $(LIBMAIN_I) "$(PREFIX)\lib"
++	copy /Y $(LIBMAIN_D) "$(PREFIX)\bin"
+ 	copy /Y src\headers\tomcrypt*.h "$(PREFIX)\include"
+ 
+ #Install useful tools
