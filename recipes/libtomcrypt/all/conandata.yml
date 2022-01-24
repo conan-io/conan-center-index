@@ -1,0 +1,12 @@
+sources:
+  "1.18.2":
+    url: "https://github.com/libtom/libtomcrypt/releases/download/v1.18.2/crypt-1.18.2.tar.xz"
+    sha256: "96ad4c3b8336050993c5bc2cf6c057484f2b0f9f763448151567fbab5e767b84"
+patches:
+  "1.18.2":
+    - patch_file: "patches/1.18.2-linkage-warnings-msvc.patch"
+      base_path: "source_subfolder"
+    #- patch_file: "patches/1.18.2-shared-lib-msvc.patch"
+    #  base_path: "source_subfolder"
+requirements:
+  - "libtommath/1.2.0"
