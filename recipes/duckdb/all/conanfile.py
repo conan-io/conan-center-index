@@ -56,6 +56,10 @@ class DuckdbConan(ConanFile):
         tools.get(**(self.conan_data["sources"][self.version][1]),
                   destination=os.path.join(self._source_subfolder, "src", "amalgamation"))
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
