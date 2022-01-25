@@ -32,7 +32,7 @@ class Llvm(ConanFile):
     description = 'The LLVM Project is a collection of modular and reusable compiler and toolchain technologies'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://github.com/llvm/llvm-project'
-    license = 'Apache 2.0'
+    license = 'Apache-2.0'
     topics = 'conan', 'c++', 'compiler', 'tooling'
 
     settings = 'os', 'arch', 'compiler', 'build_type'
