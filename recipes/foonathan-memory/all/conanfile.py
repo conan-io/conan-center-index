@@ -10,7 +10,7 @@ class FoonathanMemory(ConanFile):
     homepage = "https://github.com/foonathan/memory"
     url = "https://github.com/conan-io/conan-center-index"
     description = "STL compatible C++ memory allocator library"
-    topics = ("conan", "memory", "STL", "RawAllocator")
+    topics = ("conan", "memory", "stl", "rawallocator")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared":          [True, False],
@@ -88,13 +88,7 @@ class FoonathanMemory(ConanFile):
                 endif()
             """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
-    
-    def validate(self):
-        # FIXME: jenkins servers throw error with this combination 
-        # quick fix until somebody can reproduce
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
-            raise ConanInvalidConfiguration("package currently do not support cross build to Macos armv8")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -137,7 +131,7 @@ class FoonathanMemory(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.includedirs = [
             os.path.join("include", "foonathan_memory"),
-            os.path.join("include", "foonathan_memory", "comp")
+            #os.path.join("include", "foonathan_memory", "comp")
         ]
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
