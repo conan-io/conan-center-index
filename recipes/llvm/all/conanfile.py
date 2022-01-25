@@ -47,6 +47,16 @@ class Llvm(ConanFile):
         'fPIC': True
     }}
     generators = 'cmake_find_package'
+    installed = False
+
+    def run(self, command):
+        if "cmake " in command:
+            command = command.replace("cmake ", "/usr/bin/time -v cmake ")
+        if not self.installed:
+            self.installed = True
+            super(Llvm, self).run("sudo apt-get update -y")
+            super(Llvm, self).run("sudo apt-get install -y --no-install-recommends time")
+        super(Llvm, self).run(command)
 
     @property
     def repo_folder(self):
@@ -114,6 +124,8 @@ class Llvm(ConanFile):
                     shutil.rmtree(ignore_path)
 
     def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("")
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("Compiler version too low for this package.")
 
