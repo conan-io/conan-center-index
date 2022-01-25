@@ -144,7 +144,7 @@ class OpenCascadeConan(ConanFile):
             "project (OCCT)",
             "project (OCCT)\n"
             "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\n"
-            "conan_basic_setup(TARGETS)\n"
+            "conan_basic_setup(TARGETS KEEP_RPATHS)\n"
             "conan_global_flags()")
 
         # Avoid to add system include/libs directories
@@ -302,6 +302,9 @@ class OpenCascadeConan(ConanFile):
         # Inject C++ standard from profile since we have removed hardcoded C++11 from upstream build files
         if not tools.valid_min_cppstd(self, 11):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         self._cmake.definitions["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         self._cmake.definitions["INSTALL_TEST_CASES"] = False
