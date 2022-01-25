@@ -3,6 +3,7 @@ import os
 from conans.errors import ConanInvalidConfiguration
 import textwrap
 
+
 class FastDDSConan(ConanFile):
 
     name = "fast-dds"
@@ -59,7 +60,7 @@ class FastDDSConan(ConanFile):
             self._module_subfolder,
             "conan-target-properties.cmake"
         )
-    
+
     @property
     def _minimum_cpp_standard(self):
         return 11
@@ -89,10 +90,6 @@ class FastDDSConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -103,7 +100,7 @@ class FastDDSConan(ConanFile):
 
     def _configure_cmake(self):
         if not self._cmake:
-            self._cmake = CMake(self)         
+            self._cmake = CMake(self)
             self._cmake.definitions["BUILD_MEMORY_TOOLS"] = False
             self._cmake.definitions["NO_TLS"] = not self.options.with_ssl
             self._cmake.definitions["SECURITY"] = self.options.with_ssl
@@ -121,8 +118,6 @@ class FastDDSConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -131,7 +126,8 @@ class FastDDSConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        min_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
@@ -143,20 +139,20 @@ class FastDDSConan(ConanFile):
             if ("MT" in self.settings.compiler.runtime and self.options.shared):
                 # This combination leads to an fast-dds error when linking
                 # linking dynamic '*.dll' and static MT runtime
-                raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
+                raise ConanInvalidConfiguration(
+                    "Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
 
     def build(self):
-        #dynamic patch works for 2.3.2 to 2.5.0
+        # dynamic patch works for 2.3.2 to 2.5.0
         tools.replace_in_file("{}/CMakeLists.txt".format(self._source_subfolder),
-            "eprosima_find_thirdparty(TinyXML2 tinyxml2)",
-            "eprosima_find_thirdparty(tinyxml2 REQUIRED)")
+                              "eprosima_find_thirdparty(TinyXML2 tinyxml2)",
+                              "eprosima_find_thirdparty(tinyxml2 REQUIRED)")
         tools.replace_in_file("{}/CMakeLists.txt".format(self._source_subfolder),
-            "eprosima_find_thirdparty(Asio asio VERSION 1.10.8)",
-            "eprosima_find_thirdparty(asio REQUIRED)")
+                              "eprosima_find_thirdparty(Asio asio VERSION 1.10.8)",
+                              "eprosima_find_thirdparty(asio REQUIRED)")
         tools.replace_in_file("{}/src/cpp/CMakeLists.txt".format(self._source_subfolder),
-            "${TINYXML2_LIBRARY}",
-            "tinyxml2::tinyxml2")
-        #self._patch_sources()
+                              "${TINYXML2_LIBRARY}",
+                              "tinyxml2::tinyxml2")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -186,7 +182,7 @@ class FastDDSConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "fastdds"
         self.cpp_info.names["cmake_find_package_multi"] = "fastdds"
         # component fastrtps
-        self.cpp_info.components["fastrtps"].names["cmake_find_package"]  = "fastrtps"
+        self.cpp_info.components["fastrtps"].names["cmake_find_package"] = "fastrtps"
         self.cpp_info.components["fastrtps"].names["cmake_find_package_multi"] = "fastrtps"
         self.cpp_info.components["fastrtps"].libs = tools.collect_libs(self)
         self.cpp_info.components["fastrtps"].requires = [
@@ -198,27 +194,37 @@ class FastDDSConan(ConanFile):
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")
         if self.settings.os == "Linux":
-            self.cpp_info.components["fastrtps"].system_libs.extend(["rt", "dl", "atomic"])
+            self.cpp_info.components["fastrtps"].system_libs.extend(
+                ["rt", "dl", "atomic"])
         elif self.settings.os == "Windows":
-            self.cpp_info.components["fastrtps"].system_libs.extend(["iphlpapi","shlwapi"])
+            self.cpp_info.components["fastrtps"].system_libs.extend(
+                ["iphlpapi", "shlwapi"])
             if self.options.shared:
-                self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
+                self.cpp_info.components["fastrtps"].defines.append(
+                    "FASTRTPS_DYN_LINK")
         if self.options.with_ssl:
-            self.cpp_info.components["fastrtps"].requires.append("openssl::openssl")
-        self.cpp_info.components["fastrtps"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components["fastrtps"].requires.append(
+                "openssl::openssl")
+        self.cpp_info.components["fastrtps"].builddirs.append(
+            self._module_subfolder)
+        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [
+            self._module_file_rel_path]
+        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [
+            self._module_file_rel_path]
         # component fast-discovery
         self.cpp_info.components["fast-discovery-server"].names["cmake_find_package"] = "fast-discovery-server"
         self.cpp_info.components["fast-discovery-server"].names["cmake_find_package_multi"] = "fast-discovery-server"
         self.cpp_info.components["fast-discovery-server"].bindirs = ["bin"]
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var for fast-dds::fast-discovery-server with : {}".format(bin_path)),
+        self.output.info(
+            "Appending PATH env var for fast-dds::fast-discovery-server with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
         # component tools
         self.cpp_info.components["tools"].names["cmake_find_package"] = "tools"
         self.cpp_info.components["tools"].names["cmake_find_package_multi"] = "tools"
-        self.cpp_info.components["tools"].bindirs = [os.path.join("bin","tools")]
+        self.cpp_info.components["tools"].bindirs = [
+            os.path.join("bin", "tools")]
         bin_path = os.path.join(self._pkg_bin, "tools")
-        self.output.info("Appending PATH env var for fast-dds::tools with : {}".format(bin_path)),
+        self.output.info(
+            "Appending PATH env var for fast-dds::tools with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
