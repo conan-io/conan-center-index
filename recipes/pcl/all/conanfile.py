@@ -37,6 +37,16 @@ class PclConan(ConanFile):
     exports = ["CMakeLists.txt"]
     generators = ["cmake", "cmake_find_package", "cmake_find_package_multi"]
     _cmake = None
+    installed = False
+
+    def run(self, command):
+        if "cmake " in command:
+            command = command.replace("cmake ", "/usr/bin/time -v cmake ")
+        if not self.installed:
+            self.installed = True
+            super(PclConan, self).run("sudo apt-get update -y")
+            super(PclConan, self).run("sudo apt-get install -y --no-install-recommends time")
+        super(PclConan, self).run(command)
 
     @property
     def _source_subfolder(self):
@@ -101,6 +111,8 @@ class PclConan(ConanFile):
             self.requires("qhull/8.0.1")
 
     def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("pcl requires non-reentrant qhull, you must set qhull:reentrant=False")
 
