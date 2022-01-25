@@ -23,9 +23,11 @@ class TestPackageConan(ConanFile):
     def build(self):
         if self._skip_test:
             return
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        # TODO: conan v2: replace by VirtualBuildEnv if cross-build or VirtualRunEnv for native build
+        with tools.run_environment(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if self._skip_test:
