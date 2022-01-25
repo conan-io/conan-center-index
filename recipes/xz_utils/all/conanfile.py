@@ -82,6 +82,14 @@ class XZUtils(ConanFile):
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
 
+        # Allow to install relocatable shared lib on macOS
+        if tools.is_apple_os(self.settings.os):
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "configure"),
+                "-install_name \\$rpath/",
+                "-install_name @rpath/",
+            )
+
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
