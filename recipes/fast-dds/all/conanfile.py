@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 from conans.errors import ConanInvalidConfiguration
+from conan.tools import files
 import textwrap
 
 
@@ -69,7 +70,7 @@ class FastDDSConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "gcc": "5",
+            "gcc": "7",
             "clang": "3.9",
             "apple-clang": "8",
         }
@@ -161,7 +162,7 @@ class FastDDSConan(ConanFile):
         cmake.install()
         tools.rmdir(self._pkg_share)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.files.rename(
+        files.rename(
             src=self._pkg_tools,
             dst=os.path.join(self._pkg_bin, "tools")
         )
