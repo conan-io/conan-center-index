@@ -72,8 +72,6 @@ class CocoyaxiConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if not self.options.shared:
-            self._cmake.definitions["FPIC"] = self.options.get_safe("fPIC", False)
         runtime = self.settings.get_safe("compiler.runtime")
         if runtime:
             self._cmake.definitions["STATIC_VS_CRT"] = "MT" in runtime
