@@ -6,6 +6,8 @@ required_conan_version = ">=1.33.0"
 class WhereamiConan(ConanFile):
     name = "whereami"
     description = "Locate the current executable and the current module/library on the file system"
+    topics = ("whereami", "introspection", "getmodulefilename",
+              "dladdr", "executable-path", "getexecutablepath")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gpakosz/whereami"
     license = ("MIT", "WTFPL")
