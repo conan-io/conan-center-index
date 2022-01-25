@@ -91,6 +91,9 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
+    def package_id(self):
+        del self.info.options.secure
+
     def build_requirements(self):
         if hasattr(self, "settings_build"):
             self.build_requires('protobuf/3.17.1')
