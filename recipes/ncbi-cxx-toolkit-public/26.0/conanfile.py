@@ -133,9 +133,13 @@ class NcbiCxxToolkit(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:   
-            raise ConanInvalidConfiguration("This operationg system is not supported")
+            raise ConanInvalidConfiguration("This operating system is not supported")
         if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            runtime = self.settings.compiler.get_safe("runtime")
+            if runtime == "MT" or runtime == "MTd":
+                raise ConanInvalidConfiguration("This configuration is not supported")
         if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
 
