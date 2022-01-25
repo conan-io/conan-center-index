@@ -10,7 +10,7 @@ class FastDDSConan(ConanFile):
     homepage = "https://fast-dds.docs.eprosima.com/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The most complete OSS DDS implementation for embedded systems."
-    topics = ("DDS", "Middleware", "IPC")
+    topics = ("dds", "middleware", "ipc")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared":           [True, False],
@@ -114,9 +114,8 @@ class FastDDSConan(ConanFile):
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
         self.requires("asio/1.21.0")
-        self.requires("fast-cdr/1.0.22")
+        self.requires("fast-cdr/1.0.23")
         self.requires("foonathan-memory/0.7.1")
-        self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
 
@@ -147,7 +146,17 @@ class FastDDSConan(ConanFile):
                 raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
 
     def build(self):
-        self._patch_sources()
+        #dynamic patch works for 2.3.2 to 2.5.0
+        tools.replace_in_file("{}/CMakeLists.txt".format(self._source_subfolder),
+            "eprosima_find_thirdparty(TinyXML2 tinyxml2)",
+            "eprosima_find_thirdparty(tinyxml2 REQUIRED)")
+        tools.replace_in_file("{}/CMakeLists.txt".format(self._source_subfolder),
+            "eprosima_find_thirdparty(Asio asio VERSION 1.10.8)",
+            "eprosima_find_thirdparty(asio REQUIRED)")
+        tools.replace_in_file("{}/src/cpp/CMakeLists.txt".format(self._source_subfolder),
+            "${TINYXML2_LIBRARY}",
+            "tinyxml2::tinyxml2")
+        #self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -156,7 +165,7 @@ class FastDDSConan(ConanFile):
         cmake.install()
         tools.rmdir(self._pkg_share)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rename(
+        tools.files.rename(
             src=self._pkg_tools,
             dst=os.path.join(self._pkg_bin, "tools")
         )
@@ -185,7 +194,6 @@ class FastDDSConan(ConanFile):
             "asio::asio",
             "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory",
-            "boost::boost"
         ]
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")
