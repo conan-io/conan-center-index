@@ -21,7 +21,8 @@ class LibTomCryptConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/*"
+    
+    exports_sources = ["patches/*", "tomcrypt.def"]
 
     @property
     def _source_subfolder(self):
@@ -50,8 +51,6 @@ class LibTomCryptConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        #for patch in self.conan_data["patches"][self.version]:
-        #    tools.patch(**patch)
 
     def requirements(self):
         if tools.Version(self.version) >= "1.18.2":
@@ -85,7 +84,6 @@ class LibTomCryptConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 if self.settings.compiler == "Visual Studio":
                     if self.options.shared:
-                        raise ValueError("MSVC shared library builds are not (yet) supported, sorry.")
                         target = "tomcrypt.dll"
                     else:
                         target = "tomcrypt.lib"
