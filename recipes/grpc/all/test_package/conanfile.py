@@ -29,7 +29,7 @@ class TestPackageConan(ConanFile):
         # should be fixed by using: CMakeToolchain + VirtualBuildEnv
         if tools.cross_building(self) and self.options["grpc"].shared:
             return
-        with self._buildenv:
+        with self._buildenv():
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
