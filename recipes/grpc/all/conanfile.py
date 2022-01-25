@@ -314,16 +314,6 @@ class grpcConan(ConanFile):
                 "requires": ["grpc++", "protobuf::libprotobuf"],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
-            "grpc++_reflection": {
-                "lib": "grpc++_reflection",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpcpp_channelz": {
-                "lib": "grpcpp_channelz",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
             "upb": {
                 "lib": "upb",
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
@@ -350,6 +340,20 @@ class grpcConan(ConanFile):
                 "grpc++_unsecure": {
                     "lib": "grpc++_unsecure",
                     "requires": ["grpc_unsecure", "protobuf::libprotobuf"],
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+            })
+
+        if self.options.codegen:
+            components.update({
+                "grpc++_reflection": {
+                    "lib": "grpc++_reflection",
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "grpcpp_channelz": {
+                    "lib": "grpcpp_channelz",
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
