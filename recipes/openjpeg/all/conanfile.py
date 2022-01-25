@@ -25,13 +25,17 @@ class OpenjpegConan(ConanFile):
         "build_codec": False,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,6 +77,8 @@ class OpenjpegConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+           tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
