@@ -22,7 +22,7 @@ class RapidYAMLConan(ConanFile):
         "fPIC": True,
         "with_default_callbacks": True,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _compiler_required_cpp11 = {
         "Visual Studio": "13",
