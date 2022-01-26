@@ -339,7 +339,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.21.3")
+        self.build_requires("cmake/3.22.0")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
