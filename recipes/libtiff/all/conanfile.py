@@ -92,7 +92,7 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.8")
+            self.requires("libdeflate/1.9")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
@@ -102,9 +102,9 @@ class LibtiffConan(ConanFile):
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
