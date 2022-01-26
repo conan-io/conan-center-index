@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -120,13 +121,13 @@ class LibtiffConan(ConanFile):
 
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
         if self.options.jbig:
-            tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
+            rename(self, os.path.join(self.build_folder, "Findjbig.cmake"),
                          os.path.join(self.build_folder, "ConanFindjbig.cmake"))
         else:
             os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
         if self._has_zstd_option:
             if self.options.zstd:
-                tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
+                rename(self, os.path.join(self.build_folder, "Findzstd.cmake"),
                              os.path.join(self.build_folder, "ConanFindzstd.cmake"))
             else:
                 os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
