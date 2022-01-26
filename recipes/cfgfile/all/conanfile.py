@@ -12,7 +12,7 @@ class CfgfileConan(ConanFile):
     description = "Header-only library for reading/saving configuration files with schema defined in sources."
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
-    topics = ("conan", "cfgfile", "configuration")
+    topics = ("cfgfile", "configuration", "file")
     settings = "os", "arch", "compiler", "build_type"
 
     _cmake = None
@@ -59,7 +59,9 @@ class CfgfileConan(ConanFile):
             raise ConanInvalidConfiguration("cfgfile requires a compiler that supports at least C++14")
 
     def requirements(self):
-        if self.version == "0.2.9.1":
+        if tools.Version(self.version) >= "0.2.10":
+            self.requires("args-parser/6.2.0.1")
+        elif self.version == "0.2.9.1":
             self.requires("args-parser/6.2.0.1")
         elif self.version == "0.2.9.0":
             self.requires("args-parser/6.0.1.0")
