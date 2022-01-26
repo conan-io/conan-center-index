@@ -15,6 +15,8 @@ class GtkDocStubConan(ConanFile):
     topics = ("gtk", "documentation", "gtkdocize")
     settings = "os"
 
+    win_bash=True
+    
     exports_sources = "patches/*"
 
     @property
