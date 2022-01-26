@@ -93,11 +93,13 @@ class grpcConan(ConanFile):
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
         if self.options.shared:
-            # FIXME: try to support shared with libstdc++
+            # FIXME: try to support shared with gcc on Linux
             # current error while linking internal check_epollexclusive executable:
             # libabsl_time.a(duration.cc.o): undefined reference to symbol '_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7compareEPKc@@GLIBCXX_3.4.21'
-            if self._is_msvc or (self.settings.os == "Linux" and tools.stdcpp_library(self) == "stdc++"):
-                raise ConanInvalidConfiguration("gRPC shared not supported yet for these settings")
+            if self._is_msvc or (self.settings.os == "Linux" and self.settings.compiler == "gcc"):
+                raise ConanInvalidConfiguration(
+                    "gRPC shared not supported yet with {} on {}".format(self.settings.compiler, self.settings.os)
+                )
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
