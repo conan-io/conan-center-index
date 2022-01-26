@@ -8,7 +8,7 @@
 -datarootdir=@datarootdir@
 -datadir=@datadir@
 +SCRIPT_HOME=`dirname $0 | while read a; do cd $a && pwd && break; done`
-+datarootdir=$SCRIPT_HOME/../res
++datarootdir=$SCRIPT_HOME/../share
 +datadir=$datarootdir
  
  # options
