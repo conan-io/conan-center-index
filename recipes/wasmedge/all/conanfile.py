@@ -49,7 +49,7 @@ class WasmedgeConan(ConanFile):
     def package(self):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
 
-        srclibdir = os.path.join(self._source_subfolder, "lib64")
+        srclibdir = os.path.join(self._source_subfolder, "lib64" if self.settings.os == "Linux" else "lib")
         srcbindir = os.path.join(self._source_subfolder, "bin")
 
         self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
