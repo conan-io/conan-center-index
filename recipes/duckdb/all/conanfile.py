@@ -50,6 +50,14 @@ class DuckdbConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**(self.conan_data["sources"][self.version][0]),
                   destination=self._source_subfolder, strip_root=True)
