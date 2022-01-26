@@ -10,7 +10,7 @@ class FmtConan(ConanFile):
     name = "fmt"
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("conan", "fmt", "format", "iostream", "printf")
+    topics = ("fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
 
