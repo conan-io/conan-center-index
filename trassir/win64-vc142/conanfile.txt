@@ -10,6 +10,7 @@ boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
 caffe/1.0.windows.dssl2
+cpython-distro/2.7.18.dssl1
 dlib/19.4
 dojo-toolkit/1.11.4@trassir/sdk142
 ffmpeg/3.3.1.dssl1
@@ -35,6 +36,7 @@ libxml2/2.9.9
 libxslt/1.1.33
 lmdb/0.9.28.dssl1
 miniupnpc/2.1
+mysql/6.1@trassir/sdk142
 onnxruntime/1.7.2
 openal/1.20.1
 openblas/0.3.7.dssl1
@@ -78,7 +80,6 @@ glog:shared=True
 hdf5:shared=True
 hidapi:shared=True
 icu:shared=True
-intellivision:shared=True
 jansson:shared=True
 jsoncpp:shared=True
 libcurl:shared=True
