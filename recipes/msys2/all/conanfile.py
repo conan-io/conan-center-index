@@ -179,3 +179,6 @@ class MSYS2Conan(ConanFile):
 
         self.output.info("Appending PATH env var with : " + msys_bin)
         self.env_info.path.append(msys_bin)
+        
+        self.conf_info["tools.microsoft.bash:subsystem"] = "msys2"
+        self.conf_info["tools.microsoft.bash:path"] = os.path.join(msys_bin, "bash.exe")
