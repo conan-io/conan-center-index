@@ -59,7 +59,7 @@ class FmtConan(ConanFile):
             del self.options.fPIC
         if not self._has_with_os_api_option:
             del self.options.with_os_api
-        elif self.settings.os == "baremetal":
+        elif str(self.settings.os) == "baremetal":
             self.options.with_os_api = False
 
     def configure(self):
