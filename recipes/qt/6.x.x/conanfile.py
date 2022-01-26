@@ -280,59 +280,59 @@ class QtConan(ConanFile):
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
-            self.requires("glib/2.69.2")
+            self.requires("glib/2.70.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.5")
+            self.requires("double-conversion/3.1.7")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/69.1")
+            self.requires("icu/70.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.8.0")
+            self.requires("harfbuzz/3.2.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.1")
+                self.requires("libjpeg-turbo/2.1.2")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.37.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.2")
+            self.requires("libpq/13.4")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
             self.requires("openal/1.21.1")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.0")
+                self.requires("xkbcommon/1.3.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self.options.qtwayland:
-            self.requires("wayland/1.19.0")
+            self.requires("wayland/1.20.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.3")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.72")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
-            self.requires("gst-plugins-base/1.19.1")
+            self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
@@ -351,7 +351,7 @@ class QtConan(ConanFile):
             self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                self.build_requires("bison/3.7.1")
+                self.build_requires("bison/3.7.6")
                 self.build_requires("flex/2.6.4")
             else:
                 self.build_requires("winflexbison/2.5.24")
@@ -392,7 +392,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.19.0")
+            self.build_requires("wayland/1.20.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
