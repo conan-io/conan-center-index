@@ -1,4 +1,5 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans import ConanFile, tools
+from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
 import functools
 import os
 
@@ -31,29 +32,28 @@ class GtkDocStubConan(ConanFile):
     def package_id(self):
         self.info.header_only()
 
+    def generate(self):
+        tc = AutotoolsDeps(self)
+        tc.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))))
+        tc.configure_args.append("--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))))
+        tc.generate()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = [
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-        ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
-
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self._source_subfolder)
         autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
 
     def package_info(self):
