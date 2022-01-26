@@ -52,7 +52,7 @@ class WasmedgeConan(ConanFile):
         srclibdir = os.path.join(self._source_subfolder, "lib64")
         srcbindir = os.path.join(self._source_subfolder, "bin")
 
-        self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)  # FIXME: not available (yet)
+        self.copy("wasmedge_c.lib", src=srclibdir, dst="lib", keep_path=False)
         self.copy("wasmedge_c.dll", src=srcbindir, dst="bin", keep_path=False)
         self.copy("libwasmedge_c.so*", src=srclibdir, dst="lib", keep_path=False)
         self.copy("libwasmedge_c.dylib", src=srclibdir,  dst="lib", keep_path=False)
