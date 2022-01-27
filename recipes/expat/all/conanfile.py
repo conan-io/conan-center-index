@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 import os
 
@@ -34,6 +35,10 @@ class ExpatConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -80,8 +85,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
             # EXPAT_CHAR_TYPE was added in 2.2.8
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+            if self._is_msvc:
+                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         if tools.Version(self.version) >= "2.2.10":
             self._cmake.definitions["EXPAT_BUILD_PKGCONFIG"] = False
 
