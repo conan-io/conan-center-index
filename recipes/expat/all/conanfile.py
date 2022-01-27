@@ -69,6 +69,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["BUILD_shared"] = self.options.shared
             self._cmake.definitions["BUILD_tests"] = "Off"
             self._cmake.definitions["BUILD_tools"] = "Off"
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
             # These options were renamed in 2.2.8 to be more consistent
             self._cmake.definitions["EXPAT_BUILD_DOCS"] = "Off"
