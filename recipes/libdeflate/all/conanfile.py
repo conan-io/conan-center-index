@@ -82,22 +82,23 @@ class LibdeflateConan(ConanFile):
             self._build_make()
 
     def _package_make(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
-            autotools.install(args=["PREFIX={}".format(self.package_folder)])
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            suffix = "*static.lib" if self.settings.os == "Windows" else "*.a"
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), suffix)
-        else:
-            if self.settings.os == "Windows":
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
-                suffix = "*deflate.lib"
-            elif tools.is_apple_os(self.settings.os):
-                suffix = "*.dylib"
+        if self.settings.os == "Windows":
+            self.copy("libdeflate.h", dst="include", src=self._source_subfolder)
+            if self.options.shared:
+                self.copy("libdeflate.lib", dst="lib", src=self._source_subfolder)
+                self.copy("libdeflate.dll", dst="bin", src=self._source_subfolder)
             else:
-                suffix = "*.so*"
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), suffix)
+                self.copy("libdeflatestatic.lib", dst="lib", src=self._source_subfolder)
+        else:
+            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            with tools.chdir(self._source_subfolder):
+                autotools.install(args=["PREFIX={}".format(self.package_folder)])
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.remove_files_by_mask(
+                os.path.join(self.package_folder, "lib"),
+                "*.a" if self.options.shared else "*.[so|dylib]*",
+            )
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
