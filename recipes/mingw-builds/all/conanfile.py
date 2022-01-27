@@ -27,6 +27,29 @@ class MingwConan(ConanFile):
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
+            
+        if getattr(self, "settings_target", None):
+            if str(self.settings_target.os) not in valid_os:
+                raise ConanInvalidConfiguration("MinGW {} is only supported for the following operating systems: {}"
+                                                .format(self.version, valid_os))
+            valid_arch = ["x86_64"]
+            if str(self.settings_target.arch) not in valid_arch:
+                raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
+                                                .format(self.version, str(self.settings.os), valid_arch))
+            if self.settings_target.compiler != "gcc":
+                raise ConanInvalidConfiguration("Only GCC is allowed as compiler.")
+            if str(self.settings_target.compiler.threads) != str(self.options.threads):
+                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
+                                                "with threads={}, your profile:host declares "
+                                                "threads={}, please use the same value for both."
+                                                .format(self.options.threads,
+                                                        self.settings_target.compiler.threads))
+            if str(self.settings_target.compiler.exception) != str(self.options.exception):
+                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
+                                                "with exception={}, your profile:host declares "
+                                                "exception={}, please use the same value for both."
+                                                .format(self.options.exception,
+                                                        self.settings_target.compiler.exception))
 
     def build_requirements(self):
         self.build_requires("7zip/19.00")
