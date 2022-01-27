@@ -4,7 +4,7 @@ project(miniaudio C)
 include(GNUInstallDirs)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/extras)
 add_library(miniaudio ${SOURCE_SUBFOLDER}/miniaudio_split/miniaudio.c)
