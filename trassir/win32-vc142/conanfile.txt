@@ -83,7 +83,6 @@ glog:shared=True
 hdf5:shared=True
 hidapi:shared=True
 icu:shared=True
-intellivision:shared=True
 jansson:shared=True
 jsoncpp:shared=False
 libpng:shared=True
