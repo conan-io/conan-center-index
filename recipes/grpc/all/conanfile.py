@@ -180,9 +180,9 @@ class grpcConan(ConanFile):
             "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
             "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
         )
-        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
-            # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
-            #   executable when cross-building
+        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) < "1.42.0":
+            # Bug introduced in https://github.com/grpc/grpc/pull/26148
+            # Reverted in https://github.com/grpc/grpc/pull/27626
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                     "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
                     "if(gRPC_INSTALL)")
