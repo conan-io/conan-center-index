@@ -81,31 +81,29 @@ class LibdeflateConan(ConanFile):
         else:
             self._build_make()
 
-    def _package_make(self):
-        if self.settings.os == "Windows":
-            self.copy("libdeflate.h", dst="include", src=self._source_subfolder)
-            if self.options.shared:
-                self.copy("libdeflate.lib", dst="lib", src=self._source_subfolder)
-                self.copy("libdeflate.dll", dst="bin", src=self._source_subfolder)
-            else:
-                self.copy("libdeflatestatic.lib", dst="lib", src=self._source_subfolder)
+    def _package_windows(self):
+        self.copy("libdeflate.h", dst="include", src=self._source_subfolder)
+        if self.options.shared:
+            self.copy("*deflate.lib", dst="lib", src=self._source_subfolder)
+            self.copy("*deflate.dll", dst="bin", src=self._source_subfolder)
         else:
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            with tools.chdir(self._source_subfolder):
-                autotools.install(args=["PREFIX={}".format(self.package_folder)])
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "lib"),
-                "*.a" if self.options.shared else "*.[so|dylib]*",
-            )
+            self.copy("*deflatestatic.lib", dst="lib", src=self._source_subfolder)
+
+    def _package_make(self):
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        with tools.chdir(self._source_subfolder):
+            autotools.install(args=["PREFIX={}".format(self.package_folder)])
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(
+            os.path.join(self.package_folder, "lib"),
+            "*.a" if self.options.shared else "*.[so|dylib]*",
+        )
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self._is_msvc:
-            self.copy("libdeflate.h", src=self._source_subfolder, dst="include")
-            self.copy("*.lib", src=self._source_subfolder, dst="lib")
-            self.copy("*.dll", src=self._source_subfolder, dst="bin")
+        if self.settings.os == "Windows":
+            self._package_windows()
         else:
             self._package_make()
 
