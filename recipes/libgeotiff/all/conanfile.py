@@ -24,7 +24,7 @@ class LibgeotiffConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
