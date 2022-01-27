@@ -2,7 +2,6 @@ name: run linters
 
 on:
   pull_request:
-  workflow_dispatch:
 
 jobs:
   lint:
