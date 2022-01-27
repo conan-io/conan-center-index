@@ -2,5 +2,5 @@
 
 int main()
 {
-  Vault::Config config = Vault.ConfigBuilder.build();
+  Vault::Config config = Vault::ConfigBuilder().build();
 }

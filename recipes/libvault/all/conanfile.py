@@ -13,8 +13,11 @@ class LibvaultConan(ConanFile):
     homepage = "https://github.com/abedra/libvault"
     description = "A C++ library for Hashicorp Vault"
     topics = ("vault", "libvault", "secrets", "passwords")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     _cmake = None
 
@@ -30,7 +33,16 @@ class LibvaultConan(ConanFile):
     def _mac_os_minimum_required_version(self):
         return "10.15"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
+        self.requires("openssl/1.1.1k")
         self.requires("libcurl/7.80.0")
         self.requires("catch2/2.13.7")
 
@@ -64,15 +76,8 @@ class LibvaultConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimum_cpp_standard)
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder,
-            strip_root=True
-        )
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -87,21 +92,17 @@ class LibvaultConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
         cmake = self._configure_cmake()
         cmake.install()
 
-        self.copy("*", dst="bin", src=os.path.join(self._source_subfolder, "scripts"))
-
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "Libvault"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Libvault"
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "libvault"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "libvault"
