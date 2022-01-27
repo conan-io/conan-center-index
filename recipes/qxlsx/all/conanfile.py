@@ -23,6 +23,8 @@ class QXlsxConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/*"
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -39,26 +41,27 @@ class QXlsxConan(ConanFile):
         self.requires("qt/5.15.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
-        tools.rename("QXlsx", self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        cmake = CMake(self)
-        cmake.configure()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "header"))
-        self.copy("*.a", dst="bin", src="lib")
-        self.copy("*.a", dst="lib", src="lib")
-        self.copy("*.dylib", dst="bin", src="lib")
-        self.copy("*.dylib", dst="lib", src="lib")
-        self.copy("*.lib", dst="lib", src="lib")
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.so", dst="lib", src="lib")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
