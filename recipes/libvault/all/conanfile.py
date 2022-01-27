@@ -13,7 +13,10 @@ class LibvaultConan(ConanFile):
     homepage = "https://github.com/abedra/libvault"
     description = "A C++ library for Hashicorp Vault"
     topics = ("vault", "libvault", "secrets", "passwords")
-    no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
