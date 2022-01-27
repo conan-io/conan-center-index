@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        hook: ["yaml_linter", "recipe_linter"]
+        hook: [".github/yaml_linter", ".github/recipe_linter"]
     runs-on: ubuntu-latest
 
     steps:
@@ -30,4 +30,4 @@ jobs:
       - name: run lint
         run:  |
           echo "::add-matcher::${{ matrix.hook }}.json"
-          python3 runlint.py ${{ github.event.pull_request.number }}
+          python3 .github/runlint.py ${{ github.event.pull_request.number }}
