@@ -9,11 +9,10 @@ conan_basic_setup(TARGETS)
 find_package(ZeroMQ REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-# TODO: remove ZeroMQ:: namespace when fixed in conanfile.py
 if(ZEROMQ_SHARED)
-  target_link_libraries(${PROJECT_NAME} ZeroMQ::libzmq)
+  target_link_libraries(${PROJECT_NAME} libzmq)
 else()
-  target_link_libraries(${PROJECT_NAME} ZeroMQ::libzmq-static)
+  target_link_libraries(${PROJECT_NAME} libzmq-static)
 endif()
 
 if(WITH_LIBSODIUM)
