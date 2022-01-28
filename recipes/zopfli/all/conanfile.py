@@ -52,6 +52,8 @@ class ZopfliConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["ZOPFLI_BUILD_INSTALL"] = True
         cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+        # Generate a relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure()
         self._cmake = cmake
         return self._cmake
