@@ -15,6 +15,8 @@ class MpirConan(ConanFile):
     homepage = "http://mpir.org/"
     license = "LGPL-3.0-or-later"
 
+    provides = []
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,6 +57,8 @@ class MpirConan(ConanFile):
         if not self.options.get_safe("enable_cxx", False):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
+        if self.options.enable_gmpcompat:
+            self.provides.append("gmp")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
