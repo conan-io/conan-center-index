@@ -1,9 +1,17 @@
---- a/CMakeLists.txt	2022-01-27 16:19:57.627069144 -0500
-+++ b/CMakeLists.txt	2022-01-27 17:26:22.328337704 -0500
-@@ -14,12 +14,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,6 @@
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_CXX_FLAGS_DEBUG --coverage)
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+ option(ENABLE_TEST "Enable tests?" ON)
+@@ -14,12 +13,13 @@
  option(BUILD_SHARED_LIBS "Build vault as a shared library" ON)
  option(INSTALL "Run install targets" ON)
- 
+
 -find_package(CURL)
 -if (CURL_FOUND)
 -  include_directories(${CURL_INCLUDE_DIR})
@@ -17,9 +25,17 @@
 +        target_link_libraries("CURL::libcurl")
 +    ENDIF()
 +ENDIF()
- 
+
  include(GNUInstallDirs)
  include_directories("${PROJECT_SOURCE_DIR}/lib")
+@@ -125,6 +125,7 @@
+ endif(LINK_CURL)
+
+ if (ENABLE_COVERAGE)
++  set(CMAKE_CXX_FLAGS_DEBUG --coverage)
+   target_link_libraries(vault gcov)
+ endif ()
+
 @@ -150,25 +151,9 @@
    write_basic_package_version_file(
            ${CMAKE_CURRENT_BINARY_DIR}/libvaultConfigVersion.cmake
@@ -33,7 +49,7 @@
 -  install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
 -          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
  endif (INSTALL)
- 
+
  if (ENABLE_TEST)
 -  include(FetchContent)
 -  FetchContent_Declare(
@@ -44,14 +60,14 @@
 -  FetchContent_MakeAvailable(Catch2)
 -  list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
    enable_testing()
- 
+
    add_executable(libvault_test test/test.cpp)
 @@ -176,7 +161,7 @@
    target_include_directories(libvault_test PRIVATE include)
- 
+
    target_link_libraries(libvault_test vault)
 -  target_link_libraries(libvault_test curl)
 +  target_link_libraries(libvault_test CURL::libcurl)
    target_link_libraries(libvault_test Catch2::Catch2)
- 
+
    include(CTest)
