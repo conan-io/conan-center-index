@@ -68,14 +68,14 @@ class ZopfliConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "ZopFli")
+        self.cpp_info.set_property("cmake_file_name", "Zopfli")
 
-        self.cpp_info.components["libzopfli"].set_property("cmake_file_name", "ZopFli::libzopfli")
+        self.cpp_info.components["libzopfli"].set_property("cmake_file_name", "Zopfli::libzopfli")
         self.cpp_info.components["libzopfli"].libs = ["zopfli"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libzopfli"].system_libs = ["m"]
 
-        self.cpp_info.components["libzopflipng"].set_property("cmake_file_name", "ZopFli::libzopflipng")
+        self.cpp_info.components["libzopflipng"].set_property("cmake_file_name", "Zopfli::libzopflipng")
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
         self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
 
@@ -84,8 +84,8 @@ class ZopfliConan(ConanFile):
         self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "ZopFli"
-        self.cpp_info.names["cmake_find_package_multi"] = "ZopFli"
+        self.cpp_info.names["cmake_find_package"] = "Zopfli"
+        self.cpp_info.names["cmake_find_package_multi"] = "Zopfli"
         self.cpp_info.components["libzopfli"].names["cmake_find_package"] = "libzopfli"
         self.cpp_info.components["libzopfli"].names["cmake_find_package_multi"] = "libzopfli"
         self.cpp_info.components["libzopflipng"].names["cmake_find_package"] = "libzopflipng"
