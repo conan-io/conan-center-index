@@ -1,9 +1,10 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
+
 
 class MpirConan(ConanFile):
     name = "mpir"
@@ -13,18 +14,19 @@ class MpirConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpir.org/"
     license = "LGPL-3.0-or-later"
-    settings = "os", "compiler", "arch", "build_type"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_cxx": [True, False],
-        "enable_gmpcompat": [True, False]
+        "enable_gmpcompat": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_cxx": True,
-        "enable_gmpcompat": True
+        "enable_gmpcompat": True,
     }
 
     _autotools = None
@@ -33,6 +35,14 @@ class MpirConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,26 +50,22 @@ class MpirConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             del self.options.enable_cxx
         if not self.options.get_safe("enable_cxx", False):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("m4/1.4.19")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
-
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
+
+    def build_requirements(self):
+        self.build_requires("yasm/1.3.0")
+        if not self._is_msvc:
+            self.build_requires("m4/1.4.19")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
@@ -88,15 +94,15 @@ class MpirConan(ConanFile):
         return vcxproj_paths
 
     def _build_visual_studio(self):
-        if "MD" in self.settings.compiler.runtime and not self.options.shared: # RuntimeLibrary only defined in lib props files
-                props_path = os.path.join(self._source_subfolder, "build.vc",
-                "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
-                if self.settings.build_type == "Debug":
-                    tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>",
-                                                      "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
-                else:
-                    tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
-                                                      "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+        if "MD" in msvc_runtime_flag(self) and not self.options.shared: # RuntimeLibrary only defined in lib props files
+            props_path = os.path.join(self._source_subfolder, "build.vc",
+            "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
+            if self.settings.build_type == "Debug":
+                tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>",
+                                                  "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
+            else:
+                tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
+                                                  "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
@@ -121,7 +127,7 @@ class MpirConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_visual_studio()
         else:
             with tools.chdir(self._source_subfolder):
@@ -130,7 +136,7 @@ class MpirConan(ConanFile):
 
     def package(self):
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
@@ -154,7 +160,7 @@ class MpirConan(ConanFile):
         if self.options.get_safe("enable_cxx"):
             self.cpp_info.libs.append("mpirxx")
         self.cpp_info.libs.append("mpir")
-        if self.options.enable_gmpcompat and self.settings.compiler != "Visual Studio":
+        if self.options.enable_gmpcompat and not self._is_msvc:
             if self.options.get_safe("enable_cxx"):
                 self.cpp_info.libs.append("gmpxx")
             self.cpp_info.libs.append("gmp")
