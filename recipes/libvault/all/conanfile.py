@@ -53,7 +53,7 @@ class LibvaultConan(ConanFile):
         minimum_compiler_version = {
             "Visual Studio": "19",
             "gcc": "8",
-            "clang": "3.8",
+            "clang": "7.0",
             "apple-clang": "10"
         }
 
