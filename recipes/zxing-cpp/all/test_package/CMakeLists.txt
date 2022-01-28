@@ -9,4 +9,4 @@ conan_basic_setup(TARGETS)
 find_package(ZXing REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ZXing::ZXing)
+target_link_libraries(${PROJECT_NAME} ZXing::ZXing CONAN_PKG::stb)
