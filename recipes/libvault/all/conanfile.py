@@ -42,7 +42,6 @@ class LibvaultConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1k")
         self.requires("libcurl/7.80.0")
         self.requires("catch2/2.13.7")
 
