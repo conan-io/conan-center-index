@@ -131,6 +131,8 @@ class MpirConan(ConanFile):
             self._build_visual_studio()
         else:
             with tools.chdir(self._source_subfolder):
+                # relocatable shared lib on macOS
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
                 autotools = self._configure_autotools()
                 autotools.make()
 
