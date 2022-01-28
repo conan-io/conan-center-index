@@ -97,8 +97,9 @@ class ZfpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.property("cmake_file_name", "zfp")
-        self.cpp_info.property("cmake_target_name", "zfp::cfp") # to avoid to create an unwanted target
+        self.cpp_info.set_property("cmake_file_name", "zfp")
+        # to avoid to create an unwanted target, since we can't allow zfp::zfp to be the global target here
+        self.cpp_info.set_property("cmake_target_name", "zfp::cfp")
 
         # zfp
         self.cpp_info.components["_zfp"].set_property("cmake_target_name", "zfp::zfp")
