@@ -90,14 +90,19 @@ class GmpConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Relocatable shared lib on macOS & fix permission issue
+        if tools.is_apple_os(self.settings.os):
+            configure_file = os.path.join(self._source_subfolder, "configure")
+            tools.replace_in_file(configure_file, "-install_name \\$rpath/", "-install_name @rpath/")
+            configure_stats = os.stat(configure_file)
+            os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
+
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if tools.is_apple_os(self.settings.os):
-            configure_file = os.path.join(self._source_subfolder, "configure")
-            tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
-            configure_stats = os.stat(configure_file)
-            os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
@@ -142,8 +147,7 @@ class GmpConan(ConanFile):
             yield
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
