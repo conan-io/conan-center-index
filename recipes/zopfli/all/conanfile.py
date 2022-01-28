@@ -72,12 +72,12 @@ class ZopfliConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Zopfli")
 
-        self.cpp_info.components["libzopfli"].set_property("cmake_file_name", "Zopfli::libzopfli")
+        self.cpp_info.components["libzopfli"].set_property("cmake_target_name", "Zopfli::libzopfli")
         self.cpp_info.components["libzopfli"].libs = ["zopfli"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libzopfli"].system_libs = ["m"]
 
-        self.cpp_info.components["libzopflipng"].set_property("cmake_file_name", "Zopfli::libzopflipng")
+        self.cpp_info.components["libzopflipng"].set_property("cmake_target_name", "Zopfli::libzopflipng")
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
         self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
 
