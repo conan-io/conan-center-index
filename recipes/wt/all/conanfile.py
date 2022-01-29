@@ -138,6 +138,13 @@ class WtConan(ConanFile):
         if self.settings.os != "Windows":
             tools.replace_in_file(cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
 
+        # Do not pollute rpath of shared libs of the install tree on macOS please
+        tools.replace_in_file(
+            cmakelists,
+            "IF(APPLE)\n  SET(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
+            "if(0)",
+        )
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
