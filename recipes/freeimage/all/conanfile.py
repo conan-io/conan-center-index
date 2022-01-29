@@ -9,7 +9,7 @@ class FreeImageConan(ConanFile):
                   "like PNG, BMP, JPEG, TIFF and others as needed by today's multimedia applications."
     homepage = "https://freeimage.sourceforge.io"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later"
+    license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later", "FreeImage"
     topics = ("conan", "freeimage", "image", "decoding", "graphics")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
@@ -17,10 +17,28 @@ class FreeImageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jpeg2000": [True, False],
+        "with_openexr": [True, False],
+        "with_eigen": [True, False],
+        "with_webp": [True, False],
+        "with_raw": [True, False],
+        "with_jxr": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_jpeg": "libjpeg",
+        "with_png": True,
+        "with_tiff": True,
+        "with_jpeg2000": True,
+        "with_openexr": True,
+        "with_eigen": True,
+        "with_webp": True,
+        "with_raw": True,
+        "with_jxr": True,
     }
 
     _cmake = None
@@ -41,17 +59,31 @@ class FreeImageConan(ConanFile):
         tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
-        self.output.warn("TIFF and G3 plugins are disabled.")
+        self.output.warn("G3 plugin and JPEGTransform are disabled.")
+        if bool(self.options.with_jpeg):
+            if self.options.with_tiff:
+                self.options["libtiff"].jpeg = self.options.with_jpeg
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        self.requires("libjpeg/9d")
-        self.requires("openjpeg/2.3.1")
-        self.requires("libpng/1.6.37")
-        self.requires("libwebp/1.1.0")
-        self.requires("openexr/2.5.2 ")
-        self.requires("libraw/0.19.5")
-        self.requires("jxrlib/cci.20170615")
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9d")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.2")
+        if self.options.with_jpeg2000:
+            self.requires("openjpeg/2.4.0")
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self.options.with_webp:
+            self.requires("libwebp/1.2.2")
+        if self.options.with_openexr:
+            self.requires("openexr/2.5.7")
+        if self.options.with_raw:
+            self.requires("libraw/0.20.2")
+        if self.options.with_jxr:
+            self.requires("jxrlib/cci.20170615")
+        if self.options.with_tiff:
+            self.requires("libtiff/4.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -62,6 +94,14 @@ class FreeImageConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
+        self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000
+        self._cmake.definitions["WITH_PNG"] = self.options.with_png
+        self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
+        self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
+        self._cmake.definitions["WITH_RAW"] = self.options.with_raw
+        self._cmake.definitions["WITH_JXR"] = self.options.with_jxr
+        self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
@@ -87,10 +127,33 @@ class FreeImageConan(ConanFile):
         self.copy("license-gplv2.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
+        def imageformats_deps():
+            components = []
+            components.append("zlib::zlib")
+            if self.options.with_jpeg:
+                components.append("{0}::{0}".format(self.options.with_jpeg))
+            if self.options.with_jpeg2000:
+                components.append("openjpeg::openjpeg")
+            if self.options.with_png:
+                components.append("libpng::libpng")
+            if self.options.with_webp:
+                components.append("libwebp::libwebp")
+            if self.options.with_openexr:
+                components.append("openexr::openexr")
+            if self.options.with_raw:
+                components.append("libraw::libraw")
+            if self.options.with_jxr:
+                components.append("jxrlib::jxrlib")
+            if self.options.with_tiff:
+                components.append("libtiff::libtiff")
+            return components
+
         self.cpp_info.name = "freeimage"
         self.cpp_info.names["pkg_config"] = "freeimage"
         self.cpp_info.names["cmake_find_package"] = "FreeImage"
         self.cpp_info.names["cmake_find_package_multi"] = "FreeImage"
+        self.cpp_info.components["freeimage"].libs = ["freeimageplus"]
+        self.cpp_info.components["freeimage"].requires = imageformats_deps()
         self.cpp_info.components["FreeImagePlus"].libs = ["freeimageplus"]
         self.cpp_info.components["FreeImagePlus"].requires = ["freeimage"]
 

@@ -27,7 +27,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/010_use-external-webp.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/011_use-freeimage-config-include.patch"
+    - patch_file: "patches/011_update-libraw-support.patch"
       base_path: "source_subfolder"
       fuzz: True
     - patch_file: "patches/012_use-functions-to-override-libtiff-warning-error-handlers.patch"
