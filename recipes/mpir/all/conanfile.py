@@ -98,15 +98,18 @@ class MpirConan(ConanFile):
         return vcxproj_paths
 
     def _build_visual_studio(self):
-        if "MD" in msvc_runtime_flag(self) and not self.options.shared: # RuntimeLibrary only defined in lib props files
+        if not self.options.shared: # RuntimeLibrary only defined in lib props files
+            build_type = "debug" if self.settings.build_type == "Debug" else "release"
             props_path = os.path.join(self._source_subfolder, "build.vc",
-            "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
-            if "d" in msvc_runtime_flag(self):
-                tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>",
-                                                  "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
-            else:
-                tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
-                                                  "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+                                      "mpir_{}_lib.props".format(build_type))
+            old_runtime = "MultiThreaded{}".format(
+                "Debug" if build_type == "debug" else "",
+            )
+            new_runtime = "MultiThreaded{}{}".format(
+                "Debug" if "d" in msvc_runtime_flag(self) else "",
+                "DLL" if "MD" in msvc_runtime_flag(self) else "",
+            )
+            tools.replace_in_file(props_path, old_runtime, new_runtime)
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
