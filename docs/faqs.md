@@ -344,7 +344,7 @@ Version ranges are a useful Conan feature, find the documentation [here](https:/
 
 - Non-Determinstic `package-id`
 
-With version ranges the newest compatible package may yeild a different package-id then the one built and published by ConanCenter resulting in fustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
+With version ranges the newest compatible package may yield a different package-id than the one built and published by ConanCenter resulting in frustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
 
 - Build Reproducibility
 
