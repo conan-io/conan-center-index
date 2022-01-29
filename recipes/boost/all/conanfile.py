@@ -16,7 +16,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 # When adding (or removing) an option, also add this option to the list in
@@ -1367,6 +1367,7 @@ class BoostConan(ConanFile):
     def package_info(self):
         self.env_info.BOOST_ROOT = self.package_folder
 
+        self.cpp_info.set_property("cmake_file_name", "Boost")
         self.cpp_info.filenames["cmake_find_package"] = "Boost"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Boost"
         self.cpp_info.names["cmake_find_package"] = "Boost"
@@ -1376,6 +1377,7 @@ class BoostConan(ConanFile):
         # - Use '_libboost' component to attach extra system_libs, ...
 
         self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].set_property("cmake_target_name", "Boost::headers")
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
         self.cpp_info.components["headers"].names["pkg_config"] = "boost"
@@ -1409,6 +1411,7 @@ class BoostConan(ConanFile):
 
         # Boost::boost is an alias of Boost::headers
         self.cpp_info.components["_boost_cmake"].requires = ["headers"]
+        self.cpp_info.components["_boost_cmake"].set_property("cmake_target_name", "Boost::boost")
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
 
@@ -1416,6 +1419,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["_libboost"].requires = ["headers"]
 
             self.cpp_info.components["diagnostic_definitions"].libs = []
+            self.cpp_info.components["diagnostic_definitions"].set_property("cmake_target_name", "Boost::diagnostic_definitions")
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["pkg_config"] = "boost_diagnostic_definitions"  # FIXME: disable on pkg_config
@@ -1424,6 +1428,7 @@ class BoostConan(ConanFile):
                 self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
 
             self.cpp_info.components["disable_autolinking"].libs = []
+            self.cpp_info.components["disable_autolinking"].set_property("cmake_target_name", "Boost::disable_autolinking")
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
@@ -1441,6 +1446,7 @@ class BoostConan(ConanFile):
                     self.output.info("Disabled magic autolinking (smart and magic decisions)")
 
             self.cpp_info.components["dynamic_linking"].libs = []
+            self.cpp_info.components["dynamic_linking"].set_property("cmake_target_name", "Boost::dynamic_linking")
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
@@ -1556,6 +1562,7 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].libs = module_libraries
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
+                self.cpp_info.components[module].set_property("cmake_target_name", "Boost::" + module)
                 self.cpp_info.components[module].names["cmake_find_package"] = module
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
                 self.cpp_info.components[module].names["pkg_config"] = "boost_{}".format(module)

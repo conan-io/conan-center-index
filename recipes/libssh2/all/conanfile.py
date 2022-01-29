@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Libssh2Conan(ConanFile):
@@ -32,13 +32,17 @@ class Libssh2Conan(ConanFile):
         "enable_debug_logging": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,7 +58,7 @@ class Libssh2Conan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.crypto_backend == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         elif self.options.crypto_backend == "mbedtls":
             self.requires("mbedtls/2.25.0")
 
@@ -101,17 +105,23 @@ class Libssh2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Libssh2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
-        self.cpp_info.names["pkg_config"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["pkg_config"] = "libssh2"
+        self.cpp_info.set_property("cmake_file_name", "Libssh2")
+        self.cpp_info.set_property("cmake_target_name", "Libssh2::libssh2")
+        self.cpp_info.set_property("pkg_config_name", "libssh2")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_libssh2"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.components["_libssh2"].system_libs.append("ws2_32")
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Libssh2"
+        self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
+        self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
+        self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
+        self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
+        self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
         if self.options.with_zlib:
             self.cpp_info.components["_libssh2"].requires.append("zlib::zlib")
         if self.options.crypto_backend == "openssl":

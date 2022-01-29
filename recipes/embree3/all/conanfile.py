@@ -4,7 +4,7 @@ import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class EmbreeConan(ConanFile):
@@ -190,6 +190,7 @@ class EmbreeConan(ConanFile):
         else:
             tools.rmdir(os.path.join(self.package_folder, "bin"))
 
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"embree": "embree::embree"}
@@ -208,20 +209,12 @@ class EmbreeConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "embree"
-        self.cpp_info.names["cmake_find_package_multi"] = "embree"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "embree")
+        self.cpp_info.set_property("cmake_target_name", "embree")
 
         def _lib_exists(name):
             return True if glob.glob(os.path.join(self.package_folder, "lib", "*{}.*".format(name))) else False
@@ -237,3 +230,9 @@ class EmbreeConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "embree"
+        self.cpp_info.names["cmake_find_package_multi"] = "embree"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
