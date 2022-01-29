@@ -101,7 +101,7 @@ class MpirConan(ConanFile):
         if "MD" in msvc_runtime_flag(self) and not self.options.shared: # RuntimeLibrary only defined in lib props files
             props_path = os.path.join(self._source_subfolder, "build.vc",
             "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
-            if self.settings.build_type == "Debug":
+            if "d" in msvc_runtime_flag(self):
                 tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>",
                                                   "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
             else:
