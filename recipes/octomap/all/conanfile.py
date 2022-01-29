@@ -85,6 +85,9 @@ class OctomapConan(ConanFile):
         # No -Werror
         if tools.Version(self.version) >= "1.9.6":
             tools.replace_in_file(compiler_settings, "-Werror", "")
+        # we want a clean rpath in installed shared libs
+        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")", "")
+        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))
