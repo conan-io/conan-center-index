@@ -13,7 +13,7 @@ class OpenSimulationInterfaceConan(ConanFile):
     description = 'Generic interface environmental perception of automated driving functions in virtual scenarios'
     topics = ("asam", "adas", "open-simulation", "automated-driving")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MPL 2.0"
+    license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
