@@ -1,4 +1,4 @@
 sources:
-  "0.2.1":
-    url: "https://github.com/Rechip/simple-yaml/archive/refs/tags/v0.2.1.zip"
-    sha256: "b802b9913d7f112461fcde66419b0c12b794301fe9a5f9d19c3a7716b63c6f97"
+  "0.2.2":
+    url: "https://github.com/Rechip/simple-yaml/archive/refs/tags/v0.2.2.zip"
+    sha256: "7df6a5f15d83dfcff1eac87d14b39cf457e93a6586f888677f408b8884cebada"
