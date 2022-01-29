@@ -49,7 +49,7 @@ class SimpleYamlConan(ConanFile):
             "Visual Studio": "16.3",
             "gcc": "10",
             "clang": "11",
-            "apple-clang": "12",
+            "apple-clang": "13.3",
         }
 
     def validate(self):
