@@ -19,7 +19,7 @@ class SophusConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("eigen/3.3.7")
+        self.requires("eigen/3.4.0")
 
     def package_id(self):
         self.info.header_only()
