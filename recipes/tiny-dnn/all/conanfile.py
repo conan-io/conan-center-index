@@ -1,7 +1,8 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class TinyDnnConan(ConanFile):
@@ -11,13 +12,31 @@ class TinyDnnConan(ConanFile):
     homepage = "https://github.com/tiny-dnn/tiny-dnn"
     description = "tiny-dnn is a C++14 implementation of deep learning."
     topics = ("header-only", "deep-learning", "embedded", "iot", "computational")
-    settings = "compiler", "os"
-    options = {"with_tbb": [True, False]}
-    default_options = {"with_tbb": False}
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_tbb": [True, False],
+    }
+    default_options = {
+        "with_tbb": False,
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _min_cppstd(self):
+        return "14"
+
+    @property
+    def _min_compilers_version(self):
+        return {
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "10",
+            "Visual Studio": "14"
+        }
 
     def requirements(self):
         self.requires("cereal/1.3.0")
@@ -25,36 +44,31 @@ class TinyDnnConan(ConanFile):
         if self.options.with_tbb:
             self.requires("tbb/2020.3")
 
-    def configure(self):
-        minimal_cpp_standard = "14"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "10",
-            "Visual Studio": "14"
-        }
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd)
+
         compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
-            self.output.warn(
-                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-            return
         version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+        if compiler in self._min_compilers_version and version < self._min_compilers_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(
+                    self.name, self._min_cppstd,
+                )
+            )
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("tiny-dnn-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tiny_dnn", "util", "image.h"), "third_party/", "")
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "tiny_dnn", "util", "image.h"),
+            "third_party/", "",
+        )
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -66,15 +80,22 @@ class TinyDnnConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "tinydnn")
+        self.cpp_info.set_property("cmake_target_name", "TinyDNN::tiny_dnn")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
+        if self.options.with_tbb:
+            self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tinydnn"
         self.cpp_info.filenames["cmake_find_package_multi"] = "tinydnn"
         self.cpp_info.names["cmake_find_package"] = "TinyDNN"
         self.cpp_info.names["cmake_find_package_multi"] = "TinyDNN"
         self.cpp_info.components["tinydnn"].names["cmake_find_package"] = "tiny_dnn"
         self.cpp_info.components["tinydnn"].names["cmake_find_package_multi"] = "tiny_dnn"
+        self.cpp_info.components["tinydnn"].set_property("cmake_target_name", "TinyDNN::tiny_dnn")
         self.cpp_info.components["tinydnn"].requires = ["cereal::cereal", "stb::stb"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
         if self.options.with_tbb:
             self.cpp_info.components["tinydnn"].requires.append("tbb::tbb")
-            self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
