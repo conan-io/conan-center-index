@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 find_program(BTYACC_EXECUTABLE btyacc)
 if(NOT BTYACC_EXECUTABLE)
