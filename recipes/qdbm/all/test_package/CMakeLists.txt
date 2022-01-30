@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 add_executable(test_package test_package.c)
 target_link_libraries(test_package PRIVATE CONAN_PKG::qdbm)
