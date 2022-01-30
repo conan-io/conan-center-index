@@ -72,10 +72,12 @@ class TaskflowConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Taskflow")
+        self.cpp_info.set_property("cmake_target_name", "Taskflow::Taskflow")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
+
         self.cpp_info.names["cmake_find_package"] = "Taskflow"
         self.cpp_info.names["cmake_find_package_multi"] = "Taskflow"
-        self.cpp_info.set_property("cmake_target_name", "Taskflow::Taskflow")
