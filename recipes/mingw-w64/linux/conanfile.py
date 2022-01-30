@@ -260,10 +260,7 @@ class MingwConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib"), "*.la")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib32"), "*.la")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "gcc", "x86_64-w64-mingw32", "10.3.0"), "*.la")
+        tools.remove_files_by_mask(self.package_folder, "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
