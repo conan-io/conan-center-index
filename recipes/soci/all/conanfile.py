@@ -125,6 +125,12 @@ class SociConan(ConanFile):
                               "set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})",
                               "list(APPEND CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules)")
 
+        # Remove hardcoded install_name_dir, it prevents relocatable shared lib on macOS
+        soci_backend_cmake = os.path.join(self._source_subfolder, "cmake", "SociBackend.cmake")
+        soci_core_cmake = os.path.join(self._source_subfolder, "src", "core", "CMakeLists.txt")
+        tools.replace_in_file(soci_backend_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
+        tools.replace_in_file(soci_core_cmake, "INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -147,6 +153,9 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_MYSQL"]       = self.options.with_mysql
         self._cmake.definitions["WITH_POSTGRESQL"]  = self.options.with_postgresql
         self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
+
+        # Relocatable shared lib on macOS
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         self._cmake.configure()
 
