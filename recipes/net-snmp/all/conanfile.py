@@ -69,52 +69,28 @@ class NetSnmpConan(ConanFile):
         if self._is_msvc:
             self.build_requires("strawberryperl/5.30.0.1")
 
-    @contextmanager
-    def _add_write_permissions(self, file):
-        write = stat.S_IWRITE
-        saved_permissions = os.stat(file).st_mode
-        if saved_permissions & write == write:
-            yield
-            return
-        try:
-            os.chmod(file, saved_permissions | write)
-            yield
-        finally:
-            os.chmod(file, saved_permissions)
-
-    @contextmanager
-    def _replace_in_file(self, file):
-        with self._add_write_permissions(file):
-            with open(file, "r+", encoding="utf-8") as f:
-                args = [f.read()]
-
-                def replacer(search, replace):
-                    args[0] = args[0].replace(search, replace, 1)
-
-                yield replacer
-                f.seek(0)
-                f.write(*args)
-                f.truncate()
-
     def _patch_msvc(self):
         ssl_info = self.deps_cpp_info["openssl"]
         openssl_root = ssl_info.rootpath.replace("\\", "/")
-        with self._replace_in_file("win32\\build.pl") as replacer:
-            replacer("$openssl = false", "$openssl = true")
-            replacer(
+        search_replace = [
+            (
                 r'$default_openssldir . "\\include"',
                 f"'{openssl_root}/include'"
-            )
-            replacer(
-                r'$default_openssldir . "\\lib\\VC"',
-                f"'{openssl_root}/lib'"
-            )
-            if self._is_debug:
-                replacer("$debug = false", "$debug = true")
-            if self.options.shared:
-                replacer("$link_dynamic = false", "$link_dynamic = true")
-            if self.options.with_ipv6:
-                replacer("$b_ipv6 = false", "$b_ipv6 = true")
+            ),
+            (r'$default_openssldir . "\\lib\\VC"', f"'{openssl_root}/lib'"),
+            ("$openssl = false", "$openssl = true")
+        ]
+        if self._is_debug:
+            search_replace.append(("$debug = false", "$debug = true"))
+        if self.options.shared:
+            search_replace.append((
+                "$link_dynamic = false",
+                "$link_dynamic = true"
+            ))
+        if self.options.with_ipv6:
+            search_replace.append(("$b_ipv6 = false", "$b_ipv6 = true"))
+        for search, replace in search_replace:
+            tools.replace_in_file("win32\\build.pl", search, replace)
         runtime = self.settings.compiler.runtime
         tools.replace_in_file("win32\\Configure", '"/runtime', f'"/{runtime}')
         link_lines = "\n".join(
