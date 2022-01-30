@@ -8,6 +8,8 @@ required_conan_version = ">=1.43.0"
 
 
 class TBBConan(ConanFile):
+    deprecated = "onetbb"
+
     name = "tbb"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
