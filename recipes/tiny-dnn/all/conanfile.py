@@ -21,6 +21,12 @@ class TinyDnnConan(ConanFile):
         "with_tbb": False,
     }
 
+    exports_sources = "CMakeLists.txt"
+    # TODO: if you move this recipe to CMakeDeps, be aware that tiny-dnn
+    #       relies on CMake variables which are not defined in CMakeDeps, only
+    #       in cmake_find_package. So patch it before.
+    generators = "cmake", "cmake_find_package"
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -75,7 +81,7 @@ class TinyDnnConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["USE_TBB"] = self.options.with_tbb
         cmake.definitions["USE_GEMMLOWP"] = False
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
