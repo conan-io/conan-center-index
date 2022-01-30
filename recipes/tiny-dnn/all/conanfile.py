@@ -45,10 +45,10 @@ class TinyDnnConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("cereal/1.3.0")
-        self.requires("stb/20200203")
+        self.requires("cereal/1.3.1")
+        self.requires("stb/cci.20210713")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -104,4 +104,4 @@ class TinyDnnConan(ConanFile):
         self.cpp_info.components["tinydnn"].set_property("cmake_target_name", "TinyDNN::tiny_dnn")
         self.cpp_info.components["tinydnn"].requires = ["cereal::cereal", "stb::stb"]
         if self.options.with_tbb:
-            self.cpp_info.components["tinydnn"].requires.append("tbb::tbb")
+            self.cpp_info.components["tinydnn"].requires.append("onetbb::onetbb")
