@@ -35,6 +35,9 @@ class MingwConan(ConanFile):
                 raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
                                                 .format(str(self.options.gcc), valid_gcc))
 
+    def build_requirements(self):
+        self.build_requires("m4/1.4.19")
+
     def _download_source(self):
         arch_data = self.conan_data["sources"][self.version]
 
