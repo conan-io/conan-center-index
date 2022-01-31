@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(cmake_wrapper)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
