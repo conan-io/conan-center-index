@@ -49,12 +49,10 @@ class C4CoreConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
-        ## clang/apple-clang with libc++ is not supported. It is already fixed at 2022-01-03.
+        ## clang with libc++ is not supported. It is already fixed at 2022-01-03.
         if tools.Version(self.version) <= "0.1.8":
             if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"):
                 raise ConanInvalidConfiguration(self, "{}/{} doesn't support clang with libc++".format(self.name, self.version))
-            if (self.settings.compiler == "apple-clang" and self.settings.compiler.libcxx == "libc++"):
-                raise ConanInvalidConfiguration(self, "{}/{} doesn't support apple-clang with libc++".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
