@@ -66,7 +66,7 @@ class OpenSimulationInterfaceConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-            
+
 
     def build(self):
         cmake = self._configure_cmake()
@@ -80,7 +80,7 @@ class OpenSimulationInterfaceConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)        
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
