@@ -51,8 +51,10 @@ class C4CoreConan(ConanFile):
 
         ## clang with libc++ is not supported. It is already fixed at 2022-01-03.
         if tools.Version(self.version) <= "0.1.8":
-            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"):
-                raise ConanInvalidConfiguration(self, "{}/{} doesn't support clang with libc++".format(self.name, self.version))
+            if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
+                raise ConanInvalidConfiguration(
+                    "{}/{} doesn't support clang with libc++".format(self.name, self.version),
+                )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
