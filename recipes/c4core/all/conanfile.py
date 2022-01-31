@@ -2,7 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class C4CoreConan(ConanFile):
     name = "c4core"
@@ -14,8 +15,8 @@ class C4CoreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/c4core"
     license = "MIT",
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,8 +26,8 @@ class C4CoreConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package_multi"
-
     _cmake = None
 
     @property
@@ -41,6 +42,9 @@ class C4CoreConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("fast_float/3.4.0")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
@@ -51,9 +55,6 @@ class C4CoreConan(ConanFile):
                 raise ConanInvalidConfiguration(self, "{}/{} doesn't support clang with libc++".format(self.name, self.version))
             if (self.settings.compiler == "apple-clang" and self.settings.compiler.libcxx == "libc++"):
                 raise ConanInvalidConfiguration(self, "{}/{} doesn't support apple-clang with libc++".format(self.name, self.version))
-
-    def requirements(self):
-        self.requires("fast_float/3.4.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -84,4 +85,6 @@ class C4CoreConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.natvis")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "c4core")
+        self.cpp_info.set_property("cmake_target_name", "c4core::c4core")
         self.cpp_info.libs = ["c4core"]
