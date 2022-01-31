@@ -4,5 +4,7 @@ project(test_package C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
+find_package(qdbm REQUIRED CONFIG)
+
 add_executable(test_package test_package.c)
-target_link_libraries(test_package PRIVATE CONAN_PKG::qdbm)
+target_link_libraries(test_package PRIVATE qdbm::qdbm)
