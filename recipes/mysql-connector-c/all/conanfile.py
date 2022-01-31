@@ -15,7 +15,7 @@ class MysqlConnectorCConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
-    default_options = {'shared': False, 'with_ssl': True, 'with_zlib': True}
+    default_options = {'shared': False, 'with_ssl': False, 'with_zlib': True}
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
