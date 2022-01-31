@@ -1,0 +1,58 @@
+--- CMakeLists.txt.orig	2022-03-14 20:29:13.938536330 -0400
++++ CMakeLists.txt	2022-03-14 20:30:18.213519229 -0400
+@@ -70,43 +70,6 @@
+ # capstone
+ #
+ if (DISASM_CAPSTONE)
+-  set(CAPSTONE_arm64_SUPPORT OFF)
+-  set(CAPSTONE_x86_SUPPORT OFF)
+-  set(CAPSTONE_${FUNCHOOK_CPU}_SUPPORT ON)
+-
+-  include(ExternalProject)
+-  ExternalProject_Add(capstone_src
+-    GIT_REPOSITORY    https://github.com/aquynh/capstone.git
+-    GIT_TAG           4.0.1
+-    GIT_SHALLOW       TRUE
+-    CMAKE_ARGS        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-                      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}
+-                      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+-                      -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+-                      -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+-                      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+-                      -DCAPSTONE_BUILD_SHARED=OFF
+-                      -DCAPSTONE_BUILD_STATIC_RUNTIME=OFF
+-                      -DCAPSTONE_BUILD_TESTS=OFF
+-                      -DCAPSTONE_BUILD_CSTOOL=OFF
+-                      -DCAPSTONE_ARM_SUPPORT=OFF
+-                      -DCAPSTONE_ARM64_SUPPORT=${CAPSTONE_arm64_SUPPORT}
+-                      -DCAPSTONE_EVM_SUPPORT=OFF
+-                      -DCAPSTONE_M680X_SUPPORT=OFF
+-                      -DCAPSTONE_M68K_SUPPORT=OFF
+-                      -DCAPSTONE_MIPS_SUPPORT=OFF
+-                      -DCAPSTONE_PPC_SUPPORT=OFF
+-                      -DCAPSTONE_SPARC_SUPPORT=OFF
+-                      -DCAPSTONE_SYSZ_SUPPORT=OFF
+-                      -DCAPSTONE_TMS320C64X_SUPPORT=OFF
+-                      -DCAPSTONE_XCORE_SUPPORT=OFF
+-                      -DCAPSTONE_X86_SUPPORT=${CAPSTONE_x86_SUPPORT}
+-    INSTALL_COMMAND   ""
+-  )
+-  ExternalProject_Get_Property(capstone_src SOURCE_DIR)
+-  include_directories(${SOURCE_DIR}/include)
+-  ExternalProject_Get_Property(capstone_src BINARY_DIR)
+-  link_directories(${BINARY_DIR})
+   set(DISASM capstone)
+ endif ()
+
+--- CMakeLists.txt.orig	2022-03-14 20:49:01.771518389 -0400
++++ CMakeLists.txt	2022-03-14 20:49:11.791305406 -0400
+@@ -149,9 +149,6 @@
+ 
+ function (add_funchook_library target_name target_type)
+   add_library(${target_name} ${target_type} ${FUNCHOOK_SOURCES})
+-  if (NOT DISASM STREQUAL distorm)
+-    add_dependencies(${target_name} ${DISASM}_src)
+-  endif ()
+   set_target_properties(${target_name} PROPERTIES ${FUNCHOOK_PROPERTIES})
+   target_include_directories(${target_name} PUBLIC include)
+   target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}) # to include config.h
