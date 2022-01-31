@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.40.0"
 
 
 class OpenTDFConan(ConanFile):
