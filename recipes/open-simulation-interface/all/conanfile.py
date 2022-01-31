@@ -51,7 +51,6 @@ class OpenSimulationInterfaceConan(ConanFile):
                 raise ConanInvalidConfiguration("Shared Libraries are not supported on windows because of the missing symbol export in the library.")
 
     def configure(self):
-        del self.settings.compiler.cstd
         if self.options.shared:
             del self.options.fPIC
 
