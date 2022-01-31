@@ -43,6 +43,8 @@ class LibnameConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) >= "2.42.0":
+            del self.options.with_jasper
 
     def configure(self):
         if self.options.shared:
@@ -70,7 +72,7 @@ class LibnameConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.2")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
-        if self.options.with_jasper:
+        if self.options.get_safe("with_jasper"):
             self.requires("jasper/2.0.33")
 
     def source(self):
@@ -83,15 +85,20 @@ class LibnameConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        defs["gir"] = "false"
+        if tools.Version(self.version) >= "2.42.0":
+            defs["introspection"] = "false"
+        else:
+            defs["gir"] = "false"                
         defs["docs"] = "false"
         defs["man"] = "false"
         defs["installed_tests"] = "false"
         defs["png"] = "true" if self.options.with_libpng else "false"
         defs["tiff"] = "true" if self.options.with_libtiff else "false"
         defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
-        defs["jasper"] = "true" if self.options.with_jasper else "false"
-        defs["x11"] = "false"
+        if hasattr(self.options, "with_jasper"):
+            defs["jasper"] = "true" if self.options.with_jasper else "false"
+        if tools.Version(self.version) < "2.42.0":
+            defs["x11"] = "false"
         defs["builtin_loaders"] = "all"
         defs["gio_sniffing"] = "false"
         defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
