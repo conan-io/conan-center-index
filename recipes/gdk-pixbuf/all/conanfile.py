@@ -95,7 +95,7 @@ class LibnameConan(ConanFile):
         defs["png"] = "true" if self.options.with_libpng else "false"
         defs["tiff"] = "true" if self.options.with_libtiff else "false"
         defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
-        if hasattr(self.options, "with_jasper"):
+        if "with_jasper" in self.options:
             defs["jasper"] = "true" if self.options.with_jasper else "false"
         if tools.Version(self.version) < "2.42.0":
             defs["x11"] = "false"
