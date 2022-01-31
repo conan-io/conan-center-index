@@ -15,7 +15,7 @@ class HunspellConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://hunspell.github.io/"
     topics = ("spell", "spell-check")
-    license = "???"
+    license = ("MPL-1.1", "GPL-2.0-or-later", "LGPL-2.1-or-later")
     settings = ("os", "arch", "compiler", "build_type")
     options = {
         "shared": [True, False],
@@ -57,6 +57,8 @@ class HunspellConan(ConanFile):
 
     def package(self):
         self._configure_cmake().install()
+        self.copy("COPYING", "licenses")
+        self.copy("COPYING.LESSER", "licenses")
         self.copy("license.hunspell", "licenses")
 
     def package_info(self):
