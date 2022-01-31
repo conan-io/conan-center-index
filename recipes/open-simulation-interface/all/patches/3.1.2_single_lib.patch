@@ -11,7 +11,7 @@ index 09659d8..afa3aca 100644
  set(INSTALL_INCLUDE_DIR ${INSTALL_INCLUDE_DIR}/osi${VERSION_MAJOR})
 
  configure_file(osi_version.proto.in ${CMAKE_CURRENT_SOURCE_DIR}/osi_version.proto)
-@@ -79,52 +79,20 @@ set(OSI_PROTO_FILES
+@@ -79,52 +79,19 @@ set(OSI_PROTO_FILES
 
  protobuf_generate_cpp(PROTO_SRCS PROTO_HEADERS ${OSI_PROTO_FILES})
 
@@ -65,7 +65,6 @@ index 09659d8..afa3aca 100644
 -        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 -        $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 -)
-+set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
  set_property(
      TARGET ${PROJECT_NAME}

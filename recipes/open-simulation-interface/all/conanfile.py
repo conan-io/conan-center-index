@@ -1,9 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import re
-import sys
-import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -23,7 +20,7 @@ class OpenSimulationInterfaceConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_paths", "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
