@@ -80,7 +80,9 @@ class LibnameConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "subdir('tests')", "#subdir('tests')")
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
+                              else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
 
     def _configure_meson(self):
         meson = Meson(self)
