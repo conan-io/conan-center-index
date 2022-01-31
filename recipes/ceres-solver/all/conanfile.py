@@ -69,6 +69,8 @@ class ceressolverConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.use_gflags:
+            self.options["gflags"].nothreads = False
 
     def requirements(self):
         self.requires("eigen/3.4.0")
@@ -76,7 +78,6 @@ class ceressolverConan(ConanFile):
             self.requires("glog/0.5.0")
         if self.options.use_gflags:
             self.requires("gflags/2.2.2")
-            self.options["gflags"].nothreads = False
         if self.options.use_TBB:
             self.requires("tbb/2020.3")
 
@@ -97,6 +98,8 @@ class ceressolverConan(ConanFile):
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
         if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
             raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
+        if self.options.use_gflags and self.options["gflags"].nothreads:
+            raise ConanInvalidConfiguration("Ceres-solver requires options gflags:nothreads=False") # This could use a source as to why
         if tools.Version(self.version) >= "2.0":
             # 1.x uses ceres-solver specific FindXXX.cmake modules
             self.generators.append("cmake_find_package")
