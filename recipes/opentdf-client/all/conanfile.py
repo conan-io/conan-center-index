@@ -70,4 +70,4 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
-        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "libiconv::libiconv", "zlib::zlib", "gsl_microsoft::gsl_microsoft", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "libiconv::libiconv", "zlib::zlib", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
