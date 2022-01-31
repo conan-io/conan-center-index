@@ -11,7 +11,7 @@ required_conan_version = ">=1.29.1"
 class LibnameConan(ConanFile):
     name = "gdk-pixbuf"
     description = "toolkit for image loading and pixel buffer manipulation"
-    topics = ("conan", "gdk-pixbuf", "image")
+    topics = ("gdk-pixbuf", "image")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.gnome.org/gdk-pixbuf/"
     license = "LGPL-2.1-or-later"
@@ -55,28 +55,27 @@ class LibnameConan(ConanFile):
             raise ConanInvalidConfiguration("This package does not support Macos currently")
     
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.60.2")
+        self.build_requires("pkgconf/1.7.4")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.68.0")
+            self.build_requires("gobject-introspection/1.70.0")
     
     def requirements(self):
-        self.requires("glib/2.69.0")
+        self.requires("glib/2.70.1")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.6")
+            self.requires("libjpeg-turbo/2.1.2")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.27")
+            self.requires("jasper/2.0.33")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "subdir('tests')", "#subdir('tests')")
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "subdir('thumbnailer')", "#subdir('thumbnailer')")
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
@@ -112,7 +111,7 @@ class LibnameConan(ConanFile):
         with tools.environment_append({"LD_LIBRARY_PATH": os.path.join(self.package_folder, "lib")}):
             meson = self._configure_meson()
             meson.install()
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             os.rename(os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -124,6 +123,6 @@ class LibnameConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "gdk-pixbuf-2.0"
         if not self.options.shared:
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         self.env_info.GDK_PIXBUF_PIXDATA = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
