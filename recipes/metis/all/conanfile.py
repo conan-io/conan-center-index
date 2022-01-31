@@ -70,11 +70,11 @@ class METISConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             self._cmake.definitions["SHARED"] = self.options.shared
             self._cmake.definitions["METIS_INSTALL"] = True
             self._cmake.definitions["ASSERT"] = self.settings.build_type == "Debug"
             self._cmake.definitions["ASSERT2"] = self.settings.build_type == "Debug"
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
             self._cmake.definitions["METIS_IDX64"] = True
             self._cmake.definitions["METIS_REAL64"] = True
             self._cmake.configure(build_folder=self._build_subfolder)
