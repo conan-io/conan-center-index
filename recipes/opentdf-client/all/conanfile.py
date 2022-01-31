@@ -13,8 +13,8 @@ class OpenTDFConan(ConanFile):
     license = "MIT"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"build_python": [True, False]}
-    default_options = {"build_python": False}
+    options = {"build_python": [True, False], "build_tests": [True, False], "fPIC": [True, False]}
+    default_options = {"build_python": False, "build_tests": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
 
     _cmake = None
@@ -37,6 +37,10 @@ class OpenTDFConan(ConanFile):
         self.requires("libarchive/3.5.1@")
         self.requires("nlohmann_json/3.10.4@")
         self.requires("jwt-cpp/0.4.0@")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def source(self):
         #self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
