@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -1,25 +1,19 @@
+@@ -1,25 +1,16 @@
 -cmake_minimum_required (VERSION 2.6)
 -project (WinEditLine)
 -set (WinEditLine_VERSION_MAJOR 2)
@@ -27,9 +27,6 @@
 +cmake_minimum_required(VERSION 3.1)
 +
 +project(WinEditLine C)
-+
-+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-+conan_basic_setup(TARGETS)
 +
 +add_library(edit src/editline.c src/fn_complete.c src/history.c src/libedit.def)
 +target_include_directories(edit PRIVATE src)
