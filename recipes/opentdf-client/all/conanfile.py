@@ -27,6 +27,31 @@ class OpenTDFConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "17",
+            "gcc": "9",
+            "clang": "12",
+            "apple-clang": "12.0.0",
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+
     def requirements(self):
         self.requires("openssl/1.1.1l@")
         self.requires("boost/1.76.0@")
