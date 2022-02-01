@@ -14,9 +14,9 @@ class HunspellConan(ConanFile):
     )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://hunspell.github.io/"
-    topics = ("spell", "spell-check")
-    license = ("MPL-1.1", "GPL-2.0-or-later", "LGPL-2.1-or-later")
-    settings = ("os", "arch", "compiler", "build_type")
+    topics = "spell", "spell-check"
+    license = "MPL-1.1", "GPL-2.0-or-later", "LGPL-2.1-or-later"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,9 +25,9 @@ class HunspellConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = ("cmake",)
+    generators = "cmake"
     # FIXME: Remove once the pending upstream PR for CMake support is merged
-    exports_sources = ("CMakeLists.txt",)
+    exports_sources = "CMakeLists.txt"
     no_copy_source = True
 
     def config_options(self):
