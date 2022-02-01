@@ -1,16 +1,22 @@
 sources:
   "10.32":
-    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.32.tar.gz"
-    sha256: "9ca9be72e1a04f22be308323caa8c06ebd0c51efe99ee11278186cafbc4fe3af"
+    url:
+      - "https://sourceforge.net/projects/pcre/files/pcre2/10.32/pcre2-10.32.tar.bz2"
+    sha256: "f29e89cc5de813f45786580101aaee3984a65818631d4ddbda7b32f699b87c2e"
   "10.33":
-    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz"
-    sha256: "e2e2899a97489fc6ad1b0cc3da7952c7cca991b4a0f7db6649b75d9721025d31"
+    url:
+      - "https://sourceforge.net/projects/pcre/files/pcre2/10.33/pcre2-10.33.tar.bz2"
+    sha256: "35514dff0ccdf02b55bd2e9fa586a1b9d01f62332c3356e379eabb75f789d8aa"
   "10.35":
-    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.35.tar.gz"
-    sha256: "8fdcef8c8f4cd735169dd0225fd010487970c1bcadd49e9b90e26c7250a33dc9"
+    url:
+      - "https://sourceforge.net/projects/pcre/files/pcre2/10.35/pcre2-10.35.tar.bz2"
+    sha256: "9ccba8e02b0ce78046cdfb52e5c177f0f445e421059e43becca4359c669d4613"
   "10.36":
-    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.36.tar.gz"
-    sha256: "b95ddb9414f91a967a887d69617059fb672b914f56fa3d613812c1ee8e8a1a37"
+    url:
+      - "https://sourceforge.net/projects/pcre/files/pcre2/10.36/pcre2-10.36.tar.bz2"
+    sha256: "a9ef39278113542968c7c73a31cfcb81aca1faa64690f400b907e8ab6b4a665c"
   "10.37":
-    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.37.tar.gz"
-    sha256: "04e214c0c40a97b8a5c2b4ae88a3aa8a93e6f2e45c6b3534ddac351f26548577"
+    url:
+      - "https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.37/pcre2-10.37.tar.bz2"
+      - "https://sourceforge.net/projects/pcre/files/pcre2/10.37/pcre2-10.37.tar.bz2"
+    sha256: "4d95a96e8b80529893b4562be12648d798b957b1ba1aae39606bbc2ab956d270"

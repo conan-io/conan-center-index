@@ -1,0 +1,4 @@
+sources:
+  "cci.20211006":
+    url: https://github.com/DiligentGraphics/SPIRV-Headers/archive/5ea2d62e8c0ddd9e2a7d0ca5e3f2335e09e5f408.zip
+    sha256: 8b9a9b49600a01d7d768c7e95ae09a4e81e7b2b3ed0a7a24d2375474c00d06ff

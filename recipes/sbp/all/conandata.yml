@@ -1,0 +1,8 @@
+sources:
+  "3.4.10":
+    url:
+      source: "https://github.com/swift-nav/libsbp/archive/refs/tags/v3.4.10.tar.gz"
+      cmake: "https://github.com/swift-nav/cmake/archive/373d4fcafbbc0c208dc9ecb278d36ed8c9448eda.zip"
+    sha256:
+      source: f2fb738f49112b25e7849ca0c75415159127e9b5373b13e7027362b8fa0b1224
+      cmake: 6077d2a754d013e3cb9826f589e47b19ab01f4d91ede4f5bfc14db74bc5dc894

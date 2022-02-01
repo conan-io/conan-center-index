@@ -2,24 +2,24 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class EnttConan(ConanFile):
     name = "entt"
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
-    topics = ("conan", "entt", "gaming", "entity", "ecs")
+    topics = ("entt", "gaming", "entity", "ecs")
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     no_copy_source = True
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -62,5 +62,7 @@ class EnttConan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "src"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "EnTT")
+        self.cpp_info.set_property("cmake_target_name", "EnTT::EnTT")
         self.cpp_info.names["cmake_find_package"] = "EnTT"
         self.cpp_info.names["cmake_find_package_multi"] = "EnTT"

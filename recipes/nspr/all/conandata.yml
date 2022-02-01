@@ -8,3 +8,6 @@ sources:
   "4.29":
     sha256: 22286bdb8059d74632cc7c2865c139e63953ecfb33bf4362ab58827e86e92582
     url: https://ftp.mozilla.org/pub/nspr/releases/v4.29/src/nspr-4.29.tar.gz
+  "4.32":
+    sha256: bb6bf4f534b9559cf123dcdc6f9cd8167de950314a90a88b2a329c16836e7f6c
+    url: https://ftp.mozilla.org/pub/nspr/releases/v4.32/src/nspr-4.32.tar.gz

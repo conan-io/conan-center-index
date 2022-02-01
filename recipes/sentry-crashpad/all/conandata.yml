@@ -1,4 +1,7 @@
 sources:
+  "0.4.13":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.13/sentry-native.zip"
+    sha256: "85e0e15d7fb51388d967ab09e7ee1b95f82330a469a93c65d964ea1afd5e6127"
   "0.4.12":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.12/sentry-native.zip"
     sha256: "d7fa804995124c914a3abe077a73307960bbcadfbba9021e8ccbd05c7ba45f88"
@@ -24,17 +27,34 @@ sources:
     url: "https://github.com/getsentry/sentry-native/releases/download/0.2.6/sentry-native-0.2.6.zip"
     sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
 patches:
+  "0.4.12":
+    - patch_file: "patches/0.4.12-0001-getopt.patch"
+      base_path: "source_subfolder"
+  "0.4.11":
+    - patch_file: "patches/0.4.12-0001-getopt.patch"
+      base_path: "source_subfolder"
+  "0.4.10":
+    - patch_file: "patches/0.4.12-0001-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.9":
     - patch_file: "patches/0.4.9-0001-missing-installed-headers.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
       base_path: "source_subfolder"
   "0.4.8":
     - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.7":
     - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
+      base_path: "source_subfolder"
   "0.4.1":
     - patch_file: "patches/0.4.1-0001-missing-installed-headers.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.4.9-0002-getopt.patch"
       base_path: "source_subfolder"
   "0.2.6":
     - patch_file: "patches/0.2.6-0001-missing-installed-headers.patch"

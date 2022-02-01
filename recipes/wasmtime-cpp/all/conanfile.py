@@ -1,5 +1,5 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -29,7 +29,7 @@ class WasmtimeCppConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("wasmtime/0.29.0")
+        self.requires(f"wasmtime/{self.version}")
 
     def validate(self):
         compiler = self.settings.compiler

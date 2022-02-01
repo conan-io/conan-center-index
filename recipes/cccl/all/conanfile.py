@@ -6,7 +6,7 @@ import os
 class CcclConan(ConanFile):
     name = "cccl"
     description = "Unix cc compiler to Microsoft's cl compiler wrapper"
-    topics = ("conan", "msvc", "Visual Studio", "wrapper", "gcc")
+    topics = ("msvc", "visual studio", "wrapper", "gcc")
     homepage = "https://github.com/swig/cccl/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
@@ -32,8 +32,8 @@ class CcclConan(ConanFile):
         del self.info.options.verbose
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("cccl-cccl-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
         cccl_path = os.path.join(self.source_folder, self._source_subfolder, "cccl")
         tools.replace_in_file(cccl_path,

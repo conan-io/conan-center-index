@@ -44,3 +44,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+      base_path: "source_subfolder"

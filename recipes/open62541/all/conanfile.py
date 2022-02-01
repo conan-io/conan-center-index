@@ -150,6 +150,11 @@ class Open62541Conan(ConanFile):
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
 
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
+        if tools.Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("{0} {1} doesn't properly support shared lib on Windows".format(self.name,
+                                                                                                            self.version))
+
         if self.options.subscription == "With Events":
             self.output.warning("`{name}:subscription=With Events` is deprecated. Use `{name}:subscription=events` instead".format(name=self.name))  # Deprecated in 1.2.2
             self.options.subscription = "events"
@@ -326,6 +331,10 @@ class Open62541Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @property
+    def _tools_subfolder(self):
+        return os.path.join(self._source_subfolder, "tools")
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE-CC0", dst="licenses", src=self._source_subfolder)
@@ -342,6 +351,8 @@ class Open62541Conan(ConanFile):
                 os.remove(cmake_file)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("generate_*.py", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
+        self.copy("nodeset_compiler/*", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
 
     @property
     def _module_subfolder(self):
@@ -350,6 +361,11 @@ class Open62541Conan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder, "open62541Macros.cmake")
+
+    @staticmethod
+    def _chmod_plus_x(filename):
+        if os.name == 'posix':
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"
@@ -360,6 +376,10 @@ class Open62541Conan(ConanFile):
             "include",
             os.path.join("include", "plugin")
         ]
+
+        # required for creating custom servers from ua-nodeset
+        self.user_info.tools_dir = os.path.join(self.package_folder, "res", "tools")
+        self._chmod_plus_x(os.path.join(self.package_folder, "res", "tools", "generate_nodeid_header.py"))
 
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")

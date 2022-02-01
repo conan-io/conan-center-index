@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 15735c6ab31e92f781decc72d71dde0b0ec3c81f..3e3ad34d01a7e88af2232391411330b24387d43d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -92,6 +92,7 @@ if(LibXml2_FOUND)
+ 	list(APPEND PUBLIC_HEADER_FILES include/protoXml.h)
+ 	list(APPEND COMMON_SOURCE_FILES ${COMMON}/protoXml.cpp)
+ endif()
++list(APPEND PLATFORM_LIBS Threads::Threads)
+ 
+ if(PROTOKIT_ENABLE_WX)
+         find_package(wxWidgets REQUIRED COMPONENTS core base)
+@@ -203,7 +204,6 @@ if(MSVC)
+ 	list(APPEND PLATFORM_FLAGS /EHsc)
+ elseif(UNIX)
+ 	list(APPEND PLATFORM_DEFINITIONS UNIX _FILE_OFFSET_BITS=64)
+-	list(APPEND PLATFORM_LIBS pthread)
+ 	list(APPEND PLATFORM_SOURCE_FILES 	src/unix/unixNet.cpp 
+ 										src/unix/unixSerial.cpp 
+ 										src/unix/unixVif.cpp

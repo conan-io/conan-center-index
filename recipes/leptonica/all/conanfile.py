@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LeptonicaConan(ConanFile):
@@ -24,7 +24,7 @@ class LeptonicaConan(ConanFile):
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_openjpeg": [True, False],
-        "with_webp": [True, False]
+        "with_webp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,10 +35,9 @@ class LeptonicaConan(ConanFile):
         "with_png": True,
         "with_tiff": True,
         "with_openjpeg": True,
-        "with_webp": True
+        "with_webp": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
@@ -49,6 +48,11 @@ class LeptonicaConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -181,6 +185,8 @@ class LeptonicaConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))  # since 1.81.0
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"leptonica": "Leptonica::Leptonica"}
@@ -199,22 +205,21 @@ class LeptonicaConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Leptonica")
+        self.cpp_info.set_property("cmake_target_name", "leptonica")
+        self.cpp_info.set_property("pkg_config_name", "lept")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "Leptonica"
         self.cpp_info.names["cmake_find_package_multi"] = "Leptonica"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "lept"
-        self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))

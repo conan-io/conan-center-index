@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ScnlibConan(ConanFile):
@@ -25,13 +25,17 @@ class ScnlibConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,7 +60,11 @@ class ScnlibConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("{} {} requires several C++11 features, which your compiler does not support.".format(self.name, self.version))
+            raise ConanInvalidConfiguration(
+                "{} {} requires several C++11 features, which your compiler does not support.".format(
+                    self.name, self.version,
+                )
+            )
 
     def package_id(self):
         if self.options.header_only:
@@ -93,13 +101,19 @@ class ScnlibConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "scn"
-        self.cpp_info.names["cmake_find_package_multi"] = "scn"
         target = "scn-header-only" if self.options.header_only else "scn"
-        self.cpp_info.components["_scnlib"].names["cmake_find_package"] = target
-        self.cpp_info.components["_scnlib"].names["cmake_find_package_multi"] = target
+        self.cpp_info.set_property("cmake_file_name", "scn")
+        self.cpp_info.set_property("cmake_target_name", "scn::{}".format(target))
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.header_only:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=1"]
         else:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "scn"
+        self.cpp_info.names["cmake_find_package_multi"] = "scn"
+        self.cpp_info.components["_scnlib"].names["cmake_find_package"] = target
+        self.cpp_info.components["_scnlib"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["_scnlib"].set_property("cmake_target_name", "scn::{}".format(target))

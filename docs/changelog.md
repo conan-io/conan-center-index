@@ -1,9 +1,54 @@
 # Changelog
 
+### 18-January-2022 - 16:49 CET
+
+- [config] Bump Conan client version to 1.43.3.
+
+### 29-December-2021 - 16:41 CET
+
+- [config] Add Linux GCC 11, Clang 12 & 13 configurations with new epoch feature.
+- [config] Drop Linux GCC 6 and clang 10 configurations.
+- [fix] Fixed some unexpected errors.
+- [feature] Prepare pipeline to work with ansible provisioned machines.
+
+### 17-December-2021 - 09:56 CET
+
+- [feature] Introduce 'epoch' concept to build configurations as a strategy to build packages for new compilers.
+- [feature] Allow pull-requests to build packages from different recipes for the same library.
+- [feature] Profiles and logs from builds in the packages generated summary are now open in a new tab.
+- [fix] Improve error reporting of mismatched revision in PRs.
+
+### 14-December-2021 - 09:13 CET
+
+- [config] Bump Conan client version to 1.43.0.
+
+### 01-December-2021 - 12:29 CET
+
+- [config] Bump Conan client version to 1.42.2.
+
+### 24-November-2021 - 17:49 CET
+
+- [feature] Return host requirements when computing package IDs.
+
+### 22-November-2021 - 17:53 CET
+
+- [feature] Cache computation of package IDs.
+
+### 15-November-2021 - 11:03 CET
+
+- [feature] Add `xlarge` pod size in Linux for building packages with higher memory requirements.
+
+### 11-November-2021 - 13:22 CET
+
+- [config] Bump Conan client version to 1.41.0
+- [fix] Identify PRs to `CONTRIBUTING.md` as changes in docs.
+- [feature] Added Jenkins DSLs for job descriptions.
+- [fix] Parse integer value when assigning properties.
+
 ### 18-October-2021 - 17:05 CEST
  - [config] Upgrade Conan version to 1.40.4
  - [fix] Replace `Unauthorized User` label by `User-approval pending`
- - [feat] Remove `os_build` and `arch_build` from generated profiles 
+ - [feat] Remove `os_build` and `arch_build` from generated profiles
 
 ### 11-October-2021 - 12:14 CEST
  - [configs] Configurable Github statuses to check
@@ -11,10 +56,10 @@
  - [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
  - [feature] Skip stale pull-requests from automatic review requests.
  - [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
- - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere 
+ - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere
  - [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
  - [job] New job to remove dead branches from CI
- 
+
 ### 01-October-2021 - 13:08 CEST
 
 - [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)

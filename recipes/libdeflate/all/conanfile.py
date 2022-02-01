@@ -27,6 +27,10 @@ class LibdeflateConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -41,8 +45,8 @@ class LibdeflateConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-                not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not self._is_msvc and \
+           not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -77,7 +81,7 @@ class LibdeflateConan(ConanFile):
                 self.run("{0} -f Makefile {1}".format(self._make_program, target), win_bash=tools.os_info.is_windows)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_msvc()
         else:
             self._build_make()
@@ -92,6 +96,7 @@ class LibdeflateConan(ConanFile):
         self.copy("*.dylib", src=self._source_subfolder, dst="lib", symlinks=True)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libdeflate")
         prefix = "lib" if self.settings.os == "Windows" else ""
         suffix = "static" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.libs = ["{0}deflate{1}".format(prefix, suffix)]

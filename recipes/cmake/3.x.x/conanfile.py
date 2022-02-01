@@ -2,12 +2,12 @@ import os
 from conans import tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
     description = "Conan installer for CMake"
-    topics = ("conan", "cmake", "build", "installer")
+    topics = ("cmake", "build", "installer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
@@ -30,6 +30,10 @@ class CMakeConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
+
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1m")
 
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
@@ -58,10 +62,6 @@ class CMakeConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-
-    def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -111,8 +111,10 @@ class CMakeConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
+        self.buildenv_info.prepend_path("CMAKE_ROOT", self.package_folder)
         self.env_info.CMAKE_ROOT = self.package_folder
         mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % minor, "Modules")
+        self.buildenv_info.prepend_path("CMAKE_MODULE_PATH", mod_path)
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
