@@ -37,9 +37,8 @@ def main(pr):
             config = yaml.safe_load(file)
             for v in config["versions"]:
                 try:
-                    tmpVer = packaging.version.Version(v)
-                    if not version or tmpVer > version:
-                        version = tmpVer
+                    if not version or packaging.version.Version(v) > packaging.version.Version(version):
+                        version = v
                         folder = config["versions"][v]["folder"]
                 except packaging.version.InvalidVersion:
                     print("Error parsing version %s for package %s in pr %s" % (v, package, pr))
