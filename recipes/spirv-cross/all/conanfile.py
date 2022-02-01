@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class SpirvCrossConan(ConanFile):
@@ -211,7 +211,6 @@ class SpirvCrossConan(ConanFile):
         def _register_component(target_lib, requires):
             self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
             self.cpp_info.components[target_lib].builddirs.append(self._module_subfolder)
-            self.cpp_info.components[target_lib].set_property("cmake_build_modules", [self._module_file_rel_path])
 
             self.cpp_info.components[target_lib].names["cmake_find_package"] = target_lib
             self.cpp_info.components[target_lib].names["cmake_find_package_multi"] = target_lib

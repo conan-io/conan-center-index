@@ -1,16 +1,17 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 class LuaConan(ConanFile):
     name = "lua"
     description = "Lua is a powerful, efficient, lightweight, embeddable scripting language."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.lua.org/"
-    topics = ("conan", "lua", "scripting")
+    topics = ("lua", "scripting")
     license = "MIT"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {"shared": [False, True], "fPIC": [True, False], "compile_as_cpp": [True, False]}
     default_options = {"shared": False, "fPIC": True, "compile_as_cpp": False}
 
@@ -19,6 +20,11 @@ class LuaConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,9 +38,8 @@ class LuaConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "lua-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -62,9 +67,9 @@ class LuaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m"]
-        if self.settings.os in ["Linux", "Macos"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.defines.extend(["LUA_USE_DLOPEN", "LUA_USE_POSIX"])
         elif self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("LUA_BUILD_AS_DLL")

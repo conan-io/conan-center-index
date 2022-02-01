@@ -2,25 +2,28 @@ from conans import ConanFile, tools, CMake
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class KangaruConan(ConanFile):
     name = "kangaru"
     description = "A dependency injection container for C++11, C++14 and later"
     license = "MIT"
-    topics = ("conan", "gracicot", "kangaru",
-              "DI", "IoC", "inversion of control")
+    topics = ("gracicot", "kangaru", "DI", "IoC", "inversion of control")
     homepage = "https://github.com/gracicot/kangaru/wiki"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"reverse_destruction": [True, False],
-               "no_exception": [True, False]}
-    default_options = {"reverse_destruction": True,
-                       "no_exception": False}
 
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "reverse_destruction": [True, False],
+        "no_exception": [True, False],
+    }
+    default_options = {
+        "reverse_destruction": True,
+        "no_exception": False,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -30,6 +33,11 @@ class KangaruConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -62,6 +70,8 @@ class KangaruConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))
         self.copy(os.path.join(self._source_subfolder, "LICENSE"), "licenses")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"kangaru": "kangaru::kangaru"}
@@ -80,17 +90,13 @@ class KangaruConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "kangaru"
-        self.cpp_info.names["cmake_find_package_multi"] = "kangaru"
-        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.set_property("cmake_file_name", "kangaru")
+        self.cpp_info.set_property("cmake_target_name", "kangaru")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

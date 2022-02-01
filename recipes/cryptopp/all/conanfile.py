@@ -3,7 +3,7 @@ import os
 import shutil
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CryptoPPConan(ConanFile):
@@ -12,13 +12,19 @@ class CryptoPPConan(ConanFile):
     homepage = "https://cryptopp.com"
     license = "BSL-1.0"
     description = "Crypto++ Library is a free C++ class library of cryptographic schemes."
-    topics = ("conan", "cryptopp", "crypto", "cryptographic", "security")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    topics = ("cryptopp", "crypto", "cryptographic", "security")
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -28,6 +34,11 @@ class CryptoPPConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,16 +54,16 @@ class CryptoPPConan(ConanFile):
 
         # Get sources
         source_cryptopp = {
-          "url": data["url"]["source"],
-          "sha256": data["sha256"]["source"]
+            "url": data["url"]["source"],
+            "sha256": data["sha256"]["source"],
         }
         tools.get(**source_cryptopp)
-        os.rename("cryptopp-" + suffix, self._source_subfolder)
+        tools.rename("cryptopp-" + suffix, self._source_subfolder)
 
         # Get CMakeLists
         cmake_cryptopp = {
-          "url": data["url"]["cmake"],
-          "sha256": data["sha256"]["cmake"]
+            "url": data["url"]["cmake"],
+            "sha256": data["sha256"]["cmake"],
         }
         tools.get(**cmake_cryptopp)
         src_folder = os.path.join(self.source_folder, "cryptopp-cmake-" + suffix)
@@ -97,6 +108,7 @@ class CryptoPPConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {
@@ -118,29 +130,29 @@ class CryptoPPConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "cryptopp"
-        self.cpp_info.names["cmake_find_package_multi"] = "cryptopp"
-        self.cpp_info.names["pkg_config"] = "libcryptopp"
         cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components["libcryptopp"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["libcryptopp"].names["pkg_config"] = "libcryptopp"
+        self.cpp_info.set_property("cmake_file_name", "cryptopp")
+        self.cpp_info.set_property("cmake_target_name", cmake_target)
+        self.cpp_info.set_property("pkg_config_name", "libcryptopp")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libcryptopp"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libcryptopp"].system_libs = ["pthread", "m"]
         elif self.settings.os == "SunOS":
             self.cpp_info.components["libcryptopp"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libcryptopp"].system_libs = ["ws2_32"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = "libcryptopp"
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", cmake_target)
+        self.cpp_info.components["libcryptopp"].set_property("pkg_config_name", "libcryptopp")

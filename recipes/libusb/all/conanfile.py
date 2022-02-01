@@ -112,7 +112,8 @@ class LibUSBConan(ConanFile):
                 "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
             }
             msbuild = MSBuild(self)
-            msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties)
+            build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+            msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties, build_type=build_type)
 
     def _configure_autotools(self):
         if not self._autotools:

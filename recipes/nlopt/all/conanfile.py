@@ -1,7 +1,8 @@
-import glob
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.43.0"
+
 
 class NloptConan(ConanFile):
     name = "nlopt"
@@ -9,23 +10,24 @@ class NloptConan(ConanFile):
                   "algorithms for global and local, constrained or " \
                   "unconstrained, optimization."
     license = ["LGPL-2.1-or-later", "MIT"]
-    topics = ("conan", "nlopt", "optimization", "nonlinear")
+    topics = ("nlopt", "optimization", "nonlinear")
     homepage = "https://github.com/stevengj/nlopt"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_cxx_routines": [True, False]
+        "enable_cxx_routines": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_cxx_routines": True
+        "enable_cxx_routines": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -48,8 +50,8 @@ class NloptConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
@@ -58,10 +60,9 @@ class NloptConan(ConanFile):
 
     def _patch_sources(self):
         # don't force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                          "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                          "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
+        tools.replace_in_file(cmakelists, "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -101,18 +102,22 @@ class NloptConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(pdb_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "NLopt")
+        self.cpp_info.set_property("cmake_target_name", "NLopt::nlopt")
+        self.cpp_info.set_property("pkg_config_name", "nlopt")
+
         self.cpp_info.names["cmake_find_package"] = "NLopt"
         self.cpp_info.names["cmake_find_package_multi"] = "NLopt"
-        self.cpp_info.names["pkg_config"] = "nlopt"
         self.cpp_info.components["nloptlib"].names["cmake_find_package"] = "nlopt"
         self.cpp_info.components["nloptlib"].names["cmake_find_package_multi"] = "nlopt"
-        self.cpp_info.components["nloptlib"].names["pkg_config"] = "nlopt"
-        self.cpp_info.components["nloptlib"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.components["nloptlib"].set_property("cmake_target_name", "NLopt::nlopt")
+        self.cpp_info.components["nloptlib"].set_property("pkg_config_name", "nlopt")
+
+        self.cpp_info.components["nloptlib"].libs = ["nlopt"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["nloptlib"].system_libs.append("m")
         if not self.options.shared and self.options.enable_cxx_routines and tools.stdcpp_library(self):
             self.cpp_info.components["nloptlib"].system_libs.append(tools.stdcpp_library(self))

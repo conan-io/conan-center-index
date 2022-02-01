@@ -21,7 +21,6 @@ class JsonnetConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
     @property
@@ -41,7 +40,9 @@ class JsonnetConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.5")
+        if tools.Version(self.version) >= "0.18.0":
+            self.requires("rapidyaml/0.3.0")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
@@ -49,6 +50,11 @@ class JsonnetConan(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -60,6 +66,7 @@ class JsonnetConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        self._cmake.definitions["BUILD_SHARED_BINARIES"] = False
         self._cmake.definitions["BUILD_JSONNET"] = False
         self._cmake.definitions["BUILD_JSONNETFMT"] = False
         self._cmake.definitions["USE_SYSTEM_JSON"] = True
@@ -80,6 +87,9 @@ class JsonnetConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libjsonnet"].libs = ["jsonnet"]
         self.cpp_info.components["libjsonnet"].requires = ["nlohmann_json::nlohmann_json"]
+        if tools.Version(self.version) >= "0.18.0":
+            self.cpp_info.components["libjsonnet"].requires.append("rapidyaml::rapidyaml")
+
         if tools.stdcpp_library(self):
             self.cpp_info.components["libjsonnet"].system_libs.append(tools.stdcpp_library(self))
         if self.settings.os in ["Linux", "FreeBSD"]:

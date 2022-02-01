@@ -1,21 +1,28 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class GetTextConan(ConanFile):
     name = "libgettext"
     description = "An internationalization and localization system for multilingual programs"
-    topics = ("conan", "gettext", "intl", "libintl", "i18n")
+    topics = ("gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
-    deprecated = "gettext"
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["patches/*.patch"]
-    options = {"shared": [True, False], "fPIC": [True, False], "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"]}
-    default_options = {"shared": False, "fPIC": True, "threads": "auto"}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "threads": "auto",
+    }
 
     @property
     def _source_subfolder(self):
@@ -23,7 +30,7 @@ class GetTextConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _gettext_folder(self):
@@ -32,6 +39,10 @@ class GetTextConan(ConanFile):
     @property
     def _make_args(self):
         return ["-C", "intl"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -49,18 +60,26 @@ class GetTextConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.16")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self._is_msvc:
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
         libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
@@ -92,12 +111,11 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "bin", "share", "automake-1.16"))
-            args.extend(["CC=%s/compile cl -nologo" % automake_perldir,
+            args.extend(["CC=%s cl -nologo" % tools.unix_path(self._user_info_build["automake"].compile),
                          "LD=link",
                          "NM=dumpbin -symbols",
                          "STRIP=:",
-                         "AR=%s/ar-lib lib" % automake_perldir,
+                         "AR=%s lib" % tools.unix_path(self._user_info_build["automake"].ar_lib),
                          "RANLIB=:"])
             if rc:
                 args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
@@ -125,6 +143,12 @@ class GetTextConan(ConanFile):
                          os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Intl")
+        self.cpp_info.set_property("cmake_target_name", "Intl::Intl")
         self.cpp_info.libs = ["gnuintl"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.append("CoreFoundation")
+
+        self.cpp_info.names["cmake_find_package"] = "Intl"
+        self.cpp_info.names["cmake_find_package_multi"] = "Intl"

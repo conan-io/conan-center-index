@@ -12,7 +12,7 @@ class PodofoConan(ConanFile):
     description = "PoDoFo is a library to work with the PDF file format."
     topics = ("PDF", "PoDoFo", "podofo")
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,7 +36,6 @@ class PodofoConan(ConanFile):
         "with_unistring": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -48,21 +47,34 @@ class PodofoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self._is_msvc:
+            # libunistring recipe raises for Visual Studio
+            # TODO: Enable again when fixed?
+            self.options.with_unistring = False
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.13.93")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
         if self.options.with_jpeg:
@@ -119,6 +131,7 @@ class PodofoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libpodofo-{}".format(tools.Version(self.version).major))
         self.cpp_info.names["pkg_config"] = "libpodofo-{}".format(tools.Version(self.version).major)
         self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Windows" and self.options.shared:

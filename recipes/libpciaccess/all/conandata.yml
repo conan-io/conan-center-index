@@ -1,0 +1,4 @@
+sources:
+  "0.16":
+    url: "https://gitlab.freedesktop.org/xorg/lib/libpciaccess/-/archive/libpciaccess-0.16/libpciaccess-libpciaccess-0.16.tar.gz"
+    sha256: "983b31ab586e3f2da810bd6bcbbcf9d643f8968d2280c6e573fec95b556e971f"
