@@ -29,7 +29,7 @@ jsoncpp/1.8.3
 leveldb/1.22
 libcurl/7.64.1.dssl2
 libjpeg/9d.dssl2
-libmysqlclient/8.0.25
+libmysqlclient/8.0.17
 libpng/1.6.37
 libpq/11.5.dssl1
 libwebp/1.1.0
