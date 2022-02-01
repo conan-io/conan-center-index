@@ -1,6 +1,6 @@
 sources:
   "20160605":
-    sha256: "2669b49ee000150af7709b21c7656f1f6cbea09fd33116c40b41310adeb2b73e"
+    sha256: "d77e120714c8a392ece060d810a77045f707787bd4790aef5ad11cc821eac147"
     url: "https://github.com/ImageMagick/jbig/archive/5d8f5f6fa71766ced5e828bf7bfff642ddb8a6ad.zip"
 patches:
   "20160605":
