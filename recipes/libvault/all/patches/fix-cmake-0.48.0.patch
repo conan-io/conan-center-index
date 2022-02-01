@@ -22,7 +22,7 @@
 +IF (UseCurl)
 +    FIND_PACKAGE(CURL)
 +    IF (CURL_FOUND)
-+        target_link_libraries("CURL::libcurl")
++        target_link_libraries("CONAN_PKG::libcurl")
 +    ENDIF()
 +ENDIF()
 
