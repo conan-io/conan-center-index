@@ -12,3 +12,5 @@ patches:
       base_path: ""
     - patch_file: patches/0004-fix-apple-arm64-build.patch
       base_path: ""
+    - patch_file: patches/0005-fix-rpath-on-macos.patch
+      base_path: ""
