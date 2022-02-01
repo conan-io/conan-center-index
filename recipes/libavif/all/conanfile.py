@@ -17,15 +17,12 @@ default_codec = "aom"
 
 class LibAVIFConan(ConanFile):
     name = "libavif"
-    description = (
-        "OpenLDAP Software is an open source implementation of the "
-        "Lightweight Directory Access Protocol"
-    )
+    description = "Library for encoding and decoding .avif files"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.openldap.org/"
-    topics = ("avif",)
+    homepage = "https://github.com/AOMediaCodec/libavif"
+    topics = "avif"
     license = "BSD-2-Clause"
-    settings = ("os", "arch", "compiler", "build_type")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,8 +33,8 @@ class LibAVIFConan(ConanFile):
         "fPIC": True,
         "with_codec": default_codec,
     }
-    generators = ("cmake", "cmake_find_package_multi")
-    exports_sources = ("CMakeLists.txt", "patches/*")
+    generators = "cmake", "cmake_find_package_multi"
+    exports_sources = "CMakeLists.txt", "patches/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
