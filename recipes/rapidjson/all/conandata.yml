@@ -4,7 +4,7 @@ sources:
     sha256: bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e
   "cci.20200410":
     url: "https://github.com/Tencent/rapidjson/archive/8f4c021fa2f1e001d2376095928fc0532adf2ae6.zip"
-    sha256: e6fc99c7df7f29995838a764dd68df87b71db360f7727ace467b21b82c85efda
+    sha256: 90b511838618f1f92a0dd9a0ac23a1de436ffaa4dc891b0e5bda66a5469587cc
   "cci.20211112":
     url: "https://github.com/Tencent/rapidjson/archive/0d4517f15a8d7167ba9ae67f3f22a559ca841e3b.tar.gz"
     sha256: 3697fdcea30dc7c2b2bb68d2521a6b8793f4d3269de751eed2c5fd477ff329ce
