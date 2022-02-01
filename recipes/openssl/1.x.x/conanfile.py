@@ -751,6 +751,8 @@ class OpenSSLConan(ConanFile):
             yield
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self._full_version < "1.1.0":
@@ -761,15 +763,9 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
-                if self._full_version >= "1.1.0":
-                    if self.settings.os in ["tvOS", "watchOS"]:
-                        tools.patch(patch_file=os.path.join("patches", "1.1.1-tvos-watchos.patch"),
-                                    base_path=self._source_subfolder)
+                if self._full_version > "1.1.0":
                     self._create_targets()
                 else:
-                    if self.settings.os == "Macos":
-                        tools.patch(patch_file=os.path.join("patches", "1.0.2u-darwin-arm64.patch"),
-                                    base_path=self._source_subfolder)
                     self._patch_configure()
                     self._patch_makefile_org()
                 with self._make_context():
