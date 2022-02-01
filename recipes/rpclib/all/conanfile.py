@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.43.0"
 
+
 class rpclibConan(ConanFile):
     name = "rpclib"
     description = "A modern C++ msgpack-RPC server and client library."
@@ -74,7 +75,8 @@ class rpclibConan(ConanFile):
         #   causing the test_package to fail
         if self.settings.os in ["Windows"]:
             if self.options.shared:
-                self.cpp_info.bindirs.append(os.path.join(self.package_folder, "lib"))
+                self.cpp_info.components["_rpc"].bindirs.append(
+                    os.path.join(self.package_folder, "lib"))
 
         # TODO: Remove after Conan 2.0
         self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"
