@@ -120,3 +120,4 @@ class LibAVIFConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._alias_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = \
             [self._alias_path]
+        self.cpp_info.builddirs = ["lib"]
