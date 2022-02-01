@@ -1,0 +1,20 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -48,7 +48,7 @@
+ if(AVIF_LOCAL_LIBGAV1)
+     enable_language(CXX)
+ endif()
+-
++if("0")
+ if(APPLE)
+     set(XCRUN xcrun)
+ else()
+@@ -193,7 +193,7 @@
+         message(WARNING "libavif: Ignoring request for coverage (AVIF_ENABLE_COVERAGE); only clang is currently supported.")
+     endif()
+ endif()
+-
++endif()
+ set(AVIF_SRCS
+     src/alpha.c
+     src/avif.c
