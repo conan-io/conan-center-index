@@ -76,19 +76,19 @@ class LibMysqlClientCConan(ConanFile):
                 "NAMES zstd",
                 "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
-            "NAMES ssl",
-            "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
-            "NAMES crypto",
-            "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        tools.rename(sources_cmake, sources_cmake_orig)
-        tools.rename("CMakeLists.txt", sources_cmake)
+        #tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        #    "NAMES ssl",
+        #    "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
+        #
+        #tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+        #    "NAMES crypto",
+        #    "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
+        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        #    tools.patch(**patch)
+        #sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        #sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
+        #tools.rename(sources_cmake, sources_cmake_orig)
+        #tools.rename("CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
                 "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
