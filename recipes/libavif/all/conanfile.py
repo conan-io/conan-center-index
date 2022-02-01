@@ -115,7 +115,8 @@ class LibAVIFConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "avif")
 
         # TODO: remove in conan v2
-        self.cpp_info.name = "avif"
+        self.cpp_info.names["cmake_find_package"] = "avif"
+        self.cpp_info.names["cmake_find_package_multi"] = "avif"
         self.cpp_info.filenames["cmake_find_package"] = "libavif"
         self.cpp_info.filenames["cmake_find_package_multi"] = "libavif"
         self.cpp_info.build_modules["cmake"] = [self._alias_path]
