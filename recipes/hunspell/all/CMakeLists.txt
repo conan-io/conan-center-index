@@ -28,6 +28,10 @@ add_library(
     "${src}/suggestmgr.cxx"
 )
 
+if(MSVC)
+  target_compile_options(hunspell PRIVATE /wd4267 /wd4996)
+endif()
+
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(hunspell PRIVATE HUNSPELL_STATIC)
 endif()
