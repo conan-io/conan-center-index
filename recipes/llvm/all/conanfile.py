@@ -71,6 +71,14 @@ class Llvm(ConanFile):
         enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
         self.output.info('Enabled LLVM subprojects: {}'.format(', '.join(enabled_projects)))
 
+        cmakelists = os.path.join(self._source_subfolder, 'llvm', 'CMakeLists.txt')
+        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            with open(cmakelists, 'a') as f:
+                f.write('\nadd_definitions("-D_GLIBCXX_USE_CXX11_ABI=0")')
+        elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
+            with open(cmakelists, 'a') as f:
+                f.write('\nadd_definitions("-D_GLIBCXX_USE_CXX11_ABI=1")')
+
         cmake = CMake(self, parallel=False);
         cmake.configure(
             defs = {
