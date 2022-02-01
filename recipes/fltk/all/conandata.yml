@@ -1,0 +1,5 @@
+sources:
+  "1.3.8":
+    url: "https://github.com/fltk/fltk/archive/refs/tags/release-1.3.8.tar.gz"
+    sha256: "abddf697bf1b0a59462a0d2ec57557f4bfb9c634627e6fa50d8c664112642811"
+
