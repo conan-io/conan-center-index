@@ -348,4 +348,4 @@ With version ranges the newest compatible package may yield a different package-
 
 - Build Reproducibility
 
-If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may not be compatible. In order to prevent these types of issues, we have decided to only allow exact requirements versions.
+If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more. 
