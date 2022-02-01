@@ -68,6 +68,7 @@ class MingwConan(ConanFile):
         self.copy("*", dst="", src=target)
         tools.rmdir(target)
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "opt", "lib", "cmake"))
 
     def package_info(self):
         if getattr(self, "settings_target", None):
