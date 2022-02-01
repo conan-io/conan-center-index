@@ -11,6 +11,7 @@ class GiflibConan(ConanFile):
     license = "MIT"
     homepage = "http://giflib.sourceforge.net"
     topics = ("giflib", "image", "multimedia", "format", "graphics")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,7 +25,6 @@ class GiflibConan(ConanFile):
     }
 
     generators = "cmake"
-
     _cmake = None
 
     @property

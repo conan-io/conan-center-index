@@ -5,3 +5,10 @@ sources:
   "2.3.1":
     url: "https://github.com/uclouvain/openjpeg/archive/v2.3.1.tar.gz"
     sha256: "63f5a4713ecafc86de51bfad89cc07bb788e9bba24ebbf0c4ca637621aadb6a9"
+patches:
+  "2.4.0":
+    - patch_file: "patches/0001-relocatable-shared-macos-2.4.0.patch"
+      base_path: "source_subfolder"
+  "2.3.1":
+    - patch_file: "patches/0001-relocatable-shared-macos-2.3.1.patch"
+      base_path: "source_subfolder"
