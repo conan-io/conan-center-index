@@ -130,10 +130,16 @@ class NetSnmpConan(ConanFile):
             f"--with-openssl={ssl_path}",
         ]
         autotools = AutoToolsBuildEnvironment(self)
+        autotools.libs = []
         autotools.configure(args=args)
         return autotools
 
     def _patch_unix(self):
+        tools.replace_in_file(
+            "configure",
+            "-install_name \\$rpath/",
+            "-install_name @rpath/"
+        )
         crypto_libs = self.deps_cpp_info["openssl"].system_libs
         if len(crypto_libs) != 0:
             crypto_link_flags = " -l".join(crypto_libs)
