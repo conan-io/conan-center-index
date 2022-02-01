@@ -29,17 +29,21 @@ def main(pr):
     packages = set()
     for line in diff.split("\n"):
         if line.startswith("+++ b/recipes/") or line.startswith("--- a/recipes/"):
-            packages.add(line.split("/")[2])
-    for package in packages:
+            parts = line.split("/")
+            if len(parts) >= 5:
+                packages.add(parts[2] + "/" + parts[3])
+    for line in packages:
+        package = line.split("/")[0]
         version = None
-        folder = ""
+        folder = line.split("/")[1]
         with open(os.path.join("recipes", package, "config.yml"), "r") as file:
             config = yaml.safe_load(file)
             for v in config["versions"]:
+                if config["versions"][v]["folder"] != folder:
+                    continue
                 try:
                     if not version or packaging.version.Version(v) > packaging.version.Version(version):
                         version = v
-                        folder = config["versions"][v]["folder"]
                 except packaging.version.InvalidVersion:
                     print("Error parsing version %s for package %s in pr %s" % (v, package, pr))
 
