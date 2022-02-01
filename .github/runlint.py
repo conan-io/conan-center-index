@@ -50,7 +50,7 @@ def main(pr):
         if version:
             shell = bool(platform.system() != "Windows")
             command = "conan export %s %s/%s@" % (os.path.join("recipes", package, folder), package, version)
-            p = subprocess.run(command, shell=shell, check=True)
+            p = subprocess.run(command, shell=shell, check=False)
 
 if __name__ == "__main__":
     # execute only if run as a script
