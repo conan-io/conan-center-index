@@ -53,7 +53,7 @@ class LibvaultConan(ConanFile):
             "Visual Studio": "19",
             "gcc": "8",
             "clang": "7.0",
-            "apple-clang": "10"
+            "apple-clang": "12"
         }
 
         minimum_cpp_standard = 17
@@ -68,7 +68,7 @@ class LibvaultConan(ConanFile):
         if compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
-        if self.settings.os == "Macos":
+        if tools.is_apple_os(self.settings.os):
             os_version = self.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
