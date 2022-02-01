@@ -50,14 +50,23 @@ class libMysqlClientCConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("libmysqlclient cannot be built as static library")
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is not supported yet")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
+            if tools.Version(self.version) > "8.0.17":
+                if Version(self.settings.compiler.version) < "16":
+                    raise ConanInvalidConfiguration("Visual Studio 16 2019 or newer is required")
+            else:
+                if Version(self.settings.compiler.version) < "15":
+                    raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("clang 6 or newer is required")
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
     def _configure_cmake(self):
         cmake = CMake(self)
