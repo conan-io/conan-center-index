@@ -49,7 +49,6 @@ class LibvaultConan(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
-        lib_version = Version(self.version)
         minimum_compiler_version = {
             "Visual Studio": "19",
             "gcc": "8",
@@ -65,6 +64,9 @@ class LibvaultConan(ConanFile):
                                             " at least C++{}. {} {} is not"
                                             " supported."
                                             .format(self.name, minimum_cpp_standard, compiler, compiler_version))
+
+        if compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
+            raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
         if self.settings.os == "Macos":
             os_version = self.settings.get_safe("os.version")
