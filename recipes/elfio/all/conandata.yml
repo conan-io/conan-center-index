@@ -1,6 +1,8 @@
 sources:
+  "3.9":
+    sha256: 767b269063fc35aba6d361139f830aa91c45dc6b77942f082666876c1aa0be0f
+    url: https://github.com/serge1/ELFIO/releases/download/Release_3.9/elfio-3.9.tar.gz
   "3.8":
     sha256: 9553ce2b8d8aa2fb43f0e9be9bcbd10cd52f40b385110ea54173889c982f9ac4
     url: https://github.com/serge1/ELFIO/releases/download/Release_3.8/elfio-3.8.tar.gz
-
 

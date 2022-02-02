@@ -4,7 +4,7 @@ import itertools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Libxml2Conan(ConanFile):
@@ -69,7 +69,7 @@ class Libxml2Conan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_mingw_windows(self):
@@ -93,7 +93,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/69.1")
+            self.requires("icu/70.1")
 
     def build_requirements(self):
         if not (self._is_msvc or self._is_mingw_windows):
@@ -346,19 +346,19 @@ class Libxml2Conan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
+        self.cpp_info.set_property("cmake_file_name", "LibXml2")
+        self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
         if self._is_msvc:
-            self.cpp_info.libs = ['libxml2' if self.options.shared else 'libxml2_a']
+            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
         else:
-            self.cpp_info.libs = ['xml2']
+            self.cpp_info.libs = ["xml2"]
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
@@ -373,9 +373,9 @@ class Libxml2Conan(ConanFile):
         elif self.settings.os == "Windows":
             if self.options.ftp or self.options.http:
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
-        # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
-        self.cpp_info.names["pkg_config"] = "libxml-2.0"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "libxml-2.0"
