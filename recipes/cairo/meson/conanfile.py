@@ -375,11 +375,6 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
             self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
 
-        if self.options.with_zlib and self.options.tee and self.settings.os != "Windows":
-            self.cpp_info.components["cairo-fdr"].libs = ["cairo-fdr"]
-            self.cpp_info.components["cairo-fdr"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-fdr"].libdirs.append(os.path.join(self.package_folder, "lib", "cairo"))
-
         if self.options.with_glib and self.options.with_png and self.options.with_zlib and self.options.tee and self.settings.os != "Windows":
             self.cpp_info.components["cairo-sphinx"].libs = ["cairo-sphinx"]
             self.cpp_info.components["cairo-sphinx"].requires = ["cairo_"]

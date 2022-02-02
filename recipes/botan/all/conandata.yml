@@ -35,6 +35,9 @@ sources:
   "2.18.2":
     url: "https://github.com/randombit/botan/archive/2.18.2.tar.gz"
     sha256: "10ded69c4fd4ade9d87527b394787beefa190b4ecb65ed04535bdd00e088cd96"
+  "2.19.1":
+    url: "https://github.com/randombit/botan/archive/2.19.1.tar.gz"
+    sha256: "eb5eaac0d8bf1dcf64b7ae39736d928fca8be1b24c27787873106e41a6c36725"
 patches:
   "2.12.1":
     - patch_file: "patches/dll-dir.patch"

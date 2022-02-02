@@ -4,7 +4,7 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(ZopFli CONFIG REQUIRED)
+find_package(Zopfli CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} ZopFli::libzopfli)
+target_link_libraries(${PROJECT_NAME} Zopfli::libzopfli)
