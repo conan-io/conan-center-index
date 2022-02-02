@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -29,7 +30,7 @@ class UnleashConan(ConanFile):
         "nlohmann_json/3.10.5",
     )
 
-    build_requires = "cmake/3.21.0"
+    build_requires = "cmake/3.22.0"
 
     _cmake = None
 
@@ -76,7 +77,6 @@ class UnleashConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["ENABLE_TEST_COVERAGE"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -92,7 +92,10 @@ class UnleashConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["unleash"]
         self.cpp_info.names["cmake_find_package"] = "unleash"
+        self.cpp_info.names["cmake_find_package_multi"] = "unleash"
+

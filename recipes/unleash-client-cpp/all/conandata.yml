@@ -3,7 +3,3 @@ sources:
     url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "e5b2dfae2c03414d83d8ba32a6b6019719eb0a43669c8a31e19393b8ce9ab273"
 
-patches:
-  "1.0.1":
-    - patch_file: "patches/cmake-install.patch"
-      base_path: "source_subfolder"
