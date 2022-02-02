@@ -6,7 +6,7 @@ json
 
 [requires]
 atl/0.0@trassir/sdk120
-axtls/1.5.3@trassir/sdk120
+axtls/2.1.5@trassir/sdk120
 boost/1.58@trassir/sdk120
 c-ares/1.10.0@trassir/sdk120
 caffe/0.0@trassir/sdk120
