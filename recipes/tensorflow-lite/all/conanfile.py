@@ -98,6 +98,8 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build_requirements(self):
         self.build_requires("ninja/1.10.2")
@@ -117,8 +119,6 @@ class TensorflowLiteConan(ConanFile):
             self.requires("fp16/cci.20200514")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
