@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
+import contextlib
 import os
 import glob
 
@@ -57,10 +58,6 @@ class MpirConan(ConanFile):
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
-
     def source(self):
         tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
@@ -101,6 +98,22 @@ class MpirConan(ConanFile):
         for vcxproj_path in self._vcxproj_paths:
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "apple-clang":
+            env_build = {"CC": tools.XCRun(self.settings).cc,
+                         "CXX": tools.XCRun(self.settings).cxx}
+            if hasattr(self, "settings_build"):
+                # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
+                xcrun = tools.XCRun(self.settings_build)
+                flags = " -Wno-implicit-function-declaration -isysroot {} -arch {}".format(xcrun.sdk_path, tools.to_apple_arch(self.settings_build.arch))
+                env_build["CC_FOR_BUILD"] = xcrun.cc + flags
+                env_build["CXX_FOR_BUILD"] = xcrun.cxx + flags
+            with tools.environment_append(env_build):
+                yield
+        else:
+            yield
+
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -124,7 +137,7 @@ class MpirConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.chdir(self._source_subfolder), self._build_context():
                 autotools = self._configure_autotools()
                 autotools.make()
 
@@ -144,7 +157,7 @@ class MpirConan(ConanFile):
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
             self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
         else:
-            with tools.chdir(self._source_subfolder):
+            with tools.chdir(self._source_subfolder), self._build_context():
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
