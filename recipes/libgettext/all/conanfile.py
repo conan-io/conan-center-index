@@ -11,6 +11,8 @@ class GetTextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
+    
+    deprecated = "gettext"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
