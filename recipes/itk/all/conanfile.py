@@ -50,17 +50,17 @@ class ITKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libjpeg/9d")
         self.requires("dcmtk/3.6.6")
-        self.requires("double-conversion/3.1.5")
-        self.requires("eigen/3.3.9")
-        self.requires("expat/2.4.1")
+        self.requires("double-conversion/3.2.0")
+        self.requires("eigen/3.4.0")
+        self.requires("expat/2.4.3")
         self.requires("fftw/3.3.9")
         self.requires("gdcm/3.0.9")
         self.requires("hdf5/1.12.0")
-        self.requires("icu/69.1")
-        self.requires("libtiff/4.2.0")
+        self.requires("icu/70.1")
+        self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
+        self.requires("libtiff/4.3.0")
         self.requires("openjpeg/2.4.0")
         self.requires("tbb/2020.3")
         self.requires("zlib/1.2.11")
