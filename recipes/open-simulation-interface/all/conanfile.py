@@ -8,7 +8,7 @@ class OpenSimulationInterfaceConan(ConanFile):
     name = "open-simulation-interface"
     homepage = "https://github.com/OpenSimulationInterface/open-simulation-interface"
     description = 'Generic interface environmental perception of automated driving functions in virtual scenarios'
-    topics = ("asam", "adas", "open-simulation", "automated-driving")
+    topics = ("asam", "adas", "open-simulation", "automated-driving", "openx")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
