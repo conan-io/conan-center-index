@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
-import functools
 import os
 
 required_conan_version = ">=1.33.0"
