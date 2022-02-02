@@ -12,6 +12,9 @@
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #endif
+#ifdef BUILD_WITH_FFMPEF
+#include <opencv2/videoio.hpp>
+#endif
 
 #define w 400
 
@@ -24,6 +27,7 @@ void MyPolygon( Mat img );
 void MyLine( Mat img, Point start, Point end );
 // to test `with_ade` option
 void TestGAPI();
+void TestVideo();
 
 /**
  * @function main
@@ -79,6 +83,7 @@ int main( void ){
   MyLine( rook_image, Point( 3*w/4, 7*w/8 ), Point( 3*w/4, w ) );
   //![draw_rook]
   TestGAPI();
+  TestVideo();
 
   return(0);
 }
@@ -203,5 +208,13 @@ void TestGAPI()
     std::tie(b,g,r)   = cv::gapi::split3(vga);
     cv::GMat out      = cv::gapi::merge3(b, g | edges, r);
     cv::GComputation ac(in, out);
+#endif
+}
+
+void TestVideo()
+{
+#ifdef BUILD_WITH_FFMPEG
+    if (!videoio_registry::hasBackend(CAP_FFMPEG))
+        throw std::runtime_error("FFmpeg backend was not found");
 #endif
 }
