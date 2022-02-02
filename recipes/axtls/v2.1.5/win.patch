@@ -1,0 +1,166 @@
+diff -Naur /tmp/axTLS-2.1.5/axtls-code/crypto/crypto.h /tmp/axTLS-2.1.5_win_patch/axtls-code/crypto/crypto.h
+--- /tmp/axTLS-2.1.5/axtls-code/crypto/crypto.h	2022-02-02 15:34:58.352306815 +0300
++++ /tmp/axTLS-2.1.5_win_patch/axtls-code/crypto/crypto.h	2022-02-02 15:36:35.923742134 +0300
+@@ -46,7 +46,7 @@
+ #define STDCALL
+ #endif
+ #ifndef EXP_FUNC
+-#define EXP_FUNC
++#define EXP_FUNC __declspec(dllexport)
+ #endif
+ 
+ 
+@@ -80,12 +80,12 @@
+     AES_MODE_256
+ } AES_MODE;
+ 
+-void AES_set_key(AES_CTX *ctx, const uint8_t *key, 
++EXP_FUNC void AES_set_key(AES_CTX *ctx, const uint8_t *key, 
+         const uint8_t *iv, AES_MODE mode);
+-void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, 
++EXP_FUNC void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, 
+         uint8_t *out, int length);
+-void AES_cbc_decrypt(AES_CTX *ks, const uint8_t *in, uint8_t *out, int length);
+-void AES_convert_key(AES_CTX *ctx);
++EXP_FUNC void AES_cbc_decrypt(AES_CTX *ks, const uint8_t *in, uint8_t *out, int length);
++EXP_FUNC void AES_convert_key(AES_CTX *ctx);
+ 
+ /**************************************************************************
+  * RC4 declarations 
+@@ -118,9 +118,9 @@
+     uint8_t Message_Block[64];      /* 512-bit message blocks */
+ } SHA1_CTX;
+ 
+-void SHA1_Init(SHA1_CTX *);
+-void SHA1_Update(SHA1_CTX *, const uint8_t * msg, int len);
+-void SHA1_Final(uint8_t *digest, SHA1_CTX *);
++EXP_FUNC void SHA1_Init(SHA1_CTX *);
++EXP_FUNC void SHA1_Update(SHA1_CTX *, const uint8_t * msg, int len);
++EXP_FUNC void SHA1_Final(uint8_t *digest, SHA1_CTX *);
+ 
+ /**************************************************************************
+  * SHA256 declarations 
+@@ -135,9 +135,9 @@
+     uint8_t buffer[64];
+ } SHA256_CTX;
+ 
+-void SHA256_Init(SHA256_CTX *c);
+-void SHA256_Update(SHA256_CTX *, const uint8_t *input, int len);
+-void SHA256_Final(uint8_t *digest, SHA256_CTX *);
++EXP_FUNC void SHA256_Init(SHA256_CTX *c);
++EXP_FUNC void SHA256_Update(SHA256_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA256_Final(uint8_t *digest, SHA256_CTX *);
+ 
+ /**************************************************************************
+  * SHA512 declarations 
+@@ -161,9 +161,9 @@
+     uint64_t totalSize;
+ } SHA512_CTX;
+ 
+-void SHA512_Init(SHA512_CTX *c);
+-void SHA512_Update(SHA512_CTX *, const uint8_t *input, int len);
+-void SHA512_Final(uint8_t *digest, SHA512_CTX *);
++EXP_FUNC void SHA512_Init(SHA512_CTX *c);
++EXP_FUNC void SHA512_Update(SHA512_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA512_Final(uint8_t *digest, SHA512_CTX *);
+ 
+ /**************************************************************************
+  * SHA384 declarations 
+@@ -172,9 +172,9 @@
+ #define SHA384_SIZE   48
+ 
+ typedef SHA512_CTX SHA384_CTX;
+-void SHA384_Init(SHA384_CTX *c);
+-void SHA384_Update(SHA384_CTX *, const uint8_t *input, int len);
+-void SHA384_Final(uint8_t *digest, SHA384_CTX *);
++EXP_FUNC void SHA384_Init(SHA384_CTX *c);
++EXP_FUNC void SHA384_Update(SHA384_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA384_Final(uint8_t *digest, SHA384_CTX *);
+ 
+ /**************************************************************************
+  * MD5 declarations 
+diff -Naur /tmp/axTLS-2.1.5/axtls-code/crypto/os_int.h /tmp/axTLS-2.1.5_win_patch/axtls-code/crypto/os_int.h
+--- /tmp/axTLS-2.1.5/axtls-code/crypto/os_int.h	2022-02-02 15:34:58.352306815 +0300
++++ /tmp/axTLS-2.1.5_win_patch/axtls-code/crypto/os_int.h	2022-02-02 15:36:35.923742134 +0300
+@@ -41,25 +41,12 @@
+ extern "C" {
+ #endif
+ 
+-#if defined(WIN32)
+-typedef UINT8 uint8_t;
+-typedef INT8 int8_t;
+-typedef UINT16 uint16_t;
+-typedef INT16 int16_t;
+-typedef UINT32 uint32_t;
+-typedef INT32 int32_t;
+-typedef UINT64 uint64_t;
+-typedef INT64 int64_t;
+-#else   /* Not Win32 */
+-
+ #ifdef CONFIG_PLATFORM_SOLARIS
+ #include <inttypes.h>
+ #else
+ #include <stdint.h>
+ #endif /* Not Solaris */
+ 
+-#endif /* Not Win32 */
+-
+ #ifdef __cplusplus
+ }
+ #endif
+diff -Naur /tmp/axTLS-2.1.5/axtls-code/ssl/os_port.h /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/os_port.h
+--- /tmp/axTLS-2.1.5/axtls-code/ssl/os_port.h	2022-02-02 15:34:58.352306815 +0300
++++ /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/os_port.h	2022-02-02 15:36:35.923742134 +0300
+@@ -46,7 +46,7 @@
+ #include <stdio.h>
+ 
+ #if defined(WIN32)
+-#define STDCALL                 __stdcall
++#define STDCALL
+ #define EXP_FUNC                __declspec(dllexport)
+ #else
+ #define STDCALL
+@@ -122,6 +122,10 @@
+ EXP_FUNC int STDCALL strcasecmp(const char *s1, const char *s2);
+ EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
+ 
++#ifndef be64toh
++#define be64toh(x) _byteswap_uint64(x) 
++#endif
++
+ #else   /* Not Win32 */
+ 
+ #include <unistd.h>
+diff -Naur /tmp/axTLS-2.1.5/axtls-code/ssl/tls1.c /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/tls1.c
+--- /tmp/axTLS-2.1.5/axtls-code/ssl/tls1.c	2022-02-02 15:34:58.352306815 +0300
++++ /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/tls1.c	2022-02-02 15:36:35.923742134 +0300
+@@ -311,7 +311,7 @@
+ /*
+  * Write application data to the client
+  */
+-EXP_FUNC int STDCALL ssl_write(SSL *ssl, const uint8_t *out_data, int out_len)
++int STDCALL ssl_write(SSL *ssl, const uint8_t *out_data, int out_len)
+ {
+     int n = out_len, nw, i, tot = 0;
+ 
+diff -Naur /tmp/axTLS-2.1.5/axtls-code/ssl/tls1.h /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/tls1.h
+--- /tmp/axTLS-2.1.5/axtls-code/ssl/tls1.h	2022-02-02 15:34:58.352306815 +0300
++++ /tmp/axTLS-2.1.5_win_patch/axtls-code/ssl/tls1.h	2022-02-02 15:36:35.923742134 +0300
+@@ -256,7 +256,7 @@
+ 
+ extern const uint8_t ssl_prot_prefs[NUM_PROTOCOLS];
+ 
+-SSL *ssl_new(SSL_CTX *ssl_ctx, int client_fd);
++EXP_FUNC SSL *ssl_new(SSL_CTX *ssl_ctx, int client_fd);
+ void disposable_new(SSL *ssl);
+ void disposable_free(SSL *ssl);
+ int send_packet(SSL *ssl, uint8_t protocol, 
+@@ -284,7 +284,7 @@
+ void remove_ca_certs(CA_CERT_CTX *ca_cert_ctx);
+ #endif
+ #ifdef CONFIG_SSL_ENABLE_CLIENT
+-int do_client_connect(SSL *ssl);
++EXP_FUNC int do_client_connect(SSL *ssl);
+ #endif
+ 
+ #ifdef CONFIG_SSL_FULL_MODE
