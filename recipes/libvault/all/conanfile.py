@@ -105,5 +105,6 @@ class LibvaultConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.filenames["cmake_find_package"] = "libvault"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libvault"
+        self.cpp_info.names["cmake_find_package"] = "libvault"
+        self.cpp_info.names["cmake_find_package_multi"] = "libvault"
+        self.cpp_info.names["pkg_config"] = "vault"
