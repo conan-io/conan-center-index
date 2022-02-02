@@ -4,7 +4,7 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class ConanJBig(ConanFile):
+class JBigConan(ConanFile):
     name = "jbig"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ImageMagick/jbig"
