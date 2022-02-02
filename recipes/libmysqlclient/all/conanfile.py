@@ -15,7 +15,7 @@ class LibMysqlClientCConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_ssl": True, "with_zlib": True}
+    default_options = {"shared": True, "fPIC": True, "with_ssl": True, "with_zlib": True}
 
     _cmake = None
 
