@@ -69,7 +69,6 @@ class OpenTDFConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        #self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
