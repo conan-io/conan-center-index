@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(cmake_wrapper)
+cmake_minimum_required(VERSION 3.1)
+project(opentdf-client)
 
-include("conanbuildinfo.cmake")
+set(CMAKE_CXX_STANDARD 14)
+
+include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_subdirectory(source_subfolder)
