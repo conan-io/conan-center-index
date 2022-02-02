@@ -61,20 +61,22 @@ class XnnpackConan(ConanFile):
         self.requires("fxdiv/cci.20200417")
         self.requires("pthreadpool/cci.20210218")
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
+                              "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
+                              "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("XNNPACK-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
-
-    def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
-                              "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+        self._patch_sources()
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CONAN_BUILD_FOLDER"] = self.build_folder
         if self.settings.arch == "armv8":
             if self.settings.os == "Linux":
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
@@ -92,7 +94,6 @@ class XnnpackConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
