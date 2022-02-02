@@ -14,7 +14,7 @@ class OpenTDFConan(ConanFile):
     license = "MIT"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"build_python": [True, False], "build_tests": [True, False], "fPIC": [True, False]}
+    options = {"build_python": [True, False], "fPIC": [True, False]}
     default_options = {"build_python": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
 
