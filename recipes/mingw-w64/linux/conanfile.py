@@ -264,9 +264,13 @@ class MingwConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # Remove symlinks, we need to create them in the package_info step
+        # replace with relative symlinks so they'll resolve correctly on consumer's machine
         os.unlink(os.path.join(self.package_folder, 'mingw'))
         os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))
+        self.run("ln -s {} {}".format(os.path.join(os.curdir, self._target_tag),
+                                        os.path.join(self.package_folder, 'mingw')))
+        self.run("ln -s {} {}".format(os.path.join(os.curdir, 'lib'),
+                                        os.path.join(self.package_folder, self._target_tag, 'lib64')))
 
     def package_info(self):
         if getattr(self, "settings_target", None):
@@ -307,10 +311,4 @@ class MingwConan(ConanFile):
         self.env_info.STRIP = prefix + "strip"
         self.env_info.GCOV = prefix + "gcov"
         self.env_info.RC = prefix + "windres"
-        # Symlinks cannot be created in package step, otherwise the link target is wrong.
-        if not os.path.exists(os.path.join(self.package_folder, 'mingw')):
-            self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag),
-                                            os.path.join(self.package_folder, 'mingw')))
-        if not os.path.exists(os.path.join(self.package_folder, self._target_tag, 'lib64')):
-            self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag, 'lib'),
-                                            os.path.join(self.package_folder, self._target_tag, 'lib64')))
+        self.env_info.DLLTOOL = prefix + "dlltool"
