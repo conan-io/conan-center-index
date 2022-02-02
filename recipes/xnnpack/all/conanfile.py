@@ -76,7 +76,6 @@ class XnnpackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CONAN_BUILD_FOLDER"] = self.build_folder
         if self.settings.arch == "armv8":
             if self.settings.os == "Linux":
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
