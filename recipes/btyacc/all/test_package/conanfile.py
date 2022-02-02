@@ -5,8 +5,8 @@ from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
-    settings = ("os", "arch", "compiler", "build_type")
-    generators = ("cmake",)
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake"
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

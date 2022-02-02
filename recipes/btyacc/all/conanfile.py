@@ -11,17 +11,17 @@ class BtyaccConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ChrisDodd/btyacc"
     description = "Backtracking yacc"
-    topics = ("yacc", "parser")
-    license = "???"
-    settings = ("os", "arch", "compiler", "build_type")
+    topics = "yacc", "parser"
+    license = "Unlicense"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
     }
     default_options = {
         "fPIC": True,
     }
-    generators = ("cmake",)
-    exports_sources = ("CMakeLists.txt",)
+    generators = "cmake"
+    exports_sources = "CMakeLists.txt"
     no_copy_source = True
 
     @property
