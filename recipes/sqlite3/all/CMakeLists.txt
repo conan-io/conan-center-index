@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.18)
 project(sqlite3 C)
 
 include(conanbuildinfo.cmake)
@@ -124,18 +124,16 @@ endif()
 
 if(THREADSAFE)
     find_package(Threads REQUIRED)
-    target_link_libraries(${PROJECT_NAME}  PRIVATE Threads::Threads)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()
 
 if(NOT OMIT_LOAD_EXTENSION)
-    target_link_libraries(${PROJECT_NAME}  PRIVATE ${CMAKE_DL_LIBS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
 if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
-    find_library(MATH_LIBRARY m)
-    if(MATH_LIBRARY)
-        target_link_libraries(${PROJECT_NAME}  PRIVATE ${MATH_LIBRARY})
-    endif()
+    find_library(MATH_LIBRARY m REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${MATH_LIBRARY})
 endif()
 
 include(GNUInstallDirs)
