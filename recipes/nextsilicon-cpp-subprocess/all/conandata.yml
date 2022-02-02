@@ -1,0 +1,4 @@
+sources:
+  "2.0.2":
+    url: "https://github.com/nextsilicon/cpp-subprocess/archive/refs/tags/v2.0.2.tar.gz"
+    sha256: "9531ec4098d18ab7bdefd09e74c14266348f58d2dc0ef2562f030adfef00b84e"

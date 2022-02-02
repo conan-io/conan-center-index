@@ -335,8 +335,11 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
             # opencv will not search for ffmpeg package, but for
             # libavcodec;libavformat;libavutil;libswscale modules
-            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = False
+            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
+            self._cmake.definitions["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
+            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
+                self._cmake.definitions["FFMPEG_lib%s_VERSION" % component] = self.deps_cpp_info["ffmpeg"].components[component].version
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
