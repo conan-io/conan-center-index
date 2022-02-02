@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ITKConan(ConanFile):
@@ -13,7 +13,7 @@ class ITKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     description = "Insight Segmentation and Registration Toolkit"
-    exports_sources = "CMakeLists.txt", "patches/**"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,9 +23,9 @@ class ITKConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package"
-    short_paths = True
 
+    short_paths = True
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -40,6 +40,11 @@ class ITKConan(ConanFile):
     # - mkl
     # - vtk
     # - opencv
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
