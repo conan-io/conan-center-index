@@ -87,6 +87,8 @@ class SentryNativeConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("openssl/1.1.1m")
+
         if self.options.transport == "curl":
             self.requires("libcurl/7.80.0")
         if self.options.backend == "crashpad":
@@ -101,7 +103,6 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
             self.requires("qt/5.15.2")
-            self.requires("openssl/1.1.1m")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
@@ -130,6 +131,7 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def build_requirements(self):
+        self.build_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 
