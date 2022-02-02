@@ -132,13 +132,18 @@ class LibsodiumConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         if self._is_msvc:
             self._build_msvc()
         else:
             if self._is_mingw:
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), cwd=self._source_subfolder, win_bash=tools.os_info.is_windows)
+            if tools.is_apple_os(self.settings.os):
+                # Relocatable shared lib for Apple platforms
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "configure"),
+                    "-install_name \\$rpath/",
+                    "-install_name @rpath/"
+                )
             autotools = self._configure_autotools()
             autotools.make()
 
