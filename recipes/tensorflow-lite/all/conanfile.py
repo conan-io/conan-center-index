@@ -113,10 +113,10 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
