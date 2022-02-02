@@ -86,7 +86,7 @@ class LibnameConan(ConanFile):
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
         if tools.Version(self.version) >= "2.42.6":
             tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
-                                  "close_fds=True", "close_fds=(sys.platform != 'win32')"),
+                                  "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
     def _configure_meson(self):
         meson = Meson(self)
