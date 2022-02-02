@@ -148,14 +148,13 @@ class FreeImageConan(ConanFile):
                 components.append("libtiff::libtiff")
             return components
 
-        self.cpp_info.name = "freeimage"
         self.cpp_info.names["pkg_config"] = "freeimage"
         self.cpp_info.names["cmake_find_package"] = "FreeImage"
         self.cpp_info.names["cmake_find_package_multi"] = "FreeImage"
-        self.cpp_info.components["freeimage"].libs = ["freeimageplus"]
-        self.cpp_info.components["freeimage"].requires = imageformats_deps()
+        self.cpp_info.components["FreeImage"].libs = ["freeimage"]
+        self.cpp_info.components["FreeImage"].requires = imageformats_deps()
         self.cpp_info.components["FreeImagePlus"].libs = ["freeimageplus"]
-        self.cpp_info.components["FreeImagePlus"].requires = ["freeimage"]
+        self.cpp_info.components["FreeImagePlus"].requires = ["FreeImage"]
 
         if not self.options.shared:
-            self.cpp_info.defines.append("FREEIMAGE_LIB")
+            self.cpp_info.components["FreeImage"].defines.append("FREEIMAGE_LIB")
