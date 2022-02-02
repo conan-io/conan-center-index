@@ -62,9 +62,6 @@ class CppRestSDKConan(ConanFile):
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
-    def package_id(self):
-        self.info.requires["boost"].minor_mode()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
