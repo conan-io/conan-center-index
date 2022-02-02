@@ -21,8 +21,5 @@ int main(int argc, char **argv) {
 
   nano_tdf_client.setSignerPrivateKey(sender_private_key, EllipticCurve::SECP256R1);
 
-  // Need the EAS URL to be valid for this next line to work
-  //std::string tdf = nano_tdf_client.encryptString("Virtru is the leader in data protection!");
-
   return 0;
 }
