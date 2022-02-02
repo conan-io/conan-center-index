@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -77,8 +78,13 @@ class OpenSimulationInterfaceConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        try:
+            if self.settings.os == "Windows":
+                shutil.rmtree(os.path.join(self.package_folder, "CMake"))
+            else:
+                shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        except:
+            pass
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open_simulation_interface"
