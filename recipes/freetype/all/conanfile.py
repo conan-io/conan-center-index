@@ -113,6 +113,8 @@ class FreetypeConan(ConanFile):
         self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
         if self._has_with_brotli_option:
             self._cmake.definitions["FT_WITH_BROTLI"] = self.options.with_brotli
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
