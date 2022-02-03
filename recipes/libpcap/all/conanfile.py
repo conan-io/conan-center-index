@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibPcapConan(ConanFile):
@@ -14,19 +14,21 @@ class LibPcapConan(ConanFile):
     description = "libpcap is an API for capturing network traffic"
     license = "BSD-3-Clause"
     topics = ("networking", "pcap", "sniffing", "network-traffic")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
-        "enable_universal": [True, False]
+        "enable_universal": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
-        "enable_universal": True
+        "enable_universal": True,
     }
+
     _autotools = None
     _cmake = None
 
@@ -93,7 +95,7 @@ class LibPcapConan(ConanFile):
                 "--disable-dbus",
                 "--disable-rdma"
             ])
-            if tools.cross_building(self.settings):
+            if tools.cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 configure_args.append("--with-pcap=%s" % target_os)
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
@@ -147,12 +149,11 @@ class LibPcapConan(ConanFile):
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libpcap"
+        self.cpp_info.set_property("pkg_config_name", "libpcap")
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = ["pcap{}".format(suffix)]
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["pcap"] if self.options.shared else ["pcap_static"]
             self.cpp_info.system_libs = ["ws2_32"]
-        else:
-            self.cpp_info.libs = ["pcap"]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
