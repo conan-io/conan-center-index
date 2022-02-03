@@ -228,6 +228,7 @@ class AwsSdkCppConan(ConanFile):
         "route53domains",
         "route53resolver",
         "s3",
+        "s3-crt",
         "s3-encryption",
         "s3control",
         "s3outposts",
