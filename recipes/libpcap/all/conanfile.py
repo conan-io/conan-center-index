@@ -91,6 +91,7 @@ class LibPcapConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.libs = []
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--disable-universal" if not self.options.get_safe("enable_universal") else "")
             configure_args.append("--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb")
@@ -107,6 +108,8 @@ class LibPcapConan(ConanFile):
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
                 configure_args.append("--host=arm-linux")
             self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+            # Relocatable shared lib on macOS
+            tools.replace_in_file("Makefile", "-install_name $(libdir)/", "-install_name @rpath/")
         return self._autotools
 
     def _configure_cmake(self):
