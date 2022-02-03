@@ -57,6 +57,8 @@ class LibzenConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_UNICODE"] = self.options.enable_unicode
         self._cmake.definitions["LARGE_FILES"] = self.options.enable_large_files
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure()
         return self._cmake
 
