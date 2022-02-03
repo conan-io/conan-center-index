@@ -50,11 +50,11 @@ class LibTinsConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libpcap/1.10.0")
+        self.requires("libpcap/1.10.1")
         if self.options.with_ack_tracker:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.78.0")
         if self.options.with_wpa2:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
