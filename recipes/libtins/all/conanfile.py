@@ -123,7 +123,7 @@ class LibTinsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libtins")
         self.cpp_info.set_property("cmake_target_name", "libtins")
         self.cpp_info.set_property("pkg_config_name", "libtins")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["tins"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
