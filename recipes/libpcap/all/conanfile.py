@@ -31,8 +31,9 @@ class LibPcapConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    _autotools = None
+    generators = "cmake"
     _cmake = None
+    _autotools = None
 
     # TODO: Add dbus-glib when available
     # TODO: Add libnl-genl when available
