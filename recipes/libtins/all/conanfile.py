@@ -60,6 +60,15 @@ class LibTinsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # Use Findlibpcap.cmake from cmake_find_package
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "FIND_PACKAGE(PCAP REQUIRED)",
+                              "find_package(libpcap REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "${PCAP_LIBRARY}",
+                              "libpcap::libpcap")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -77,6 +86,7 @@ class LibTinsConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -116,6 +126,7 @@ class LibTinsConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
