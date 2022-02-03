@@ -57,9 +57,12 @@ class BinutilsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        at = Autotools(self)
-        at.configure(build_script_folder=self._source_subfolder)
-        at.make()
+        try:
+            at = Autotools(self)
+            at.configure(build_script_folder=self._source_subfolder)
+            at.make()
+        finally:
+            self.output.info(tools.load('config.log'))
 
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
