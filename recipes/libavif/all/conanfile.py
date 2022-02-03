@@ -48,8 +48,7 @@ class LibAVIFConan(ConanFile):
 
     def requirements(self):
         self.requires(codecs[str(self.options.with_codec)])
-        # FIXME: require once libyuv is at least version 1774
-        # self.requires("libyuv/cci.20201106")
+        self.requires("libyuv/cci.20201106")
 
     @property
     def _source_subfolder(self):
@@ -69,7 +68,7 @@ class LibAVIFConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         self._configure_cmake().build()
 
@@ -97,6 +96,7 @@ class LibAVIFConan(ConanFile):
         tools.save(alias, content)
 
     def package_info(self):
+        self.cpp_info.requires.append("libyuv::libyuv")
         if self.options.with_codec == "aom":
             self.cpp_info.requires.append("libaom-av1::libaom-av1")
         elif self.options.with_codec == "dav1d":
