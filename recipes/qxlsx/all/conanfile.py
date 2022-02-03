@@ -49,6 +49,9 @@ class QXlsxConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
+        self._cmake.definitions["QXLSX_PARENTPATH"] = os.path.join(self._source_subfolder, "QXlsx")
+        self._cmake.definitions["QXLSX_HEADERPATH "] = os.path.join(self._source_subfolder, "QXlsx", "header")
+        self._cmake.definitions["QXLSX_SOURCEPATH  "] = os.path.join(self._source_subfolder, "QXlsx", "source")
         self._cmake.configure()
         return self._cmake
 
