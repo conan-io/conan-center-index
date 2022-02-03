@@ -81,7 +81,7 @@ class LibPcapConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.7.1")
+            self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
 
     def source(self):
