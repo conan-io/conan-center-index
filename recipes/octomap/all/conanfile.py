@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -33,6 +34,10 @@ class OctomapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -47,9 +52,7 @@ class OctomapConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.shared and \
-           ((self.settings.compiler == "Visual Studio" and "MTd" in self.settings.compiler.runtime) or \
-            (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static" and self.settings.compiler.runtime_type == "Debug")):
+        if self.options.shared and self._is_msvc and msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("shared octomap doesn't support MTd runtime")
 
     def source(self):
@@ -82,6 +85,9 @@ class OctomapConan(ConanFile):
         # No -Werror
         if tools.Version(self.version) >= "1.9.6":
             tools.replace_in_file(compiler_settings, "-Werror", "")
+        # we want a clean rpath in installed shared libs
+        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")", "")
+        tools.replace_in_file(compiler_settings, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))
