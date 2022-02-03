@@ -80,10 +80,10 @@ class LibZipConan(ConanFile):
             self.requires("xz_utils/5.2.5")
 
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
 
         if self.options.crypto == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
         elif self.options.crypto == "mbedtls":
             self.requires("mbedtls/2.25")
 
