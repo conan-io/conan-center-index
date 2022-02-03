@@ -10,15 +10,12 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/003_use-external-jpeg.patch"
       base_path: "source_subfolder"
-      fuzz: True
     - patch_file: "patches/004_use-external-jxrlib.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/005_use-external-openexr.patch"
+    - patch_file: "patches/005_use-external-libtiff.patch"
       base_path: "source_subfolder"
-      fuzz: True
-    - patch_file: "patches/006_use-external-libtiff.patch"
+    - patch_file: "patches/006_use-external-openexr.patch"
       base_path: "source_subfolder"
-      fuzz: True
     - patch_file: "patches/007_use-external-openjpeg.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/008_use-external-png-zlib.patch"
@@ -29,10 +26,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/011_update-libraw-support.patch"
       base_path: "source_subfolder"
-      fuzz: True
     - patch_file: "patches/012_use-functions-to-override-libtiff-warning-error-handlers.patch"
       base_path: "source_subfolder"
-      fuzz: True
     - patch_file: "patches/013_use-typedef-as-already-declared.patch"
       base_path: "source_subfolder"
-      fuzz: True
