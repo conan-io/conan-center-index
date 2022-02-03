@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import AutoToolsBuildEnvironment, tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
 import glob
@@ -29,6 +30,7 @@ class LibPcapConan(ConanFile):
         "enable_universal": True,
     }
 
+    exports_sources = "CMakeLists.txt"
     _autotools = None
     _cmake = None
 
@@ -40,6 +42,10 @@ class LibPcapConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _settings_build(self):
@@ -109,7 +115,13 @@ class LibPcapConan(ConanFile):
         self._cmake = CMake(self)
         if not self.options.shared:
             self._cmake.definitions["ENABLE_REMOTE"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        if self._is_msvc:
+            self._cmake.definitions["USE_STATIC_RT"] = "MT" in msvc_runtime_flag(self)
+        else:
+            # Don't force -static-libgcc for MinGW, because conan users expect
+            # to inject this compilation flag themselves
+            self._cmake.definitions["USE_STATIC_RT"] = False
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
