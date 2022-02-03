@@ -58,7 +58,7 @@ index d5be902..8dbcd5d 100644
  //   Extended TIFF Directory GEO Tag Support
  // ----------------------------------------------------------
  
-+// vcpkg: function imported from libtiff/tif_dirinfo.c, in which it is not exported 
++// conan: function imported from libtiff/tif_dirinfo.c, in which it is not exported 
 +/*
 + * Return size of TIFFDataType in bytes.
 + *
@@ -136,7 +136,7 @@ index d5be902..8dbcd5d 100644
  
  	// loop over all Core Directory Tags
  	// ### uses private data, but there is no other way
-+    // -> vcpkg: Best we can do without private headers is to hard-code a list of known EXIF tags and read those
++    // -> conan: Best we can do without private headers is to hard-code a list of known EXIF tags and read those
  	if(md_model == TagLib::EXIF_MAIN) {
 -		const TIFFDirectory *td = &tif->tif_dir;
 -
