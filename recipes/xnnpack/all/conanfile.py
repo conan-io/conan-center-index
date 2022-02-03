@@ -89,12 +89,13 @@ class XnnpackConan(ConanFile):
         self._cmake.definitions["XNNPACK_BUILD_TESTS"] = False
         self._cmake.definitions["XNNPACK_BUILD_BENCHMARKS"] = False
         self._cmake.definitions["XNNPACK_USE_SYSTEM_LIBS"] = True
+        self._cmake.definitions["CMAKE_SKIP_INSTALL_ALL_DEPENDENCY"] = True
         self._cmake.configure()
         return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
-        cmake.build()
+        cmake.build(target="XNNPACK")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
