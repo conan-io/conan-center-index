@@ -804,6 +804,9 @@ class QtConan(ConanFile):
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
 
+        if self.options.widgets:
+            _create_private_module("Widgets", ["CorePrivate", "GuiPrivate", "Widgets"])
+
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
 
@@ -934,6 +937,10 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
 
+            build_modules.append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
+
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
@@ -974,6 +981,9 @@ class QtConan(ConanFile):
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
+            build_modules.append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Widgets"))
         if self.options.gui and self.options.widgets:
             _create_module("PrintSupport", ["Gui", "Widgets"])
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
@@ -1248,10 +1258,6 @@ class QtConan(ConanFile):
             build_modules.append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_entry_point_file)
-
-        build_modules.append(self._cmake_qt6_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
