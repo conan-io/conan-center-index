@@ -98,13 +98,25 @@ class LibZipConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        top_cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Honor zstd enabled
         if self._has_zstd_support:
-            top_cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
             lib_cmakelists = os.path.join(self._source_subfolder, "lib", "CMakeLists.txt")
             tools.replace_in_file(top_cmakelists, "find_package(Zstd)", "find_package(zstd)")
             tools.replace_in_file(top_cmakelists, "Zstd_FOUND", "zstd_FOUND")
             tools.replace_in_file(lib_cmakelists, "Zstd::Zstd", "zstd::zstd")
+        # Do not pollute rpath of installed binaries
+        tools.replace_in_file(
+            top_cmakelists,
+            "set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})",
+            "",
+        )
+        tools.replace_in_file(
+            top_cmakelists,
+            "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
+            "",
+        )
 
     def _configure_cmake(self):
         if self._cmake:
