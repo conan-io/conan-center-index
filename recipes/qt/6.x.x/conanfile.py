@@ -91,6 +91,7 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "multiconfiguration": [True, False],
+        "disabled_features": "ANY",
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -130,6 +131,7 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "multiconfiguration": False,
+        "disabled_features": "",
     }
     default_options.update({module: False for module in _submodules})
 
@@ -591,6 +593,9 @@ class QtConan(ConanFile):
             else:
                 self._cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 self._cmake.definitions["FEATURE_system_%s" % feature] = "OFF"
+
+        for feature in str(self.options.disabled_features).split(" "):
+            self._cmake.definitions["FEATURE_%s" % feature] = "OFF"
 
         if self.settings.os == "Macos":
             self._cmake.definitions["FEATURE_framework"] = "OFF"
