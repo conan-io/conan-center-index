@@ -96,6 +96,7 @@ class FclConan(ConanFile):
             self._cmake.definitions["OCTOMAP_MINOR_VERSION"] = octomap_minor
             self._cmake.definitions["OCTOMAP_PATCH_VERSION"] = octomap_patch
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["FCL_NO_DEFAULT_RPATH"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
