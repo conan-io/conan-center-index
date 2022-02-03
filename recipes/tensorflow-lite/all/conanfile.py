@@ -115,7 +115,10 @@ class TensorflowLiteConan(ConanFile):
             self.requires("intel-neon2sse/cci.20210225")
         self.requires("ruy/cci.20210622")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20211026")
+            if self.version == "2.8.0":
+                self.requires("xnnpack/cci.20211210")
+            else:
+                self.requires("xnnpack/cci.20211026")
             self.requires("fp16/cci.20200514")
 
     def build(self):
