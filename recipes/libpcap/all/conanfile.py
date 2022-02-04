@@ -19,13 +19,15 @@ class LibPcapConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
-        "enable_universal": [True, False]
+        "enable_universal": [True, False],
+        "enable_dpdk": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
-        "enable_universal": True
+        "enable_universal": True,
+        "enable_dpdk": True
     }
     _autotools = None
     _cmake = None
@@ -86,6 +88,7 @@ class LibPcapConan(ConanFile):
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--disable-universal" if not self.options.get_safe("enable_universal") else "")
             configure_args.append("--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb")
+            configure_args.append("--with-dpdk" if self.options.get_safe("enable_dpdk") else "--without-dpdk")
             configure_args.extend([
                 "--without-libnl",
                 "--disable-bluetooth",
