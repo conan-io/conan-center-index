@@ -135,8 +135,8 @@ class XapianCoreConan(ConanFile):
             autotools.install()
 
         if self._is_msvc and not self.options.shared:
-            rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
-                   os.path.join(self.package_folder, "lib", "xapian.lib"))
+            rename(self, os.path.join(self.package_folder, "lib", "libxapian.lib"),
+                         os.path.join(self.package_folder, "lib", "xapian.lib"))
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "bin", "xapian-config")))
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libxapian.la")))
