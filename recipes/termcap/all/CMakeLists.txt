@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(conan_termcap C)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+include("conanbuildinfo.cmake")
 conan_basic_setup()
 
 include(CheckIncludeFile)
