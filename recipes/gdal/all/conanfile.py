@@ -896,6 +896,10 @@ class GdalConan(ConanFile):
                 tools.replace_in_file(os.path.join("port", "cpl_config.h.in"),
                                       "/* port/cpl_config.h.in",
                                       "#pragma once\n/* port/cpl_config.h.in")
+                # Relocatable shared lib on macOS
+                tools.replace_in_file("configure",
+                                      "-install_name \\$rpath/",
+                                      "-install_name @rpath/")
                 autotools = self._configure_autotools()
                 autotools.make()
 
