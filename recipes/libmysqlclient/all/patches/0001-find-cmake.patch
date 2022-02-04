@@ -32,3 +32,25 @@ diff --git a/cmake/zlib.cmake b/cmake/zlib.cmake
 +    SET(ZLIB_LIBRARY ZLIB::ZLIB CACHE INTERNAL "System zlib library")
    ENDIF()
  ENDMACRO()
+
+diff --git a/cmake/ssl.cmake b/cmake/ssl.cmake
+index b4c0e28c..278dadb9 100644
+--- a/cmake/ssl.cmake
++++ b/cmake/ssl.cmake
+@@ -282,6 +282,16 @@ MACRO (MYSQL_CHECK_SSL)
+     FIND_LIBRARY(CRYPTO_LIBRARY
+                  NAMES crypto libcrypto libeay32
+                  HINTS ${OPENSSL_ROOT_DIR}/lib)
++    IF(NOT OPENSSL_LIBRARY)
++        FIND_LIBRARY(OPENSSL_LIBRARY
++                    NAMES ssld libssld ssleay32d ssleay32MDd
++                    HINTS ${OPENSSL_ROOT_DIR}/lib)
++    ENDIF()
++    IF(NOT CRYPTO_LIBRARY)
++        FIND_LIBRARY(CRYPTO_LIBRARY
++                    NAMES cryptod libcryptod libeay32d
++                    HINTS ${OPENSSL_ROOT_DIR}/lib)
++    ENDIF()
+ 
+     IF(OPENSSL_INCLUDE_DIR)
+       # Verify version number. Version information looks like:

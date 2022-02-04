@@ -75,14 +75,6 @@ class LibMysqlClientCConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
                 "NAMES zstd",
                 "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
-
-        #tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
-        #    "NAMES ssl",
-        #    "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
-        
-        #tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
-        #    "NAMES crypto",
-        #    "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
         
         tools.patch(**self.conan_data["patches"][self.version])
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
