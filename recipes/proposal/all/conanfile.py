@@ -47,10 +47,10 @@ class PROPOSALConan(ConanFile):
 
     def requirements(self):
         self.requires("cubicinterpolation/0.1.4")
-        self.requires("spdlog/1.8.2")
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("spdlog/1.9.2")
+        self.requires("nlohmann_json/3.10.5")
         if self.options.with_python:
-            self.requires("pybind11/2.6.2")
+            self.requires("pybind11/2.9.1")
 
     @property
     def _minimum_compilers_version(self):
