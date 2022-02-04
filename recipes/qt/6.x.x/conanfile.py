@@ -342,8 +342,6 @@ class QtConan(ConanFile):
         self.build_requires("cmake/3.22.0")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires('strawberryperl/5.30.0.1')
 
         if self.options.get_safe("qtwebengine"):
             self.build_requires("ninja/1.10.2")
@@ -406,6 +404,7 @@ class QtConan(ConanFile):
                                "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                "set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+                               "set(HOST_PERL echo CACHE FORCE)\n"
                                "enable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
