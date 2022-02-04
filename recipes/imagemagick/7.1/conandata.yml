@@ -1,0 +1,9 @@
+sources:
+  "7.1.0-29":
+    source:
+      url: "https://github.com/ImageMagick/ImageMagick/archive/7.1.0-29.tar.gz"
+      sha256: "889be185fd17a9b9b3d4090e28aecdec289a4f690964a7964b4f893c7a8ec21c"
+patches:
+  "7.1.0-29":
+    - patch_file: "patches/cmakeify.patch"
+      base_path: "source_subfolder"
