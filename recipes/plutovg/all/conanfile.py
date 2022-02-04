@@ -61,12 +61,11 @@ class PlutoVGConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.a", dst="lib", src="lib", keep_path=False)
-        self.copy("*.so", dst="lib", src="lib", keep_path=False)
-        self.copy("*.lib", dst="lib", src="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", src="bin", keep_path=False)
-        self.copy("*.dynlib", dst="lib", src="bin", keep_path=False)
+        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="*.a", dst="lib", src="lib", keep_path=False)
+        self.copy(pattern="*.so", dst="lib", src="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src="bin", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["plutovg"]
