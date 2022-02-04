@@ -114,9 +114,16 @@ class XapianCoreConan(ConanFile):
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Relocatable shared lib on macOS
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                              "-install_name \\$rpath/",
+                              "-install_name @rpath/")
+
+    def build(self):
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
