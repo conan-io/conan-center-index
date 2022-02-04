@@ -128,6 +128,10 @@ class LibiconvConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # relocatable shared libs on macOS
+        for configure in ["configure", os.path.join("libcharset", "configure")]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, configure),
+                                  "-install_name \\$rpath/", "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
