@@ -404,7 +404,7 @@ class QtConan(ConanFile):
                                "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                "set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
-                               "set(HOST_PERL echo CACHE FILEPATH "" FORCE)\n"
+                               "set(HOST_PERL echo CACHE STRING \"Perl binary\")\n"
                                "enable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
