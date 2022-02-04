@@ -134,6 +134,7 @@ endif()
 if(ENABLE_ICU)
     find_package(ICU REQUIRED COMPONENTS data i18n uc)
     target_link_libraries(${PROJECT_NAME} PRIVATE ICU::data ICU::i18n ICU::uc)
+    enable_language(CXX)
 endif()
 
 if(NOT OMIT_LOAD_EXTENSION)
@@ -162,6 +163,11 @@ if(SQLITE3_BUILD_EXECUTABLE)
     set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3" 
                                                  IMPORT_SUFFIX "-bin.lib"
                                                  PDB_NAME "sqlite3-bin")
+
+    if(ENABLE_ICU)
+        set_target_properties(sqlite3-bin PROPERTIES LINKER_LANGUAGE CXX)
+    endif()
+
     include(CheckSymbolExists)
     check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
     if(NOT HAVE_SYSTEM)
