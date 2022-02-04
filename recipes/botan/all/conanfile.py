@@ -199,6 +199,7 @@ class BotanConan(ConanFile):
                 'Linux': 'linux',
                 'Macos': 'darwin',
                 'Android': 'linux',
+                'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
     def _dependency_build_flags(self, dependency):
