@@ -255,11 +255,11 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.8")
+            self.requires("libdeflate/1.9")
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.get_safe("with_blosc"):
             self.requires("c-blosc/1.21.1")
         if self.options.get_safe("with_lz4"):
@@ -315,7 +315,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.2")
+            self.requires("expat/2.4.4")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
@@ -329,7 +329,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.37.1")
+            self.requires("sqlite3/3.37.2")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -337,9 +337,9 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.37")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
         if self.options.with_geos:
-            self.requires("geos/3.10.1")
+            self.requires("geos/3.10.2")
         # if self.options.with_sfcgal:
         #     self.requires("sfcgal/1.3.7")
         if self.options.with_qhull:
