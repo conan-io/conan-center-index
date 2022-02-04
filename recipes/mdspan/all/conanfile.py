@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class MDSpanConan(ConanFile):
@@ -12,7 +12,7 @@ class MDSpanConan(ConanFile):
     topics = ("multi-dimensional", "array", "span")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -32,7 +32,7 @@ class MDSpanConan(ConanFile):
             "apple-clang": "5.1"
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -50,6 +50,9 @@ class MDSpanConan(ConanFile):
                         self.settings.compiler,
                         self.settings.compiler.version))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -57,13 +60,15 @@ class MDSpanConan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("*LICENSE", dst="licenses", keep_path=False)
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "mdspan")
+        self.cpp_info.set_property("cmake_target_name", "std::mdspan")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "mdspan"
         self.cpp_info.filenames["cmake_find_package_multi"] = "mdspan"
         self.cpp_info.names["cmake_find_package"] = "std"
         self.cpp_info.names["cmake_find_package_multi"] = "std"
         self.cpp_info.components["_mdspan"].names["cmake_find_package"] = "mdspan"
         self.cpp_info.components["_mdspan"].names["cmake_find_package_multi"] = "mdspan"
+        self.cpp_info.components["_mdspan"].set_property("cmake_target_name", "std::mdspan")
