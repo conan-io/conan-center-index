@@ -694,6 +694,8 @@ class GdalConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        # FIXME: set self._autotools.libs to empty array and improve patch in configure.ac,
+        #        to avoid configure errors on macOS if all shared
 
         yes_no = lambda v: "yes" if v else "no"
         internal_no = lambda v: "internal" if v else "no"
