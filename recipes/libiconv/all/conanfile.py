@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
@@ -145,7 +146,7 @@ class LibiconvConan(ConanFile):
 
         if self._is_msvc and self.options.shared:
             for import_lib in ["iconv", "charset"]:
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
 
     def package_info(self):
