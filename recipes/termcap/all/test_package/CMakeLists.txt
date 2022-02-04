@@ -4,7 +4,7 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(Termcap CONFIG REQUIRED)
+find_package(termcap CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} Termcap::Termcap)
+target_link_libraries(${PROJECT_NAME} termcap::termcap)

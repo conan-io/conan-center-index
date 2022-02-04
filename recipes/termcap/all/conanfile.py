@@ -93,9 +93,6 @@ class TermcapConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "etc", "termcap")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_target_name", "Termcap")
-        self.cpp_info.names["cmake_find_package"] = "Termcap"
-        self.cpp_info.names["cmake_find_package_multi"] = "Termcap"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.definitions = ["TERMCAP_SHARED"]
