@@ -337,6 +337,8 @@ class AwsSdkCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "1.9":
+            delattr(self.options, "s3-crt")
 
     def configure(self):
         if self.options.shared:
@@ -393,7 +395,7 @@ class AwsSdkCppConan(ConanFile):
 
         build_only = ["core"]
         for sdk in self._sdks:
-            if getattr(self.options, sdk):
+            if self.options.get_safe(sdk):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
 
@@ -452,7 +454,7 @@ class AwsSdkCppConan(ConanFile):
             self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
 
         # other components
-        enabled_sdks = [sdk for sdk in self._sdks if getattr(self.options, sdk)]
+        enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
         for hl_comp in self._internal_requirements.keys():
             if getattr(self.options, hl_comp):
                 for internal_requirement in self._internal_requirements[hl_comp]:
