@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 import re
 
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.33.0"
 
 
 class TermcapConan(ConanFile):
