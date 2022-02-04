@@ -57,6 +57,7 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
     settings = "os", "arch", "compiler", "build_type"
+    provides = []
 
     options = {
         "shared": [True, False],
@@ -231,6 +232,16 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if self.options.get_safe(module):
                 _enablemodule(module)
+
+        for opt, dep  in [("with_doubleconversion", "double-conversion"),
+                          ("with_freetype", "freetype"),
+                          ("with_harfbuzz", "harfbuzz"),
+                          ("with_libjpeg", "libjpeg"),
+                          ("with_libpng", "libpng"),
+                          ("with_sqlite3", "sqlite3"),
+                          ("with_pcre2", "pcre2")]:
+            if self.options.get_safe(opt, False) == "qt":
+                self.provides.append(dep) 
 
     def validate(self):
         # C++ minimum standard required
