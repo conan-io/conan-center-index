@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 import shutil
 
+required_conan_version = ">=1.43.0"
+
 
 class FreeImageConan(ConanFile):
     name = "freeimage"
@@ -9,9 +11,8 @@ class FreeImageConan(ConanFile):
                   "like PNG, BMP, JPEG, TIFF and others as needed by today's multimedia applications."
     homepage = "https://freeimage.sourceforge.io"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later", "FreeImage"
-    topics = ("conan", "freeimage", "image", "decoding", "graphics")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later"
+    topics = ("freeimage", "image", "decoding", "graphics")
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -51,6 +52,11 @@ class FreeImageConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -60,7 +66,7 @@ class FreeImageConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         self.output.warn("G3 plugin and JPEGTransform are disabled.")
-        if bool(self.options.with_jpeg):
+        if self.options.with_jpeg is not None:
             if self.options.with_tiff:
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
@@ -86,9 +92,8 @@ class FreeImageConan(ConanFile):
             self.requires("libtiff/4.3.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "FreeImage"
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
