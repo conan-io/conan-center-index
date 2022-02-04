@@ -3,16 +3,8 @@ import os
 import textwrap
 
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
-
-codecs = {
-    "aom": "libaom-av1/3.1.2",
-    "dav1d": "dav1d/0.9.1",
-}
-
-default_codec = "aom"
 
 
 class LibAVIFConan(ConanFile):
@@ -26,12 +18,12 @@ class LibAVIFConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_codec": list(codecs.keys()),
+        "with_decoder": ["aom", "dav1d"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_codec": default_codec,
+        "with_decoder": "dav1d",
     }
     generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/*"
@@ -46,9 +38,15 @@ class LibAVIFConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @property
+    def _has_dav1d(self):
+        return self.options.with_decoder == "dav1d"
+
     def requirements(self):
-        self.requires(codecs[str(self.options.with_codec)])
+        self.requires("libaom-av1/3.1.2")
         self.requires("libyuv/cci.20201106")
+        if self._has_dav1d:
+            self.requires("dav1d/0.9.1")
 
     @property
     def _source_subfolder(self):
@@ -62,8 +60,10 @@ class LibAVIFConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        suffix = str(self.options.with_codec).upper()
-        cmake.definitions[f"AVIF_CODEC_{suffix}"] = True
+        cmake.definitions["AVIF_CODEC_AOM"] = True
+        if self._has_dav1d:
+            cmake.definitions["AVIF_CODEC_DAV1D"] = True
+            cmake.definitions["AVIF_CODEC_AOM_DECODE"] = False
         cmake.configure()
         return cmake
 
@@ -96,10 +96,8 @@ class LibAVIFConan(ConanFile):
         tools.save(alias, content)
 
     def package_info(self):
-        self.cpp_info.requires.append("libyuv::libyuv")
-        if self.options.with_codec == "aom":
-            self.cpp_info.requires.append("libaom-av1::libaom-av1")
-        elif self.options.with_codec == "dav1d":
+        self.cpp_info.requires = ["libyuv::libyuv", "libaom-av1::libaom-av1"]
+        if self._has_dav1d:
             self.cpp_info.requires.append("dav1d::dav1d")
 
         self.cpp_info.libs = ["avif"]
@@ -107,6 +105,8 @@ class LibAVIFConan(ConanFile):
             self.cpp_info.defines = ["AVIF_DLL"]
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = ["pthread", "m"]
+            if self.settings.os == "Linux" and self._has_dav1d:
+                self.cpp_info.system_libs.append("dl")
 
         self.cpp_info.set_property("cmake_file_name", "libavif")
         self.cpp_info.set_property("cmake_target_name", "avif")
