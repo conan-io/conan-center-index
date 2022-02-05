@@ -143,7 +143,7 @@ class FlannConan(ConanFile):
         flann_c_lib = "flann" if self.options.shared else "flann_s"
         self.cpp_info.components["flann_c"].set_property("cmake_target_name", "flann::{}".format(flann_c_lib))
         self.cpp_info.components["flann_c"].libs = [flann_c_lib]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["flann_c"].system_libs.append("m")
         if not self.options.shared:
             self.cpp_info.components["flann_c"].defines.append("FLANN_STATIC")
