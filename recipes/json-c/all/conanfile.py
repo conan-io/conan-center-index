@@ -22,6 +22,7 @@ class JSONCConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
 
@@ -32,11 +33,6 @@ class JSONCConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,16 +48,6 @@ class JSONCConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if tools.Version(self.version) <= "0.13.1" and \
-           tools.cross_building(self) and self.settings.os != "Windows":
-            host = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "execute_process(COMMAND ./configure ",
-                                  "execute_process(COMMAND ./configure --host %s " % host)
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -75,7 +61,6 @@ class JSONCConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
