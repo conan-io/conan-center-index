@@ -118,7 +118,7 @@ main( int     argc,
     FT_Set_Transform( face, &matrix, &pen );
 
     /* load glyph image into the slot (erase previous one) */
-    error = FT_Load_Char( face, text[n], FT_LOAD_RENDER | FT_LOAD_TARGET_LCD);
+    error = FT_Load_Char( face, text[n], FT_LOAD_RENDER);
     if (error) {
         exit(EXIT_FAILURE);
     }
