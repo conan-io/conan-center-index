@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1.2)
 project(test_package CXX)
 
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
