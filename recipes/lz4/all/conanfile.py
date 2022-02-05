@@ -69,6 +69,8 @@ class LZ4Conan(ConanFile):
         self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
         self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
         self._cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure()
         return self._cmake
 
