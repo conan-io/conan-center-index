@@ -69,3 +69,5 @@ class PlutoVGConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["plutovg"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
