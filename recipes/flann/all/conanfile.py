@@ -97,6 +97,9 @@ class FlannConan(ConanFile):
         # OpenMP support can be added later if needed
         self._cmake.definitions["USE_OPENMP"] = False
 
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
