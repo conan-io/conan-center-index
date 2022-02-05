@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.cross_building import cross_building as tools_cross_building
 from conan.tools.layout import cmake_layout
 
+required_conan_version = ">=1.43.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
