@@ -66,7 +66,7 @@ class PlutoVGConan(ConanFile):
         self.copy(pattern="*.so", dst="lib", src="lib", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src="lib", keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src="bin", keep_path=False)
-        self.copy(pattern="*.dylib", dst="bin", src="bin", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["plutovg"]
