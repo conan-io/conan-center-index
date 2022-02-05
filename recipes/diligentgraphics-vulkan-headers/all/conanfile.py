@@ -13,6 +13,7 @@ class VulkanHeadersConan(ConanFile):
     homepage = "https://github.com/DiligentGraphics/Vulkan-Headers"
     url = "https://github.com/conan-io/conan-center-index"
     provides = "vulkan-headers"
+    deprecated = "vulkan-headers"
     no_copy_source = True
 
     @property

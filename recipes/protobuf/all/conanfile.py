@@ -208,24 +208,20 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "protobuf")
         self.cpp_info.set_property("pkg_config_name", "protobuf_full_package") # unofficial, but required to avoid side effects (libprotobuf component "steals" the default global pkg_config name)
 
-        self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
-
-        lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
-        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
-
         build_modules = [
             os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
         ]
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
+
+        lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
         self.cpp_info.components["libprotobuf"].set_property("pkg_config_name", "protobuf")
         self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
-        self.cpp_info.components["libprotobuf"].set_property("cmake_build_modules", build_modules)
-        self.cpp_info.components["libprotobuf"].build_modules = build_modules
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
@@ -249,8 +245,6 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotobuf-lite"].set_property("cmake_target_name", "protobuf::libprotobuf-lite")
             self.cpp_info.components["libprotobuf-lite"].set_property("pkg_config_name", "protobuf-lite")
             self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
-            self.cpp_info.components["libprotobuf-lite"].set_property("cmake_build_modules", build_modules)
-            self.cpp_info.components["libprotobuf-lite"].build_modules = build_modules
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
@@ -265,3 +259,11 @@ class ProtobufConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
+        self.cpp_info.names["pkg_config"] ="protobuf_full_package"
+        self.cpp_info.components["libprotobuf"].build_modules = build_modules
+        if self.options.lite:
+            self.cpp_info.components["libprotobuf-lite"].build_modules = build_modules

@@ -3,10 +3,10 @@ project(test_package CXX)
 
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    conan_basic_setup(TARGETS)
 endif()
 
-find_package(fmt REQUIRED)
+find_package(fmt REQUIRED CONFIG)
 
 # TEST_PACKAGE #################################################################
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)

@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, tools, CMake
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class EigenConan(ConanFile):
@@ -10,19 +12,31 @@ class EigenConan(ConanFile):
                    numerical solvers, and related algorithms."
     license = ("MPL-2.0", "LGPL-3.0-or-later")
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"MPL2_only": [True, False]}
-    default_options = {"MPL2_only": False}
-    exports_sources = ["patches/*"]
-    no_copy_source = True
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "MPL2_only": [True, False],
+    }
+    default_options = {
+        "MPL2_only": False,
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("eigen-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
@@ -36,17 +50,21 @@ class EigenConan(ConanFile):
         self.copy("COPYING.*", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Eigen3")
+        self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
+        self.cpp_info.set_property("pkg_config_name", "eigen3")
+        # TODO: back to global scope once cmake_find_package* generators removed
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["eigen3"].system_libs = ["m"]
+        if self.options.MPL2_only:
+            self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "Eigen3"
         self.cpp_info.names["cmake_find_package_multi"] = "Eigen3"
         self.cpp_info.names["pkg_config"] = "eigen3"
         self.cpp_info.components["eigen3"].names["cmake_find_package"] = "Eigen"
         self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "Eigen"
+        self.cpp_info.components["eigen3"].set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["eigen3"].system_libs = ["m"]
-        if self.options.MPL2_only:
-            self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
