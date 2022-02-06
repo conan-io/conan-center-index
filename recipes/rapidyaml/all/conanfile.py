@@ -95,7 +95,6 @@ class RapidYAMLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
-        # TODO: create c4core recipe
         self.cpp_info.libs = ["ryml"]
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
