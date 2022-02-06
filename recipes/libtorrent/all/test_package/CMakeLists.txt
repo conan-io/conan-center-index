@@ -8,7 +8,7 @@ if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)
 endif()
 
-find_package(LibtorrentRasterbar REQUIRED)
+find_package(LibtorrentRasterbar REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} LibtorrentRasterbar::torrent-rasterbar)
