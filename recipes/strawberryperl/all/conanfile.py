@@ -35,6 +35,7 @@ class StrawberryperlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: %s" % bin_path)
