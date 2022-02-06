@@ -104,6 +104,8 @@ class FlatbuffersConan(ConanFile):
         self._cmake.definitions["VERSION_MAJOR"] = version.major
         self._cmake.definitions["VERSION_MINOR"] = version.minor
         self._cmake.definitions["VERSION_PATCH"] = version.patch
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         self._cmake.configure()
         return self._cmake
