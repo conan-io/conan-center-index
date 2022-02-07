@@ -2,6 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 import re
 
+
 required_conan_version = ">=1.33.0"
 
 
@@ -10,9 +11,8 @@ class TermcapConan(ConanFile):
     homepage = "https://www.gnu.org/software/termcap"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Enables programs to use display terminals in a terminal-independent manner"
-    license = "GPL-2.0"
-    topics = ("conan", "termcap", "terminal", "display")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    license = "GPL-2.0-or-later"
+    topics = ("terminal", "display", "text", "writing")
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], }
@@ -23,6 +23,15 @@ class TermcapConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,8 +64,7 @@ class TermcapConan(ConanFile):
         self._cmake.definitions["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
         self._cmake.definitions["TERMCAP_CAP_FILE"] = os.path.join(self._source_subfolder, "termcap.src").replace("\\", "/")
         self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
-        self._cmake.verbose = True
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
@@ -85,8 +93,6 @@ class TermcapConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "etc", "termcap")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Termcap"
-        self.cpp_info.names["cmake_find_package_multi"] = "Termcap"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.definitions = ["TERMCAP_SHARED"]
