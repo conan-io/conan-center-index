@@ -108,9 +108,6 @@ class TensorflowLiteConan(ConanFile):
                 raise ConanInvalidConfiguration(
                         f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
 
-    def build_requirements(self):
-        self.build_requires("ninja/1.10.2")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
