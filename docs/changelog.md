@@ -1,5 +1,23 @@
 # Changelog
 
+### 03-February-2022 - 17:01 CET
+
+- [feature] New label to identify pull-requests that are just bumping dependencies version.
+- [bugfix] Fixed bugs with promotion and properties for references that don't build any binary.
+- [feature] Add parameter to chose if documentation of supported platforms should be updated automatically.
+- [feature] Improve Conan version regex to accept development versions
+
+### 26-January-2022 - 11:14 CET
+
+- [config] Add MacOS apple-clang 13.0 configuration to a new epoch.
+- [feature] Handle `header_only=True` default option in recipes.
+- [feature] Notify failed builds due to expired Visual Studio licenses.
+- [feature] Tapaholes job now sets epoch as well.
+- [fix] Throw error if configuration file to use is not found.
+- [feature] Add missing DSL job descriptions.
+- [feature] Child jobs use the same parent folder.
+- [refactor] Remove resource locking.
+
 ### 18-January-2022 - 16:49 CET
 
 - [config] Bump Conan client version to 1.43.3.
