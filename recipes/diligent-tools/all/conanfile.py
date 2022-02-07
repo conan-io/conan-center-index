@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 class DiligentToolsConan(ConanFile):
     name = "diligent-tools"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/DiligentGraphics/DiligentCore/tree/v2.5"
+    homepage = "https://github.com/DiligentGraphics/DiligentTools/"
     description = "Diligent Core is a modern cross-platfrom low-level graphics API."
     license = ("Apache 2.0")
     topics = ("graphics")
@@ -38,10 +38,6 @@ class DiligentToolsConan(ConanFile):
                 self.info.settings.compiler.runtime = "MD/MDd"
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
-
-    #def validate(self):
-    #    if self.options["spirv-cross"].namespace != 'diligent_spirv_cross':
-    #        raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross. To do so, add [-o spirv-cross:namespace=diligent_spirv_cross]")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -97,20 +93,18 @@ class DiligentToolsConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+
+        self.copy(pattern="*.dll", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/DiligentCore")
-        if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/DiligentCore")
-
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
-        # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE=diligent_spirv_cross")
         self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
