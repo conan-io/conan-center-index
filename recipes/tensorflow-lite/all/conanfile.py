@@ -105,9 +105,6 @@ class TensorflowLiteConan(ConanFile):
         patched_content = "".join(line for line in original_content if "find_package" not in line)
         open(cmake_lists_path, "w").write(patched_content)
 
-    def build_requirements(self):
-        self.build_requires("ninja/1.10.2")
-
     def requirements(self):
         self.requires("abseil/20210324.2")
         self.requires("eigen/3.4.0")
