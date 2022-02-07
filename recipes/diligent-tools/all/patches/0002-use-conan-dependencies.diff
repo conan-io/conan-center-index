@@ -1,0 +1,33 @@
+diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
+index 861933c..e3a6cf8 100644
+--- a/TextureLoader/CMakeLists.txt
++++ b/TextureLoader/CMakeLists.txt
+@@ -53,9 +53,10 @@ PRIVATE
+     Diligent-GraphicsEngineInterface 
+     Diligent-GraphicsAccessories
+     Diligent-GraphicsTools
+-    LibPng 
+-    LibTiff 
+-    ZLib
++    CONAN_PKG::libpng
++    CONAN_PKG::libtiff
++    CONAN_PKG::zlib
++    CONAN_PKG::libjpeg
+ )
+ 
+ if (NOT DILIGENT_EXTERNAL_LIBJPEG)
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index bb267e0..5099806 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -1,10 +1,5 @@
+ cmake_minimum_required (VERSION 3.6)
+ 
+-add_subdirectory(libjpeg-9a)
+-add_subdirectory(libtiff)
+-add_subdirectory(zlib-1.2.8)
+-add_subdirectory(lpng-1.6.17)
+-
+ set(LICENSE_INSTALL_PATH "Licenses/ThirdParty/${DILIGENT_TOOLS_DIR}")
+ 
+ install(FILES args/LICENSE DESTINATION ${LICENSE_INSTALL_PATH} RENAME args-license.txt)

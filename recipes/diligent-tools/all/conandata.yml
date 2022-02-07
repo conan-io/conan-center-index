@@ -1,4 +1,11 @@
 sources:
-  "20211005":
-    url: "https://github.com/DiligentGraphics/DiligentTools/archive/2adbd5ef44fb6f90c8bcb75457acb148b8bde6a2.zip"
-    sha256: "4ec7195fd1a3c414a281edf4e2f0957795b0b71e9ea9a09fae3dd1af82a82fe7"
+  "20220205":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/280448ac0506e75c716b2108562b0277c700886c.tar.gz"
+    sha256: "24d81c0c98e5cee7ef3a22b011778199a4a8ca57d43eabd8f8d2784518ce3915"
+patches:
+  "20220205":
+    - patch_file: "patches/0001-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+  "20220205":
+    - patch_file: "patches/0002-use-conan-dependencies.diff"
+      base_path: "source_subfolder"

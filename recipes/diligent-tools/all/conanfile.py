@@ -11,12 +11,10 @@ class DiligentToolsConan(ConanFile):
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
-    "fPIC":         [True, False],
-    "with_glslang": [True, False],
+    "fPIC":         [True, False]
     }
     default_options = {"shared": False, 
-    "fPIC": True,
-    "with_glslang" : True
+    "fPIC": True
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
@@ -54,9 +52,8 @@ class DiligentToolsConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        pass
-        #for patch in self.conan_data["patches"][self.version]:
-        #    tools.patch(**patch)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def requirements(self):
         self.requires("diligent-core/2.5.1")
@@ -82,16 +79,11 @@ class DiligentToolsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
+        self._cmake.definitions["DILIGENT_INSTALL_TOOLS"] = False
         self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D11"] = True
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D12"] = True
-        self._cmake.definitions["DILIGENT_NO_DXC"] = True
-
-        self._cmake.definitions["ENABLE_RTTI"] = True
-        self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
 
         self._cmake.definitions[self.diligent_platform()] = True
         self._cmake.configure(build_folder=self._build_subfolder)
