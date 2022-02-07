@@ -57,8 +57,8 @@ class XnnpackConan(ConanFile):
 
     def requirements(self):
         self.requires("cpuinfo/cci.20201217")
-        self.requires("fp16/cci.20200514")
-        self.requires("fxdiv/cci.20200417")
+        self.requires("fp16/cci.20210320")
+        # Note: using newer version of pthreadpool compared to reference cci.20201205
         self.requires("pthreadpool/cci.20210218")
 
     def _patch_sources(self):
@@ -82,14 +82,19 @@ class XnnpackConan(ConanFile):
             else:
                 # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
-        self._cmake.definitions["XNNPACK_LIBRARY_TYPE"] = "default"
+        self._cmake.definitions["XNNPACK_LIBRARY_TYPE"] = "shared" if self.options.shared else "static"
         self._cmake.definitions["XNNPACK_ENABLE_ASSEMBLY"] = self.options.assembly
         self._cmake.definitions["XNNPACK_ENABLE_MEMOPT"] = self.options.memopt
         self._cmake.definitions["XNNPACK_ENABLE_SPARSE"] = self.options.sparse
         self._cmake.definitions["XNNPACK_BUILD_TESTS"] = False
         self._cmake.definitions["XNNPACK_BUILD_BENCHMARKS"] = False
+
+        # Use conan dependencies instead of downloading them during configuration
         self._cmake.definitions["XNNPACK_USE_SYSTEM_LIBS"] = True
+
+        # Install only built targets, in this case just the XNNPACK target
         self._cmake.definitions["CMAKE_SKIP_INSTALL_ALL_DEPENDENCY"] = True
+
         self._cmake.configure()
         return self._cmake
 
