@@ -19,7 +19,7 @@ This section gathers the most common questions from the community related to pac
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
-  * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
+  * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
@@ -29,7 +29,7 @@ This section gathers the most common questions from the community related to pac
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
-  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)<!-- endToc -->
+  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
@@ -143,7 +143,7 @@ Notes about `build_type`:
 
 We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
 
-## Can I remove an option from recipe
+## Can I remove an option from a recipe?
 
 It's preferable to leave all options (ie. not removing them) because it may break other packages which require those deleted options.
 Prefer the deprecation path with a mapping from old options to new ones:
@@ -340,6 +340,12 @@ Keep reading in the [consuming recipes section](consuming_recipes.md).
 
 ## Why are version ranges not allowed?
 
-Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably "Build Reproducibility".
+Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably:
 
-If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may not be compatible. In order to prevent these types of issues, we have decided to only allow exact requirements versions.
+- Non-Determinstic `package-id`
+
+With version ranges the newest compatible package may yield a different package-id than the one built and published by ConanCenter resulting in frustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
+
+- Build Reproducibility
+
+If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more. 
