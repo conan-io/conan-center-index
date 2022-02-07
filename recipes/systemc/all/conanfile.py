@@ -3,18 +3,18 @@ from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
 
 
 class SystemcConan(ConanFile):
     name = "systemc"
-    version = "2.3.3"
     description = """SystemC is a set of C++ classes and macros which provide
                      an event-driven simulation interface."""
     homepage = "https://www.accellera.org/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     topics = ("simulation", "modeling", "esl", "tlm")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,12 +37,20 @@ class SystemcConan(ConanFile):
         "enable_pthreads": False,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -97,14 +105,20 @@ class SystemcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SystemCLanguage")
+        self.cpp_info.set_property("cmake_target_name", "SystemC::systemc")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["_systemc"].libs = ["systemc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_systemc"].system_libs = ["pthread"]
+        if self._is_msvc:
+            self.cpp_info.components["_systemc"].cxxflags.append("/vmg")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "SystemCLanguage"
         self.cpp_info.filenames["cmake_find_package_multi"] = "SystemCLanguage"
         self.cpp_info.names["cmake_find_package"] = "SystemC"
         self.cpp_info.names["cmake_find_package_multi"] = "SystemC"
         self.cpp_info.components["_systemc"].names["cmake_find_package"] = "systemc"
         self.cpp_info.components["_systemc"].names["cmake_find_package_multi"] = "systemc"
-        self.cpp_info.components["_systemc"].libs = ["systemc"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["_systemc"].system_libs = ["pthread"]
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["_systemc"].cxxflags.append("/vmg")
+        self.cpp_info.components["_systemc"].set_property("cmake_target_name", "SystemC::systemc")

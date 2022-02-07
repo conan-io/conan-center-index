@@ -1,16 +1,15 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class AwsCrtCpp(ConanFile):
     name = "aws-crt-cpp"
     description = "C++ wrapper around the aws-c-* libraries. Provides Cross-Platform Transport Protocols and SSL/TLS implementations for C++."
-    topics = ("conan", "aws")
+    topics = ("aws", "amazon", "cloud", "wrapper")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-crt-cpp"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +27,11 @@ class AwsCrtCpp(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,13 +46,13 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-event-stream/0.2.7")
-        self.requires("aws-c-common/0.6.9")
-        self.requires("aws-c-io/0.10.9")
-        self.requires("aws-c-http/0.6.7")
-        self.requires("aws-c-auth/0.6.4")
-        self.requires("aws-c-mqtt/0.7.6")
-        self.requires("aws-c-s3/0.1.19")
-        self.requires("aws-checksums/0.1.11")
+        self.requires("aws-c-common/0.6.15")
+        self.requires("aws-c-io/0.10.13")
+        self.requires("aws-c-http/0.6.10")
+        self.requires("aws-c-auth/0.6.8")
+        self.requires("aws-c-mqtt/0.7.9")
+        self.requires("aws-c-s3/0.1.29")
+        self.requires("aws-checksums/0.1.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -76,6 +80,9 @@ class AwsCrtCpp(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-crt-cpp"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-crt-cpp")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
         self.cpp_info.names["cmake_find_package"] = "AWS"

@@ -1,4 +1,7 @@
 sources:
+  "1.2.2":
+    url: "https://github.com/webmproject/libwebp/archive/v1.2.2.tar.gz"
+    sha256: "51e9297aadb7d9eb99129fe0050f53a11fcce38a0848fb2b0389e385ad93695e"
   "1.2.1":
     url: "https://github.com/webmproject/libwebp/archive/refs/tags/v1.2.1.tar.gz"
     sha256: "01bcde6a40a602294994050b81df379d71c40b7e39c819c024d079b3c56307f4"
@@ -12,6 +15,9 @@ sources:
     url: "https://github.com/webmproject/libwebp/archive/v1.0.3.tar.gz"
     sha256: "082d114bcb18a0e2aafc3148d43367c39304f86bf18ba0b2e766447e111a4a91"
 patches:
+  "1.2.2":
+    - patch_file: "patches/0001-fix-dll-export.patch"
+      base_path: "source_subfolder"
   "1.2.1":
     - patch_file: "patches/0001-fix-dll-export.patch"
       base_path: "source_subfolder"

@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SQLiteCppConan(ConanFile):
@@ -18,15 +18,14 @@ class SQLiteCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "lint": [True, False, "deprecated"],
+        "stack_protection": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "lint": "deprecated",
+        "stack_protection": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -38,6 +37,11 @@ class SQLiteCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,20 +49,15 @@ class SQLiteCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.lint != "deprecated":
-            self.output.warn("lint option is deprecated, do not use anymore")
 
     def requirements(self):
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.37.2")
 
     def validate(self):
         if tools.Version(self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
-
-    def package_id(self):
-        del self.info.options.lint
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -86,6 +85,7 @@ class SQLiteCppConan(ConanFile):
         self._cmake.definitions["SQLITECPP_RUN_DOXYGEN"] = False
         self._cmake.definitions["SQLITECPP_BUILD_EXAMPLES"] = False
         self._cmake.definitions["SQLITECPP_BUILD_TESTS"] = False
+        self._cmake.definitions["SQLITECPP_USE_STACK_PROTECTION"] = self.options.stack_protection
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -99,6 +99,8 @@ class SQLiteCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"SQLiteCpp": "SQLiteCpp::SQLiteCpp"}
@@ -117,20 +119,18 @@ class SQLiteCppConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "SQLiteCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "SQLiteCpp"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "SQLiteCpp")
+        self.cpp_info.set_property("cmake_target_name", "SQLiteCpp")
         self.cpp_info.libs = ["SQLiteCpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "SQLiteCpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLiteCpp"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class grpcConan(ConanFile):
@@ -11,9 +12,6 @@ class grpcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/**"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     # TODO: Add shared option
@@ -27,7 +25,8 @@ class grpcConan(ConanFile):
         "objective_c_plugin": [True, False],
         "php_plugin": [True, False],
         "python_plugin": [True, False],
-        "ruby_plugin": [True, False]
+        "ruby_plugin": [True, False],
+        "secure": [True, False]
     }
     default_options = {
         "fPIC": True,
@@ -40,8 +39,11 @@ class grpcConan(ConanFile):
         "php_plugin": True,
         "python_plugin": True,
         "ruby_plugin": True,
+        "secure": False,
     }
 
+    short_paths = True
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -52,24 +54,23 @@ class grpcConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        self.requires('zlib/1.2.11')
-        self.requires('openssl/1.1.1l')
-        self.requires('protobuf/3.17.1')
-        self.requires('c-ares/1.17.1')
-        self.requires('abseil/20210324.2')
-        self.requires('re2/20210601')
-
-    def build_requirements(self):
-        self.build_requires('protobuf/3.17.1')
-
-        #when cross compiling we need pre compiled grpc plugins for protoc
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            self.build_requires('grpc/{}'.format(self.version))
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy(pattern="cmake/*")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires('zlib/1.2.11')
+        self.requires('openssl/1.1.1m')
+        self.requires('protobuf/3.17.1')
+        self.requires('c-ares/1.17.2')
+        self.requires('abseil/20211102.0')
+        self.requires('re2/20211101')
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -80,14 +81,25 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
+        if tools.is_apple_os(self.settings.os) and "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration("gRPC is not supported on M1 Mac due to limitations in protobuf support.")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires('protobuf/3.17.1')
+            # when cross compiling we need pre compiled grpc plugins for protoc
+            if tools.cross_building(self):
+                self.build_requires('grpc/{}'.format(self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        # Fix the protoc search path for cross compiling
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
-                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
-                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
-        )
-        if tools.Version(self.version) >= "1.39.0":
+        if tools.Version(self.version) < "1.42.0":
+            # Fix the protoc search path for cross compiling
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
+                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
+                    "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
+            )
+        if tools.Version(self.version) >= "1.39.0" and tools.Version(self.version) <= "1.39.1":
             # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
             #   executable when cross-building
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -135,6 +147,11 @@ class grpcConan(ConanFile):
         if not tools.valid_min_cppstd(self, 11):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
+        if tools.cross_building(self):
+            # otherwise find_package() can't find config files since
+            # conan doesn't populate CMAKE_FIND_ROOT_PATH
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_PACKAGE"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -157,7 +174,7 @@ class grpcConan(ConanFile):
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.cmake", dst=os.path.join("lib", "cmake"), src=os.path.join(self.source_folder, "cmake"))
-    
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
@@ -196,13 +213,14 @@ class grpcConan(ConanFile):
         self.cpp_info.components["_grpc"].libs = ["grpc"]
 
         # gRPC::grpc_unsecure
-        self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
-        self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
-        self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
-        self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
-        self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
+        if not self.options.secure:
+            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
+            self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
+            self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
+            self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
+            self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
 
         # gRPC::grpc++
         self.cpp_info.components["grpc++"].names["cmake_find_package"] = "grpc++"
@@ -235,11 +253,12 @@ class grpcConan(ConanFile):
         self.cpp_info.components["grpc++_reflection"].libs = ["grpc++_reflection"]
 
         # gRPC::grpc++_unsecure
-        self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package"] = "grpc++_unsecure"
-        self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package_multi"] = "grpc++_unsecure"
-        self.cpp_info.components["grpc++_unsecure"].requires = ["protobuf::libprotobuf", "grpc_unsecure"]
-        self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
-        self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
+        if not self.options.secure:
+            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package"] = "grpc++_unsecure"
+            self.cpp_info.components["grpc++_unsecure"].names["cmake_find_package_multi"] = "grpc++_unsecure"
+            self.cpp_info.components["grpc++_unsecure"].requires = ["protobuf::libprotobuf", "grpc_unsecure"]
+            self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
+            self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
 
         # gRPC::grpcpp_channelz
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package"] = "grpcpp_channelz"

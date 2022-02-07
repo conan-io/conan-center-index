@@ -1,7 +1,7 @@
 sources:
-  "0.0.1":
-    sha256: 6627bf4f5baad3be1ebb9c904b0a13fc67d9211f8c874ecab7f05cc38da3d083
-    url: https://github.com/rvarago/kitten/archive/0.0.1.tar.gz
   "0.1.0":
-    sha256: fe04a3f58cd521effef2503ac6137eac37684d2d442034e9d19d77a2a01afd57
-    url: https://github.com/rvarago/kitten/archive/0.1.0.tar.gz
+    url: "https://github.com/rvarago/kitten/archive/0.1.0.tar.gz"
+    sha256: "fe04a3f58cd521effef2503ac6137eac37684d2d442034e9d19d77a2a01afd57"
+  "0.0.1":
+    url: "https://github.com/rvarago/kitten/archive/0.0.1.tar.gz"
+    sha256: "6627bf4f5baad3be1ebb9c904b0a13fc67d9211f8c874ecab7f05cc38da3d083"

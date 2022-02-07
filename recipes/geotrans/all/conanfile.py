@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.35.0"
+
 
 class GeotransConan(ConanFile):
     name = "geotrans"
@@ -20,9 +22,17 @@ class GeotransConan(ConanFile):
         "conversion",
         "transformation",
     )
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
     _cmake = None
@@ -72,9 +82,6 @@ class GeotransConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        mpccs_data_path = os.path.join(self.package_folder, "res")
-        self.output.info("Creating MPCCS_DATA environment variable: {}".format(mpccs_data_path))
-        self.env_info.MPCCS_DATA = mpccs_data_path
         self.cpp_info.components["dtcc"].libs = ["MSPdtcc"]
         self.cpp_info.components["dtcc"].includedirs = [
             path[0] for path in os.walk("include")
@@ -87,3 +94,9 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["ccs"].includedirs = [
             path[0] for path in os.walk("include")
         ]
+
+        mpccs_data_path = os.path.join(self.package_folder, "res")
+        self.output.info("Prepending to MPCCS_DATA runtime environment variable: {}".format(mpccs_data_path))
+        self.runenv_info.prepend_path("MPCCS_DATA", mpccs_data_path)
+        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+        self.env_info.MPCCS_DATA.append(mpccs_data_path)

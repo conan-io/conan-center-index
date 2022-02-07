@@ -9,13 +9,14 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if hasattr(self, "settings_build") and tools.cross_building(self):
             self.build_requires(str(self.requires['grpc']))
-            
+
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["SECURE"] = self.options["grpc"].secure
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "bin", "greeter_client_server")
             self.run(bin_path, run_environment=True)

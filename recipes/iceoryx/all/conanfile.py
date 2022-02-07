@@ -3,18 +3,18 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class IceoryxConan(ConanFile):
-
     name = "iceoryx"
     license = "Apache-2.0"
     homepage = "https://iceoryx.io/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Eclipse iceoryx - true zero-copy inter-process-communication"
     topics = ("Shared Memory", "IPC", "ROS", "Middleware")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,13 +25,18 @@ class IceoryxConan(ConanFile):
         "fPIC": True,
         "toml_config": True,
     }
+
     generators = ["cmake", "cmake_find_package"]
-    exports_sources = ["patches/**","CMakeLists.txt"]
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -109,25 +114,19 @@ class IceoryxConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.mkdir(self._pkg_res)
         if self.options.toml_config:
+            tools.mkdir(os.path.join(self.package_folder, "res"))
             tools.rename(
-                os.path.join(self._pkg_etc, "roudi_config_example.toml"),
-                os.path.join(self._pkg_res, "roudi_config.toml")
+                os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
+                os.path.join(self.package_folder, "res", "roudi_config.toml")
             )
-        tools.rmdir(self._pkg_etc)
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {v["target"]:"iceoryx::{}".format(k) for k, v in self._iceoryx_components.items()}
         )
-
-    @property
-    def _pkg_etc(self):
-        return os.path.join(self.package_folder, "etc")
-
-    @property
-    def _pkg_res(self):
-        return os.path.join(self.package_folder, "res")
 
     @property
     def _iceoryx_components(self):
@@ -201,33 +200,28 @@ class IceoryxConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         # FIXME: We should provide 3 CMake config files:
         #        iceoryx_utilsConfig.cmake, iceoryx_poshConfig.cmake and iceoryx_binding_cConfig.cmake
         #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
-        self.cpp_info.names["cmake_find_package"] = "iceoryx"
-        self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
+        self.cpp_info.set_property("cmake_file_name", "iceoryx")
 
         def _register_components(components):
-            for cmake_lib_name, values in components.items():
+            for lib_name, values in components.items():
+                cmake_target = values.get("target", [])
                 system_libs = values.get("system_libs", [])
                 requires = values.get("requires", [])
-                self.cpp_info.components[cmake_lib_name].names["cmake_find_package"] = cmake_lib_name
-                self.cpp_info.components[cmake_lib_name].names["cmake_find_package_multi"] = cmake_lib_name
-                self.cpp_info.components[cmake_lib_name].builddirs.append(self._module_subfolder)
-                self.cpp_info.components[cmake_lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[cmake_lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-                self.cpp_info.components[cmake_lib_name].libs = [cmake_lib_name]
-                self.cpp_info.components[cmake_lib_name].system_libs = system_libs
-                self.cpp_info.components[cmake_lib_name].requires = requires
+                self.cpp_info.components[lib_name].set_property("cmake_target_name", cmake_target)
+                self.cpp_info.components[lib_name].libs = [lib_name]
+                self.cpp_info.components[lib_name].system_libs = system_libs
+                self.cpp_info.components[lib_name].requires = requires
+
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         _register_components(self._iceoryx_components)
 

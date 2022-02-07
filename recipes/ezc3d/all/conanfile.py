@@ -2,14 +2,14 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Ezc3dConan(ConanFile):
     name = "ezc3d"
     description = "EZC3D is an easy to use reader, modifier and writer for C3D format files."
     license = "MIT"
-    topics = ("conan", "ezc3d", "c3d")
+    topics = ("ezc3d", "c3d")
     homepage = "https://github.com/pyomeca/ezc3d"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -120,11 +120,15 @@ class Ezc3dConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ezc3d")
+        self.cpp_info.set_property("cmake_target_name", "ezc3d")
+
         self.cpp_info.names["cmake_find_package"] = "ezc3d"
         self.cpp_info.names["cmake_find_package_multi"] = "ezc3d"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
         self.cpp_info.includedirs.append(os.path.join("include", "ezc3d"))
         lib_suffix = {"Debug": "_debug"}.get(str(self.settings.build_type), "")
         self.cpp_info.libs = ["ezc3d" + lib_suffix]

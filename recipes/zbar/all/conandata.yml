@@ -1,4 +1,7 @@
 sources:
+  "0.23.92":
+    url: "https://github.com/mchehab/zbar/archive/refs/tags/0.23.92.tar.gz"
+    sha256: "dffc16695cb6e42fa318a4946fd42866c0f5ab735f7eaf450b108d1c3a19b4ba"
   "0.10":
     url: "https://sourceforge.net/projects/zbar/files/zbar/0.10/zbar-0.10.tar.gz"
     sha256: "575fa82de699faa7bda2d2ebbe3e1af0a4152ec4d3ad72c0ab6712d7cc9b5dd2"

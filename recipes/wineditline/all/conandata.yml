@@ -1,0 +1,8 @@
+sources:
+  "2.206":
+    sha256: "2d255c417244e963261dc6171684265f405df030e90ba6e6690a99284d645161"
+    url: https://sourceforge.net/projects/mingweditline/files/wineditline-2.206.zip/download
+patches:
+  "2.206":
+    - patch_file: patches/0001-fix-cmakelists.patch
+      base_path: source_subfolder

@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SpscqueueConan(ConanFile):
@@ -12,7 +12,7 @@ class SpscqueueConan(ConanFile):
     topics = ("spscqueue", "thread", "queue")
     homepage = "https://github.com/rigtorp/SPSCQueue"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -37,5 +37,9 @@ class SpscqueueConan(ConanFile):
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SPSCQueue")
+        self.cpp_info.set_property("cmake_target_name", "SPSCQueue::SPSCQueue")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "SPSCQueue"
         self.cpp_info.names["cmake_find_package_multi"] = "SPSCQueue"
