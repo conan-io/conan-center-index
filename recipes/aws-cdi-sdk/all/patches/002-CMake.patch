@@ -1,50 +1,16 @@
-commit 51688cb7a605834b476340658230e239647f8a99
+commit 74eeb8a432fa08f3827ebfaba730c1b7b0e2c615
 Author: dvirtz <dvirtz@gmail.com>
 Date:   Mon Jul 5 09:51:24 2021 +0300
 
     build standalone cmake
 
 diff --git a/aws-cpp-sdk-cdi/CMakeLists.txt b/aws-cpp-sdk-cdi/CMakeLists.txt
-index 9ca1679..5dcbcec 100644
+index 9ca1679..b4f1393 100644
 --- a/aws-cpp-sdk-cdi/CMakeLists.txt
 +++ b/aws-cpp-sdk-cdi/CMakeLists.txt
-@@ -1,4 +1,39 @@
+@@ -1,4 +1,5 @@
 -add_project(aws-cpp-sdk-cdi "C++ SDK for the AWS cdi service" aws-cpp-sdk-core)
-+find_package(AWSSDK COMPONENTS aws-sdk-cpp-core)
-+
-+set(AWS_NATIVE_SDK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-+set(SIMPLE_INSTALL TRUE)
-+
-+if (CMAKE_INSTALL_BINDIR)
-+    set(BINARY_DIRECTORY "${CMAKE_INSTALL_BINDIR}")
-+endif()
-+
-+if (CMAKE_INSTALL_LIBDIR)
-+    set(LIBRARY_DIRECTORY "${CMAKE_INSTALL_LIBDIR}")
-+endif()
-+
-+if (CMAKE_INSTALL_INCLUDEDIR)
-+    set(INCLUDE_DIRECTORY "${CMAKE_INSTALL_INCLUDEDIR}")
-+endif()
-+
-+if(BUILD_SHARED_LIBS)
-+    set(ARCHIVE_DIRECTORY "${BINARY_DIRECTORY}")
-+else()
-+    set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
-+endif()
-+
-+if(DEFINED CMAKE_CXX_STANDARD)
-+    set(STANDARD_DEFAULT ${CMAKE_CXX_STANDARD})
-+else()
-+    set(STANDARD_DEFAULT "11")
-+endif()
-+set(CPP_STANDARD ${STANDARD_DEFAULT} CACHE STRING "Flag to upgrade the C++ standard used. The default is 11. The minimum is 11.")
-+
-+include(CMakePackageConfigHelpers)
-+include(cmake/initialize_project_version.cmake)
-+include(cmake/utilities.cmake)
-+include(cmake/compiler_settings.cmake)
-+
++find_package(AWSSDK REQUIRED)
 +add_project(aws-cpp-sdk-cdi "C++ SDK for the AWS cdi service" AWS::aws-sdk-cpp-core)
  
  file(GLOB AWS_CDI_HEADERS

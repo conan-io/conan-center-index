@@ -42,13 +42,8 @@ class AwsCdiSdkConan(ConanFile):
         tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0],
+        tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        for source in self.conan_data["sources"][self.version][1:]:
-            filename = os.path.join(self._source_subfolder, 
-                                    "aws-cpp-sdk-cdi", 
-                                    source["url"].split(self.deps_cpp_info["aws-sdk-cpp"].version)[-1].lstrip("/"))
-            tools.download(**source, filename=filename)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -88,12 +83,12 @@ class AwsCdiSdkConan(ConanFile):
             cc, cxx = self._detect_compilers()
             vars["CC"] = cc
             vars["CXX"] = cxx
-            if self.settings.build_type == 'Debug':
-                vars["DEBUG"] = 'y'
+            if self.settings.build_type == "Debug":
+                vars["DEBUG"] = "y"
 
             args = ["require_aws_sdk=no"]
 
-            autotools.make(target='libsdk', vars=vars, args=args)
+            autotools.make(target="libsdk", vars=vars, args=args)
 
     def package(self):
         cmake = self._configure_cmake()
