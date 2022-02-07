@@ -109,7 +109,7 @@ class TensorflowLiteConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.0")
+        self.requires("flatbuffers/1.12.0")
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
