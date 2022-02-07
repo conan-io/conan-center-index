@@ -37,6 +37,12 @@ class FlatbuffersConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _has_flatc(self):
+        # don't build flatc when it makes little sense or not supported
+        return not (self.settings.os in ["Android", "iOS", "watchOS", "tvOS"] or \
+                    str(self.settings.os).upper() == "QNX")
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         self.copy(os.path.join("cmake", "FlatcTargets.cmake"))
@@ -62,6 +68,8 @@ class FlatbuffersConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
+        if self.options.header_only and not self._has_flatc:
+            self.info.header_only()
         # deprecated options
         del self.info.options.flatc
         del self.info.options.flatbuffers
@@ -93,7 +101,7 @@ class FlatbuffersConan(ConanFile):
         self._cmake.definitions["FLATBUFFERS_BUILD_TESTS"] = False
         self._cmake.definitions["FLATBUFFERS_INSTALL"] = True
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.header_only and not self.options.shared
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = True
+        self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self._has_flatc
         self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = False
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
         self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = not self.options.header_only and self.options.shared
@@ -157,9 +165,10 @@ class FlatbuffersConan(ConanFile):
             os.path.join(self._module_path, "BuildFlatBuffers.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        if self._has_flatc:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "FlatBuffers"
