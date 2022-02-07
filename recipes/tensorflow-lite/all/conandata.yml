@@ -2,11 +2,3 @@ sources:
   "2.6.0":
     url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.6.0.tar.gz"
     sha256: "41b32eeaddcbc02b0583660bcf508469550e4cd0f86b22d2abe72dfebeacde0f"
-patches:
-  "2.6.0":
-    - patch_file: "patches/local_find_packages.patch"
-      base_path: "src"
-    - patch_file: "patches/link_targets.patch"
-      base_path: "src"
-    - patch_file: "patches/non_x86_support.patch"
-      base_path: "src"

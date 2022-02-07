@@ -113,8 +113,12 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+
+        # All CMake targets will be provided by Conan through the wrapper, removing every occurrence of `find_package`
+        cmake_lists_path = os.path.join(self.source_folder, self._source_subfolder, "tensorflow/lite/CMakeLists.txt")
+        original_content = open(cmake_lists_path, "r").readlines()
+        patched_content = "".join(line for line in original_content if "find_package" not in line)
+        open(cmake_lists_path, "w").write(patched_content)
 
     def build(self):
         cmake = self._configure_cmake()
