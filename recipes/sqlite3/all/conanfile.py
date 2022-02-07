@@ -69,7 +69,7 @@ class Sqlite3Conan(ConanFile):
     }
 
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
