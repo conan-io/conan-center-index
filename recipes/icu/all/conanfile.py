@@ -26,6 +26,7 @@ class ICUBase(ConanFile):
         "with_dyload": [True, False],
         "dat_package_file": "ANY",
         "with_icuio": [True, False],
+        "with_extras": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class ICUBase(ConanFile):
         "with_dyload": True,
         "dat_package_file": None,
         "with_icuio": True,
+        "with_extras": False,
     }
 
     _env_build = None
@@ -200,8 +202,7 @@ class ICUBase(ConanFile):
                 "--prefix={0}".format(prefix),
                 "--disable-samples",
                 "--disable-layout",
-                "--disable-layoutex",
-                "--disable-extras"]
+                "--disable-layoutex"]
 
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
@@ -211,6 +212,9 @@ class ICUBase(ConanFile):
 
         if not self.options.with_icuio:
             args.append("--disable-icuio")
+
+        if not self.options.with_extras:
+            args.append("--disable-extras")
 
         env_build = self._configure_autotools()
         if tools.cross_building(self, skip_x64_x86=True):
