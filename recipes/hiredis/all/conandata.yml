@@ -9,6 +9,8 @@ patches:
   "1.0.2":
     - patch_file: "patches/fix-cmake.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-aix.patch"
+      base_path: "source_subfolder"
   "1.0.0":
     - patch_file: "patches/fix-cmake.patch"
       base_path: "source_subfolder"
