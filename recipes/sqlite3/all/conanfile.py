@@ -92,6 +92,10 @@ class Sqlite3Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.options.enable_icu:
+            self.requires("icu/70.1")
+
     def validate(self):
         if not self.options.enable_default_vfs and self.options.build_executable:
             # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
@@ -169,10 +173,6 @@ class Sqlite3Conan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
-
-    def requirements(self):
-        if self.options.enable_icu:
-            self.requires("icu/70.1")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
