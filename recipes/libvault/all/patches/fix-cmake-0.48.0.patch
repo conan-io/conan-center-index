@@ -43,33 +43,16 @@
    target_link_libraries(vault gcov)
  endif ()
 
-@@ -150,25 +151,9 @@
-   write_basic_package_version_file(
-           ${CMAKE_CURRENT_BINARY_DIR}/libvaultConfigVersion.cmake
-           COMPATIBILITY SameMajorVersion)
--
--  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libvaultConfig.cmake"
--          "${CMAKE_CURRENT_BINARY_DIR}/libvaultConfigVersion.cmake"
--          DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libvault")
--
+@@ -155,7 +156,7 @@
+           "${CMAKE_CURRENT_BINARY_DIR}/libvaultConfigVersion.cmake"
+           DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libvault")
+
 -  configure_file(vault.pc.in vault.pc @ONLY)
--  install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
--          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
++        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/vault.pc.in" "${CMAKE_BINARY_DIR}/vault.pc" @ONLY)
+   install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
+           DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
  endif (INSTALL)
-
- if (ENABLE_TEST)
--  include(FetchContent)
--  FetchContent_Declare(
--          Catch2
--          GIT_SHALLOW    TRUE
--          GIT_REPOSITORY https://github.com/catchorg/Catch2.git
--          GIT_TAG        v2.13.6)
--  FetchContent_MakeAvailable(Catch2)
--  list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
-   enable_testing()
-
-   add_executable(libvault_test test/test.cpp)
-@@ -176,7 +161,7 @@
+@@ -176,7 +177,7 @@
    target_include_directories(libvault_test PRIVATE include)
 
    target_link_libraries(libvault_test vault)
