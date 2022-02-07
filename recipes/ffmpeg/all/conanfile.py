@@ -172,7 +172,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_openh264:
@@ -184,21 +184,21 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.0.16")
+            self.requires("sdl/2.0.20")
         if self.options.with_libx264:
             self.requires("libx264/20191217")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.10.0")
+            self.requires("libvpx/1.11.0")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
