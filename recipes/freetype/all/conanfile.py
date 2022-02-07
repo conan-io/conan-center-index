@@ -23,6 +23,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_brotli": [True, False],
+        "subpixel": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "with_brotli": True,
+        "subpixel": False
     }
 
     exports_sources = "CMakeLists.txt"
@@ -101,6 +103,10 @@ class FreetypeConan(ConanFile):
             if not self.options.with_brotli:
                 tools.replace_in_file(cmakelists, "find_package(BrotliDec)", "")
                 tools.replace_in_file(cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
+
+        config_h = os.path.join(self._source_subfolder, "include", "freetype", "config", "ftoption.h")
+        if self.options.subpixel:
+            tools.replace_in_file(config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
 
     def _configure_cmake(self):
         if self._cmake:
