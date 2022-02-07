@@ -125,7 +125,7 @@ class TensorflowLiteConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions.update({
             "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": True,
-            "TFLITE_ENABLE_RUY": self.options.get_safe("with_ruy", False),
+            "TFLITE_ENABLE_RUY": self.options.with_ruy,
             "TFLITE_ENABLE_NNAPI": self.options.get_safe("with_nnapi", False),
             "TFLITE_ENABLE_GPU": False,
             "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
@@ -174,7 +174,7 @@ class TensorflowLiteConan(ConanFile):
         defines = []
         if not self.options.shared:
             defines.append("TFL_STATIC_LIBRARY_BUILD")
-        if self.options.get_safe("with_ruy", False):
+        if self.options.with_ruy:
             defines.append("TFLITE_WITH_RUY")
 
         self.cpp_info.defines = defines
