@@ -1,0 +1,80 @@
+commit d96b41068a4d1eec30e94403b2fed543f378f763
+Author: Andrei Malashkin <andrei.malashkin@reactivereality.com>
+Date:   Mon Feb 7 15:01:09 2022 +0100
+
+    forth patch
+
+diff --git a/HLSL2GLSLConverter/CMakeLists.txt b/HLSL2GLSLConverter/CMakeLists.txt
+index 0b1de80..e69515c 100644
+--- a/HLSL2GLSLConverter/CMakeLists.txt
++++ b/HLSL2GLSLConverter/CMakeLists.txt
+@@ -33,12 +33,7 @@ target_compile_definitions(HLSL2GLSLConverter PRIVATE UNICODE)
+ 
+ target_link_libraries(HLSL2GLSLConverter 
+ PRIVATE 
+-    Diligent-BuildSettings 
+-    Diligent-TargetPlatform
+-    Diligent-Common
+-    Diligent-GraphicsTools
+-    Diligent-HLSL2GLSLConverterLib 
+-    Diligent-GraphicsEngineOpenGL-static
++    CONAN_PKG::diligent-core
+ )
+ 
+ source_group("source" FILES ${SOURCE})
+diff --git a/NativeApp/Android/ndk_helper/CMakeLists.txt b/NativeApp/Android/ndk_helper/CMakeLists.txt
+index 6f23857..3aa07a8 100644
+--- a/NativeApp/Android/ndk_helper/CMakeLists.txt
++++ b/NativeApp/Android/ndk_helper/CMakeLists.txt
+@@ -29,7 +29,7 @@ PUBLIC
+ 
+ target_link_libraries(NDKHelper 
+ PRIVATE 
+-	Diligent-BuildSettings
++        CONAN_PKG::diligent-core
+ PUBLIC
+     native_app_glue
+ )
+diff --git a/NativeApp/CMakeLists.txt b/NativeApp/CMakeLists.txt
+index 366c303..165ba72 100644
+--- a/NativeApp/CMakeLists.txt
++++ b/NativeApp/CMakeLists.txt
+@@ -432,8 +432,7 @@ PUBLIC
+ 
+ target_link_libraries(Diligent-NativeAppBase 
+ PRIVATE 
+-    Diligent-BuildSettings
+-    Diligent-Common
++    CONAN_PKG::diligent-core
+ )
+ 
+ if(PLATFORM_WIN32)
+diff --git a/NativeApp/Linux/CMakeLists.txt b/NativeApp/Linux/CMakeLists.txt
+index a550fe0..e8f3a87 100644
+--- a/NativeApp/Linux/CMakeLists.txt
++++ b/NativeApp/Linux/CMakeLists.txt
+@@ -20,7 +20,7 @@ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(XCBKeySyms 
+ PRIVATE 
+-    Diligent-BuildSettings
++    CONAN_PKG::diligent-core
+     xcb
+ )
+ 
+diff --git a/RenderStatePackager/CMakeLists.txt b/RenderStatePackager/CMakeLists.txt
+index 2131e53..0c92cc8 100644
+--- a/RenderStatePackager/CMakeLists.txt
++++ b/RenderStatePackager/CMakeLists.txt
+@@ -28,10 +28,7 @@ target_include_directories(Diligent-RenderStatePackager
+ 
+ target_link_libraries(Diligent-RenderStatePackager
+ PUBLIC
+-    Diligent-BuildSettings
+-    Diligent-Common
+-    Diligent-Archiver-static
+-    Diligent-RenderStateNotation
++    CONAN_PKG::diligent-core
+ )
+ 
+ set_target_properties(Diligent-RenderStatePackager PROPERTIES

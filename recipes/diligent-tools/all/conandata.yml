@@ -6,6 +6,9 @@ patches:
   "20220205":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
-  "20220205":
     - patch_file: "patches/0002-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-diligent-core-include-paths.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-fix-using-diligent-lib.diff"
       base_path: "source_subfolder"
