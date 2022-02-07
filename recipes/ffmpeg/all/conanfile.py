@@ -102,9 +102,8 @@ class FFMpegConan(ConanFile):
     generators = "pkg_config"
 
     _dependencies = {
-        "avdevice": ["avcodec"],
         "avformat": ["avcodec"],
-        "avdevice": ["avformat"],
+        "avdevice": ["avcodec", "avformat"],
         "avfilter": ["avformat"],
         "with_bzip2": ["avformat"],
         "with_ssl": ["avformat"],
