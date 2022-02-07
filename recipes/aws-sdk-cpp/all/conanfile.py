@@ -1,7 +1,9 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+from conan.tools.files import rename
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -421,6 +423,29 @@ class AwsSdkCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @property
+    def _res_folder(self):
+        return "res"
+
+    def _create_project_cmake_module(self):
+        # package files needed to build other components (e.g. aws-cdi-sdk) with this SDK
+        for file in [
+            "cmake/compiler_settings.cmake",
+            "cmake/initialize_project_version.cmake",
+            "cmake/utilities.cmake",
+            "cmake/sdk_plugin_conf.cmake",
+            "toolchains/cmakeProjectConfig.cmake",
+            "toolchains/pkg-config.pc.in",
+            "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
+        ]:
+            self.copy(file, src=self._source_subfolder, dst=self._res_folder)
+            tools.replace_in_file(os.path.join(self.package_folder, self._res_folder, file), "CMAKE_CURRENT_SOURCE_DIR", "AWS_NATIVE_SDK_ROOT", strict=False)
+
+        # avoid getting error from hook
+        with tools.chdir(os.path.join(self.package_folder, self._res_folder)):
+            rename(self, os.path.join("toolchains", "cmakeProjectConfig.cmake"), os.path.join("toolchains", "cmakeProjectConf.cmake"))
+            tools.replace_in_file(os.path.join("cmake", "utilities.cmake"), "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake")
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
@@ -431,6 +456,8 @@ class AwsSdkCppConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        self._create_project_cmake_module()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "AWSSDK")
@@ -507,3 +534,9 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
+
+        self.cpp_info.components["plugin_scripts"].requires = ["core"]
+        self.cpp_info.components["plugin_scripts"].builddirs.extend([
+            os.path.join(self._res_folder, "cmake"),
+            os.path.join(self._res_folder, "toolchains")])
+        self.cpp_info.components["plugin_scripts"].build_modules.append(os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake"))
