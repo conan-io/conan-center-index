@@ -6,7 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(plutovg REQUIRED CONFIG)
 
-set(CMAKE_CXX_STANDARD 11)
-
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} plutovg::plutovg)
