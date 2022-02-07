@@ -1,8 +1,8 @@
 diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
-index 861933c..e3a6cf8 100644
+index 941a006..942e7c6 100644
 --- a/TextureLoader/CMakeLists.txt
 +++ b/TextureLoader/CMakeLists.txt
-@@ -53,9 +53,10 @@ PRIVATE
+@@ -51,9 +51,10 @@ PRIVATE
      Diligent-GraphicsEngineInterface 
      Diligent-GraphicsAccessories
      Diligent-GraphicsTools
@@ -17,7 +17,7 @@ index 861933c..e3a6cf8 100644
  
  if (NOT DILIGENT_EXTERNAL_LIBJPEG)
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index bb267e0..5099806 100644
+index 4c89c41..3c7406f 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -1,10 +1,5 @@
@@ -30,4 +30,4 @@ index bb267e0..5099806 100644
 -
  set(LICENSE_INSTALL_PATH "Licenses/ThirdParty/${DILIGENT_TOOLS_DIR}")
  
- install(FILES args/LICENSE DESTINATION ${LICENSE_INSTALL_PATH} RENAME args-license.txt)
+ install(FILES libjpeg-9a/README DESTINATION ${LICENSE_INSTALL_PATH} RENAME libjpeg-readme.txt)

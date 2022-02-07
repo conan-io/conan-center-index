@@ -1,9 +1,3 @@
-commit d96b41068a4d1eec30e94403b2fed543f378f763
-Author: Andrei Malashkin <andrei.malashkin@reactivereality.com>
-Date:   Mon Feb 7 15:01:09 2022 +0100
-
-    forth patch
-
 diff --git a/HLSL2GLSLConverter/CMakeLists.txt b/HLSL2GLSLConverter/CMakeLists.txt
 index 0b1de80..e69515c 100644
 --- a/HLSL2GLSLConverter/CMakeLists.txt
@@ -62,19 +56,3 @@ index a550fe0..e8f3a87 100644
      xcb
  )
  
-diff --git a/RenderStatePackager/CMakeLists.txt b/RenderStatePackager/CMakeLists.txt
-index 2131e53..0c92cc8 100644
---- a/RenderStatePackager/CMakeLists.txt
-+++ b/RenderStatePackager/CMakeLists.txt
-@@ -28,10 +28,7 @@ target_include_directories(Diligent-RenderStatePackager
- 
- target_link_libraries(Diligent-RenderStatePackager
- PUBLIC
--    Diligent-BuildSettings
--    Diligent-Common
--    Diligent-Archiver-static
--    Diligent-RenderStateNotation
-+    CONAN_PKG::diligent-core
- )
- 
- set_target_properties(Diligent-RenderStatePackager PROPERTIES

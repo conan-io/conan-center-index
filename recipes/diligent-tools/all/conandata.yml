@@ -1,7 +1,7 @@
 sources:
   "20220205":
-    url: "https://github.com/DiligentGraphics/DiligentTools/archive/280448ac0506e75c716b2108562b0277c700886c.tar.gz"
-    sha256: "24d81c0c98e5cee7ef3a22b011778199a4a8ca57d43eabd8f8d2784518ce3915"
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/846ffbe83ac5ae0c96135f5a772d0077d0d086a8.tar.gz"
+    sha256: "12ec01e730aefd64ca0d335b5ac6af47279f5e58617f37bc062cd83422f81703"
 patches:
   "20220205":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
