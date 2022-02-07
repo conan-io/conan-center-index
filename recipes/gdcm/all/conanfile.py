@@ -1,9 +1,11 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class GDCMConan(ConanFile):
     name = "gdcm"
@@ -12,6 +14,7 @@ class GDCMConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     description = "C++ library for DICOM medical files"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,8 +24,8 @@ class GDCMConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package"
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -33,6 +36,15 @@ class GDCMConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,23 +53,16 @@ class GDCMConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if (self.settings.compiler == "Visual Studio"
-                and self.options.shared
-                and str(self.settings.compiler.runtime).startswith("MT")):
-            raise ConanInvalidConfiguration("shared gdcm can't be built with MT or MTd")
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
-
     def requirements(self):
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.4.3")
         self.requires("openjpeg/2.4.0")
         self.requires("zlib/1.2.11")
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+    def validate(self):
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared gdcm can't be built with MT or MTd")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -78,6 +83,8 @@ class GDCMConan(ConanFile):
         self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = True
         self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = True
         self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = True
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -98,11 +105,13 @@ class GDCMConan(ConanFile):
         lib_dir = os.path.join(self.package_folder, "lib")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
+        self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._gdcm_cmake_module_aliases_path),
-            self._gdcm_libraries
+            {library: "GDCM::{}".format(library) for library in self._gdcm_libraries},
         )
-        self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
 
     def _create_cmake_variables(self, variables_file):
         v = tools.Version(self.version)
@@ -143,16 +152,18 @@ class GDCMConan(ConanFile):
         tools.save(variables_file, content)
 
     @staticmethod
-    def _create_cmake_module_alias_targets(targets_file, libraries):
-        content = "\n".join([textwrap.dedent("""\
-            if(TARGET {aliased} AND NOT TARGET {alias})
-                add_library({alias} INTERFACE IMPORTED)
-                set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-            endif()
-            """.format(alias=library, aliased="GDCM::"+library)) for library in libraries])
-        tools.save(targets_file, content)
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
 
-    @property 
+    @property
     def _gdcm_subdir(self):
         v = tools.Version(self.version)
         return "gdcm-{}.{}".format(v.major, v.minor)
@@ -193,14 +204,17 @@ class GDCMConan(ConanFile):
         return gdcm_libs
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "GDCM"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDCM"
-        gdcm_libs = self._gdcm_libraries
-        for lib in gdcm_libs:
+        self.cpp_info.set_property("cmake_file_name", "GDCM")
+        self.cpp_info.set_property("cmake_build_modules", [self._gdcm_cmake_variables_path])
+
+        for lib in self._gdcm_libraries:
+            self.cpp_info.components[lib].set_property("cmake_target_name", lib)
             self.cpp_info.components[lib].libs = [lib]
             self.cpp_info.components[lib].includedirs = [os.path.join("include", self._gdcm_subdir)]
-            self.cpp_info.components[lib].builddirs = [self._gdcm_builddir] 
-            self.cpp_info.components[lib].build_modules["cmake"] = self._gdcm_build_modules
+            self.cpp_info.components[lib].builddirs.append(self._gdcm_builddir)
+
+            # TODO: to remove in conan v2 once cmake_find_package* generators removed
+            self.cpp_info.components[lib].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path]
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._gdcm_build_modules
 
@@ -222,3 +236,7 @@ class GDCMConan(ConanFile):
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
                 if tools.is_apple_os(self.settings.os):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "GDCM"
+        self.cpp_info.names["cmake_find_package_multi"] = "GDCM"
