@@ -1,8 +1,8 @@
 diff --git a/AssetLoader/CMakeLists.txt b/AssetLoader/CMakeLists.txt
-index 52b8694..d9bdd65 100644
+index 52b8694..f36f0a5 100644
 --- a/AssetLoader/CMakeLists.txt
 +++ b/AssetLoader/CMakeLists.txt
-@@ -34,13 +34,7 @@ source_group("interface" FILES ${INTERFACE})
+@@ -34,13 +34,8 @@ source_group("interface" FILES ${INTERFACE})
  
  target_link_libraries(Diligent-AssetLoader 
  PRIVATE 
@@ -12,7 +12,7 @@ index 52b8694..d9bdd65 100644
 -    Diligent-GraphicsEngineInterface
 -    Diligent-GraphicsAccessories
 -    Diligent-GraphicsTools
--    Diligent-TextureLoader
+     Diligent-TextureLoader
 +    CONAN_PKG::diligent-core
  )
  
