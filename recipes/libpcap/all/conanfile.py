@@ -1,10 +1,11 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import AutoToolsBuildEnvironment, tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibPcapConan(ConanFile):
@@ -14,21 +15,25 @@ class LibPcapConan(ConanFile):
     description = "libpcap is an API for capturing network traffic"
     license = "BSD-3-Clause"
     topics = ("networking", "pcap", "sniffing", "network-traffic")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
-        "enable_universal": [True, False]
+        "enable_universal": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
-        "enable_universal": True
+        "enable_universal": True,
     }
-    _autotools = None
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
+    _autotools = None
 
     # TODO: Add dbus-glib when available
     # TODO: Add libnl-genl when available
@@ -38,6 +43,10 @@ class LibPcapConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _settings_build(self):
@@ -73,7 +82,7 @@ class LibPcapConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.7.1")
+            self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
 
     def source(self):
@@ -83,6 +92,7 @@ class LibPcapConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.libs = []
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--disable-universal" if not self.options.get_safe("enable_universal") else "")
             configure_args.append("--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb")
@@ -93,12 +103,14 @@ class LibPcapConan(ConanFile):
                 "--disable-dbus",
                 "--disable-rdma"
             ])
-            if tools.cross_building(self.settings):
+            if tools.cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 configure_args.append("--with-pcap=%s" % target_os)
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
                 configure_args.append("--host=arm-linux")
             self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+            # Relocatable shared lib on macOS
+            tools.replace_in_file("Makefile", "-install_name $(libdir)/", "-install_name @rpath/")
         return self._autotools
 
     def _configure_cmake(self):
@@ -107,7 +119,13 @@ class LibPcapConan(ConanFile):
         self._cmake = CMake(self)
         if not self.options.shared:
             self._cmake.definitions["ENABLE_REMOTE"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        if self._is_msvc:
+            self._cmake.definitions["USE_STATIC_RT"] = "MT" in msvc_runtime_flag(self)
+        else:
+            # Don't force -static-libgcc for MinGW, because conan users expect
+            # to inject this compilation flag themselves
+            self._cmake.definitions["USE_STATIC_RT"] = False
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
@@ -147,12 +165,11 @@ class LibPcapConan(ConanFile):
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libpcap"
+        self.cpp_info.set_property("pkg_config_name", "libpcap")
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = ["pcap{}".format(suffix)]
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["pcap"] if self.options.shared else ["pcap_static"]
             self.cpp_info.system_libs = ["ws2_32"]
-        else:
-            self.cpp_info.libs = ["pcap"]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
