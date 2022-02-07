@@ -7,7 +7,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+           not self.options["flatbuffers"].header_only: # due to missing package id of build requirement if header_only
             self.build_requires(str(self.requires["flatbuffers"]))
 
     def build(self):
