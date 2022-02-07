@@ -143,4 +143,5 @@ class LibTomCryptConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
 
+        # TODO: to remove in conan v2 once pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libtomcrypt"
