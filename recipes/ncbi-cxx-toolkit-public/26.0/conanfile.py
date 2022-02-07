@@ -8,13 +8,6 @@ import tempfile
 import sys
 import stat
 
-def _remove_readonly(fn, path, excinfo):
-    try:
-        os.chmod(path, stat.S_IWRITE)
-        fn(path)
-    except Exception as exc:
-        print("Skipped: ", path, " because ", exc)
-
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
     license = "CC0-1.0"
@@ -27,21 +20,17 @@ class NcbiCxxToolkit(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    tk_tmp_tree = ""
-    tk_src_tree = ""
-    all_NCBI_requires = {}
-
     options = {
         "shared":     [True, False],
         "fPIC":       [True, False],
-        "projects":   "ANY",
-        "targets":    "ANY"
+        "with_projects": "ANY",
+        "with_targets":  "ANY"
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
-        "projects":   "",
-        "targets":    "",
+        "with_projects":  "",
+        "with_targets":   "",
     }
     NCBI_to_Conan_requires = {
         "BerkeleyDB":   "libdb/5.3.28@#355aa134e9ee1bda60fa224f8b54c913",
@@ -60,23 +49,10 @@ class NcbiCxxToolkit(ConanFile):
         "XML":          "libxml2/2.9.12@#9817dd585ffc6de1479da6d5bcf01fc0",
         "XSLT":         "libxslt/1.1.34@#47946f5c7abe03d18179b55be67bbabe",
         "UV":           "libuv/1.42.0@#e1801aae9570062012d94db20338451b",
-        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9"
+        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9",
+        "OpenSSL":      "openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe",
+        "ZSTD":         "zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207"
     }
-
-#----------------------------------------------------------------------------
-    def __del__(self):
-        if os.path.isdir(self.tk_tmp_tree):
-            print("Just a moment...")
-            self._remove_tmp_tree(self.tk_tmp_tree)
-
-    def _remove_tmp_tree(self, path):
-        if os.path.isdir(path):
-            os.chdir(os.path.join(self.tk_tmp_tree, ".."))
-            try:
-                shutil.rmtree(path, onerror=_remove_readonly)
-            except:
-                print("Cannot remove directory: ", path)
-                print("Please remove it manually")
 
 #----------------------------------------------------------------------------
     def _get_RequiresMapKeys(self):
@@ -85,7 +61,6 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def _translate_ReqKey(self, key):
         if key in self.NCBI_to_Conan_requires.keys():
-#ATTENTION
             if key == "BerkeleyDB" and self.settings.os == "Windows":
                 return None
             if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
@@ -97,35 +72,17 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     @property
-    def _src(self):
+    def _source_subfolder(self):
         return "src"
-
-    def _get_Source(self):
-        self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
-        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", self._src))
-        src_found = False;
-        if os.path.isdir(src):
-            self.tk_src_tree = src
-            src_found = True;
-        else:
-            tk_url = self.conan_data["sources"][self.version]["url"]
-            print("getting Toolkit sources...")
-            print("from url: " + tk_url)
-            curdir = os.getcwd()
-            os.chdir(self.tk_tmp_tree)
-            tools.get(**self.conan_data["sources"][self.version], strip_root = True)
-            os.chdir(curdir)
-            src_found = True;
-            self.tk_src_tree = self._src
 
 #----------------------------------------------------------------------------
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
-        if self.options.projects != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.projects
-        if self.options.targets != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.targets
+        if self.options.with_projects != "":
+            cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.with_projects
+        if self.options.with_targets != "":
+            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
         return cmake
 
 #----------------------------------------------------------------------------
@@ -136,10 +93,8 @@ class NcbiCxxToolkit(ConanFile):
             raise ConanInvalidConfiguration("This operating system is not supported")
         if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            runtime = self.settings.compiler.get_safe("runtime")
-            if runtime == "MT" or runtime == "MTd":
-                raise ConanInvalidConfiguration("This configuration is not supported")
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("This configuration is not supported")
         if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
 
@@ -153,57 +108,30 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def requirements(self):
-        if not self.version in self.conan_data["sources"].keys():
-            raise ConanException("Invalid Toolkit version requested. Available: " + ' '.join(self.conan_data["sources"].keys()))
-        self.output.info("Analyzing requirements. Please wait...")
-        curdir = os.getcwd()
-        self._get_Source()
-        os.chdir(self.tk_tmp_tree)
-        shared = "ON" if self.options.shared else "OFF"
-        subprocess.run(["cmake", self.tk_src_tree,
-            "-DNCBI_PTBCFG_COLLECT_REQUIRES=ON",
-            "-DNCBI_PTBCFG_COLLECT_REQUIRES_FILE=req",
-            "-DBUILD_SHARED_LIBS='%s'" % shared,
-            "-DNCBI_PTBCFG_PROJECT_TARGETS='%s'" % self.options.targets,
-            "-DNCBI_PTBCFG_PROJECT_LIST='%s'" % self.options.projects],
-            stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-        reqfile = os.path.join(self.tk_src_tree, "..", "req")
-        if os.path.isfile(reqfile):
-            self.all_NCBI_requires = set(open(reqfile).read().split())
-            for req in self.all_NCBI_requires:
-                pkg = self._translate_ReqKey(req)
-                if pkg is not None:
-                    print("Package requires ", pkg)
-                    self.requires(pkg)
-                    pkg = pkg[:pkg.find("/")]
-#ATTENTION
-                    if req == "MySQL":
-                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
-                    if req == "CASSANDRA":
-                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
-                    if req == "TIFF":
-                        self.requires("zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207")
-            os.remove(reqfile)
-        os.chdir(curdir)
+        NCBIreqs = self._get_RequiresMapKeys()
+        for req in NCBIreqs:
+            pkg = self._translate_ReqKey(req)
+            if pkg is not None:
+                self.requires(pkg)
 
 #----------------------------------------------------------------------------
     def source(self):
-        if self.tk_tmp_tree == "":
-            self._get_Source()
-        shutil.move(os.path.join(self.tk_tmp_tree, "include"), ".")
-        shutil.move(os.path.join(self.tk_tmp_tree, self._src), ".")
-        if os.path.isdir(os.path.join(self.tk_tmp_tree, "scripts")):
-            shutil.move(os.path.join(self.tk_tmp_tree, "scripts"), ".")
-        if os.path.isdir(os.path.join(self.tk_tmp_tree, "doc")):
-            shutil.move(os.path.join(self.tk_tmp_tree, "doc"), ".")
-        self._remove_tmp_tree(self.tk_tmp_tree)
+        tk_url = self.conan_data["sources"][self.version]["url"]
+        print("getting Toolkit sources...")
+        print("from url: " + tk_url)
+        tools.get(**self.conan_data["sources"][self.version], strip_root = True)
+
+#----------------------------------------------------------------------------
+    def imports(self):
+        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
 
 #----------------------------------------------------------------------------
     def build(self):
         cmake = self._configure_cmake()
-        cmake.configure(source_folder=self._src)
-        if self.settings.os == "Windows":
-            self.run('cmake --build . %s -j 1' % cmake.build_config)
+        cmake.configure(source_folder=self._source_subfolder)
+# Visual Studio sometimes runs "out of heap space"
+        if self.settings.compiler == "Visual Studio":
+            self.run("cmake --build . %s -j 1" % cmake.build_config)
         else:
             cmake.build()
 
@@ -212,12 +140,8 @@ class NcbiCxxToolkit(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-    def imports(self):
-        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
-
 #----------------------------------------------------------------------------
     def package_info(self):
-        allrequires = self.all_NCBI_requires
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].system_libs = ["ws2_32", "dbghelp"]
             self.cpp_info.components["NETWORKLIBS"].system_libs = [""]
@@ -231,17 +155,11 @@ class NcbiCxxToolkit(ConanFile):
         NCBIreqs = self._get_RequiresMapKeys()
         for req in NCBIreqs:
             pkg = self._translate_ReqKey(req)
-            if req in allrequires and pkg is not None and not pkg == "":
+            if pkg is not None:
                 pkg = pkg[:pkg.find("/")]
                 ref = pkg + "::" + pkg
                 self.cpp_info.components[req].requires = [ref]
-#ATTENTION
-                if req == "MySQL":
-                    self.cpp_info.components[req].requires.append("openssl::openssl")
-                if req == "CASSANDRA":
-                    self.cpp_info.components[req].requires.append("openssl::openssl")
-                if req == "TIFF":
-                    self.cpp_info.components[req].requires.append("zstd::zstd")
+                self.cpp_info.components["ORIGLIBS"].requires.append(ref)
             else:
                 self.cpp_info.components[req].libs = []
 
