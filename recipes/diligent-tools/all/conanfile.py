@@ -97,9 +97,6 @@ class DiligentToolsConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
-                     dst=os.path.join(self.package_folder, "include", "DiligentCore"))
-
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
