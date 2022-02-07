@@ -111,15 +111,18 @@ class TensorflowLiteConan(ConanFile):
         self.requires("fft/cci.20061228")
         self.requires("flatbuffers/1.12.0")
         self.requires("gemmlowp/cci.20210928")
+
+        # Note: ruy is still needed for building even when TFLITE_WITH_RUY is set to 0
+        self.requires("ruy/cci.20210622")
+
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20210622")
+
         if self.options.with_xnnpack:
-            if self.version == "2.8.0":
-                self.requires("xnnpack/cci.20211210")
-            else:
-                self.requires("xnnpack/cci.20211026")
-            self.requires("fp16/cci.20200514")
+            self.requires("xnnpack/cci.20211210")
+
+        if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
+            self.requires("fp16/cci.20210320")
 
     def build(self):
         cmake = self._configure_cmake()
