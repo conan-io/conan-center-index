@@ -10,7 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-fix-diligent-core-include-paths.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0004-fix-using-diligent-lib.diff"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0005-fix-install.diff"
+    - patch_file: "patches/0004-fix-install.diff"
       base_path: "source_subfolder"
