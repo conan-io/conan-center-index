@@ -1,0 +1,1 @@
+https://github.com/conan-io/conan-center-index/blob/b4c5601c6b0f3cc0b6382cbcf3a0cb22452426a0/recipes/libmysqlclient/all/conanfile.py

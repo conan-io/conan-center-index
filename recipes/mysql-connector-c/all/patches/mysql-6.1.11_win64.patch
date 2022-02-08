@@ -1,0 +1,15 @@
+diff --git a/cmake/install_macros.cmake b/cmake/install_macros.cmake
+index f39dfb67..8a1bb169 100644
+--- a/cmake/install_macros.cmake
++++ b/cmake/install_macros.cmake
+@@ -362,8 +362,8 @@ FUNCTION(INSTALL_DEBUG_TARGET target)
+         CONFIGURATIONS Release RelWithDebInfo
+         COMPONENT ${ARG_COMPONENT}
+         OPTIONAL)
+-    ENDIF()
+-  ENDFOREACH()
++    ENDFOREACH()
++  ENDIF()
+ 
+ ENDFUNCTION()
+ 

@@ -29,6 +29,7 @@ jsoncpp/1.8.3
 leveldb/1.22
 libcurl/7.64.1.dssl2
 libjpeg/9d.dssl2
+libmysqlclient/8.0.17
 libpng/1.6.37
 libpq/11.5.dssl1
 libwebp/1.1.0
@@ -41,7 +42,7 @@ openal/1.20.1
 openblas/0.3.7.dssl1
 opencv/2.4.13.7
 openh264/1.7.0.dssl2
-openssl/1.1.1d.dssl2
+openssl/1.1.1k
 pjsip/2.9
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
