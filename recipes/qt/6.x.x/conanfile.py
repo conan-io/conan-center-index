@@ -276,7 +276,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
 
-        if self.options.get_safe("with_fontconfig", False) and not self._with_system_dependency("with_freetype", False):
+        if self.options.get_safe("with_fontconfig", False) and not self._with_system_dependency("with_freetype"):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
