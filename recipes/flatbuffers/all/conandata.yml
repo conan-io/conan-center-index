@@ -15,6 +15,8 @@ patches:
   "2.0.5":
     - patch_file: "patches/0002-apple-no-universal-build.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-no-flatc-execution-build-time.patch"
+      base_path: "source_subfolder"
   "1.11.0":
     - patch_file: "patches/0001-fix-copy-ctor.patch"
       base_path: "source_subfolder"
