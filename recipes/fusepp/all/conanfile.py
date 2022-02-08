@@ -1,0 +1,55 @@
+from conans import ConanFile, CMake, tools
+
+class FuseppConan(ConanFile):
+    name = "fusepp"
+    description = "A simple C++ wrapper for the FUSE filesystem."
+    license = "MIT"
+    topics = ("fuse", "fusepp", "wrapper", "filesystem")
+    homepage = "https://github.com/winternet/Fusepp"
+    url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
+
+    generators = "cmake"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure(source_folder=self._source_subfolder)
+        cmake.build()
+
+    def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("Fuse*.h", dst="include", src=self._source_subfolder)
+        self.copy("Fuse.cpp", dst="include", src=self._source_subfolder)
+        self.copy("*.dll", dst="bin", keep_path=False)
+        self.copy("*.so", dst="lib", keep_path=False)
+        self.copy("*.dylib", dst="lib", keep_path=False)
+        self.copy("*.a", dst="lib", keep_path=False)
+
+    def package_info(self):
+        self.cpp_info.libs = ["fusepp"]

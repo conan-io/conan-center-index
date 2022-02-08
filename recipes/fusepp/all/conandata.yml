@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/winternet/Fusepp/archive/refs/tags/3.0.0.tar.gz"
+    sha256: "a6f74d64af705e2eed88c7800e74e3f0f366f7637bf7e45c1dcec2be367d209d"
