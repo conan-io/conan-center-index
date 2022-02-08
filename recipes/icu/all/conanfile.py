@@ -380,7 +380,7 @@ class ICUBase(ConanFile):
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Prepending to ICU_DATA runtime environment variable: {}".format(data_path))
             self.runenv_info.prepend_path("ICU_DATA", data_path)
-            if self._enable_icu_tools:
+            if self._enable_icu_tools or self.options.with_extras:
                 self.buildenv_info.prepend_path("ICU_DATA", data_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.ICU_DATA.append(data_path)
@@ -402,6 +402,7 @@ class ICUBase(ConanFile):
             self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
             self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
+        if self._enable_icu_tools or self.options.with_extras:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
