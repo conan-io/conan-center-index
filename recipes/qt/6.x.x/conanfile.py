@@ -167,6 +167,10 @@ class QtConan(ConanFile):
 
         return self._submodules_tree
 
+    def _with_system_dependency(self, dep):
+        option = self.options.get_safe(dep, False)
+        return option and option != "qt"
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -241,7 +245,7 @@ class QtConan(ConanFile):
                           ("with_sqlite3", "sqlite3"),
                           ("with_pcre2", "pcre2")]:
             if self.options.get_safe(opt, False) == "qt":
-                self.provides.append(dep) 
+                self.provides.append(dep)
 
     def validate(self):
         # C++ minimum standard required
@@ -272,7 +276,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
 
-        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False) is True:
+        if self.options.get_safe("with_fontconfig", False) and not self._with_system_dependency("with_freetype", False):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
@@ -286,7 +290,7 @@ class QtConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
             self.requires("openssl/1.1.1m")
-        if self.options.with_pcre2 is True:
+        if self._with_system_dependency("with_pcre2"):
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.182")
@@ -294,24 +298,24 @@ class QtConan(ConanFile):
                 self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
             self.requires("glib/2.70.1")
-        if self.options.with_doubleconversion is True and not self.options.multiconfiguration:
+        if self._with_system_dependency("with_doubleconversion") and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.7")
-        if self.options.get_safe("with_freetype", False) is True and not self.options.multiconfiguration:
+        if self._with_system_dependency("with_freetype") and not self.options.multiconfiguration:
             self.requires("freetype/2.11.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/70.1")
-        if self.options.get_safe("with_harfbuzz", False) is True and not self.options.multiconfiguration:
+        if self._with_system_dependency("with_harfbuzz") and not self.options.multiconfiguration:
             self.requires("harfbuzz/3.2.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
             elif self.options.with_libjpeg == "libjpeg":
                 self.requires("libjpeg/9d")
-        if self.options.get_safe("with_libpng", False) is True and not self.options.multiconfiguration:
+        if self._with_system_dependency("with_libpng") and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
-        if self.options.with_sqlite3 is True and not self.options.multiconfiguration:
+        if self._with_system_dependency("with_sqlite3") and not self.options.multiconfiguration:
             self.requires("sqlite3/3.37.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
@@ -415,9 +419,7 @@ class QtConan(ConanFile):
 
         tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
                         "enable_testing()",
-                        "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\n"
-                               "list(REMOVE_ITEM CONAN_INCLUDE_DIRS \"${CONAN_INCLUDE_DIRS_STRAWBERRYPERL}\")\n" # strawberryperl exports includes for jpg, png and many other dependencies that might interfere with the build
-                               "conan_basic_setup(KEEP_RPATHS)\n"
+                        "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\n"
                                "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                "set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
@@ -594,8 +596,8 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "jpeg", "jpeg"),
                               ("with_libpng", "png", "png"),
                               ("with_sqlite3", "sqlite", "sql_sqlite"),
-                              ("with_pcre2", "pcre2", "pcre2"),]:
-            if self.options.get_safe(opt, False) is not False:
+                              ("with_pcre2", "pcre2", "pcre2")]:
+            if self.options.get_safe(opt, False):
                 self._cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
                 if self.options.multiconfiguration or self.options.get_safe(opt, False) == "qt":
                     self._cmake.definitions["FEATURE_system_%s" % feature] = "OFF"
@@ -875,9 +877,9 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
         core_reqs = ["zlib::zlib"]
-        if self.options.with_pcre2 is True:
+        if self._with_system_dependency("with_pcre2"):
             core_reqs.append("pcre2::pcre2")
-        if self.options.with_doubleconversion is True:
+        if self._with_system_dependency("with_doubleconversion"):
             core_reqs.append("double-conversion::double-conversion")
         if self.options.get_safe("with_icu", False):
             core_reqs.append("icu::icu")
@@ -899,9 +901,9 @@ class QtConan(ConanFile):
             gui_reqs = []
             if self.options.with_dbus:
                 gui_reqs.append("DBus")
-            if self.options.with_freetype is True:
+            if self._with_system_dependency("with_freetype"):
                 gui_reqs.append("freetype::freetype")
-            if self.options.with_libpng is True:
+            if self._with_system_dependency("with_libpng"):
                 gui_reqs.append("libpng::libpng")
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
@@ -915,7 +917,7 @@ class QtConan(ConanFile):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if tools.is_apple_os(self.settings.os):
                     gui_reqs.append("moltenvk::moltenvk")
-            if self.options.with_harfbuzz is True:
+            if self._with_system_dependency("with_harfbuzz"):
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
@@ -950,7 +952,7 @@ class QtConan(ConanFile):
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
         if self.options.with_sqlite3:
-            _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"] if self.options.with_sqlite3 is True else [])
+            _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"] if self._with_system_dependency("with_sqlite3") else [])
         if self.options.with_pq:
             _create_plugin("QPSQLDriverPlugin", "qsqlpsql", "sqldrivers", ["libpq::libpq"])
         if self.options.with_odbc:
