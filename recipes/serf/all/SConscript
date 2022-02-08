@@ -1,0 +1,14 @@
+# SConstruct
+import os
+
+env = Environment()
+
+conan = SConscript("SConscript_conan")
+assert conan
+
+flags = conan["conan"]
+env.MergeFlags(flags)
+
+print("CC is: {}".format(env.subst('$CC')))
+
+SConscript('source_subfolder')

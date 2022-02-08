@@ -11,8 +11,9 @@ class SerfConan(ConanFile):
     topics = ("apache", "http", "library", "apr")
     homepage = "https://serf.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
+    exports_sources = "patches/**", "SConscript"
     settings = "os", "arch", "compiler", "build_type"
+    generators = "scons"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -80,7 +81,7 @@ class SerfConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = AutoToolsBuildEnvironment(self)
-        args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
+        args = ["-Y", self.source_folder]
         kwargs = {
             "APR": self.deps_cpp_info["apr"].rootpath.replace("\\", "/"),
             "APU": self.deps_cpp_info["apr-util"].rootpath.replace("\\", "/"),
@@ -103,10 +104,9 @@ class SerfConan(ConanFile):
                 "MSVC_VERSION": "{:.1f}".format(float(tools.msvs_toolset(self.settings).lstrip("v")) / 10),
             })
 
-        escape_str = lambda x : "\"{}\"".format(x)
-        with tools.chdir(self._source_subfolder):
-            with self._build_context():
-                self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
+        escape_str = lambda x : "'{}'".format(x)
+        with self._build_context():
+            self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
     @property
     def _static_ext(self):
