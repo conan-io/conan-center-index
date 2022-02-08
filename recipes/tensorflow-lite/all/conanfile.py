@@ -30,7 +30,7 @@ class TensorflowLiteConan(ConanFile):
         "with_ruy": False,
         "with_nnapi": False,
         "with_mmap": True,
-        "with_xnnpack": True,
+        "with_xnnpack": True
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -77,10 +77,6 @@ class TensorflowLiteConan(ConanFile):
             self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
-        if self.options.shared:
-            if self.settings.os == "Linux" and not self.options["ruy"].shared:
-                raise ConanInvalidConfiguration(
-                        f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,8 +89,6 @@ class TensorflowLiteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Linux":
-                self.options["ruy"].shared = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
