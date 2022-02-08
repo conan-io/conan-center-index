@@ -87,8 +87,6 @@ class SentryNativeConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1m")
-
         if self.options.transport == "curl":
             self.requires("libcurl/7.80.0")
         if self.options.backend == "crashpad":
@@ -103,6 +101,7 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
             self.requires("qt/5.15.2")
+            self.requires("openssl/1.1.1m")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
@@ -131,14 +130,7 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
-           self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 
