@@ -122,10 +122,6 @@ class NcbiCxxToolkit(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root = True)
 
 #----------------------------------------------------------------------------
-    def imports(self):
-        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
-
-#----------------------------------------------------------------------------
     def build(self):
         cmake = self._configure_cmake()
         cmake.configure(source_folder=self._source_subfolder)
