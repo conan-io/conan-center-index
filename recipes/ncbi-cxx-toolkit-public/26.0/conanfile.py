@@ -18,7 +18,7 @@ class NcbiCxxToolkit(ConanFile):
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     options = {
         "shared":     [True, False],
@@ -164,7 +164,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components[req].libs = []
 
         allexports = {}
-        impfile = self.package_folder + "/res/ncbi-cpp-toolkit.imports"
+        impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         if os.path.isfile(impfile):
             allexports = set(open(impfile).read().split())
 
