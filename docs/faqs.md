@@ -357,7 +357,7 @@ logic is embedded at the time of building, so it might not match the version of 
 by Conan, and for sure, the other dynamic libraries won't be used, only the ones linked directly by the consumer
 project. See a more detailed [example here](https://github.com/conan-io/conan/issues/9712).
 
-In order to consume all those libraries are shared ones, the user needs to build them from sources. This can be
+In order to consume all those libraries as shared ones, building from sources is needed. This can be
 easily achievable using `*:shared=True` in the _host_ profile and `--build` in the install command. With these inputs,
 Conan will build from sources all the packages and use the shared libraries when linking.
 
@@ -366,5 +366,5 @@ Conan will build from sources all the packages and use the shared libraries when
 > that will encode this information in the package ID and ensure that any change in the static libraries that are
 > embedded into a shared one is taken into account when computing the package ID.
 > 
-> In this repository we are not using it, because it will lead to many missing packages, making it possible
+> In this repository we are not using it, because it will lead to many missing packages, making it impossible
 > for the CI to actually build consumers in PRs.
