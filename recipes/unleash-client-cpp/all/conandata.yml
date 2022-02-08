@@ -1,5 +1,5 @@
 sources:
-  "1.1.0":
-    url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "8d9b15cfe91fc238a1fe8cf89e2a51431eb5c7ad869b5ef1af3a0651a529afe6"
+  "1.1.1":
+    url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "2750dc231bf608910d4270ac39d83d46d25b88cc547a9d4d31f7ce4950effa7c"
 

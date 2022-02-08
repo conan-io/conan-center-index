@@ -30,8 +30,6 @@ class UnleashConan(ConanFile):
         "nlohmann_json/3.10.5",
     )
 
-    build_requires = "cmake/3.22.0"
-
     _cmake = None
 
     _compilers_min_version = {
