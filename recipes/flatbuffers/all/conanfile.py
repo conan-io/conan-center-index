@@ -40,8 +40,7 @@ class FlatbuffersConan(ConanFile):
     @property
     def _has_flatc(self):
         # don't build flatc when it makes little sense or not supported
-        return not (self.settings.os in ["Android", "iOS", "watchOS", "tvOS"] or \
-                    str(self.settings.os).upper() == "QNX")
+        return self.settings.os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
