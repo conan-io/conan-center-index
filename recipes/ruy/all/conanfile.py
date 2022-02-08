@@ -22,7 +22,7 @@ class RuyConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
     }
 
     _cmake = None
