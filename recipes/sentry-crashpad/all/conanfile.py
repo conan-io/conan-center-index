@@ -1,8 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
 
 
 class SentryCrashpadConan(ConanFile):
@@ -11,8 +11,10 @@ class SentryCrashpadConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getsentry/sentry-native"
     license = "Apache-2.0"
-    topics = ("conan", "crashpad", "error-reporting", "crash-reporting")
+    topics = ("crashpad", "error-reporting", "crash-reporting")
+
     provides = "crashpad", "mini_chromium"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -22,10 +24,9 @@ class SentryCrashpadConan(ConanFile):
         "fPIC": True,
         "with_tls": "openssl",
     }
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
-    short_paths = True
 
+    short_paths = True
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -45,6 +46,11 @@ class SentryCrashpadConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,10 +60,10 @@ class SentryCrashpadConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.get_safe("with_tls"):
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
             tools.check_min_cppstd(self, 14)
@@ -103,63 +109,111 @@ class SentryCrashpadConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "crashpad"
-        self.cpp_info.names["cmake_find_package_multi"] = "crashpad"
-        self.cpp_info.filenames["cmake_find_package"] = "crashpad"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "crashpad"
+        self.cpp_info.set_property("cmake_file_name", "crashpad")
 
-        self.cpp_info.components["mini_chromium"].includedirs.append(os.path.join("include", "crashpad", "mini_chromium"))
-        self.cpp_info.components["mini_chromium"].libs = ["mini_chromium"]
+        # mini_chromium
+        self.cpp_info.components["crashpad_mini_chromium"].set_property("cmake_target_name", "crashpad::mini_chromium")
+        self.cpp_info.components["crashpad_mini_chromium"].includedirs.append(os.path.join("include", "crashpad", "mini_chromium"))
+        self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["mini_chromium"].system_libs.append("pthread")
-        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["crashpad_mini_chromium"].frameworks = ["CoreFoundation", "Foundation", "Security"]
             if self.settings.os == "Macos":
-                self.cpp_info.components["mini_chromium"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+                self.cpp_info.components["crashpad_mini_chromium"].frameworks.extend(["ApplicationServices", "IOKit"])
             else:  # iOS
-                self.cpp_info.components["mini_chromium"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
+                self.cpp_info.components["crashpad_mini_chromium"].frameworks.extend(["CoreGraphics", "CoreText"])
 
-        self.cpp_info.components["compat"].includedirs.append(os.path.join("include", "crashpad"))
+        # compat
+        self.cpp_info.components["crashpad_compat"].set_property("cmake_target_name", "crashpad::compat")
+        self.cpp_info.components["crashpad_compat"].includedirs.append(os.path.join("include", "crashpad"))
         # On Apple crashpad_compat is an interface library
         if not tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["compat"].libs = ["crashpad_compat"]
+            self.cpp_info.components["crashpad_compat"].libs = ["crashpad_compat"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["compat"].system_libs.append("dl")
+            self.cpp_info.components["crashpad_compat"].system_libs.append("dl")
 
-        self.cpp_info.components["util"].libs = ["crashpad_util"]
-        self.cpp_info.components["util"].requires = ["compat", "mini_chromium", "zlib::zlib"]
+        # util
+        self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
+        self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
+        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
-            self.cpp_info.components["util"].system_libs.append("winhttp")
+            self.cpp_info.components["crashpad_util"].system_libs.append("winhttp")
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["crashpad_util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
+            self.cpp_info.components["crashpad_util"].system_libs.append("bsm")
         if self.options.get_safe("with_tls") == "openssl":
-            self.cpp_info.components["util"].requires.append("openssl::openssl")
+            self.cpp_info.components["crashpad_util"].requires.append("openssl::openssl")
 
-        if self.settings.os == "Macos":
-            self.cpp_info.components["util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
-            self.cpp_info.components["util"].system_libs.append("bsm")
+        # client
+        self.cpp_info.components["crashpad_client"].set_property("cmake_target_name", "crashpad::client")
+        self.cpp_info.components["crashpad_client"].libs = ["crashpad_client"]
+        self.cpp_info.components["crashpad_client"].requires = ["crashpad_util", "crashpad_mini_chromium"]
 
-        self.cpp_info.components["client"].libs = ["crashpad_client"]
-        self.cpp_info.components["client"].requires = ["util", "mini_chromium"]
-
-        self.cpp_info.components["snapshot"].libs = ["crashpad_snapshot"]
-        self.cpp_info.components["snapshot"].requires = ["client", "compat", "util", "mini_chromium"]
+        # snapshot
+        self.cpp_info.components["crashpad_snapshot"].set_property("cmake_target_name", "crashpad::snapshot")
+        self.cpp_info.components["crashpad_snapshot"].libs = ["crashpad_snapshot"]
+        self.cpp_info.components["crashpad_snapshot"].requires = [
+            "crashpad_client", "crashpad_compat",
+            "crashpad_util", "crashpad_mini_chromium",
+        ]
         if self.settings.os == "Windows":
             self.cpp_info.components["snapshot"].system_libs.append("powrprof")
 
-        self.cpp_info.components["minidump"].libs = ["crashpad_minidump"]
-        self.cpp_info.components["minidump"].requires = ["compat", "snapshot", "util", "mini_chromium"]
+        # minidump
+        self.cpp_info.components["crashpad_minidump"].set_property("cmake_target_name", "crashpad::minidump")
+        self.cpp_info.components["crashpad_minidump"].libs = ["crashpad_minidump"]
+        self.cpp_info.components["crashpad_minidump"].requires = [
+            "crashpad_compat", "crashpad_snapshot",
+            "crashpad_util", "crashpad_mini_chromium",
+        ]
 
         if tools.Version(self.version) > "0.3":
             if self.settings.os == "Windows":
-                self.cpp_info.components["getopt"].libs = ["crashpad_getopt"]
+                # getopt
+                self.cpp_info.components["crashpad_getopt"].set_property("cmake_target_name", "crashpad::getopt")
+                self.cpp_info.components["crashpad_getopt"].libs = ["crashpad_getopt"]
 
-            self.cpp_info.components["handler"].libs = ["crashpad_handler_lib"]
-            self.cpp_info.components["handler"].requires = ["compat", "minidump", "snapshot", "util", "mini_chromium"]
+            # handler
+            self.cpp_info.components["crashpad_handler"].set_property("cmake_target_name", "crashpad::handler")
+            self.cpp_info.components["crashpad_handler"].libs = ["crashpad_handler_lib"]
+            self.cpp_info.components["crashpad_handler"].requires = [
+                "crashpad_compat", "crashpad_minidump", "crashpad_snapshot",
+                "crashpad_util", "crashpad_mini_chromium",
+            ]
             if self.settings.os == "Windows":
-                self.cpp_info.components["handler"].requires.append("getopt")
+                self.cpp_info.components["crashpad_handler"].requires.append("crashpad_getopt")
 
-        self.cpp_info.components["tools"].libs = ["crashpad_tools"]
+        # tools
+        self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
+        self.cpp_info.components["crashpad_tools"].libs = ["crashpad_tools"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "crashpad"
+        self.cpp_info.names["cmake_find_package_multi"] = "crashpad"
+        self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package"] = "mini_chromium"
+        self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package_multi"] = "mini_chromium"
+        self.cpp_info.components["crashpad_compat"].names["cmake_find_package"] = "compat"
+        self.cpp_info.components["crashpad_compat"].names["cmake_find_package_multi"] = "compat"
+        self.cpp_info.components["crashpad_util"].names["cmake_find_package"] = "util"
+        self.cpp_info.components["crashpad_util"].names["cmake_find_package_multi"] = "util"
+        self.cpp_info.components["crashpad_client"].names["cmake_find_package"] = "client"
+        self.cpp_info.components["crashpad_client"].names["cmake_find_package_multi"] = "client"
+        self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package"] = "snapshot"
+        self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package_multi"] = "snapshot"
+        self.cpp_info.components["crashpad_minidump"].names["cmake_find_package"] = "minidump"
+        self.cpp_info.components["crashpad_minidump"].names["cmake_find_package_multi"] = "minidump"
+        if tools.Version(self.version) > "0.3":
+            if self.settings.os == "Windows":
+                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package"] = "getopt"
+                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package_multi"] = "getopt"
+            self.cpp_info.components["crashpad_handler"].names["cmake_find_package"] = "handler"
+            self.cpp_info.components["crashpad_handler"].names["cmake_find_package_multi"] = "handler"
+        self.cpp_info.components["crashpad_tools"].names["cmake_find_package"] = "tools"
+        self.cpp_info.components["crashpad_tools"].names["cmake_find_package_multi"] = "tools"
