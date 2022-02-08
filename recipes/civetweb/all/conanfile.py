@@ -80,7 +80,7 @@ class CivetwebConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
-        if self.options.with_zlib:
+        if self.options.with_zlib and tools.Version(self.version) >= "1.15":
             self.requires("zlib/1.2.11")
 
     def validate(self):
@@ -97,8 +97,7 @@ class CivetwebConan(ConanFile):
         self._cmake = CMake(self)
 
         if self.options.with_ssl:
-            openssl_version = tools.Version(
-                self.deps_cpp_info["openssl"].version[:-1])
+            openssl_version = tools.Version(self.deps_cpp_info["openssl"].version[:-1])
             self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             self._cmake.definitions["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
             self._cmake.definitions["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
@@ -117,8 +116,10 @@ class CivetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_SERVER_STATS"] = self.options.with_server_stats
         self._cmake.definitions["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
-        self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+
+        if tools.Version(self.version) >= "1.15":
+            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
 
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
