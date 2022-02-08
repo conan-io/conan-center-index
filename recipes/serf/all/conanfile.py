@@ -1,7 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanException
 from contextlib import contextmanager
-import glob
 import os
 import re
 
@@ -10,7 +8,7 @@ class SerfConan(ConanFile):
     name = "serf"
     description = "The serf library is a high performance C-based HTTP client library built upon the Apache Portable Runtime (APR) library."
     license = "Apache-2.0"
-    topics = ("conan", "serf", "apache", "http", "library")
+    topics = ("apache", "http", "library", "apr")
     homepage = "https://serf.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "patches/**"
@@ -41,14 +39,13 @@ class SerfConan(ConanFile):
     def requirements(self):
         self.requires("apr-util/1.6.1")
         self.requires("zlib/1.2.11")
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1m")
 
     def build_requirements(self):
-        self.build_requires("scons/3.1.2")
+        self.build_requires("scons/4.2.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("serf-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -64,6 +61,7 @@ class SerfConan(ConanFile):
             return "clang"
         return {
             "Visual Studio": "cl",
+            "msvc": "cl",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
 
     def _lib_path_arg(self, path):
@@ -73,7 +71,7 @@ class SerfConan(ConanFile):
     @contextmanager
     def _build_context(self):
         extra_env = {}
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler in ["Visual Studio", "msvc"]:
             extra_env["OPENSSL_LIBS"] = ";".join("{}.lib".format(lib) for lib in self.deps_cpp_info["openssl"].libs)
         with tools.environment_append(extra_env):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
@@ -129,20 +127,14 @@ class SerfConan(ConanFile):
                 self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.exp")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), f"serf-{self._version_major}.*")
         if self.settings.os == "Windows":
-            for file in glob.glob(os.path.join(self.package_folder, "lib", "*.exp")):
-                os.unlink(file)
-            for file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-                os.unlink(file)
             if self.options.shared:
-                for file in glob.glob(os.path.join(self.package_folder, "lib", "serf-{}.*".format(self._version_major))):
-                    os.unlink(file)
                 tools.mkdir(os.path.join(self.package_folder, "bin"))
                 os.rename(os.path.join(self.package_folder, "lib", "libserf-{}.dll".format(self._version_major)),
                           os.path.join(self.package_folder, "bin", "libserf-{}.dll".format(self._version_major)))
-            else:
-                for file in glob.glob(os.path.join(self.package_folder, "lib", "libserf-{}.*".format(self._version_major))):
-                    os.unlink(file)
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
