@@ -106,7 +106,7 @@ class SerfConan(ConanFile):
         escape_str = lambda x : "\"{}\"".format(x)
         with tools.chdir(self._source_subfolder):
             with self._build_context():
-                    self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
+                self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
     @property
     def _static_ext(self):
@@ -138,7 +138,7 @@ class SerfConan(ConanFile):
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
-                if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
+                if any(re.finditer(r"\.{}(\.?|$)".format(ext_to_remove), fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
 
     @property
