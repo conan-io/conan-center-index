@@ -64,6 +64,7 @@ class M4Conan(ConanFile):
                 autotools.flags.extend(["-rtlib=compiler-rt", "-Wno-unused-command-line-argument"])
         if self.settings.os == 'Windows':
             conf_args.extend(["ac_cv_func__set_invalid_parameter_handler=yes"])
+        conf_args.extend(["HELP2MAN=/bin/true"])
 
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return autotools
