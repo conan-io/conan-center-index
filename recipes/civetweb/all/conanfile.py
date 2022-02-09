@@ -59,6 +59,10 @@ class CivetwebConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_zlib_option(self):
+        return tools.Version(self.version) >= "1.15"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -67,6 +71,8 @@ class CivetwebConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_zlib_option:
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -80,7 +86,7 @@ class CivetwebConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
-        if self.options.with_zlib and tools.Version(self.version) >= "1.15":
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
     def validate(self):
@@ -118,8 +124,8 @@ class CivetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         self._cmake.definitions["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
 
-        if tools.Version(self.version) >= "1.15":
-            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
+        if self.options.get_safe("with_zlib"):
+            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = True
 
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
