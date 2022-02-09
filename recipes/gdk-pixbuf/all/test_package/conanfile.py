@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run("gdk-pixbuf-pixdata -v", run_environment=True)
             self.run(bin_path, run_environment=True)
