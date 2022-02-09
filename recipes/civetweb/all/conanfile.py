@@ -164,8 +164,11 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
             if self.options.shared:
                 self.cpp_info.components["_civetweb"].defines.append("CIVETWEB_DLL_IMPORTS")
+
         if self.options.with_ssl:
-            self.cpp_info.components["_civetweb"].requires = ["openssl::openssl"]
+            self.cpp_info.components["_civetweb"].requires.append("openssl::openssl")
+        if self.options.get_safe("with_zlib"):
+            self.cpp_info.components["_civetweb"].requires.append("zlib::zlib")
 
         if self.options.with_cxx:
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
