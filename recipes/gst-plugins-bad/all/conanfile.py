@@ -63,7 +63,7 @@ class GStPluginsBadConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("glib/2.70.0")
+        self.requires("glib/2.70.1")
         self.requires("gstreamer/1.19.1")
         self.requires("gst-plugins-base/1.19.1")
 
