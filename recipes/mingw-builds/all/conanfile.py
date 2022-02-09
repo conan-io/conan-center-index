@@ -13,6 +13,8 @@ class MingwConan(ConanFile):
     settings = "os", "arch"
     options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"]}
     default_options = {"threads": "posix", "exception": "seh"}
+    
+    provides = "mingw-w64"
 
     @property
     def _settings_build(self):
