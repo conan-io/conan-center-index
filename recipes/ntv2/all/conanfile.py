@@ -47,7 +47,10 @@ class Ntv2Conan(ConanFile):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "ajalibraries", "ajantv2", "src", "lin"), dst=os.path.join("include", "ajantv2", "lin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["ajantv2shared" if self.options.shared else "ajantv2"]
+        lib_name = "ajantv2shared" if self.options.shared else "ajantv2"
+        if self.settings.build_type == "Debug":
+            lib_name += "d"
+        self.cpp_info.libs = [lib_name]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.defines = ["AJALinux", "AJA_LINUX", "NTV2_USE_STDINT"]
         elif self.settings.os == "Darwin":
