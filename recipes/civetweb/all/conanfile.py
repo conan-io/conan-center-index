@@ -124,8 +124,8 @@ class CivetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         self._cmake.definitions["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
 
-        if self.options.get_safe("with_zlib"):
-            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = True
+        if self._has_zlib_option:
+            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
 
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
