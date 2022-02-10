@@ -6,6 +6,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def requirements(self):
+        self.requires("libfuse/3.10.5")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()

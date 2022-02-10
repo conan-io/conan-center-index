@@ -39,6 +39,9 @@ class FuseppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
+    def requirements(self):
+        self.requires("libfuse/3.10.5")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
@@ -52,6 +55,3 @@ class FuseppConan(ConanFile):
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
-
-    def package_info(self):
-        self.cpp_info.libs = ["fusepp"]
