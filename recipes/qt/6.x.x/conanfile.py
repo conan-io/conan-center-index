@@ -319,8 +319,7 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            if tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.1")
+            self.requires("xkbcommon/1.3.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -915,9 +914,7 @@ class QtConan(ConanFile):
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.append("xorg::xorg")
-                if not tools.cross_building(self, skip_x64_x86=True):
-                    gui_reqs.append("xkbcommon::xkbcommon")
+                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -951,7 +948,7 @@ class QtConan(ConanFile):
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
-            else:
+            elif self.settings.os in ["Linux", "FreeBSD"]:
                 _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
