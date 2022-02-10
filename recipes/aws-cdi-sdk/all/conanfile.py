@@ -103,8 +103,14 @@ class AwsCdiSdkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = self.collect_libs()
+        cppSdk = self.cpp_info.components["aws-cpp-sdk-cdi"]
+        cppSdk.libs = ["aws-cpp-sdk-cdi"]
+
+        cppSdk.requires = ["aws-sdk-cpp::monitoring", "aws-libfabric::aws-libfabric"]
+
+        cSdk = self.cpp_info.components["cdisdk"]
+        cSdk.libs = ["cdisdk"]
+        cSdk.requires = ["aws-cpp-sdk-cdi"]
         if self.settings.os == "Linux":
-            self.cpp_info.defines = ["_LINUX"]
-        self.cpp_info.requires = ["aws-sdk-cpp::monitoring", "aws-libfabric::aws-libfabric"]
+            cSdk.defines = ["_LINUX"]
 

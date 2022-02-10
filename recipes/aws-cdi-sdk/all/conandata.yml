@@ -6,5 +6,3 @@ patches:
   "2.2.0":
     - base_path: source_subfolder
       patch_file: patches/001-Makefile.patch
-    - base_path: source_subfolder
-      patch_file: patches/002-CMake.patch
