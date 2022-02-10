@@ -59,7 +59,7 @@ class DatadogOpenTracingConan(ConanFile):
         self.requires("opentracing-cpp/1.6.0")
         self.requires("zlib/1.2.11")
         self.requires("libcurl/7.80.0")
-        self.requires("msgpack/3.3.0")
+        self.requires("msgpack-cxx/4.0.3")
         self.requires("nlohmann_json/3.10.5")
 
     def validate(self):
@@ -116,5 +116,5 @@ class DatadogOpenTracingConan(ConanFile):
         self.cpp_info.components["dd_opentracing"].names["cmake_find_package_multi"] = "dd_opentracing" + target_suffix
         self.cpp_info.components["dd_opentracing"].requires = [
             "opentracing-cpp::opentracing-cpp", "zlib::zlib", "libcurl::libcurl",
-            "msgpack::msgpack", "nlohmann_json::nlohmann_json",
+            "msgpack-cxx::msgpackc-cxx", "nlohmann_json::nlohmann_json",
         ]
