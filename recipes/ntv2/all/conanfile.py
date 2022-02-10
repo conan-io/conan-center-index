@@ -57,7 +57,7 @@ class Ntv2Conan(ConanFile):
         self.cpp_info.libs = [lib_name]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.defines = ["AJALinux", "AJA_LINUX", "NTV2_USE_STDINT"]
-        elif self.settings.os == "Darwin":
+        elif self.settings.os == "Macos":
             self.cpp_info.defines = ["AJAMac", "AJA_MAC"]
         elif self.settings.os == "Windows":
             self.cpp_info.defines = ["AJAWindows", "AJA_WINDOWS"]
