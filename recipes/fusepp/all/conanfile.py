@@ -25,6 +25,10 @@ class FuseppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
