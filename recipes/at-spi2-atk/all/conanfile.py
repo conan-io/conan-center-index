@@ -47,7 +47,7 @@ class AtSPI2AtkConan(ConanFile):
 
     def requirements(self):
         self.requires('at-spi2-core/2.42.0')
-        self.requires('atk/2.42.0')
+        self.requires('atk/2.36.0')
         self.requires('glib/2.70.1')
         self.requires('libxml2/2.9.12')
 
