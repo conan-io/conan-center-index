@@ -1,12 +1,6 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
-import subprocess
-import tempfile
-import sys
-import stat
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
@@ -117,9 +111,6 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def source(self):
-        tk_url = self.conan_data["sources"][self.version]["url"]
-        print("getting Toolkit sources...")
-        print("from url: " + tk_url)
         tools.get(**self.conan_data["sources"][self.version], strip_root = True)
 
 #----------------------------------------------------------------------------
