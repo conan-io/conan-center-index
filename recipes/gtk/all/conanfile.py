@@ -89,7 +89,8 @@ class GtkConan(ConanFile):
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.60.2")
+        self.build_requires("libxml2/2.9.12") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
