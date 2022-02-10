@@ -52,8 +52,8 @@ for each combination. There are some particular cases for this general rule:
 
    > Note.- Intentionally, the `build_type` setting should not be removed from the package ID in this case. Preserving this
    > setting will ensure that the package ID for Debug and Release configurations will be different and both binaries can be
-   > available in the Conan cache at the same time. This enable consumers to switch from one configuration to the other in case
-   > the want to run or to debug those executables.
+   > available in the Conan cache at the same time. This enable consumers to switch from one configuration to the other in the case
+   > they want to run or to debug those executables.
 
 
 ## Options
@@ -66,7 +66,7 @@ in this direction. However, there are a couple of options that have a special me
 
    > Note.- The CI applies `shared=True` only to the package being built, while every other requirement will use their defaults
    > (typically `shared=False`). It's important to keep this in mind when trying to consume shared packages from ConanCenter
-   > as their requirements were linked inside the shared library.
+   > as their requirements were linked inside the shared library. See [FAQs](faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
 
  * `header_only` (with values `True` or `False`). If the CI detects this option, it will generate all the configurations for the
    value `header_only=False` and add one more configuration with `header_only=True`. **Only one

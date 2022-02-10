@@ -361,7 +361,7 @@ In order to consume all those libraries as shared ones, building from sources is
 easily achievable using `*:shared=True` in the _host_ profile and `--build` in the install command. With these inputs,
 Conan will build from sources all the packages and use the shared libraries when linking.
 
-> Note.- The proper solution for recipes would be to use something like
+> ℹ️ Note: If you are hosting your own recipes, the proper solution for recipes would be to use something like
 > [`shared_library_package_id`](https://docs.conan.io/en/latest/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
 > that will encode this information in the package ID and ensure that any change in the static libraries that are
 > embedded into a shared one is taken into account when computing the package ID.
