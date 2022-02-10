@@ -281,15 +281,15 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.182")
+            self.requires("vulkan-loader/1.2.198.0")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.4")
+                self.requires("moltenvk/1.1.6")
         if self.options.with_glib:
             self.requires("glib/2.70.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.7")
+            self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
@@ -330,7 +330,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.3")
+            self.requires("expat/2.4.4")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
@@ -351,7 +351,6 @@ class QtConan(ConanFile):
             self.build_requires('strawberryperl/5.30.0.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.build_requires("ninja/1.10.2")
             self.build_requires("nodejs/16.3.0")
             self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
