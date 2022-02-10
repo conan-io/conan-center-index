@@ -96,8 +96,8 @@ class GtkConan(ConanFile):
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.4")
-        self.requires("glib/2.69.3")
+        self.requires("gdk-pixbuf/2.42.6")
+        self.requires("glib/2.70.1")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
@@ -110,18 +110,18 @@ class GtkConan(ConanFile):
             if self.options.with_wayland:
                 if self._gtk3:
                     self.requires("xkbcommon/1.3.1")
-                self.requires("wayland/1.19.0")
+                self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
         self.requires("libepoxy/1.5.9")
         if self.options.with_pango:
-            self.requires("pango/1.49.1")
+            self.requires("pango/1.49.3")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.2.1")
+            self.requires("ffmpeg/4.4")
         if self.options.with_gstreamer:
-            self.requires("gstreamer/1.19.1")
+            self.requires("gstreamer/1.19.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
