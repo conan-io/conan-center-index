@@ -6,6 +6,8 @@ conan_basic_setup(KEEP_RPATHS)
 
 include(GNUInstallDirs)
 
+set(CMAKE_C_EXTENSIONS OFF)
+
 add_library(schrift source_subfolder/schrift.c)
 target_compile_features(schrift PRIVATE c_std_99)
 set_target_properties(schrift PROPERTIES
