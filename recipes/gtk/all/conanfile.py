@@ -133,7 +133,7 @@ class GtkConan(ConanFile):
             defs["wayland_backend" if self._gtk3 else "wayland-backend"] = "true" if self.options.with_wayland else "false"
             defs["x11_backend" if self._gtk3 else "x11-backend"] = "true" if self.options.with_x11 else "false"
         defs["introspection"] = "false" if self._gtk3 else "disabled"
-        defs["documentation"] = "false"
+        defs["gtk_doc" if self._gtk4 else "documentation"] = "false"
         defs["man-pages"] = "false"
         defs["tests" if self._gtk3 else "build-tests"] = "false"
         defs["examples" if self._gtk3 else "build-examples"] = "false"
@@ -147,7 +147,8 @@ class GtkConan(ConanFile):
             defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             defs["print-cups"] = enabled_disabled(self.options.with_cups)
-            defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
+            if tools.Version(self.version) < "4.3.2":
+                defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
