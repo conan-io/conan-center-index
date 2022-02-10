@@ -23,6 +23,10 @@ class Ntv2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -60,4 +64,6 @@ class Ntv2Conan(ConanFile):
         self.cpp_info.includedirs.extend([os.path.join("include", "ajantv2"), os.path.join("include", "ajantv2", "lin")])
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "rt"]
+            if self.options.shared:
+                self.cpp_info.system_libs.append("dl")
 
