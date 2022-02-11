@@ -386,8 +386,8 @@ class QtConan(ConanFile):
             self.requires("wayland/1.20.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination="qt5")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
