@@ -99,6 +99,9 @@ class LibMysqlClientCConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_files(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
         if not self._with_lz4:
             libs_to_remove.append("lz4")
@@ -136,8 +139,16 @@ class LibMysqlClientCConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES crypto",
             "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+
+        # Do not copy shared libs of dependencies to package folder
+        deps_shared = ["SSL"]
+        if tools.Version(self.version) > "8.0.17":
+            deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
+        for dep in deps_shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "MYSQL_CHECK_{}_DLLS()".format(dep),
+                                  "")
+
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
         tools.rename(sources_cmake, sources_cmake_orig)
