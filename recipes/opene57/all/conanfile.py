@@ -76,12 +76,10 @@ class Opene57Conan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
