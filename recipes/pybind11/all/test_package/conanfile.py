@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
 import sys
-from platform import python_version
 
 
 class TestPackageConan(ConanFile):

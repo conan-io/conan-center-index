@@ -78,9 +78,7 @@ class PyBind11Conan(ConanFile):
             self.cpp_info.components["opt_size"].requires = ["main"]
             self.cpp_info.components["python2_no_register"].requires = ["main"]
         else:
-            self.cpp_info.includedirs.append(os.path.join(
-                self.package_folder, "include", "pybind11"))
-
+            self.cpp_info.includedirs.append(os.path.join("include", "pybind11"))
             self.cpp_info.builddirs = [cmake_base_path]
 
             build_modules = [os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"), os.path.join(cmake_base_path, "pybind11Tools.cmake")]
