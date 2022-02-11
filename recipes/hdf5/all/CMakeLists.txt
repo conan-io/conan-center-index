@@ -4,4 +4,8 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+if (MSVC)
+	add_link_options("$<$<CONFIG:DEBUG>:/Z7>")
+endif ()
+
 add_subdirectory("source_subfolder")
