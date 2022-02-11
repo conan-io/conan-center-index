@@ -6,6 +6,11 @@ import subprocess
 
 
 def main():
+    # disable warning on FIXME and TODO
+    p = subprocess.run(["pylint", "--disable=W0511", "--generate-rcfile"], capture_output=True, text=True)
+    with open('~/.pylintrc', 'w') as f:
+        f.write(p.stdout)
+
     packages = set()
     files = subprocess.run(["git", "show", "--first-parent", "--name-only", r'--pretty="format:%n"'], capture_output=True, text=True)
     for line in files.stdout.splitlines():
