@@ -90,7 +90,8 @@ class GtkConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.60.2")
-        self.build_requires("libxml2/2.9.12") # for xmllint
+        if self._gtk4:
+            self.build_requires("libxml2/2.9.12") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
