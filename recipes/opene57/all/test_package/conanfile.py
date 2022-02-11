@@ -1,9 +1,9 @@
-import shutil,os
+import os
 from conans import ConanFile, CMake, tools
 
 class TestOpenE57Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         if not tools.cross_building(self):
@@ -13,9 +13,5 @@ class TestOpenE57Conan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path=""
-            if self.settings.compiler == "Visual Studio":
-                bin_path = os.path.join("bin", "{}".format(self.settings.build_type), "opene57_example")
-            else:
-                bin_path = os.path.join("bin", "opene57_example")
+            bin_path = os.path.join("bin", "opene57_example")
             self.run(bin_path, run_environment=True)
