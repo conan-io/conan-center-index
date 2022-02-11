@@ -737,3 +737,4 @@ class OpenCVConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
+
