@@ -1,4 +1,7 @@
 sources:
+  "3.3.4":
+    url: "https://github.com/godotengine/godot-cpp/archive/godot-3.3.4-stable.tar.gz"
+    sha256: "fa12b8dd8652109eceae7aecf134f64529edfb34ec33d24b1a9c220b40599575"
   "cci.3.2-20200130":
     url: "https://github.com/godotengine/godot-cpp/archive/aba8766618c6aa40c6f7b40b513e8e47cfa807f4.zip"
     sha256: "a6dba9cda3c36c669ffca2bb9dd4e372bcd1fbf23c74076505467247c15f0e77"
