@@ -3,12 +3,12 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 class OpenE57Conan(ConanFile):
-    name = "openE57"
+    name = "opene57"
     description = "A C++ library for reading and writing E57 files, " \
                   "fork of the original libE57 (http://libe57.org)"
     topics = ("conan", "openE57", "e57")
     version = "1.6.0"
-    url = "https://github.com/openE57/openE57"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openE57/openE57"
     license = ("MIT", "E57 Software Licenses")
     settings = "os", "compiler", "arch", "build_type"
