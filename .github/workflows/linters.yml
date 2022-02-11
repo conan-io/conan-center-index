@@ -32,4 +32,5 @@ jobs:
       - name: run lint
         run:  |
           echo "::add-matcher::.github/${{ matrix.hook }}.json"
+          pylint --disable=W0511 --generate-rcfile > ~/.pylintrc
           python3 .github/runlint.py
