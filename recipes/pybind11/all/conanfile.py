@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class PyBind11Conan(ConanFile):
@@ -66,6 +66,7 @@ class PyBind11Conan(ConanFile):
             self.cpp_info.components["main"].builddirs = [cmake_base_path]
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Common.cmake"))
+            self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "pybind11", "pybind11Common.cmake")])
             self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
             self.cpp_info.components["headers"].requires = ["main"]
             self.cpp_info.components["embed"].requires = ["main"]
