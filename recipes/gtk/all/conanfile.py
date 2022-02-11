@@ -90,14 +90,15 @@ class GtkConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.60.2")
-        self.build_requires("libxml2/2.9.12") # for xmllint
+        if self._gtk4:
+            self.build_requires("libxml2/2.9.12") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.4")
-        self.requires("glib/2.69.3")
+        self.requires("gdk-pixbuf/2.42.6")
+        self.requires("glib/2.70.1")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
@@ -110,18 +111,18 @@ class GtkConan(ConanFile):
             if self.options.with_wayland:
                 if self._gtk3:
                     self.requires("xkbcommon/1.3.1")
-                self.requires("wayland/1.19.0")
+                self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
         self.requires("libepoxy/1.5.9")
         if self.options.with_pango:
-            self.requires("pango/1.49.1")
+            self.requires("pango/1.49.3")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.2.1")
+            self.requires("ffmpeg/4.4")
         if self.options.with_gstreamer:
-            self.requires("gstreamer/1.19.1")
+            self.requires("gstreamer/1.19.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -133,8 +134,8 @@ class GtkConan(ConanFile):
             defs["wayland_backend" if self._gtk3 else "wayland-backend"] = "true" if self.options.with_wayland else "false"
             defs["x11_backend" if self._gtk3 else "x11-backend"] = "true" if self.options.with_x11 else "false"
         defs["introspection"] = "false" if self._gtk3 else "disabled"
-        defs["documentation"] = "false"
-        defs["man-pages"] = "false"
+        defs["gtk_doc"] = "false"
+        defs["man-pages" if self._gtk4 else "man"] = "false"
         defs["tests" if self._gtk3 else "build-tests"] = "false"
         defs["examples" if self._gtk3 else "build-examples"] = "false"
         defs["demos"] = "false"
@@ -147,7 +148,8 @@ class GtkConan(ConanFile):
             defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             defs["print-cups"] = enabled_disabled(self.options.with_cups)
-            defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
+            if tools.Version(self.version) < "4.3.2":
+                defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
