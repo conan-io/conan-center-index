@@ -2,7 +2,7 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
-class OpenE57Conan(ConanFile):
+class Opene57Conan(ConanFile):
     name = "opene57"
     description = "A C++ library for reading and writing E57 files, " \
                   "fork of the original libE57 (http://libe57.org)"
