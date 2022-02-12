@@ -3,7 +3,7 @@ from conans.errors import ConanException, ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibwebsocketsConan(ConanFile):
@@ -12,10 +12,9 @@ class LibwebsocketsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/warmcat/libwebsockets"
     license = "MIT"
-    topics = ("conan", "libwebsockets", "websocket")
-    exports_sources = "CMakeLists.txt"
+    topics = ("libwebsockets", "websocket")
+
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -186,11 +185,17 @@ class LibwebsocketsConan(ConanFile):
         "enable_spawn": False
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -247,7 +252,7 @@ class LibwebsocketsConan(ConanFile):
     def _get_library_extension(self, dep):
         if self.options[dep].shared:
             if self.settings.os == "Windows" :
-                if self.settings.compiler == "Visual Studio":
+                if self._is_msvc:
                     return ".lib"
                 else:
                     return ".dll.a"
@@ -256,7 +261,7 @@ class LibwebsocketsConan(ConanFile):
             else:
                 return ".so"
         else:
-            if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+            if self.settings.os == "Windows" and self._is_msvc:
                 return ".lib"
             else:
                 return ".a"
@@ -446,6 +451,8 @@ class LibwebsocketsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {self._cmake_target: "Libwebsockets::{}".format(self._cmake_target)}
@@ -464,34 +471,35 @@ class LibwebsocketsConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     @property
     def _cmake_target(self):
         return "websockets_shared" if self.options.shared else "websockets"
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Libwebsockets")
+        self.cpp_info.set_property("cmake_target_name", self._cmake_target)
         pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
+        self.cpp_info.set_property("pkg_config_name", pkgconfig_name)
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
+        if self.settings.os == "Windows":
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Libwebsockets"
         self.cpp_info.names["cmake_find_package_multi"] = "Libwebsockets"
         self.cpp_info.names["pkg_config"] = pkgconfig_name
         self.cpp_info.components["_libwebsockets"].names["cmake_find_package"] = self._cmake_target
         self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = self._cmake_target
-        self.cpp_info.components["_libwebsockets"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["_libwebsockets"].names["pkgconfig_name"] = pkgconfig_name
-        self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
-        if self.settings.os == "Windows":
-            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
-        elif self.settings.os == "Linux":
-            self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
+        self.cpp_info.components["_libwebsockets"].set_property("cmake_target_name", self._cmake_target)
+        self.cpp_info.components["_libwebsockets"].set_property("pkg_config_name", pkgconfig_name)
         if self.options.with_libuv:
             self.cpp_info.components["_libwebsockets"].requires.append("libuv::libuv")
         if self.options.with_libevent == "libevent":
