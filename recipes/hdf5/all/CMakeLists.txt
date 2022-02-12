@@ -5,7 +5,7 @@ include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 if (MSVC)
-	add_compile_options($<$<C_COMPILER_ID:MSVC>:/Z7)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Z7")
 endif ()
 
 add_subdirectory("source_subfolder")
