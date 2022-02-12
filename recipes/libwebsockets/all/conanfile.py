@@ -426,6 +426,7 @@ class LibwebsocketsConan(ConanFile):
 
         if tools.Version(self.version) >= "4.1.0":
             self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
+            self._cmake.definitions["DISABLE_WERROR"] = True
 
         self._cmake.configure()
         return self._cmake
@@ -443,6 +444,8 @@ class LibwebsocketsConan(ConanFile):
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
+        if tools.Version(self.version) < "4.1.0":
+            tools.replace_in_file(cmakelists, "-Werror", "")
 
     def build(self):
         self._patch_sources()
