@@ -7,8 +7,12 @@ sources:
     sha256: "8770a440f1af98c3f0d9d4dffd568de2d4c21b245e7231e987e26bc236aeb5aa"
 patches:
   "4.0.3":
-    - patch_file: "patches/conan-4.0.3.patch"
+    - patch_file: "patches/0001-conan-4.0.3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-macos-rpath-4.0.3.patch"
       base_path: "source_subfolder"
   "4.0.2":
-    - patch_file: "patches/conan-4.0.2.patch"
+    - patch_file: "patches/0001-conan-4.0.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-macos-rpath-4.0.2.patch"
       base_path: "source_subfolder"
