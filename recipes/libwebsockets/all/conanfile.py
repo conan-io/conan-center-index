@@ -209,7 +209,7 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.41.1")
+            self.requires("libuv/1.42.0")
 
         if self.options.with_libevent == "libevent":
             self.requires("libevent/2.1.12")
@@ -225,14 +225,14 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libmount/2.36.2")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.37.2")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.6.0")
+            self.requires("wolfssl/4.8.1")
 
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
