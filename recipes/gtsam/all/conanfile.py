@@ -93,13 +93,14 @@ class GtsamConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_TBB:
+            self.options["onetbb"].tbbmalloc = True
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("eigen/3.3.9")
+        self.requires("boost/1.78.0")
+        self.requires("eigen/3.4.0")
         if self.options.with_TBB:
-            self.requires("tbb/2020.3")
-            self.options["tbb"].tbbmalloc = True
+            self.requires("onetbb/2020.3")
 
     @property
     def _required_boost_components(self):
@@ -113,6 +114,9 @@ class GtsamConan(ConanFile):
                     self.name, ", ".join(self._required_boost_components)
                 )
             )
+
+        if self.options.with_TBB and not self.options["onetbb"].tbbmalloc:
+            raise ConanInvalidConfiguration("gtsam with tbb requires onetbb:tbbmalloc=True")
 
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
             raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
@@ -220,7 +224,7 @@ class GtsamConan(ConanFile):
         self.cpp_info.components["libgtsam"].requires = ["boost::{}".format(component) for component in self._required_boost_components]
         self.cpp_info.components["libgtsam"].requires.append("eigen::eigen")
         if self.options.with_TBB:
-            self.cpp_info.components["libgtsam"].requires.append("tbb::tbb")
+            self.cpp_info.components["libgtsam"].requires.append("onetbb::onetbb")
         if self.options.support_nested_dissection:
             self.cpp_info.components["libgtsam"].requires.append("libmetis-gtsam")
         if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
