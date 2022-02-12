@@ -431,9 +431,15 @@ class LibwebsocketsConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(
+            cmakelists,
+            "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
+            "",
+        )
         if tools.Version(self.version) == "4.0.15" and self.options.with_ssl:
             tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                cmakelists,
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
