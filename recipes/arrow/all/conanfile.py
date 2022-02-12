@@ -14,7 +14,7 @@ class ArrowConan(ConanFile):
     homepage = "https://arrow.apache.org/"
     license = ("Apache-2.0",)
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -100,6 +100,11 @@ class ArrowConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -358,7 +363,7 @@ class ArrowConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
