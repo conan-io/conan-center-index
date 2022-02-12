@@ -59,15 +59,15 @@ class Opene57Conan(ConanFile):
         if self.options.with_tools:
             self.build_requires("boost/1.78.0")
             self.options["boost"].multithreading = True
-            self.options["boost"].shared = False
+            self.options["boost"].shared = self.options.shared
 
     def requirements(self):
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
             self.requires("icu/70.1")
-            self.options["icu"].shared = False
+            self.options["icu"].shared = self.options.shared
 
         self.requires("xerces-c/3.2.3")
-        self.options["xerces-c"].shared = False
+        self.options["xerces-c"].shared = self.options.shared
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
