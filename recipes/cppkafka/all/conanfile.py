@@ -47,6 +47,7 @@ class CppKafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        self.options["librdkafka"].shared = self.options.shared
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
