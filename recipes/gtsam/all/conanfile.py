@@ -237,12 +237,12 @@ class GtsamConan(ConanFile):
 
         if self.options.support_nested_dissection:
             self.cpp_info.components["libmetis-gtsam"].set_property("cmake_target_name", "metis-gtsam")
-            self.cpp_info.components["libmetis-gtsam"].libs = ["{}metis-gtsam".format(prefix)]
+            self.cpp_info.components["libmetis-gtsam"].libs = ["metis-gtsam"]
             self.cpp_info.components["libmetis-gtsam"].names["pkg_config"] = "metis-gtsam"
 
         if self.options.install_cppunitlite:
             self.cpp_info.components["gtsam_CppUnitLite"].set_property("cmake_target_name", "CppUnitLite")
-            self.cpp_info.components["gtsam_CppUnitLite"].libs = ["{}CppUnitLite".format(prefix)]
+            self.cpp_info.components["gtsam_CppUnitLite"].libs = ["CppUnitLite"]
             self.cpp_info.components["gtsam_CppUnitLite"].requires = ["boost::boost"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
