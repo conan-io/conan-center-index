@@ -7,7 +7,7 @@ class FuseppConan(ConanFile):
     description = "A simple C++ wrapper for the FUSE filesystem."
     license = "MIT"
     topics = ("fuse", "fusepp", "wrapper", "filesystem")
-    homepage = "https://github.com/winternet/Fusepp"
+    homepage = "https://github.com/jachappell/Fusepp"
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -19,6 +19,7 @@ class FuseppConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    exports_sources = "CMakeLists.txt"
 
     generators = "cmake"
 
@@ -52,7 +53,7 @@ class FuseppConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
