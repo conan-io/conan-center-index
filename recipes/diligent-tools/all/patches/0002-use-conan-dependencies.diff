@@ -36,10 +36,10 @@ index 0b1de80..e69515c 100644
  
  source_group("source" FILES ${SOURCE})
 diff --git a/Imgui/CMakeLists.txt b/Imgui/CMakeLists.txt
-index 76c792a..6c070f5 100644
+index 041f324..8c19675 100644
 --- a/Imgui/CMakeLists.txt
 +++ b/Imgui/CMakeLists.txt
-@@ -111,13 +111,8 @@ source_group("imGuIZMO.quat" FILES ${IMGUIZMO_QUAT_SOURCE})
+@@ -106,13 +106,8 @@ source_group("imGuIZMO.quat" FILES ${IMGUIZMO_QUAT_SOURCE})
  
  target_link_libraries(Diligent-Imgui
  PRIVATE
