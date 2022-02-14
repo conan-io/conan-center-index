@@ -18,6 +18,8 @@ patches:
       patch_file: "patches/7.0.0-0003-fix-shared-msvc.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/7.0.0-0004-mallctl-takes-size_t.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/7.0.0-0005-remove-find-cmake.patch"
   "2.0.0":
     - base_path: "source_subfolder"
       patch_file: "patches/2.0.0-0001-cmake.patch"
