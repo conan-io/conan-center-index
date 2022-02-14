@@ -7,7 +7,7 @@ required_conan_version = ">=1.29.0"
 class LibnameConan(ConanFile):
     name = "graphene"
     description = "A thin layer of graphic data types."
-    topics = ("conan", "graphene")
+    topics = ("graphic", "canvas", "types")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://ebassi.github.io/graphene/"
     license = "MIT"
@@ -36,12 +36,12 @@ class LibnameConan(ConanFile):
                 raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
     
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.60.2")
+        self.build_requires("pkgconf/1.7.4")
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.70.0")
+            self.requires("glib/2.70.1")
 
     def configure(self):
         if self.options.shared:
@@ -50,9 +50,8 @@ class LibnameConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -81,7 +80,7 @@ class LibnameConan(ConanFile):
         with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
             meson.install()
         
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if self.settings.compiler in ["Visual Studio", "msvc"] and not self.options.shared:
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 if os.path.isfile("libgraphene-1.0.a"):
                     tools.rename("libgraphene-1.0.a", "graphene-1.0.lib")

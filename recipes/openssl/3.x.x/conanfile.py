@@ -103,7 +103,6 @@ class OpenSSLConan(ConanFile):
             self.options.no_asm = True
             self.options.no_threads = True
             self.options.no_stdio = True
-            self.options.no_tests = True
 
     def configure(self):
         if self.options.shared:

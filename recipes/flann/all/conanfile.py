@@ -97,6 +97,9 @@ class FlannConan(ConanFile):
         # OpenMP support can be added later if needed
         self._cmake.definitions["USE_OPENMP"] = False
 
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -133,7 +136,7 @@ class FlannConan(ConanFile):
 
         # flann_cpp
         flann_cpp_lib = "flann_cpp" if self.options.shared else "flann_cpp_s"
-        self.cpp_info.components["flann_cpp"].set_property("cmake_file_name", flann_cpp_lib)
+        self.cpp_info.components["flann_cpp"].set_property("cmake_target_name", "flann::{}".format(flann_cpp_lib))
         self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
@@ -141,9 +144,9 @@ class FlannConan(ConanFile):
 
         # flann
         flann_c_lib = "flann" if self.options.shared else "flann_s"
-        self.cpp_info.components["flann_c"].set_property("cmake_file_name", flann_c_lib)
+        self.cpp_info.components["flann_c"].set_property("cmake_target_name", "flann::{}".format(flann_c_lib))
         self.cpp_info.components["flann_c"].libs = [flann_c_lib]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["flann_c"].system_libs.append("m")
         if not self.options.shared:
             self.cpp_info.components["flann_c"].defines.append("FLANN_STATIC")

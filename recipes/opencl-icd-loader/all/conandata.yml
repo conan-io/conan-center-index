@@ -1,4 +1,7 @@
 sources:
+  "2022.01.04":
+    url: "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/v2022.01.04.tar.gz"
+    sha256: "9f21d958af68c1b625a03c2befddd79da95d610614ddab6c291f26f01a947dd8"
   "2021.04.29":
     url: "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/v2021.04.29.tar.gz"
     sha256: "c2eb8a15b3d6d0795d609f55a4cea92eaa34571f6a21428d5593673b568ac6fd"
@@ -9,6 +12,6 @@ patches:
   "2020.06.16":
     - base_path: "source_subfolder"
       patch_file: "patches/2020.06.16/0001-xcode-missing-includes.patch"
-      # patch_type: portability 
+      # patch_type: portability
       # source: https://github.com/KhronosGroup/OpenCL-ICD-Loader/pull/131
       # description: Add missing includes (needed for new Xcode versions)

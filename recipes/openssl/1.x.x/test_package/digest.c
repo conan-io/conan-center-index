@@ -67,18 +67,19 @@ int main()
 	SHA3_hash(EVP_sha3_256(), (unsigned char*)&string, strlen(string), (unsigned char*)&sha3_256_digest, &digest_len);
 	SHA3_hash(EVP_sha3_512(), (unsigned char*)&string, strlen(string), (unsigned char*)&sha3_512_digest, &digest_len);
 #endif
-	for(int i = 0; i < MD5_DIGEST_LENGTH; i++)
+	int i;
+	for(i = 0; i < MD5_DIGEST_LENGTH; i++)
 		 snprintf(&md5_string[i*2], sizeof(md5_string)-i*2, "%02x", (unsigned int)md5_digest[i]);
 
-	for(int i = 0; i < SHA_DIGEST_LENGTH; i++)
+	for(i = 0; i < SHA_DIGEST_LENGTH; i++)
 		 snprintf(&sha1_string[i*2], sizeof(sha1_string)-i*2, "%02x", (unsigned int)sha1_digest[i]);
 
-	for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+	for(i = 0; i < SHA256_DIGEST_LENGTH; i++) {
 		 snprintf(&sha256_string[i*2], sizeof(sha256_string)-i*2, "%02x", (unsigned int)sha256_digest[i]);
 		 snprintf(&sha3_256_string[i*2], sizeof(sha3_256_string)-i*2, "%02x", (unsigned int)sha3_256_digest[i]);
 	}
 
-	for(int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+	for(i = 0; i < SHA512_DIGEST_LENGTH; i++) {
 		 snprintf(&sha512_string[i*2], sizeof(sha512_string)-i*2, "%02x", (unsigned int)sha512_digest[i]);
 		 snprintf(&sha3_512_string[i*2], sizeof(sha3_512_string)-i*2, "%02x", (unsigned int)sha3_512_digest[i]);
 	}
