@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.cross_building import cross_building
 import os
@@ -12,8 +12,11 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         toolchain = CMakeToolchain(self)
-        toolchain.variables["PYTHON_EXECUTABLE"] = self._python_interpreter
+        toolchain.variables["PYTHON_EXECUTABLE"] = self._python_interpreter.replace("\\", "/")
         toolchain.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -29,7 +32,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             env = Environment()
-            env.define("PYTHONPATH", os.getcwd())
+            env.define("PYTHONPATH", self.cpp.build.libdirs[0])
             env.vars(self).save_script("launcher")
             test_path = os.path.join(self.source_folder, "test.py")
             self.run("{} {}".format(self._python_interpreter, test_path), env="launcher")
