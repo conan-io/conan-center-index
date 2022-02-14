@@ -11,3 +11,6 @@ sources:
   "2.10.0":
     url: "https://github.com/skypjack/uvw/archive/v2.10.0_libuv_v1.42.tar.gz"
     sha256: "30b0ba97a94d5e652490c6b1b32c95e608263f21cf3bc606308d09b3e3a114bf"
+  "2.11.0":
+    url: "https://github.com/skypjack/uvw/archive/v2.11.0_libuv_v1.43.tar.gz"
+    sha256: "3af4efa2842299490ec764f2148f85f4426dfb4f8d8aa436cc2d049db2b7b514"
