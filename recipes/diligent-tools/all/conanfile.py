@@ -53,6 +53,12 @@ class DiligentToolsConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
+
     def requirements(self):
         self.requires("diligent-core/2.5.1")
         self.requires("imgui/1.86")
