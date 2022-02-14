@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class JwtCppConan(ConanFile):
     name = "jwt-cpp"
