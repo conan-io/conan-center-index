@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["PYTHON_EXECUTABLE"] = self._python_interpreter.replace("\\", "/")
+        cmake.definitions["PYTHON_EXECUTABLE"] = self._python_interpreter
         cmake.configure()
         cmake.build()
 
