@@ -26,3 +26,6 @@ sources:
   "1.4.1":
     url: "https://github.com/mjansson/mdns/archive/1.4.1.tar.gz"
     sha256: "decaf007376c62389712dda67c0eaa8ffb682e7be32ece816b1646119f061be3"
+  "1.4.2":
+    url: "https://github.com/mjansson/mdns/archive/1.4.2.tar.gz"
+    sha256: "c69cfdebe28a489c85f33744f7811c40572a9769a81cd57ecc09ef95802347f2"
