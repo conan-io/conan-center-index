@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["GHC_FILESYSTEM_VERSION"] = self.deps_cpp_info["ghc-filesystem"].version
         cmake.configure()
         cmake.build()
 
