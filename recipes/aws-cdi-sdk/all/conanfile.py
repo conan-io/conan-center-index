@@ -107,10 +107,30 @@ class AwsCdiSdkConan(ConanFile):
         cppSdk.libs = ["aws-cpp-sdk-cdi"]
 
         cppSdk.requires = ["aws-sdk-cpp::monitoring", "aws-libfabric::aws-libfabric"]
+        
+        cppSdk.set_property("cmake_file_name", "aws-cpp-sdk-cdi")
+        cppSdk.set_property("cmake_target_name", "aws-cpp-sdk-cdi")
+        cppSdk.set_property("pkg_config_name", "aws-cpp-sdk-cdi")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: Remove the namespace on CMake targets
+        cppSdk.names["cmake_find_package"] = "aws-cpp-sdk-cdi"
+        cppSdk.names["cmake_find_package_multi"] = "aws-cpp-sdk-cdi"
+        cppSdk.names["pkg_config"] = "aws-cpp-sdk-cdi"
 
         cSdk = self.cpp_info.components["cdisdk"]
         cSdk.libs = ["cdisdk"]
         cSdk.requires = ["aws-cpp-sdk-cdi"]
         if self.settings.os == "Linux":
             cSdk.defines = ["_LINUX"]
+
+        cSdk.set_property("cmake_file_name", "aws-cdi-sdk")
+        cSdk.set_property("cmake_target_name", "aws-cdi-sdk")
+        cSdk.set_property("pkg_config_name", "aws-cdi-sdk")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: Remove the namespace on CMake targets
+        cSdk.names["cmake_find_package"] = "aws-cdi-sdk"
+        cSdk.names["cmake_find_package_multi"] = "aws-cdi-sdk"
+        cSdk.names["pkg_config"] = "aws-cdi-sdk"
 
