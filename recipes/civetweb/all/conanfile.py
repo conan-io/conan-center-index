@@ -15,22 +15,38 @@ class CivetwebConan(ConanFile):
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared"            : [True, False],
-        "fPIC"              : [True, False],
-        "with_ssl"        : [True, False],
+        "fPIC": [True, False],
+        "shared": [True, False],
         "ssl_dynamic_loading": [True, False],
-        "with_websockets" : [True, False],
-        "with_ipv6"       : [True, False],
-        "with_cxx"        : [True, False]
+        "with_caching": [True, False],
+        "with_cgi": [True, False],
+        "with_cxx": [True, False],
+        "with_duktape": [True, False],
+        "with_ipv6": [True, False],
+        "with_lua": [True, False],
+        "with_server_stats": [True, False],
+        "with_ssl": [True, False],
+        "with_static_files": [True, False],
+        "with_third_party_output": [True, False],
+        "with_websockets": [True, False],
+        "with_zlib": [True, False],
     }
     default_options = {
-        "shared"            : False,
-        "fPIC"              : True,
-        "with_ssl"        : True,
+        "fPIC": True,
+        "shared": False,
         "ssl_dynamic_loading": False,
-        "with_websockets" : True,
-        "with_ipv6"       : True,
-        "with_cxx"        : True
+        "with_caching": True,
+        "with_cgi": True,
+        "with_cxx": True,
+        "with_duktape": False,
+        "with_ipv6": True,
+        "with_lua": False,
+        "with_server_stats": False,
+        "with_ssl": True,
+        "with_static_files": True,
+        "with_third_party_output": False,
+        "with_websockets": True,
+        "with_zlib": False,
     }
 
     _cmake = None
@@ -43,6 +59,10 @@ class CivetwebConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_zlib_option(self):
+        return tools.Version(self.version) >= "1.15"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -51,6 +71,8 @@ class CivetwebConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_zlib_option:
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -64,6 +86,8 @@ class CivetwebConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
+        if self.options.get_safe("with_zlib"):
+            self.requires("zlib/1.2.11")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
@@ -77,18 +101,32 @@ class CivetwebConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
+
         if self.options.with_ssl:
             openssl_version = tools.Version(self.deps_cpp_info["openssl"].version[:-1])
+            self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
+            self._cmake.definitions["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
             self._cmake.definitions["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
             self._cmake.definitions["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.minor == "1"
-            self._cmake.definitions["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
-        self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
-        self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
-        self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
+
         self._cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
-        self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
         self._cmake.definitions["CIVETWEB_CXX_ENABLE_LTO"] = False
+        self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
+
+        self._cmake.definitions["CIVETWEB_DISABLE_CACHING"] = not self.options.with_caching
+        self._cmake.definitions["CIVETWEB_DISABLE_CGI"] = not self.options.with_cgi
+        self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
+        self._cmake.definitions["CIVETWEB_ENABLE_DUKTAPE"] = self.options.with_duktape
+        self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
+        self._cmake.definitions["CIVETWEB_ENABLE_LUA"] = self.options.with_lua
+        self._cmake.definitions["CIVETWEB_ENABLE_SERVER_STATS"] = self.options.with_server_stats
+        self._cmake.definitions["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
+        self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
+        self._cmake.definitions["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+
+        if self._has_zlib_option:
+            self._cmake.definitions["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
+
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
@@ -126,8 +164,11 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
             if self.options.shared:
                 self.cpp_info.components["_civetweb"].defines.append("CIVETWEB_DLL_IMPORTS")
+
         if self.options.with_ssl:
-            self.cpp_info.components["_civetweb"].requires = ["openssl::openssl"]
+            self.cpp_info.components["_civetweb"].requires.append("openssl::openssl")
+        if self.options.get_safe("with_zlib"):
+            self.cpp_info.components["_civetweb"].requires.append("zlib::zlib")
 
         if self.options.with_cxx:
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
