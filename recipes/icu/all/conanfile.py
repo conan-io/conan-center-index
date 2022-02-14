@@ -26,6 +26,7 @@ class ICUBase(ConanFile):
         "with_dyload": [True, False],
         "dat_package_file": "ANY",
         "with_icuio": [True, False],
+        "with_extras": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class ICUBase(ConanFile):
         "with_dyload": True,
         "dat_package_file": None,
         "with_icuio": True,
+        "with_extras": False,
     }
 
     _env_build = None
@@ -200,8 +202,7 @@ class ICUBase(ConanFile):
                 "--prefix={0}".format(prefix),
                 "--disable-samples",
                 "--disable-layout",
-                "--disable-layoutex",
-                "--disable-extras"]
+                "--disable-layoutex"]
 
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
@@ -211,6 +212,9 @@ class ICUBase(ConanFile):
 
         if not self.options.with_icuio:
             args.append("--disable-icuio")
+
+        if not self.options.with_extras:
+            args.append("--disable-extras")
 
         env_build = self._configure_autotools()
         if tools.cross_building(self, skip_x64_x86=True):
@@ -376,7 +380,7 @@ class ICUBase(ConanFile):
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Prepending to ICU_DATA runtime environment variable: {}".format(data_path))
             self.runenv_info.prepend_path("ICU_DATA", data_path)
-            if self._enable_icu_tools:
+            if self._enable_icu_tools or self.options.with_extras:
                 self.buildenv_info.prepend_path("ICU_DATA", data_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.ICU_DATA.append(data_path)
@@ -398,6 +402,7 @@ class ICUBase(ConanFile):
             self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
             self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
+        if self._enable_icu_tools or self.options.with_extras:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
