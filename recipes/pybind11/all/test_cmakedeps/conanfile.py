@@ -1,5 +1,6 @@
 from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.layout import cmake_layout
 from conan.tools.env import Environment
 from conan.tools.cross_building import cross_building
 import os
