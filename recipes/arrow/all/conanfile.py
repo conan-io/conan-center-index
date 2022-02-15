@@ -111,7 +111,7 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) < "2.0.0":
             del self.options.runtime_simd_level
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
             raise ConanInvalidConfiguration("This recipe does not support this compiler version")
 
@@ -135,6 +135,19 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
         if self.options.with_llvm == False and self._with_llvm(True):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
+
+        if self._with_grpc():
+            raise ConanInvalidConfiguration("CCI has no grpc recipe (yet)")
+        if self.options.with_backtrace:
+            raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
+        if self.options.with_cuda:
+            raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
+        if self.options.with_flight_rpc:
+            raise ConanInvalidConfiguration("CCI has no flight_rpc recipe (yet)")
+        if self.options.with_hiveserver2:
+            raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
+        if self.options.with_orc:
+            raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
@@ -215,55 +228,41 @@ class ArrowConan(ConanFile):
         else:
             return bool(self.options.with_openssl)
 
-    def build_requirements(self):
-        if self._with_grpc():
-            raise ConanInvalidConfiguration("CCI has no grpc recipe (yet)")
-
     def requirements(self):
         if self._with_thrift():
-            self.requires("thrift/0.13.0")
-        if self.options.with_backtrace:
-            raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
+            self.requires("thrift/0.15.0")
         if self._with_protobuf():
-            self.requires("protobuf/3.12.4")
+            self.requires("protobuf/3.19.2")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
-            self.requires("boost/1.74.0")
-        if self.options.with_cuda:
-            raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_flight_rpc:
-            raise ConanInvalidConfiguration("CCI has no flight_rpc recipe (yet)")
+            self.requires("boost/1.78.0")
         if self._with_gflags():
             self.requires("gflags/2.2.2")
         if self._with_glog():
-            self.requires("glog/0.4.0")
-        if self.options.with_hiveserver2:
-            raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
+            self.requires("glog/0.5.0")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
-            self.requires("llvm-core/12.0.0")
+            self.requires("llvm-core/13.0.0")
         if self._with_openssl():
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         if self.options.with_s3:
-            self.requires("aws-sdk-cpp/1.7.299")
+            self.requires("aws-sdk-cpp/1.9.100")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
-        if self.options.with_orc:
-            raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/1.9.3")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.8")
+            self.requires("snappy/1.1.9")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.2")
         if self._with_re2():
-            self.requires("re2/20201101")
+            self.requires("re2/20211101")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
