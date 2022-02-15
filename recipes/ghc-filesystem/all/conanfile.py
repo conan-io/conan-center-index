@@ -36,17 +36,17 @@ class GhcFilesystemRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        config_file = "ghcFilesystem" if tools.Version(self.version) < "1.5.2" else "ghc_filesystem"
-        self.cpp_info.set_property("cmake_file_name", config_file)
+        self.cpp_info.set_property("cmake_file_name", "ghc_filesystem")
         self.cpp_info.set_property("cmake_target_name", "ghcFilesystem::ghc_filesystem")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["ghc_filesystem"].bindirs = []
+        self.cpp_info.components["ghc_filesystem"].frameworkdirs = []
         self.cpp_info.components["ghc_filesystem"].libdirs = []
         self.cpp_info.components["ghc_filesystem"].resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = config_file
-        self.cpp_info.filenames["cmake_find_package_multi"] = config_file
+        self.cpp_info.filenames["cmake_find_package"] = "ghc_filesystem"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "ghc_filesystem"
         self.cpp_info.names["cmake_find_package"] = "ghcFilesystem"
         self.cpp_info.names["cmake_find_package_multi"] = "ghcFilesystem"
         self.cpp_info.components["ghc_filesystem"].names["cmake_find_package"] = "ghc_filesystem"
