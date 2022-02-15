@@ -46,7 +46,7 @@ class Ntv2Conan(ConanFile):
 
         for suffix in ["so", "lib", "a", "dylib", "bc", "dll"]:
             self.copy(
-                f"*.{suffix}", src=os.path.join("ajalibraries", "ajantv2"), dst="lib")
+                f"*.{suffix}", src=os.path.join("ajalibraries", "ajantv2"), dst="lib", keep_path=False)
         for lib in ["ajaanc", "ajacc", "ajantv2"]:
             self.copy("*", src=os.path.join(self._source_subfolder,
                       "ajalibraries", lib, "includes"), dst=os.path.join("include", lib))
@@ -101,7 +101,7 @@ class Ntv2Conan(ConanFile):
 
         elif self.settings.os == "Windows":
 
-            self.cpp_info.defines = ["AJAWindows", "AJA_WINDOWS"]
+            self.cpp_info.defines = ["AJAWindows", "AJA_WINDOWS", "MSWindows"]
             self.cpp_info.includedirs.extend([
                 os.path.join("include", "ajalibraries",
                              "ajantv2", "src", "win"),
