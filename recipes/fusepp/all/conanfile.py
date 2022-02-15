@@ -22,6 +22,7 @@ class FuseppConan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
