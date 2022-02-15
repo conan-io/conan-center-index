@@ -58,9 +58,5 @@ class FuseppConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("Fuse*.h", dst="include", src=self._source_subfolder)
-        self.copy("Fuse.cpp", dst="include", src=self._source_subfolder)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
