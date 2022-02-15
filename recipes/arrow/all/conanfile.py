@@ -13,7 +13,6 @@ class ArrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://arrow.apache.org/"
     license = ("Apache-2.0",)
-    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
