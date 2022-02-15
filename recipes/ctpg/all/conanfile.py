@@ -51,4 +51,9 @@ class CTPGConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE*", "licenses", self._source_subfolder)
-        self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
+        if tools.Version(self.version) >= "1.3.7":
+            self.copy("ctpg.hpp",
+                os.path.join("include", "ctpg"), 
+                os.path.join(self._source_subfolder, "include", "ctpg"))
+        else:
+            self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
