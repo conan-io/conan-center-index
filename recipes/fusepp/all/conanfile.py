@@ -60,7 +60,7 @@ class FuseppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        cmake = self._configure_cmake(self):
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
