@@ -18,7 +18,6 @@ This section gathers the most common questions from the community related to pac
       * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
-  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
@@ -30,7 +29,8 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
-  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)<!-- endToc -->
+  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
