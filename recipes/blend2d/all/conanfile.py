@@ -18,8 +18,6 @@ class Blend2dConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
     _cmake = None
@@ -27,6 +25,11 @@ class Blend2dConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,8 +57,8 @@ class Blend2dConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "  include(\"${ASMJIT_DIR}/CMakeLists.txt\")", "")
-
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
