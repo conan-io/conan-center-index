@@ -487,7 +487,7 @@ class ArrowConan(ConanFile):
         if self.options.with_brotli:
             self.cpp_info.components["libarrow"].requires.append("brotli::brotli")
         if self.options.with_bz2:
-            self.cpp_info.components["libarrow"].requires.append("bz2::bz2")
+            self.cpp_info.components["libarrow"].requires.append("bzip2::bzip2")
         if self.options.with_lz4:
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
