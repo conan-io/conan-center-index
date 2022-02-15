@@ -52,6 +52,13 @@ class FuseppConan(ConanFile):
     def requirements(self):
         self.requires("libfuse/3.10.5")
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
