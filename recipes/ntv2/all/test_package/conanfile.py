@@ -1,5 +1,3 @@
-import os
-
 from conan import ConanFile
 from conan.tools.cmake import CMake
 from conans import tools
@@ -18,4 +16,5 @@ class Ntv2TestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             cmake = CMake(self)
-            cmake.test()
+            with tools.run_environment(self):
+                cmake.test()

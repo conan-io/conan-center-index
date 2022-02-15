@@ -44,9 +44,12 @@ class Ntv2Conan(ConanFile):
     def package(self):
         self.copy(os.path.join(self._source_subfolder, 'LICENSE'), 'licenses')
 
-        for suffix in ["so", "lib", "a", "dylib", "bc", "dll"]:
+        for suffix in ["so", "lib", "a", "dylib", "bc"]:
             self.copy(
                 f"*.{suffix}", src=os.path.join("ajalibraries", "ajantv2"), dst="lib", keep_path=False)
+        if self.settings.os == "Windows" and self.options.shared:
+            self.copy(
+                f"*.dll", src=os.path.join("ajalibraries", "ajantv2"), dst="bin", keep_path=False)
         for lib in ["ajaanc", "ajacc", "ajantv2"]:
             self.copy("*", src=os.path.join(self._source_subfolder,
                       "ajalibraries", lib, "includes"), dst=os.path.join("include", lib))
