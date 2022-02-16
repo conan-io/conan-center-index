@@ -125,6 +125,8 @@ class SpirvtoolsConan(ConanFile):
         cmake.definitions["SPIRV_CHECK_CONTEXT"] = False
         cmake.definitions["SPIRV_BUILD_FUZZER"] = False
         cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = not self.options.build_executables
+        # To install relocatable shared libs on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         cmake.configure(build_folder=self._build_subfolder)
         self._cmake = cmake
