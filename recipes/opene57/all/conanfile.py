@@ -12,20 +12,25 @@ class Opene57Conan(ConanFile):
     homepage = "https://github.com/openE57/openE57"
     license = ("MIT", "BSL-1.0")
     settings = "os", "compiler", "arch", "build_type"
-    options = {"with_tools": [True, False],
-               "shared": [True, False],
-               "fPIC": [True, False]}
+    options = { "with_tools": [True, False],
+                "shared": [True, False],
+                "fPIC": [True, False]
+               }
     default_options = {
-        'with_tools': False,
-        'shared': False,
-        'fPIC': True}
-    exports_sources = "CMakeLists.txt"
+                "with_tools": False,
+                "shared": False,
+                "fPIC": True
+               }
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _minimum_compilers_version(self):
@@ -35,6 +40,11 @@ class Opene57Conan(ConanFile):
             "clang": "6",
             "apple-clang": "10",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,14 +64,6 @@ class Opene57Conan(ConanFile):
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
-
-        # Check stdlib ABI compatibility
-        compiler_name = str(self.settings.compiler)
-        if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
-        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
-                                            ' or "compiler.libcxx=libc++"' % self.name)
 
     def build_requirements(self):
         if self.options.with_tools:
@@ -91,11 +93,13 @@ class Opene57Conan(ConanFile):
         if self.settings.os == "Windows":
             self._cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
         else:
-            self._cmake.definitions["BUILD_WITH_FPIC"] = self.options.fPIC
-        self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.definitions["BUILD_WITH_FPIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
