@@ -199,7 +199,7 @@ class ArrowConan(ConanFile):
             if version.major == "1":
                 if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
                     return True
-            elif version.major == "2":
+            elif version.major >= "2":
                 if self.settings.compiler == "Visual Studio":
                     return True
             return False
