@@ -12,9 +12,9 @@ class LibXpmConan(ConanFile):
     description = "X Pixmap (XPM) image file format library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/xorg/lib/libxpm"
-    topics = ("xpm",)
+    topics = "xpm"
     license = "MIT-open-group"
-    settings = ("os", "arch", "compiler", "build_type")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,8 +23,8 @@ class LibXpmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = ("cmake",)
-    exports_sources = ("CMakeLists.txt", "windows/*")
+    generators = "cmake"
+    exports_sources = "CMakeLists.txt", "windows/*"
     no_copy_source = True
 
     def validate(self):
