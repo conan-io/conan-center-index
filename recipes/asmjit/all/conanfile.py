@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import glob
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class AsmjitConan(ConanFile):
     name = "asmjit"
@@ -71,6 +71,12 @@ class AsmjitConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "asmjit")
+        self.cpp_info.set_property("cmake_target_name", "asmjit::asmjit")
+
+        self.cpp_info.names["cmake_find_package"] = "asmjit"
+        self.cpp_info.names["cmake_find_package_multi"] = "asmjit"
+
         self.cpp_info.libs = ["asmjit"]
         if not self.options.shared:
             self.cpp_info.defines = ["ASMJIT_STATIC"]
