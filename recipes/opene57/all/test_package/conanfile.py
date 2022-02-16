@@ -1,5 +1,4 @@
 import os
-from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 
 class TestOpenE57Conan(ConanFile):
@@ -7,11 +6,9 @@ class TestOpenE57Conan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        if not tools.cross_building(self):
-            cmake = CMake(self)
-            cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
