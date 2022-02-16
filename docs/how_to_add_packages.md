@@ -67,7 +67,7 @@ Packages generated and uploaded by this build service don't include any _user_ o
 ## Recipe files structure
 
 Every entry in the `recipes` folder contains all the files required by Conan to create the binaries for all the versions of one library. Those
-files doesn't depend on any other file in the repository (we are not using `python_requires`) and every pull-request can modify only one of those
+files don't depend on any other file in the repository (we are not using `python_requires`) and every pull-request can modify only one of those
 folders at a time.
 
 This is the canonical structure of one of these folders, where the same `conanfile.py` recipe is suitable to build all the versions of the library:
