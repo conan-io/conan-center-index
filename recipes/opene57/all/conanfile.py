@@ -55,6 +55,14 @@ class Opene57Conan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
+        # Check stdlib ABI compatibility
+        compiler_name = str(self.settings.compiler)
+        if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
+        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"' % self.name)
+
     def build_requirements(self):
         if self.options.with_tools:
             self.build_requires("boost/1.78.0")
