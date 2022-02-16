@@ -22,7 +22,7 @@ class MiniaudioConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "header_only": False,
+        "header_only": True,
     }
 
     generators = "cmake"
