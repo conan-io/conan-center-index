@@ -1,19 +1,17 @@
 from conans import CMake, ConanFile, tools
 import os, shutil, glob
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class FltkConan(ConanFile):
     name = "fltk"
     description = "Fast Light Toolkit is a cross-platform C++ GUI toolkit"
     topics = ("fltk", "gui")
     homepage = "https://www.fltk.org"
-    license = "LGPL-2.0-custom"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package_multi"
+    license = "LGPL-2.0-custom"
     settings = "os", "arch", "compiler", "build_type"
-
+    exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,6 +26,8 @@ class FltkConan(ConanFile):
         "with_threads": True,
         "with_gdiplus": True,
     }
+    # generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake",
 
     @property
     def _source_subfolder(self):
@@ -75,38 +75,34 @@ class FltkConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(self._source_subfolder + "/COPYING", dst="licenses", keep_path=False, ignore_case=True)
-        # # these headers and libs come from dependencies
-        # deps_includes = self.package_folder + "/include/FL/images"
-        # if os.path.isdir(deps_includes):
-        #     shutil.rmtree(deps_includes)
-        # removed_libs = ["z", "jpeg", "png"]
-        # for rlib in removed_libs:
-        #     for fn in glob.glob(self.package_folder + "/*/*fltk_" + rlib + "*.*"):
-        #         os.remove(fn)       # lib/fltk_png.lib, bin/libfltk_png_SHARED.dll
-        # if self.options.shared:
-        #     for fn in glob.glob(self.package_folder + "/lib/*.lib"):
-        #         if '_SHARED' not in fn:
-        #             os.remove(fn)   # static libraries
-        tools.remove_from_path(os.path.join(self.package_folder, "share", "fltk"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "fltk")
+        self.cpp_info.set_property("cmake_target_name", "fltk::fltk")
+
+        self.cpp_info.names["cmake_find_package"] = "fltk"
+        self.cpp_info.names["cmake_find_package_multi"] = "fltk"
+
         if self.options.shared:
             self.cpp_info.defines.append("FL_DLL")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ['m', 'dl', 'X11', 'Xext']
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(['pthread'])
             if self.options.with_gl:
                 self.cpp_info.system_libs.extend(['GL', 'GLU'])
-        if self.settings.os == "Windows" and self.options.get_safe("with_gdiplus"):
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ['Cocoa', 'OpenGL', 'IOKit', 'Carbon', 'CoreFoundation', 'CoreVideo']
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs = [
-                "gdiplus",
-                "uuid",
-                "msimg32",
                 "gdi32",
                 "imm32",
+                "msimg32",
                 "ole32",
-                "oleaut32"
+                "oleaut32",
+                "uuid",
             ]
-
+            if self.options.get_safe("with_gdiplus"):
+                self.cpp_info.system_libs.append("gdiplus")
