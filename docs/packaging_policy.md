@@ -5,7 +5,10 @@ part of this repository.
 
 <!-- toc -->
 ## Contents
-<!-- endToc -->
+
+  * [Sources](#sources)
+  * [Settings](#settings)
+  * [Options](#options)<!-- endToc -->
 
 
 ## Sources

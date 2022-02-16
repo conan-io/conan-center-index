@@ -25,7 +25,7 @@ def main():
                     if not version or packaging.version.Version(v) > packaging.version.Version(version):
                         version = v
                 except packaging.version.InvalidVersion:
-                    print("Error parsing version %s for package %s in pr %s" % (v, package, pr))
+                    print("Error parsing version %s for package %s" % (v, package))
 
         if version:
             command = ["conan", "export", os.path.join("recipes", package, folder), "%s/%s@" % (package, version)]
