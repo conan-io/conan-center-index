@@ -86,13 +86,6 @@ class MiniaudioConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
-            # Keep lighter miniaudio.h since we built the library
-            self.copy(
-                pattern="miniaudio.h",
-                dst="include/",
-                src=os.path.join(self._source_subfolder,
-                                 "extras/miniaudio_split"),
-            )
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
