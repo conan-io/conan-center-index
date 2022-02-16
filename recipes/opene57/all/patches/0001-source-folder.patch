@@ -17,18 +17,6 @@ index b8ae7d9..6c55e87 100644
          DESTINATION .)
  
  set(CPACK_PACKAGE_VENDOR "Michele Adduci <adduci@tutanota.com>")
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index a489d6b..29dbf46 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -13,7 +13,6 @@ include(GenerateExportHeader)
- # Check if we are building a conan recipe
- #if(NOT EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
- #include(InstallRequiredSystemLibraries)
--include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compiler_options.cmake)
- #endif()
- 
- include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 diff --git a/src/tools/CMakeLists.txt b/src/tools/CMakeLists.txt
 index baa5281..2d26bcb 100644
 --- a/src/tools/CMakeLists.txt
