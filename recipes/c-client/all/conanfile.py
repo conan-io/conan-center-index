@@ -13,9 +13,9 @@ class CclientConan(ConanFile):
     description = "University of Washington IMAP toolkit"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uw-imap/imap"
-    topics = ("imap",)
+    topics = "imap"
     license = "Apache-2.0"
-    settings = ("os", "arch", "compiler", "build_type")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         # FIXME: can this library be made shared?
         "fPIC": [True, False],
@@ -23,7 +23,7 @@ class CclientConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-    exports_sources = ("patches/*", "cclient.def")
+    exports_sources = "patches/*", "cclient.def"
 
     @property
     def _settings_build(self):
