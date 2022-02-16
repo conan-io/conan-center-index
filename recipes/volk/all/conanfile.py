@@ -1,22 +1,25 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class VolkConan(ConanFile):
     name = "volk"
     license = "MIT"
     homepage = "https://github.com/zeux/volk"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "volk is a meta-loader for Vulkan. It allows you to \
-    dynamically load entrypoints required to use Vulkan without linking\
-     to vulkan-1.dll or statically linking Vulkan loader. Additionally,\
-      volk simplifies the use of Vulkan extensions by automatically\
-       loading all associated entrypoints. Finally, volk enables\
-        loading Vulkan entrypoints directly from the driver which \
-        can increase performance by skipping loader dispatch \
-        overhead."
-    topics = ("Vulkan", "loader", "extension", "entrypoint", "graphics")
+    description = (
+        "volk is a meta-loader for Vulkan. It allows you to dynamically load "
+        "entrypoints required to use Vulkan without linking to vulkan-1.dll or "
+        "statically linking Vulkan loader. Additionally, volk simplifies the "
+        "use of Vulkan extensions by automatically loading all associated "
+        "entrypoints. Finally, volk enables loading Vulkan entrypoints "
+        "directly from the driver which can increase performance by skipping "
+        "loader dispatch overhead."
+    )
+    topics = ("vulkan", "loader", "extension", "entrypoint", "graphics")
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
@@ -24,9 +27,9 @@ class VolkConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-
     _cmake = None
 
     @property
@@ -67,19 +70,20 @@ class VolkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "volk"
-        self.cpp_info.names["cmake_find_package_multi"] = "volk"
+        self.cpp_info.set_property("cmake_file_name", "volk")
 
-        self.cpp_info.components["libvolk"].names["cmake_find_package"] = "volk"
-        self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = "volk"
+        self.cpp_info.components["libvolk"].set_property("cmake_target_name", "volk::volk")
         self.cpp_info.components["libvolk"].libs = ["volk"]
         self.cpp_info.components["libvolk"].requires = ["vulkan-headers::vulkan-headers"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libvolk"].system_libs = ["dl"]
 
-        self.cpp_info.components["volk_headers"].names["cmake_find_package"] = "volk_headers"
-        self.cpp_info.components["volk_headers"].names["cmake_find_package_multi"] = "volk_headers"
+        self.cpp_info.components["volk_headers"].set_property("cmake_target_name", "volk::volk_headers")
         self.cpp_info.components["volk_headers"].libs = []
         self.cpp_info.components["volk_headers"].requires = ["vulkan-headers::vulkan-headers"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["volk_headers"].system_libs = ["dl"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["libvolk"].names["cmake_find_package"] = "volk"
+        self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = "volk"
