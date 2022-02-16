@@ -76,10 +76,14 @@ class Opene57Conan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["PROJECT_VERSION"] = self.version
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
         self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
+        if self.settings.os == "Windows":
+            self._cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
+        else:
+            self._cmake.definitions["BUILD_WITH_FPIC"] = self.options.fPIC
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
