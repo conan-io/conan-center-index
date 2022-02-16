@@ -50,6 +50,7 @@ class FltkConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("opengl/system")
             self.requires("glu/system")
+            self.requires("fontconfig/2.13.93")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -58,16 +59,23 @@ class FltkConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['OPTION_BUILD_SHARED_LIBS'] = self.options.shared
-        cmake.definitions['OPTION_BUILD_EXAMPLES'] = False
+        cmake.definitions['FLTK_BUILD_TEST'] = False
+        cmake.definitions['FLTK_BUILD_EXAMPLES'] = False
         cmake.definitions['OPTION_USE_GL'] = self.options.with_gl
         cmake.definitions['OPTION_USE_THREADS'] = self.options.with_threads
-        cmake.definitions['OPTION_USE_SYSTEM_ZLIB'] = False
-        cmake.definitions['OPTION_USE_SYSTEM_LIBJPEG'] = False
-        cmake.definitions['OPTION_USE_SYSTEM_LIBPNG'] = False
+        cmake.definitions['FLTK_USE_BUILTIN_JPEG'] = False
+        cmake.definitions['FLTK_USE_BUILTIN_PNG'] = False
+        cmake.definitions['FLTK_USE_BUILTIN_ZLIB'] = False
+        cmake.definitions['OPTION_BUILD_HTML_DOCUMENTATION'] = False
+        cmake.definitions['OPTION_BUILD_PDF_DOCUMENTATION'] = False
+        cmake.definitions['debug_build'] = True
         cmake.configure()
         return cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "export.cmake"), """  add_subdirectory(fluid)
+  set (FLTK_FLUID_EXECUTABLE fluid)
+  set (FLUID fluid) # export""", "")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -76,6 +84,7 @@ class FltkConan(ConanFile):
         cmake.install()
         self.copy(self._source_subfolder + "/COPYING", dst="licenses", keep_path=False, ignore_case=True)
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "FLTK.framework"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")
@@ -88,7 +97,7 @@ class FltkConan(ConanFile):
             self.cpp_info.defines.append("FL_DLL")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ['m', 'dl', 'X11', 'Xext']
+            self.cpp_info.system_libs = ['m', 'dl', 'X11', 'Xext', 'Xfixes', 'Xft', 'Xrender', 'Xcursor', 'Xinerama']
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(['pthread'])
             if self.options.with_gl:
