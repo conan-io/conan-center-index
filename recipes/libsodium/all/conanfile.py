@@ -87,14 +87,12 @@ class LibsodiumConan(ConanFile):
                 "14": "vs2015",
                 "15": "vs2017",
                 "16": "vs2019",
-                "17": "vs2022",
             }
         else:
             folder = {
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
-                "193": "vs2022",
             }
         return folder.get(str(self.settings.compiler.version))
 
