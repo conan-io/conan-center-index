@@ -96,7 +96,7 @@ class LibsodiumConan(ConanFile):
                 "192": "vs2019",
                 "193": "vs2022",
             }
-        folder.get(str(self.settings.compiler.version))
+        return folder.get(str(self.settings.compiler.version))
 
     def _build_msvc(self):
         msvc_sln_folder = self._msvc_sln_folder or "vs2019"
