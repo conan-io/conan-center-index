@@ -1,6 +1,8 @@
 import os
 from conans import CMake, ConanFile, tools
 
+required_conan_version = ">=1.43.0"
+
 
 class QXlsxConan(ConanFile):
     name = "qxlsx"
@@ -72,3 +74,4 @@ class QXlsxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "QXlsx")
         self.cpp_info.names["cmake_find_package"] = "QXlsx"
         self.cpp_info.names["cmake_find_package_multi"] = "QXlsx"
+
