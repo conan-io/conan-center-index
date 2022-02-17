@@ -102,6 +102,7 @@ class DiligentToolsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        self.copy("*.hpp", src=self._source_subfolder, dst="include/DiligentTools", keep_path=True)        
         self.copy(pattern="*.dll", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
@@ -112,6 +113,7 @@ class DiligentToolsConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools", "AssetLoader", "interface"))
 
         self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
 
