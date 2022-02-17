@@ -17,7 +17,9 @@ class TestPackageConan(ConanFile):
     @property
     def _python_interpreter(self):
         if getattr(sys, "frozen", False):
+            self.output.warn("!!! INTERPRETER: python from frozen")
             return "python"
+        self.output.warn("!!! INTERPRETER: sys.executable: {}".format(sys.executable))
         return sys.executable
 
     def test(self):
