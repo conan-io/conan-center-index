@@ -48,19 +48,45 @@ class MoltenVKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cereal/1.3.0")
-        self.requires("glslang/11.7.0")
+        self.requires("cereal/1.3.1")
+        self.requires("glslang/{}".format(self._glslang_version))
         self.requires("spirv-cross/{}".format(self._spirv_cross_version))
         self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2021.4")
+            self.requires("spirv-tools/{}".format(self._spirv_tools_version))
         if tools.Version(self.version) < "1.1.0":
             raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
             self.requires("vulkan-portability/0.2")
 
     @property
+    def _glslang_version(self):
+        return {
+            "1.1.8": "1.3.204.0",
+            "1.1.7": "1.3.204.0",
+            "1.1.6": "11.7.0",
+            "1.1.5": "11.6.0",
+            "1.1.4": "11.5.0",
+            "1.1.1": "8.13.3559",
+            "1.1.0": "8.13.3559",
+        }[self.version]
+
+    @property
+    def _spirv_tools_version(self):
+        return {
+            "1.1.8": "1.3.204.0",
+            "1.1.7": "1.3.204.0",
+            "1.1.6": "2021.4",
+            "1.1.5": "2021.3",
+            "1.1.4": "2021.2",
+            "1.1.1": "2020.5",
+            "1.1.0": "2020.5",
+        }[self.version]
+
+    @property
     def _spirv_cross_version(self):
         return {
+            "1.1.8": "1.3.204.0",
+            "1.1.7": "1.3.204.0",
             "1.1.6": "cci.20211113",
             "1.1.5": "cci.20210823",
             "1.1.4": "cci.20210621",
@@ -77,6 +103,8 @@ class MoltenVKConan(ConanFile):
     @property
     def _vulkan_headers_version(self):
         return {
+            "1.1.8": "1.3.204.0",
+            "1.1.7": "1.3.204.0",
             "1.1.6": "1.2.198.0",
             "1.1.5": "1.2.189",
             "1.1.4": "1.2.182",
