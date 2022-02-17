@@ -58,6 +58,8 @@ class DiligentToolsConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.options.shared:
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
+        if self.settings.os == 'Macos':
+            raise ConanInvalidConfiguration("Can't build because of issue https://github.com/DiligentGraphics/DiligentTools/issues/161")
 
     def requirements(self):
         self.requires("diligent-core/2.5.1")
