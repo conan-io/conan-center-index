@@ -267,7 +267,7 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["context"].requires = ["util"]
 
         self.cpp_info.components["snapshot"].libs = ["snapshot"]
-        self.cpp_info.components["snapshot"].requires = ["client_common", "mini_chromium_base", "util"]
+        self.cpp_info.components["snapshot"].requires = ["context", "client_common", "mini_chromium_base", "util"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["snapshot"].frameworks.extend(["OpenCL"])
 
