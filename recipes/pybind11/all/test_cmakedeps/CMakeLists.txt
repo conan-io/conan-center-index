@@ -5,7 +5,14 @@ project(test_package CXX)
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(test_package MODULE test_package.cpp)
-# target_link_libraries(test_package PRIVATE pybind11::pybind11)
+
+
+if(${PYBIND_VERSION} VERSION_LESS "2.6.0")
+    # Previous versions don't manage correctly the target (more old cmake approach) so the headers
+    # are not automatically added to the target in the `pybind11_add_module`
+    target_link_libraries(test_package PRIVATE pybind11::pybind11)
+endif()
+
 set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
 
 enable_testing()

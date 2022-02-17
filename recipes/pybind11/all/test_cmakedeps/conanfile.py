@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["PYTHON_EXECUTABLE"] = self._python_interpreter.replace("\\", "/")
+        toolchain.variables["PYBIND_VERSION"] = str(self.dependencies["pybind11"].ref.version)
         toolchain.generate()
 
     def layout(self):
