@@ -18,7 +18,6 @@ class OneTBBConan(ConanFile):
         "are portable, composable and have future-proof scalability."
     )
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
