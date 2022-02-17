@@ -11,8 +11,8 @@ conan_set_libcxx()
 conan_set_vs_runtime()
 
 find_package(pybind11 REQUIRED)
+
 pybind11_add_module(test_package MODULE test_package.cpp)
-target_link_libraries(test_package PRIVATE pybind11::pybind11)
 set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
 
 enable_testing()
