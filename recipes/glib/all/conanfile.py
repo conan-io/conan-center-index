@@ -44,7 +44,7 @@ class GLibConan(ConanFile):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
-            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0"
+            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
 
     def configure(self):
         if self.options.shared:
