@@ -1,11 +1,9 @@
+#include <iostream>
+
 #include <rtmidi/RtMidi.h>
 
 int main (void) {
-    try {
-        RtMidiIn midiIn(RtMidi::RTMIDI_DUMMY);
-    } catch ( RtMidiError &error ) {
-        error.printMessage();
-    }
+    std::cout << "Version: " << RtMidi::getVersion() << std::endl;
 
     return 0;
 }
