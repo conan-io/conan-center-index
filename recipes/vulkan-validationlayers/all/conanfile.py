@@ -42,7 +42,7 @@ class VulkanValidationLayersConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
@@ -119,7 +119,7 @@ class VulkanValidationLayersConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
         self._cmake.definitions["USE_CCACHE"] = False
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
             self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
             self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
