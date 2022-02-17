@@ -1,5 +1,9 @@
-#include "hello.h"
+#include "Fuse.h"
+#include "Fuse-impl.h"
+
+class MyFilesystem : public Fusepp::Fuse<MyFilesystem> {
+};
 
 int main() {
-    hello();
+    MyFilesystem();
 }
