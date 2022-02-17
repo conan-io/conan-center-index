@@ -277,8 +277,10 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].libs = ["minidump"]
         self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
 
+        self.cpp_info.components["net"].libs = ["net"]
+
         self.cpp_info.components["handler_common"].libs = ["handler_common"]
-        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util"]
+        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util", "net"]
 
         self.cpp_info.components["handler"].libs = ["handler"]
         self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"]
