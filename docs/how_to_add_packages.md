@@ -156,7 +156,7 @@ Also, **every `conanfile.py` should be accompanied by one or several folder to t
 ### The test package folders: `test_package` and `test_<something>`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
-a minimal project to test the package is strictly required. You can read about it the 
+a minimal project to test the package is strictly required. You can read about it in the 
 [Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
 
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
@@ -164,10 +164,8 @@ Sometimes it is useful to test the package using different build systems (CMake,
 way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
 (`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files ([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
 
-When using more than one `test_<something>` folder, try to reuse the project files as much as possible: source files, `CMakeLists.txt`,... as
-we are interested on validating that all the different generators provide the same information and target names and they can be safely 
-interchanged: some users prefer one generators over the others, some generators might be deprecated in the future,... but Conan won't force
-you to change the project files.
+When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
+project files as simple as possible, without the need of extra logic to handle different scenarios.
 
 ```
 .
@@ -182,7 +180,9 @@ you to change the project files.
 |               +-- CMakeLists.txt
 |               +-- main.cpp
 |           +-- test_cmakedeps/
-|               +-- conanfile.py  # Uses project files from `test_package`
+|               +-- conanfile.py
+|               +-- CMakeLists.txt
+|               +-- conanfile.py
 ```
 
 The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
