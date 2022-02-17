@@ -37,8 +37,6 @@ class FTXUIConan(ConanFile):
         self._validate_compiler_settings()
         if self.settings.compiler in ["Visual Studio", "msvc"]:
             raise ConanInvalidConfiguration("Visual Studio unsupported")
-        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration("only libstdc++11 ABI supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
