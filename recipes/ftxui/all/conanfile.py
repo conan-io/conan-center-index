@@ -84,6 +84,12 @@ class FTXUIConan(ConanFile):
             conan.tools.files.rename(self, src, dst)
 
     def package_info(self):
-        self.cpp_info.libs = ['ftxui-dom',
-                              'ftxui-screen',
-                              'ftxui-component']
+        self.cpp_info.name = 'ftxui'
+        self.cpp_info.components['ftxui-dom'].names['cmake_find_package'] = ['ftxui-dom']
+        self.cpp_info.components['ftxui-dom'].libs = ['ftxui-dom']
+        self.cpp_info.components['ftxui-dom'].requires = ['ftxui-screen']
+        self.cpp_info.components['ftxui-screen'].names['cmake_find_package'] = ['ftxui-screen']
+        self.cpp_info.components['ftxui-screen'].libs = ['ftxui-screen']
+        self.cpp_info.components['ftxui-component'].names['cmake_find_package'] = ['ftxui-component']
+        self.cpp_info.components['ftxui-component'].libs = ['ftxui-component']
+        self.cpp_info.components['ftxui-component'].requires = ['ftxui-dom']
