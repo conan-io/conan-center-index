@@ -4,6 +4,8 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+set(CMAKE_CXX_STANDARD 11)
+
 find_package(blend2d CONFIG REQUIRED)
 
 add_executable(test_package test_package.cpp)
