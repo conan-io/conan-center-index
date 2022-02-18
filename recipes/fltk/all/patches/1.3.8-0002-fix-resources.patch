@@ -1,0 +1,19 @@
+diff --git a/CMake/options.cmake b/CMake/options.cmake
+index ddd650f..e35f3d9 100644
+--- a/CMake/options.cmake
++++ b/CMake/options.cmake
+@@ -386,9 +386,14 @@ else ()
+   option (OPTION_USE_SYSTEM_LIBPNG "use system libpng" ON)
+ endif (APPLE)
+ 
++if(0)
+ if (OPTION_USE_SYSTEM_LIBPNG)
+   include (FindPNG)
+ endif (OPTION_USE_SYSTEM_LIBPNG)
++else()
++find_package(PNG REQUIRED)
++set (HAVE_PNG_H 1)
++endif()
+ 
+ if (PNG_FOUND)
+   set (FLTK_PNG_LIBRARIES ${PNG_LIBRARIES})
