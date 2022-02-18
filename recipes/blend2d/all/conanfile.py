@@ -38,6 +38,7 @@ class Blend2dConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        self.options["asmjit"].shared = self.options.shared
 
     def requirements(self):
         self.requires("asmjit/cci.20220210")
@@ -75,4 +76,4 @@ class Blend2dConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["blend2d"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt", "dl"])
+            self.cpp_info.system_libs.extend(["pthread", "rt",])
