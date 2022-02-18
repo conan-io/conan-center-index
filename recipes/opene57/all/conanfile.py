@@ -57,6 +57,7 @@ class Opene57Conan(ConanFile):
     def validate(self):
         if self.options.shared:
             raise ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
+            
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
@@ -64,20 +65,32 @@ class Opene57Conan(ConanFile):
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
+        
+        if self.options.with_tools:
+            #self.build_requires("boost/1.78.0")
+            if not self.options["boost"].multithreading: 
+                raise ConanInvalidConfiguration("Boost Multithreading is required when building tools.")
+            if not self.options["boost"].multithreading: 
+                raise ConanInvalidConfiguration("Boost Multithreading is required when building tools.")
+            if self.options.shared != self.options["boost"].shared:
+                raise ConanInvalidConfiguration("Boost 'shared' option differs from opene57 one.")
+            
+        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
+            if self.options.shared != self.options["icu"].shared:
+                raise ConanInvalidConfiguration("ICU 'shared' option differs from opene57 one.")
+                
+        if self.options["xerces-c"].shared != self.options.shared:
+            raise ConanInvalidConfiguration("Xerces-C 'shared' option differs from opene57 one.")
 
     def build_requirements(self):
         if self.options.with_tools:
             self.build_requires("boost/1.78.0")
-            self.options["boost"].multithreading = True
-            self.options["boost"].shared = self.options.shared
 
     def requirements(self):
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
             self.requires("icu/70.1")
-            self.options["icu"].shared = self.options.shared
 
         self.requires("xerces-c/3.2.3")
-        self.options["xerces-c"].shared = self.options.shared
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
