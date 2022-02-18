@@ -42,7 +42,7 @@ class CcfitsConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cfitsio/3.490")
+        self.requires("cfitsio/4.0.0")
 
     def validate(self):
         if tools.Version(self.version) >= "2.6":
