@@ -75,4 +75,4 @@ class Blend2dConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["blend2d"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "rt", "dl"])
