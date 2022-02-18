@@ -86,7 +86,7 @@ class grpcConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.17.1')
+            self.build_requires('protobuf/3.19.2')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
@@ -216,7 +216,7 @@ class grpcConan(ConanFile):
         if not self.options.secure:
             self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
             self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
-            self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
+            self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "abseil::absl_random_random", "gpr", "address_sorting", "upb"]
             if tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
             self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
