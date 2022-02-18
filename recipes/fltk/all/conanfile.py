@@ -55,6 +55,7 @@ class FltkConan(ConanFile):
             self.requires("opengl/system")
             self.requires("glu/system")
             self.requires("fontconfig/2.13.93")
+            self.requires("xorg/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -101,9 +102,8 @@ class FltkConan(ConanFile):
             self.cpp_info.defines.append("FL_DLL")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ['m', 'dl', 'X11', 'Xext', 'Xfixes', 'Xft', 'Xrender', 'Xcursor', 'Xinerama']
             if self.options.with_threads:
-                self.cpp_info.system_libs.extend(['pthread'])
+                self.cpp_info.system_libs.extend(['pthread', 'dl'])
             if self.options.with_gl:
                 self.cpp_info.system_libs.extend(['GL', 'GLU'])
         if self.settings.os == "Macos":
