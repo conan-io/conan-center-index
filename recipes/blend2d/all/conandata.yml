@@ -6,4 +6,4 @@ sources:
 patches:
   "0.0.17":
     - base_path: "source_subfolder"
-      patch_file: "patches/0.0.17-disable-embed-asmjit.patch"
+      patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
