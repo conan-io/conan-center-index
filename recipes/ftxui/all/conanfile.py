@@ -76,7 +76,7 @@ class FTXUIConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
         libs = ['ftxui-dom', 'ftxui-screen', 'ftxui-component']
-        ext = '.a'
+        ext = ('.so' if self.options.shared else '.a')
 
         for lib in libs:
             src = os.path.join(self.package_folder, "lib", f"{lib}{ext}")
