@@ -21,12 +21,13 @@ sources:
           - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
             sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
     Macos:
-      "x86_64":
-        "gcc":
-          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_x86_64.tar.gz"
-            sha256: "10aa4d15b67577d66b2589320bb0ddc5436199657098647ba5d006a214a6411f"
-          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
-            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      ## MacOX x86_64 depends system llvm library.
+      #"x86_64":
+      #  "gcc":
+      #    - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_x86_64.tar.gz"
+      #      sha256: "10aa4d15b67577d66b2589320bb0ddc5436199657098647ba5d006a214a6411f"
+      #    - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
+      #      sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
       "armv8":
         "gcc":
           - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.1/WasmEdge-0.9.1-darwin_arm64.tar.gz"
