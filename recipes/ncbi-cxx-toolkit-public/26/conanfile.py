@@ -28,25 +28,25 @@ class NcbiCxxToolkit(ConanFile):
         "with_targets":   "",
     }
     NCBI_to_Conan_requires = {
-        "BerkeleyDB":   "libdb/5.3.28@#355aa134e9ee1bda60fa224f8b54c913",
-        "BZ2":          "bzip2/1.0.8@#493645787acdd3909523a6a2773b1b36",
-        "CASSANDRA":    "cassandra-cpp-driver/2.15.3@#27c46dd9dfbb2a3afef30aa2e914f00a",
-        "GIF":          "giflib/5.2.1@#75a273d91a6c63bc0d8a93799ce19acc",
-        "JPEG":         "libjpeg/9d@#956b5e73632aac77088571f574d766c0",
-        "LMDB":         "lmdb/0.9.29@#3bdb51ff4c3649bd865ee3857f0f2e07",
-        "LZO":          "lzo/2.10@#76a80652793ae478a12f6f9a8eb17a89",
-        "MySQL":        "libmysqlclient/8.0.25@#bbe62517865849c442c032cc7aecfd57",
-        "NGHTTP2":      "libnghttp2/1.45.1@#cef166f78349143079e1c667d823b25a",
-        "PCRE":         "pcre/8.45@#b6bae758d36ca2050bb8527ea408eb75",
-        "PNG":          "libpng/1.6.37@#8b23717a9884a2b06884c599072955f4",
-        "SQLITE3":      "sqlite3/3.36.0@#567836d4f4b7b58a4e834bf98288d609",
-        "TIFF":         "libtiff/4.3.0@#28ac662980826ae8ffe8d6236cdd9735",
-        "XML":          "libxml2/2.9.12@#9817dd585ffc6de1479da6d5bcf01fc0",
-        "XSLT":         "libxslt/1.1.34@#47946f5c7abe03d18179b55be67bbabe",
-        "UV":           "libuv/1.42.0@#e1801aae9570062012d94db20338451b",
-        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9",
-        "OpenSSL":      "openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe",
-        "ZSTD":         "zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207"
+        "BerkeleyDB":   "libdb/5.3.28",
+        "BZ2":          "bzip2/1.0.8",
+        "CASSANDRA":    "cassandra-cpp-driver/2.15.3",
+        "GIF":          "giflib/5.2.1",
+        "JPEG":         "libjpeg/9d",
+        "LMDB":         "lmdb/0.9.29",
+        "LZO":          "lzo/2.10",
+        "MySQL":        "libmysqlclient/8.0.25",
+        "NGHTTP2":      "libnghttp2/1.46.0",
+        "PCRE":         "pcre/8.45",
+        "PNG":          "libpng/1.6.37",
+        "SQLITE3":      "sqlite3/3.37.2",
+        "TIFF":         "libtiff/4.3.0",
+        "XML":          "libxml2/2.9.12",
+        "XSLT":         "libxslt/1.1.34",
+        "UV":           "libuv/1.42.0",
+        "Z":            "zlib/1.2.11",
+        "OpenSSL":      "openssl/1.1.1l",
+        "ZSTD":         "zstd/1.5.2"
     }
 
 #----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ class NcbiCxxToolkit(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].system_libs = ["ws2_32", "dbghelp"]
-            self.cpp_info.components["NETWORKLIBS"].system_libs = [""]
+            self.cpp_info.components["NETWORKLIBS"].system_libs = []
         elif self.settings.os == "Linux":
             self.cpp_info.components["ORIGLIBS"].system_libs = ["dl", "rt", "m", "pthread"]
             self.cpp_info.components["NETWORKLIBS"].system_libs = ["resolv"]
