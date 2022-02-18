@@ -70,7 +70,7 @@ class CfitsioConan(ConanFile):
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.78.0")
+            self.requires("libcurl/7.80.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
