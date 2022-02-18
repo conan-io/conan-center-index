@@ -20,7 +20,7 @@ sources:
             sha256: "515bcac3520cd546d9d14372b7930ab48b43f1c5dc258a9f61a82b22c0107eef"
           - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.1/LICENSE"
             sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-    Macos:
+    #Macos:
       ## MacOS x86_64 depends system llvm library.
       #"x86_64":
       #  "gcc":
