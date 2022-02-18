@@ -51,7 +51,7 @@ signalr-qt/0.1.dssl3
 #sip/4.19.3 need to port tech1scripts
 snappy/1.1.8.dssl1
 sqlite3/3.31.0.dssl1
-Tevian/2.13.6@trassir/stable
+tevian/2.13.6@trassir/stable
 qt/5.14.1.dssl3
 qtwebkit/5.212.0-alpha4.dssl3
 xz_utils/5.2.4.dssl2
@@ -208,7 +208,7 @@ qt:qtserialport=False
 qt:qtspeech=False
 qt:qtsvg=True
 qt:qttools=True
-qt:qttranslations=False
+qt:qttranslations=True
 qt:qtvirtualkeyboard=False
 qt:qtwayland=False
 qt:qtwebchannel=False
