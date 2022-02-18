@@ -56,27 +56,7 @@ class DiligentFxConan(ConanFile):
             tools.patch(**patch)
 
     def requirements(self):
-        self.requires("diligent-core/2.5.1")
         self.requires("diligent-tools/cci.20211009")
-
-        #self.requires("libjpeg/9d")
-        #self.requires("libtiff/4.3.0")
-        #self.requires("zlib/1.2.11")
-        #self.requires("libpng/1.6.37")
-
-        #self.requires("spirv-cross/cci.20210930")
-        # commented out due to conan-center CI limitations
-        #self.options["spirv-cross"].namespace = "diligent_spirv_cross"
-        #self.requires("spirv-headers/cci.20211010")
-        #self.requires("spirv-tools/2021.4")
-        #self.requires("glslang/11.7.0")
-        #self.requires("vulkan-headers/1.2.195")
-        #self.requires("volk/1.2.195")
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
-            if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.0")        
 
     def diligent_platform(self):
         if self.settings.os == "Windows":
@@ -98,15 +78,8 @@ class DiligentFxConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D11"] = True
-        self._cmake.definitions["DILIGENT_NO_DIRECT3D12"] = True
-        self._cmake.definitions["DILIGENT_NO_DXC"] = True
-
-        self._cmake.definitions["ENABLE_RTTI"] = True
-        self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
 
         self._cmake.definitions[self.diligent_platform()] = True
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -121,6 +94,8 @@ class DiligentFxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
+        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+                     dst=os.path.join(self.package_folder, "include", "DiligentFx"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
@@ -129,12 +104,9 @@ class DiligentFxConan(ConanFile):
             self.cpp_info.libdirs.append("lib/source_subfolder/Release")
 
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "source_subfolder"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "GLTF_PBR_Renderer", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "PostProcess", "EpipolarLightScattering", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE=diligent_spirv_cross")
-        self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
 
-        if self.settings.os in ["Macos", "Linux"]:
-            self.cpp_info.system_libs = ["dl", "pthread"]
-        if self.settings.os == 'Macos':
-            self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa']
