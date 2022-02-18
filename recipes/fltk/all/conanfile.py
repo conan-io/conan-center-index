@@ -98,7 +98,7 @@ class FltkConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "fltk"
         self.cpp_info.names["cmake_find_package_multi"] = "fltk"
 
-        if self.options.shared:
+        if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("FL_DLL")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
