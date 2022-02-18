@@ -93,7 +93,7 @@ class XZUtils(ConanFile):
                 targets=[target],
                 build_type=self._effective_msbuild_type(),
                 platforms={"x86": "Win32", "x86_64": "x64"},
-                upgrade_project=False)
+                upgrade_project=Version(self.settings.compiler.version) >= "17")
 
     def _configure_autotools(self):
         if self._autotools:
