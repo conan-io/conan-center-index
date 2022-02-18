@@ -145,9 +145,6 @@ class DiligentCoreConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == 'Macos':
-            self.copy("Platforms/Linux/interface/LinuxPlatformMisc.hpp", src=self._source_subfolder, dst="include/DiligentCore", keep_path=True)
 
     def package_info(self):
         if self.settings.build_type == "Debug":
