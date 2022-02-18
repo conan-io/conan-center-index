@@ -58,6 +58,9 @@ class Blend2dConan(ConanFile):
         self._cmake.definitions["BLEND2D_TEST"] = False
         self._cmake.definitions["BLEND2D_EMBED"] = False
         self._cmake.definitions["BLEND2D_STATIC"] = not self.options.shared
+        if not self.options.shared:
+            self._cmake.definitions["CMAKE_C_FLAGS"] = "-DBL_STATIC"
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-DBL_STATIC"
         self._cmake.configure()
         return self._cmake
 
@@ -77,3 +80,5 @@ class Blend2dConan(ConanFile):
         self.cpp_info.libs = ["blend2d"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "rt",])
+        if not self.options.shared:
+            self.cpp_info.defines.append("BL_STATIC")
