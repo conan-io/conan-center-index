@@ -39,7 +39,7 @@ index bc38952..af09206 100644
 -                     IS_RUNTIME_DEPENDENCY
 -                     # libarrow.so doesn't depend on libboost*.
 -                     FALSE)
-+  find_package(boost REQUIRED)
++  find_package(Boost REQUIRED)
  
    if(TARGET Boost::system)
      set(BOOST_SYSTEM_LIBRARY Boost::system)
