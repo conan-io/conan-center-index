@@ -1,0 +1,8 @@
+sources:
+  "cci.20211112":
+    url: "https://github.com/DiligentGraphics/DiligentFX/archive/d2f70a5107f51800e84b08072ec72dfbc0144529.tar.gz"
+    sha256: "0ce506bc1d509551468cc7e109f76fb7beeecf90238e93cc30c129b5ebc9f28d"
+patches:
+  "cci.20211112":
+    - patch_file: "patches/0001-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
