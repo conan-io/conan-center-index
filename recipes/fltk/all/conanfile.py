@@ -68,12 +68,8 @@ class FltkConan(ConanFile):
         cmake.definitions['FLTK_BUILD_EXAMPLES'] = False
         cmake.definitions['OPTION_USE_GL'] = self.options.with_gl
         cmake.definitions['OPTION_USE_THREADS'] = self.options.with_threads
-        cmake.definitions['FLTK_USE_BUILTIN_JPEG'] = False
-        cmake.definitions['FLTK_USE_BUILTIN_PNG'] = False
-        cmake.definitions['FLTK_USE_BUILTIN_ZLIB'] = False
         cmake.definitions['OPTION_BUILD_HTML_DOCUMENTATION'] = False
         cmake.definitions['OPTION_BUILD_PDF_DOCUMENTATION'] = False
-        cmake.definitions['debug_build'] = True
         cmake.configure()
         return cmake
 
