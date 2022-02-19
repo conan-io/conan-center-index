@@ -22,12 +22,11 @@ index 2d7baf1..c2e86e0 100644
  endif()
  
  if(ARROW_MIMALLOC)
-
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index bc38952..af09206 100644
+index bc38952..0973ff4 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-@@ -953,14 +953,7 @@ else()
+@@ -953,14 +953,13 @@ else()
  endif()
  
  if(ARROW_BOOST_REQUIRED)
@@ -39,11 +38,17 @@ index bc38952..af09206 100644
 -                     IS_RUNTIME_DEPENDENCY
 -                     # libarrow.so doesn't depend on libboost*.
 -                     FALSE)
-+  find_package(Boost REQUIRED)
++  find_package(Boost CONFIG REQUIRED)
++  message("ARROW_BUILD_INTEGRATION: ${ARROW_BUILD_INTEGRATION}")
++  message("ARROW_BUILD_TESTS: ${ARROW_BUILD_TESTS}")
++  message("ARROW_GANDIVA: ${ARROW_GANDIVA}")
++  message("ARROW_BOOST_REQUIRE_LIBRARY : ${ARROW_BOOST_REQUIRE_LIBRARY}")
++  message("Boost_INCLUDE_DIR : ${Boost_INCLUDE_DIR}")
++  message("BOOST_INCLUDE_DIR : ${BOOST_INCLUDE_DIR}")
  
    if(TARGET Boost::system)
      set(BOOST_SYSTEM_LIBRARY Boost::system)
-@@ -1038,6 +1031,7 @@ macro(build_snappy)
+@@ -1038,6 +1037,7 @@ macro(build_snappy)
  endmacro()
  
  if(ARROW_WITH_SNAPPY)
@@ -51,7 +56,7 @@ index bc38952..af09206 100644
    resolve_dependency(Snappy PC_PACKAGE_NAMES snappy)
    if(${Snappy_SOURCE} STREQUAL "SYSTEM" AND NOT snappy_PC_FOUND)
      get_target_property(SNAPPY_LIB Snappy::snappy IMPORTED_LOCATION)
-@@ -1046,6 +1040,8 @@ if(ARROW_WITH_SNAPPY)
+@@ -1046,6 +1046,8 @@ if(ARROW_WITH_SNAPPY)
    # TODO: Don't use global includes but rather target_include_directories
    get_target_property(SNAPPY_INCLUDE_DIRS Snappy::snappy INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${SNAPPY_INCLUDE_DIRS})
@@ -60,7 +65,7 @@ index bc38952..af09206 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1108,7 +1104,7 @@ macro(build_brotli)
+@@ -1108,7 +1110,7 @@ macro(build_brotli)
  endmacro()
  
  if(ARROW_WITH_BROTLI)
@@ -69,7 +74,7 @@ index bc38952..af09206 100644
    # TODO: Don't use global includes but rather target_include_directories
    get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
                        INTERFACE_INCLUDE_DIRECTORIES)
-@@ -1228,10 +1224,13 @@ macro(build_glog)
+@@ -1228,10 +1230,13 @@ macro(build_glog)
  endmacro()
  
  if(ARROW_USE_GLOG)
@@ -83,7 +88,7 @@ index bc38952..af09206 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -1300,14 +1299,7 @@ macro(build_gflags)
+@@ -1300,14 +1305,7 @@ macro(build_gflags)
  endmacro()
  
  if(ARROW_NEED_GFLAGS)
@@ -99,7 +104,7 @@ index bc38952..af09206 100644
    # TODO: Don't use global includes but rather target_include_directories
    include_directories(SYSTEM ${GFLAGS_INCLUDE_DIR})
  
-@@ -1606,7 +1598,7 @@ if(ARROW_JEMALLOC)
+@@ -1606,7 +1604,7 @@ if(ARROW_JEMALLOC)
    # conflict with the default allocator as well as other jemalloc
    # installations.
    # find_package(jemalloc)
@@ -108,7 +113,7 @@ index bc38952..af09206 100644
    set(ARROW_JEMALLOC_USE_SHARED OFF)
    set(JEMALLOC_PREFIX
        "${CMAKE_CURRENT_BINARY_DIR}/jemalloc_ep-prefix/src/jemalloc_ep/dist/")
-@@ -1664,6 +1656,9 @@ if(ARROW_JEMALLOC)
+@@ -1664,6 +1662,9 @@ if(ARROW_JEMALLOC)
                                     "${CMAKE_CURRENT_BINARY_DIR}/jemalloc_ep-prefix/src")
    add_dependencies(jemalloc::jemalloc jemalloc_ep)
  
@@ -118,7 +123,7 @@ index bc38952..af09206 100644
    list(APPEND ARROW_BUNDLED_STATIC_LIBS jemalloc::jemalloc)
  endif()
  
-@@ -2082,11 +2077,14 @@ macro(build_zlib)
+@@ -2082,11 +2083,14 @@ macro(build_zlib)
  endmacro()
  
  if(ARROW_WITH_ZLIB)
@@ -133,7 +138,7 @@ index bc38952..af09206 100644
  endif()
  
  macro(build_lz4)
-@@ -2140,11 +2138,14 @@ macro(build_lz4)
+@@ -2140,11 +2144,14 @@ macro(build_lz4)
  endmacro()
  
  if(ARROW_WITH_LZ4)
@@ -148,7 +153,7 @@ index bc38952..af09206 100644
  endif()
  
  macro(build_zstd)
-@@ -2205,6 +2206,7 @@ macro(build_zstd)
+@@ -2205,6 +2212,7 @@ macro(build_zstd)
  endmacro()
  
  if(ARROW_WITH_ZSTD)
@@ -156,7 +161,7 @@ index bc38952..af09206 100644
    # ARROW-13384: ZSTD_minCLevel was added in v1.4.0, required by ARROW-13091
    resolve_dependency(zstd
                       PC_PACKAGE_NAMES
-@@ -2232,6 +2234,8 @@ if(ARROW_WITH_ZSTD)
+@@ -2232,6 +2240,8 @@ if(ARROW_WITH_ZSTD)
    get_target_property(ZSTD_INCLUDE_DIR ${ARROW_ZSTD_LIBZSTD}
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${ZSTD_INCLUDE_DIR})
@@ -165,7 +170,7 @@ index bc38952..af09206 100644
  endif()
  
  # ----------------------------------------------------------------------
-@@ -2271,6 +2275,7 @@ macro(build_re2)
+@@ -2271,6 +2281,7 @@ macro(build_re2)
  endmacro()
  
  if(ARROW_WITH_RE2)
@@ -173,7 +178,7 @@ index bc38952..af09206 100644
    # Don't specify "PC_PACKAGE_NAMES re2" here because re2.pc may
    # include -std=c++11. It's not compatible with C source and C++
    # source not uses C++ 11.
-@@ -2284,6 +2289,8 @@ if(ARROW_WITH_RE2)
+@@ -2284,6 +2295,8 @@ if(ARROW_WITH_RE2)
    # TODO: Don't use global includes but rather target_include_directories
    get_target_property(RE2_INCLUDE_DIR re2::re2 INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${RE2_INCLUDE_DIR})
@@ -182,7 +187,7 @@ index bc38952..af09206 100644
  endif()
  
  macro(build_bzip2)
-@@ -2335,10 +2342,7 @@ macro(build_bzip2)
+@@ -2335,10 +2348,7 @@ macro(build_bzip2)
  endmacro()
  
  if(ARROW_WITH_BZ2)

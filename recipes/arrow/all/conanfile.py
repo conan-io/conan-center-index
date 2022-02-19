@@ -149,6 +149,10 @@ class ArrowConan(ConanFile):
         if self.options.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
 
+        if self.options.shared and self._with_jemalloc():
+            if self.options["jemalloc"].enable_cxx:
+                raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
+
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
             return bool(self.options.dataset_modules)
@@ -365,10 +369,6 @@ class ArrowConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.shared and self._with_jemalloc():
-            if self.options["jemalloc"].enable_cxx:
-                raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
-
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
