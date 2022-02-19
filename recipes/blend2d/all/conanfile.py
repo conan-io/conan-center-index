@@ -58,6 +58,7 @@ class Blend2dConan(ConanFile):
         self._cmake.definitions["BLEND2D_TEST"] = False
         self._cmake.definitions["BLEND2D_EMBED"] = False
         self._cmake.definitions["BLEND2D_STATIC"] = not self.options.shared
+        self._cmake.definitions["BLEND2D_NO_STDCXX"] = False
         if not self.options.shared:
             self._cmake.definitions["CMAKE_C_FLAGS"] = "-DBL_STATIC"
             self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-DBL_STATIC"
