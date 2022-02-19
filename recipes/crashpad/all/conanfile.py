@@ -138,14 +138,14 @@ class CrashpadConan(ConanFile):
         else:
             return str(self.options.http_transport)
 
-    def _version_greater_equal_to_cci_20220216(self):
-        return self.version >= "cci.20220216"
+    def _version_greater_equal_to_cci_20220219(self):
+        return self.version >= "cci.20220219"
 
     def _has_separate_util_net_lib(self):
-        return self._version_greater_equal_to_cci_20220216()
+        return self._version_greater_equal_to_cci_20220219()
 
     def _needs_to_link_tool_support(self):
-        return self._version_greater_equal_to_cci_20220216()
+        return self._version_greater_equal_to_cci_20220219()
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
