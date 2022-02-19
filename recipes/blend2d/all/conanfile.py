@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
+
 class Blend2dConan(ConanFile):
     name = "blend2d"
     license = "zlib"
@@ -38,7 +40,6 @@ class Blend2dConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.options["asmjit"].shared = self.options.shared
 
     def requirements(self):
         self.requires("asmjit/cci.20220210")
