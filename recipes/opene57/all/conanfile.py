@@ -67,9 +67,6 @@ class Opene57Conan(ConanFile):
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
         
         if self.options.with_tools:
-            #self.build_requires("boost/1.78.0")
-            if not self.options["boost"].multithreading: 
-                raise ConanInvalidConfiguration("Boost Multithreading is required when building tools.")
             if not self.options["boost"].multithreading: 
                 raise ConanInvalidConfiguration("Boost Multithreading is required when building tools.")
             if self.options.shared != self.options["boost"].shared:
