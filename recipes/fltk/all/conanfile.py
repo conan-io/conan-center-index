@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-import os, shutil, glob
+import os
 
 required_conan_version = ">=1.43.0"
 
