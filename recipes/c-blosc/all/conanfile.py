@@ -43,6 +43,10 @@ class CbloscConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -123,7 +127,8 @@ class CbloscConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "blosc")
-        self.cpp_info.libs = tools.collect_libs(self)
+        prefix = "lib" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.libs = ["{}blosc".format(prefix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
