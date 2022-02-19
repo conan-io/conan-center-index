@@ -46,12 +46,21 @@ class Opene57Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.shared:
+            del self.options.fPIC
+
+        self.options['xerces-c'].shared = self.options.shared
+
+        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
+            self.options['icu'].shared = self.options.shared
+
+        if self.options.with_tools:
+            self.options['boost'].shared = self.options.shared
+            self.options['boost'].multithreading = True
+
+    def config_options(self):
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def validate(self):
@@ -60,24 +69,12 @@ class Opene57Conan(ConanFile):
             
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
+
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
-        
-        if self.options.with_tools:
-            if not self.options["boost"].multithreading: 
-                raise ConanInvalidConfiguration("Boost Multithreading is required when building tools.")
-            if self.options.shared != self.options["boost"].shared:
-                raise ConanInvalidConfiguration("Boost 'shared' option differs from opene57 one.")
-            
-        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
-            if self.options.shared != self.options["icu"].shared:
-                raise ConanInvalidConfiguration("ICU 'shared' option differs from opene57 one.")
-                
-        if self.options["xerces-c"].shared != self.options.shared:
-            raise ConanInvalidConfiguration("Xerces-C 'shared' option differs from opene57 one.")
 
     def build_requirements(self):
         if self.options.with_tools:
