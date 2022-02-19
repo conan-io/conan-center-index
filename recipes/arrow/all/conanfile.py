@@ -28,6 +28,7 @@ class ArrowConan(ConanFile):
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
+        "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon", ],
         "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
@@ -51,8 +52,6 @@ class ArrowConan(ConanFile):
         "with_bz2": [True, False],
         "with_lz4": [True, False],
         "with_snappy": [True, False],
-        "simd_level": ["DEFAULT", "NONE", "SSE4_2", "AVX2", "AVX512", "NEON", ],
-        "runtime_simd_level": ["MAX", "NONE", "SSE4_2", "AVX2", "AVX512", ],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
     }
@@ -69,6 +68,7 @@ class ArrowConan(ConanFile):
         "encryption": False,
         "filesystem_layer": False,
         "hdfs_bridgs": False,
+        "simd_level": "default",
         "runtime_simd_level": "max",
         "with_backtrace": False,
         "with_boost": "auto",
@@ -92,8 +92,6 @@ class ArrowConan(ConanFile):
         "with_utf8proc": "auto",
         "with_lz4": False,
         "with_snappy": False,
-        "simd_level": "DEFAULT",
-        "runtime_simd_level": "MAX",
         "with_zlib": False,
         "with_zstd": False,
     }
@@ -113,6 +111,7 @@ class ArrowConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if tools.Version(self.version) < "2.0.0":
+            del self.options.simd_level
             del self.options.runtime_simd_level
 
     def validate(self):
@@ -265,7 +264,7 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.3")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if self.options.simd_level != "NONE" or self.options.runtime_simd_level != "NONE":
+        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/8.0.3")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -332,11 +331,11 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["RE2_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ZLIB_SOURCE"] = "SYSTEM"
-        self._cmake.definitions["ARROW_SIMD_LEVEL"] = self.options.simd_level
-        self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = self.options.runtime_simd_level
+
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
         if tools.Version(self.version) >= "2.0":
             self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
+            self._cmake.definitions["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
             self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
@@ -498,7 +497,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if self.options.simd_level != "NONE" or self.options.runtime_simd_level != "NONE":
+        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
         if self.options.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
