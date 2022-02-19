@@ -1,18 +1,17 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.36.0"
 
-required_conan_version = ">=1.33.0"
 
 class CbloscConan(ConanFile):
     name = "c-blosc"
     description = "An extremely fast, multi-threaded, meta-compressor library."
     license = "BSD-3-Clause"
-    topics = ("conan", "c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression")
     homepage = "https://github.com/Blosc/c-blosc"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,7 +20,7 @@ class CbloscConan(ConanFile):
         "with_lz4": [True, False],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
-        "with_zstd": [True, False]
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,9 +29,10 @@ class CbloscConan(ConanFile):
         "with_lz4": True,
         "with_snappy": True,
         "with_zlib": True,
-        "with_zstd": True
+        "with_zstd": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -43,17 +43,22 @@ class CbloscConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.simd_intrinsics
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.simd_intrinsics
 
     def requirements(self):
         if self.options.with_lz4:
@@ -115,7 +120,10 @@ class CbloscConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "blosc"
+        self.cpp_info.set_property("pkg_config_name", "blosc")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "blosc"
