@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(alac)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 file(GLOB ALAC_LIB_SRCS source_subfolder/codec/*.c source_subfolder/codec/*.cpp)
 file(GLOB ALAC_LIB_PUBLIC_HDRS source_subfolder/codec/ALAC*.h)
