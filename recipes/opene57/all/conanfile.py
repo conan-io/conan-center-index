@@ -100,13 +100,11 @@ class Opene57Conan(ConanFile):
         if self.settings.os == "Windows":
             self._cmake.definitions["BUILD_WITH_MT"] = "MT" in str(msvc_runtime_flag(self))
         else:
-            self._cmake.definitions["BUILD_WITH_FPIC"] = self.options.get_safe("fPIC", True)
+            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -1,8 +1,4 @@
 sources:
-  "1.6.1":
-    sha256: 898b9227aa844154099fdfa9123b8ed80f09e11b70ddbc0b7b84e54e3b01670c
-    url: https://github.com/openE57/openE57/archive/refs/tags/1.6.1.tar.gz
-patches:
-  "1.6.1":
-    - patch_file: "patches/0001-source-folder.patch"
-      base_path: "source_subfolder"
+  "1.6.2":
+    sha256: 2d487e663cf43105b19653d34250fd45f947af839e327336b6878464a99d5423
+    url: https://github.com/openE57/openE57/archive/refs/tags/1.6.2.tar.gz
