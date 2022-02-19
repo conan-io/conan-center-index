@@ -113,7 +113,7 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) < "2.0.0":
             del self.options.simd_level
             del self.options.runtime_simd_level
-        if tools.Version(self.version) < "6.0.0":
+        elif tools.Version(self.version) < "6.0.0":
             self.options.simd_level = "sse4_2"
 
     def validate(self):
@@ -158,7 +158,7 @@ class ArrowConan(ConanFile):
             if self.options["jemalloc"].enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
-        if tools.version(self.version) < "6.0.0" and self.options.simd_level == "default":
+        if tools.Version(self.version) < "6.0.0" and self.options.simd_level == "default":
             raise ConanInvalidConfiguration("In {}/{}, simd_level options is not supported `default` value.".format(self.name, self.version))
 
     def _compute(self, required=False):
