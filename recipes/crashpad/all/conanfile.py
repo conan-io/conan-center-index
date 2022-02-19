@@ -278,12 +278,13 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
 
         self.cpp_info.components["net"].libs = ["net"]
+        self.cpp_info.components["tool_support"].libs = ["tool_support"]
 
         self.cpp_info.components["handler_common"].libs = ["handler_common"]
         self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util", "net"]
 
         self.cpp_info.components["handler"].libs = ["handler"]
-        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"]
+        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot", "tool_support"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))

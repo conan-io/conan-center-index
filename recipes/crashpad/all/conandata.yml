@@ -47,3 +47,5 @@ patches:
       # reused patch from cci.20210507
     - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/cci.20220216-0007-static-lib-tool_support.patch"
+      base_path: "source_subfolder"
