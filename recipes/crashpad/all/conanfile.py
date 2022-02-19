@@ -138,6 +138,14 @@ class CrashpadConan(ConanFile):
         else:
             return str(self.options.http_transport)
 
+    @property
+    def _has_separate_util_net_lib(self):
+        return tools.Version(self.version) >= "cci.20220216"
+
+    @property
+    def _needs_to_link_tool_support(self):
+        return tools.Version(self.version) >= "cci.20220216"
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -277,14 +285,21 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].libs = ["minidump"]
         self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
 
-        self.cpp_info.components["net"].libs = ["net"]
-        self.cpp_info.components["tool_support"].libs = ["tool_support"]
+        extra_handler_common_req = []
+        if self._has_separate_util_net_lib():
+            self.cpp_info.components["net"].libs = ["net"]
+            extra_handler_common_req = ["net"]
+
+        extra_handler_req = []
+        if self._needs_to_link_tool_support():
+            self.cpp_info.components["tool_support"].libs = ["tool_support"]
+            extra_handler_req = ["tool_support"]
 
         self.cpp_info.components["handler_common"].libs = ["handler_common"]
-        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util", "net"]
+        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util"] + extra_handler_common_req
 
         self.cpp_info.components["handler"].libs = ["handler"]
-        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot", "tool_support"]
+        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"] + extra_handler_req
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
