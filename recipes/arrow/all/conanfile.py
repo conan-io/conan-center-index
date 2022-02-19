@@ -113,6 +113,8 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) < "2.0.0":
             del self.options.simd_level
             del self.options.runtime_simd_level
+        if tools.Version(self.version) < "6.0.0":
+            self.options.simd_level = "sse4_2"
 
     def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
@@ -155,6 +157,9 @@ class ArrowConan(ConanFile):
         if self.options.shared and self._with_jemalloc():
             if self.options["jemalloc"].enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
+
+        if tools.version(self.version) < "6.0.0" and self.options.simd_level == "default":
+            raise ConanInvalidConfiguration("In {}/{}, simd_level options is not supported `default` value.".format(self.name, self.version))
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
@@ -264,7 +269,9 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.3")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
+        if tools.Version(self.version) >= "6.0.0" and \
+            self.options.get_safe("simd_level") != None or \
+            self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/8.0.3")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
