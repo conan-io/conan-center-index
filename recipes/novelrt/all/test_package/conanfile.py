@@ -1,6 +1,7 @@
 import os, sys
 from conans import ConanFile, CMake, tools
 
+
 class NovelRTTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"

@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools, errors
 import sys, os
 
 required_conan_version = ">=1.33.0"
+
+
 class NovelRTConan(ConanFile):
     name = "novelrt"
     version = "0.0.1"
@@ -26,19 +28,19 @@ class NovelRTConan(ConanFile):
     ]
     generators = "cmake_find_package", "cmake_paths"
     default_options = {
-        "freetype:shared":True,
-        "glfw:shared":True,
-        "libsndfile:shared":True,
-        "openal:shared":True,
-        "PNG:shared":True,
-        "BZip2:shared":True,
-        "flac:shared":True,
-        "fmt:shared":True,
-        "Opus:shared":True,
-        "Ogg:shared":True,
-        "Vorbis:shared":True,
-        "spdlog:header_only":True,
-        "vulkan-loader:shared":True,
+        "freetype:shared": True,
+        "glfw:shared": True,
+        "libsndfile:shared": True,
+        "openal:shared": True,
+        "PNG:shared": True,
+        "BZip2:shared": True,
+        "flac:shared": True,
+        "fmt:shared": True,
+        "Opus:shared": True,
+        "Ogg:shared": True,
+        "Vorbis:shared": True,
+        "spdlog:header_only": True,
+        "vulkan-loader:shared": True,
     }
     cmake = None
     unsupportedOS = ['AIX', 'Android', 'Arduino', 'Emscripten', 'FreeBSD', 'Macos', 'Neutrino', 'SunOS', 'WindowsCE', 'WindowsStore', 'iOS', 'tvOS', 'watchOS']
