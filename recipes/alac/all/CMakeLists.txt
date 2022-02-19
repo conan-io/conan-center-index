@@ -4,6 +4,8 @@ project(alac)
 include(conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS)
 
+include(GNUInstallDirs)
+
 file(GLOB ALAC_LIB_SRCS source_subfolder/codec/*.c source_subfolder/codec/*.cpp)
 file(GLOB ALAC_LIB_PUBLIC_HDRS source_subfolder/codec/ALAC*.h)
 
