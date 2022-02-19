@@ -18,7 +18,6 @@ This section gathers the most common questions from the community related to pac
       * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
-  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
@@ -30,7 +29,8 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
-  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)<!-- endToc -->
+  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -131,17 +131,6 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 #### Why is there no option for PDB, as there is for fPIC?
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
-
-## Why _installer_ packages remove some settings from their package ID?
-
-There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
-`conan-center-index` itself as `build_require` and they are consumed as utilities or tools by other users. In these contexts, the expectations are to consume an optimized binary (`build_type=Release`) and it is not important the compiler used to build it.
-
-We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
-
-Notes about `build_type`:
-
-We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
 
 ## Can I remove an option from a recipe?
 
@@ -349,3 +338,33 @@ With version ranges the newest compatible package may yield a different package-
 - Build Reproducibility
 
 If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more. 
+
+## How to consume a graph of shared libraries?
+
+When the CI builds packages with `shared=True`, it applies the option only to the package being created, but not to
+the requirements. As the default value for the `shared` option is usually `False`, you can expect that the dynamic
+library that has just being generated has linked all its requirements as static libraries.
+
+It is important to remark the default [package id mode](https://docs.conan.io/en/latest/creating_packages/define_abi_compatibility.html#versioning-schema)
+used by Conan (which is the same default used by ConanCenter): `semver_direct_mode`. With this default only the major
+version of the requirements is encoded in the package ID. 
+
+The two previous behaviors together can lead to unexpected results for a user that want to consume a graph of
+dependencies as shared libraries from ConanCenter. They might think that using `*:shared=True` in their profile is
+enough, and indeed Conan will retrieve from ConanCenter all the dynamic libraries for all the graph of dependencies, but
+**all of them will contain the logic of their respective requirements embedded in the dynamic library**, and this
+logic is embedded at the time of building, so it might not match the version of the requirements that was resolved
+by Conan, and for sure, the other dynamic libraries won't be used, only the ones linked directly by the consumer
+project. See a more detailed [example here](https://github.com/conan-io/conan/issues/9712).
+
+In order to consume all those libraries as shared ones, building from sources is needed. This can be
+easily achievable using `*:shared=True` in the _host_ profile and `--build` in the install command. With these inputs,
+Conan will build from sources all the packages and use the shared libraries when linking.
+
+> ℹ️ Note: If you are hosting your own recipes, the proper solution for recipes would be to use something like
+> [`shared_library_package_id`](https://docs.conan.io/en/latest/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
+> that will encode this information in the package ID and ensure that any change in the static libraries that are
+> embedded into a shared one is taken into account when computing the package ID.
+> 
+> In this repository we are not using it, because it will lead to many missing packages, making it impossible
+> for the CI to actually build consumers in PRs.

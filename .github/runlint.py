@@ -1,37 +1,17 @@
 import os
 import yaml
-import requests
 import packaging.version
 import subprocess
-import platform
-import sys
 
 
-def main(pr):
-    session = requests.session()
-    session.headers = {}
-    token = os.getenv("GH_TOKEN")
-    if token:
-        session.headers["Authorization"] = "token %s" % token
 
-    session.headers["Accept"] = "application/vnd.github.v3+json"
-    session.headers["User-Agent"] = "request"
-    session.auth = None
-    # if user and pw:
-    #    session.auth = requests.auth.HTTPBasicAuth(user, pw)
-
-    github_server_url = os.getenv("GITHUB_SERVER_URL")
-    github_repo = os.getenv("GITHUB_REPOSITORY")
-
-    r = session.request("GET", f"{github_server_url}/{github_repo}/pull/{pr}.diff")
-    r.raise_for_status()
-    diff = r.text
+def main():
     packages = set()
-    for line in diff.split("\n"):
-        if line.startswith("+++ b/recipes/") or line.startswith("--- a/recipes/"):
-            parts = line.split("/")
-            if len(parts) >= 5:
-                packages.add(parts[2] + "/" + parts[3])
+    files = subprocess.run(["git", "show", "--first-parent", "--name-only", r'--pretty="format:%n"'], capture_output=True, text=True)
+    for line in files.stdout.splitlines():
+        parts = line.split("/")
+        if len(parts) >= 4:
+            packages.add(parts[1] + "/" + parts[2])
     for line in packages:
         package = line.split("/")[0]
         version = None
@@ -45,13 +25,12 @@ def main(pr):
                     if not version or packaging.version.Version(v) > packaging.version.Version(version):
                         version = v
                 except packaging.version.InvalidVersion:
-                    print("Error parsing version %s for package %s in pr %s" % (v, package, pr))
+                    print("Error parsing version %s for package %s" % (v, package))
 
         if version:
-            shell = bool(platform.system() != "Windows")
-            command = "conan export %s %s/%s@" % (os.path.join("recipes", package, folder), package, version)
-            p = subprocess.run(command, shell=shell, check=False)
+            command = ["conan", "export", os.path.join("recipes", package, folder), "%s/%s@" % (package, version)]
+            p = subprocess.run(command, check=False)
 
 if __name__ == "__main__":
     # execute only if run as a script
-    main(sys.argv[1])
+    main()
