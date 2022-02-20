@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 
 class FTXUIConan(ConanFile):
     name = "ftxui"
-    description = "💻 C++ Functional Terminal User Interface."
+    description = "C++ Functional Terminal User Interface."
     license = "MIT"
     topics = ("ncurses", "terminal", "screen", "tui")
     homepage = "https://github.com/ArthurSonzogni/FTXUI"
