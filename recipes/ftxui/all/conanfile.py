@@ -45,18 +45,13 @@ class FTXUIConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def _validate_compiler_settings(self):
+    def validate(self):
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
         if compiler == 'gcc' and version < '8':
             raise ConanInvalidConfiguration("gcc 8 required")
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-
-    def validate(self):
-        self._validate_compiler_settings()
-        if self.settings.compiler in ["Visual Studio", "msvc"]:
-            raise ConanInvalidConfiguration("Visual Studio unsupported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
