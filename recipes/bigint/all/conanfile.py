@@ -1,4 +1,6 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 
 required_conan_version = ">=1.33.0"
@@ -29,6 +31,10 @@ class BigintConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -41,6 +47,10 @@ class BigintConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared with static runtime not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
