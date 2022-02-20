@@ -5,4 +5,3 @@ include(conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS)
 
 add_subdirectory(source_subfolder)
-
