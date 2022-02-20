@@ -28,6 +28,10 @@ class Blend2dConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -49,6 +53,11 @@ class Blend2dConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
+
+        # In Visual Studio < 16, there are compilation error. patch is already provided.
+        # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
+        if self._is_msvc and self.settings.compiler.version < "16":
+            raise tools.ConanInvalidConfiguration("This recipe does not support this compiler version")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
