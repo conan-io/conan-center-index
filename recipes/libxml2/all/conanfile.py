@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
+import functools
 import itertools
 import os
 import textwrap
@@ -57,7 +58,6 @@ class Libxml2Conan(ConanFile):
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -235,26 +235,21 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
-        configure_args = ['--prefix=%s' % full_install_subfolder]
-        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
-        if self.options.shared:
-            configure_args.extend(['--enable-shared', '--disable-static'])
-        else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        for option_name in self._option_names:
+            option_value = getattr(self.options, option_name)
+            args.append("--with-{}={}".format(option_name, yes_no(option_value)))
 
-        for name in self._option_names:
-            value = getattr(self.options, name)
-            value = ("--with-%s" % name) if value else ("--without-%s" % name)
-            configure_args.append(value)
-
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def _patch_sources(self):
         # Break dependency of install on build
