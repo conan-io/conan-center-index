@@ -62,6 +62,8 @@ class FTXUIConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["FTXUI_BUILD_DOCS"] = False
+        self._cmake.definitions["FTXUI_BUILD_EXAMPLES"] = False
         self._cmake.configure()
         return self._cmake
 
