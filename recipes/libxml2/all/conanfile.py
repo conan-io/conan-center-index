@@ -307,7 +307,8 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
 
-            os.remove(os.path.join(self.package_folder, "lib", "libxml2.la"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
             for prefix in ["run", "test"]:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
             tools.rmdir(os.path.join(self.package_folder, "share"))
