@@ -262,9 +262,10 @@ class Libxml2Conan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
+        # relocatable shared lib on macOS
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                              "-install_name \\$rpath/",
+                              "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
