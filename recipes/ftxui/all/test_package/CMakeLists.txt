@@ -8,4 +8,5 @@ conan_basic_setup(TARGETS)
 
 find_package(ftxui REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ftxui::ftxui)
+target_link_libraries(${PROJECT_NAME} ftxui::dom ftxui::screen)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
