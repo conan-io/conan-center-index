@@ -4,7 +4,7 @@ import conan.tools.files
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FTXUIConan(ConanFile):
