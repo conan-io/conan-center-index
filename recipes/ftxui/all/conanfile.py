@@ -25,7 +25,7 @@ class FTXUIConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -68,6 +68,9 @@ class FTXUIConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            conan.tools.files.patch(self, **patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -76,14 +79,6 @@ class FTXUIConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
-        libs = ['ftxui-dom', 'ftxui-screen', 'ftxui-component']
-        ext = ('.so' if self.options.shared else '.a')
-
-        for lib in libs:
-            src = os.path.join(self.package_folder, "lib", f"{lib}{ext}")
-            dst = os.path.join(self.package_folder, "lib", f"lib{lib}{ext}")
-            conan.tools.files.rename(self, src, dst)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ftxui")
