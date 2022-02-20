@@ -354,10 +354,9 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
-        if self._is_msvc:
-            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
-        else:
-            self.cpp_info.libs = ["xml2"]
+        prefix = "lib" if self._is_msvc else ""
+        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.libs = ["{}xml2{}".format(prefix, suffix)]
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
