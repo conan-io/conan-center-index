@@ -24,8 +24,11 @@ class XXSDSSDSLLite(ConanFile):
     def source(self):
         source = self.conan_data["sources"][self.version]
         tools.get(**source)
-        extracted_folder = "sdsl-lite-" + \
-            os.path.splitext(os.path.basename(source["url"]))[0]
+        extracted_folder = "sdsl-lite-"
+        if self.version.startswith("cci"):
+            extracted_folder += os.path.splitext(os.path.basename(source["url"]))[0]
+        else:
+            extracted_folder += self.version
         os.rename(extracted_folder, self._source_subfolder)
 
     def build(self):
