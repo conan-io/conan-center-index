@@ -57,6 +57,8 @@ class FTXUIConan(ConanFile):
             raise ConanInvalidConfiguration("gcc 8 required")
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
+        if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared with static runtime not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
