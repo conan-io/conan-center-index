@@ -1,12 +1,11 @@
 from conans import ConanFile, CMake, tools
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
 class Blend2dConan(ConanFile):
     name = "blend2d"
-    license = "zlib"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://blend2d.com/"
     description = "2D Vector Graphics Engine Powered by a JIT Compiler"
@@ -20,7 +19,7 @@ class Blend2dConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
 
