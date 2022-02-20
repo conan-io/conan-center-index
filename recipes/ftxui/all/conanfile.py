@@ -84,12 +84,25 @@ class FTXUIConan(ConanFile):
             conan.tools.files.rename(self, src, dst)
 
     def package_info(self):
-        self.cpp_info.name = 'ftxui'
-        self.cpp_info.components['ftxui-dom'].names['cmake_find_package'] = ['ftxui-dom']
-        self.cpp_info.components['ftxui-dom'].libs = ['ftxui-dom']
-        self.cpp_info.components['ftxui-dom'].requires = ['ftxui-screen']
-        self.cpp_info.components['ftxui-screen'].names['cmake_find_package'] = ['ftxui-screen']
-        self.cpp_info.components['ftxui-screen'].libs = ['ftxui-screen']
-        self.cpp_info.components['ftxui-component'].names['cmake_find_package'] = ['ftxui-component']
-        self.cpp_info.components['ftxui-component'].libs = ['ftxui-component']
-        self.cpp_info.components['ftxui-component'].requires = ['ftxui-dom']
+        self.cpp_info.set_property("cmake_file_name", "ftxui")
+
+        self.cpp_info.components["ftxui-dom"].set_property("cmake_target_name", "ftxui::dom")
+        self.cpp_info.components["ftxui-dom"].libs = ["ftxui-dom"]
+        self.cpp_info.components["ftxui-dom"].requires = ["ftxui-screen"]
+
+        self.cpp_info.components["ftxui-screen"].set_property("cmake_target_name", "ftxui::screen")
+        self.cpp_info.components["ftxui-screen"].libs = ["ftxui-screen"]
+
+        self.cpp_info.components["ftxui-component"].set_property("cmake_target_name", "ftxui::component")
+        self.cpp_info.components["ftxui-component"].libs = ["ftxui-component"]
+        self.cpp_info.components["ftxui-component"].requires = ["ftxui-dom"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ftxui-component"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["ftxui-dom"].names["cmake_find_package"] = "dom"
+        self.cpp_info.components["ftxui-dom"].names["cmake_find_package_multi"] = "dom"
+        self.cpp_info.components["ftxui-screen"].names["cmake_find_package"] = "screen"
+        self.cpp_info.components["ftxui-screen"].names["cmake_find_package_multi"] = "screen"
+        self.cpp_info.components["ftxui-component"].names["cmake_find_package"] = "component"
+        self.cpp_info.components["ftxui-component"].names["cmake_find_package_multi"] = "component"
