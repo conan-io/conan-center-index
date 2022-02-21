@@ -69,7 +69,7 @@ class LibUSBConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
-        if self._settings_build.os == "Linux" and self.settings.os == "Linux":
+        if self.settings.os == "Linux":
             if self.options.enable_udev:
                 self.requires("libudev/system")
 
