@@ -184,6 +184,7 @@ class LibtorchConan(ConanFile):
             self.options["libnuma"].shared = True
 
     def requirements(self):
+        self.requires('cpython/3.8.12')
         self.requires("cpuinfo/cci.20201217")
         self.requires("eigen/3.3.9")
         self.requires("fmt/7.1.3")
