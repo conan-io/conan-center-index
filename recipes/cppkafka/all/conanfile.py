@@ -10,9 +10,8 @@ class CppKafkaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mfontanini/cppkafka"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     options = {
        "shared": [True, False],
@@ -33,12 +32,10 @@ class CppKafkaConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("librdkafka/1.8.2")
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,6 +46,10 @@ class CppKafkaConan(ConanFile):
             del self.options.fPIC
         self.options["librdkafka"].shared = self.options.shared
 
+    def requirements(self):
+        self.requires("boost/1.78.0")
+        self.requires("librdkafka/1.8.2")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
@@ -57,7 +58,10 @@ class CppKafkaConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("cppkafka could not be built by MSVC <14")
 
-    def configure_cmake(self):
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
         cmake = CMake(self)
         opts = dict()
         opts["RDKAFKA_LIBRARY"] = self.deps_cpp_info["librdkafka"].rootpath
@@ -69,12 +73,15 @@ class CppKafkaConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self.configure_cmake()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self.configure_cmake()
+        cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
