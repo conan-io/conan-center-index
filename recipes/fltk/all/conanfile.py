@@ -25,8 +25,7 @@ class FltkConan(ConanFile):
         "with_threads": True,
         "with_gdiplus": True,
     }
-    # generators = "cmake", "cmake_find_package_multi"
-    generators = "cmake",
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
