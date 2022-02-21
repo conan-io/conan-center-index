@@ -9,7 +9,7 @@ class DdcutilConan(ConanFile):
     description = "ddcutil is a Linux program for managing monitor settings, such as brightness, color levels, and input source"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.ddcutil.com/"
-    topics = ("ddcutil", "display", "monitor", "settings", "Linux")
+    topics = ("ddcutil", "display", "monitor", "settings", "linux")
     license = "GPL-2.0-or-later"
     
     settings = "os", "compiler", "build_type", "arch"
