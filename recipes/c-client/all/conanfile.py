@@ -81,8 +81,11 @@ class CclientConan(ConanFile):
     def _chmod_x(self, path):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
+    def _touch(self, path):
+        with open(path, "a", encoding=None): pass
+
     def _build_unix(self):
-        with open("ip6", "a"): pass
+        self._touch("ip6")
         self._chmod_x("tools/an")
         self._chmod_x("tools/ua")
         unix = "src/osdep/unix"
