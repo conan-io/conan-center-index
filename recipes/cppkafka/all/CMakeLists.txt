@@ -4,4 +4,8 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+if(MSVC)
+    add_definitions("-Dcppkafka_EXPORTS")
+endif()
+
 add_subdirectory("source_subfolder")
