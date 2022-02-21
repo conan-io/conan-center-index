@@ -1,0 +1,6 @@
+sources:
+  "1.9.4":
+    - url: "https://downloads.sourceforge.net/nas/nas-1.9.4.src.tar.gz"
+      sha256: "cf36ea63751ce86cfd3b76c1659ce0d6a361a2e7cb34069854e156532703b39d"
+    - url: "https://unlicense.org/UNLICENSE"
+      sha256: "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"

@@ -30,10 +30,12 @@ class MpdecimalConan(ConanFile):
     _autotools = None
 
     def configure(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self.settings.os != "Macos" and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -161,6 +163,8 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            self._autotools.link_flags.append("-arch arm64")
         self._autotools .configure()
         return self._autotools
 

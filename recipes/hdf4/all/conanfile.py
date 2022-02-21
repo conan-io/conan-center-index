@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class Hdf4Conan(ConanFile):
     name = "hdf4"
@@ -9,24 +11,25 @@ class Hdf4Conan(ConanFile):
     topics = ("conan", "hdf4", "hdf", "data")
     homepage = "https://portal.hdfgroup.org/display/HDF4/HDF4"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "jpegturbo": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
-        "szip_encoding": [True, False]
+        "szip_encoding": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "jpegturbo": False,
         "szip_support": None,
-        "szip_encoding": False
+        "szip_encoding": False,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -52,7 +55,7 @@ class Hdf4Conan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.1.0")
         else:
             self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
@@ -61,8 +64,8 @@ class Hdf4Conan(ConanFile):
             self.requires("szip/2.1.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hdf-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -93,6 +96,9 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_BUILD_TOOLS"] = False
         self._cmake.definitions["HDF4_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF4_BUILD_JAVA"] = False
+        if tools.cross_building(self):
+            self._cmake.definitions["H4_PRINTF_LL_TEST_RUN"] = "0"
+            self._cmake.definitions["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Tinyutf8Conan(ConanFile):
@@ -11,7 +11,7 @@ class Tinyutf8Conan(ConanFile):
     topics = ("tiny-utf8", "utf8")
     homepage = "https://github.com/DuffsDevice/tiny-utf8"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -34,5 +34,9 @@ class Tinyutf8Conan(ConanFile):
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "tinyutf8")
+        self.cpp_info.set_property("cmake_target_name", "tinyutf8::tinyutf8")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "tinyutf8"
         self.cpp_info.names["cmake_find_package_multi"] = "tinyutf8"

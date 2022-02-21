@@ -2,18 +2,17 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class freeglutConan(ConanFile):
     name = "freeglut"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
-    topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
+    topics = ("freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://freeglut.sourceforge.net"
     license = "X11"
-    exports_sources = ["CMakeLists.txt", "*.patch"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,6 +20,7 @@ class freeglutConan(ConanFile):
         "gles": [True, False],
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
+        "replace_glut": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,7 +28,10 @@ class freeglutConan(ConanFile):
         "gles": False,
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
+        "replace_glut": True,
     }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -39,16 +42,20 @@ class freeglutConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("opengl/system")
@@ -68,7 +75,8 @@ class freeglutConan(ConanFile):
             raise ConanInvalidConfiguration("%s does not support gcc >= 10 and clang >= 11" % self.name)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -85,6 +93,7 @@ class freeglutConan(ConanFile):
         self._cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
         self._cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
         self._cmake.definitions["INSTALL_PDB"] = False
+        self._cmake.definitions["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -102,27 +111,35 @@ class freeglutConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "FreeGLUT"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "FreeGLUT"
-        self.cpp_info.names["cmake_find_package"] = "FreeGLUT"
-        self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
+        config_target = "freeglut" if self.options.shared else "freeglut_static"
+        pkg_config = "freeglut" if self.settings.os == "Windows" else "glut"
 
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "GLUT")
+        self.cpp_info.set_property("cmake_module_target_name", "GLUT::GLUT")
+        self.cpp_info.set_property("cmake_file_name", "FreeGLUT")
+        self.cpp_info.set_property("cmake_target_name", "FreeGLUT::{}".format(config_target))
+        self.cpp_info.set_property("pkg_config_name", pkg_config)
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["freeglut_"].libs = tools.collect_libs(self)
-
-        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = "freeglut" if self.options.shared else "freeglut_static"
-        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = "freeglut" if self.options.shared else "freeglut_static"
-        self.cpp_info.components["freeglut_"].names["pkg_config"] = "freeglut" if self.settings.os == "Windows" else "glut"
-
-        self.cpp_info.components["freeglut_"].requires.append("opengl::opengl")
-        self.cpp_info.components["freeglut_"].requires.append("glu::glu")
         if self.settings.os == "Linux":
-            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
-
-        if self.settings.os == "Windows":
+            self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])
+        elif self.settings.os == "Windows":
             if not self.options.shared:
                 self.cpp_info.components["freeglut_"].defines.append("FREEGLUT_STATIC=1")
             self.cpp_info.components["freeglut_"].defines.append("FREEGLUT_LIB_PRAGMAS=0")
             self.cpp_info.components["freeglut_"].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
 
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "GLUT"
+        self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
+        self.cpp_info.names["pkg_config"] = pkg_config
+        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = "GLUT"
+        self.cpp_info.components["freeglut_"].set_property("cmake_module_target_name", "GLUT::GLUT")
+        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = config_target
+        self.cpp_info.components["freeglut_"].set_property("cmake_target_name", "FreeGLUT::{}".format(config_target))
+        self.cpp_info.components["freeglut_"].set_property("pkg_config_name", pkg_config)
+        self.cpp_info.components["freeglut_"].requires.extend(["opengl::opengl", "glu::glu"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])
+            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")

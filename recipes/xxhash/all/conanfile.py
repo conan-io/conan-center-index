@@ -1,14 +1,17 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.43.0"
 
 
-class XxHash(ConanFile):
+class XxHashConan(ConanFile):
     name = "xxhash"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Cyan4973/xxHash"
     description = "Extremely fast non-cryptographic hash algorithm"
-    topics = ("conan", "hash", "algorithm", "fast", "checksum", "hash-functions")
+    topics = ("hash", "algorithm", "fast", "checksum", "hash-functions")
     license = "BSD-2-Clause"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,10 +23,14 @@ class XxHash(ConanFile):
         "fPIC": True,
         "utility": True,
     }
+
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
-
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,20 +42,19 @@ class XxHash(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "xxHash-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is None:
             self._cmake = CMake(self)
             self._cmake.definitions["XXHASH_BUNDLED_MODE"] = False
             self._cmake.definitions["XXHASH_BUILD_XXHSUM"] = self.options.utility
+            # Fix CMake configuration if target is iOS/tvOS/watchOS
+            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             self._cmake.configure()
         return self._cmake
 
@@ -64,14 +70,21 @@ class XxHash(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "xxHash"
-        self.cpp_info.names["cmake_find_package_multi"] = "xxHash"
-        self.cpp_info.names["pkg_config"] = "libxxhash"
-        self.cpp_info.components["libxxhash"].names["cmake_find_package"] = "xxhash"
-        self.cpp_info.components["libxxhash"].names["cmake_find_package_multi"] = "xxhash"
+        self.cpp_info.set_property("cmake_file_name", "xxHash")
+        self.cpp_info.set_property("cmake_target_name", "xxHash::xxhash")
+        self.cpp_info.set_property("pkg_config_name", "libxxhash")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libxxhash"].libs = ["xxhash"]
 
         if self.options.utility:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "xxHash"
+        self.cpp_info.names["cmake_find_package_multi"] = "xxHash"
+        self.cpp_info.names["pkg_config"] = "libxxhash"
+        self.cpp_info.components["libxxhash"].names["cmake_find_package"] = "xxhash"
+        self.cpp_info.components["libxxhash"].names["cmake_find_package_multi"] = "xxhash"
+        self.cpp_info.components["libxxhash"].set_property("cmake_target_name", "xxHash::xxhash")

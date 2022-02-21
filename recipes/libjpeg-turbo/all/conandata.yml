@@ -1,16 +1,22 @@
 sources:
-  "2.0.2":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz"
-    sha256: "b45255bd476c19c7c6b198c07c0487e8b8536373b82f2b38346b32b4fa7bb942"
-  "2.0.4":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.4.tar.gz"
-    sha256: "7777c3c19762940cff42b3ba4d7cd5c52d1671b39a79532050c85efb99079064"
-  "2.0.5":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.5.tar.gz"
-    sha256: "b3090cd37b5a8b3e4dbd30a1311b3989a894e5d3c668f14cbc6739d77c9402b7"
-  "2.0.6":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.6.tar.gz"
-    sha256: "005aee2fcdca252cee42271f7f90574dda64ca6505d9f8b86ae61abc2b426371"
+  "2.1.2":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.1.2.tar.gz"
+    sha256: "e7fdc8a255c45bc8fbd9aa11c1a49c23092fcd7379296aeaeb14d3343a3d1bed"
+  "2.1.1":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.1.1.tar.gz"
+    sha256: "20e9cd3e5f517950dfb7a300ad344543d88719c254407ffb5ad88d891bf701c4"
   "2.1.0":
     url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.1.0.tar.gz"
     sha256: "d6b7790927d658108dfd3bee2f0c66a2924c51ee7f9dc930f62c452f4a638c52"
+  "2.0.6":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.6.tar.gz"
+    sha256: "005aee2fcdca252cee42271f7f90574dda64ca6505d9f8b86ae61abc2b426371"
+  "2.0.5":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.5.tar.gz"
+    sha256: "b3090cd37b5a8b3e4dbd30a1311b3989a894e5d3c668f14cbc6739d77c9402b7"
+  "2.0.4":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.4.tar.gz"
+    sha256: "7777c3c19762940cff42b3ba4d7cd5c52d1671b39a79532050c85efb99079064"
+  "2.0.2":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz"
+    sha256: "b45255bd476c19c7c6b198c07c0487e8b8536373b82f2b38346b32b4fa7bb942"

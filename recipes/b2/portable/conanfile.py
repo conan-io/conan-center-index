@@ -46,17 +46,14 @@ class B2Conan(ConanFile):
         'toolset': 'auto'
     }
 
-    def configure(self):
+    def validate(self):
         if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
             raise ConanInvalidConfiguration(
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "b2-" + \
-            os.path.basename(self.conan_data["sources"][self.version]['url']).replace(
-                ".tar.gz", "")
-        os.rename(extracted_dir, "source")
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination="source")
 
     def build(self):
         use_windows_commands = os.name == 'nt'

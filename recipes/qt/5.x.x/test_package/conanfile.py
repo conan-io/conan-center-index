@@ -9,18 +9,22 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "qt", "cmake", "cmake_find_package_multi", "qmake"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+        if self._settings_build.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
-            self.build_requires("meson/0.57.1")
+            self.build_requires("meson/0.59.0")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
-            not tools.cross_building(self.settings) and\
+            not tools.cross_building(self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 
@@ -39,17 +43,17 @@ class TestPackageConan(ConanFile):
                         os.environ[var] = val
                     return val
 
-                value = _getenvpath('CC')
+                value = _getenvpath("CC")
                 if value:
-                    args += ['QMAKE_CC=' + value,
-                             'QMAKE_LINK_C=' + value,
-                             'QMAKE_LINK_C_SHLIB=' + value]
+                    args += ['QMAKE_CC="' + value + '"',
+                             'QMAKE_LINK_C="' + value + '"',
+                             'QMAKE_LINK_C_SHLIB="' + value + '"']
 
                 value = _getenvpath('CXX')
                 if value:
-                    args += ['QMAKE_CXX=' + value,
-                             'QMAKE_LINK=' + value,
-                             'QMAKE_LINK_SHLIB=' + value]
+                    args += ['QMAKE_CXX="' + value + '"',
+                             'QMAKE_LINK="' + value + '"',
+                             'QMAKE_LINK_SHLIB="' + value + '"']
 
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
@@ -102,14 +106,14 @@ class TestPackageConan(ConanFile):
             self.output.info("Testing Meson")
             shutil.copy("qt.conf", "meson_folder")
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
-    
+
     def _test_with_cmake_find_package_multi(self):
         self.output.info("Testing CMake_find_package_multi")
         shutil.copy("qt.conf", "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake_find_package_multi()

@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(PkgConfig)
-pkg_check_modules(libmaxminddb REQUIRED IMPORTED_TARGET GLOBAL libmaxminddb)
+find_package(maxminddb REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PkgConfig::libmaxminddb)
+target_link_libraries(${PROJECT_NAME} maxminddb::maxminddb)

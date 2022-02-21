@@ -1,0 +1,21 @@
+Install headers for Visual Studio
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -29,3 +29,6 @@ install(TARGETS GKlib
+   ARCHIVE DESTINATION lib/${LINSTALL_PATH}
+   LIBRARY DESTINATION lib/${LINSTALL_PATH})
+ install(FILES ${GKlib_includes} DESTINATION include/${HINSTALL_PATH})
++if(MSVC)
++  install(FILES ${GKlib_win32_includes} DESTINATION include/${HINSTALL_PATH}/win32)
++endif()
+diff --git a/GKlibSystem.cmake b/GKlibSystem.cmake
+index d83b208..3dc5a7b 100644
+--- a/GKlibSystem.cmake
++++ b/GKlibSystem.cmake
+@@ -135,3 +135,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GKlib_COPTIONS} ${GKlib_COPTS}")
+ # Find GKlib sources.
+ file(GLOB GKlib_sources ${GKLIB_PATH}/*.c)
+ file(GLOB GKlib_includes ${GKLIB_PATH}/*.h)
++if(MSVC)
++  file(GLOB GKlib_win32_includes ${GKLIB_PATH}/win32/*.h)
++endif()

@@ -1,0 +1,12 @@
+fixed upstream https://github.com/pistacheio/pistache/pull/965
+
+--- a/include/pistache/typeid.h
++++ b/include/pistache/typeid.h
+@@ -11,6 +11,7 @@
+ 
+ #pragma once
+ 
++#include <cstddef>
+ #include <functional>
+ 
+ namespace Pistache {

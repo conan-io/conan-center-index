@@ -4,6 +4,7 @@ import os
 import shutil
 import glob
 
+required_conan_version = ">=1.36.0"
 
 class GobjectIntrospectionConan(ConanFile):
     name = "gobject-introspection"
@@ -36,26 +37,25 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration("%s recipe does not support windows. Contributions are welcome!" % self.name)
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.58.0")
+        self.build_requires("pkgconf/1.7.4")
         if self.settings.os == "Windows":
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
             self.build_requires("bison/3.7.1")
 
     def requirements(self):
-        self.requires("glib/2.67.1")
+        self.requires("glib/2.69.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
         defs = dict()
         defs["build_introspection_data"] = self.options["glib"].shared
+        defs["datadir"] = os.path.join(self.package_folder, "res")
 
         meson.configure(
             source_folder=self._source_subfolder,
@@ -93,10 +93,7 @@ class GobjectIntrospectionConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.move(
-            os.path.join(self.package_folder, "share"),
-            os.path.join(self.package_folder, "res"),
-        )
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
@@ -110,3 +107,19 @@ class GobjectIntrospectionConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        exe_ext = ".exe" if self.settings.os == "Windows" else ""
+
+        pkgconfig_variables = {
+            'datadir': '${prefix}/res',
+            'bindir': '${prefix}/bin',
+            'g_ir_scanner': '${bindir}/g-ir-scanner',
+            'g_ir_compiler': '${bindir}/g-ir-compiler%s' % exe_ext,
+            'g_ir_generate': '${bindir}/g-ir-generate%s' % exe_ext,
+            'gidatadir': '${datadir}/gobject-introspection-1.0',
+            'girdir': '${datadir}/gir-1.0',
+            'typelibdir': '${libdir}/girepository-1.0',
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))

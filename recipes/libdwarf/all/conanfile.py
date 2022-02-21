@@ -29,6 +29,8 @@ class LibdwarfConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -43,6 +45,9 @@ class LibdwarfConan(ConanFile):
         cmake.definitions["BUILD_SHARED"] = self.options.shared
         cmake.definitions["BUILD_DWARFGEN"] = False
         cmake.definitions["BUILD_DWARFEXAMPLE"] = False
+        if tools.cross_building(self):
+            cmake.definitions["HAVE_UNUSED_ATTRIBUTE_EXITCODE"] = "0"
+            cmake.definitions["HAVE_UNUSED_ATTRIBUTE_EXITCODE__TRYRUN_OUTPUT"] = ""
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 

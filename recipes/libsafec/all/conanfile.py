@@ -12,22 +12,44 @@ class LibSafeCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rurban/safeclib"
     license = "MIT"
-    topics = ("conan", "safec", "libc")
+    topics = ("safec", "libc", "bounds-checking")
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     exports_sources = "patches/*"
+
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @property
     def _supported_compiler(self):
@@ -39,20 +61,13 @@ class LibSafeCConan(ConanFile):
             return False
         return True
 
-    def configure(self):
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This platform is not yet supported by libsafec (os=Macos arch=armv8)")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration(
                 "libsafec doesn't support {}/{}".format(
                     self.settings.compiler, self.settings.compiler.version))
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -62,14 +77,15 @@ class LibSafeCConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.options.shared:
-            args = ["--enable-shared", "--disable-static"]
-        else:
-            args = ["--disable-shared", "--enable-static"]
-        args.extend(["--disable-doc", "--disable-Werror"])
-        if self.settings.build_type in ("Debug", "RelWithDebInfo"):
-            args.append("--enable-debug")
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--disable-doc",
+            "--disable-Werror",
+        ]
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):

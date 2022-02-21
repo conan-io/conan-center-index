@@ -1,0 +1,13 @@
+Fixes this erro:
+Only one of PREFIX or INSTALL_BASE can be given.  Not both.
+--- Makefile.in
++++ Makefile.in
+@@ -1623,7 +1623,7 @@
+ 
+ perl/Makefile: perl/Makefile.PL
+ 	mkdir -p perl
+-	cd perl && perl Makefile.PL INSTALLDIRS=${INSTALLDIRS}
++	cd perl && perl Makefile.PL INSTALLDIRS=${INSTALLDIRS} PREFIX=$(prefix) INSTALL_BASE=
+ 	-rm perl/Makefile.old > /dev/null
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.

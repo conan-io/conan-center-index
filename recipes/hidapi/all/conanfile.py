@@ -2,6 +2,7 @@ import os
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.43.0"
 
 class HidapiConan(ConanFile):
     name = "hidapi"
@@ -99,11 +100,13 @@ class HidapiConan(ConanFile):
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libusb"].names["pkg_config"] = "hidapi-libusb"
+            self.cpp_info.components["libusb"].set_property("pkg_config_name", "hidapi-libusb")
             self.cpp_info.components["libusb"].libs = ["hidapi-libusb"]
             self.cpp_info.components["libusb"].requires = ["libusb::libusb"]
             self.cpp_info.components["libusb"].system_libs = ["pthread", "dl", "rt"]
 
             self.cpp_info.components["hidraw"].names["pkg_config"] = "hidapi-hidraw"
+            self.cpp_info.components["hidraw"].set_property("pkg_config_name", "hidapi-hidraw")
             self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
             self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         else:

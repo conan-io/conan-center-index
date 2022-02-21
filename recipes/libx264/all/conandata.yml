@@ -1,7 +1,7 @@
 sources:
-  "20190605":
-    url: "http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20190605-2245.tar.bz2"
-    sha256: "c75203ef4759e4d7bc38e686b156c54c43b78edc73123c0b25db5224758bd1fc"
   "20191217":
     url: "https://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20191217-2245.tar.bz2"
     sha256: "0bb67d095513391e637b3b47e8efc3ba4603c3844f1b4c2690f4d36da7763055"
+  "20190605":
+    url: "http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20190605-2245.tar.bz2"
+    sha256: "c75203ef4759e4d7bc38e686b156c54c43b78edc73123c0b25db5224758bd1fc"

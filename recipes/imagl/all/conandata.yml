@@ -11,3 +11,16 @@ sources:
   "0.2.1":
     url: "https://gitlab-lepuy.iut-clermont.uca.fr/opengl/imagl/-/archive/v0.2.1/imagl-v0.2.1.tar.gz"
     sha256: "5a68cdeff4338e411695cca16c4230567de298f8efee2a9fadcc6fa644a70248"
+patches:
+  "0.1.0":
+    - patch_file: "patches/0001-no-unmanaged-conan-0.1.x.patch"
+      base_path: "source_subfolder"
+  "0.1.1":
+    - patch_file: "patches/0001-no-unmanaged-conan-0.1.x.patch"
+      base_path: "source_subfolder"
+  "0.1.2":
+    - patch_file: "patches/0001-no-unmanaged-conan-0.1.x.patch"
+      base_path: "source_subfolder"
+  "0.2.1":
+    - patch_file: "patches/0001-no-unmanaged-conan-0.2.1.patch"
+      base_path: "source_subfolder"

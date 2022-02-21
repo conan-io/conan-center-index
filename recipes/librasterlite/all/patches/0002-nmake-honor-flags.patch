@@ -1,0 +1,43 @@
+This patch for msvc build allows to:
+* define OPTFLAG ourself from conanfile (allow to honor profile)
+* inject a custom SYSTEM_LIBS variable from conanfile (allow robust shared build)
+* not hardcode this very specific C:\OSGeo4W environment
+* define rasterliteGetVersion() to be compliant with autotools build
+
+--- a/makefile.vc
++++ b/makefile.vc
+@@ -2,7 +2,6 @@
+ #
+ # NMAKE Makefile to build librasterlite on Windows
+ #
+-!INCLUDE nmake.opt
+ 
+ OBJ_EXT = obj
+ EXT = $(OBJ_EXT)
+@@ -11,10 +10,10 @@ LIBOBJ = lib\rasterlite.$(EXT) lib\rasterlite_gif.$(EXT) \
+ 	lib\rasterlite_png.$(EXT) lib\rasterlite_jpeg.$(EXT) \
+ 	lib\rasterlite_io.$(EXT) lib\rasterlite_image.$(EXT) \
+ 	lib\rasterlite_tiff.$(EXT) lib\rasterlite_aux.$(EXT) \
+-	lib\rasterlite_quantize.$(EXT)
++	lib\rasterlite_quantize.$(EXT) lib\rasterlite_version.$(EXT)
+ RASTERLITE_DLL 	       =	rasterlite$(VERSION).dll
+ 
+-CFLAGS	=	/nologo -IC:\OSGeo4W\include -I.\headers $(OPTFLAGS)
++CFLAGS	=	/nologo -I.\headers $(CFLAGS) $(OPTFLAGS)
+ 
+ CFLAGS2	=	/nologo -IC:\OSGeo4W\include -I.\headers $(OPTFLAGS2)
+ 
+@@ -30,11 +29,8 @@ rasterlite.lib:	$(LIBOBJ)
+ $(RASTERLITE_DLL):	rasterlite_i.lib
+ 
+ rasterlite_i.lib:	$(LIBOBJ)
+-	link /debug /dll /out:$(RASTERLITE_DLL) \
+-		/implib:rasterlite_i.lib $(LIBOBJ) \
+-		C:\OSGeo4W\lib\jpeg_i.lib C:\OSGeo4W\lib\libtiff_i.lib \
+-		C:\OSGeo4W\lib\libpng13.lib C:\OSGeo4W\lib\zlib.lib \
+-		C:\OSGeo4W\lib\geotiff_i.lib C:\OSGeo4W\lib\spatialite_i.lib
++	link /dll /out:$(RASTERLITE_DLL) \
++		/implib:rasterlite_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
+ 	if exist $(RASTERLITE_DLL).manifest mt -manifest \
+ 		$(RASTERLITE_DLL).manifest -outputresource:$(RASTERLITE_DLL);2
+ 

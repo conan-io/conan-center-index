@@ -28,16 +28,14 @@ class StrawberryperlConan(ConanFile):
         self.copy(pattern="*", src=os.path.join("perl", "bin"), dst="bin")
         self.copy(pattern="*", src=os.path.join("perl", "lib"), dst="lib")
         self.copy(pattern="*", src=os.path.join("perl", "vendor", "lib"), dst="lib")
-        self.copy(pattern="*", src=os.path.join("c", "bin"), dst="bin")
-        self.copy(pattern="*", src=os.path.join("c", "lib"), dst="lib")
-        self.copy(pattern="*", src=os.path.join("c", "include"), dst="include")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: %s" % bin_path)
         self.env_info.PATH.append(bin_path)
 
-        self.deps_user_info.perl = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")
+        self.user_info.perl = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")

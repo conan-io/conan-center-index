@@ -12,4 +12,5 @@ int main()
 
   N_Vector v = N_VNew_Serial(1);;
   N_VScale(2.0, y, v);
+  return 0;
 }

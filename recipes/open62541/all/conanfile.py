@@ -1,51 +1,105 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import shutil
+import glob
+import os
 import yaml
+
+required_conan_version = ">=1.33.0"
 
 
 class Open62541Conan(ConanFile):
     name = "open62541"
     license = "MPLv2"
-    exports_sources = [
-        "CMakeLists.txt",
-        "patches/**"
-    ]
-    exports = "submoduledata.yml"
     homepage = "https://open62541.org/"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "open62541 is an open source and free implementation of OPC UA (OPC Unified Architecture) written in the common subset of the C99 and C++98 languages. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. open62541 library is platform independent. All platform-specific functionality is implemented via exchangeable plugins. Plugin implementations are provided for the major operating systems."
+    description = "open62541 is an open source and free implementation of OPC UA " \
+                  "(OPC Unified Architecture) written in the common subset of the " \
+                  "C99 and C++98 languages. The library is usable with all major " \
+                  "compilers and provides the necessary tools to implement dedicated " \
+                  "OPC UA clients and servers, or to integrate OPC UA-based communication " \
+                  "into existing applications. open62541 library is platform independent. " \
+                  "All platform-specific functionality is implemented via exchangeable " \
+                  "plugins. Plugin implementations are provided for the major operating systems."
     topics = (
         "OPC UA", "open62541", "sdk", "server/client", "c", "iec-62541",
         "industrial automation", "tsn", "time sensetive networks", "publish-subscirbe", "pubsub"
     )
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        # False: UA_ENABLE_HISTORIZING=Off
+        # True: UA_ENABLE_HISTORIZING=On
+        # Experimental: UA_ENABLE_HISTORIZING=On and UA_ENABLE_EXPERIMENTAL_HISTORIZING=On
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
-        "subscription": [True, False, "With Events"],
+        # False: UA_ENABLE_SUBSCRIPTIONS=Off
+        # True: UA_ENABLE_SUBSCRIPTIONS=On
+        # With Events: deprecated. Use 'events' instead
+        # events: UA_ENABLE_SUBSCRIPTIONS_EVENTS=On
+        # alarms,conditions,events: UA_ENABLE_SUBSCRIPTIONS_EVENTS=On and UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=On
+        "subscription": [True, False, "With Events", "events", "alarms,conditions,events"],
+        # False: UA_ENABLE_METHODCALLS=Off
+        # True: UA_ENABLE_METHODCALLS=Onn
         "methods": [True, False],
+        # False: UA_ENABLE_NODEMANAGEMENT=Off
+        # True: UA_ENABLE_NODEMANAGEMENT=On
         "dynamic_nodes": [True, False],
+        # False: UA_ENABLE_AMALGAMATION=Off
+        # True: UA_ENABLE_AMALGAMATION=On
         "single_header": [True, False],
+        # None: UA_MULTITHREADING=0
+        # Threadsafe: UA_MULTITHREADING=100
+        # Internal threads: UA_MULTITHREADING=200
         "multithreading": ["None", "Threadsafe", "Internal threads"],
+        # False: UA_ENABLE_IMMUTABLE_NODES=Off
+        # True: UA_ENABLE_IMMUTABLE_NODES=On
         "imutable_nodes": [True, False],
+        # False: UA_ENABLE_WEBSOCKET_SERVER=Off
+        # True: UA_ENABLE_WEBSOCKET_SERVER=On
         "web_socket": [True, False],
-        "discovery": [True, False, "With Multicast"],
+        # False: UA_ENABLE_DISCOVERY=Off
+        # True: UA_ENABLE_DISCOVERY=On
+        # With Multicast: Deprecated. Use 'multicast' instead
+        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On
+        # semaphore: UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On and UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
+        # Deprecated. Use discovery=semaphore instead
         "discovery_semaphore": [True, False],
+        # False: UA_ENABLE_QUERY=Off
+        # True: UA_ENABLE_QUERY=On
         "query": [True, False],
-        "encryption": [False, "openssl", "mbedtls-apache", "mbedtls-gpl"],
+        # False: UA_ENABLE_ENCRYPTION=Off
+        # openssl: UA_ENABLE_ENCRYPTION=On and UA_ENABLE_ENCRYPTION_OPENSSL=On
+        # mbedtls: UA_ENABLE_ENCRYPTION=On
+        "encryption": [False, "openssl", "mbedtls"],
+        # False: UA_ENABLE_JSON_ENCODING=Off
+        # True: UA_ENABLE_JSON_ENCODING=On
         "json_support": [True, False],
+        # False: UA_ENABLE_PUBSUB=Off
+        # Simple: UA_ENABLE_PUBSUB=On
+        # Ethernet: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP=On
+        # Ethernet_XDP: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP_XDP=On
         "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
+        # False: UA_ENABLE_DA=Off
+        # True: UA_ENABLE_DA=On
         "data_access": [True, False],
+        # False: UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS=Off and UA_NAMESPACE_ZERO=options.namespace_zero
+        # True: UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS=On and UA_NAMESPACE_ZERO=Full
         "compiled_nodeset_descriptions": [True, False],
+        # UA_NAMESPACE_ZERO=option.namespace_zero (only if compiled_nodeset_descriptions=False)
         "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
+        # UA_ENABLE_MICRO_EMB_DEV_PROFILE=embedded_profile
         "embedded_profile": [True, False],
+        # UA_ENABLE_TYPENAMES=typenames
         "typenames": [True, False],
+        # UA_ENABLE_HARDENING=hardening
         "hardening": [True, False],
+        # UA_COMPILE_AS_CXX=cpp_compatible
         "cpp_compatible": [True, False],
+        # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False]
     }
     default_options = {
@@ -60,7 +114,7 @@ class Open62541Conan(ConanFile):
         "multithreading": "None",
         "imutable_nodes": False,
         "web_socket": False,
-        "discovery": True,
+        "discovery": "semaphore",
         "discovery_semaphore": True,
         "query": False,
         "encryption": False,
@@ -75,46 +129,53 @@ class Open62541Conan(ConanFile):
         "cpp_compatible": False,
         "readable_statuscodes": True
     }
-    generators = "cmake", "cmake_find_package"
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports = "submoduledata.yml"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        if tools.Version(self.version) >= "1.1.0":
-            if self.options.encryption == "mbedtls-apache":
-                self.requires("mbedtls/2.16.3-apache")
-            elif self.options.encryption == "mbedtls-gpl":
-                self.requires("mbedtls/2.16.3-gpl")
-            elif self.options.encryption == "openssl":
-                self.requires("openssl/1.1.1j")
-
-            if self.options.web_socket:
-                self.requires("libwebsockets/4.1.6")
-        else:
-            if self.options.encryption == "mbedtls-apache":
-                self.requires("mbedtls/2.16.3-apache")
-            elif self.options.encryption == "mbedtls-gpl":
-                self.requires("mbedtls/2.16.3-gpl")
-
-        if self.options.discovery == "With Multicast":
-            self.requires("pro-mdnsd/0.8.4")
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.cpp_compatible:
+            del self.settings.compiler.cppstd
+            del self.settings.compiler.libcxx
 
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
+        if tools.Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("{0} {1} doesn't properly support shared lib on Windows".format(self.name,
+                                                                                                            self.version))
+
+        if self.options.subscription == "With Events":
+            self.output.warning("`{name}:subscription=With Events` is deprecated. Use `{name}:subscription=events` instead".format(name=self.name))  # Deprecated in 1.2.2
+            self.options.subscription = "events"
+
+        if self.options.web_socket:
+            self.options["libwebsockets"].with_ssl = self.options.encryption
+
+    def requirements(self):
+        if self.options.encryption == "mbedtls":
+            self.requires("mbedtls/2.25.0")
+        elif self.options.encryption == "openssl":
+            self.requires("openssl/1.1.1k")
+        if self.options.web_socket:
+            self.requires("libwebsockets/4.2.0")
+        if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
+            self.requires("pro-mdnsd/0.8.4")
+
+    def validate(self):
         if not self.options.subscription:
-            if self.options.subscription_events:
-                raise ConanInvalidConfiguration(
-                    "Open62541 requires subscription option")
+            raise ConanInvalidConfiguration(
+                "Open62541 requires subscription option")
 
         if not self.options.discovery:
             if self.options.discovery_semaphore:
@@ -154,20 +215,13 @@ class Open62541Conan(ConanFile):
                 "PubSub over Ethernet is not supported for your OS!")
 
         if self.options.web_socket:
-            self.options["libwebsockets"].with_ssl = self.options.encryption
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-        if not self.options.cpp_compatible:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
+            if self.options["libwebsockets"].with_ssl != self.options.encryption:
+                raise ConanInvalidConfiguration(
+                    "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
 
     def source(self):
-        archive_name = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
         submodule_filename = os.path.join(
             self.recipe_folder, 'submoduledata.yml')
@@ -186,7 +240,7 @@ class Open62541Conan(ConanFile):
                 tools.get(**submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
                 tools.rmdir(submodule_source)
-                os.rename(archive_name, submodule_source)
+                tools.rename(archive_name, submodule_source)
 
     def _get_log_level(self):
         return {
@@ -211,7 +265,6 @@ class Open62541Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.verbose = True
 
         version = tools.Version(self.version)
         self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major
@@ -219,10 +272,12 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch
 
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
+        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
         if self.options.subscription != False:
-            self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
-            if self.options.subscription == "With Events":
+            if "events" in str(self.options.subscription):
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
+            if "alarms" in str(self.options.subscription) and "conditions" in str(self.options.subscription):
+                self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS"] = True
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
@@ -231,23 +286,24 @@ class Open62541Conan(ConanFile):
             )
         self._cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         self._cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
+        self._cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.historize != False
         if self.options.historize != False:
-            self._cmake.definitions["UA_ENABLE_HISTORIZING"] = True
             if self.options.historize == "Experimental":
                 self._cmake.definitions["UA_ENABLE_EXPERIMENTAL_HISTORIZING"] = True
+        self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
         if self.options.discovery != False:
-            self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
-            if self.options.discovery == "With Multicast":
-                self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = True
-            self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
+            self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = \
+                self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery)
+            self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
+                self.options.discovery_semaphore or "semaphore" in str(self.options.discovery)
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
+        self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
         if self.options.encryption != False:
-            self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
             if self.options.encryption == "openssl":
                 self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
+        self._cmake.definitions["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
         if self.options.pub_sub != False:
-            self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
             elif self.settings.os == "Linux" and self.options.pub_sub == "Ethernet_XDP":
@@ -270,9 +326,14 @@ class Open62541Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
+
+    @property
+    def _tools_subfolder(self):
+        return os.path.join(self._source_subfolder, "tools")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -285,18 +346,40 @@ class Open62541Conan(ConanFile):
         tools.remove_files_by_mask(os.path.join(
             self.package_folder, "lib"), '*.pdb')
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*")):
+            if not cmake_file.endswith(self._module_file_rel_path):
+                os.remove(cmake_file)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("generate_*.py", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
+        self.copy("nodeset_compiler/*", src=self._tools_subfolder, dst=os.path.join("res", "tools"))
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake", "open62541")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder, "open62541Macros.cmake")
+
+    @staticmethod
+    def _chmod_plus_x(filename):
+        if os.name == 'posix':
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"
         self.cpp_info.names["cmake_find_package_multi"] = "open62541"
+        self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [
             "include",
             os.path.join("include", "plugin")
         ]
+
+        # required for creating custom servers from ua-nodeset
+        self.user_info.tools_dir = os.path.join(self.package_folder, "res", "tools")
+        self._chmod_plus_x(os.path.join(self.package_folder, "res", "tools", "generate_nodeid_header.py"))
 
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
@@ -305,8 +388,5 @@ class Open62541Conan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "win32"))
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "posix"))
-        self.cpp_info.builddirs = [
-            "lib",
-            os.path.join("lib", "cmake"),
-            os.path.join("lib", "cmake", "open62541")
-        ]
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules = [self._module_file_rel_path]

@@ -1,0 +1,21 @@
+diff --git a/iceoryx_posh/CMakeLists.txt b/iceoryx_posh/CMakeLists.txt
+index 6df5429b..e7dedbc4 100644
+--- a/iceoryx_posh/CMakeLists.txt
++++ b/iceoryx_posh/CMakeLists.txt
+@@ -27,8 +27,6 @@ option(TOML_CONFIG "TOML support for RouDi with dynamic configuration" ON)
+ option(ONE_TO_MANY_ONLY "Restricts communication to 1:n pattern" OFF)
+ 
+ if(TOML_CONFIG)
+-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpptoml/ ${CMAKE_BINARY_DIR}/dependencies/posh/cpptoml/prebuild)
+-
+     find_package(cpptoml REQUIRED)
+ endif()
+ 
+@@ -325,7 +323,6 @@ if(TOML_CONFIG)
+         iceoryx_posh::iceoryx_posh
+         iceoryx_utils::iceoryx_utils
+         iceoryx_posh::iceoryx_posh_roudi
+-        cpptoml
+         ${ICEORYX_SANITIZER_FLAGS}
+     )
+ 

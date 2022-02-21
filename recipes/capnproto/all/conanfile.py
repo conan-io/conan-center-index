@@ -2,33 +2,34 @@ from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CapnprotoConan(ConanFile):
     name = "capnproto"
     description = "Cap'n Proto serialization/RPC system."
     license = "MIT"
-    topics = ("conan", "capnproto", "serialization", "rpc")
+    topics = ("capnproto", "serialization", "rpc")
     homepage = "https://capnproto.org"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ("CMakeLists.txt", "patches/**")
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
-        "with_zlib": [True, False]
+        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
-        "with_zlib": True
+        "with_zlib": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
     _autotools = None
 
@@ -41,6 +42,10 @@ class CapnprotoConan(ConanFile):
         return "build_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
@@ -48,6 +53,11 @@ class CapnprotoConan(ConanFile):
             "clang": "5",
             "apple-clang": "5.1",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,23 +68,25 @@ class CapnprotoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
+
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1m")
+        if self.options.get_safe("with_zlib"):
+            self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Cap'n Proto requires C++14. Your compiler is unknown. Assuming it supports C++14.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Cap'n Proto requires C++14, which your compiler does not support.")
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
         if self.settings.os == "Windows" and tools.Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pre 0.8.0")
-
-    def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
-        if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.11")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -102,12 +114,15 @@ class CapnprotoConan(ConanFile):
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--disable-static" if self.options.shared else "--enable-static",
             "--with-openssl" if self.options.with_openssl else "--without-openssl",
-            "--enable-reflection"
+            "--enable-reflection",
         ]
         if tools.Version(self.version) >= "0.8.0":
             args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(args=args, configure_dir=os.path.join(self._source_subfolder, "c++"))
+        # Fix rpath on macOS
+        if self.settings.os == "Macos":
+            self._autotools.link_flags.append("-Wl,-rpath,@loader_path/../lib")
+        self._autotools.configure(args=args)
         return self._autotools
 
     def build(self):
@@ -119,8 +134,11 @@ class CapnprotoConan(ConanFile):
         else:
             with tools.chdir(os.path.join(self._source_subfolder, "c++")):
                 self.run("{} --install --verbose -Wall".format(tools.get_env("AUTORECONF")))
-            autotools = self._configure_autotools()
-            autotools.make()
+                # Fix rpath on macOS
+                if self.settings.os == "Macos":
+                    tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name @rpath/")
+                autotools = self._configure_autotools()
+                autotools.make()
 
     @property
     def _cmake_folder(self):
@@ -132,8 +150,9 @@ class CapnprotoConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
         else:
-            autotools = self._configure_autotools()
-            autotools.install()
+            with tools.chdir(os.path.join(self._source_subfolder, "c++")):
+                autotools = self._configure_autotools()
+                autotools.install()
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
@@ -141,16 +160,28 @@ class CapnprotoConan(ConanFile):
                 os.remove(cmake_file)
         # inject mandatory variables so that CAPNP_GENERATE_CPP function can
         # work in a robust way (build from source or from pre build package)
+        find_execs = textwrap.dedent("""\
+            if(CMAKE_CROSSCOMPILING)
+                find_program(CAPNP_EXECUTABLE capnp PATHS ENV PATH NO_DEFAULT_PATH)
+                find_program(CAPNPC_CXX_EXECUTABLE capnpc-c++ PATHS ENV PATH NO_DEFAULT_PATH)
+            endif()
+            if(NOT CAPNP_EXECUTABLE)
+                set(CAPNP_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            if(NOT CAPNPC_CXX_EXECUTABLE)
+                set(CAPNPC_CXX_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
+            function(CAPNP_GENERATE_CPP SOURCES HEADERS)
+        """)
         tools.replace_in_file(os.path.join(self.package_folder, self._cmake_folder, "CapnProtoMacros.cmake"),
                               "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
-                              """set(CAPNP_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
-set(CAPNPC_CXX_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
-set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
-function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
+                              find_execs)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CapnProto"
-        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
+        self.cpp_info.set_property("cmake_file_name", "CapnProto")
+        capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [capnprotomacros])
 
         components = [
             {"name": "capnp", "requires": ["kj"]},
@@ -166,27 +197,35 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
+        if tools.Version(self.version) >= "0.9.0":
+            components.append({
+                "name": "capnp-websocket",
+                "requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"],
+            })
 
         for component in components:
             self._register_component(component)
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["capnpc"].system_libs = ["pthread"]
             self.cpp_info.components["kj"].system_libs = ["pthread"]
             self.cpp_info.components["kj-async"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
-        self.cpp_info.components["kj"].builddirs.append(self._cmake_folder)
-        self.cpp_info.components["kj"].build_modules = [os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "CapnProto"
+        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
+        self.cpp_info.components["kj"].build_modules = [capnprotomacros]
+
     def _register_component(self, component):
         name = component["name"]
-        self.cpp_info.components[name].names["cmake_find_package"] = name
-        self.cpp_info.components[name].names["cmake_find_package_multi"] = name
-        self.cpp_info.components[name].names["pkg_config"] = name
+        self.cpp_info.components[name].set_property("cmake_target_name", "CapnProto::{}".format(name))
+        self.cpp_info.components[name].builddirs.append(self._cmake_folder)
+        self.cpp_info.components[name].set_property("pkg_config_name", name)
         self.cpp_info.components[name].libs = [name]
         self.cpp_info.components[name].requires = component["requires"]

@@ -1,0 +1,4 @@
+sources:
+  "0.3.2":
+    url: "https://github.com/latchset/libverto/releases/download/0.3.2/libverto-0.3.2.tar.gz"
+    sha256: "8d1756fd704f147549f606cd987050fb94b0b1ff621ea6aa4d6bf0b74450468a"

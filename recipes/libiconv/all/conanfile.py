@@ -1,6 +1,9 @@
+from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
+
+required_conan_version = ">=1.43.0"
 
 
 class LibiconvConan(ConanFile):
@@ -10,10 +13,16 @@ class LibiconvConan(ConanFile):
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion")
     license = "LGPL-2.1"
-    exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _autotools = None
 
@@ -23,11 +32,15 @@ class LibiconvConan(ConanFile):
 
     @property
     def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self))
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,9 +52,13 @@ class LibiconvConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -64,7 +81,7 @@ class LibiconvConan(ConanFile):
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self.settings) or self._is_msvc:
+        if not tools.cross_building(self) or self._is_msvc:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
@@ -101,7 +118,8 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if self._is_msvc:
+        if (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12") or \
+           self.settings.compiler == "msvc":
             self._autotools.flags.append("-FS")
 
         self._autotools.configure(args=configure_args, host=host, build=build)
@@ -110,6 +128,10 @@ class LibiconvConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # relocatable shared libs on macOS
+        for configure in ["configure", os.path.join("libcharset", "configure")]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, configure),
+                                  "-install_name \\$rpath/", "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
@@ -123,18 +145,22 @@ class LibiconvConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcharset.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libiconv.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         if self._is_msvc and self.options.shared:
             for import_lib in ["iconv", "charset"]:
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Iconv")
+        self.cpp_info.set_property("cmake_target_name", "Iconv::Iconv")
+
         self.cpp_info.names["cmake_find_package"] = "Iconv"
         self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
+
         self.cpp_info.libs = ["iconv", "charset"]
 
         binpath = os.path.join(self.package_folder, "bin")

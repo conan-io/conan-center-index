@@ -1,17 +1,22 @@
 from conans import CMake, ConanFile, tools
-import glob
 import os
+
+required_conan_version = ">=1.43.0"
 
 
 class NetcdfConan(ConanFile):
     name = "netcdf"
-    description = "The Unidata network Common Data Form (netCDF) is an interface for scientific data access and a freely-distributed software library that provides an implementation of the interface."
+    description = (
+        "The Unidata network Common Data Form (netCDF) is an interface for "
+        "scientific data access and a freely-distributed software library "
+        "that provides an implementation of the interface."
+    )
     topics = ("unidata", "unidata-netcdf", "networking")
     license = "BSD-3-Clause"
     homepage = "https://github.com/Unidata/netcdf-c"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,8 +33,8 @@ class NetcdfConan(ConanFile):
         "cdf5": True,
         "dap": True,
     }
-    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
 
+    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
     _cmake = None
 
     @property
@@ -43,6 +48,11 @@ class NetcdfConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,11 +68,11 @@ class NetcdfConan(ConanFile):
         if self._with_hdf5:
             self.requires("hdf5/1.12.0")
         if self.options.dap:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.80.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("netcdf-c-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -97,23 +107,33 @@ class NetcdfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for fn in glob.glob(os.path.join(self.package_folder, "bin", "*")):
-            if "netcdf" not in os.path.basename(fn):
-                os.unlink(fn)
+        if self.settings.os == "Windows" and self.options.shared:
+            for vc_file in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), vc_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+        else:
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "netcdf"
-        self.cpp_info.names["cmake_find_package"] = "netCDF"
-        self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
+        self.cpp_info.set_property("cmake_file_name", "netCDF")
+        self.cpp_info.set_property("cmake_target_name", "netCDF::netcdf")
+        self.cpp_info.set_property("pkg_config_name", "netcdf")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap:
             self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "netCDF"
+        self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
+        self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
+        self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
+        self.cpp_info.components["libnetcdf"].set_property("cmake_target_name", "netCDF::netcdf")
+        self.cpp_info.components["libnetcdf"].set_property("pkg_config_name", "netcdf")

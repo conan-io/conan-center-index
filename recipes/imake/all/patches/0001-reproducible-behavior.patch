@@ -1,0 +1,14 @@
+Hardcode gcc instead of using `PREPROC` (=compiler used when building imake).
+This leads to more reproducible behavior.
+(CC can be overridden by a CC environment variable or --cc argument)
+--- mdepend.cpp
++++ mdepend.cpp
+@@ -21,7 +21,7 @@
+ XCOMM	"-" (at least, that is what the documentation implies).
+ XCOMM
+ 
+-CC=PREPROC
++CC=gcc
+ 
+ silent='-'
+ 

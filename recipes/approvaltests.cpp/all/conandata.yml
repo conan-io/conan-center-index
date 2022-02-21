@@ -1,74 +1,4 @@
 sources:
-  8.0.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.0.0/ApprovalTests.v.8.0.0.hpp
-      sha256: e16a97081f8582be951d95a9d53dc611f1f5a84e117a477029890d0b34ae99d6
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.0.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.1.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.1.0/ApprovalTests.v.8.1.0.hpp
-      sha256: 6212684654b3deec3e54669602832b45bd9d9b6a2f45dbddce23ab5ba91e2d7e
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.1.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.1.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.1.1/ApprovalTests.v.8.1.1.hpp
-      sha256: 19b39976cbe381c64470399bcf40b61d34712fe959396e1cf4b60c9508a28d34
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.1.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.2.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.2.0/ApprovalTests.v.8.2.0.hpp
-      sha256: ef8eeafdef5b1c158e2dc73ba7e12b7697621cbf0c34b175755718f159fa4df8
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.2.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.3.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.3.0/ApprovalTests.v.8.3.0.hpp
-      sha256: 6e422b22a369c1a4134b68e7ef611e021ffbe43cfd411a81529b92d48fd03f59
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.3.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.4.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.4.0/ApprovalTests.v.8.4.0.hpp
-      sha256: 65e826aaca1cb9126c7bd41da9f1b4b131ec4cdde57450dda49233578e389bbb
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.4.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.5.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.5.0/ApprovalTests.v.8.5.0.hpp
-      sha256: ab2bee6487229e4f1f26d578b36ac6a73dfeb0fdab36b2ed774b4575ee544a33
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.5.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.6.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.6.0/ApprovalTests.v.8.6.0.hpp
-      sha256: eb62bc0aae1996fed35db0ab8571199a694954668c3ce27d5250db6a09b98f06
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.6.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.7.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.7.0/ApprovalTests.v.8.7.0.hpp
-      sha256: 764f0d441b10739d2cba5fb5aff43d2e4dcd1eb7972cccf884db92eae30c3460
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.7.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.7.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.7.1/ApprovalTests.v.8.7.1.hpp
-      sha256: 8b68e0278ccdc277cf39a59aacfd651c5ca59ff7b1a2604f251dc9162b64a214
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.7.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.8.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.8.0/ApprovalTests.v.8.8.0.hpp
-      sha256: fa572c13dd27c885427dc3539813518502456545993f9eb32b8eb5c5c388d857
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.8.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.8.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.8.1/ApprovalTests.v.8.8.1.hpp
-      sha256: 5fb945e50d37b1cdfdd35aacdd93dab58f0d1c6814f8792c79f7c4aa521f9f40
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.8.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.9.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.9.0/ApprovalTests.v.8.9.0.hpp
-      sha256: eaba5a46ab4406f5bd5c735ae26f453a957b664662c5febe1dad7de88718988d
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.9.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  8.9.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.9.1/ApprovalTests.v.8.9.1.hpp
-      sha256: 8c27eefe37355aaf6f8b8d1ecb23a1354c0c5af97725f105182f1eb1fd17ee3c
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.9.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
   8.9.2:
     - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.8.9.2/ApprovalTests.v.8.9.2.hpp
       sha256: e743f1b83afb045cb9bdee310e438a3ed610a549240e4b4c4c995e548c773da5
@@ -79,83 +9,28 @@ sources:
       sha256: cae3599dc29bd50c2cf48967e209c854e7b867ecdc8a5aec143b6fb4a7dcc739
     - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.9.0.0/LICENSE"
       sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.0.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.0.0/ApprovalTests.v.10.0.0.hpp
-      sha256: 3d1beff2305b067f12a56cc79f0f091fde6cb9edc02fcbfef28c26e24352976c
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.0.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.0.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.0.1/ApprovalTests.v.10.0.1.hpp
-      sha256: 62dad6a3803a49e2281497c07f64e0396503b8e99a474293383acb7be98a69ef
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.0.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.1.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.1.0/ApprovalTests.v.10.1.0.hpp
-      sha256: 031cdaeeb31d3b78aed5a6e13fc80c4d1ec607932703b38066ac2afb9b2bb2f8
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.1.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.1.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.1.1/ApprovalTests.v.10.1.1.hpp
-      sha256: 3d4109bb926f53e18c12b14de934baad8c6464c220076293b63a63155a82f754
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.1.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.1.2:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.1.2/ApprovalTests.v.10.1.2.hpp
-      sha256: 614af9434a821df39b0ffbc79ac079f2e025eb19db32e1891e9e082729b70ddc
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.1.2/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.2.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.2.0/ApprovalTests.v.10.2.0.hpp
-      sha256: 6d699ba637213c30ef09dfc43cb3e9ce114044f593aeea9a94e88d8baa74d33a
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.2.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.2.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.2.1/ApprovalTests.v.10.2.1.hpp
-      sha256: 9a080f5f7c502998a08e1213fd66a884ca278e764e6555bb5eb305810adc28cc
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.2.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.3.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.3.0/ApprovalTests.v.10.3.0.hpp
-      sha256: 2d86c0c2e09627620e065bbebae5676c7f69e78431bb82f1f7d74334275c9af9
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.3.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.4.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.4.0/ApprovalTests.v.10.4.0.hpp
-      sha256: 36d8a0eb9c1765e745e8a2da7cbdc6546206e17410a04b7572757ee2c3a67d55
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.4.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.5.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.5.0/ApprovalTests.v.10.5.0.hpp
-      sha256: 6f922787d3590d38d4fa2e42fe2c33cba1a04eed8e80aa420c2eb999bf21f671
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.5.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.5.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.5.1/ApprovalTests.v.10.5.1.hpp
-      sha256: 9097155f20631fd7e0cebe86a1d5744fe2b0d76a1ce7f7b4f63f0368c71a7d5e
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.5.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.6.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.6.0/ApprovalTests.v.10.6.0.hpp
-      sha256: e4ae4a5fa19cb2a2b723bdbef940fd6e0c6f0e18dc6ee0e7b10b88218a33d7dc
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.6.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.7.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.7.0/ApprovalTests.v.10.7.0.hpp
-      sha256: bfb1cc074cef756e0310cdf666116932a6779ba002a11ba9f4db7558ded28f04
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.7.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.7.1:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.7.1/ApprovalTests.v.10.7.1.hpp
-      sha256: 453eff5d04dcfdc566690df8393bf02f21aced80f5ec03068d00111632a7b549
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.7.1/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-  10.8.0:
-    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.8.0/ApprovalTests.v.10.8.0.hpp
-      sha256: adcc8ac09777f62eda5dcb721d6c1ebc9f22a621997c761920c9d3858c4d3eff
-    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.8.0/LICENSE"
-      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
   10.9.1:
     - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.9.1/ApprovalTests.v.10.9.1.hpp
       sha256: 65aa9ab1afa1b9c2df5890274010eed0f8c2f57b08a81c5cb719b71a0ad9d14c
     - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.9.1/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+  10.10.0:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.10.0/ApprovalTests.v.10.10.0.hpp
+      sha256: e8fbe19011adad46d8a6309b1e2112fb9de729dddaa12f5fd9dfd6adb44dba2e
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.10.0/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+  10.11.0:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.11.0/ApprovalTests.v.10.11.0.hpp
+      sha256: 7f4efb835d59b2f31c3dc8a6f35335ad621da538ccb09abf2037d29d4f13f0b2
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.11.0/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+  10.12.0:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.12.0/ApprovalTests.v.10.12.0.hpp
+      sha256: 5084ad71b8cc73ea9d753685b652d8828842335a59ab93a2199ceac879a4b292
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.12.0/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+  10.12.1:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.12.1/ApprovalTests.v.10.12.1.hpp
+      sha256: 5e87f2e4b39f027676c9259c3edd4a4a8078c0814cdfb371718ef0eb685477c2
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.12.1/LICENSE"
       sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4

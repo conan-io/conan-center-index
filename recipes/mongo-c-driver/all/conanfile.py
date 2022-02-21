@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
 
 
 class MongoCDriverConan(ConanFile):
@@ -11,11 +11,9 @@ class MongoCDriverConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mongoc.org/"
     description = "A Cross Platform MongoDB Client Library for C"
-    topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
-    settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package", "pkg_config"
-    short_paths = True
+    topics = ("libbson", "libmongoc", "mongo", "mongodb", "database", "db")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,7 +23,7 @@ class MongoCDriverConan(ConanFile):
         "with_zlib": [True, False],
         "with_zstd": [True, False],
         "with_icu": [True, False],
-        "srv": [True, False]
+        "srv": [True, False],
     }
 
     default_options = {
@@ -37,9 +35,11 @@ class MongoCDriverConan(ConanFile):
         "with_zlib": True,
         "with_zstd": True,
         "with_icu": True,
-        "srv": True
+        "srv": True,
     }
 
+    short_paths = True
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     @property
@@ -50,16 +50,39 @@ class MongoCDriverConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.with_sasl = "sspi"
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.with_ssl == "openssl":
+            self.requires("openssl/1.1.1m")
+        elif self.options.with_ssl == "libressl":
+            self.requires("libressl/3.2.1")
+        if self.options.with_sasl == "cyrus":
+            self.requires("cyrus-sasl/2.1.27")
+        if self.options.with_snappy:
+            self.requires("snappy/1.1.9")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_zstd:
+            self.requires("zstd/1.5.1")
+        if self.options.with_icu:
+            self.requires("icu/70.1")
+
+    def validate(self):
         if self.options.with_ssl == "darwin" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("with_ssl=darwin only allowed on Apple os family")
         if self.options.with_ssl == "windows" and self.settings.os != "Windows":
@@ -67,29 +90,13 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
 
-    def requirements(self):
-        if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1j")
-        elif self.options.with_ssl == "libressl":
-            self.requires("libressl/3.2.1")
-        if self.options.with_sasl == "cyrus":
-            self.requires("cyrus-sasl/2.1.27")
-        if self.options.with_snappy:
-            self.requires("snappy/1.1.8")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
-        if self.options.with_icu:
-            self.requires("icu/68.2")
-
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -180,14 +187,22 @@ class MongoCDriverConan(ConanFile):
     def package_info(self):
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
+        mongoc_target = "mongoc_shared" if self.options.shared else "mongoc_static"
+        self.cpp_info.set_property("cmake_file_name", "mongoc-1.0")
+        self.cpp_info.set_property("cmake_target_name", "mongo::{}".format(mongoc_target))
+
         self.cpp_info.filenames["cmake_find_package"] = "mongoc-1.0"
         self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc-1.0"
         self.cpp_info.names["cmake_find_package"] = "mongo"
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
+
         # mongoc
-        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc_shared" if self.options.shared else "mongoc_static"
-        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc_shared" if self.options.shared else "mongoc_static"
-        self.cpp_info.components["mongoc"].names["pkg_config"] = "libmongoc-1.0" if self.options.shared else "libmongoc-static-1.0"
+        self.cpp_info.components["mongoc"].set_property("cmake_target_name", "mongo::{}".format(mongoc_target))
+        self.cpp_info.components["mongoc"].set_property("pkg_config_name", "libmongoc-1.0" if self.options.shared else "libmongoc-static-1.0")
+
+        self.cpp_info.components["mongoc"].names["cmake_find_package"] = mongoc_target
+        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = mongoc_target
+
         self.cpp_info.components["mongoc"].includedirs = [os.path.join("include", "libmongoc-1.0")]
         self.cpp_info.components["mongoc"].libs = ["mongoc-1.0" if self.options.shared else "mongoc-static-1.0"]
         if not self.options.shared:
@@ -217,15 +232,20 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("icu::icu")
         if self.options.srv:
             self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
+
         # bson
-        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson_shared" if self.options.shared else "bson_static"
-        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson_shared" if self.options.shared else "bson_static"
-        self.cpp_info.components["bson"].names["pkg_config"] = "libbson-1.0" if self.options.shared else "libbson-static-1.0"
+        bson_target = "bson_shared" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].set_property("cmake_target_name", "mongo::{}".format(bson_target))
+        self.cpp_info.components["bson"].set_property("pkg_config_name", "libbson-1.0" if self.options.shared else "libbson-static-1.0")
+
+        self.cpp_info.components["bson"].names["cmake_find_package"] = bson_target
+        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = bson_target
+
         self.cpp_info.components["bson"].includedirs = [os.path.join("include", "libbson-1.0")]
         self.cpp_info.components["bson"].libs = ["bson-1.0" if self.options.shared else "bson-static-1.0"]
         if not self.options.shared:
             self.cpp_info.components["bson"].defines = ["BSON_STATIC"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["bson"].system_libs = ["m", "pthread", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["bson"].system_libs = ["ws2_32"]

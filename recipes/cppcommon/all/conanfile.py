@@ -60,7 +60,7 @@ class CppCommon(ConanFile):
             self.output.warn("cppcommon requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def requirements(self):
-        self.requires("fmt/7.1.3")
+        self.requires("fmt/8.0.0")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
 

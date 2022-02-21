@@ -1,15 +1,18 @@
-import os
 from conans import ConanFile, tools, CMake
+import os
+import textwrap
+
+required_conan_version = ">=1.43.0"
 
 
 class CzmqConan(ConanFile):
     name = "czmq"
     homepage = "https://github.com/zeromq/czmq"
-    description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
-    topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
+    description = "High-level C binding for ZeroMQ"
+    topics = ("zmq", "libzmq", "message-queue", "asynchronous")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
-    exports_sources = "CMakeLists.txt", "patches/**"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,35 +28,50 @@ class CzmqConan(ConanFile):
         "with_lz4": True,
         "with_libuuid": True,
     }
-    generators = "cmake"
 
+    generators = "cmake"
     _cmake = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             # libuuid is not available on Windows
-            del self.options.with_uuid
+            del self.options.with_libuuid
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1g")  # zdigest depends on openssl
-        self.requires("zeromq/4.3.2")
+        self.requires("openssl/1.1.1m")  # zdigest depends on openssl
+        self.requires("zeromq/4.3.4")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.71.1")
+            self.requires("libcurl/7.80.0")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/1.9.3")
         if self.options.get_safe("with_libuuid"):
-                self.requires("libuuid/1.0.3")
+            self.requires("libuuid/1.0.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("czmq-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -65,7 +83,7 @@ class CzmqConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
@@ -77,32 +95,54 @@ class CzmqConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {self._czmq_target: "czmq::czmq"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _czmq_target(self):
+        return "czmq" if self.options.shared else "czmq-static"
+
     def package_info(self):
-        # TODO: CMake imported target shouldn't be namespaced
-        self.cpp_info.names["pkg_config"] = "libczmq"
-        czmq_target = "czmq" if self.options.shared else "czmq-static"
-        self.cpp_info.components["libczmq"].names["cmake_find_package"] = czmq_target
-        self.cpp_info.components["libczmq"].names["cmake_find_package_multi"] = czmq_target
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["libczmq"].libs = ["czmq" if self.options.shared else "libczmq"]
-            self.cpp_info.components["libczmq"].system_libs.append("rpcrt4")
-        else:
-            self.cpp_info.components["libczmq"].libs = ["czmq"]
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libczmq"].system_libs.extend(["pthread", "m"])
-        if self.settings.os == "Windows":
-            self.cpp_info.components["libczmq"].system_libs.append("rpcrt4")
+        self.cpp_info.set_property("cmake_file_name", "czmq")
+        self.cpp_info.set_property("cmake_target_name", self._czmq_target)
+        self.cpp_info.set_property("pkg_config_name", "libczmq")
+        prefix = "lib" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.libs = ["{}czmq".format(prefix)]
         if not self.options.shared:
-            self.cpp_info.components["libczmq"].defines.append("CZMQ_STATIC")
-        self.cpp_info.components["libczmq"].requires = ["openssl::openssl", "zeromq::zeromq"]
-        if self.options.with_libcurl:
-            self.cpp_info.components["libczmq"].requires.append("libcurl::libcurl")
-        if self.options.with_lz4:
-            self.cpp_info.components["libczmq"].requires.append("lz4::lz4")
-        if self.options.get_safe("with_libuuid"):
-            self.cpp_info.components["libczmq"].requires.append("libuuid::libuuid")
+            self.cpp_info.defines.append("CZMQ_STATIC")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "m"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("rpcrt4")
+        if not self.options.shared:
+            stdcpp_library = tools.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.system_libs.append(stdcpp_library)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "libczmq"

@@ -1,26 +1,43 @@
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import re
 import shutil
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+
+required_conan_version = ">=1.43.0"
 
 
 class LibjpegConan(ConanFile):
     name = "libjpeg"
     description = "Libjpeg is a widely used C library for reading and writing JPEG image files."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
+    topics = ("image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
     license = "http://ijg.org/files/README"
     homepage = "http://ijg.org"
-    exports_sources = ["Win32.Mak", "patches/**"]
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("Win32.Mak")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,14 +49,18 @@ class LibjpegConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+        if self._settings_build.os == "Windows" and not self._is_msvc and \
            not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("jpeg-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_nmake(self):
         shutil.copy("Win32.Mak", os.path.join(self._source_subfolder, "Win32.Mak"))
@@ -64,40 +85,32 @@ class LibjpegConan(ConanFile):
                 self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
 
     def _configure_autotools(self):
-        """For unix and mingw environments"""
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.defines.append("LIBJPEG_BUILDING")
-        config_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            config_args.extend(["--enable-shared=yes", "--enable-static=no"])
-        else:
-            config_args.extend(["--enable-shared=no", "--enable-static=yes"])
-
-        if self.settings.os == "Windows":
-            mingw_arch = {
-                "x86_64": "x86_64",
-                "x86": "i686",
-            }
-            build_triplet = host_triplet = "{}-w64-mingw32".format(mingw_arch[str(self.settings.arch)])
-            config_args.extend([
-                "--build={}".format(build_triplet),
-                "--host={}".format(host_triplet),
-            ])
-
-        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Fix rpath in LC_ID_DYLIB of installed shared libs on macOS
+        if tools.is_apple_os(self.settings.os):
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "configure"),
+                "-install_name \\$rpath/",
+                "-install_name @rpath/",
+            )
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_nmake()
         else:
             autotools = self._configure_autotools()
@@ -105,7 +118,7 @@ class LibjpegConan(ConanFile):
 
     def package(self):
         self.copy("README", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
 
@@ -115,15 +128,13 @@ class LibjpegConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            os.unlink(os.path.join(self.package_folder, "lib", "libjpeg.la"))
-
+            if self.settings.os == "Windows" and self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+            else:
+                tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-
-            bindir = os.path.join(self.package_folder, "bin")
-            for file in os.listdir(bindir):
-                if file.endswith(".exe"):
-                    os.unlink(os.path.join(bindir, file))
 
         for fn in ("jpegint.h", "transupp.h",):
             self.copy(fn, src=self._source_subfolder, dst="include")
@@ -137,9 +148,15 @@ class LibjpegConan(ConanFile):
             tools.save(path, re.subn(r"(?:EXTERN|GLOBAL)\(([^)]+)\)", r"\1", tools.load(path))[0])
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "JPEG")
+        self.cpp_info.set_property("cmake_target_name", "JPEG::JPEG")
+        self.cpp_info.set_property("pkg_config_name", "libjpeg")
+
         self.cpp_info.names["cmake_find_package"] = "JPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
-        if self.settings.compiler == "Visual Studio":
+
+        if self._is_msvc:
             self.cpp_info.libs = ["libjpeg"]
         else:
             self.cpp_info.libs = ["jpeg"]

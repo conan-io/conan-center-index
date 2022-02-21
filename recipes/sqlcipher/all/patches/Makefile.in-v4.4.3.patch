@@ -1,13 +1,22 @@
 diff --git a/Makefile.in b/Makefile.in
-index d365631..920ac7d 100644
+index d365631..cb1c867 100644
 --- a/Makefile.in
 +++ b/Makefile.in
+@@ -655,7 +655,7 @@ DBFUZZ_OPT =
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-all:	sqlite3.h libsqlcipher.la sqlcipher$(TEXE) $(HAVE_TCL:1=libtclsqlite3.la)
++all:	sqlite3.h libsqlcipher.la
+ 
+ Makefile: $(TOP)/Makefile.in
+ 	./config.status
 @@ -1472,9 +1472,8 @@ lib_install:	libsqlcipher.la
  	$(INSTALL) -d $(DESTDIR)$(libdir)
  	$(LTINSTALL) libsqlcipher.la $(DESTDIR)$(libdir)
  
 -install:	sqlcipher$(TEXE) lib_install sqlite3.h sqlcipher.pc ${HAVE_TCL:1=tcl_install}
-+install:	lib_install sqlite3.h
++install:	lib_install sqlite3.h sqlcipher.pc
  	$(INSTALL) -d $(DESTDIR)$(bindir)
 -	$(LTINSTALL) sqlcipher$(TEXE) $(DESTDIR)$(bindir)
  	$(INSTALL) -d $(DESTDIR)$(includedir)

@@ -40,6 +40,11 @@ class CcfitsConan(ConanFile):
     def requirements(self):
         self.requires("cfitsio/3.490")
 
+    def validate(self):
+        if tools.Version(self.version) >= "2.6":
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)

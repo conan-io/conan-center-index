@@ -1,0 +1,7 @@
+sources:
+  "1.4.2":
+    url: "https://github.com/ddemidov/amgcl/archive/1.4.2.tar.gz"
+    sha256: "db0de6b75e6c205f44542c3ac8d9935c8357a58072963228d0bb11a54181aea8"
+  "1.4.0":
+    url: "https://github.com/ddemidov/amgcl/archive/refs/tags/1.4.0.tar.gz"
+    sha256: 018b824396494c8958faa6337cebcaba48a2584d828f279eef0bbf9e05f900a7

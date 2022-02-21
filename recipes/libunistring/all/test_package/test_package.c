@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
 int main(int argc, char * argv[]) {
     const char *text = "This is some text";

@@ -1,8 +1,8 @@
+from conans import CMake, ConanFile, tools
 import os
 
-from conans import CMake, ConanFile, tools
+required_conan_version = ">=1.43.0"
 
-required_conan_version = ">=1.28.0"
 
 class RabbitmqcConan(ConanFile):
     name = "rabbitmq-c"
@@ -10,11 +10,20 @@ class RabbitmqcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alanxz/rabbitmq-c"
     description = "This is a C-language AMQP client library for use with v2.0+ of the RabbitMQ broker."
-
     topics = ("rabbitmq-c", "rabbitmq", "message queue")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "ssl": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "ssl": False}
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "ssl": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "ssl": False,
+    }
+
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
     _cmake = None
@@ -35,12 +44,11 @@ class RabbitmqcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1m")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is None:
@@ -67,16 +75,15 @@ class RabbitmqcConan(ConanFile):
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "rabbitmq-c"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "rabbitmq-c"
-        self.cpp_info.names["cmake_find_package"] = "rabbitmq"
-        self.cpp_info.names["cmake_find_package_multi"] = "rabbitmq"
-        self.cpp_info.names["pkg_config"] = "librabbitmq"
         rabbitmq_target = "rabbitmq" if self.options.shared else "rabbitmq-static"
-        self.cpp_info.components["rabbitmq"].names["cmake_find_package"] = rabbitmq_target
-        self.cpp_info.components["rabbitmq"].names["cmake_find_package_multi"] = rabbitmq_target
+        self.cpp_info.set_property("cmake_file_name", "rabbitmq-c")
+        self.cpp_info.set_property("cmake_target_name", "rabbitmq::{}".format(rabbitmq_target))
+        self.cpp_info.set_property("pkg_config_name", "librabbitmq")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         if self.settings.os == "Windows":
             self.cpp_info.components["rabbitmq"].libs = [
                 "rabbitmq.4" if self.options.shared else "librabbitmq.4"
@@ -84,9 +91,20 @@ class RabbitmqcConan(ConanFile):
             self.cpp_info.components["rabbitmq"].system_libs.extend(["crypt32", "ws2_32"])
         else:
             self.cpp_info.components["rabbitmq"].libs = ["rabbitmq"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["rabbitmq"].system_libs.append("pthread")
         if not self.options.shared:
             self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "rabbitmq-c"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "rabbitmq-c"
+        self.cpp_info.names["cmake_find_package"] = "rabbitmq"
+        self.cpp_info.names["cmake_find_package_multi"] = "rabbitmq"
+        self.cpp_info.names["pkg_config"] = "librabbitmq"
+        self.cpp_info.components["rabbitmq"].names["cmake_find_package"] = rabbitmq_target
+        self.cpp_info.components["rabbitmq"].names["cmake_find_package_multi"] = rabbitmq_target
+        self.cpp_info.components["rabbitmq"].set_property("cmake_target_name", "rabbitmq::{}".format(rabbitmq_target))
+        self.cpp_info.components["rabbitmq"].set_property("pkg_config_name", "librabbitmq")
         if self.options.ssl:
             self.cpp_info.components["rabbitmq"].requires.append("openssl::openssl")

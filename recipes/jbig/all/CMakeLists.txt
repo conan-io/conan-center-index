@@ -1,42 +1,37 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(jbig LANGUAGES C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
+
+include(GNUInstallDirs)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-add_library(${CMAKE_PROJECT_NAME} source_subfolder/libjbig/jbig.h
-                                  source_subfolder/libjbig/jbig.c
-                                  source_subfolder/libjbig/jbig_tab.c)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
-if (WIN32)
-    if (BUILD_SHARED_LIBS)
-        target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE _JBIGDLL_=1)
-    endif()
+add_library(jbig
+    source_subfolder/libjbig/jbig.c
+    source_subfolder/libjbig/jbig_tab.c
+)
+target_include_directories(jbig PUBLIC source_subfolder/libjbig)
+if(MSVC AND BUILD_SHARED_LIBS)
+    target_compile_definitions(jbig PUBLIC _JBIGDLL_)
 endif()
 
-include(GNUInstallDirs)
+install(TARGETS jbig
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-set(OTHER_TARGETS)
+install(FILES source_subfolder/libjbig/jbig.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-if (BUILD_EXECUTABLES)
+if(BUILD_EXECUTABLES)
     add_executable(pbmtojbg source_subfolder/pbmtools/pbmtojbg.c)
-    target_link_libraries(pbmtojbg ${CMAKE_PROJECT_NAME})
-    target_include_directories(pbmtojbg PRIVATE source_subfolder/libjbig)
+    target_link_libraries(pbmtojbg PRIVATE jbig)
 
     add_executable(jbgtopbm source_subfolder/pbmtools/jbgtopbm.c)
-    target_link_libraries(jbgtopbm ${CMAKE_PROJECT_NAME})
-    target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
+    target_link_libraries(jbgtopbm PRIVATE jbig)
 
-    set(OTHER_TARGETS jbgtopbm pbmtojbg)
+    install(TARGETS pbmtojbg jbgtopbm DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
-
-install(TARGETS ${CMAKE_PROJECT_NAME} ${OTHER_TARGETS}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-
-install(FILES source_subfolder/libjbig/jbig.h DESTINATION include)

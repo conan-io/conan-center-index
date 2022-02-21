@@ -7,4 +7,7 @@ versions:
     folder: all
   "5.7.2.5":
     folder: all
-
+  "5.7.2.6":
+    folder: all
+  "5.7.3":
+    folder: all

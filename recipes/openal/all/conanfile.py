@@ -3,23 +3,28 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpenALConan(ConanFile):
     name = "openal"
     description = "OpenAL Soft is a software implementation of the OpenAL 3D audio API."
-    topics = ("conan", "openal", "audio", "api")
+    topics = ("openal", "audio", "api")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.openal.org"
-    license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    homepage = "https://openal-soft.org/"
+    license = "LGPL-2.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -30,43 +35,14 @@ class OpenALConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    @property
-    def _supports_cxx14(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
-                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
-        min_version = {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-        }.get(str(self.settings.compiler))
-        if min_version:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                return False, "This compiler version does not support c++14"
-            else:
-                return True, "Unknown compiler. Assuming your compiler supports c++14"
-        return True, None
-
-    @property
-    def _supports_cxx11(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
-                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
-        min_version = {
-            "Visual Studio": "13",
-            "gcc": "5",
-            "clang": "5",
-        }.get(str(self.settings.compiler))
-        if min_version:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                return False, "This compiler version does not support c++11"
-            else:
-                return True, "Unknown compiler. Assuming your compiler supports c++11"
-        return True, None
 
     @property
     def _openal_cxx_backend(self):
@@ -81,6 +57,39 @@ class OpenALConan(ConanFile):
         if not self._openal_cxx_backend:
             del self.settings.compiler.libcxx
 
+    def requirements(self):
+        if self.settings.os == "Linux":
+            self.requires("libalsa/1.2.5.1")
+
+    @property
+    def _supports_cxx14(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
+        min_version = {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+            return False, "This compiler version does not support c++14"
+        return True, None
+
+    @property
+    def _supports_cxx11(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
+        min_version = {
+            "Visual Studio": "13",
+            "gcc": "5",
+            "clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+            return False, "This compiler version does not support c++11"
+        return True, None
+
+    def validate(self):
         if tools.Version(self.version) >= "1.21":
             ok, msg = self._supports_cxx14
             if not ok:
@@ -93,10 +102,6 @@ class OpenALConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
             if msg:
                 self.output.warn(msg)
-
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("libalsa/1.2.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -149,27 +154,25 @@ class OpenALConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "OpenAL")
+        self.cpp_info.set_property("cmake_target_name", "OpenAL::OpenAL")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "openal")
+
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
-        self.cpp_info.names["pkg_config"] = "openal"
-
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])

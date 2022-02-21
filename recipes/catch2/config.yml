@@ -29,3 +29,7 @@ versions:
     folder: 2.x.x
   2.13.6:
     folder: 2.x.x
+  "2.13.7":
+    folder: 2.x.x
+  "2.13.8":
+    folder: 2.x.x

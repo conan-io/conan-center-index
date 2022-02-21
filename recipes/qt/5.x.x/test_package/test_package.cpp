@@ -5,8 +5,17 @@
 #include "greeter.h"
 #include <QFile>
 
-// Qt Network test
 #include <QNetworkAccessManager>
+#include <QtConcurrent>
+#include <QDomText>
+#include <QSqlDatabase>
+
+#include <qplatformdefs.h>
+
+void f()
+{
+    qDebug() << "inside f";
+}
 
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
@@ -28,7 +37,16 @@ int main(int argc, char *argv[]){
     qDebug() << "Resource content:" << f.readAll();
     f.close();
 
+    qDebug() << W_OK;
+
     QNetworkAccessManager networkTester;
+
+    QSqlDatabase sqlTester;
+
+    QFuture<void> future = QtConcurrent::run(::f);
+    future.waitForFinished();
+
+    QDomText xmlTester;
 
     return app.exec();
 }

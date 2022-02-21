@@ -1,4 +1,8 @@
 versions:
+  "20211101":
+    folder: all
+  "20210901":
+    folder: all
   "20210601":
     folder: all
   "20210401":

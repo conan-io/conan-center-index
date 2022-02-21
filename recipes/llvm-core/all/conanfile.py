@@ -7,6 +7,8 @@ import re
 import os.path
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LLVMCoreConan(ConanFile):
     name = 'llvm-core'
@@ -15,8 +17,8 @@ class LLVMCoreConan(ConanFile):
         'optimizers, and runtime environments.'
     )
     license = 'Apache-2.0 WITH LLVM-exception'
-    topics = ('conan', 'llvm')
-    homepage = 'https://github.com/llvm/llvm-project/tree/master/llvm'
+    topics = ('llvm', 'compiler')
+    homepage = 'https://llvm.org'
     url = 'https://github.com/conan-io/conan-center-index'
 
     settings = ('os', 'arch', 'compiler', 'build_type')
@@ -69,7 +71,7 @@ class LLVMCoreConan(ConanFile):
     # Older cmake versions may have issues generating the graphviz output used
     # to model the components
     build_requires = [
-        'cmake/3.20.3'
+        'cmake/3.20.5'
     ]
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
@@ -211,8 +213,7 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        os.rename('llvm-{}.src'.format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         self._patch_sources()
 
     def build(self):
@@ -235,7 +236,7 @@ class LLVMCoreConan(ConanFile):
                 lib = '*LLVMTableGenGlobalISel{}'.format(ext)
                 self.copy(lib, dst='lib', src='lib')
 
-            self.run('cmake --graphviz=graph/llvm.dot .')
+            CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
             with tools.chdir('graph'):
                 dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
 

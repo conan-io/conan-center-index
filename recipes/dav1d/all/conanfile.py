@@ -1,7 +1,9 @@
 import os
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">= 1.29.1"
+required_conan_version = ">=1.33.0"
+
 
 class Dav1dConan(ConanFile):
     name = "dav1d"
@@ -46,6 +48,10 @@ class Dav1dConan(ConanFile):
             # debug builds with assembly often causes linker hangs or LNK1000
             self.options.assembly = False
 
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -63,8 +69,8 @@ class Dav1dConan(ConanFile):
             self.build_requires("nasm/2.15.05")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("dav1d-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),

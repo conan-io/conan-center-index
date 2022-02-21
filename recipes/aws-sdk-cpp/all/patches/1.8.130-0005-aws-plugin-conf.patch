@@ -1,0 +1,44 @@
+commit 1179cb040d6b9292d30eb7d444298cd286f9f574
+Author: dvirtz <dvirtz@gmail.com>
+Date:   Tue Nov 16 21:38:45 2021 +0200
+
+    add a file to configure SDK plugins
+
+diff --git a/cmake/sdk_plugin_conf.cmake b/cmake/sdk_plugin_conf.cmake
+new file mode 100644
+index 0000000000..474ead75bd
+--- /dev/null
++++ b/cmake/sdk_plugin_conf.cmake
+@@ -0,0 +1,32 @@
++get_filename_component(AWS_NATIVE_SDK_ROOT ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
++set(SIMPLE_INSTALL TRUE)
++
++if (CMAKE_INSTALL_BINDIR)
++    set(BINARY_DIRECTORY "${CMAKE_INSTALL_BINDIR}")
++endif()
++
++if (CMAKE_INSTALL_LIBDIR)
++    set(LIBRARY_DIRECTORY "${CMAKE_INSTALL_LIBDIR}")
++endif()
++
++if (CMAKE_INSTALL_INCLUDEDIR)
++    set(INCLUDE_DIRECTORY "${CMAKE_INSTALL_INCLUDEDIR}")
++endif()
++
++if(BUILD_SHARED_LIBS)
++    set(ARCHIVE_DIRECTORY "${BINARY_DIRECTORY}")
++else()
++    set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
++endif()
++
++if(DEFINED CMAKE_CXX_STANDARD)
++    set(STANDARD_DEFAULT ${CMAKE_CXX_STANDARD})
++else()
++    set(STANDARD_DEFAULT "11")
++endif()
++set(CPP_STANDARD ${STANDARD_DEFAULT} CACHE STRING "Flag to upgrade the C++ standard used. The default is 11. The minimum is 11.")
++
++include(CMakePackageConfigHelpers)
++include(initialize_project_version)
++include(utilities)
++include(compiler_settings)

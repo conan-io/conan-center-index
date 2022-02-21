@@ -2,3 +2,9 @@ sources:
   "0.2.0":
     url: "https://github.com/ngrodzitski/logr/archive/v0.2.0.tar.gz"
     sha256: "4e1707f9450f12b0752d8ef4d72a3f38a2e6be0014ca7edde049f22e9b9119a4"
+  "0.2.1":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.2.1.tar.gz"
+    sha256: "411282bb03d678d7266951b979102392dbf7e5e14b629bccfb2c4e74cfa758c6"
+  "0.3.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.3.0.tar.gz"
+    sha256: "21eea6cce32e3ccf3769f66211143b17f8b36891e79ec3ef5209f849d9e79ad7"

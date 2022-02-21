@@ -2,14 +2,14 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SdlttfConan(ConanFile):
     name = "sdl_ttf"
     description = "A TrueType font library for SDL"
     license = "Zlib"
-    topics = ("conan", "sdl2", "sdl2_ttf", "sdl", "sdl_ttf", "ttf", "font")
+    topics = ("sdl2", "sdl2_ttf", "sdl", "sdl_ttf", "ttf", "font")
     homepage = "https://www.libsdl.org/projects/SDL_ttf"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -23,7 +23,6 @@ class SdlttfConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -34,6 +33,11 @@ class SdlttfConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,8 +50,8 @@ class SdlttfConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("freetype/2.10.4")
-        self.requires("sdl/2.0.14")
+        self.requires("freetype/2.11.1")
+        self.requires("sdl/2.0.18")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
@@ -59,10 +63,9 @@ class SdlttfConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        # Handle sdl2 static target
-        if not self.options["sdl"].shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "SDL2::SDL2", "SDL2::SDL2-static")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         # missing from distribution (only in 2.0.15?)
         tools.save(os.path.join(self._source_subfolder, "SDL2_ttfConfig.cmake"), "")
 
@@ -88,9 +91,14 @@ class SdlttfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "SDL2_ttf.framework"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SDL2_ttf")
+        self.cpp_info.set_property("cmake_target_name", "SDL2_ttf::SDL2_ttf")
+        self.cpp_info.set_property("pkg_config_name", "SDL2_ttf")
+
         self.cpp_info.names["cmake_find_package"] = "SDL2_ttf"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_ttf"
         self.cpp_info.names["pkg_config"] = "SDL2_ttf"
+
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.libs = ["SDL2_ttf"]
         self.cpp_info.requires = ["freetype::freetype", "sdl::libsdl2"]

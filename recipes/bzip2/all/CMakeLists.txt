@@ -4,7 +4,7 @@ project(bzip2 C)
 include(GNUInstallDirs)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 if(MSVC OR MSVC90 OR MSVC10)
     set(MSVC ON)

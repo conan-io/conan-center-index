@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class LibwebpConan(ConanFile):
@@ -9,21 +11,34 @@ class LibwebpConan(ConanFile):
     homepage = "https://github.com/webmproject/libwebp"
     topics = ("image", "libwebp", "webp", "decoding", "encoding")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "with_simd": [True, False], "near_lossless": [True, False],
-               "swap_16bit_csp": [True, False]}
-    default_options = {"shared": False, "fPIC": True,
-                       "with_simd": True, "near_lossless": True,
-                       "swap_16bit_csp": False}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_simd": [True, False],
+        "near_lossless": [True, False],
+        "swap_16bit_csp": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_simd": True,
+        "near_lossless": True,
+        "swap_16bit_csp": False,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,9 +51,8 @@ class LibwebpConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _version_components(self):
@@ -68,6 +82,8 @@ class LibwebpConan(ConanFile):
         self._cmake.definitions["WEBP_BUILD_VWEBP"] = False
         self._cmake.definitions["WEBP_BUILD_EXTRAS"] = False
         self._cmake.definitions["WEBP_BUILD_WEBPINFO"] = False
+        if tools.Version(self.version) >= "1.2.1":
+            self._cmake.definitions["WEBP_BUILD_LIBWEBPMUX"] = True
         self._cmake.definitions["WEBP_BUILD_WEBPMUX"] = False
 
         self._cmake.configure()
@@ -75,12 +91,8 @@ class LibwebpConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # build libwebpmux (not in patch file to avoid one patch per version)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(WEBP_BUILD_GIF2WEBP OR WEBP_BUILD_IMG2WEBP)",
-                              "if(TRUE)")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -92,38 +104,40 @@ class LibwebpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "WebP"
-        self.cpp_info.names["cmake_find_package_multi"] = "WebP"
+        self.cpp_info.set_property("cmake_file_name", "WebP")
+        self.cpp_info.set_property("pkg_config_name", "libwebp-all-do-not-use")
+
         # webpdecoder
-        self.cpp_info.components["webpdecoder"].names["cmake_find_package"] = "webpdecoder"
-        self.cpp_info.components["webpdecoder"].names["cmake_find_package_multi"] = "webpdecoder"
-        self.cpp_info.components["webpdecoder"].names["pkg_config"] = "libwebpdecoder"
-        self.cpp_info.components["webpdecoder"].libs = [self._lib_name("webpdecoder")]
-        if self.settings.os == "Linux":
+        self.cpp_info.components["webpdecoder"].set_property("cmake_target_name", "WebP::webpdecoder")
+        self.cpp_info.components["webpdecoder"].set_property("pkg_config_name", "libwebpdecoder")
+        self.cpp_info.components["webpdecoder"].libs = ["webpdecoder"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webpdecoder"].system_libs = ["pthread"]
+
         # webp
-        self.cpp_info.components["webp"].names["cmake_find_package"] = "webp"
-        self.cpp_info.components["webp"].names["cmake_find_package_multi"] = "webp"
-        self.cpp_info.components["webp"].names["pkg_config"] = "libwebp"
-        self.cpp_info.components["webp"].libs = [self._lib_name("webp")]
-        if self.settings.os == "Linux":
+        self.cpp_info.components["webp"].set_property("cmake_target_name", "WebP::webp")
+        self.cpp_info.components["webp"].set_property("pkg_config_name", "libwebp")
+        self.cpp_info.components["webp"].libs = ["webp"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webp"].system_libs = ["m", "pthread"]
+
         # webpdemux
-        self.cpp_info.components["webpdemux"].names["cmake_find_package"] = "webpdemux"
-        self.cpp_info.components["webpdemux"].names["cmake_find_package_multi"] = "webpdemux"
-        self.cpp_info.components["webpdemux"].names["pkg_config"] = "libwebpdemux"
-        self.cpp_info.components["webpdemux"].libs = [self._lib_name("webpdemux")]
+        self.cpp_info.components["webpdemux"].set_property("cmake_target_name", "WebP::webpdemux")
+        self.cpp_info.components["webpdemux"].set_property("pkg_config_name", "libwebpdemux")
+        self.cpp_info.components["webpdemux"].libs = ["webpdemux"]
         self.cpp_info.components["webpdemux"].requires = ["webp"]
+
         # webpmux
-        self.cpp_info.components["webpmux"].names["cmake_find_package"] = "libwebpmux"
-        self.cpp_info.components["webpmux"].names["cmake_find_package_multi"] = "libwebpmux"
-        self.cpp_info.components["webpmux"].names["pkg_config"] = "libwebpmux"
-        self.cpp_info.components["webpmux"].libs = [self._lib_name("webpmux")]
+        self.cpp_info.components["webpmux"].set_property("cmake_target_name", "WebP::libwebpmux")
+        self.cpp_info.components["webpmux"].set_property("pkg_config_name", "libwebpmux")
+        self.cpp_info.components["webpmux"].libs = ["webpmux"]
         self.cpp_info.components["webpmux"].requires = ["webp"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webpmux"].system_libs = ["m"]
 
-    def _lib_name(self, name):
-        if self.options.shared and self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            return name + ".dll"
-        return name
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "WebP"
+        self.cpp_info.names["cmake_find_package_multi"] = "WebP"
+        self.cpp_info.names["pkg_config"] = "libwebp-all-do-not-use"
+        self.cpp_info.components["webpmux"].names["cmake_find_package"] = "libwebpmux"
+        self.cpp_info.components["webpmux"].names["cmake_find_package_multi"] = "libwebpmux"

@@ -1,0 +1,4 @@
+sources:
+  "cci.20200813":
+    url: "https://github.com/KhronosGroup/OpenGL-Registry/raw/43aad35cba1b76ea1f33f8d6234fa57ae8e2fbbe/api/GL/wglext.h"
+    sha256: "f02ff1cfd6444501d2454cf91e44289d687ef8917bd0ef80bf6a6a69a3dd5123"

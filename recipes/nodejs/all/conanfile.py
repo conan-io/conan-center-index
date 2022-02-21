@@ -19,12 +19,23 @@ class NodejsConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    @property
+    def _nodejs_arch(self):
+        if str(self.settings.os) == "Linux":
+            if str(self.settings.arch).startswith("armv7"):
+                return "armv7"
+            if str(self.settings.arch).startswith("armv8") and "32" not in str(self.settings.arch):
+                return "armv8"
+        return str(self.settings.arch)
+
     def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Only x86_64 binaries are available")
+        if (not (self.version in self.conan_data["sources"]) or
+            not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
+            not (self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
+            raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

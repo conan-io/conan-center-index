@@ -5,7 +5,9 @@
 #include <cstdlib> //-- I need this for atoi
 using namespace std;
 
+extern "C" {
 int yylex();
+}
 int yyerror(const char *p) { cerr << "Error: " << p << endl; return 0; }
 %}
 

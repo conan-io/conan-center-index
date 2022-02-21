@@ -28,7 +28,7 @@ conan-center-index tries to make the process as smooth and simple as possible fo
 
 In general, reviews are driven by the automated [bot](https://github.com/conan-center-bot). The bot is responsible for:
 
-- Adding or removing labels (such as [No Beta User](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3A%22No+Beta+user%22) or [Docs](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3ADocs)).
+- Adding or removing labels (such as [Bump version](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3A%22Bump+version%22) or [Docs](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3ADocs)).
 - Writing comments (most of the time, it's a build status, either failure with logs or success).
 - Merging pull requests.
 - Closing issues (after merging pull requests with GitHub keywords).
@@ -51,7 +51,7 @@ If you struggle to fix build errors yourself, you may want to ask for help from 
 ### Unexpected error
 
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
-Keep in mind conan-center-index is still in "early access program", and there are still some instabilities. Especially, as we're using lots of external services,
+Keep in mind conan-center-index is still _under development_, and there can be some instabilities. Especially, as we're using lots of external services,
 which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
 So, what to do once `Unexpected error` was encountered? You may consider re-running the build by closing your pull request, waiting 15 seconds, and then re-opening it again.
 
@@ -61,9 +61,9 @@ Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-
 
 ## Avoiding conflicts
 
-It's recommended to rebase your changes on top of the master branch to avoid conflicts.
-Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts.
-Obviously, PRs that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts. Pull Requests that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+
+Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch. This is importatnt for ConanCenter to ensure it is building the correct recipe revision, see [this comment](https://github.com/conan-io/conan-center-index/pull/8797#discussion_r781993233) for details. One trick is to look out for comments from the [Community's Conflict PR Bot](https://github.com/prince-chrismc/conan-center-index/blob/patch-41/docs/community_resources.md#bots) which can alter you to possible problems.
 
 ## Draft
 
@@ -83,7 +83,6 @@ The list includes only official Conan developers:
 - [@danimtb](https://github.com/danimtb)
 - [@jgsogo](https://github.com/jgsogo)
 - [@czoido](https://github.com/czoido)
-- [@solvingj](https://github.com/solvingj)
 - [@sse4](https://github.com/sse4)
 - [@uilianries](https://github.com/uilianries)
 
@@ -101,6 +100,7 @@ The list includes conan-center-index contributors who are very active and proven
 - [@gocarlos](https://github.com/gocarlos)
 - [@mathbunnyru](https://github.com/mathbunnyru)
 - [@ericriff](https://github.com/ericriff)
+- [@toge](https://github.com/toge)
 
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
@@ -125,7 +125,7 @@ It doesn't always mean accepting all the suggestions, but at least providing a r
 The bot runs Automatic Merges every 30 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of 48 PRs merged per day (in practice, it's even less for reasons listed below).
 PR is selected for the merge only if:
 
-- Author is an added [beta user](https://github.com/conan-io/conan-center-index/issues/4).
+- Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).
 - Author has signed CLA.
 - PR is not a Draft or WIP.
 - PR has a green status (successful build).
@@ -135,6 +135,8 @@ PR is selected for the merge only if:
 - Master build is not running already (see below)
 
 If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
+
+The conan-center-bot will perform a [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This means should do not need to rebase your pull request; doing so will dismiss any reviews and the reviewer will need to restart.
 
 ### Merge
 

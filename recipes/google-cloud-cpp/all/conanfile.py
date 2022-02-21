@@ -1,9 +1,10 @@
 import os
+import textwrap
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 class GoogleCloudCppConan(ConanFile):
     name = "google-cloud-cpp"
@@ -38,9 +39,17 @@ class GoogleCloudCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        
+    
+    def validate(self):
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
+
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
+
+        if tools.Version(self.version) >= "1.30.0":
+            if self.settings.compiler == 'clang' and tools.Version(self.settings.compiler.version) < "6.0":
+                raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
@@ -56,13 +65,13 @@ class GoogleCloudCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
-        self.requires('protobuf/3.15.5')
-        self.requires('grpc/1.37.1')
-        self.requires('nlohmann_json/3.9.1')
+        self.requires('protobuf/3.17.1')
+        self.requires('grpc/1.39.1')
+        self.requires('nlohmann_json/3.10.2')
         self.requires('crc32c/1.1.1')
-        self.requires('abseil/20210324.0')
-        self.requires('libcurl/7.75.0')
-        self.requires('openssl/1.1.1k')
+        self.requires('abseil/20210324.2')
+        self.requires('libcurl/7.78.0')
+        self.requires('openssl/1.1.1l')
         # TODO: Add googleapis once it is available in CCI (now it is embedded)
 
     def _configure_cmake(self):
@@ -86,9 +95,24 @@ class GoogleCloudCppConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        # Do not override CMAKE_CXX_STANDARD if provided
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            textwrap.dedent("""\
+                set(CMAKE_CXX_STANDARD
+                    11
+                    CACHE STRING "Configure the C++ standard version for all targets.")"""),
+            textwrap.dedent("""\
+                if(NOT "${CMAKE_CXX_STANDARD}")
+                    set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
+                endif()
+                """))
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

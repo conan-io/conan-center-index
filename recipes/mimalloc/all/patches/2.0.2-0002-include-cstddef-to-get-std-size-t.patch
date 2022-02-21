@@ -1,0 +1,12 @@
+diff --git a/include/mimalloc.h b/include/mimalloc.h
+index 254a7d9..3c3142b 100644
+--- a/include/mimalloc.h
++++ b/include/mimalloc.h
+@@ -387,6 +387,7 @@ mi_decl_nodiscard mi_decl_export void* mi_new_reallocn(void* p, size_t newcount,
+ #ifdef __cplusplus
+ 
+ #include <cstdint>     // PTRDIFF_MAX
++#include <cstddef>     // std::size_t
+ #if (__cplusplus >= 201103L) || (_MSC_VER > 1900)  // C++11
+ #include <type_traits> // std::true_type
+ #include <utility>     // std::forward

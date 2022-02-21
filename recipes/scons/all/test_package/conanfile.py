@@ -5,17 +5,19 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "scons"
 
     def build(self):
-
-        scons_path = tools.which("scons")
+        scons_path = self.deps_user_info["scons"].scons
         if not scons_path:
             raise ConanException("scons could not be found")
         if not scons_path.replace("\\", "/").startswith(self.deps_cpp_info["scons"].rootpath.replace("\\", "/")):
             raise ConanException("an external scons was found")
 
+        output = StringIO()
+        self.run("{} --version".format(scons_path), run_environment=True, output=output, ignore_errors=True)
+        self.output.info("output: %s" % output.getvalue())
         output = StringIO()
         self.run("{} --version".format(scons_path), run_environment=True, output=output)
         text = output.getvalue()
@@ -31,6 +33,11 @@ class TestPackageConan(ConanFile):
         self.run("scons {}".format(" ".join(scons_args)), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        from io import StringIO
+
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
+            output = StringIO()
+            self.run(bin_path, run_environment=True, ignore_errors=True, output=output)
+            self.output.info("output: %s" % output.getvalue())
             self.run(bin_path, run_environment=True)

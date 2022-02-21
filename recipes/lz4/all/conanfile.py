@@ -1,6 +1,8 @@
 from conans import CMake, ConanFile, tools
 import os
 
+required_conan_version = ">=1.36.0"
+
 
 class LZ4Conan(ConanFile):
     name = "lz4"
@@ -8,18 +10,33 @@ class LZ4Conan(ConanFile):
     license = ("BSD-2-Clause", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lz4/lz4"
-    topics = ("conan", "lz4", "compression")
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    topics = ("lz4", "compression")
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,9 +49,8 @@ class LZ4Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "{0}-{1}".format(self.name, self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _cmakelists_subfolder(self):
@@ -53,6 +69,8 @@ class LZ4Conan(ConanFile):
         self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
         self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
         self._cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure()
         return self._cmake
 
@@ -71,7 +89,9 @@ class LZ4Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "liblz4"
+        self.cpp_info.set_property("pkg_config_name", "liblz4")
         self.cpp_info.libs = ["lz4"]
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             self.cpp_info.defines.append("LZ4_DLL_IMPORT=1")
+
+        self.cpp_info.names["pkg_config"] = "liblz4"

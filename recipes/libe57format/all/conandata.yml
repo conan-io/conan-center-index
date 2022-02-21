@@ -1,0 +1,8 @@
+sources:
+  "2.2.0":
+    sha256: "19df04af07925bf43e1793534b0c77cb1346a2bee7746859d2fe1714a24f1c7d"
+    url: "https://github.com/asmaloney/libE57Format/archive/refs/tags/v2.2.0.tar.gz"
+patches:
+  "2.2.0":
+    - patch_file: "patches/fix-pic.patch"
+      base_path: "source_subfolder"

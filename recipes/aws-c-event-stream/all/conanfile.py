@@ -1,12 +1,13 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
+
 
 class AwsCEventStream(ConanFile):
     name = "aws-c-event-stream"
     description = "C99 implementation of the vnd.amazon.eventstream content-type"
-    topics = ("conan", "aws", "eventstream", "content", )
+    topics = ("aws", "eventstream", "content", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-event-stream"
     license = "Apache-2.0",
@@ -39,13 +40,14 @@ class AwsCEventStream(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.4.25")
-        self.requires("aws-checksums/0.1.5")
+        self.requires("aws-checksums/0.1.12")
+        self.requires("aws-c-common/0.6.15")
+        if tools.Version(self.version) >= "0.2":
+            self.requires("aws-c-io/0.10.13")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "aws-c-event-stream-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -56,12 +58,9 @@ class AwsCEventStream(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -73,6 +72,8 @@ class AwsCEventStream(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-event-stream"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-event-stream")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-event-stream")
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-event-stream"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-event-stream"
         self.cpp_info.names["cmake_find_package"] = "AWS"
@@ -80,4 +81,6 @@ class AwsCEventStream(ConanFile):
         self.cpp_info.components["aws-c-event-stream-lib"].names["cmake_find_package"] = "aws-c-event-stream"
         self.cpp_info.components["aws-c-event-stream-lib"].names["cmake_find_package_multi"] = "aws-c-event-stream"
         self.cpp_info.components["aws-c-event-stream-lib"].libs = ["aws-c-event-stream"]
-        self.cpp_info.components["aws-c-event-stream-lib"].requires = ["aws-c-common::aws-c-common", "aws-checksums::aws-checksums"]
+        self.cpp_info.components["aws-c-event-stream-lib"].requires = ["aws-c-common::aws-c-common-lib", "aws-checksums::aws-checksums"]
+        if tools.Version(self.version) >= "0.2":
+            self.cpp_info.components["aws-c-event-stream-lib"].requires.append("aws-c-io::aws-c-io-lib")

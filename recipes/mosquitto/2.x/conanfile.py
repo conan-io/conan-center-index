@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-required_conan_version = ">=1.31.0"
+required_conan_version = ">=1.33.0"
 
 
 class Mosquitto(ConanFile):
@@ -13,23 +13,27 @@ class Mosquitto(ConanFile):
     description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "ssl": [True, False],
-               "clients": [True, False],
-               "broker": [True, False],
-               "apps": [True, False],
-               "cjson": [True, False],
-               "build_cpp": [True, False],
-               "websockets": [True, False],
-            }
-    default_options = {"shared": False,
-                       "ssl": True,
-                       "clients": False,
-                       "broker": False,
-                       "apps": False,
-                       "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
-                       "build_cpp": True,
-                       "websockets": False,
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "ssl": [True, False],
+        "clients": [True, False],
+        "broker": [True, False],
+        "apps": [True, False],
+        "cjson": [True, False],
+        "build_cpp": [True, False],
+        "websockets": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "ssl": True,
+        "clients": False,
+        "broker": False,
+        "apps": False,
+        "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
+        "build_cpp": True,
+        "websockets": False,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
@@ -60,16 +64,15 @@ class Mosquitto(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.get_safe("cjson"):
             self.requires("cjson/1.7.14")
         if self.options.get_safe("websockets"):
-            self.requires("libwebsockets/4.1.6")
+            self.requires("libwebsockets/4.2.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.replace("-", ".") + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -155,26 +158,26 @@ class Mosquitto(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["libmosquittopp"].system_libs = ["ws2_32"]
 
-        if self.options.broker:
-            self.cpp_info.components["broker"].libdirs = []
-            self.cpp_info.components["broker"].include_dirs = []
+        if self.options.broker or self.options.get_safe("apps") or self.options.get_safe("clients"):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        if self.options.broker:
+            self.cpp_info.components["mosquitto_broker"].libdirs = []
+            self.cpp_info.components["mosquitto_broker"].include_dirs = []
             if self.options.websockets:
-                self.cpp_info.components["broker"].requires.append("libwebsockets::libwebsockets")
+                self.cpp_info.components["mosquitto_broker"].requires.append("libwebsockets::libwebsockets")
             if self.settings.os in ("FreeBSD", "Linux"):
-                self.cpp_info.components["broker"].system_libs = ["pthread", "m"]
+                self.cpp_info.components["mosquitto_broker"].system_libs = ["pthread", "m"]
             elif self.settings.os == "Windows":
-                self.cpp_info.components["broker"].system_libs = ["ws2_32"]
+                self.cpp_info.components["mosquitto_broker"].system_libs = ["ws2_32"]
 
         for option in ["apps", "clients"]:
             if self.options.get_safe(option):
-                self.cpp_info.components[option].libdirs = []
-                self.cpp_info.components[option].include_dirs = []
-                bin_path = os.path.join(self.package_folder, "bin")
-                self.output.info("Appending PATH env var with : {}".format(bin_path))
-                self.env_info.PATH.append(bin_path)
-                self.cpp_info.components[option].requires = ["openssl::openssl", "libmosquitto"]
+                option_comp_name = "mosquitto_{}".format(option)
+                self.cpp_info.components[option_comp_name].libdirs = []
+                self.cpp_info.components[option_comp_name].include_dirs = []
+                self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
                 if self.options.cjson:
-                    self.cpp_info.components[option].requires.append("cjson::cjson")
+                    self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")

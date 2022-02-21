@@ -1,0 +1,36 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -161,6 +161,4 @@   # ourselves; for real use case we don't care about stdlib, as it is "granted",
+   # so just linking all other libraries is fine.
+   if (NOT APPLE)
+-    set(CMAKE_EXE_LINKER_FLAGS
+-        "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")
+   endif()
+ endif()  # JPEGXL_STATIC
+@@ -278,8 +277,6 @@ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_STANDARD_REQUIRED YES)
+ 
+-add_subdirectory(third_party)
+-
+ # Copy the JXL license file to the output build directory.
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+                ${PROJECT_BINARY_DIR}/LICENSE.jpeg-xl COPYONLY)
+@@ -380,6 +376,3 @@ # Plugins for third-party software
+ if (${JPEGXL_ENABLE_PLUGINS})
+ add_subdirectory(plugins)
+ endif ()
+-
+-# Binary tools
+-add_subdirectory(tools)
+
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -132,7 +132,6 @@ # The jxl library definition.
+ include(jxl.cmake)
+ 
+ # Other libraries outside the core jxl library.
+-include(jxl_extras.cmake)
+ include(jxl_threads.cmake)
+ 
+ # Install all the library headers from the source and the generated ones. There

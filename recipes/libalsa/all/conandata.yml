@@ -1,10 +1,17 @@
 sources:
-  "1.1.9":
-    url: "https://github.com/alsa-project/alsa-lib/archive/v1.1.9.tar.gz"
-    sha256: "be3443c69dd2cb86e751c0abaa4b74343c75db28ef13d11d19a3130a5b0ff78d"
-  "1.2.2":
-    url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.2.tar.gz"
-    sha256: "ad4fa29e3927c5bec0f71b24b6a88523f4e386905341fc9047abef5744805023"
+  "1.2.5.1":
+    url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.5.1.tar.gz"
+    sha256: "bc1d9ed505e183fc59413425d34e8106322a0e399befcde8466bd96e6764e6c8"
   "1.2.4":
     url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.4.tar.gz"
     sha256: "0c6ab052d7ea980a01d0208da5e5e10849bd16c4c9961bbd5d2665083b74a6c0"
+  "1.2.2":
+    url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.2.tar.gz"
+    sha256: "ad4fa29e3927c5bec0f71b24b6a88523f4e386905341fc9047abef5744805023"
+  "1.1.9":
+    url: "https://github.com/alsa-project/alsa-lib/archive/v1.1.9.tar.gz"
+    sha256: "be3443c69dd2cb86e751c0abaa4b74343c75db28ef13d11d19a3130a5b0ff78d"
+patches:
+  "1.2.5.1":
+    - patch_file: "patches/1.2.5.1-0001-control-empty-fix-the-static-build.patch"
+      base_path: "source_subfolder"

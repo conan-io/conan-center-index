@@ -7,29 +7,32 @@ class MozillaBuildConan(ConanFile):
     name = "mozilla-build"
     homepage = "https://wiki.mozilla.org/MozillaBuild"
     description = "Mozilla build requirements on Windows"
-    topics = ("conan", "mozilla", "build")
+    topics = ("mozilla", "build")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os_build", "arch_build"
+    settings = "arch", "build_type", "compiler", "os"
     license = "MPL-2.0"
 
-    def configure(self):
-        if self.settings.os_build != "Windows":
+    def validate(self):
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
 
     def build_requirements(self):
         self.build_requires("7zip/19.00")
 
     def build(self):
-        url = self.conan_data["sources"][self.version]["url"]
-        tools.download(url, "mozilla-build.exe")
-        tools.check_sha256("mozilla-build.exe", self.conan_data["sources"][self.version]["sha256"])
-        self.run("7z x mozilla-build.exe")
-        os.unlink("mozilla-build.exe")
-        tools.download("https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt", "LICENSE")
+        filename = "mozilla-build.exe"
+        tools.download(**self.conan_data["sources"][self.version][0], filename=filename)
+        tools.download(**self.conan_data["sources"][self.version][1], filename="LICENSE")
+        self.run(f"7z x {filename}", run_environment=True)
+
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
         self.copy("nsinstall.exe", src="bin", dst="bin")
+
+    def package_id(self):
+        del self.info.settings.build_type
+        del self.info.settings.compiler
 
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")

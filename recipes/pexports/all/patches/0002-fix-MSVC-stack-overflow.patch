@@ -1,0 +1,12 @@
+__report_gsfailure would end up being called when buidling pexports with build_type=Debug
+--- pexports.c
++++ pexports.c
+@@ -354,7 +354,7 @@
+ IMAGE_DOS_HEADER *load_pe_image(const char *filename)
+ {
+ #ifdef _MSC_VER
+-  struct _stat32 st;
++  struct stat st;
+ #else
+   struct stat st;
+ #endif

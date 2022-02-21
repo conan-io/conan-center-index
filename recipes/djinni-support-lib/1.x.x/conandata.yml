@@ -2,3 +2,9 @@ sources:
   "1.0.0":
     url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v1.0.0.tar.gz
     sha256: "25f8c648c3bec78a54d5387a792f1d7cd3c073c4477dc50ad2b9c5270a590779"
+  "1.1.0":
+    url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v1.1.0.tar.gz
+    sha256: "3a67d1c26959a9df5c158fdf0792e036149009b206ed89fcee8c7b1608187336"
+  "1.2.0":
+    url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v1.2.0.tar.gz
+    sha256: "3630870c2b3305dc6216f8ca8e37139f3f59f2ea7bd600a1154c5aa1c4d983a9"

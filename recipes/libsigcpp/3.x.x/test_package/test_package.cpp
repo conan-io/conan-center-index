@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-#include <sigc++-3.0/sigc++/sigc++.h>
+#include <sigc++/sigc++.h>
 
 void on_print(const std::string& str)
 {

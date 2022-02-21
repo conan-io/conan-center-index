@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
-import fnmatch
+
+required_conan_version = ">=1.33.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -8,7 +9,7 @@ class OpenH264Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openh264.org/"
     description = "Open Source H.264 Codec"
-    topics = ("conan", "h264", "codec", "video", "compression", )
+    topics = ("h264", "codec", "video", "compression", )
     license = "BSD-2-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -20,11 +21,16 @@ class OpenH264Conan(ConanFile):
         "shared": "False",
         "fPIC": True,
     }
-    exports_sources = "patches/**"
+
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,14 +41,14 @@ class OpenH264Conan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("nasm/2.14")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self.settings.arch in ("x86", "x86_64"):
+            self.build_requires("nasm/2.15.05")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -50,17 +56,17 @@ class OpenH264Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
                                 "CFLAGS_OPT += -MT",
-                                "CFLAGS_OPT += -%s" % str(self.settings.compiler.runtime))
+                                "CFLAGS_OPT += -{}".format(self.settings.compiler.runtime))
             tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
                                 "CFLAGS_DEBUG += -MTd -Gm",
-                                "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
+                                "CFLAGS_DEBUG += -{} -Gm".format(self.settings.compiler.runtime))
         if self.settings.os == "Android":
             tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_STL := stlport_shared",
-                                  "APP_STL := %s" % str(self.settings.compiler.libcxx))
+                                  "APP_STL := {}".format(self.settings.compiler.libcxx))
             tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
                                   "APP_PLATFORM := android-12",
-                                  "APP_PLATFORM := %s" % self._android_target)
+                                  "APP_PLATFORM := {}".format(self._android_target))
 
     @property
     def _library_filename(self):
@@ -81,22 +87,16 @@ class OpenH264Conan(ConanFile):
 
     @property
     def _make_arch(self):
-        if self.settings.os == "Android":
-            arch = str(self.settings.arch)
-            arch = {"armv7": "arm",
-                    "armv8": "arm64"}.get(arch, arch)
-        else:
-            if self.settings.arch == "x86":
-                arch = "i386"
-            elif self.settings.arch == "x86_64":
-                arch = "x86_64"
-            else:
-                arch = self.settings.arch
-        return arch
+        return {
+            "armv7": "arm",
+            "armv8": "arm64",
+            "x86": "i386",
+            "x86_64": "x86_64",
+        }.get(str(self.settings.arch), str(self.settings.arch))
 
     @property
     def _android_target(self):
-        return "android-%s" % str(self.settings.os.api_level)
+        return "android-{}".format(self.settings.os.api_level)
 
     @property
     def _make_args(self):
@@ -104,34 +104,39 @@ class OpenH264Conan(ConanFile):
         if tools.os_info.is_windows:
             prefix = tools.unix_path(prefix)
         args = [
-            "ARCH=%s" % self._make_arch,
-            "PREFIX=%s" % prefix,
+            "ARCH={}".format(self._make_arch),
+            "PREFIX={}".format(prefix),
         ]
-        env_build = AutoToolsBuildEnvironment(self)
+        autotools = AutoToolsBuildEnvironment(self)
         if self.settings.compiler == "Visual Studio":
-            env_build.flags.extend(["-nologo", "-{}".format(self.settings.compiler.runtime)])
-            env_build.link_flags.insert(0, "-link")
+            autotools.flags.extend(["-nologo", "-{}".format(self.settings.compiler.runtime)])
+            autotools.link_flags.insert(0, "-link")
+            if tools.Version(self.settings.compiler.version) >= "12":
+                autotools.flags.append("-FS")
+        elif self.settings.compiler in ("apple-clang",):
+            if self.settings.arch in ("armv8",):
+                autotools.link_flags.append("-arch arm64")
         if self.options.shared:
-            env_build.fpic = True
-        args.extend(["{}={}".format(k, v) for k,v in env_build.vars.items()])
+            autotools.fpic = True
+        args.extend(["{}={}".format(k, v) for k,v in autotools.vars.items()])
 
         if self.settings.compiler == "Visual Studio":
             args.append("OS=msvc")
-            env_build.flags.append("-FS")
+            autotools.flags.append("-FS")
         else:
             if self.settings.os == "Windows":
                 args.append("OS=mingw_nt")
             if self.settings.os == "Android":
                 libcxx = str(self.settings.compiler.libcxx)
-                stl_lib = "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib%s " % ("c++_static.a" if libcxx == "c++_static" else "c++_shared.so") \
+                stl_lib = "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib{}".format("c++_static.a" if libcxx == "c++_static" else "c++_shared.so") \
                           + "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a"
                 ndk_home = os.environ["ANDROID_NDK_HOME"]
                 args.extend([
-                    "NDKLEVEL=%s" % str(self.settings.os.api_level),
-                    "STL_LIB=%s" % stl_lib,
+                    "NDKLEVEL={}".format(self.settings.os.api_level),
+                    "STL_LIB={}".format(stl_lib),
                     "OS=android",
-                    "NDKROOT=%s" % ndk_home,  # not NDK_ROOT here
-                    "TARGET=%s" % self._android_target,
+                    "NDKROOT={}".format(ndk_home),  # not NDK_ROOT here
+                    "TARGET={}".format(self._android_target),
                     "CCASFLAGS=$(CFLAGS) -fno-integrated-as",
                 ])
 
@@ -139,14 +144,14 @@ class OpenH264Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target=self._library_filename)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
@@ -158,7 +163,7 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.libs = ["openh264_dll"]
         else:
             self.cpp_info.libs = ["openh264"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")

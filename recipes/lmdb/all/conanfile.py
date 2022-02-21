@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.29.0"
+
 
 class lmdbConan(ConanFile):
     name = "lmdb"
@@ -59,11 +61,9 @@ class lmdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lmdb"]
-        self.cpp_info.names["cmake_find_package"] = "LMDB"
-        self.cpp_info.names["cmake_find_package_multi"] = "LMDB"
         self.cpp_info.names["pkg_config"] = "lmdb"
 
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
 
         bin_path = os.path.join(self.package_folder, "bin")

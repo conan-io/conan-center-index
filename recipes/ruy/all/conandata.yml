@@ -1,0 +1,4 @@
+sources:
+  "cci.20210622":
+    url: "https://github.com/google/ruy/archive/9c56af3fce210a8a103eda19bd6f47c08a9e3d90.tar.gz"
+    sha256: "8895874cfbf7263b028a6ec55b4b1737af0ea2b7bfedac90fd14d0b0a654f2dc"

@@ -1,0 +1,77 @@
+--- a/frontend/parse.c
++++ b/frontend/parse.c
+@@ -70,8 +70,10 @@
+ #ifdef HAVE_ICONV
+ #include <iconv.h>
+ #include <errno.h>
++#ifdef HAVE_LANGINFO
+ #include <locale.h>
+ #include <langinfo.h>
++#endif
+ #endif
+ 
+ #if defined _ALLOW_INTERNAL_OPTIONS
+@@ -146,6 +148,18 @@
+     return n;
+ }
+ 
++static char*
++currentCharacterEncoding()
++{
++#ifdef HAVE_LANGINFO
++    char* cur_code = nl_langinfo(CODESET);
++#else
++    char* env_lang = getenv("LANG");
++    char* xxx_code = env_lang == NULL ? NULL : strrchr(env_lang, '.');
++    char* cur_code = xxx_code == NULL ? "" : xxx_code+1;
++#endif
++    return cur_code;
++}
+ 
+ static size_t
+ currCharCodeSize(void)
+@@ -153,7 +167,7 @@
+     size_t n = 1;
+     char dst[32];
+     char* src = "A";
+-    char* cur_code = nl_langinfo(CODESET);
++    char* cur_code = currentCharacterEncoding();
+     iconv_t xiconv = iconv_open(cur_code, "ISO_8859-1");
+     if (xiconv != (iconv_t)-1) {
+         for (n = 0; n < 32; ++n) {
+@@ -181,7 +195,7 @@
+         size_t const n = l*4;
+         dst = calloc(n+4, 4);
+         if (dst != 0) {
+-            char* cur_code = nl_langinfo(CODESET);
++            char* cur_code = currentCharacterEncoding();
+             iconv_t xiconv = iconv_open(cur_code, "ISO_8859-1");
+             if (xiconv != (iconv_t)-1) {
+                 char* i_ptr = src;
+@@ -205,7 +219,7 @@
+         size_t const n = l*4;
+         dst = calloc(n+4, 4);
+         if (dst != 0) {
+-            char* cur_code = nl_langinfo(CODESET);
++            char* cur_code = currentCharacterEncoding();
+             iconv_t xiconv = iconv_open(cur_code, "UTF-16LE");
+             if (xiconv != (iconv_t)-1) {
+                 char* i_ptr = (char*)src;
+@@ -231,7 +245,7 @@
+         size_t const n = l*4;
+         dst = calloc(n+4, 4);
+         if (dst != 0) {
+-            char* cur_code = nl_langinfo(CODESET);
++            char* cur_code = currentCharacterEncoding();
+             iconv_t xiconv = iconv_open("ISO_8859-1//TRANSLIT", cur_code);
+             if (xiconv != (iconv_t)-1) {
+                 char* i_ptr = (char*)src;
+@@ -257,7 +271,7 @@
+         size_t const n = (l+1)*4;
+         dst = calloc(n+4, 4);
+         if (dst != 0) {
+-            char* cur_code = nl_langinfo(CODESET);
++            char* cur_code = currentCharacterEncoding();
+             iconv_t xiconv = iconv_open("UTF-16LE//TRANSLIT", cur_code);
+             dst[0] = 0xff;
+             dst[1] = 0xfe;

@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class JsondtoConan(ConanFile):
     name = "json_dto"
     license = "BSD-3-Clause"
@@ -9,26 +12,19 @@ class JsondtoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A small header-only helper for converting data between json representation and c++ structs"
     topics = ("json", "dto", "serialization")
-    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def requirements(self):
         self.requires("rapidjson/1.1.0")
 
-    def configure(self):
+    def validate(self):
         minimal_cpp_standard = "14"
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "5",
@@ -42,34 +38,28 @@ class JsondtoConan(ConanFile):
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
             self.output.warn(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
-
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+        elif tools.Version(self.settings.compiler.version) < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["JSON_DTO_INSTALL"] = True
-        self._cmake.definitions["JSON_DTO_FIND_DEPS"] = False
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
-        return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-v." + self.version
-        os.rename(extracted_dir, self._source_subfolder )
-
-    def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "11":
+            raise ConanInvalidConfiguration(f"{self.name} requires apple-clang less then version 11")
 
     def package_id(self):
         self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def package(self):
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        cmake = CMake(self)
+        cmake.definitions["JSON_DTO_INSTALL"] = True
+        cmake.definitions["JSON_DTO_FIND_DEPS"] = False
+        cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "json-dto"
+        self.cpp_info.names["cmake_find_package_multi"] = "json-dto"

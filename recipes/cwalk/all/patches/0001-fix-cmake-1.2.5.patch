@@ -1,0 +1,12 @@
+Do not enable warnings as errors
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,7 +39,6 @@ endif()
+ add_library(cwalk
+   "${INCLUDE_DIRECTORY}/cwalk.h"
+   "${SOURCE_DIRECTORY}/cwalk.c")
+-enable_warnings(cwalk)
+ target_include_directories(cwalk PUBLIC
+   $<BUILD_INTERFACE:${INCLUDE_DIRECTORY}>
+   $<INSTALL_INTERFACE:include>

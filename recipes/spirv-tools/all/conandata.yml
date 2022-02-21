@@ -1,26 +1,48 @@
 sources:
+  "2021.4":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2021.4.tar.gz"
+    sha256: "d68de260708dda785d109ff1ceeecde2d2ab71142fa5bf59061bb9f47dd3bb2c"
+  "2021.3":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2021.3.tar.gz"
+    sha256: "b6b4194121ee8084c62b20f8d574c32f766e4e9237dfe60b0658b316d19c6b13"
+  "2021.2":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2021.2.tar.gz"
+    sha256: "2416a0354a0b14b8e7b671f6f99652cc8a8a83dc9acf195dafd22fbee5e92035"
   "2020.5":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.5.tar.gz"
-    sha256: "947ee994ba416380bd7ccc1c6377ac28a4802a55ca81ccc06796c28e84c00b71"
-  "v2020.5":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.5.tar.gz"
     sha256: "947ee994ba416380bd7ccc1c6377ac28a4802a55ca81ccc06796c28e84c00b71"
   "2020.3":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.3.tar.gz"
     sha256: "8b538a1cb2a4275ef9617abcb047d54e8292f975ac1d93323d5dd1e19c85280b"
-  "v2020.3":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.3.tar.gz"
-    sha256: "8b538a1cb2a4275ef9617abcb047d54e8292f975ac1d93323d5dd1e19c85280b"
   "2019.2":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2019.2.tar.gz"
     sha256: "1fde9d2a0df920a401441cd77253fc7b3b9ab0578eabda8caaaceaa6c7638440"
-  "v2019.2":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2019.2.tar.gz"
-    sha256: "1fde9d2a0df920a401441cd77253fc7b3b9ab0578eabda8caaaceaa6c7638440"
 patches:
-  "2020.5":
-    - patch_file: "patches/support-SPV_KHR_fragment_shading_rate.patch"
+  "2021.4":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
       base_path: "source_subfolder"
-  "v2020.5":
-    - patch_file: "patches/support-SPV_KHR_fragment_shading_rate.patch"
+  "2021.3":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
+      base_path: "source_subfolder"
+  "2021.2":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
+      base_path: "source_subfolder"
+  "2020.5":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.5.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-support-SPV_KHR_fragment_shading_rate.patch"
+      base_path: "source_subfolder"
+  "2020.3":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2020.3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-more-platforms-2020.3.patch"
+      base_path: "source_subfolder"
+  "2019.2":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2019.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-more-platforms-2019.2.patch"
       base_path: "source_subfolder"

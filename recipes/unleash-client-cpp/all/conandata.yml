@@ -1,0 +1,8 @@
+sources:
+  "1.1.1":
+    url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "2750dc231bf608910d4270ac39d83d46d25b88cc547a9d4d31f7ce4950effa7c"
+patches:
+  "1.1.1":
+    - patch_file: "patches/0001-no-conan-cmake.patch"
+      base_path: "source_subfolder"

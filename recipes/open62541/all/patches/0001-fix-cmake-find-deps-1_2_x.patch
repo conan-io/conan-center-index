@@ -1,0 +1,198 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9184b943..8f4b6772 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,9 +7,8 @@ endif()
+ 
+ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
+ 
+-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
++set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR};${PROJECT_SOURCE_DIR}/tools/cmake")
+ find_package(PythonInterp REQUIRED)
+-find_package(Git)
+ include(AssignSourceGroup)
+ include(GNUInstallDirs)
+ 
+@@ -33,12 +32,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ # Version #
+ ###########
+ 
+-include(SetGitBasedVersion)
+-
+-# The version string will be automatically set based on the git describe output.
+-# This will automate the version strings. Just create a new tag, and the version will be set correctly.
+-set_open62541_version()
+-MESSAGE(STATUS "open62541 Version: ${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}${OPEN62541_VER_LABEL}")
++set(OPEN62541_VER_MINOR "0" CACHE STRING "Set the major version. Used by conan")
++set(OPEN62541_VER_MAJOR "0" CACHE STRING "Set the minor version. Used by conan")
++set(OPEN62541_VER_PATCH "0" CACHE STRING "Set the patch version. Used by conan")
++set(OPEN62541_VER_LABEL "")
++set(OPEN62541_VER_COMMIT "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
+ 
+ #################
+ # Build Options #
+@@ -481,7 +479,7 @@ if(UA_ENABLE_ENCRYPTION)
+         # that is not possible, manually compile mbedTLS and set the cmake variables
+         # defined in /tools/cmake/FindMbedTLS.cmake.
+         find_package(MbedTLS REQUIRED)
+-        list(APPEND open62541_LIBRARIES ${MBEDTLS_LIBRARIES})
++        list(APPEND open62541_LIBRARIES ${MbedTLS_LIBRARIES})
+     endif()
+ endif()
+ 
+@@ -489,8 +487,10 @@ if(UA_ENABLE_WEBSOCKET_SERVER)
+     # The recommended way is to install libwebsockets via the OS package manager. If
+     # that is not possible, manually compile libwebsockets and set the cmake variables
+     # defined in /tools/cmake/Findlibwebsockets.cmake
+-    find_package(libwebsockets REQUIRED)
+-    list(APPEND open62541_LIBRARIES ${LIBWEBSOCKETS_LIBRARIES})
++    find_package(Libwebsockets REQUIRED)
++    list(APPEND open62541_LIBRARIES ${Libwebsockets_LIBRARIES})
++    message(STATUS "Libwebsockets library: ${Libwebsockets_LIBRARIES}")
++    message(STATUS "Libwebsockets includes: ${Libwebsockets_INCLUDE_DIRS}")
+ 
+     set(ua_architecture_directories_to_include ${ua_architecture_directories_to_include}
+                                                ${LIBWEBSOCKETS_INCLUDE_DIR})
+@@ -526,11 +526,11 @@ if(NOT UA_FORCE_CPP AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID}" ST
+     check_add_cc_flag("-Wall")      # Warnings
+     check_add_cc_flag("-Wextra")    # More warnings
+     check_add_cc_flag("-Wpedantic") # Standard compliance
+-    check_add_cc_flag("-Werror")    # All warnings are errors
+ 
+     check_add_cc_flag("-Wno-static-in-inline") # Clang doesn't like the use of static inline methods inside static inline methods
+     check_add_cc_flag("-Wno-overlength-strings") # May happen in the nodeset compiler when complex values are directly encoded
+     check_add_cc_flag("-Wno-unused-parameter") # some methods may require unused arguments to cast to a method pointer
++    check_add_cc_flag("-Wno-unused-command-line-argument")
+ 
+     # Use a strict subset of the C and C++ languages
+     check_add_cc_flag("-Wc++-compat")
+@@ -659,8 +659,6 @@ if(APPLE)
+ endif()
+ 
+ if(MSVC)
+-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX /w44996") # Compiler warnings, error on warning
+-
+   if(UA_MSVC_FORCE_STATIC_CRT AND NOT BUILD_SHARED_LIBS)
+     set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS
+         CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
+@@ -683,20 +681,7 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
+ configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
+-  include(GenerateExportHeader)
+-    set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
+-    # create a "fake" empty library to generate the export header macros
+-    add_library(libmdnsd ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+-    set_property(TARGET libmdnsd PROPERTY LINKER_LANGUAGE CXX)
+-    set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
+-    configure_file("deps/mdnsd/libmdnsd/mdnsd_config_extra.in"
+-                   "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra")
+-    file(READ "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra" MDNSD_CONFIG_EXTRA)
+-    generate_export_header(libmdnsd
+-      EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h"
+-      BASE_NAME MDNSD
+-      DEFINE_NO_DEPRECATED
+-      CUSTOM_CONTENT_FROM_VARIABLE MDNSD_CONFIG_EXTRA)
++    find_package(mdnsd)
+ endif()
+ 
+ set(exported_headers ${exported_headers}
+@@ -976,18 +961,7 @@ if(UA_DEBUG_DUMP_PKGS)
+ endif()
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
+-    # prepend in list, otherwise it complains that winsock2.h has to be included before windows.h
+-    set(internal_headers ${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h
+-                         ${internal_headers} )
+     set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.c
+         ${lib_sources})
+ endif()
+ 
+@@ -1178,11 +1152,14 @@ if(UA_ENABLE_AMALGAMATION)
+     target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
+     target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
+     if(UA_ENABLE_ENCRYPTION_MBEDTLS)
+-        target_include_directories(open62541-object PRIVATE ${MBEDTLS_INCLUDE_DIRS})
++        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
+     endif()
+     if(UA_ENABLE_ENCRYPTION_OPENSSL)
+         target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
+     endif()
++    if(UA_ENABLE_WEBSOCKET_SERVER)
++        target_include_directories(open62541-plugins PRIVATE ${Libwebsockets_INCLUDE_DIR})
++    endif()
+ 
+     # make sure the open62541_amalgamation target builds before so that amalgamation is finished and it is not executed again for open62541-object
+     # and thus may overwrite the amalgamation result during multiprocessor compilation
+@@ -1217,6 +1194,12 @@ else()
+                       )
+ 
+     target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
++    if(UA_ENABLE_DISCOVERY_MULTICAST)
++        target_include_directories(open62541-object PUBLIC ${mdnsd_INCLUDE_DIRS})
++    endif()
++    if(UA_ENABLE_WEBSOCKET_SERVER)
++        target_include_directories(open62541-object PUBLIC ${Libwebsockets_INCLUDE_DIRS})
++    endif()
+ 
+     add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
+     add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
+@@ -1230,6 +1213,13 @@ else()
+         set_target_properties(open62541-static PROPERTIES OUTPUT_NAME open62541)
+     endif()
+     add_library(open62541 $<TARGET_OBJECTS:open62541-object> $<TARGET_OBJECTS:open62541-plugins>)
++    if(UA_ENABLE_DISCOVERY_MULTICAST)
++        list(APPEND open62541_LIBRARIES mdnsd::mdnsd)
++    endif()
++
++    if(UA_ENABLE_WEBSOCKET_SERVER)
++        list(APPEND open62541_LIBRARIES Libwebsockets::Libwebsockets)
++    endif()
+ 
+     if(UA_FORCE_CPP)
+         set_source_files_properties(${lib_sources} PROPERTIES LANGUAGE CXX)
+@@ -1263,7 +1253,7 @@ else()
+     include_directories_private("${PROJECT_BINARY_DIR}")
+ 
+     if(UA_ENABLE_ENCRYPTION_MBEDTLS)
+-        include_directories_private(${MBEDTLS_INCLUDE_DIRS})
++        include_directories_private(${MbedTLS_INCLUDE_DIRS})
+     endif()
+     if(UA_ENABLE_ENCRYPTION_OPENSSL)
+         include_directories_private(${OPENSSL_INCLUDE_DIR})
+diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
+index 38de16e7..16b137af 100644
+--- a/src/server/ua_discovery_manager.h
++++ b/src/server/ua_discovery_manager.h
+@@ -44,7 +44,7 @@ typedef struct periodicServerRegisterCallback_entry {
+ 
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+-#include "mdnsd/libmdnsd/mdnsd.h"
++#include "libmdnsd/mdnsd.h"
+ 
+ /**
+  * TXT record:
+diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
+index 7b0385c8..59aa6b16 100644
+--- a/src/server/ua_server_discovery_mdns.c
++++ b/src/server/ua_server_discovery_mdns.c
+@@ -11,8 +11,8 @@
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+ #ifndef UA_ENABLE_AMALGAMATION
+-#include "mdnsd/libmdnsd/xht.h"
+-#include "mdnsd/libmdnsd/sdtxt.h"
++#include "libmdnsd/xht.h"
++#include "libmdnsd/sdtxt.h"
+ #endif
+ 
+ #ifdef _WIN32

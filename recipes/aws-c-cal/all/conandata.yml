@@ -1,0 +1,14 @@
+sources:
+  "0.5.12":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.12.tar.gz"
+    sha256: "350c29a288d5d498bd6574fca659cffc9453bf62691fbde5788399716c2bd132"
+  "0.5.11":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.11.tar.gz"
+    sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
+patches:
+  "0.5.12":
+    - patch_file: "patches/0001-use-openssl-cmake-imported-target.cmake"
+      base_path: "source_subfolder"
+  "0.5.11":
+    - patch_file: "patches/0001-use-openssl-cmake-imported-target.cmake"
+      base_path: "source_subfolder"

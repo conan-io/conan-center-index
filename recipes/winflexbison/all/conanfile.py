@@ -1,41 +1,44 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
+import os
+
+required_conan_version = ">= 1.33.0"
+
 
 class WinflexbisonConan(ConanFile):
     name = "winflexbison"
     description = "Flex and Bison for Windows"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lexxmark/winflexbison"
-    topics = ("conan", "winflexbison", "flex", "bison")
-
+    topics = ("flex", "bison")
     generators = "cmake"
     license = "GPL-3.0-or-later"
-    exports_sources = ["CMakeLists.txt"]
+    settings = "os", "arch", "compiler", "build_type"
 
-    settings = "os", "build_type", "arch", "compiler"
+    exports_sources = "CMakeLists.txt", "patches/*"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    _cmake = None
-
-    def config_options(self):
+    def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("winflexbison is only supported on Windows.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -50,19 +53,19 @@ class WinflexbisonConan(ConanFile):
     def package(self):
         if self.settings.build_type in ("Release", "Debug") and tools.Version(self.version) < "2.5.23":
             actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
-            self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
+            self.copy("*.exe", src=actual_build_path, dst="bin", keep_path=False)
         else:
-            self.copy(pattern="*.exe", dst="bin", src="bin", keep_path=False)
-        self.copy(pattern="data/*", dst="bin", src="{}/bison".format(self._source_subfolder), keep_path=True)
-        self.copy(pattern="FlexLexer.h", dst="include", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
+            self.copy("*.exe", src="bin", dst="bin", keep_path=False)
+        self.copy("data/*", src="{}/bison".format(self._source_subfolder), dst="bin", keep_path=True)
+        self.copy("FlexLexer.h", src=os.path.join(self._source_subfolder, "flex", "src"), dst="include", keep_path=False)
 
         # Copy licenses
         self._extract_license()
-        self.copy(pattern="COPYING.GPL3", dst="licenses")
-        self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
-        os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "bison-license"))
-        self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "bison", "src"), keep_path=False)
-        os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "flex-license"))
+        self.copy("COPYING.GPL3", dst="licenses")
+        self.copy("COPYING", src=os.path.join(self._source_subfolder, "flex", "src"), dst="licenses", keep_path=False)
+        tools.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "bison-license"))
+        self.copy("COPYING", src=os.path.join(self._source_subfolder, "bison", "src"), dst="licenses", keep_path=False)
+        tools.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "flex-license"))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")

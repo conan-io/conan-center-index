@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class MpdecimalConan(ConanFile):
     name = "mpdecimal"
@@ -22,13 +24,18 @@ class MpdecimalConan(ConanFile):
         "fPIC": True,
         "cxx": True,
     }
+
     exports_sources = "patches/**"
+
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _autotools = None
+    @property
+    def _settings_build(self):
+        return getattr(self, "setings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,24 +44,26 @@ class MpdecimalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("Arch is unsupported")
-        if self.options.cxx:
-            if self.options.shared and self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
-        else:
+        if not self.options.cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("automake/1.16.3")
-            if tools.os_info.is_windows:
-                self.build_requires("msys2/20200517")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
+
+    def validate(self):
+        if self.settings.os != "Macos" and self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("Arch is unsupported")
+        if self.options.cxx:
+            if self.options.shared and self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mpdecimal-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -84,12 +93,12 @@ class MpdecimalConan(ConanFile):
         builds = [[libmpdec_folder, mpdec_target, mpdec_extra_flags] ]
         if self.options.cxx:
             builds.append([libmpdecpp_folder, mpdecpp_target, mpdecxx_extra_flags])
-        with tools.vcvars(self.settings):
+        with tools.vcvars(self):
             for build_dir, target, extra_flags in builds:
                 with tools.chdir(build_dir):
                     self.run("""nmake /nologo /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_CXXFLAGS="{cxxflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                         target=target,
-                        machine={"x86": "pro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
+                        machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
                         debug="1" if self.settings.build_type == "Debug" else "0",
                         dll="1" if self.options.shared else "0",
                         cflags=" ".join(autotools.flags + extra_flags),
@@ -114,10 +123,14 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        conf_vars = self._autotools.vars
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            conf_vars["LDFLAGS"] += " -arch arm64"
+            conf_vars["LDXXFLAGS"] = "-arch arm64"
         conf_args = [
             "--enable-cxx" if self.options.cxx else "--disable-cxx"
         ]
-        self._autotools.configure(args=conf_args)
+        self._autotools.configure(args=conf_args, vars=conf_vars)
         return self._autotools
 
     @property

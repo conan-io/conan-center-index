@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/tmp/CMakeLists.txt
+index 3471701..49efee3 100644
+--- a/CMakeLists.txt
++++ b/tmp/CMakeLists.txt
+@@ -35,7 +35,7 @@ endif()
+ 
+ include(FlagsMSVC)
+ set(MSVC_RUNTIME "dynamic")
+-configure_msvc_runtime()
++# configure_msvc_runtime()
+ print_default_msvc_flags()
+ 
+ add_definitions( -DVALVE_CRYPTO_ENABLE_25519 )

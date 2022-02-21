@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 project(sqlite3 C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 # Add some options from https://sqlite.org/compile.html
 option(SQLITE3_BUILD_EXECUTABLE "Build sqlite command line utility for accessing SQLite databases")
@@ -37,9 +37,14 @@ set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or B
 option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 
 add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
-if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-endif(MSVC AND BUILD_SHARED_LIBS)
+set_target_properties(${PROJECT_NAME} PROPERTIES C_VISIBILITY_PRESET hidden)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${PROJECT_NAME}
+        PRIVATE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllexport)">
+        INTERFACE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllimport)">
+        PUBLIC $<$<NOT:$<BOOL:${WIN32}>>:"SQLITE_API=__attribute__((visibility(\"default\")))">
+    )
+endif()
 if(ENABLE_JSON1)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_JSON1)
 endif()
@@ -145,7 +150,12 @@ install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 if(SQLITE3_BUILD_EXECUTABLE)
     add_executable(sqlite3-bin source_subfolder/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
-    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
+    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3" PDB_NAME "sqlite3-bin")
+    include(CheckSymbolExists)
+    check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
+    if(NOT HAVE_SYSTEM)
+        target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
+    endif()
     install(TARGETS sqlite3-bin
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}

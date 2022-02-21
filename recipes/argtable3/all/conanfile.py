@@ -13,7 +13,6 @@ class Argtable3Conan(ConanFile):
     homepage = "https://www.argtable.org/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,6 +21,8 @@ class Argtable3Conan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
     _cmake = None
@@ -88,6 +89,7 @@ class Argtable3Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
+        # These targets were for versions <= 3.2.0 (newer create argtable3::argtable3)
         target_name = "argtable3" if self.options.shared else "argtable3_static"
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -95,15 +97,21 @@ class Argtable3Conan(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.libs = ["argtable3" if self.options.shared else "argtable3_static"]
+        suffix = ""
         if not self.options.shared:
-            if self.settings.os == "Linux":
+            suffix += "_static"
+        if tools.Version(self.version) >= "3.2.1" and self.settings.build_type == "Debug":
+            suffix += "d"
+        self.cpp_info.libs = ["argtable3{}".format(suffix)]
+        if not self.options.shared:
+            if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs.append("m")
 
         self.cpp_info.filenames["cmake_find_package"] = "Argtable3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Argtable3"
+        self.cpp_info.names["cmake_find_package"] = "argtable3"
+        self.cpp_info.names["cmake_find_package_multi"] = "argtable3"
 
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-

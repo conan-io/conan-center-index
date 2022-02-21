@@ -1,0 +1,233 @@
+ CMakeLists.txt              | 18 +++++++-----
+ src/CMakeLists.txt          |  1 -
+ src/makemsix/CMakeLists.txt |  3 ++
+ src/msix/CMakeLists.txt     | 67 ++++++++++++++++-----------------------------
+ 4 files changed, 37 insertions(+), 52 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dc5908cd..b2e857a5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,11 +21,13 @@ if(POLICY CMP0077)
+     cmake_policy(SET CMP0077 NEW)
+ endif()
+ 
++if(CALCULATE_VERSION)
+ # Default version is 0.0.0
+ set(VERSION_MAJOR "0")
+ set(VERSION_MINOR "0")
+ set(VERSION_PATCH "0")
+ set(GIT_BRANCH_NAME "master")
++endif()
+ 
+ # CMake useful variables
+ set(MSIX_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+@@ -35,6 +37,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+ 
++if(CALCULATE_VERSION)
+ ## Git (and its revision)
+ find_package(Git) # QUIET) # if we don't find git or FindGit.cmake is not on the system we ignore it.
+ 
+@@ -77,15 +80,22 @@ if(GIT_FOUND)
+ else()
+     message("git not found.")
+ endif()
++endif()
+ 
++if(CALCULATE_VERSION)
+ # Set the version number of your project here (format is MAJOR.MINOR.PATCHLEVEL - e.g. 1.0.0)
+ set(MSIX_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+ message(STATUS "MSIX Packaging SDK version ${MSIX_VERSION}")
+ message(STATUS "MSIX Packaging SDK branch name ${GIT_BRANCH_NAME}")
+ add_definitions(-DSDK_VERSION="${MSIX_VERSION}")
++else()
++message(STATUS "MSIX Packaging SDK version ${PROJECT_VERSION}")
++add_definitions(-DSDK_VERSION="${PROJECT_VERSION}")
++endif()
+ # Validates CMake options.
+ include(msix_options)
+ 
++if(ENABLE_NUGET_PACKAGING)
+ # Configure Package.nuspec
+ if(WIN32)
+     set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.Windows")
+@@ -103,6 +113,7 @@ configure_file(${MSIX_PROJECT_ROOT}/Package.nuspec.cmakein ${MSIX_BINARY_ROOT}/P
+ configure_file(${MSIX_PROJECT_ROOT}/Microsoft.MSIX.Packaging.targets ${MSIX_BINARY_ROOT}/build/native/${MSIX_NUGET_NAME}.targets)
+ message(STATUS "Package.Nuspec created")
+ message(STATUS "--------------------------------")
++endif()
+ 
+ # Configure license txt
+ configure_file(${MSIX_PROJECT_ROOT}/LICENSE ${MSIX_BINARY_ROOT}/build/LICENSE)
+@@ -170,9 +181,6 @@ if((MACOS) OR (IOS))
+             message(FATAL_ERROR "Unsupported iOS version: ${IOS_DEPLOYMENT_TARGET}, this project requires at least iOS version 10.0")
+         endif()
+     endif()
+-elseif(AOSP OR LINUX)
+-    # Static libraries must be position independent to be linked with a shared object.
+-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+ # Mac needed variables
+@@ -183,10 +191,6 @@ set(CMAKE_MACOSX_RPATH ON)
+ #set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+-add_subdirectory(lib)
+-message(STATUS "libs processed")
+ add_subdirectory(src)
+ message(STATUS "src processed")
+-add_subdirectory(sample)
+-message(STATUS "sample processed")
+ message(STATUS "DONE!")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a2655a7b..5d224b64 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -6,4 +6,3 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
+ 
+ add_subdirectory(msix)
+ add_subdirectory(makemsix)
+-add_subdirectory(test)
+diff --git a/src/makemsix/CMakeLists.txt b/src/makemsix/CMakeLists.txt
+index 92b082e6..ebae9789 100644
+--- a/src/makemsix/CMakeLists.txt
++++ b/src/makemsix/CMakeLists.txt
+@@ -24,3 +24,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${MSIX_BINARY_ROOT}/src/msix)
+ 
+ add_dependencies(${PROJECT_NAME} msix)
+ target_link_libraries(${PROJECT_NAME} msix)
++
++# define installing rules for target files
++install(TARGETS ${PROJECT_NAME})
+diff --git a/src/msix/CMakeLists.txt b/src/msix/CMakeLists.txt
+index 75d3afdf..e1fb2984 100644
+--- a/src/msix/CMakeLists.txt
++++ b/src/msix/CMakeLists.txt
+@@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
+ 
+ project(msix)
+ 
++# Define the library
++add_library(${PROJECT_NAME}
++    msix.cpp
++)
++
+ # Handle exports and flags we need to set
+ list(APPEND MSIX_UNPACK_EXPORTS
+     "UnpackPackage"
+@@ -144,7 +149,7 @@ if(NOT SKIP_BUNDLES)
+     if (WIN32)
+         list(APPEND MsixSrc PAL/Applicability/Win32/Applicability.cpp)
+     elseif(LINUX)
+-        find_package(ICU REQUIRED COMPONENTS uc)
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::icu)
+         list(APPEND MsixSrc PAL/Applicability/Linux/Applicability.cpp)
+     elseif(AOSP)
+         list(APPEND MsixSrc PAL/Applicability/AOSP/Applicability.cpp)
+@@ -195,14 +200,16 @@ if(CRYPTO_LIB MATCHES crypt32)
+         PAL/Signature/Win32/SignatureValidator.cpp
+     )
+ elseif(CRYPTO_LIB MATCHES openssl)
+-    if(OpenSSL_FOUND)
+-        list(APPEND MsixSrc
+-            PAL/Crypto/OpenSSL/Crypto.cpp
+-            PAL/Signature/OpenSSL/SignatureValidator.cpp
+-        )
++    list(APPEND MsixSrc
++        PAL/Crypto/OpenSSL/Crypto.cpp
++        PAL/Signature/OpenSSL/SignatureValidator.cpp
++    )
++    if((IOS) OR (MACOS))
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl -Wl,-dead_strip)
++    elseif(NOT MSVC)
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl -Wl,--gc-sections)
+     else()
+-        # ... and were done here...  :/
+-        message(FATAL_ERROR "OpenSSL NOT FOUND!")
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl)
+     endif()
+ endif()
+ 
+@@ -220,14 +227,7 @@ foreach(FILE ${MsixSrc})
+     message(STATUS "\t${FILE}")
+ endforeach()
+ 
+-# Define the library
+-add_library(${PROJECT_NAME} SHARED 
+-    msix.cpp
+-    ${MsixSrc}
+-)
+-
+-# Adding dependency to the third party libs directory
+-add_dependencies(${PROJECT_NAME} LIBS)
++target_sources(${PROJECT_NAME} PRIVATE ${MsixSrc})
+ 
+ # Copy out public headers to <binary dir>/src/unpack
+ configure_file(../inc/MSIXWindows.hpp   ${CMAKE_CURRENT_BINARY_DIR}/MSIXWindows.hpp  )
+@@ -260,7 +260,7 @@ if(WIN32)
+             "/DELAYLOAD:api-ms-win-core-winrt-l1-1-0.dll")
+     string(REPLACE ";" " " DELAYFLAGS "${DELAYFLAGS}")
+     set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS "${DELAYFLAGS} /LTCG")
+-    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /DEF:windowsexports.def")
++    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /DEF:${CMAKE_CURRENT_BINARY_DIR}/windowsexports.def")
+     if(USE_STATIC_MSVC)
+         if(CMAKE_BUILD_TYPE MATCHES Debug)
+             set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRTD")
+@@ -285,29 +285,20 @@ if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
+     target_link_libraries(${PROJECT_NAME} PRIVATE libcompression.dylib)
+ elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
+     # for AOSP, use the libz.so from the android ndk.
+-    find_package(ZLIB REQUIRED)
+     target_link_libraries(${PROJECT_NAME} PRIVATE -lz)
+-else() # WIN32 or USE_MSIX_SDK_ZLIB
+-    target_include_directories(${PROJECT_NAME} PRIVATE 
+-            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/zlib
+-            ${MSIX_PROJECT_ROOT}/lib/zlib
+-        )
++else()
+     if(USE_SHARED_ZLIB)
+         message(STATUS "MSIX takes a dynamic dependency on zlib")
+-        target_link_libraries(${PROJECT_NAME} PRIVATE zlib)
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::zlib)
+     else()
+         message(STATUS "MSIX takes a static dependency on zlib")
+-        target_link_libraries(${PROJECT_NAME} PRIVATE zlibstatic)
++        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::zlib)
+     endif()
+ endif()
+ 
+ # Parser
+ if(XML_PARSER MATCHES xerces)
+-    target_include_directories(${PROJECT_NAME} PRIVATE
+-        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/xerces/src
+-        ${MSIX_PROJECT_ROOT}/lib/xerces/src
+-    )
+-    target_link_libraries(${PROJECT_NAME} PRIVATE xerces-c)
++    target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::xerces-c)
+ endif()
+ 
+ if(XML_PARSER MATCHES applexml)
+@@ -363,18 +354,6 @@ endif()
+ if((IOS) OR (MACOS))
+     target_link_libraries(${PROJECT_NAME} PRIVATE ${COREFOUNDATION_LIBRARY} ${FOUNDATION_LIBRARY})
+ endif()
+-if(LINUX)
+-    target_link_libraries(${PROJECT_NAME} PRIVATE ${ICU_LIBRARIES})
+-endif()
+ 
+-if(OpenSSL_FOUND)
+-    # include the libraries needed to use OpenSSL
+-    target_include_directories(${PROJECT_NAME} PRIVATE ${OpenSSL_INCLUDE_PATH})
+-    if((IOS) OR (MACOS))
+-        target_link_libraries(${PROJECT_NAME} PRIVATE crypto -Wl,-dead_strip)
+-    elseif(NOT MSVC)
+-        target_link_libraries(${PROJECT_NAME} PRIVATE crypto -Wl,--gc-sections)
+-    else()
+-        target_link_libraries(${PROJECT_NAME} PRIVATE crypto)
+-    endif()
+-endif()
++# define installing rules for target files
++install(TARGETS ${PROJECT_NAME})

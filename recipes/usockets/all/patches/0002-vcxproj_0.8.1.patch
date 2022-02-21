@@ -1,0 +1,17 @@
+diff --git a/uSockets.vcxproj b/uSockets.vcxproj
+index 87cbb85..e3871f3 100644
+--- a/uSockets.vcxproj
++++ b/uSockets.vcxproj
+@@ -19,11 +19,10 @@
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{39D08679-782E-41AC-BDE0-06A462568EFF}</ProjectGuid>
+-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" />
+   <PropertyGroup>
+-    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <ConfigurationType>StaticLibrary</ConfigurationType>
+     <PlatformToolset>v141</PlatformToolset>
+     <ProjectName>uSockets</ProjectName>
+   </PropertyGroup>

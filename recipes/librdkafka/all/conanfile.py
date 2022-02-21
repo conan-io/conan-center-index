@@ -1,6 +1,7 @@
+from conans import CMake, ConanFile, tools
 import os
 
-from conans import CMake, ConanFile, tools
+required_conan_version = ">=1.43.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -8,10 +9,13 @@ class LibrdkafkaConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/edenhill/librdkafka"
-    description = "Librdkafka is an Apache Kafka C/C++ library designed with message delivery reliability and high performance in mind."
-
+    description = (
+        "Librdkafka is an Apache Kafka C/C++ library designed with message "
+        "delivery reliability and high performance in mind."
+    )
     topics = ("kafka", "librdkafka")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -20,7 +24,6 @@ class LibrdkafkaConan(ConanFile):
         "plugins": [True, False],
         "ssl": [True, False],
         "sasl": [True, False],
-        "lz4": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
@@ -30,15 +33,19 @@ class LibrdkafkaConan(ConanFile):
         "plugins": False,
         "ssl": False,
         "sasl": False,
-        "lz4": "deprecated",
     }
+
     generators = "cmake", "cmake_find_package", "pkg_config"
-    exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,31 +54,25 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.lz4 != "deprecated":
-            self.output.warn("lz4 option is deprecated. Actually, librdkafka always depends on lz4.")
 
     def requirements(self):
         self.requires("lz4/1.9.3")
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.1")
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
 
-    def package_id(self):
-        del self.info.options.lz4
-
     def build_requirements(self):
         if self.options.sasl and self.settings.os != "Windows":
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -114,12 +115,15 @@ class LibrdkafkaConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "RdKafka"
-        self.cpp_info.names["cmake_find_package_multi"] = "RdKafka"
+        self.cpp_info.set_property("cmake_file_name", "RdKafka")
+        # Avoid to create undesirables librdkafka::librdkafka target and librdkafka.pc
+        # it's fine since rdkafka++ component depends on all components
+        self.cpp_info.set_property("cmake_target_name", "RdKafka::rdkafka++")
+        self.cpp_info.set_property("pkg_config_name", "rdkafka++")
+
         # rdkafka
-        self.cpp_info.components["rdkafka"].names["cmake_find_package"] = "rdkafka"
-        self.cpp_info.components["rdkafka"].names["cmake_find_package_multi"] = "rdkafka"
-        self.cpp_info.components["rdkafka"].names["pkg_config"] = "rdkafka"
+        self.cpp_info.components["rdkafka"].set_property("cmake_target_name", "RdKafka::rdkafka")
+        self.cpp_info.components["rdkafka"].set_property("pkg_config_name", "rdkafka")
         self.cpp_info.components["rdkafka"].libs = ["rdkafka"]
         self.cpp_info.components["rdkafka"].requires = ["lz4::lz4"]
         if self.options.zlib:
@@ -134,13 +138,17 @@ class LibrdkafkaConan(ConanFile):
             self.cpp_info.components["rdkafka"].system_libs = ["ws2_32", "secur32"]
             if self.options.ssl:
                 self.cpp_info.components["rdkafka"].system_libs.append("crypt32")
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["rdkafka"].system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
             self.cpp_info.components["rdkafka"].defines.append("LIBRDKAFKA_STATICLIB")
+
         # rdkafka++
-        self.cpp_info.components["rdkafka++"].names["cmake_find_package"] = "rdkafka++"
-        self.cpp_info.components["rdkafka++"].names["cmake_find_package_multi"] = "rdkafka++"
-        self.cpp_info.components["rdkafka++"].names["pkg_config"] = "rdkafka++"
+        self.cpp_info.components["rdkafka++"].set_property("cmake_target_name", "RdKafka::rdkafka++")
+        self.cpp_info.components["rdkafka++"].set_property("pkg_config_name", "rdkafka++")
         self.cpp_info.components["rdkafka++"].libs = ["rdkafka++"]
         self.cpp_info.components["rdkafka++"].requires = ["rdkafka"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "RdKafka"
+        self.cpp_info.names["cmake_find_package_multi"] = "RdKafka"

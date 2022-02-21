@@ -1,8 +1,14 @@
 sources:
+  "2.6":
+    url: "https://heasarc.gsfc.nasa.gov/fitsio/CCfits-2.6/CCfits-2.6.tar.gz"
+    sha256: "c8395e80379df4e2a63b0890166fb47be4b96dff977214e7ed10ea9d3e9e9a9e"
   "2.5":
-    url: "https://heasarc.gsfc.nasa.gov/fitsio/ccfits/CCfits-2.5.tar.gz"
+    url: "https://heasarc.gsfc.nasa.gov/fitsio/CCfits-2.5/CCfits-2.5.tar.gz"
     sha256: "e542f39fa496417c401be7fbca715d566462cf4c56c83e3d43b6df3cb8d92105"
 patches:
+  "2.6":
+    - patch_file: "patches/0001-adapt-cmakelists-for-conan-2.6.patch"
+      base_path: "source_subfolder"
   "2.5":
-    - patch_file: "patches/0001-adapt-cmakelists-for-conan.patch"
+    - patch_file: "patches/0001-adapt-cmakelists-for-conan-2.5.patch"
       base_path: "source_subfolder"

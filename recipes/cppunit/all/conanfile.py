@@ -1,6 +1,8 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+import contextlib
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CppunitConan(ConanFile):
@@ -19,6 +21,7 @@ class CppunitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     generators = "pkg_config"
 
     _autotools = None
@@ -26,6 +29,10 @@ class CppunitConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,19 +43,19 @@ class CppunitConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -100,7 +107,7 @@ class CppunitConan(ConanFile):
             os.rename(os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
                       os.path.join(self.package_folder, "lib", "cppunit.lib"))
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcppunit.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 

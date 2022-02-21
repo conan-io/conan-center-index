@@ -1,4 +1,6 @@
 sources:
   "3.3":
-    sha256: ac86e5794c6a99c25dee0b60720c7cfd9833ec64785c74838723179830749c9c
-    url: https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-3.3.exe
+    - url: "https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-3.3.exe"
+      sha256: "ac86e5794c6a99c25dee0b60720c7cfd9833ec64785c74838723179830749c9c"
+    - url: "https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt"
+      sha256: "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"

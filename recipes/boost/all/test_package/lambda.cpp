@@ -3,6 +3,10 @@
 #include <vector>
 #include <algorithm>
 
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 int main(int argc, const char * const argv[])
 {
     using namespace boost::lambda;

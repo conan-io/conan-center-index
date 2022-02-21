@@ -1,8 +1,10 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
 
-class CwalkConan(ConanFile):
+
+class CargsConan(ConanFile):
     name = "cargs"
     description = "A lightweight getopt replacement that works on Linux, " \
                   "Windows and macOS. Command line argument parser library" \
@@ -33,12 +35,14 @@ class CwalkConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         cmake = CMake(self)

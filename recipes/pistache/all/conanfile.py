@@ -1,10 +1,8 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class PistacheConan(ConanFile):
@@ -14,10 +12,19 @@ class PistacheConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("http", "rest", "framework", "networking")
     description = "Pistache is a modern and elegant HTTP and REST framework for C++"
-    settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_ssl": False}
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_ssl": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_ssl": False,
+    }
+
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -29,7 +36,21 @@ class PistacheConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("rapidjson/1.1.0")
+        if self.options.with_ssl:
+            self.requires("openssl/1.1.1m")
+
+    def validate(self):
         compilers = {
             "gcc": "7",
             "clang": "6",
@@ -40,9 +61,6 @@ class PistacheConan(ConanFile):
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration("Clang support is broken. See pistacheio/pistache#835.")
 
-        if self.options.shared:
-            del self.options.fPIC
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
@@ -52,15 +70,9 @@ class PistacheConan(ConanFile):
         else:
             self.output.warn("Pistache requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
 
-    def requirements(self):
-        self.requires("rapidjson/1.1.0")
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("pistache-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

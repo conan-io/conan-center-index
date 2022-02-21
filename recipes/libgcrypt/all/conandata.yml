@@ -1,0 +1,4 @@
+sources:
+  "1.8.4":
+    url: "https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.8.4.tar.gz"
+    sha256: "fc3c49cc8611068e6008482c3bbee6c66b9287808bbb4e14a473f4cc347b78ce"

@@ -13,6 +13,7 @@ int main()
     }
     else
     {
+        std::cout << "Cannot sum" << std::endl;
         calc.soap_stream_fault(std::cerr);
     }
     calc.destroy(); // same as: soap_destroy(calc.soap); soap_end(calc.soap);

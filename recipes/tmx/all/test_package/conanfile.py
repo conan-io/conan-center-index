@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             tmx_path = os.path.join(self.source_folder, "externtileset.tmx")
             self.run("{} {}".format(bin_path, tmx_path), run_environment=True)

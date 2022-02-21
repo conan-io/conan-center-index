@@ -1,0 +1,25 @@
+From 3eba074264a5b3a36fedff3e5b13b3743bba2932 Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alx.manpages@gmail.com>
+Date: Mon, 7 Jun 2021 11:46:46 +0200
+Subject: [PATCH] remove asio defines
+
+---
+ include/server/asio/asio.h | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/include/server/asio/asio.h b/include/server/asio/asio.h
+index 8ad4d6bc..b8cb7030 100644
+--- a/include/server/asio/asio.h
++++ b/include/server/asio/asio.h
+@@ -26,8 +26,6 @@
+ 
+ #else
+ 
+-#define ASIO_STANDALONE
+-#define ASIO_SEPARATE_COMPILATION
+ #define ASIO_NO_WIN32_LEAN_AND_MEAN
+ 
+ #if defined(_MSC_VER)
+-- 
+2.31.1.498.g6c1eba8ee3d
+

@@ -1,0 +1,11 @@
+--- src/sysc/kernel/sc_cmnhdr.h
++++ src/sysc/kernel/sc_cmnhdr.h
+@@ -199,7 +199,7 @@
+ // (deliberately outside of include guards to enable later effect)
+ #if defined(SC_HAS_WINDOWS_H_) && defined(SC_INCLUDE_WINDOWS_H)
+ #  undef SC_HAS_WINDOWS_H_
+-#  include <Windows.h>
++#  include <windows.h>
+ #endif
+ 
+ // $Log: sc_cmnhdr.h,v $

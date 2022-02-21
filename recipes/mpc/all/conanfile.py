@@ -32,12 +32,21 @@ class MpcConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("The mpc package cannot be built on Visual Studio.")
-            
     def requirements(self):
         self.requires("mpfr/4.1.0")
+
+    def validate(self):
+        # FIXME: add Visual Studio support, upstream has a makefile.vc
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("mpc can be built with Visual Studio, but it's not supported yet in this recipe.")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -45,7 +54,7 @@ class MpcConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = []
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])

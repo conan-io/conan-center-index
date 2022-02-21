@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, tools, CMake
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class ZfpConan(ConanFile):
@@ -8,13 +10,13 @@ class ZfpConan(ConanFile):
     homepage = "https://github.com/LLNL/zfp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    topics = ("conan", "zfp", "compression", "arrays")
+    topics = ("zfp", "compression", "arrays")
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "bit_stream_word_size": [8,16,32,64],
         "with_cuda": [True, False],
         "with_bit_stream_strided": [True, False],
         "with_aligned_alloc": [True, False],
@@ -26,6 +28,7 @@ class ZfpConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "bit_stream_word_size": 64,
         "with_cuda": False,
         "with_bit_stream_strided": False,
         "with_aligned_alloc": False,
@@ -35,6 +38,8 @@ class ZfpConan(ConanFile):
         "with_openmp": False,
     }
 
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -44,6 +49,10 @@ class ZfpConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,9 +67,8 @@ class ZfpConan(ConanFile):
             self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "zfp-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -69,6 +77,7 @@ class ZfpConan(ConanFile):
         self._cmake.definitions["BUILD_CFP"] = True
         self._cmake.definitions["BUILD_UTILITIES"] = False
         self._cmake.definitions["ZFP_WITH_CUDA"] = self.options.with_cuda
+        self._cmake.definitions["ZFP_BIT_STREAM_WORD_SIZE"] = self.options.bit_stream_word_size
         self._cmake.definitions["ZFP_WITH_BIT_STREAM_STRIDED"] = self.options.with_bit_stream_strided
         self._cmake.definitions["ZFP_WITH_ALIGNED_ALLOC"] = self.options.with_aligned_alloc
         self._cmake.definitions["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
@@ -88,12 +97,31 @@ class ZfpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "zfp")
+        # to avoid to create an unwanted target, since we can't allow zfp::zfp to be the global target here
+        self.cpp_info.set_property("cmake_target_name", "zfp::cfp")
+
         # zfp
-        self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"
-        self.cpp_info.components["_zfp"].names["cmake_find_package_multi"] = "zfp"
+        self.cpp_info.components["_zfp"].set_property("cmake_target_name", "zfp::zfp")
         self.cpp_info.components["_zfp"].libs = ["zfp"]
+
         # cfp
-        self.cpp_info.components["cfp"].names["cmake_find_package"] = "cfp"
-        self.cpp_info.components["cfp"].names["cmake_find_package_multi"] = "cfp"
+        self.cpp_info.components["cfp"].set_property("cmake_target_name", "zfp::cfp")
         self.cpp_info.components["cfp"].libs = ["cfp"]
         self.cpp_info.components["cfp"].requires = ["_zfp"]
+
+        if not self.options.shared and self.options.with_openmp:
+            openmp_flags = []
+            if self._is_msvc:
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler in ("gcc", "clang"):
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "apple-clang":
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+
+            self.cpp_info.components["_zfp"].sharedlinkflags = openmp_flags
+            self.cpp_info.components["_zfp"].exelinkflags = openmp_flags
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"
+        self.cpp_info.components["_zfp"].names["cmake_find_package_multi"] = "zfp"

@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class ArduinojsonConan(ConanFile):
@@ -12,6 +12,7 @@ class ArduinojsonConan(ConanFile):
     topics = ("json", "arduino", "iot", "embedded", "esp8266")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -49,16 +50,19 @@ class ArduinojsonConan(ConanFile):
         self.copy("*LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "src"))
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "src"))
-
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"ArduinoJson": "ArduinoJson::ArduinoJson"}
         )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ArduinoJson")
+        self.cpp_info.set_property("cmake_target_name", "ArduinoJson")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "ArduinoJson"
         self.cpp_info.names["cmake_find_package_multi"] = "ArduinoJson"
-
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

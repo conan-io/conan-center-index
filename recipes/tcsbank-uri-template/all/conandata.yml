@@ -2,3 +2,9 @@ sources:
   "1.1.3":
     url: "https://github.com/TinkoffCreditSystems/uri-template/archive/refs/tags/v1.1.3.tar.gz"
     sha256: "4eaf984eb7857a56b09e9ad911a77042573d1540a19b9e945369ec6384f54131"
+  "1.1.4":
+    url: "https://github.com/TinkoffCreditSystems/uri-template/archive/refs/tags/v1.1.4.tar.gz"
+    sha256: "5f6e562813f1cf9ce40137db88ea4db54dc4bd77a6e5f813b106d494bbfb72b3"
+  "1.2.1":
+    url: "https://github.com/TinkoffCreditSystems/uri-template/archive/refs/tags/v1.2.1.tar.gz"
+    sha256: "afdfc29cb914642702c26968b11ca50c5a435653b0af5773e3d27d4444c425e2"

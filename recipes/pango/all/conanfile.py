@@ -30,7 +30,7 @@ class PangoConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
     
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
@@ -61,12 +61,12 @@ class PangoConan(ConanFile):
             raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
-        self.build_requires("meson/0.57.1")
+        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.60.2")
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.1")
 
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
@@ -74,14 +74,13 @@ class PangoConan(ConanFile):
             self.requires("xorg/system")
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/2.7.4")
-        self.requires("glib/2.67.6")
-        self.requires("fribidi/1.0.9")
+        self.requires("harfbuzz/3.2.0")
+        self.requires("glib/2.70.1")
+        self.requires("fribidi/1.0.10")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extrated_dir = self.name + "-" + self.version
-        os.rename(extrated_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         defs = dict()
@@ -112,7 +111,7 @@ class PangoConan(ConanFile):
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
             meson = self._configure_meson()
             meson.install()
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
@@ -124,7 +123,7 @@ class PangoConan(ConanFile):
     def package_info(self):
         self.cpp_info.components['pango_'].libs = ['pango-1.0']
         self.cpp_info.components['pango_'].names['pkg_config'] = 'pango'
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux","FreeBSD"]:
             self.cpp_info.components['pango_'].system_libs.append("m")
         self.cpp_info.components['pango_'].requires.append('glib::glib-2.0')
         self.cpp_info.components['pango_'].requires.append('glib::gobject-2.0')

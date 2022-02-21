@@ -7,8 +7,8 @@ required_conan_version = ">=1.33.0"
 
 class Crc_CppConan(ConanFile):
     name = "crc_cpp"
-    description = "A header only, constexpr / compile time small-table based CRC library for C++17 or newer"
-    topics = ("conan", "crc_cpp", "crc", "constexpr" "cpp17", "cpp20", "header-only")
+    description = "A header only constexpr / compile time small-table based CRC library for C++17 and newer"
+    topics = ("conan", "crc_cpp", "crc", "constexpr", "cpp17", "cpp20", "header-only")
     settings = "compiler", "os"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AshleyRoll/crc_cpp"
