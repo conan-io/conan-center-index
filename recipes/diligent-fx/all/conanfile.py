@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import shutil
 
 class DiligentFxConan(ConanFile):
     name = "diligent-fx"
@@ -96,6 +97,10 @@ class DiligentFxConan(ConanFile):
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
                      dst=os.path.join(self.package_folder, "include", "DiligentFx"))
+        #tools.rename(src=os.path.join(self.package_folder, "Shaders"),
+        #             dst=os.path.join(self.package_folder, "res"))
+        shutil.move(os.path.join(self.package_folder, "Shaders"), 
+                    os.path.join(self.package_folder, "res", "Shaders"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
@@ -108,5 +113,6 @@ class DiligentFxConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "GLTF_PBR_Renderer", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "PostProcess", "EpipolarLightScattering", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("res"))
 
 
