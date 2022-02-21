@@ -225,7 +225,7 @@ class LibtorchConan(ConanFile):
         if self.options.get_safe("with_nnpack"):
             raise ConanInvalidConfiguration("nnpack recipe not yet available in CCI")
         if self.options.get_safe("with_qnnpack"):
-            self.requires("fp16/cci.20200514")
+            self.requires("fp16/cci.20210320")
             self.requires("fxdiv/cci.20200417")
             self.requires("psimd/cci.20200517")
         if self.options.with_xnnpack:
