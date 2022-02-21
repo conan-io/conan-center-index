@@ -126,4 +126,5 @@ class CclientConan(ConanFile):
         else:
             self.cpp_info.defines = ["_DEFAULT_SOURCE"]
             self.cpp_info.system_libs = ["crypt"]
+            self.cpp_info.requires = ["openssl::crypto", "openssl::ssl"]
         self.cpp_info.libs = ["cclient" if self._is_msvc else "c-client"]
