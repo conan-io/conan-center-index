@@ -147,6 +147,15 @@ class OpenCVConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # relocatable shared lib on macOS
+        tools.replace_in_file(cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
+        # Cleanup RPATH
+        tools.replace_in_file(cmakelists,
+                              "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
+                              "")
+        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
