@@ -17,13 +17,12 @@ class CclientConan(ConanFile):
     license = "Apache-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        # FIXME: can this library be made shared?
         "fPIC": [True, False],
     }
     default_options = {
         "fPIC": True,
     }
-    exports_sources = "patches/*", "cclient.def"
+    exports_sources = "patches/*"
 
     @property
     def _settings_build(self):
@@ -70,12 +69,8 @@ class CclientConan(ConanFile):
         warnings = \
             "/W3 /wd4267 /wd4244 /wd4273 /wd4311 /wd4312 /wd4133 /wd4028"
         cflags = f"{runtime} {warnings} /GS {opt_flags}"
-        # FIXME: use link.exe with cclient.def for shared build
-        # NOTE: the makefile depends on cclient.lib, which is generated for all
-        #       library types anyway
-        link = "LIB /NOLOGO /OUT:cclient.lib"
-        search = "EXTRACFLAGS =\nLINK ="
-        replace = f"EXTRACFLAGS = {cflags}\nLINK = {link}"
+        search = "EXTRACFLAGS ="
+        replace = f"EXTRACFLAGS = {cflags}"
         tools.replace_in_file(r"src\osdep\nt\makefile.w2k", search, replace)
 
     def _build_msvc(self):
@@ -126,7 +121,7 @@ class CclientConan(ConanFile):
             self.copy("*.a", "lib", "c-client")
 
     def package_info(self):
-        if self._is_msvc: # and not self.options.shared:
+        if self._is_msvc:
             self.cpp_info.system_libs = \
                 ["Winmm", "Ws2_32", "Secur32", "Crypt32"]
         else:

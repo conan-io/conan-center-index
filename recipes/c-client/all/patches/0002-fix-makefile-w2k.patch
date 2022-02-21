@@ -1,12 +1,6 @@
 --- src/osdep/nt/makefile.w2k
 +++ src/osdep/nt/makefile.w2k
-@@ -28,13 +28,14 @@
- EXTRAAUTHENTICATORS =
- EXTRADRIVERS = 
- EXTRACFLAGS =
-+LINK =
- AUTHENTICATORS = ext gss md5 pla log
- DRIVERS = imap nntp pop3 mbx mtx tenex unix
+@@ -33,8 +33,8 @@
  CREATEDRIVER = mbx
  APPENDDRIVER = unix
  OSCOMPAT = /DWIN32
@@ -17,12 +11,3 @@
  CC = cl
  CCLIENTLIB = cclient.lib
  
-@@ -104,7 +105,7 @@
- 	imap4r1.obj nntp.obj pop3.obj smtp.obj os_w2k.obj \
- 	mbxnt.obj mtxnt.obj tenexnt.obj unixnt.obj dummynt.obj pseudo.obj
- 	if exist $(CCLIENTLIB) del $(CCLIENTLIB)
--	LIB /NOLOGO /OUT:cclient.lib \
-+	$(LINK) \
- 	mail.obj misc.obj fdstring.obj flstring.obj netmsg.obj \
- 	newsrc.obj rfc822.obj smanager.obj utf8.obj utf8aux.obj \
- 	imap4r1.obj nntp.obj pop3.obj smtp.obj os_w2k.obj \
