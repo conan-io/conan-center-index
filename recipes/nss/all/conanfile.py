@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os, glob
 
@@ -40,7 +40,7 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.32")
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.37.2")
         self.requires("zlib/1.2.11")
 
     def validate(self):
@@ -124,9 +124,9 @@ class NSSConan(ConanFile):
             _format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
             _format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
         args.append("NSS_DISABLE_GTESTS=1")
-        # args.append("NSS_USE_SYSTEM_SQLITE=1")
-        # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
-        # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
+        args.append("NSS_USE_SYSTEM_SQLITE=1")
+        args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
+        args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
         args.append("NSDISTMODE=copy")
         if tools.cross_building(self):
             args.append("CROSS_COMPILE=1")
@@ -138,7 +138,8 @@ class NSSConan(ConanFile):
             tools.patch(**patch)
         with tools.chdir(os.path.join(self._source_subfolder, "nss")):
             with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                self.run("make %s" % " ".join(self._make_args), run_environment=True)
+                with tools.environment_append(RunEnvironment(self).vars):
+                    self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
         self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
