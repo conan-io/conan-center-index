@@ -9,15 +9,13 @@ class DiligentToolsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DiligentGraphics/DiligentTools/"
     description = "Diligent Core is a modern cross-platfrom low-level graphics API."
-    license = ("Apache 2.0")
-    topics = ("graphics")
+    license = ("Apache-2.0")
+    topics = ("graphics", "texture", "gltf", "draco", "imgui")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
-    "fPIC": [True, False]
-    }
+               "fPIC": [True, False]}
     default_options = {"shared": False, 
-    "fPIC": True
-    }
+                       "fPIC": True}
     generators = "cmake_find_package", "cmake"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**", "BuildUtils.cmake"]
@@ -63,7 +61,8 @@ class DiligentToolsConan(ConanFile):
         self.requires("diligent-core/2.5.1")
         self.requires("imgui/1.86")
 
-    def diligent_platform(self):
+    @property
+    def _diligent_platform(self):
         if self.settings.os == "Windows":
             return "PLATFORM_WIN32"
         elif self.settings.os == "Macos":
@@ -89,7 +88,7 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
 
-        self._cmake.definitions[self.diligent_platform()] = True
+        self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -114,7 +113,7 @@ class DiligentToolsConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools", "AssetLoader", "interface"))
 
-        self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
+        self.cpp_info.defines.append(f"{self._diligent_platform}=1")
 
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
