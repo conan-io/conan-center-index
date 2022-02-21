@@ -108,6 +108,8 @@ class LibFDKAACConan(ConanFile):
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared lib on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             if self.settings.os == "Android" and tools.os_info.is_windows:
                 # remove escape for quotation marks, to make ndk on windows happy
                 tools.replace_in_file("configure",
@@ -119,6 +121,7 @@ class LibFDKAACConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
