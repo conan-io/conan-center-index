@@ -1,4 +1,3 @@
-import functools
 import os
 import stat
 
@@ -13,7 +12,7 @@ class CclientConan(ConanFile):
     description = "University of Washington IMAP toolkit"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uw-imap/imap"
-    topics = "imap"
+    topics = "imap", "uw-imap", "tcp-ip"
     license = "Apache-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -76,8 +75,8 @@ class CclientConan(ConanFile):
     def _build_msvc(self):
         make = "nmake /nologo /f makefile.w2k"
         with tools.vcvars(self):
-            self.run(f"{make} c-client")
-            self.run(make, cwd="c-client")
+            self.run(f"{make} c-client", run_environment=True)
+            self.run(make, cwd="c-client", run_environment=True)
 
     def _chmod_x(self, path):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
