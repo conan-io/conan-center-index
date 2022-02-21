@@ -229,7 +229,7 @@ class LibtorchConan(ConanFile):
             self.requires("fxdiv/cci.20200417")
             self.requires("psimd/cci.20200517")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20210310")
+            self.requires("xnnpack/cci.20211210")
         if self.options.get_safe("with_nnpack") or self.options.get_safe("with_qnnpack") or self.options.with_xnnpack:
             self.requires("pthreadpool/cci.20210218")
         if self.options.get_safe("with_numa"):
