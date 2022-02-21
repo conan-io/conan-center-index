@@ -1,3 +1,5 @@
 versions:
+  "0.7.9":
+    folder: all
   "0.7.6":
     folder: all

@@ -1,0 +1,11 @@
+--- conf.d/link_confs.py
++++ conf.d/link_confs.py
+@@ -26,7 +26,7 @@
+             break
+         except OSError as e:
+             # Symlink privileges are not available
+-            if len(e.args) == 1 and 'privilege' in e.args[0]:
++            if (len(e.args) == 1 and 'privilege' in e.args[0]) or (len(e.args) == 2 and 'privilege' in e.args[1]):
+                 break
+             raise
+         except FileExistsError:

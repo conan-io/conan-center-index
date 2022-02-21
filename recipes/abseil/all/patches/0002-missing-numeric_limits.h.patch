@@ -1,0 +1,11 @@
+--- absl/synchronization/internal/graphcycles.cc
++++ absl/synchronization/internal/graphcycles.cc
+@@ -34,7 +34,7 @@
+ #ifndef ABSL_LOW_LEVEL_ALLOC_MISSING
+ 
+ #include "absl/synchronization/internal/graphcycles.h"
+-
++#include <limits>
+ #include <algorithm>
+ #include <array>
+ #include "absl/base/internal/hide_ptr.h"

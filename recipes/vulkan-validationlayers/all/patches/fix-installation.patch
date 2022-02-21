@@ -17,27 +17,15 @@ https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2551
          if(CMAKE_GENERATOR MATCHES "^Visual Studio.*")
              foreach(TARGET_NAME ${TARGET_NAMES})
 -                install(FILES ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
-+                install(FILES $<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_BINDIR})
++                install(FILES $<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
              endforeach()
          else()
              foreach(TARGET_NAME ${TARGET_NAMES})
 -                install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
-+                install(FILES $<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_BINDIR})
++                install(FILES $<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
              endforeach()
          endif()
      elseif(UNIX) # UNIX includes APPLE
-@@ -111,7 +111,10 @@ if(WIN32)
-         target_compile_definitions(VkLayer_${target} PUBLIC ${LAYER_COMPILE_DEFINITIONS})
-         target_link_libraries(VkLayer_${target} PRIVATE VkLayer_utils)
-         add_dependencies(VkLayer_${target} VkLayer_utils)
--        install(TARGETS VkLayer_${target} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-+        install(TARGETS VkLayer_${target}
-+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-     endmacro()
- elseif(APPLE)
-     macro(AddVkLayer target LAYER_COMPILE_DEFINITIONS)
 @@ -124,7 +127,7 @@ elseif(APPLE)
                                           "-Wl"
                                           INSTALL_RPATH

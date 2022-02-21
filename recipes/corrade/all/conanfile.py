@@ -12,7 +12,7 @@ class CorradeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics/corrade"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "cmake/*"]
+    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/*"]
     generators = "cmake"
     short_paths = True
     _cmake = None
@@ -92,6 +92,9 @@ class CorradeConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        
         cmake = self._configure_cmake()
         cmake.build()
 

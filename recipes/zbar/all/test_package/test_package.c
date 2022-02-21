@@ -17,11 +17,20 @@ int main (int argc, char **argv)
     /* clean up */
     zbar_image_scanner_destroy(scanner);
 
+#ifdef ZBAR_VERSION_PARAM3
+	unsigned VersionMajor;
+	unsigned VersionMinor;
+	unsigned VersionPatch;
+	zbar_version(&VersionMajor, &VersionMinor, &VersionPatch);
+
+	printf("Compiled ZBar version %d.%d.%d \n", VersionMajor, VersionMinor, VersionPatch);
+#else
 	unsigned VersionMajor;
 	unsigned VersionMinor;
 	zbar_version(&VersionMajor, &VersionMinor);
 
 	printf("Compiled ZBar version %d.%d \n", VersionMajor, VersionMinor);
+#endif
 
 	printf("Zbar Test Completed \n");
 

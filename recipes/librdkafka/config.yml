@@ -13,3 +13,7 @@ versions:
     folder: all
   "1.7.0":
     folder: all
+  "1.8.0":
+    folder: all
+  "1.8.2":
+    folder: all

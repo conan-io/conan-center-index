@@ -3,6 +3,8 @@ import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
 
 class LibcapConan(ConanFile):
     name = "libcap"
@@ -23,6 +25,8 @@ class LibcapConan(ConanFile):
         "fPIC": True,
         "psx_syscals": False,
     }
+    exports_sources = "patches/**"
+
     _autotools = None
     _autotools_env = None
 
@@ -39,9 +43,8 @@ class LibcapConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        src_folder = "{}-{}".format(self.name, self.version)
-        os.rename(src_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -64,24 +67,12 @@ class LibcapConan(ConanFile):
 
         return self._autotools, self._autotools_env
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
-        make_rules = os.path.join(self._source_subfolder, "Make.Rules")
-        tools.replace_in_file(
-            make_rules,
-            "IPATH += -fPIC -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include",
-            "IPATH += -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include")
-        tools.replace_in_file(
-            make_rules,
-            "CC := $(CROSS_COMPILE)gcc",
-            "CC ?= $(CROSS_COMPILE)gcc")
-        tools.replace_in_file(
-            make_rules,
-            "AR := $(CROSS_COMPILE)ar",
-            "AR ?= $(CROSS_COMPILE)ar")
-        tools.replace_in_file(
-            make_rules,
-            "RANLIB := $(CROSS_COMPILE)ranlib",
-            "RANLIB ?= $(CROSS_COMPILE)ranlib")
+        self._patch_sources()
 
         with tools.chdir(os.path.join(self._source_subfolder, self.name)):
             env_build, env_build_vars = self._configure_autotools()

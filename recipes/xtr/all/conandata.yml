@@ -1,0 +1,7 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/choll/xtr/archive/refs/tags/1.0.1.tar.gz"
+    sha256: "7cc5ec7a2d7d2979e33b928191def79dc05c8074f4c8bb76cd0a20d9b514be0c"
+  "1.0.0":
+    url: "https://github.com/choll/xtr/archive/refs/tags/1.0.0.tar.gz"
+    sha256: "c828883f3045762442fb8a69ed2633e523493a307a0cb2717ac0df93606db7fd"

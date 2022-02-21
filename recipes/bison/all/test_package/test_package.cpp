@@ -2,12 +2,12 @@
 
 extern "C"
 {
-    int yyerror(char *);
+    int yyerror(const char *);
 }
 
 int main()
 {
-    char error[] = "Bincrafters";
+    char error[] = "conan-center-index";
     std::cout << yyerror(error) << std::endl;
     return 0;
 }

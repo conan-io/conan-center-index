@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 add_executable(test_package test_package.c)
 if(PROJ_VERSION_GE_7)

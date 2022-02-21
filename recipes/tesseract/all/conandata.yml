@@ -1,12 +1,22 @@
 sources:
+  "5.0.0":
+    url: "https://github.com/tesseract-ocr/tesseract/archive/5.0.0.tar.gz"
+    sha256: "72467b7876dc0c39ef7fbcb0f793f73aee1c78d9fabab3ab19cbac1eb42e9fed"
   "4.1.1":
     url: "https://github.com/tesseract-ocr/tesseract/archive/4.1.1.tar.gz"
     sha256: "2a66ff0d8595bff8f04032165e6c936389b1e5727c3ce5a27b3e059d218db1cb"
 patches:
+  "5.0.0":
+     - patch_file: "patches/0002-Link-with-targets-5.0.0.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0004-control-optimizations-5.0.0.patch"
+       base_path: "source_subfolder"
   "4.1.1":
      - patch_file: "patches/0001-install-bundle.patch"
        base_path: "source_subfolder"
      - patch_file: "patches/0002-Link-with-targets.patch"
        base_path: "source_subfolder"
      - patch_file: "patches/0003-Dont-change-locale.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0004-control-optimizations-4.1.1.patch"
        base_path: "source_subfolder"

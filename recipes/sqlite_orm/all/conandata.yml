@@ -1,4 +1,11 @@
 sources:
+  "1.7":
+    url: "https://github.com/fnc12/sqlite_orm/archive/refs/tags/v1.7.tar.gz"
+    sha256: "5123ce12b27e4418b030d59223de0dff2c4ba588844e3dc7e98f6407e3e71dc2"
   "1.6":
     url: "https://github.com/fnc12/sqlite_orm/archive/1.6.tar.gz"
     sha256: "2f1ac922aa564d2a8385515a7d39c7a354df192b370a4713862e41b92bd4e388"
+patches:
+  "1.7":
+    - patch_file: "patches/0001-declare-is-upsert-clause.patch"
+      base_path: "source_subfolder"

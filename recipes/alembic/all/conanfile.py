@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
-import shutil
+
+required_conan_version = ">=1.43.0"
 
 
 class AlembicConan(ConanFile):
@@ -10,20 +11,20 @@ class AlembicConan(ConanFile):
     homepage = "https://github.com/alembic/alembic"
     description = "Open framework for storing and sharing scene data."
     topics = ("3d", "scene", "geometry", "graphics")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_hdf5": [True, False]
+        "with_hdf5": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_hdf5": False
+        "with_hdf5": False,
     }
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -33,6 +34,11 @@ class AlembicConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,6 +97,10 @@ class AlembicConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Alembic")
+        self.cpp_info.set_property("cmake_target_name", "Alembic::Alembic")
+        self.cpp_info.libs = ["Alembic"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Alembic"
         self.cpp_info.names["cmake_find_package_multi"] = "Alembic"
-        self.cpp_info.libs = ["Alembic"]

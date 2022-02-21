@@ -18,12 +18,19 @@ This section gathers the most common questions from the community related to pac
       * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
-  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
-  * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
+  * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
-  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
+  * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
+  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
+  * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
+  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
+  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -125,16 +132,7 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
 
-## Why _installer_ packages remove some settings from their package ID?
-
-There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
-`conan-center-index` itself as `build_require` and they are consumed as utilities or tools by other users. In these contexts, the expectations are to consume an optimized binary (`build_type=Release`) and it is not important the compiler used to build it.
-
-We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
-
-Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
-
-## Can I remove an option from recipe
+## Can I remove an option from a recipe?
 
 It's preferable to leave all options (ie. not removing them) because it may break other packages which require those deleted options.
 Prefer the deprecation path with a mapping from old options to new ones:
@@ -150,7 +148,7 @@ default_options = {"foobar": "deprecated"}
 
 def configure(self):
     if self.options.foobar != "deprecated":
-        self.out.warn("foobar option is deprecated, do not use anymore.")
+        self.output.warn("foobar option is deprecated, do not use anymore.")
 
 def package_id(self):
     del self.info.options.foobar
@@ -181,7 +179,7 @@ def configure(self):
     tools.check_min_cppstd(self, 14) 👈 Wrong!
 ```
 
-This fails to cover the waste number of use cases for the following reasons:
+This fails to cover the vast number of use cases for the following reasons:
 
 1. `cppstd` is not configured in the `--detect`ed profiles generated by Conan, the majority of users simply do not have this setting.
 2. A shocking number of projects override this setting within their respective build scripts, this setting does not get applied in those cases.
@@ -200,3 +198,173 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+
+## What is the policy for removing older versions of a package?
+
+Keeping many older versions can be a problem, as over time they may become incompatible with newer versions of the package's Python code and/or dependencies. They also become downloaded less often than newer versions, and yet continue to consume CI resources during Pull Requests.
+
+Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective recipes and binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
+
+There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
+
+## Can I install packages from the system package manager?
+
+It depends. You can not mix both regular projects with system packages, but you can provide package wrappers for system packages. However, Conan can not track system packages, like their version and options, which creates a fragile situation where affects libraries and binaries built in your package but can not be totally reproduced.
+Also, system package managers require administrator permission to install packages, which is not always possible and may break limited users. Moreover, more than one Conan package may require the same system package and there is no way to track their mutual usage.
+
+The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requirement` nor `SystemPackageTool` in recipes, to avoid mixing both regular projects with
+system packages at same recipe.
+
+There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#system-packages) for more.
+
+## Why ConanCenter does **not** build and execute tests in recipes
+
+<!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
+
+There are different motivations
+- time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
+- ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+## What is the policy for supported python versions?
+
+`Python 2.7` and earlier is not supported by the ConanCenter, as it's already [EOL](https://www.python.org/doc/sunset-python-2/).
+
+`Python 3.5` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://www.python.org/dev/peps/pep-0478/).
+
+Versions `Python 3.6+` onwards are currently supported by the infrastructure and the recipes.
+
+Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.5+` ATM.
+
+Windows agents currently use `Python 3.6.7+`. macOS agents use version `Python 3.7.3+`.
+
+The version run by our agents and docker images is a subject to change, as security updates to the Python are released, or they enter EOL.
+
+Additional concerns about supported versions within conan ecosystem (not just ConanCenter, but client itself and other tools) are documented in [tribe](https://github.com/conan-io/tribe/pull/3).
+
+For ConanCenter, besides security, there are various concerns about critical features provided by the Python interpreter, include its syntax and the standard library, e.g.:
+
+- LZMA compression support
+- Unicode awareness
+- long-path awareness
+
+Right now, only the [CPython](https://github.com/python/cpython) flavor of the interpreter is supported (e.g. we never tested recipes work with IronPython, JPython, Cython, etc.).
+
+In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 architecture) - 32-bit builds (x86) are not supported and not installed on the agents.
+
+There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
+ as we don't test all the possible combinations (and probably will never be). Patches are welcomed if problems are found.
+
+## How to package libraries that depend on proprietary closed-source libraries?
+
+There are several popular software libraries provided by Intel:
+
+* [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html)
+* [Intel Integrated Performance Primitives (IPP)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/ipp.html)
+* [Intel Deep Neural Networking Library (DNN)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onednn.html)
+
+these Intel libraries are widely used by various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
+
+Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
+
+* they are closed-source and commercial products, ConanCenter cannot redistribute their binaries due to the license restrictions
+* registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
+* they use graphical installers which are hard to automate within conan recipe
+
+instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the following references:
+
+* `intel-mkl/<version>`, e.g. `intel-mkl/2021`
+* `intel-ipp/<version>`, e.g. `intel-ipp/2021`
+* `intel-dnn/<version>`, e.g. `intel-dnn/2021`
+
+**NOTE**: These references are not available in ConanCenter and will likely never be! it's the consumer's responsibility to provide the recipes for these libraries.
+
+
+Since these references will be never available in ConanCenter, they will be deactivated in the consuming recipes by default:
+
+```python
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_intel_mkl": [True, False]}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_intel_mkl": False}
+
+    def requirements(self):
+        if self.options.with_intel_mkl:
+            self.requires("intel-mkl/2021")
+```
+
+If consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
+
+Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
+
+For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
+
+```
+[requires]
+intel-mkl/2021@mycompany/stable
+```
+
+## How to _protect_ my project from breaking changes in recipes?
+
+This repository and the CI building recipes is continuosly pushing to new Conan versions,
+sometimes adopting new features as soon as they are released 
+([Conan client changelog](https://docs.conan.io/en/latest/changelog.html)).
+
+You should expect that latest revision of recipes can introduce breaking changes and new
+features that will be broken unless you also upgrade Conan client (and sometimes you will
+need to modify your project if the recipe changes the binaries, flags,... it provides).
+
+To isolate from this changes there are different strategies you can follow:
+ * **Cache recipes in your own Artifactory**: your project should use only this remote and
+   new recipe revisions are only pushed to your Artifactory after they have been validated
+   in your project.
+ * **Pin the version of every reference you consume in your project** using recipe revisions
+   and lockfiles. 
+
+Keep reading in the [consuming recipes section](consuming_recipes.md).
+
+## Why are version ranges not allowed?
+
+Version ranges are a useful Conan feature, find the documentation [here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However, in the context of ConanCenter they pose a few key challenges, most notably:
+
+- Non-Determinstic `package-id`
+
+With version ranges the newest compatible package may yield a different package-id than the one built and published by ConanCenter resulting in frustrating error "no binaries found". For more context see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
+
+- Build Reproducibility
+
+If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more. 
+
+## How to consume a graph of shared libraries?
+
+When the CI builds packages with `shared=True`, it applies the option only to the package being created, but not to
+the requirements. As the default value for the `shared` option is usually `False`, you can expect that the dynamic
+library that has just being generated has linked all its requirements as static libraries.
+
+It is important to remark the default [package id mode](https://docs.conan.io/en/latest/creating_packages/define_abi_compatibility.html#versioning-schema)
+used by Conan (which is the same default used by ConanCenter): `semver_direct_mode`. With this default only the major
+version of the requirements is encoded in the package ID. 
+
+The two previous behaviors together can lead to unexpected results for a user that want to consume a graph of
+dependencies as shared libraries from ConanCenter. They might think that using `*:shared=True` in their profile is
+enough, and indeed Conan will retrieve from ConanCenter all the dynamic libraries for all the graph of dependencies, but
+**all of them will contain the logic of their respective requirements embedded in the dynamic library**, and this
+logic is embedded at the time of building, so it might not match the version of the requirements that was resolved
+by Conan, and for sure, the other dynamic libraries won't be used, only the ones linked directly by the consumer
+project. See a more detailed [example here](https://github.com/conan-io/conan/issues/9712).
+
+In order to consume all those libraries as shared ones, building from sources is needed. This can be
+easily achievable using `*:shared=True` in the _host_ profile and `--build` in the install command. With these inputs,
+Conan will build from sources all the packages and use the shared libraries when linking.
+
+> ℹ️ Note: If you are hosting your own recipes, the proper solution for recipes would be to use something like
+> [`shared_library_package_id`](https://docs.conan.io/en/latest/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
+> that will encode this information in the package ID and ensure that any change in the static libraries that are
+> embedded into a shared one is taken into account when computing the package ID.
+> 
+> In this repository we are not using it, because it will lead to many missing packages, making it impossible
+> for the CI to actually build consumers in PRs.

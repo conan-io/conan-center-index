@@ -70,7 +70,7 @@ class DjinniSuppotLib(ConanFile):
 
     def build_requirements(self):
         if not self.options.system_java and self._jni_support:
-            self.build_requires("zulu-openjdk/11.0.8@")
+            self.build_requires("zulu-openjdk/11.0.12@")
 
     def config_options(self):
         if self.settings.os == "Windows":

@@ -3,14 +3,14 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OnnxConan(ConanFile):
     name = "onnx"
     description = "Open standard for machine learning interoperability."
     license = "Apache-2.0"
-    topics = ("conan", "onnx", "machine-learning", "deep-learning", "neural-network")
+    topics = ("machine-learning", "deep-learning", "neural-network")
     homepage = "https://github.com/onnx/onnx"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -24,7 +24,6 @@ class OnnxConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -36,6 +35,15 @@ class OnnxConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,13 +51,15 @@ class OnnxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
     def requirements(self):
         self.requires("protobuf/3.17.1")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
@@ -58,12 +68,6 @@ class OnnxConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # No warnings as errors for Visual Studio also
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/WX", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -87,7 +91,8 @@ class OnnxConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -156,6 +161,8 @@ class OnnxConan(ConanFile):
         }
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ONNX")
+
         self.cpp_info.names["cmake_find_package"] = "ONNX"
         self.cpp_info.names["cmake_find_package_multi"] = "ONNX"
 
@@ -165,13 +172,16 @@ class OnnxConan(ConanFile):
                 libs = comp_values.get("libs", [])
                 defines = comp_values.get("defines", [])
                 requires = comp_values.get("requires", [])
+                self.cpp_info.components[comp_name].set_property("cmake_target_name", target)
+                self.cpp_info.components[comp_name].libs = libs
+                self.cpp_info.components[comp_name].defines = defines
+                self.cpp_info.components[comp_name].requires = requires
+
+                # TODO: to remove in conan v2 once cmake_find_package_* generators removed
                 self.cpp_info.components[comp_name].names["cmake_find_package"] = target
                 self.cpp_info.components[comp_name].names["cmake_find_package_multi"] = target
                 self.cpp_info.components[comp_name].builddirs.append(self._module_subfolder)
                 self.cpp_info.components[comp_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[comp_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-                self.cpp_info.components[comp_name].libs = libs
-                self.cpp_info.components[comp_name].defines = defines
-                self.cpp_info.components[comp_name].requires = requires
 
         _register_components(self._onnx_components)

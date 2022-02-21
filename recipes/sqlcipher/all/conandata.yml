@@ -11,6 +11,9 @@ sources:
   4.4.3:
     sha256: e52d0595dc1ed30eed68523fe286d38657bd905957447a3725706ff54e21edf8
     url: https://github.com/sqlcipher/sqlcipher/archive/v4.4.3.zip
+  4.5.0:
+    sha256: ce754d1fc1f55c7b39bdab28ee0e4a5c1e286254e2fbbab43e2c8135e5e6ab49
+    url: https://github.com/sqlcipher/sqlcipher/archive/v4.5.0.zip
 patches:
   4.3.0:
     - patch_file: patches/Makefile.in-v4.3.0.patch
@@ -39,4 +42,11 @@ patches:
     - patch_file: patches/Makefile.msc-v4.4.3.patch
       base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.4.3.patch
+      base_path: source_subfolder
+  4.5.0:
+    - patch_file: patches/Makefile.in-v4.5.0.patch
+      base_path: source_subfolder
+    - patch_file: patches/Makefile.msc-v4.5.0.patch
+      base_path: source_subfolder
+    - patch_file: patches/fix_configure-v4.5.0.patch
       base_path: source_subfolder

@@ -17,3 +17,6 @@ sources:
   "2.40.3":
     url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.40/at-spi2-core-2.40.3.tar.xz"
     sha256: "e49837c2ad30d71e1f29ca8e0968a54b95030272f7ff40b89b48968653f37a5c"
+  "2.42.0":
+    url: "https://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.42/at-spi2-core-2.42.0.tar.xz"
+    sha256: "4b5da10e94fa3c6195f95222438f63a0234b99ef9df772c7640e82baeaa6e386"

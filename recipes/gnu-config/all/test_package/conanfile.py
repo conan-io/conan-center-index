@@ -2,12 +2,16 @@ from conans import ConanFile, tools
 from conans.errors import ConanException
 
 
-class TestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20190524")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def test(self):
         triplet = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))

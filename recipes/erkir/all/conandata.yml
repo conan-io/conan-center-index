@@ -1,0 +1,8 @@
+sources:
+  "1.0.0":
+    url: https://github.com/vahancho/erkir/archive/refs/tags/1.0.0.tar.gz
+    sha256: 0bc5122fe2fef0f9036de275483af7f8adb947f6e8dd63fc18ac085ef31e9421
+patches:
+  "1.0.0":
+    - patch_file: patches/remove-testing-1.0.0.patch
+      base_path: source_subfolder

@@ -1,0 +1,5 @@
+sources:
+  "2.1.32":
+    url: https://download.tinkerforge.com/bindings/c/tinkerforge_c_bindings_2_1_32.zip
+    sha256: "228f8eb3e64170312ceaca7354ba5f3178e89389782b304657ccdd2a2fd2b6b5"
+

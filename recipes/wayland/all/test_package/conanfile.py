@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
                 self.run('%s --version' % pkg_config.variables["wayland_scanner"], run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
 

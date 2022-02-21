@@ -1,0 +1,4 @@
+sources:
+  "2.4.109":
+    url: "https://dri.freedesktop.org/libdrm/libdrm-2.4.109.tar.xz"
+    sha256: "629352e08c1fe84862ca046598d8a08ce14d26ab25ee1f4704f993d074cb7f26"

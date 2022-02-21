@@ -242,7 +242,7 @@ class Hdf5Conan(ConanFile):
 
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])
-        self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join(self.package_folder, "include", "hdf5"))
+        self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join("include", "hdf5"))
         if self.settings.os == "Linux":
             self.cpp_info.components["hdf5_c"].system_libs.extend(["dl", "m"])
             if self.options.get_safe("threadsafe"):

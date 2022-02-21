@@ -1,20 +1,20 @@
 from conans import ConanFile, CMake, tools
-import os
+
+required_conan_version = ">=1.43.0"
 
 
 class OpenclIcdLoaderConan(ConanFile):
     name = "opencl-icd-loader"
     description = "OpenCL ICD Loader."
     license = "Apache-2.0"
-    topics = ("conan", "opencl-icd-loader", "opencl", "khronos", "parallel", "icd-loader")
+    topics = ("opencl-icd-loader", "opencl", "khronos", "parallel", "icd-loader")
     homepage = "https://github.com/KhronosGroup/OpenCL-ICD-Loader"
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "disable_openclon12": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "disable_openclon12": False}
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -22,9 +22,16 @@ class OpenclIcdLoaderConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.disable_openclon12
 
     def configure(self):
         if self.options.shared:
@@ -36,8 +43,7 @@ class OpenclIcdLoaderConan(ConanFile):
         self.requires("opencl-headers/{}".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("OpenCL-ICD-Loader-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -48,6 +54,8 @@ class OpenclIcdLoaderConan(ConanFile):
             self._cmake.definitions["USE_DYNAMIC_VCXX_RUNTIME"] = str(self.settings.compiler.runtime).startswith("MD")
         self._cmake.definitions["OPENCL_ICD_LOADER_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["OPENCL_ICD_LOADER_BUILD_TESTING"] = False
+        if self.settings.os == "Windows":
+            self._cmake.definitions["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = self.options.disable_openclon12
         self._cmake.configure()
         return self._cmake
 
@@ -66,6 +74,7 @@ class OpenclIcdLoaderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libs = ["OpenCL"]
         if not self.options.shared:
             if self.settings.os == "Linux":

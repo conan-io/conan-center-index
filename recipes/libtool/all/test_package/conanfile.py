@@ -8,6 +8,7 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    test_type = "build_requires", "requires"
 
     @property
     def _settings_build(self):

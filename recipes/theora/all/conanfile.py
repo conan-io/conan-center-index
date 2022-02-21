@@ -1,6 +1,7 @@
 import os
 import shutil
 import stat
+import re
 from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 
 required_conan_version = ">=1.33.0"
@@ -76,15 +77,20 @@ class TheoraConan(ConanFile):
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
+        properties = {
+            # Enable LTO when CFLAGS contains -GL
+            "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+        }
+
         with tools.chdir(vcproj_dir):
             msbuild = MSBuild(self)
             try:
                 # upgrade .vcproj
-                msbuild.build(vcproj, platforms={"x86": "Win32", "x86_64": "x64"})
+                msbuild.build(vcproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
             except:
                 # build .vcxproj
                 vcxproj = "{}_{}.vcxproj".format(project, config)
-                msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"})
+                msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -131,19 +137,25 @@ class TheoraConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "theora_full_package" # to avoid conflicts with _theora component
+
+        self.cpp_info.components["_theora"].names["pkg_config"] = "theora"
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["libtheora" if self.options.shared else "libtheora_static"]
+            self.cpp_info.components["_theora"].libs = ["libtheora" if self.options.shared else "libtheora_static"]
         else:
-            self.cpp_info.names["pkg_config"] = "theora_full_package" # to avoid conflicts with _theora component
-
-            self.cpp_info.components["_theora"].names["pkg_config"] = "theora"
             self.cpp_info.components["_theora"].libs = ["theora"]
-            self.cpp_info.components["_theora"].requires = ["ogg::ogg"]
+        self.cpp_info.components["_theora"].requires = ["ogg::ogg"]
 
-            self.cpp_info.components["theoradec"].names["pkg_config"] = "theoradec"
+        self.cpp_info.components["theoradec"].names["pkg_config"] = "theoradec"
+        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["theoradec"].requires.append("_theora")
+        else:
             self.cpp_info.components["theoradec"].libs = ["theoradec"]
-            self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
 
-            self.cpp_info.components["theoraenc"].names["pkg_config"] = "theoraenc"
+        self.cpp_info.components["theoraenc"].names["pkg_config"] = "theoraenc"
+        self.cpp_info.components["theoraenc"].requires = ["theoradec", "ogg::ogg"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["theoradec"].requires.append("_theora")
+        else:
             self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
-            self.cpp_info.components["theoraenc"].requires = ["theoradec", "ogg::ogg"]

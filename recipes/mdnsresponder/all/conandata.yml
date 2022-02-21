@@ -11,6 +11,10 @@ patches:
       patch_file: "patches/878.200.35/DLLStub.c.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/878.200.35/mDNSResponder.sln.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/878.200.35/mDNSWin32.c.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/878.200.35/Service.c.patch"
   "878.200.35-opt":
     - base_path: "source_subfolder"
       patch_file: "patches/878.200.35/opt/permit-over-long-service-types.patch"

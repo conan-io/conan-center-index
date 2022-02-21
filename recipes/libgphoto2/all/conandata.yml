@@ -1,0 +1,8 @@
+sources:
+  "2.5.27":
+    url: "https://github.com/gphoto/libgphoto2/releases/download/v2.5.27/libgphoto2-2.5.27.tar.xz"
+    sha256: "a7253bd18c6ef65352150ac36a668f883a5ad2634eb6455b3ca9aa6ac98d0073"
+patches:
+  "2.5.27":
+    - patch_file: patches/macos_snprintf_patch.diff
+      base_path: source_subfolder

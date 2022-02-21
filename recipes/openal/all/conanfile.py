@@ -3,23 +3,28 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpenALConan(ConanFile):
     name = "openal"
     description = "OpenAL Soft is a software implementation of the OpenAL 3D audio API."
-    topics = ("conan", "openal", "audio", "api")
+    topics = ("openal", "audio", "api")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.openal.org"
-    license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    homepage = "https://openal-soft.org/"
+    license = "LGPL-2.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -29,6 +34,11 @@ class OpenALConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,7 +59,7 @@ class OpenALConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
 
     @property
     def _supports_cxx14(self):
@@ -144,25 +154,23 @@ class OpenALConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "OpenAL")
+        self.cpp_info.set_property("cmake_target_name", "OpenAL::OpenAL")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "openal")
+
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
-        self.cpp_info.names["pkg_config"] = "openal"
-
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])

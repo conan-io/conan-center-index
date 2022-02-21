@@ -11,7 +11,7 @@ class AutomakeConan(ConanFile):
     description = "Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards."
     topics = ("conan", "automake", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
 
@@ -39,12 +39,15 @@ class AutomakeConan(ConanFile):
         # automake requires perl-Thread-Queue package
 
     def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires("autoconf/2.71")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.arch
         del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -77,7 +80,7 @@ class AutomakeConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
                                                "          $map_traced_defs{$arg1} = $file;",
                                                "          $file = `cygpath -u $file`;\n"
-                                               "          $file =~ s/^\s+|\s+$//g;\n"
+                                               "          $file =~ s/^\\s+|\\s+$//g;\n"
                                                "          $map_traced_defs{$arg1} = $file;")
 
     def build(self):

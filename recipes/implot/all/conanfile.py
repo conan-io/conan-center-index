@@ -8,13 +8,13 @@ class ImplotConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/epezent/implot"
     description = "Advanced 2D Plotting for Dear ImGui"
-    topics = ("conan", "imgui", "plot", "graphics")
+    topics = ("imgui", "plot", "graphics", )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    requires = "imgui/1.83"
+    requires = "imgui/1.85"
 
     options = {
         "shared": [True, False],

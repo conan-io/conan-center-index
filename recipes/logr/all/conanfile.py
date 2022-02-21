@@ -2,19 +2,23 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+
 class LogrConan(ConanFile):
     name = "logr"
     license = "BSD-3-Clause"
     homepage = "https://github.com/ngrodzitski/logr"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Logger frontend substitution for spdlog, glog, etc for server/desktop applications"
+    description = (
+        "Logger frontend substitution for spdlog, glog, etc "
+        "for server/desktop applications"
+    )
     topics = ("logger", "development", "util", "utils")
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    options = { "backend": ["spdlog", "glog", "log4cplus", None] }
-    default_options = { "backend": "spdlog"}
+    options = {"backend": ["spdlog", "glog", "log4cplus", "boostlog", None]}
+    default_options = {"backend": "spdlog"}
 
     _cmake = None
 
@@ -27,14 +31,16 @@ class LogrConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("fmt/7.1.2")
+        self.requires("fmt/8.0.1")
 
         if self.options.backend == "spdlog":
-            self.requires("spdlog/1.8.2")
+            self.requires("spdlog/1.9.2")
         elif self.options.backend == "glog":
-            self.requires("glog/0.4.0")
+            self.requires("glog/0.5.0")
         elif self.options.backend == "log4cplus":
             self.requires("log4cplus/2.0.5")
+        elif self.options.backend == "boostlog":
+            self.requires("boost/1.77.0")
 
     def configure(self):
         minimal_cpp_standard = "17"
@@ -44,29 +50,47 @@ class LogrConan(ConanFile):
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
-            "Visual Studio": "16"
+            "Visual Studio": "16",
         }
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+                (
+                    "%s recipe lacks information about the %s compiler "
+                    "standard version support"
+                )
+                % (self.name, compiler)
+            )
             self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+                "%s requires a compiler that supports at least C++%s"
+                % (self.name, minimal_cpp_standard)
+            )
             return
 
         version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++%s"
+                % (self.name, minimal_cpp_standard)
+            )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["LOGR_WITH_SPDLOG_BACKEND"] = self.options.backend == "spdlog"
-        self._cmake.definitions["LOGR_WITH_GLOG_BACKEND"] = self.options.backend == "glog"
-        self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = self.options.backend == "log4cplus"
+        self._cmake.definitions["LOGR_WITH_SPDLOG_BACKEND"] = (
+            self.options.backend == "spdlog"
+        )
+        self._cmake.definitions["LOGR_WITH_GLOG_BACKEND"] = (
+            self.options.backend == "glog"
+        )
+        self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = (
+            self.options.backend == "log4cplus"
+        )
+        self._cmake.definitions["LOGR_WITH_BOOSTLOG_BACKEND"] = (
+            self.options.backend == "boostlog"
+        )
 
         self._cmake.definitions["LOGR_INSTALL"] = True
         self._cmake.definitions["LOGR_CONAN_PACKAGING"] = True
@@ -95,3 +119,31 @@ class LogrConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "logr"
         self.cpp_info.names["cmake_find_package_multi"] = "logr"
+
+        self.cpp_info.components["logr_base"].includedirs = ["include"]
+        self.cpp_info.components["logr_base"].requires = ["fmt::fmt"]
+
+        if self.options.backend == "spdlog":
+            self.cpp_info.components["logr_spdlog"].includedirs = []
+            self.cpp_info.components["logr_spdlog"].requires = [
+                "logr_base",
+                "spdlog::spdlog",
+            ]
+        elif self.options.backend == "glog":
+            self.cpp_info.components["logr_glog"].includedirs = []
+            self.cpp_info.components["logr_glog"].requires = [
+                "logr_base",
+                "glog::glog",
+            ]
+        elif self.options.backend == "log4cplus":
+            self.cpp_info.components["logr_log4cplus"].includedirs = []
+            self.cpp_info.components["logr_log4cplus"].requires = [
+                "logr_base",
+                "log4cplus::log4cplus",
+            ]
+        elif self.options.backend == "boostlog":
+            self.cpp_info.components["logr_boostlog"].includedirs = []
+            self.cpp_info.components["logr_boostlog"].requires = [
+                "logr_base",
+                "boost::log",
+            ]

@@ -55,7 +55,7 @@ class MpdecimalConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self.settings.os != "Macos" and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
         if self.options.cxx:
             if self.options.shared and self.settings.os == "Windows":
@@ -98,7 +98,7 @@ class MpdecimalConan(ConanFile):
                 with tools.chdir(build_dir):
                     self.run("""nmake /nologo /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_CXXFLAGS="{cxxflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                         target=target,
-                        machine={"x86": "pro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
+                        machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
                         debug="1" if self.settings.build_type == "Debug" else "0",
                         dll="1" if self.options.shared else "0",
                         cflags=" ".join(autotools.flags + extra_flags),
@@ -123,10 +123,14 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        conf_vars = self._autotools.vars
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            conf_vars["LDFLAGS"] += " -arch arm64"
+            conf_vars["LDXXFLAGS"] = "-arch arm64"
         conf_args = [
             "--enable-cxx" if self.options.cxx else "--disable-cxx"
         ]
-        self._autotools.configure(args=conf_args)
+        self._autotools.configure(args=conf_args, vars=conf_vars)
         return self._autotools
 
     @property

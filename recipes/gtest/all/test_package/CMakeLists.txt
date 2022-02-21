@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.2)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(GTest REQUIRED)
 
@@ -13,7 +13,7 @@ else()
 endif()
 
 if(WITH_MAIN)
-    target_link_libraries(${PROJECT_NAME} GTest::gtest GTest::gtest_main )
+    target_link_libraries(${PROJECT_NAME} GTest::gtest GTest::gtest_main)
     if(WITH_GMOCK)
         target_link_libraries(${PROJECT_NAME} GTest::gmock GTest::gmock_main)
     endif()

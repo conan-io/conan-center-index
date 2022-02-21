@@ -8,3 +8,6 @@ sources:
   0.0.15:
     url: https://github.com/bernedom/bertrand/archive/0.0.15.tar.gz
     sha256: 5ad481c2fc3d3166d8660ab3013b4513c5b425c9f13c8925b3cfb40f988d8e9b
+  0.0.17:
+    url: https://github.com/bernedom/bertrand/archive/0.0.17.tar.gz
+    sha256: 72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012

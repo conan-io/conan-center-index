@@ -1,7 +1,8 @@
-import os
 from conans import ConanFile, tools
+import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
+
 
 class ByteLiteConan(ConanFile):
     name = "byte-lite"
@@ -9,8 +10,9 @@ class ByteLiteConan(ConanFile):
     homepage = "https://github.com/martinmoene/byte-lite"
     description = ("byte lite - A single-file header-only C++17-like byte type for \
                     C++98, C++11 and later")
-    topics = ("conan", "cpp11", "cpp14", "cpp17", "byte", "byte-implementations")
+    topics = ("cpp11", "cpp14", "cpp17", "byte", "byte-implementations")
     license = "BSL-1.0"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -21,18 +23,22 @@ class ByteLiteConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "byte-lite")
+        self.cpp_info.set_property("cmake_target_name", "nonstd::byte-lite")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "byte-lite"
         self.cpp_info.filenames["cmake_find_package_multi"] = "byte-lite"
         self.cpp_info.names["cmake_find_package"] = "nonstd"
         self.cpp_info.names["cmake_find_package_multi"] = "nonstd"
         self.cpp_info.components["bytelite"].names["cmake_find_package"] = "byte-lite"
         self.cpp_info.components["bytelite"].names["cmake_find_package_multi"] = "byte-lite"
+        self.cpp_info.components["bytelite"].set_property("cmake_target_name", "nonstd::byte-lite")

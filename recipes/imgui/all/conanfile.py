@@ -9,7 +9,7 @@ class IMGUIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ocornut/imgui"
     description = "Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies"
-    topics = ("conan", "imgui", "gui", "graphical")
+    topics = ("dear", "imgui", "gui", "graphical", "bloat-free", )
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"

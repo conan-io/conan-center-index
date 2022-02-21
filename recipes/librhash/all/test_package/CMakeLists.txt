@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.3)
-project(test_package CXX)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-set(CMAKE_CXX_STANDARD 11)
+conan_basic_setup(TARGETS)
 
-add_executable(${PROJECT_NAME} example.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+find_package(LibRHash CONFIG REQUIRED)
+
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE LibRHash::LibRHash)

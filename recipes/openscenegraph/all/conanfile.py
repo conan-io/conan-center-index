@@ -1,13 +1,14 @@
 from conans import CMake, ConanFile, tools
-import glob, os
+from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.29.1"
 
 
-class ConanFile(ConanFile):
+class OpenSceneGraphConanFile(ConanFile):
     name = "openscenegraph"
     description = "OpenSceneGraph is an open source high performance 3D graphics toolkit"
-    topics = "conan", "openscenegraph", "graphics"
+    topics = ("openscenegraph", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openscenegraph.org"
     license = "LGPL-2.1-only", "WxWindows-exception-3.1"
@@ -103,8 +104,11 @@ class ConanFile(ConanFile):
             del self.options.with_png
             del self.options.with_dcmtk
 
+    def validate(self):
         if self.options.get_safe("with_asio", False):
             raise ConanInvalidConfiguration("ASIO support in OSG is broken, see https://github.com/openscenegraph/OpenSceneGraph/issues/921")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("openscenegraph recipe cannot be cross-built yet. Contributions are welcome.")
 
     def requirements(self):
         if self.options.enable_windowing_system and self.settings.os == "Linux":
@@ -112,7 +116,7 @@ class ConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
@@ -144,8 +148,8 @@ class ConanFile(ConanFile):
             self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("OpenSceneGraph-OpenSceneGraph-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):

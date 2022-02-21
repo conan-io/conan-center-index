@@ -27,18 +27,24 @@ class WaylandProtocolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Wayland-protocols can be built on Linux only")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.60.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "dep_scanner = dependency('wayland-scanner', native: true)",
-                              "#dep_scanner = dependency('wayland-scanner', native: true)")
+        if tools.Version(self.version) <= 1.23:
+            # fixed upstream in https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/113
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                  "dep_scanner = dependency('wayland-scanner', native: true)",
+                                  "#dep_scanner = dependency('wayland-scanner', native: true)")
 
     def _configure_meson(self):
         if not self._meson:
@@ -73,3 +79,7 @@ class WaylandProtocolsConan(ConanFile):
         self.cpp_info.set_property(
             "pkg_config_custom_content",
             "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+        
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
+        self.cpp_info.bindirs = []

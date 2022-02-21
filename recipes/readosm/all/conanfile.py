@@ -1,7 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class ReadosmConan(ConanFile):
@@ -25,12 +25,23 @@ class ReadosmConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,15 +54,11 @@ class ReadosmConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.4.3")
         self.requires("zlib/1.2.11")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
@@ -102,14 +109,14 @@ class ReadosmConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_msvc()
         else:
             self._build_autotools()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.copy("readosm.h", dst="include", src=os.path.join(self._source_subfolder, "headers"))
             self.copy("*.lib", dst="lib", src=self._source_subfolder)
             self.copy("*.dll", dst="bin", src=self._source_subfolder)
@@ -121,6 +128,6 @@ class ReadosmConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "readosm"
-        suffix = "_i" if self.settings.compiler == "Visual Studio" and self.options.shared else ""
+        self.cpp_info.set_property("pkg_config_name", "readosm")
+        suffix = "_i" if self._is_msvc and self.options.shared else ""
         self.cpp_info.libs = ["readosm{}".format(suffix)]

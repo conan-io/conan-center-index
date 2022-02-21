@@ -1,0 +1,416 @@
+--- PCbuild/pcbuild.sln
++++ PCbuild/pcbuild.sln
+@@ -58,2 +58,0 @@
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3", "sqlite3.vcxproj", "{A1A295E5-463C-437F-81CA-1F32367685DA}"
+-EndProject
+--- PCbuild/python.vcxproj
++++ PCbuild/python.vcxproj
+@@ -85,1 +85,1 @@
+-  <Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
++  <!--<Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
+@@ -93,1 +93,1 @@
+-  </Target>
++  </Target>-->
+--- PCbuild/_freeze_importlib.vcxproj
++++ PCbuild/_freeze_importlib.vcxproj
+@@ -110,1 +110,1 @@
+-  <Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
++  <!--<Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
+@@ -112,1 +112,1 @@
+-  </Target>
++  </Target>-->
+--- PCbuild/_bz2.vcxproj
++++ PCbuild/_bz2.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>bz2</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_bzip2.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -69,17 +69,17 @@
+   </ItemDefinitionGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_bz2module.c" />
+-    <ClCompile Include="$(bz2Dir)\blocksort.c" />
++   <!--<ClCompile Include="$(bz2Dir)\blocksort.c" />
+     <ClCompile Include="$(bz2Dir)\bzlib.c" />
+     <ClCompile Include="$(bz2Dir)\compress.c" />
+     <ClCompile Include="$(bz2Dir)\crctable.c" />
+     <ClCompile Include="$(bz2Dir)\decompress.c" />
+     <ClCompile Include="$(bz2Dir)\huffman.c" />
+-    <ClCompile Include="$(bz2Dir)\randtable.c" />
++    <ClCompile Include="$(bz2Dir)\randtable.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+-    <ClInclude Include="$(bz2Dir)\bzlib.h" />
+-    <ClInclude Include="$(bz2Dir)\bzlib_private.h" />
++    <!--<ClInclude Include="$(bz2Dir)\bzlib.h" />
++    <ClInclude Include="$(bz2Dir)\bzlib_private.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/_decimal.vcxproj
++++ PCbuild/_decimal.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_decimal</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_mpdecimal.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -64,11 +64,11 @@
+       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MASM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <PreprocessorDefinitions Condition="'$(Platform)' == 'Win32'">CONFIG_32;PPRO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <PreprocessorDefinitions Condition="'$(Platform)' == 'x64'">CONFIG_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <AdditionalIncludeDirectories>..\Modules\_decimal;..\Modules\_decimal\libmpdec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>..\Modules\_decimal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+-    <ClInclude Include="..\Modules\_decimal\libmpdec\basearith.h" />
++    <!--<ClInclude Include="..\Modules\_decimal\libmpdec\basearith.h" />
+     <ClInclude Include="..\Modules\_decimal\libmpdec\bits.h" />
+     <ClInclude Include="..\Modules\_decimal\libmpdec\constants.h" />
+     <ClInclude Include="..\Modules\_decimal\libmpdec\convolute.h" />
+@@ -84,10 +84,10 @@
+     <ClInclude Include="..\Modules\_decimal\libmpdec\typearith.h" />
+     <ClInclude Include="..\Modules\_decimal\libmpdec\umodarith.h" />
+     <ClInclude Include="..\Modules\_decimal\libmpdec\vccompat.h" />
+-    <ClInclude Include="..\Modules\_decimal\libmpdec\vcstdint.h" />
++    <ClInclude Include="..\Modules\_decimal\libmpdec\vcstdint.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_decimal\_decimal.c" />
+-    <ClCompile Include="..\Modules\_decimal\libmpdec\basearith.c" />
++    <!--<ClCompile Include="..\Modules\_decimal\libmpdec\basearith.c" />
+     <ClCompile Include="..\Modules\_decimal\libmpdec\constants.c" />
+     <ClCompile Include="..\Modules\_decimal\libmpdec\context.c" />
+@@ -102,13 +102,13 @@
+     <ClCompile Include="..\Modules\_decimal\libmpdec\numbertheory.c" />
+     <ClCompile Include="..\Modules\_decimal\libmpdec\sixstep.c" />
+-    <ClCompile Include="..\Modules\_decimal\libmpdec\transpose.c" />
++    <ClCompile Include="..\Modules\_decimal\libmpdec\transpose.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+-    <CustomBuild Include="..\Modules\_decimal\libmpdec\vcdiv64.asm">
++    <!--<CustomBuild Include="..\Modules\_decimal\libmpdec\vcdiv64.asm">
+       <ExcludedFromBuild Condition="'$(Platform)'=='Win32'">true</ExcludedFromBuild>
+       <Command>ml64 /nologo /c /Zi /Fo "$(IntDir)vcdiv64.obj" "%(FullPath)"</Command>
+       <Outputs>$(IntDir)vcdiv64.obj;%(Outputs)</Outputs>
+-    </CustomBuild>
++    </CustomBuild>-->
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/_elementtree.vcxproj
++++ PCbuild/_elementtree.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_elementtree</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -65,8 +65,8 @@
+-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+-    <ClInclude Include="..\Modules\expat\ascii.h" />
++    <!--<ClInclude Include="..\Modules\expat\ascii.h" />
+     <ClInclude Include="..\Modules\expat\asciitab.h" />
+     <ClInclude Include="..\Modules\expat\expat.h" />
+     <ClInclude Include="..\Modules\expat\expat_config.h" />
+@@ -80,13 +80,13 @@
+     <ClInclude Include="..\Modules\expat\utf8tab.h" />
+     <ClInclude Include="..\Modules\expat\winconfig.h" />
+     <ClInclude Include="..\Modules\expat\xmlrole.h" />
+-    <ClInclude Include="..\Modules\expat\xmltok.h" />
++    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_elementtree.c" />
+-    <ClCompile Include="..\Modules\expat\xmlparse.c" />
++    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
+     <ClCompile Include="..\Modules\expat\xmlrole.c" />
+-    <ClCompile Include="..\Modules\expat\xmltok.c" />
++    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/_lzma.vcxproj
++++ PCbuild/_lzma.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>lzma</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_xz_utils.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -62,10 +62,10 @@
+   <ItemDefinitionGroup>
+     <ClCompile>
+       <AdditionalIncludeDirectories>$(lzmaDir)src/liblzma/api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>WIN32;_FILE_OFFSET_BITS=64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;LZMA_API_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>$(ConanPreprocessorDefinitions);WIN32;_FILE_OFFSET_BITS=64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;LZMA_API_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -79,10 +79,10 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="liblzma.vcxproj">
++    <!--<ProjectReference Include="liblzma.vcxproj">
+       <Project>{12728250-16eC-4dc6-94d7-e21dd88947f8}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+--- PCbuild/_sqlite3.vcxproj
++++ PCbuild/_sqlite3.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_sqlite3</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_sqlite3.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -95,10 +95,10 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="sqlite3.vcxproj">
++    <!--<ProjectReference Include="sqlite3.vcxproj">
+       <Project>{a1a295e5-463c-437f-81ca-1f32367685da}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+--- PCbuild/openssl.vcxproj
++++ PCbuild/openssl.vcxproj
+@@ -74,6 +74,6 @@ nmake
+ 
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+ 
+-  <Target Name="_PatchUplink" BeforeTargets="Build">
++  <!--<Target Name="_PatchUplink" BeforeTargets="Build">
+     <PropertyGroup>
+       <Uplink>$(opensslDir)\ms\uplink.c</Uplink>
+@@ -110,7 +110,7 @@ nmake
+     <Copy SourceFiles="@(_AppLink)" DestinationFolder="$(opensslOutDir)\include" />
+     <Copy SourceFiles="@(_Include)" DestinationFolder="$(opensslOutDir)\include\openssl" />
+   </Target>
+-
++-->
+   <Target Name="SignFiles" AfterTargets="Build" Condition="$(_SignCommand) != ''">
+     <ItemGroup>
+       <FilesToSign Include="$(opensslOutDir)\lib*.dll" />
+--- PCbuild/pyexpat.vcxproj
++++ PCbuild/pyexpat.vcxproj
+@@ -39,7 +39,7 @@
+     <ProjectGuid>{D06B6426-4762-44CC-8BAD-D79052507F2F}</ProjectGuid>
+     <RootNamespace>pyexpat</RootNamespace>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -58,19 +58,19 @@
+   <PropertyGroup Label="UserMacros" />
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PYEXPAT_EXPORTS;HAVE_EXPAT_H;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+-    <ClInclude Include="..\Modules\expat\xmlrole.h" />
+-    <ClInclude Include="..\Modules\expat\xmltok.h" />
++    <!--<ClInclude Include="..\Modules\expat\xmlrole.h" />
++    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\pyexpat.c" />
+-    <ClCompile Include="..\Modules\expat\xmlparse.c" />
++    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
+     <ClCompile Include="..\Modules\expat\xmlrole.c" />
+-    <ClCompile Include="..\Modules\expat\xmltok.c" />
++    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/pythoncore.vcxproj
++++ PCbuild/pythoncore.vcxproj
+@@ -38,7 +38,7 @@
+     <ProjectGuid>{CF7AC3D1-E2DF-41D2-BEA6-1E2556CDEA26}</ProjectGuid>
+     <RootNamespace>pythoncore</RootNamespace>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_zlib.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -215,7 +215,7 @@
+     <ClInclude Include="..\Python\wordcode_helpers.h" />
+   </ItemGroup>
+   <ItemGroup Condition="$(IncludeExternals)">
+-    <ClInclude Include="$(zlibDir)\crc32.h" />
++    <!--<ClInclude Include="$(zlibDir)\crc32.h" />
+     <ClInclude Include="$(zlibDir)\deflate.h" />
+     <ClInclude Include="$(zlibDir)\inffast.h" />
+     <ClInclude Include="$(zlibDir)\inffixed.h" />
+@@ -225,7 +225,7 @@
+     <ClInclude Include="$(zlibDir)\zconf.h" />
+     <ClInclude Include="$(zlibDir)\zconf.in.h" />
+     <ClInclude Include="$(zlibDir)\zlib.h" />
+-    <ClInclude Include="$(zlibDir)\zutil.h" />
++    <ClInclude Include="$(zlibDir)\zutil.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_abc.c" />
+@@ -409,7 +409,7 @@
+   </ItemGroup>
+   <ItemGroup Condition="$(IncludeExternals)">
+     <ClCompile Include="..\Modules\zlibmodule.c" />
+-    <ClCompile Include="$(zlibDir)\adler32.c" />
++    <!--<ClCompile Include="$(zlibDir)\adler32.c" />
+     <ClCompile Include="$(zlibDir)\compress.c" />
+     <ClCompile Include="$(zlibDir)\crc32.c" />
+     <ClCompile Include="$(zlibDir)\deflate.c" />
+@@ -419,7 +419,7 @@
+     <ClCompile Include="$(zlibDir)\inftrees.c" />
+     <ClCompile Include="$(zlibDir)\trees.c" />
+     <ClCompile Include="$(zlibDir)\uncompr.c" />
+-    <ClCompile Include="$(zlibDir)\zutil.c" />
++    <ClCompile Include="$(zlibDir)\zutil.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\PC\dl_nt.c" />
+--- PCbuild/_hashlib.vcxproj
++++ PCbuild/_hashlib.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_hashlib</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -54,7 +54,7 @@
+   <ImportGroup Label="PropertySheets">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+     <Import Project="pyproject.props" />
+-    <Import Project="openssl.props" />
++    <!--<Import Project="openssl.props" />-->
+   </ImportGroup>
+   <PropertyGroup Label="UserMacros" />
+   <PropertyGroup>
+--- PCbuild/_ssl.vcxproj
++++ PCbuild/_ssl.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_ssl</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+@@ -54,7 +54,7 @@
+   <ImportGroup Label="PropertySheets">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+     <Import Project="pyproject.props" />
+-    <Import Project="openssl.props" />
++    <!--<Import Project="openssl.props" />-->
+   </ImportGroup>
+   <PropertyGroup Label="UserMacros" />
+   <PropertyGroup>
+@@ -67,9 +67,9 @@
+   </ItemDefinitionGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_ssl.c" />
+-    <ClCompile Include="$(opensslIncludeDir)\applink.c">
++    <!--<ClCompile Include="$(opensslIncludeDir)\applink.c">
+       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+-    </ClCompile>
++    </ClCompile>-->
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/_tkinter.vcxproj
++++ PCbuild/_tkinter.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_tk.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
+@@ -61,12 +61,12 @@
+   </PropertyGroup>
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <AdditionalIncludeDirectories>$(tcltkDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <PreprocessorDefinitions Condition="'$(BuildForRelease)' != 'true'">Py_TCLTK_DIR="$(tcltkDir.TrimEnd('\').Replace('\', '\\'))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <!--<PreprocessorDefinitions Condition="'$(BuildForRelease)' != 'true'">Py_TCLTK_DIR="$(tcltkDir.TrimEnd('\').Replace('\', '\\'))";%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -76,10 +76,10 @@
+   <ItemGroup>
+     <ResourceCompile Include="..\PC\python_nt.rc" />
+   </ItemGroup>
+-  <ItemGroup>
++  <!--<ItemGroup>
+     <_TclTkDLL Include="$(tcltkdir)\bin\$(tclDllName)" />
+     <_TclTkDLL Include="$(tcltkdir)\bin\$(tkDllName)" />
+-  </ItemGroup>
++  </ItemGroup>-->
+   <ItemGroup>
+     <ProjectReference Include="pythoncore.vcxproj">
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+--- PCbuild/pcbuild.sln
++++ PCbuild/pcbuild.sln
+@@ -9,9 +9,6 @@
+ 	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "python", "python.vcxproj", "{B11D750F-CD1F-4A96-85CE-E69A5C5259F9}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{0E9791DB-593A-465F-98BC-681011311618} = {0E9791DB-593A-465F-98BC-681011311618}
+-	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pythoncore", "pythoncore.vcxproj", "{CF7AC3D1-E2DF-41D2-BEA6-1E2556CDEA26}"
+ EndProject

@@ -60,6 +60,7 @@ class BertrandConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = CMake(self)
         cmake.definitions["BERTRAND_BUILD_TESTING"] = False
+        cmake.definitions["BERTRAND_INSTALL_LIBRARY"] = True
         cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))

@@ -4,4 +4,4 @@ versions:
   "1.17.2":
     folder: all
   "1.17.4":
-    folder: all
+    folder: meson

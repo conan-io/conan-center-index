@@ -2,35 +2,40 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Libde265Conan(ConanFile):
     name = "libde265"
     description = "Open h.265 video codec implementation."
     license = "LGPL-3.0-or-later"
-    topics = ("conan", "libde265", "codec", "video", "h.265")
+    topics = ("libde265", "codec", "video", "h.265")
     homepage = "https://github.com/strukturag/libde265"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "sse": [True, False]
+        "sse": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "sse": True
+        "sse": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -94,25 +99,18 @@ class Libde265Conan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "libde265"
-        self.cpp_info.names["cmake_find_package_multi"] = "libde265"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "libde265"
+        self.cpp_info.set_property("cmake_file_name", "libde265")
+        self.cpp_info.set_property("cmake_target_name", "libde265")
+        self.cpp_info.set_property("pkg_config_name", "libde265")
+
         self.cpp_info.libs = ["libde265"]
         if not self.options.shared:
             self.cpp_info.defines = ["LIBDE265_STATIC_BUILD"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
@@ -120,3 +118,7 @@ class Libde265Conan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

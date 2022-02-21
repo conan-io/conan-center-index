@@ -1,4 +1,11 @@
 sources:
+  "0.17.12":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.12.tar.gz"
+    sha256: "acdd8b83198c5a471f92702bc4101828fe55361005764143704c39acd6f80ffc"
   "0.14.3":
     url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.14.3.tar.gz"
     sha256: "3ea16c43e691bab0c373ba1ad072f6535390c516ebda658dfaf4d074d920e0fb"
+patches:
+  "0.17.12":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0.17.12-fix-cast-error.patch"

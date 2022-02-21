@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.43.0"
+
 
 class FlecsConan(ConanFile):
     name = "flecs"
@@ -13,8 +15,14 @@ class FlecsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -35,8 +43,8 @@ class FlecsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -60,11 +68,16 @@ class FlecsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        suffix = "" if self.options.shared else "_static"
+        self.cpp_info.set_property("cmake_file_name", "flecs")
+        self.cpp_info.set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
+
         self.cpp_info.names["cmake_find_package"] = "flecs"
         self.cpp_info.names["cmake_find_package_multi"] = "flecs"
-        target_and_lib_name = "flecs" if self.options.shared else "flecs_static"
-        self.cpp_info.components["_flecs"].names["cmake_find_package"] = target_and_lib_name
-        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = target_and_lib_name
-        self.cpp_info.components["_flecs"].libs = [target_and_lib_name]
+        self.cpp_info.components["_flecs"].names["cmake_find_package"] = "flecs{}".format(suffix)
+        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = "flecs{}".format(suffix)
+        self.cpp_info.components["_flecs"].set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
+
+        self.cpp_info.components["_flecs"].libs = ["flecs{}".format(suffix)]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")

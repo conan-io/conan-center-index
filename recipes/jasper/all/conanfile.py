@@ -1,9 +1,8 @@
 from conans import ConanFile, CMake, tools
-import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class JasperConan(ConanFile):
@@ -11,24 +10,22 @@ class JasperConan(ConanFile):
     license = "JasPer License Version 2.0"
     homepage = "https://jasper-software.github.io/jasper"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "jasper", "tool-kit", "coding")
+    topics = ("jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
-        "jpegturbo": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_libjpeg": "libjpeg",
-        "jpegturbo": "deprecated",
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -38,6 +35,11 @@ class JasperConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,19 +51,11 @@ class JasperConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-        # Handle deprecated libjpeg option
-        if self.options.jpegturbo != "deprecated":
-            self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
-            self.options.with_libjpeg = "libjpeg-turbo" if self.options.jpegturbo else "libjpeg"
-
     def requirements(self):
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.2")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
-
-    def package_id(self):
-        del self.options.jpegturbo
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -79,9 +73,21 @@ class JasperConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Clean rpath in installed shared lib
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        cmds_to_remove = [
+            "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
+            "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
+            "set(CMAKE_INSTALL_RPATH\n		  \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")",
+        ]
+        for cmd_to_remove in cmds_to_remove:
+            tools.replace_in_file(cmakelists, cmd_to_remove, "")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -92,9 +98,9 @@ class JasperConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
-            for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
-                if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
-                    os.unlink(dll_file)
+            for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
+                                           "{}*.dll".format(dll_prefix))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
@@ -118,20 +124,20 @@ class JasperConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Jasper")
+        self.cpp_info.set_property("cmake_target_name", "Jasper::Jasper")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "jasper")
+
         self.cpp_info.names["cmake_find_package"] = "Jasper"
         self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
-        self.cpp_info.names["pkg_config"] = "jasper"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+
         self.cpp_info.libs = ["jasper"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

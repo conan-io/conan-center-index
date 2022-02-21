@@ -1,10 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TensorpipeConan(ConanFile):
@@ -14,7 +13,7 @@ class TensorpipeConan(ConanFile):
                   "using the fastest transport for the tensors contained " \
                   "therein (e.g., CUDA device-to-device copy)."
     license = "BSD-3-Clause"
-    topics = ("conan", "tensorpipe", "tensor", "cuda")
+    topics = ("tensorpipe", "tensor", "cuda")
     homepage = "https://github.com/pytorch/tensorpipe"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -57,25 +56,26 @@ class TensorpipeConan(ConanFile):
             del self.options.fPIC
         if not self.options.cuda:
             del self.options.cuda_ipc
+
+    def requirements(self):
+        self.requires("libnop/cci.20200728")
+        self.requires("libuv/1.42.0")
+        if self.options.cuda:
+            raise ConanInvalidConfiguration("cuda recipe not yet available in CCI")
+            self.requires("cuda/11.2")
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("tensorpipe doesn't support Windows")
 
-    def requirements(self):
-        self.requires("libnop/cci.20200728")
-        self.requires("libuv/1.41.0")
-        if self.options.cuda:
-            raise ConanInvalidConfiguration("cuda recipe not yet available in CCI")
-            self.requires("cuda/11.2")
-
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("tensorpipe-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -104,9 +104,10 @@ class TensorpipeConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"tensorpipe": "Tensorpipe::Tensorpipe"}
+            {"tensorpipe": "Tensorpipe::Tensorpipe"},
         )
 
     @staticmethod
@@ -122,20 +123,18 @@ class TensorpipeConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Tensorpipe"
-        self.cpp_info.names["cmake_find_package_multi"] = "Tensorpipe"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "Tensorpipe")
+        self.cpp_info.set_property("cmake_target_name", "tensorpipe")
         self.cpp_info.libs = ["tensorpipe"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks = ["CoreFoundation", "IOKit"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Tensorpipe"
+        self.cpp_info.names["cmake_find_package_multi"] = "Tensorpipe"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

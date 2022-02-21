@@ -1,4 +1,7 @@
 sources:
+  "0.7.0":
+    url: "https://github.com/arximboldi/immer/archive/v0.7.0.tar.gz"
+    sha256: "cf67ab428aa3610eb0f72d0ea936c15cce3f91df26ee143ab783acd053507fe4"
   "0.6.2":
     url: "https://github.com/arximboldi/immer/archive/refs/tags/v0.6.2.tar.gz"
     sha256: "c3bb8847034437dee64adacb04e1e0163ae640b596c582eb4c0aa1d7c6447cd7"

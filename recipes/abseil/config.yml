@@ -1,21 +1,9 @@
 versions:
-  "20200205":
+  "20211102.0":
     folder: all
-  "20200225.2":
-    folder: all
-  "20200225.3":
-    folder: all
-  "20200923":
-    folder: all
-  "20200923.1":
-    folder: all
-  "20200923.2":
+  "20210324.2":
     folder: all
   "20200923.3":
     folder: all
-  "20210324.0":
-    folder: all
-  "20210324.1":
-    folder: all
-  "20210324.2":
+  "20200225.3":
     folder: all

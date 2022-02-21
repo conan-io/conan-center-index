@@ -72,7 +72,7 @@ class SdbusCppConan(ConanFile):
             self.build_requires("expat/2.4.1")
 
     def requirements(self):
-        self.requires("libsystemd/248.3")
+        self.requires("libsystemd/249.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

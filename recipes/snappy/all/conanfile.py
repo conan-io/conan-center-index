@@ -1,16 +1,18 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SnappyConan(ConanFile):
     name = "snappy"
     description = "A fast compressor/decompressor"
-    topics = ("conan", "snappy", "google", "compressor", "decompressor")
+    topics = ("snappy", "google", "compressor", "decompressor")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/snappy"
     license = "BSD-3-Clause"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -19,11 +21,8 @@ class SnappyConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
-
     _cmake = None
 
     @property
@@ -34,6 +33,11 @@ class SnappyConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -41,7 +45,9 @@ class SnappyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
@@ -75,10 +81,16 @@ class SnappyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Snappy")
+        self.cpp_info.set_property("cmake_target_name", "Snappy::snappy")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["snappylib"].libs = tools.collect_libs(self)
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["snappylib"].system_libs.append(tools.stdcpp_library(self))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Snappy"
         self.cpp_info.names["cmake_find_package_multi"] = "Snappy"
         self.cpp_info.components["snappylib"].names["cmake_find_package"] = "snappy"
         self.cpp_info.components["snappylib"].names["cmake_find_package_multi"] = "snappy"
-        self.cpp_info.components["snappylib"].libs = tools.collect_libs(self)
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.components["snappylib"].system_libs.append(tools.stdcpp_library(self))
+        self.cpp_info.components["snappylib"].set_property("cmake_target_name", "Snappy::snappy")

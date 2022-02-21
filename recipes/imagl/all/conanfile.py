@@ -61,10 +61,6 @@ class ImaglConan(ConanFile):
             del self.options.fPIC
         if not self._supports_jpeg:
             del self.options.with_jpeg
-        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
-            del self.options.allow_clang_11
-        else:
-            self.output.warn("allow_clang_11 option will be removed in the future when conan center index will support clang 11.")
 
     def configure(self):
         if self.options.shared:
@@ -97,8 +93,6 @@ class ImaglConan(ConanFile):
             self.output.warn("imaGL requires C++20. Your compiler is unknown. Assuming it supports C++20.")
         elif lazy_lt_semver(compiler_version, minimum_version):
             raise ConanInvalidConfiguration("imaGL requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), compiler_version))
-        elif str(self.settings.compiler) == "clang" and compiler_version == "11" and not self.options.allow_clang_11:
-            raise ConanInvalidConfiguration("Clang 11 is not currently supported by conan center index. To build imaGL, append '-o imagl:allow_clang_11=True --build missing' to your 'conan install' command line.")
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 

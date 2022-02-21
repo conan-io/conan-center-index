@@ -11,6 +11,14 @@ class NumCppConan(ConanFile):
     topics = ("python", "numpy", "numeric")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpilger26/NumCpp"
+    options = {
+        "with_boost" : [True, False],
+        "threads" : [True, False],
+    }
+    default_options = {
+        "with_boost" : True,
+        "threads" : False,
+    }
     license = "MIT"
     no_copy_source = True
     settings = "compiler"
@@ -41,7 +49,13 @@ class NumCppConan(ConanFile):
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        if tools.Version(self.version) < "2.5.0" or self.options.with_boost:
+            self.requires("boost/1.75.0")
+
+    def config_options(self):
+        if tools.Version(self.version) < "2.5.0":
+            del self.options.with_boost
+            self.options.threads = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,5 +71,13 @@ class NumCppConan(ConanFile):
         self.info.header_only()
         
     def package_info(self):
+        if not self.options.get_safe("with_boost", False):
+            self.cpp_info.cxxflags.append("-DNUMCPP_NO_USE_BOOST")
+
+        if tools.Version(self.version) < "2.5.0" and self.options.threads == False:
+            self.cpp_info.defines.append("NO_MULTITHREAD")
+        if tools.Version(self.version) >= "2.5.0" and self.options.threads == True:
+            self.cpp_info.defines.append("NUMCPP_USE_MULTITHREAD")
+
         self.cpp_info.names["cmake_find_package"] = "NumCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "NumCpp"

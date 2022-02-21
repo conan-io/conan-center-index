@@ -1,8 +1,10 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/oatpp/oatpp-sqlite/archive/1.2.0.tar.gz"
-    sha256: "626fc81a0ae1154c68299c30c557a793bf2cf3318ad9991bc4f1547afda704dd"
+  "1.3.0":
+    url: "https://github.com/oatpp/oatpp-sqlite/archive/1.3.0.tar.gz"
+    sha256: "f3abd7b0b1ea49fd4882fcf074223fdc4a2c82e9a9429341c3be48dd6187ebfd"
   "1.2.5":
     url: "https://github.com/oatpp/oatpp-sqlite/archive/1.2.5.tar.gz"
     sha256: "8366eb8e0121504774ca9b7f4f776093ac0d1c9c31f97a762f16b82820406ea9"
-    
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp-sqlite/archive/1.2.0.tar.gz"
+    sha256: "626fc81a0ae1154c68299c30c557a793bf2cf3318ad9991bc4f1547afda704dd"

@@ -1,12 +1,12 @@
 import os
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class AwsCHttp(ConanFile):
     name = "aws-c-http"
     description = "C99 implementation of the HTTP/1.1 and HTTP/2 specifications"
-    topics = ("conan", "aws", "amazon", "cloud", )
+    topics = ("aws", "amazon", "cloud", "http", "http2", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-http"
     license = "Apache-2.0",
@@ -39,8 +39,9 @@ class AwsCHttp(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-compression/0.2.13")
-        self.requires("aws-c-io/0.10.5")
+        self.requires("aws-c-common/0.6.15")
+        self.requires("aws-c-compression/0.2.14")
+        self.requires("aws-c-io/0.10.13")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -65,11 +66,20 @@ class AwsCHttp(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-http"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-http")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-http")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-http"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+
+        self.cpp_info.components["aws-c-http-lib"].set_property("cmake_target_name", "AWS::aws-c-http")
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
-        self.cpp_info.components["aws-c-http-lib"].requires = ["aws-c-compression::aws-c-compression-lib", "aws-c-io::aws-c-io-lib"]
+        self.cpp_info.components["aws-c-http-lib"].requires = [
+            "aws-c-common::aws-c-common-lib",
+            "aws-c-compression::aws-c-compression-lib",
+            "aws-c-io::aws-c-io-lib"
+        ]

@@ -2,6 +2,9 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class CoinOsiConan(ConanFile):
@@ -37,6 +40,10 @@ class CoinOsiConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,6 +56,7 @@ class CoinOsiConan(ConanFile):
         self.requires("coin-utils/2.11.4")
 
     def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -56,6 +64,9 @@ class CoinOsiConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
+        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+            raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -92,12 +103,16 @@ class CoinOsiConan(ConanFile):
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
             if tools.Version(self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -106,7 +121,7 @@ class CoinOsiConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1"]) # due to configure generated with old autotools version
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 

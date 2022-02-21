@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class XtensorConan(ConanFile):
@@ -12,7 +12,8 @@ class XtensorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtensor"
     description = "C++ tensors with broadcasting and lazy computing"
-    topics = ("conan", "numpy", "multidimensional-arrays", "tensors")
+    topics = ("numpy", "multidimensional-arrays", "tensors")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xsimd": [True, False],
@@ -24,13 +25,27 @@ class XtensorConan(ConanFile):
         "tbb": False,
         "openmp": False,
     }
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def requirements(self):
+        self.requires("xtl/0.7.4")
+        self.requires("nlohmann_json/3.10.5")
+        if self.options.xsimd:
+            if tools.Version(self.version) < "0.24.0":
+                self.requires("xsimd/7.5.0")
+            else:
+                self.requires("xsimd/8.0.3")
+        if self.options.tbb:
+            self.requires("tbb/2020.3")
+
+    def validate(self):
         if self.options.tbb and self.options.openmp:
             raise ConanInvalidConfiguration(
                 "The options 'tbb' and 'openmp' can not be used together."
@@ -50,14 +65,6 @@ class XtensorConan(ConanFile):
         ):
             raise ConanInvalidConfiguration("xtensor requires at least C++14")
 
-    def requirements(self):
-        self.requires("xtl/0.7.2")
-        self.requires("nlohmann_json/3.9.1")
-        if self.options.xsimd:
-            self.requires("xsimd/7.4.10")
-        if self.options.tbb:
-            self.requires("tbb/2020.3")
-
     def package_id(self):
         self.info.header_only()
 
@@ -65,11 +72,17 @@ class XtensorConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(
             "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
         )
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"xtensor": "xtensor::xtensor"}
@@ -88,24 +101,20 @@ class XtensorConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "xtensor"
-        self.cpp_info.names["cmake_find_package_multi"] = "xtensor"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "xtensor"
+        self.cpp_info.set_property("cmake_file_name", "xtensor")
+        self.cpp_info.set_property("cmake_target_name", "xtensor")
+        self.cpp_info.set_property("pkg_config_name", "xtensor")
         if self.options.xsimd:
             self.cpp_info.defines.append("XTENSOR_USE_XSIMD")
         if self.options.tbb:
             self.cpp_info.defines.append("XTENSOR_USE_TBB")
         if self.options.openmp:
             self.cpp_info.defines.append("XTENSOR_USE_OPENMP")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

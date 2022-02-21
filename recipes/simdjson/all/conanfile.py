@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class SimdjsonConan(ConanFile):
     name = "simdjson"
     description = "Parsing gigabytes of JSON per second"
-    topics = ("conan", "json", "parser", "simd", "format")
+    topics = ("json", "parser", "simd", "format")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/simdjson"
     license = "Apache-2.0"
@@ -75,19 +75,22 @@ class SimdjsonConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        simd_flags_file = os.path.join(self._source_subfolder, "cmake", "simdjson-flags.cmake")
-        tools.replace_in_file(simd_flags_file, "target_compile_options(simdjson-internal-flags INTERFACE -fPIC)", "")
-        tools.replace_in_file(simd_flags_file, "-Werror", "")
-        tools.replace_in_file(simd_flags_file, "/WX", "")
+        if tools.Version(self.version) < "1.0.0":
+            # Those flags are not set in 1.0.0 since SIMDJSON_DEVELOPER_MODE is disabled in non-top project
+            simd_flags_file = os.path.join(self._source_subfolder, "cmake", "simdjson-flags.cmake")
+            tools.replace_in_file(simd_flags_file, "target_compile_options(simdjson-internal-flags INTERFACE -fPIC)", "")
+            tools.replace_in_file(simd_flags_file, "-Werror", "")
+            tools.replace_in_file(simd_flags_file, "/WX", "")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["SIMDJSON_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["SIMDJSON_ENABLE_THREADS"] = self.options.threads
-        self._cmake.definitions["SIMDJSON_SANITIZE"] = False
-        self._cmake.definitions["SIMDJSON_JUST_LIBRARY"] = True
+        if tools.Version(self.version) < "1.0.0":
+            self._cmake.definitions["SIMDJSON_BUILD_STATIC"] = not self.options.shared
+            self._cmake.definitions["SIMDJSON_SANITIZE"] = False
+            self._cmake.definitions["SIMDJSON_JUST_LIBRARY"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

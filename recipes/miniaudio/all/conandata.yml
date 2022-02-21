@@ -1,16 +1,19 @@
 sources:
-  "0.10.32":
-    url: https://github.com/mackron/miniaudio/archive/d06d4983d3ff512690eb37f5edd25bf96f8f3764.tar.gz
-    sha256: 1FB7784AA6BC1C8138376C966BBDB444FF51CE04EF4289067BC59FB163CF38EA
-  "0.10.33":
-    url: https://github.com/mackron/miniaudio/archive/fca829edefd8389380f8e3ee26cc4b8c426dd742.tar.gz
-    sha256: DF1B4E36211112FDC35AF92F2288DAFDEB07290F4010E7C5E2505AFFA880E0EE
-  "0.10.35":
-    url: https://github.com/mackron/miniaudio/archive/199d6a7875b4288af6a7b615367c8fdc2019b03c.tar.gz
-    sha256: 3D9C5FCB112E24E9C038F7520C93D52882CECE6C93DF259FD33A389B7DEB7C40
-  "0.10.39":
-    url: https://github.com/mackron/miniaudio/archive/8bf157f10e278302f8a6c1c9cd1065f2bea26dd2.tar.gz
-    sha256: 573C511F1FD1C64BD331160E357DE611A144E5BDBAF1CD872195B8D535FA557E
+  "0.11.2":
+    url: "https://github.com/mackron/miniaudio/archive/42abbbea4602af80d1ccb4a22cdc35813aceee7a.tar.gz"
+    sha256: "7d54fbe5c7dae30e30ca6b3ffecaed81c61637752d56a8434a0a66895e36352a"
   "0.10.40":
-    url: https://github.com/mackron/miniaudio/archive/37fe1343f04f6fd9bd82229ca50a48b77ecce564.tar.gz
-    sha256: 363478247C144F94A09B62A6BD27E11FEA7334FE2247B666C0D8891607D3C39C
+    url: "https://github.com/mackron/miniaudio/archive/37fe1343f04f6fd9bd82229ca50a48b77ecce564.tar.gz"
+    sha256: "363478247C144F94A09B62A6BD27E11FEA7334FE2247B666C0D8891607D3C39C"
+  "0.10.39":
+    url: "https://github.com/mackron/miniaudio/archive/8bf157f10e278302f8a6c1c9cd1065f2bea26dd2.tar.gz"
+    sha256: "573C511F1FD1C64BD331160E357DE611A144E5BDBAF1CD872195B8D535FA557E"
+  "0.10.35":
+    url: "https://github.com/mackron/miniaudio/archive/199d6a7875b4288af6a7b615367c8fdc2019b03c.tar.gz"
+    sha256: "3D9C5FCB112E24E9C038F7520C93D52882CECE6C93DF259FD33A389B7DEB7C40"
+  "0.10.33":
+    url: "https://github.com/mackron/miniaudio/archive/fca829edefd8389380f8e3ee26cc4b8c426dd742.tar.gz"
+    sha256: "DF1B4E36211112FDC35AF92F2288DAFDEB07290F4010E7C5E2505AFFA880E0EE"
+  "0.10.32":
+    url: "https://github.com/mackron/miniaudio/archive/d06d4983d3ff512690eb37f5edd25bf96f8f3764.tar.gz"
+    sha256: "1FB7784AA6BC1C8138376C966BBDB444FF51CE04EF4289067BC59FB163CF38EA"

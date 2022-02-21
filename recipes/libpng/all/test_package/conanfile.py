@@ -1,12 +1,11 @@
+from conans import ConanFile, CMake, tools
 import os
 import re
 import subprocess
 
-from conans import ConanFile, CMake, tools
-
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
 
     def build(self):
@@ -15,7 +14,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             if "arm" in self.settings.arch and not tools.os_info.is_macos:
                 self.test_arm()
             else:

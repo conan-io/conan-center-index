@@ -1,21 +1,20 @@
 from conans import ConanFile, tools
-import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class LyraConan(ConanFile):
     name = "lyra"
     homepage = "https://bfgroup.github.io/Lyra/"
     description = "A simple to use, composing, header only, command line arguments parser for C++ 11 and beyond."
-    topics = ("conan", "cli", "c++11")
+    topics = ("cli", "cli-parser", "argparse", "commandline",
+              "flags", "header-only", "no-dependencies", "c++11")
     no_copy_source = True
     settings = "compiler"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    _source_subfolder = "source_subfolder"
 
     def configure(self):
         if self.settings.compiler.cppstd:
@@ -25,15 +24,13 @@ class LyraConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "Lyra-" + \
-            os.path.basename(self.conan_data["sources"][self.version]['url']).replace(
-                ".tar.gz", "")
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("*.h*", dst="include", src=self._source_subfolder+"/include")
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "lyra"

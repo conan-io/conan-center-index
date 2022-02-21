@@ -1,4 +1,10 @@
 sources:
+  "20211101":
+    url: "https://github.com/google/re2/archive/refs/tags/2021-11-01.tar.gz"
+    sha256: "8c45f7fba029ab41f2a7e6545058d9eec94eef97ce70df58e92d85cfc08b4669"
+  "20210901":
+    url: "https://github.com/google/re2/archive/refs/tags/2021-09-01.tar.gz"
+    sha256: "42a2e1d56b5de252f5d418dc1cc0848e9e52ca22b056453988b18c6195ec7f8d"
   "20210601":
     url: "https://github.com/google/re2/archive/refs/tags/2021-06-01.tar.gz"
     sha256: "26155e050b10b5969e986dab35654247a3b1b295e0532880b5a9c13c0a700ceb"

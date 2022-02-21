@@ -4,30 +4,37 @@ import re
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibcurlConan(ConanFile):
     name = "libcurl"
 
     description = "command line tool and library for transferring data with URLs"
-    topics = ("conan", "curl", "libcurl", "data-transfer")
+    topics = ("curl", "libcurl", "data-transfer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
-    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
-        "with_openssl": [True, False, "deprecated"],
-        "with_wolfssl": [True, False, "deprecated"],
-        "with_winssl": [True, False, "deprecated"],
-        "darwin_ssl": [True, False, "deprecated"],
+        "with_file": [True, False],
+        "with_ftp": [True, False],
+        "with_http": [True, False],
         "with_ldap": [True, False],
+        "with_rtsp": [True, False],
+        "with_dict": [True, False],
+        "with_telnet": [True, False],
+        "with_tftp": [True, False],
+        "with_pop3": [True, False],
+        "with_imap": [True, False],
+        "with_smb": [True, False],
+        "with_smtp": [True, False],
+        "with_gopher": [True, False],
+        "with_mqtt": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
@@ -40,20 +47,34 @@ class LibcurlConan(ConanFile):
         "with_zstd": [True, False],
         "with_c_ares": [True, False],
         "with_proxy": [True, False],
-        "with_rtsp": [True, False],
         "with_crypto_auth": [True, False],
         "with_ntlm": [True, False],
         "with_ntlm_wb": [True, False],
+        "with_cookies": [True, False],
+        "with_ipv6": [True, False],
+        "with_docs": [True, False],
+        "with_verbose_debug": [True, False],
+        "with_symbol_hiding": [True, False],
+        "with_unix_sockets": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": "openssl",
-        "with_openssl": "deprecated",
-        "with_wolfssl": "deprecated",
-        "with_winssl": "deprecated",
-        "darwin_ssl": "deprecated",
+        "with_dict": True,
+        "with_file": True,
+        "with_ftp": True,
+        "with_gopher": True,
+        "with_http": True,
+        "with_imap": True,
         "with_ldap": False,
+        "with_mqtt": True,
+        "with_pop3": True,
+        "with_rtsp": True,
+        "with_smb": True,
+        "with_smtp": True,
+        "with_telnet": True,
+        "with_tftp": True,
         "with_libssh2": False,
         "with_libidn": False,
         "with_librtmp": False,
@@ -66,12 +87,18 @@ class LibcurlConan(ConanFile):
         "with_zstd": False,
         "with_c_ares": False,
         "with_proxy": True,
-        "with_rtsp": True,
         "with_crypto_auth": True,
         "with_ntlm": True,
         "with_ntlm_wb": True,
+        "with_cookies": True,
+        "with_ipv6": True,
+        "with_docs": False,
+        "with_verbose_debug": True,
+        "with_symbol_hiding": False,
+        "with_unix_sockets": True,
     }
 
+    generators = "cmake", "cmake_find_package_multi", "pkg_config"
     _autotools = None
     _autotools_vars = None
     _cmake = None
@@ -85,16 +112,24 @@ class LibcurlConan(ConanFile):
         return "build_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler != "Visual Studio"
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
     def _is_win_x_android(self):
         return self.settings.os == "Android" and tools.os_info.is_windows
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_using_cmake_build(self):
-        return self.settings.compiler == "Visual Studio" or self._is_win_x_android
+        return self._is_msvc or self._is_win_x_android
 
     @property
     def _has_zstd_option(self):
@@ -104,6 +139,12 @@ class LibcurlConan(ConanFile):
     def _has_metalink_option(self):
         # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
         return tools.Version(self.version) < "7.78.0" and not self._is_using_cmake_build
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy("lib_Makefile_add.am")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -121,37 +162,6 @@ class LibcurlConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        # Deprecated options
-        # ===============================
-        if (any(deprecated_option != "deprecated" for deprecated_option in [self.options.with_openssl, self.options.with_wolfssl, self.options.with_winssl, self.options.darwin_ssl])):
-            self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
-            if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
-                if self.options.darwin_ssl == True:
-                    self.options.with_ssl = "darwinssl"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-            if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
-                if self.settings.os == "Windows" and self.options.with_winssl == True:
-                    self.options.with_ssl = "schannel"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-        # ===============================
-
-        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
-        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
-            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
-
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
             if tools.Version(self.version) < "7.75.0":
@@ -160,32 +170,32 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.6.0")
+            self.requires("wolfssl/4.8.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.43.0")
+            self.requires("libnghttp2/1.45.1")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
+            self.requires("libssh2/1.10.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.17.1")
+            self.requires("c-ares/1.17.2")
 
-    def package_id(self):
-        # Deprecated options
-        del self.info.options.with_openssl
-        del self.info.options.with_winssl
-        del self.info.options.darwin_ssl
-        del self.info.options.with_wolfssl
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def validate(self):
+        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("schannel only suppported on Windows.")
+        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
+        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
+            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
+        if self.options.with_ssl == "openssl":
+            if self.options.with_ntlm and self.options["openssl"].no_des:
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -202,6 +212,7 @@ class LibcurlConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
+    # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
         #
@@ -304,10 +315,29 @@ class LibcurlConan(ConanFile):
             "--with-brotli={}".format(yes_no(self.options.with_brotli)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-dict={}".format(yes_no(self.options.with_dict)),
+            "--enable-file={}".format(yes_no(self.options.with_file)),
+            "--enable-ftp={}".format(yes_no(self.options.with_ftp)),
+            "--enable-gopher={}".format(yes_no(self.options.with_gopher)),
+            "--enable-http={}".format(yes_no(self.options.with_http)),
+            "--enable-imap={}".format(yes_no(self.options.with_imap)),
             "--enable-ldap={}".format(yes_no(self.options.with_ldap)),
+            "--enable-mqtt={}".format(yes_no(self.options.with_mqtt)),
+            "--enable-pop3={}".format(yes_no(self.options.with_pop3)),
+            "--enable-rtsp={}".format(yes_no(self.options.with_rtsp)),
+            "--enable-smb={}".format(yes_no(self.options.with_smb)),
+            "--enable-smtp={}".format(yes_no(self.options.with_smtp)),
+            "--enable-telnet={}".format(yes_no(self.options.with_telnet)),
+            "--enable-tftp={}".format(yes_no(self.options.with_tftp)),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
             "--enable-threaded-resolver={}".format(yes_no(self.options.with_c_ares)),
+            "--enable-cookies={}".format(yes_no(self.options.with_cookies)),
+            "--enable-ipv6={}".format(yes_no(self.options.with_ipv6)),
+            "--enable-manual={}".format(yes_no(self.options.with_docs)),
+            "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
+            "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
+            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
@@ -338,10 +368,10 @@ class LibcurlConan(ConanFile):
 
         if self._has_metalink_option:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
-        
+
         if not self.options.with_proxy:
             params.append("--disable-proxy")
-       
+
         if not self.options.with_rtsp:
             params.append("--disable-rtsp")
 
@@ -397,9 +427,9 @@ class LibcurlConan(ConanFile):
             # autoreconf
             self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
 
-            # fix generated autotools files on alle to have relocateable binaries
+            # fix generated autotools files to have relocatable binaries
             if tools.is_apple_os(self.settings.os):
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
 
             self.run("chmod +x configure")
 
@@ -519,24 +549,22 @@ class LibcurlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CURL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
-        self.cpp_info.names["pkg_config"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
-        self.cpp_info.components["curl"].names["pkg_config"] = "libcurl"
+        self.cpp_info.set_property("cmake_file_name", "CURL")
+        self.cpp_info.set_property("cmake_target_name", "CURL::libcurl")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("pkg_config_name", "libcurl")
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
         else:
             self.cpp_info.components["curl"].libs = ["curl"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 if self.options.with_libidn:
                     self.cpp_info.components["curl"].libs.append("idn")
                 if self.options.with_librtmp:
                     self.cpp_info.components["curl"].libs.append("rtmp")
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
         elif self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
@@ -579,7 +607,10 @@ class LibcurlConan(ConanFile):
         if self.options.with_c_ares:
             self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
 
-    def validate(self):
-        if self.options.with_ssl == "openssl":
-            if self.options.with_ntlm and self.options["openssl"].no_des:
-                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "CURL"
+        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
+        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
+        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
+        self.cpp_info.components["curl"].set_property("cmake_target_name", "CURL::libcurl")
+        self.cpp_info.components["curl"].set_property("pkg_config_name", "libcurl")

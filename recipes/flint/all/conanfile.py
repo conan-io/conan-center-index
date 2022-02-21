@@ -9,7 +9,7 @@ class FlintConan(ConanFile):
     name = "flint"
     description = "FLINT (Fast Library for Number Theory)"
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "math", "numerical")
+    topics = ("math", "numerical")
     homepage = "https://www.flintlib.org"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -38,15 +38,15 @@ class FlintConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("gmp/6.2.1")
         self.requires("mpfr/4.1.0")
         if self.settings.compiler == "Visual Studio":
             self.requires("pthreads4w/3.0.0")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -68,6 +68,10 @@ class FlintConan(ConanFile):
         self._cmake.definitions["IPO_SUPPORTED"] = False
         # No BLAS yet
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CBLAS"] = True
+        # handle run in a cross-build
+        if tools.cross_building(self):
+            self._cmake.definitions["FLINT_USES_POPCNT_EXITCODE"] = "1"
+            self._cmake.definitions["FLINT_USES_POPCNT_EXITCODE__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

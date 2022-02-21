@@ -1,0 +1,24 @@
+diff -ru a/tools/build/src/tools/mpi.jam b/tools/build/src/tools/mpi.jam
+--- a/tools/build/src/tools/mpi.jam	2019-12-10 01:20:16.000000000 +0100
++++ b/tools/build/src/tools/mpi.jam	2020-09-02 13:17:22.942349254 +0200
+@@ -66,6 +66,8 @@
+ import type ;
+ import path ;
+ 
++import errors ;
++
+ # Make this module a project
+ project.initialize $(__name__) ;
+ project mpi ;
+@@ -538,6 +540,11 @@
+     # Set up the "mpi" alias
+     alias mpi : : : : $(options) ;
+   }
++
++  if ! $(.configured)
++  {
++	 errors.user-error "MPI not configured" ;
++  }     
+ }
+ 
+ # States whether MPI has bee configured

@@ -1,0 +1,10 @@
+--- a/include/celero/TestFixture.h
++++ b/include/celero/TestFixture.h
+@@ -24,6 +24,7 @@
+ #include <cstddef>
+ #include <cstdint>
+ #include <limits>
++#include <memory>
+ #include <string>
+ #include <vector>
+ 

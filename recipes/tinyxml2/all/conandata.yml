@@ -1,7 +1,17 @@
 sources:
+  "9.0.0":
+    url: "https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz"
+    sha256: "cc2f1417c308b1f6acc54f88eb70771a0bf65f76282ce5c40e54cfe52952702c"
   "8.0.0":
     url: "https://github.com/leethomason/tinyxml2/archive/8.0.0.tar.gz"
     sha256: "6ce574fbb46751842d23089485ae73d3db12c1b6639cda7721bf3a7ee862012c"
   "7.1.0":
     url: "https://github.com/leethomason/tinyxml2/archive/7.1.0.tar.gz"
     sha256: "68ebd396a4220d5a9b5a621c6e9c66349c5cfdf5efaea3f16e3bb92e45f4e2a3"
+patches:
+  "8.0.0":
+    - patch_file: "patches/0001-cmake-pic.patch"
+      base_path: "source_subfolder"
+  "7.1.0":
+    - patch_file: "patches/0001-cmake-pic.patch"
+      base_path: "source_subfolder"

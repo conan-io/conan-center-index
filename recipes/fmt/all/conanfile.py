@@ -1,20 +1,20 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FmtConan(ConanFile):
     name = "fmt"
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("conan", "fmt", "format", "iostream", "printf")
+    topics = ("fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "header_only": [True, False],
         "shared": [True, False],
@@ -30,6 +30,7 @@ class FmtConan(ConanFile):
         "with_os_api": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -41,18 +42,28 @@ class FmtConan(ConanFile):
         return "build_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _has_with_os_api_option(self):
         return tools.Version(self.version) >= "7.0.0"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_with_os_api_option:
             del self.options.with_os_api
+        elif str(self.settings.os) == "baremetal":
+            self.options.with_os_api = False
 
     def configure(self):
         if self.options.header_only:
-            self.settings.clear()
             del self.options.fPIC
             del self.options.shared
             del self.options.with_os_api
@@ -60,9 +71,10 @@ class FmtConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.get_safe("shared") and self.settings.compiler == "Visual Studio" and \
-           "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+        if self.options.get_safe("shared") and self._is_msvc and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration(
+                "Visual Studio build for shared library with MT runtime is not supported"
+            )
 
     def package_id(self):
         if self.options.header_only:

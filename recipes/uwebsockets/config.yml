@@ -7,3 +7,7 @@ versions:
     folder: all
   "19.3.0":
     folder: all
+  "20.8.0":
+    folder: all
+  "20.9.0":
+    folder: all

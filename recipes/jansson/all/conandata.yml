@@ -5,3 +5,6 @@ sources:
   "2.13.1":
     url: "https://github.com/akheron/jansson/archive/v2.13.1.tar.gz"
     sha256: "f22901582138e3203959c9257cf83eba9929ac41d7be4a42557213a22ebcc7a0"
+  "2.14":
+    url: "https://github.com/akheron/jansson/archive/v2.14.tar.gz"
+    sha256: "c739578bf6b764aa0752db9a2fdadcfe921c78f1228c7ec0bb47fa804c55d17b"

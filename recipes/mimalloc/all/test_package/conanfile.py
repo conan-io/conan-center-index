@@ -4,7 +4,7 @@ import os
 
 class MimallocTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         # No override:
@@ -75,7 +75,7 @@ class MimallocTestConan(ConanFile):
         return environment
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             return
 
         self.output.info("Environment append: {}".format(self._environment))

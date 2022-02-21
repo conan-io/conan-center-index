@@ -34,6 +34,12 @@ sources:
           "x86_64":
               url: "https://nodejs.org/dist/v16.3.0/node-v16.3.0-linux-x64.tar.xz"
               sha256: "5347ece975747e4d9768d4ed3f8b2220c955ac01f8a695347cd7f71ff5efa318"
+          "armv7":
+              url: "https://nodejs.org/dist/v16.3.0/node-v16.3.0-linux-armv7l.tar.xz"
+              sha256: "c8817e30fb910476ec1f223de7eedd31f3d157ddf2003a3083d7f5662180e4de"
+          "armv8":
+              url: "https://nodejs.org/dist/v16.3.0/node-v16.3.0-linux-arm64.tar.xz"
+              sha256: "67dd97e41aad1bc11736e99cba119525b4f3472b132c46730ba8cf03f7076e23"
       Macos:
           "x86_64":
               url: "https://nodejs.org/dist/v16.3.0/node-v16.3.0-darwin-x64.tar.gz"

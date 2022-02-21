@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OnigurumaConan(ConanFile):
@@ -68,12 +68,17 @@ class OnigurumaConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "oniguruma"
-        self.cpp_info.names["cmake_find_package_multi"] = "oniguruma"
-        self.cpp_info.names["pkg_config"] = "oniguruma"
-        self.cpp_info.components["onig"].names["cmake_find_package"] = "onig"
-        self.cpp_info.components["onig"].names["cmake_find_package_multi"] = "onig"
-        self.cpp_info.components["onig"].names["pkg_config"] = "oniguruma"
+        self.cpp_info.set_property("cmake_file_name", "oniguruma")
+        self.cpp_info.set_property("cmake_target_name", "oniguruma::onig")
+        self.cpp_info.set_property("pkg_config_name", "oniguruma")
+        # TODO: back to global scope after conan v2 once cmake_find_package_* removed
         self.cpp_info.components["onig"].libs = ["onig"]
         if not self.options.shared:
             self.cpp_info.components["onig"].defines.append("ONIG_STATIC")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.components["onig"].set_property("cmake_target_name", "oniguruma::onig")
+        self.cpp_info.components["onig"].set_property("pkg_config_name", "oniguruma")
+        self.cpp_info.components["onig"].names["cmake_find_package"] = "onig"
+        self.cpp_info.components["onig"].names["cmake_find_package_multi"] = "onig"
+        self.cpp_info.components["onig"].names["pkg_config"] = "oniguruma"

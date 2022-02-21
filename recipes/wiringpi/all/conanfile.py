@@ -2,13 +2,14 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class WiringpiConan(ConanFile):
     name = "wiringpi"
     license = "LGPL-3.0"
     description = "GPIO Interface library for the Raspberry Pi"
     homepage = "http://wiringpi.com"
-    topics = ("conan", "wiringpi", "gpio", "raspberrypi")
+    topics = ("wiringpi", "gpio", "raspberrypi")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
@@ -32,16 +33,18 @@ class WiringpiConan(ConanFile):
         return "build_subfolder"
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("WiringPi only works for Linux.")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("WiringPi-final_official_" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

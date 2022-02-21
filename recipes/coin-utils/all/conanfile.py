@@ -40,6 +40,10 @@ class CoinUtilsConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,16 +52,18 @@ class CoinUtilsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
-
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not supported (tested M1)")
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("bzip2/1.0.8")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
+        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
+        #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
+        #        should be packaged and added to build requirements.
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+            raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
@@ -67,24 +73,20 @@ class CoinUtilsConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
                     "LD": "link -nologo",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
@@ -94,18 +96,12 @@ class CoinUtilsConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-
-        if self.settings.compiler != "Visual Studio":
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                os.path.join(self._source_subfolder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
-            self._autotools.flags.append("-FS")
+            if tools.Version(self.settings.compiler.version) >= "12":
+                self._autotools.flags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -113,13 +109,17 @@ class CoinUtilsConan(ConanFile):
         ]
         if self.settings.compiler == "Visual Studio":
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
+        if self.settings.compiler != "Visual Studio":
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -128,7 +128,7 @@ class CoinUtilsConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1"])
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))

@@ -62,21 +62,18 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration("{} does not support clang with libstdc++. Use libc++ instead.".format(self.name))
 
-        # TODO remove once figured out why clang 11/libc++ doesn't build on CCI
-        # (due to unable to find std::experiemental::noop_coroutine, author is unable to reproduce on local machine)
-        if self.settings.compiler == "clang" and self.settings.compiler.version == "11":
-            raise ConanInvalidConfiguration("WIP: {} currently doesn't build on clang 11".format(self.name))
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if self.settings.os == "Windows" and self.options.shared:
+                self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
             self._cmake.configure()
         return self._cmake
 
@@ -99,10 +96,17 @@ class AndreasbuhrCppCoroConan(ConanFile):
         comp = self.cpp_info.components["cppcoro"]
         comp.names["cmake_find_package"] = "cppcoro"
         comp.names["cmake_find_package_multi"] = "cppcoro"
+        comp.libs = ["cppcoro"]
+
+        if self.settings.os == "Linux" and self.options.shared:
+            comp.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            comp.system_libs = ["synchronization"]
 
         if self.settings.compiler == "Visual Studio":
             comp.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
             comp.cxxflags.append("-fcoroutines")
+            comp.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
         elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
             comp.cxxflags.append("-fcoroutines-ts")

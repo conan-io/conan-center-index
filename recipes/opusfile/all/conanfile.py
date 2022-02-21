@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class OpusFileConan(ConanFile):
     name = "opusfile"
     description = "stand-alone decoder library for .opus streams"
-    topics = ("conan", "opus", "opusfile", "audio", "decoder", "decoding", "multimedia", "sound")
+    topics = ("opus", "opusfile", "audio", "decoder", "decoding", "multimedia", "sound")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/opusfile"
     license = "BSD-3-Clause"
@@ -59,7 +59,7 @@ class OpusFileConan(ConanFile):
         self.requires("ogg/1.3.4")
         self.requires("opus/1.3.1")
         if self.options.http:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
 
     def build_requirements(self):
         if not self._is_msvc:

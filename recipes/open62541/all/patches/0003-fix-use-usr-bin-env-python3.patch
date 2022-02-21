@@ -1,0 +1,113 @@
+diff --git a/tools/amalgamate.py b/tools/amalgamate.py
+index 8db9d2f7..6e042a6a 100755
+--- a/tools/amalgamate.py
++++ b/tools/amalgamate.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # coding: UTF-8
+ # This Source Code Form is subject to the terms of the Mozilla Public
+diff --git a/tools/c2rst.py b/tools/c2rst.py
+index b9971e54..036b6b92 100755
+--- a/tools/c2rst.py
++++ b/tools/c2rst.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this 
+diff --git a/tools/gdb-prettyprint.py b/tools/gdb-prettyprint.py
+index ca80df44..486ee9a7 100644
+--- a/tools/gdb-prettyprint.py
++++ b/tools/gdb-prettyprint.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # Load into gdb with 'source <path-to>/tools/gdb-prettyprint.py'
+ # Make sure to have 'set print pretty on' to get nice structure printouts
+diff --git a/tools/generate_datatypes.py b/tools/generate_datatypes.py
+index 3ad6a8a3..227dd41c 100755
+--- a/tools/generate_datatypes.py
++++ b/tools/generate_datatypes.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+diff --git a/tools/generate_nodeid_header.py b/tools/generate_nodeid_header.py
+index b7c8a9f7..14b7062c 100644
+--- a/tools/generate_nodeid_header.py
++++ b/tools/generate_nodeid_header.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this 
+diff --git a/tools/generate_statuscode_descriptions.py b/tools/generate_statuscode_descriptions.py
+index 9679af23..d6ced7df 100755
+--- a/tools/generate_statuscode_descriptions.py
++++ b/tools/generate_statuscode_descriptions.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this 
+diff --git a/tools/nodeset_compiler/nodeset.py b/tools/nodeset_compiler/nodeset.py
+index 1889ff6d..b5e016cc 100644
+--- a/tools/nodeset_compiler/nodeset.py
++++ b/tools/nodeset_compiler/nodeset.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ 
+ ### This Source Code Form is subject to the terms of the Mozilla Public
+diff --git a/tools/nodeset_compiler/nodeset_testing.py b/tools/nodeset_compiler/nodeset_testing.py
+index a1121086..5997f82e 100644
+--- a/tools/nodeset_compiler/nodeset_testing.py
++++ b/tools/nodeset_compiler/nodeset_testing.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ ### This Source Code Form is subject to the terms of the Mozilla Public
+ ### License, v. 2.0. If a copy of the MPL was not distributed with this
+diff --git a/tools/prepare_packaging.py b/tools/prepare_packaging.py
+index bb775b1f..84d7b2d0 100644
+--- a/tools/prepare_packaging.py
++++ b/tools/prepare_packaging.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+diff --git a/tools/update_copyright_header.py b/tools/update_copyright_header.py
+index a8d950df..1ce6fed6 100755
+--- a/tools/update_copyright_header.py
++++ b/tools/update_copyright_header.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+diff --git a/tools/valgrind_check_error.py b/tools/valgrind_check_error.py
+index e192cecc..a263f6aa 100755
+--- a/tools/valgrind_check_error.py
++++ b/tools/valgrind_check_error.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ # coding: UTF-8
+ # This Source Code Form is subject to the terms of the Mozilla Public
+-- 
+2.17.1
+
