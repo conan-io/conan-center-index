@@ -12,20 +12,13 @@ class XtlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtl"
     description = "The x template library"
-    settings = "os", "compiler"
     topics = ("templates", "containers", "algorithms")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def package_id(self):
-        self.info.header_only()
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -48,9 +41,18 @@ class XtlConan(ConanFile):
                     "The compiler {} {} does not support C++14."
                     .format(self.settings.compiler, self.settings.compiler.version))
 
+    def package_id(self):
+        self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"xtl": "xtl::xtl"}
@@ -69,19 +71,14 @@ class XtlConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "xtl"
-        self.cpp_info.names["cmake_find_package_multi"] = "xtl"
-        self.cpp_info.set_property("cmake_target_name", "xtl::xtl")
-        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.set_property("cmake_file_name", "xtl")
+        self.cpp_info.set_property("cmake_target_name", "xtl")
+        self.cpp_info.set_property("pkg_config_name", "xtl")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "xtl"

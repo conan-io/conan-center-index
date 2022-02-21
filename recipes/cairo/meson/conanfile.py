@@ -1,8 +1,8 @@
-from conans import ConanFile, tools, Meson
+from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+import contextlib
 import glob
 import os
-import shutil
 
 required_conan_version = ">=1.38.0"
 
@@ -47,7 +47,6 @@ class CairoConan(ConanFile):
         "tee": True,
     }
 
-    exports_sources = "patches/*"
     generators = "pkg_config"
 
     _meson = None
@@ -63,6 +62,10 @@ class CairoConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -86,13 +89,13 @@ class CairoConan(ConanFile):
     def requirements(self):
         self.requires("pixman/0.40.0")
         if self.options.with_zlib and self.options.with_png:
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.2")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_png:
@@ -112,7 +115,7 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.60.2")
         self.build_requires("pkgconf/1.7.4")
 
     def validate(self):
@@ -121,7 +124,19 @@ class CairoConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["msvc", "Visual Studio"]
+
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self._is_msvc:
+            env_build = VisualStudioBuildEnvironment(self)
+            if not self.options.shared:
+                env_build.flags.append("-DCAIRO_WIN32_STATIC_BUILD")
+                env_build.cxx_flags.append("-DCAIRO_WIN32_STATIC_BUILD")
+            with tools.environment_append(env_build.vars):
+                yield
+        else:
+            yield
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -167,21 +182,6 @@ class CairoConan(ConanFile):
         defs["gtk2-utils"] = "disabled"
         defs["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
-        meson_args = ""
-        if not self.options.shared and self.settings.compiler == "Visual Studio":
-            meson_args += " -DCAIRO_WIN32_STATIC_BUILD"
-        if self.options.get_safe("with_opengl") == "desktop" and self.settings.os == "Windows":
-            gl_includes = []
-            for dependency in ["glext", "wglext", "khrplatform"]:
-                package = self.dependencies[dependency]
-                for include in package.cpp_info.includedirs:
-                    gl_includes.append(os.path.join(package.package_folder, include))
-            for gl_include in gl_includes:
-                meson_args += " -I{}".format(gl_include)
-        if len(meson_args):
-            meson.options["c_args"] = meson_args
-            meson.options["cpp_args"] = meson_args
-
         meson.configure(
             source_folder=self._source_subfolder,
             args=["--wrap-mode=nofallback"],
@@ -199,23 +199,24 @@ class CairoConan(ConanFile):
             tools.replace_in_file("freetype2.pc",
                                   "Version: %s" % self.deps_cpp_info["freetype"].version,
                                   "Version: 9.7.3")
-
-        meson = self._configure_meson()
-        meson.build()
+        with self._build_context():
+            meson = self._configure_meson()
+            meson.build()
 
     def _fix_library_names(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    shutil.move(filename_old, filename_new)
+                    tools.rename(filename_old, filename_new)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
-        meson = self._configure_meson()
-        meson.install()
+        with self._build_context():
+            meson = self._configure_meson()
+            meson.install()
         self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
@@ -373,16 +374,6 @@ class CairoConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
             self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
-
-        if self.options.with_zlib and self.settings.os != "Windows":
-            self.cpp_info.components["cairo-trace"].libs = ["cairo-trace"]
-            self.cpp_info.components["cairo-trace"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-trace"].libdirs.append(os.path.join(self.package_folder, "lib", "cairo"))
-
-        if self.options.with_zlib and self.options.tee and self.settings.os != "Windows":
-            self.cpp_info.components["cairo-fdr"].libs = ["cairo-fdr"]
-            self.cpp_info.components["cairo-fdr"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-fdr"].libdirs.append(os.path.join(self.package_folder, "lib", "cairo"))
 
         if self.options.with_glib and self.options.with_png and self.options.with_zlib and self.options.tee and self.settings.os != "Windows":
             self.cpp_info.components["cairo-sphinx"].libs = ["cairo-sphinx"]

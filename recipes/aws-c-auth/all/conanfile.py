@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class AwsCAuth(ConanFile):
@@ -70,15 +70,17 @@ class AwsCAuth(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-auth"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-auth")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.set_property("cmake_target_name", "AWS")
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "aws-c-auth")
+        self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")
+
         self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
         self.cpp_info.components["aws-c-auth-lib"].requires = [
             "aws-c-common::aws-c-common-lib",

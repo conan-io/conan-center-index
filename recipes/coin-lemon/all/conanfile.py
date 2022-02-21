@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
+
 
 class CoinLemonConan(ConanFile):
     name = "coin-lemon"
@@ -10,6 +11,7 @@ class CoinLemonConan(ConanFile):
     homepage = "http://lemon.cs.elte.hu"
     description = "LEMON stands for Library for Efficient Modeling and Optimization in Networks."
     topics = ("data structures", "algorithms", "graphs", "network")
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -19,13 +21,18 @@ class CoinLemonConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,11 +41,6 @@ class CoinLemonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -71,20 +73,13 @@ class CoinLemonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["lemon"]
-        else:
-            self.cpp_info.libs = ["emon"]
+        self.cpp_info.set_property("cmake_file_name", "LEMON")
+        self.cpp_info.set_property("cmake_target_name", "LEMON::LEMON") # no official target name actually
+        self.cpp_info.set_property("pkg_config_name", "lemon")
+        self.cpp_info.libs = ["lemon" if self.settings.os == "Windows" else "emon"]
+        self.cpp_info.defines.append("LEMON_ONLY_TEMPLATES")
 
-        self.cpp_info.names["pkg_config"] = "LEMON"
-        self.cpp_info.set_property("pkg_config_name", "LEMON")
-
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LEMON"
         self.cpp_info.names["cmake_find_package_multi"] = "LEMON"
-        self.cpp_info.set_property("cmake_target_name", "LEMON")
-
-        self.cpp_info.filenames["cmake_find_package"] = "LEMON"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "LEMON"
-        self.cpp_info.set_property("cmake_file_name", "LEMON")
-
-        self.cpp_info.defines.append("LEMON_ONLY_TEMPLATES")
+        self.cpp_info.names["pkg_config"] = "lemon"

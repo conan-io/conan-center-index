@@ -13,6 +13,7 @@ class SpirvtoolsConan(ConanFile):
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos", "diligent")
     url = "https://github.com/conan-io/conan-center-index"
     provides = "spirv-tools"
+    deprecated = "spirv-tools"
     license = "Apache-2.0"
 
     settings = "os", "compiler", "arch", "build_type"

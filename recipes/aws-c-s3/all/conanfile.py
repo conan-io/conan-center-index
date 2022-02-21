@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
+
 
 class AwsCS3(ConanFile):
     name = "aws-c-s3"
@@ -67,15 +68,17 @@ class AwsCS3(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-s3"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-c-s3")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-s3")
+
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-s3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-s3"
-        self.cpp_info.set_property("cmake_file_name", "aws-c-s3")
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.set_property("cmake_target_name", "AWS")
         self.cpp_info.components["aws-c-s3-lib"].names["cmake_find_package"] = "aws-c-s3"
         self.cpp_info.components["aws-c-s3-lib"].names["cmake_find_package_multi"] = "aws-c-s3"
-        self.cpp_info.components["aws-c-s3-lib"].set_property("cmake_target_name", "aws-c-s3")
+        self.cpp_info.components["aws-c-s3-lib"].set_property("cmake_target_name", "AWS::aws-c-s3")
+
         self.cpp_info.components["aws-c-s3-lib"].libs = ["aws-c-s3"]
         self.cpp_info.components["aws-c-s3-lib"].requires = [
             "aws-c-common::aws-c-common-lib",

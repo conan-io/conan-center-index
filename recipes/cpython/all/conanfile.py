@@ -700,9 +700,10 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].libdirs = []
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        if self.options.env_vars:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
 
         python = self._cpython_interpreter_path
         self.user_info.python = python
@@ -724,7 +725,7 @@ class CPythonConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             if self.options.env_vars:
-                self.output.info("Setting PYTHON environment variable: {}".format(pythonhome))
+                self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
                 self.env_info.PYTHONHOME = pythonhome
 
         if self._is_py2:

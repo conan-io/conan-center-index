@@ -61,9 +61,9 @@ Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-
 
 ## Avoiding conflicts
 
-It's recommended to rebase your changes on top of the master branch to avoid conflicts.
-Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts.
-Obviously, PRs that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts. Pull Requests that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+
+Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch. This is importatnt for ConanCenter to ensure it is building the correct recipe revision, see [this comment](https://github.com/conan-io/conan-center-index/pull/8797#discussion_r781993233) for details. One trick is to look out for comments from the [Community's Conflict PR Bot](https://github.com/prince-chrismc/conan-center-index/blob/patch-41/docs/community_resources.md#bots) which can alter you to possible problems.
 
 ## Draft
 
@@ -135,6 +135,8 @@ PR is selected for the merge only if:
 - Master build is not running already (see below)
 
 If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
+
+The conan-center-bot will perform a [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This means should do not need to rebase your pull request; doing so will dismiss any reviews and the reviewer will need to restart.
 
 ### Merge
 

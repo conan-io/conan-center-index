@@ -37,8 +37,11 @@ class FastFloatConan(ConanFile):
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "FastFloat")
+        self.cpp_info.set_property("cmake_target_name", "FastFloat::fast_float")
+
         self.cpp_info.names["cmake_find_package"] = "FastFloat"
         self.cpp_info.names["cmake_find_package_multi"] = "FastFloat"
-        self.cpp_info.set_property("cmake_target_name", "FastFloat::fast_float")
         self.cpp_info.components["fastfloat"].names["cmake_find_package"] = "fast_float"
         self.cpp_info.components["fastfloat"].names["cmake_find_package_multi"] = "fast_float"
+        self.cpp_info.components["fastfloat"].set_property("cmake_target_name", "FastFloat::fast_float")

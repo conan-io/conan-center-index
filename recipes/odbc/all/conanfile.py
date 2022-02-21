@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OdbcConan(ConanFile):
@@ -13,17 +13,17 @@ class OdbcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.unixodbc.org"
     license = ("LGPL-2.1", "GPL-2.1")
-    exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libiconv": [True, False]
+        "with_libiconv": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libiconv": True
+        "with_libiconv": True,
     }
 
     _autotools = None
@@ -31,6 +31,10 @@ class OdbcConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.shared:
@@ -44,7 +48,7 @@ class OdbcConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
+            raise ConanInvalidConfiguration("odbc is a system lib on Windows")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
@@ -96,25 +100,34 @@ class OdbcConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "ODBC")
+        self.cpp_info.set_property("cmake_target_name", "ODBC::ODBC")
+        # to avoid conflict with pkgconfig file of _odbc component
+        self.cpp_info.set_property("pkg_config_name", "odbc_full_package")
+
         self.cpp_info.names["cmake_find_package"] = "ODBC"
         self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
+
         # odbc
-        self.cpp_info.components["_odbc"].names["pkg_config"] = "odbc"
+        self.cpp_info.components["_odbc"].set_property("pkg_config_name", "odbc")
         self.cpp_info.components["_odbc"].libs = ["odbc"]
         self.cpp_info.components["_odbc"].requires = ["odbcltdl"]
         if self.options.with_libiconv:
             self.cpp_info.components["_odbc"].requires.append("libiconv::libiconv")
+
         # odbcinst
-        self.cpp_info.components["odbcinst"].names["pkg_config"] = "odbcinst"
+        self.cpp_info.components["odbcinst"].set_property("pkg_config_name", "odbcinst")
         self.cpp_info.components["odbcinst"].libs = ["odbcinst"]
         self.cpp_info.components["odbcinst"].requires = ["odbcltdl"]
+
         # odbccr
-        self.cpp_info.components["odbccr"].names["pkg_config"] = "odbccr"
+        self.cpp_info.components["odbccr"].set_property("pkg_config_name", "odbccr")
         self.cpp_info.components["odbccr"].libs = ["odbccr"]
 
         self.cpp_info.components["odbcltdl"].libs = ["ltdl"]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_odbc"].system_libs = ["pthread"]
             self.cpp_info.components["odbcinst"].system_libs = ["pthread"]
             self.cpp_info.components["odbcltdl"].system_libs = ["dl"]

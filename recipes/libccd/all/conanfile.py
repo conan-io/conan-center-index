@@ -2,30 +2,31 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibccdConan(ConanFile):
     name = "libccd"
     description = "Library for collision detection between two convex shapes."
     license = "BSD-3-Clause"
-    topics = ("conan", "libccd", "collision", "3d")
+    topics = ("libccd", "collision", "3d")
     homepage = "https://github.com/danfis/libccd"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_double_precision": [True, False]
+        "enable_double_precision": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_double_precision": False
+        "enable_double_precision": False,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -91,23 +92,23 @@ class LibccdConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "ccd"
-        self.cpp_info.names["cmake_find_package_multi"] = "ccd"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "ccd"
+        self.cpp_info.set_property("cmake_file_name", "ccd")
+        self.cpp_info.set_property("cmake_target_name", "ccd")
+        self.cpp_info.set_property("pkg_config_name", "ccd")
+
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append("CCD_STATIC_DEFINE")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "ccd"
+        self.cpp_info.names["cmake_find_package_multi"] = "ccd"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "ccd"

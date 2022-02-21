@@ -4,6 +4,11 @@ project(test_package)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
+# Workaround for -rpath on arm64: https://cmake.org/cmake/help/latest/release/3.20.html#id2
+if(CMAKE_VERSION VERSION_LESS "3.20.1" AND CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+    set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
+endif()
+
 # This is a non-official mpdecimal module!
 find_package(mpdecimal REQUIRED)
 

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibgeotiffConan(ConanFile):
@@ -10,15 +10,21 @@ class LibgeotiffConan(ConanFile):
     description = "Libgeotiff is an open source library normally hosted on top " \
                   "of libtiff for reading, and writing GeoTIFF information tags."
     license = ["MIT", "BSD-3-Clause"]
-    topics = ("conan", "libgeotiff", "geotiff", "tiff")
+    topics = ("libgeotiff", "geotiff", "tiff")
     homepage = "https://github.com/OSGeo/libgeotiff"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -28,6 +34,11 @@ class LibgeotiffConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,15 +51,15 @@ class LibgeotiffConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("libtiff/4.2.0")
-        self.requires("proj/8.1.0")
+        self.requires("libtiff/4.3.0")
+        self.requires("proj/8.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -70,10 +81,10 @@ class LibgeotiffConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_vars_file)
+            os.path.join(self.package_folder, self._module_vars_file)
         )
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_target_file),
+            os.path.join(self.package_folder, self._module_target_file),
             {"geotiff_library": "geotiff::geotiff"}
         )
 
@@ -110,18 +121,24 @@ class LibgeotiffConan(ConanFile):
 
     @property
     def _module_vars_file(self):
-        return "conan-official-{}-variables.cmake".format(self.name)
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     @property
     def _module_target_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "GeoTIFF")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
+        self.cpp_info.set_property("cmake_file_name", "geotiff")
+        self.cpp_info.set_property("cmake_target_name", "geotiff_library")
+
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_vars_file)]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [os.path.join(self._module_subfolder, self._module_target_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_file]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_file]
+
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

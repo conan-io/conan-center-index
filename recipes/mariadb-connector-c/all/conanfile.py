@@ -136,5 +136,7 @@ class MariadbConnectorcConan(ConanFile):
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
         self.output.info("Prepending to MARIADB_PLUGIN_DIR runtime environment variable: {}".format(plugin_dir))
         self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+
+        # TODO: to remove in conan v2?
+        self.cpp_info.names["pkg_config"] = "libmariadb"
         self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

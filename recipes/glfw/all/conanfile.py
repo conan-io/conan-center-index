@@ -1,9 +1,9 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-# TODO: bump to 1.43.0 due to set_property()
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class GlfwConan(ConanFile):
@@ -34,6 +34,10 @@ class GlfwConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -86,8 +90,8 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             self._cmake.definitions["GLFW_INSTALL"] = True
             self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
+            if self._is_msvc:
+                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
             self._cmake.configure()
         return self._cmake
 
@@ -120,13 +124,8 @@ class GlfwConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glfw3")
@@ -135,7 +134,7 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             libname += "dll"
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -145,11 +144,11 @@ class GlfwConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
 
-        # backward support of cmake_find_package & cmake_find_package_multi
+        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
         self.cpp_info.names["cmake_find_package"] = "glfw"
         self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "glfw3"

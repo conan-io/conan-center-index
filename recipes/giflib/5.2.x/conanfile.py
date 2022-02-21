@@ -1,7 +1,7 @@
 from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class GiflibConan(ConanFile):
@@ -11,6 +11,7 @@ class GiflibConan(ConanFile):
     license = "MIT"
     homepage = "http://giflib.sourceforge.net"
     topics = ("giflib", "image", "multimedia", "format", "graphics")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,14 +24,21 @@ class GiflibConan(ConanFile):
         "utils" : True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
-
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +51,7 @@ class GiflibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.requires("getopt-for-visual-studio/20200201")
 
     def source(self):
@@ -73,10 +81,15 @@ class GiflibConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "GIF")
+        self.cpp_info.set_property("cmake_target_name", "GIF::GIF")
+
         self.cpp_info.names["cmake_find_package"] = "GIF"
         self.cpp_info.names["cmake_find_package_multi"] = "GIF"
+
         self.cpp_info.libs = ["gif"]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
 
         bin_path = os.path.join(self.package_folder, "bin")

@@ -1,0 +1,36 @@
+sources:
+  "0.9.0":
+    Windows:
+      "x86_64":
+        Visual Studio:
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-windows.zip"
+            sha256: "f81bfea4cf09053510e3e74c16c1ee010fc93def8a7e78744443b950f0011c3b"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.0/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Linux:
+      "x86_64":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-manylinux2014_x86_64.tar.gz"
+            sha256: "27847f15e4294e707486458e857d7cb11806481bb67a26f076a717a1446827ed"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.0/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-manylinux2014_aarch64.tar.gz"
+            sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.0/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Macos:
+      ## MacOX x86_64 depends system llvm library.
+      # "x86_64":
+      #   "gcc":
+      #     - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-darwin_x86_64.tar.gz"
+      #       sha256: "1bc0c0a3247543d331b8390d4a97848080a66b519afbc890d86347592bfd72da"
+      #     - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.0/LICENSE"
+      #       sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.9.0/WasmEdge-0.9.0-darwin_arm64.tar.gz"
+            sha256: "236a407a646f746ab78a1d0a39fa4e85fe28eae219b1635ba49f908d7944686d"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.9.0/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"

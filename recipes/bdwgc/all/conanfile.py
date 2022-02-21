@@ -69,7 +69,7 @@ class BdwGcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if tools.Version(self.version) <= "8.0.4":
+        if tools.Version(self.version) <= "8.0.6":
             del self.options.throw_bad_alloc_library
         if not self.options.cplusplus:
             del self.settings.compiler.libcxx

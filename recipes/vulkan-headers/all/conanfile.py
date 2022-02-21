@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class VulkanHeadersConan(ConanFile):
@@ -33,11 +33,10 @@ class VulkanHeadersConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VulkanHeaders")
-        self.cpp_info.set_property("cmake_target_name", "Vulkan")
-        self.cpp_info.components["vulkanheaders"].set_property("cmake_target_name", "Headers")
+        self.cpp_info.components["vulkanheaders"].set_property("cmake_target_name", "Vulkan::Headers")
         self.cpp_info.components["vulkanheaders"].bindirs = []
         self.cpp_info.components["vulkanheaders"].libdirs = []
-        self.cpp_info.components["vulkanregistry"].set_property("cmake_target_name", "Registry")
+        self.cpp_info.components["vulkanregistry"].set_property("cmake_target_name", "Vulkan::Registry")
         self.cpp_info.components["vulkanregistry"].includedirs = [os.path.join("res", "vulkan", "registry")]
         self.cpp_info.components["vulkanregistry"].bindirs = []
         self.cpp_info.components["vulkanregistry"].libdirs = []

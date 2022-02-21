@@ -91,6 +91,12 @@ class ArmadilloConan(ConanFile):
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
 
+        # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
+        # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
+        # Therefore, in these cases we remove the `use_extern_rng` option in conan
+        if self.settings.os == "Windows":
+            del self.options.use_extern_rng
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -147,6 +153,12 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
+        # Ignore use_extern_rng when the option has been removed
+        if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
+            raise ConanInvalidConfiguration(
+                "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
+            )
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -194,7 +206,7 @@ class ArmadilloConan(ConanFile):
         )
         self._cmake.definitions["ARMA_USE_HDF5"] = self.options.use_hdf5
         self._cmake.definitions["ARMA_USE_ARPACK"] = self.options.use_arpack
-        self._cmake.definitions["ARMA_USE_EXTERN_RNG"] = self.options.use_extern_rng
+        self._cmake.definitions["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_exern_rng", default=False)
         self._cmake.definitions["ARMA_USE_SUPERLU"] = self.options.use_superlu
         self._cmake.definitions["ARMA_USE_WRAPPER"] = self.options.use_wrapper
         self._cmake.definitions["ARMA_USE_ACCELERATE"] = (
@@ -266,6 +278,9 @@ class ArmadilloConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.names["pkg_config"] = "armadillo"
+
+        if self.options.get_safe("use_extern_rng"):
+            self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
 
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")

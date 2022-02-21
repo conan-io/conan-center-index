@@ -1,7 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 required_conan_version = ">=1.43.0"
+
 
 class ZstdConan(ConanFile):
     name = "zstd"
@@ -10,11 +11,20 @@ class ZstdConan(ConanFile):
     description = "Zstandard - Fast real-time compression algorithm"
     topics = ("zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "threading": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "threading": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -50,6 +60,10 @@ class ZstdConan(ConanFile):
         self._cmake.definitions["ZSTD_BUILD_PROGRAMS"] = False
         self._cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
+        if tools.Version(self.version) < "1.4.3":
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

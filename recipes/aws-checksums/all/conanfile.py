@@ -1,17 +1,20 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class AwsChecksums(ConanFile):
     name = "aws-checksums"
-    description = "Cross-Platform HW accelerated CRC32c and CRC32 with fallback to efficient SW implementations. C interface with language bindings for each of our SDKs "
+    description = (
+        "Cross-Platform HW accelerated CRC32c and CRC32 with fallback to efficient "
+        "SW implementations. C interface with language bindings for each of our SDKs."
+    )
     topics = ("aws", "checksum", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-checksums"
     license = "Apache-2.0",
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,6 +25,7 @@ class AwsChecksums(ConanFile):
         "fPIC": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -72,11 +76,17 @@ class AwsChecksums(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-checksums"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "aws-checksums")
+        self.cpp_info.set_property("cmake_target_name", "AWS::aws-checksums")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["aws-checksums-lib"].libs = ["aws-checksums"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "aws-checksums"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-checksums"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package"] = "aws-checksums"
         self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package_multi"] = "aws-checksums"
-        self.cpp_info.components["aws-checksums-lib"].libs = ["aws-checksums"]
+        self.cpp_info.components["aws-checksums-lib"].set_property("cmake_target_name", "AWS::aws-checksums")
         self.cpp_info.components["aws-checksums-lib"].requires = ["aws-c-common::aws-c-common-lib"]

@@ -12,6 +12,7 @@ class SpirvheadersConan(ConanFile):
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
     provides = "spirv-headers"
+    deprecated = "spirv-headers"
 
     settings = "os", "compiler", "arch", "build_type"
 

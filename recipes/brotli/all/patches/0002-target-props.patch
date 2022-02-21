@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -183,6 +183,16 @@ foreach(lib IN LISTS BROTLI_SHARED_LIBS)
+@@ -183,6 +183,16 @@
    set_target_properties (${lib} PROPERTIES DEFINE_SYMBOL "${LIB}_SHARED_COMPILATION")
  endforeach()
  
@@ -17,7 +17,7 @@
  foreach(lib IN LISTS BROTLI_SHARED_LIBS BROTLI_STATIC_LIBS)
    target_link_libraries(${lib} ${LIBM_LIBRARY})
    set_property(TARGET ${lib} APPEND PROPERTY INCLUDE_DIRECTORIES ${BROTLI_INCLUDE_DIRS})
-@@ -190,7 +200,6 @@ foreach(lib IN LISTS BROTLI_SHARED_LIBS BROTLI_STATIC_LIBS)
+@@ -190,7 +200,6 @@
      VERSION "${BROTLI_ABI_COMPATIBILITY}.${BROTLI_ABI_AGE}.${BROTLI_ABI_REVISION}"
      SOVERSION "${BROTLI_ABI_COMPATIBILITY}")
    if(NOT BROTLI_EMSCRIPTEN)
@@ -25,14 +25,14 @@
    endif()
    set_property(TARGET ${lib} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BROTLI_INCLUDE_DIRS}")
  endforeach()
-@@ -217,15 +226,13 @@ endif()
+@@ -217,15 +226,12 @@
  # Build the brotli executable
  add_executable(brotli ${BROTLI_CLI_C})
  target_link_libraries(brotli ${BROTLI_LIBRARIES_STATIC})
 +set_target_properties(brotli PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT ON)
  
  # Installation
- if(NOT BROTLI_EMSCRIPTEN)
+-if(NOT BROTLI_EMSCRIPTEN)
  if(NOT BROTLI_BUNDLED_MODE)
 -  install(
 -    TARGETS brotli
@@ -43,7 +43,7 @@
    install(
      TARGETS ${BROTLI_LIBRARIES_CORE}
      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-@@ -233,12 +240,14 @@ if(NOT BROTLI_BUNDLED_MODE)
+@@ -233,19 +239,20 @@
      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
    )
  
@@ -58,3 +58,10 @@
  
    install(
      DIRECTORY ${BROTLI_INCLUDE_DIRS}/brotli
+     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+   )
+ endif()  # BROTLI_BUNDLED_MODE
+-endif()  # BROTLI_EMSCRIPTEN
+ 
+ # Tests
+ 

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OatppsqliteConan(ConanFile):
@@ -11,8 +11,8 @@ class OatppsqliteConan(ConanFile):
     homepage = "https://github.com/oatpp/oatpp-sqlite"
     url = "https://github.com/conan-io/conan-center-index"
     description = "oat++ SQLite library"
-    topics = ("conan", "oat++", "oatpp", "sqlite")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("oat++", "oatpp", "sqlite")
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
@@ -35,6 +35,8 @@ class OatppsqliteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
@@ -46,7 +48,7 @@ class OatppsqliteConan(ConanFile):
 
     def requirements(self):
         self.requires("oatpp/" + self.version)
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.37.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -74,15 +76,18 @@ class OatppsqliteConan(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "oatpp-sqlite"
         self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-sqlite"
+        self.cpp_info.set_property("cmake_file_name", "oatpp-sqlite")
         self.cpp_info.names["cmake_find_package"] = "oatpp"
         self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
+        self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-sqlite")
         self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package"] = "oatpp-sqlite"
         self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package_multi"] = "oatpp-sqlite"
+        self.cpp_info.components["_oatpp-sqlite"].set_property("cmake_target_name", "oatpp::oatpp-sqlite")
         self.cpp_info.components["_oatpp-sqlite"].includedirs = [
             os.path.join("include", "oatpp-{}".format(self.version), "oatpp-sqlite")
         ]
         self.cpp_info.components["_oatpp-sqlite"].libdirs = [os.path.join("lib", "oatpp-{}".format(self.version))]
         self.cpp_info.components["_oatpp-sqlite"].libs = ["oatpp-sqlite"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_oatpp-sqlite"].system_libs = ["pthread"]
         self.cpp_info.components["_oatpp-sqlite"].requires = ["oatpp::oatpp", "sqlite3::sqlite3"]

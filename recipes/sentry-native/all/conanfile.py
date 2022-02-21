@@ -1,22 +1,22 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SentryNativeConan(ConanFile):
     name = "sentry-native"
-    description = "The Sentry Native SDK is an error and crash reporting client for native applications,\n" \
-                  "optimized for C and C++. Sentry allows to add tags,\n" \
-                  "breadcrumbs and arbitrary custom context to enrich error reports."
+    description = (
+        "The Sentry Native SDK is an error and crash reporting client for native "
+        "applications, optimized for C and C++. Sentry allows to add tags, "
+        "breadcrumbs and arbitrary custom context to enrich error reports."
+    )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getsentry/sentry-native"
     license = "MIT"
-    topics = ("conan", "breakpad", "crashpad",
-              "error-reporting", "crash-reporting")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
+    topics = ("breakpad", "crashpad", "error-reporting", "crash-reporting")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,6 +38,7 @@ class SentryNativeConan(ConanFile):
 
     }
 
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
     _cmake = None
 
     @property
@@ -52,6 +53,11 @@ class SentryNativeConan(ConanFile):
             "clang": "3.4",
             "apple-clang": "5.1",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,6 +86,25 @@ class SentryNativeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if self.options.transport == "curl":
+            self.requires("libcurl/7.80.0")
+        if self.options.backend == "crashpad":
+            if self.options.with_crashpad == "sentry":
+                self.requires("sentry-crashpad/{}".format(self.version))
+            if self.options.with_crashpad == "google":
+                self.requires("crashpad/cci.20210507")
+        elif self.options.backend == "breakpad":
+            if self.options.with_breakpad == "sentry":
+                self.requires("sentry-breakpad/{}".format(self.version))
+            if self.options.with_breakpad == "google":
+                self.requires("breakpad/cci.20210521")
+        if self.options.qt:
+            self.requires("qt/5.15.2")
+            self.requires("openssl/1.1.1m")
+            if tools.Version(self.version) < "0.4.5":
+                raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
@@ -107,25 +132,6 @@ class SentryNativeConan(ConanFile):
     def build_requirements(self):
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
-
-    def requirements(self):
-        if self.options.transport == "curl":
-            self.requires("libcurl/7.78.0")
-        if self.options.backend == "crashpad":
-            if self.options.with_crashpad == "sentry":
-                self.requires("sentry-crashpad/{}".format(self.version))
-            if self.options.with_crashpad == "google":
-                self.requires("crashpad/cci.20210507")
-        elif self.options.backend == "breakpad":
-            if self.options.with_breakpad == "sentry":
-                self.requires("sentry-breakpad/{}".format(self.version))
-            if self.options.with_breakpad == "google":
-                self.requires("breakpad/cci.20210521")
-        if self.options.qt:
-            self.requires("qt/5.15.2")
-            self.requires("openssl/1.1.1l")
-            if tools.Version(self.version) < "0.4.5":
-                raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
@@ -158,8 +164,8 @@ class SentryNativeConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*pdb")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "sentry"
-        self.cpp_info.names["cmake_find_package_multi"] = "sentry"
+        self.cpp_info.set_property("cmake_file_name", "sentry")
+        self.cpp_info.set_property("cmake_target_name", "sentry::sentry")
         self.cpp_info.libs = ["sentry"]
         if self.settings.os in ("Android", "FreeBSD", "Linux"):
             self.cpp_info.exelinkflags = ["-Wl,-E,--build-id=sha1"]
@@ -177,3 +183,7 @@ class SentryNativeConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "sentry"
+        self.cpp_info.names["cmake_find_package_multi"] = "sentry"

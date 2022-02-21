@@ -24,7 +24,6 @@ class PerfettoConan(ConanFile):
             "disable_logging": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
     _cmake = None
@@ -60,7 +59,17 @@ class PerfettoConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

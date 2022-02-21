@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SpirvheadersConan(ConanFile):
@@ -53,5 +53,11 @@ class SpirvheadersConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SPIRV-Headers")
+        self.cpp_info.set_property("cmake_target_name", "SPIRV-Headers::SPIRV-Headers")
+        self.cpp_info.set_property("pkg_config_name", "SPIRV-Headers")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "SPIRV-Headers"
         self.cpp_info.names["cmake_find_package_multi"] = "SPIRV-Headers"
+        self.cpp_info.names["pkg_config"] = "SPIRV-Headers"

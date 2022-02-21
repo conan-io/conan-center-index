@@ -272,7 +272,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
@@ -280,66 +280,66 @@ class QtConan(ConanFile):
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
-            self.requires("glib/2.69.2")
+            self.requires("glib/2.70.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.5")
+            self.requires("double-conversion/3.1.7")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/69.1")
+            self.requires("icu/70.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.8.0")
+            self.requires("harfbuzz/3.2.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.0")
+                self.requires("libjpeg-turbo/2.1.2")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.37.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.2")
+            self.requires("libpq/13.4")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
             self.requires("openal/1.21.1")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.0")
+                self.requires("xkbcommon/1.3.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self.options.qtwayland:
-            self.requires("wayland/1.19.0")
+            self.requires("wayland/1.20.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.3")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.72")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
-            self.requires("gst-plugins-base/1.19.1")
+            self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.21.3")
+        self.build_requires("cmake/3.22.0")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
@@ -351,7 +351,7 @@ class QtConan(ConanFile):
             self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                self.build_requires("bison/3.7.1")
+                self.build_requires("bison/3.7.6")
                 self.build_requires("flex/2.6.4")
             else:
                 self.build_requires("winflexbison/2.5.24")
@@ -392,7 +392,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.19.0")
+            self.build_requires("wayland/1.20.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -954,6 +954,9 @@ class QtConan(ConanFile):
 
         if self.options.qt5compat:
             _create_module("Core5Compat")
+        
+        # since https://github.com/qt/qtdeclarative/commit/4fb84137f1c0a49d64b8bef66fef8a4384cc2a68
+        qt_quick_enabled = self.options.gui and (tools.Version(self.version) < "6.2.0" or self.options.qtshadertools)
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
@@ -963,7 +966,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
-            if self.options.gui:
+            if qt_quick_enabled:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
                 if self.options.widgets:
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
@@ -981,14 +984,14 @@ class QtConan(ConanFile):
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
-        if self.options.qtquick3d and self.options.gui:
+        if self.options.qtquick3d and qt_quick_enabled:
             _create_module("Quick3DUtils", ["Gui"])
             _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
         if (self.options.get_safe("qtquickcontrols2") or \
-            (self.options.qtdeclarative and tools.Version(self.version) >= "6.2.0")) and self.options.gui:
+            (self.options.qtdeclarative and tools.Version(self.version) >= "6.2.0")) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
@@ -1012,7 +1015,7 @@ class QtConan(ConanFile):
             _create_module("AxContainer", ["AxBase"])
         if self.options.get_safe("qtcharts"):
             _create_module("Charts", ["Gui", "Widgets"])
-        if self.options.get_safe("qtdatavis3d"):
+        if self.options.get_safe("qtdatavis3d") and qt_quick_enabled:
             _create_module("DataVisualization", ["Gui", "OpenGL", "Qml", "Quick"])
         if self.options.get_safe("qtlottie"):
             _create_module("Bodymovin", ["Gui"])
@@ -1022,7 +1025,7 @@ class QtConan(ConanFile):
             _create_module("Scxml")
             _create_plugin("QScxmlEcmaScriptDataModelPlugin", "qscxmlecmascriptdatamodel", "scxmldatamodel", ["Scxml", "Qml"])
             _create_module("ScxmlQml", ["Scxml", "Qml"])
-        if self.options.get_safe("qtvirtualkeyboard"):
+        if self.options.get_safe("qtvirtualkeyboard") and qt_quick_enabled:
             _create_module("VirtualKeyboard", ["Gui", "Qml", "Quick"])
             _create_plugin("QVirtualKeyboardPlugin", "qtvirtualkeyboardplugin", "platforminputcontexts", ["Gui", "Qml", "VirtualKeyboard"])
             _create_plugin("QtVirtualKeyboardHangulPlugin", "qtvirtualkeyboard_hangul", "virtualkeyboard", ["Gui", "Qml", "VirtualKeyboard"])
@@ -1037,12 +1040,13 @@ class QtConan(ConanFile):
             _create_module("3DExtras", ["Gui", "3DCore", "3DInput", "3DLogic", "3DRender"])
             _create_plugin("DefaultGeometryLoaderPlugin", "defaultgeometryloader", "geometryloaders", ["3DCore", "3DRender", "Gui"])
             _create_plugin("fbxGeometryLoaderPlugin", "fbxgeometryloader", "geometryloaders", ["3DCore", "3DRender", "Gui"])
-            _create_module("3DQuick", ["3DCore", "Gui", "Qml", "Quick"])
-            _create_module("3DQuickAnimation", ["3DAnimation", "3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
-            _create_module("3DQuickExtras", ["3DCore", "3DExtras", "3DInput", "3DQuick", "3DRender", "Gui", "Qml"])
-            _create_module("3DQuickInput", ["3DCore", "3DInput", "3DQuick", "Gui", "Qml"])
-            _create_module("3DQuickRender", ["3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
-            _create_module("3DQuickScene2D", ["3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
+            if qt_quick_enabled:
+                _create_module("3DQuick", ["3DCore", "Gui", "Qml", "Quick"])
+                _create_module("3DQuickAnimation", ["3DAnimation", "3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
+                _create_module("3DQuickExtras", ["3DCore", "3DExtras", "3DInput", "3DQuick", "3DRender", "Gui", "Qml"])
+                _create_module("3DQuickInput", ["3DCore", "3DInput", "3DQuick", "Gui", "Qml"])
+                _create_module("3DQuickRender", ["3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
+                _create_module("3DQuickScene2D", ["3DCore", "3DQuick", "3DRender", "Gui", "Qml"])
         if self.options.get_safe("qtimageformats"):
             _create_plugin("ICNSPlugin", "qicns", "imageformats", ["Gui"])
             _create_plugin("QJp2Plugin", "qjp2", "imageformats", ["Gui"])
@@ -1074,7 +1078,7 @@ class QtConan(ConanFile):
                 multimedia_reqs.append("pulseaudio::pulse")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
-            if self.options.qtdeclarative and self.options.gui:
+            if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
@@ -1131,7 +1135,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebchannel"):
             _create_module("WebChannel", ["Qml"])
 
-        if self.options.get_safe("qtwebengine"):
+        if self.options.get_safe("qtwebengine") and qt_quick_enabled:
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \

@@ -33,7 +33,7 @@ class WaylandProtocolsConan(ConanFile):
             raise ConanInvalidConfiguration("Wayland-protocols can be built on Linux only")
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.1")
+        self.build_requires("meson/0.60.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

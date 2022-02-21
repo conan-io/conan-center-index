@@ -4,7 +4,7 @@ import contextlib
 import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FontconfigConan(ConanFile):
@@ -24,7 +24,6 @@ class FontconfigConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/*"
     generators = "pkg_config"
 
     @property
@@ -36,8 +35,16 @@ class FontconfigConan(ConanFile):
         return "build_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,23 +57,22 @@ class FontconfigConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("freetype/2.11.0")
-        self.requires("expat/2.4.1")
+        self.requires("freetype/2.11.1")
+        self.requires("expat/2.4.2")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
+
+    def validate(self):
+        if self._is_msvc and tools.Version(self.version) < "2.13.93":
+            raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("meson/0.59.1")
-        else:
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
-
-    def validate(self):
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.version) < "2.13.93":
-            raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
+        if self._is_msvc:
+            self.build_requires("meson/0.60.2")
+        elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -116,7 +122,7 @@ class FontconfigConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.vcvars(self):
                 env = {
                     "CC": "cl",
@@ -131,7 +137,7 @@ class FontconfigConan(ConanFile):
 
     def build(self):
         self._patch_files()
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with self._build_context():
                 meson = self._configure_meson()
                 meson.build()
@@ -142,7 +148,7 @@ class FontconfigConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with self._build_context():
                 meson = self._configure_meson()
                 meson.install()
@@ -162,16 +168,23 @@ class FontconfigConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Fontconfig")
+        self.cpp_info.set_property("cmake_target_name", "Fontconfig::Fontconfig")
+        self.cpp_info.set_property("pkg_config_name", "fontconfig")
         self.cpp_info.libs = ["fontconfig"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
+
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.cpp_info.names["pkg_config"] = "fontconfig"
 
         fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
         self.output.info("Creating FONTCONFIG_FILE environment variable: {}".format(fontconfig_file))
-        self.env_info.FONTCONFIG_FILE = fontconfig_file
+        self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
+        self.env_info.FONTCONFIG_FILE = fontconfig_file # TODO: remove in conan v2?
+
         fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
         self.output.info("Creating FONTCONFIG_PATH environment variable: {}".format(fontconfig_path))
-        self.env_info.FONTCONFIG_PATH = fontconfig_path
+        self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
+        self.env_info.FONTCONFIG_PATH = fontconfig_path # TODO: remove in conan v2?

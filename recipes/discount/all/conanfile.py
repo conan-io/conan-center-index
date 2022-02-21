@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class DiscountConan(ConanFile):
@@ -22,13 +23,17 @@ class DiscountConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,6 +44,10 @@ class DiscountConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("discount doesn't support cross-build yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -67,10 +76,16 @@ class DiscountConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "discount")
+        self.cpp_info.set_property("cmake_target_name", "discount::libmarkdown")
+        self.cpp_info.set_property("pkg_config_name", "libmarkdown")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.components["_discount"].libs = ["markdown"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "discount"
         self.cpp_info.names["cmake_find_package_multi"] = "discount"
         self.cpp_info.names["pkg_config"] = "libmarkdown"
         self.cpp_info.components["_discount"].names["cmake_find_package"] = "libmarkdown"
         self.cpp_info.components["_discount"].names["cmake_find_package_multi"] = "libmarkdown"
-        self.cpp_info.components["_discount"].names["pkg_config"] = "libmarkdown"
-        self.cpp_info.components["_discount"].libs = ["markdown"]
+        self.cpp_info.components["_discount"].set_property("pkg_config_name", "libmarkdown")

@@ -103,7 +103,6 @@ class OpenSSLConan(ConanFile):
             self.options.no_asm = True
             self.options.no_threads = True
             self.options.no_stdio = True
-            self.options.no_tests = True
 
     def configure(self):
         if self.options.shared:
@@ -132,7 +131,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["msvc", "Visual Studio"]
 
     @property
     def _is_clangcl(self):
@@ -319,7 +318,8 @@ class OpenSSLConan(ConanFile):
     def _ancestor_target(self):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
-        query = f"{self.settings.os}-{self.settings.arch}-{self.settings.compiler}"
+        compiler = "Visual Studio" if self.settings.compiler == "msvc" else self.settings.compiler
+        query = f"{self.settings.os}-{self.settings.arch}-{compiler}"
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
             raise ConanInvalidConfiguration(
@@ -626,10 +626,20 @@ class OpenSSLConan(ConanFile):
         make_program = tools.unix_path(make_program)
         return make_program
 
+    @property
+    def _runtime(self):
+        if self.settings.compiler == "msvc":
+            return "M{}{}".format(
+                    "T" if self.settings.compiler.runtime == "static" else "D",
+                    "d" if self.settings.compiler.runtime_type == "Debug" else "",
+                )
+        else:
+            return self.settings.compiler.runtime
+
     def _replace_runtime_in_file(self, filename):
         for e in ("MDd", "MTd", "MD", "MT"):
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
+            tools.replace_in_file(filename, "/%s " % e, "/%s " % self._runtime, strict=False)
+            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self._runtime, strict=False)
 
     def package(self):
         self.copy("*LICENSE*", src=self._source_subfolder, dst="licenses")

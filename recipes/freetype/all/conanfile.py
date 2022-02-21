@@ -4,7 +4,7 @@ import re
 import shutil
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FreetypeConan(ConanFile):
@@ -23,6 +23,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_brotli": [True, False],
+        "subpixel": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "with_brotli": True,
+        "subpixel": False
     }
 
     exports_sources = "CMakeLists.txt"
@@ -102,6 +104,10 @@ class FreetypeConan(ConanFile):
                 tools.replace_in_file(cmakelists, "find_package(BrotliDec)", "")
                 tools.replace_in_file(cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
 
+        config_h = os.path.join(self._source_subfolder, "include", "freetype", "config", "ftoption.h")
+        if self.options.subpixel:
+            tools.replace_in_file(config_h, "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */", "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -113,6 +119,8 @@ class FreetypeConan(ConanFile):
         self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
         if self._has_with_brotli_option:
             self._cmake.definitions["FT_WITH_BROTLI"] = self.options.with_brotli
+        # Generate a relocatable shared lib on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
@@ -228,25 +236,33 @@ class FreetypeConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "Freetype")
+        self.cpp_info.set_property("cmake_module_target_name", "Freetype::Freetype")
+        self.cpp_info.set_property("cmake_file_name", "freetype")
+        self.cpp_info.set_property("cmake_target_name", "freetype")
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "freetype2")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FT2_CONFIG = freetype_config
         self._chmod_plus_x(freetype_config)
-        # cmake's FindFreetype.cmake module with imported target: Freetype::Freetype
-        self.cpp_info.filenames["cmake_find_package"] = "Freetype"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
-        self.cpp_info.names["cmake_find_package"] = "Freetype"
-        self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
-        self.cpp_info.names["pkg_config"] = "freetype2"
 
         libtool_version = tools.load(self._libtool_version_txt).strip()
         self.user_info.LIBTOOL_VERSION = libtool_version
         # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
         # self.cpp_info.version["pkg_config"] = pkg_config_version
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Freetype"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
+        self.cpp_info.names["cmake_find_package"] = "Freetype"
+        self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
+        self.cpp_info.names["pkg_config"] = "freetype2"
