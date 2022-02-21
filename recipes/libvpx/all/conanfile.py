@@ -160,6 +160,10 @@ class LibVPXConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # relocatable shared lib on macOS
+        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
+                              "-dynamiclib",
+                              "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.make()
