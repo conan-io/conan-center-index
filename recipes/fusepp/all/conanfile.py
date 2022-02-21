@@ -67,3 +67,12 @@ class FuseppConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["fusepp"]
+        # TODO: Remove after Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "fusepp"
+        self.cpp_info.names["cmake_find_package_multi"] = "fusepp"
+
+        self.cpp_info.set_property("cmake_file_name", "fusepp")
+        self.cpp_info.set_property("cmake_target_name", "fusepp")
