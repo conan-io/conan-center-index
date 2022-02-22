@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools, errors
-import sys, os
 
 required_conan_version = ">=1.33.0"
 
@@ -13,7 +12,7 @@ class NovelRTConan(ConanFile):
     description = "A cross-platform 2D game engine accompanied by a strong toolset for visual novels."
     topics = {"conan", "game", "engine" "gamedev", "visualnovel", "vn"}
     settings = "os", "compiler", "build_type", "arch"
-    build_requires = "cmake/3.19.8"
+    build_requires = ("cmake/3.19.8")
     requires = [
         ("freetype/2.10.1"),
         ("glfw/3.3.2"),
@@ -115,5 +114,8 @@ class NovelRTConan(ConanFile):
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support {self.settings.os} at this time.")
         if self.settings.compiler in self.unsupportedCompilers:
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation with {self.settings.compiler} at this time.")
+        if self.settings.compiler == "clang":
+            if self.settings.compiler.libcxx != "libstdc++11":
+                raise errors.ConanInvalidConfiguration(f"Please use libstdc++11 when compiling NovelRT with Clang.")
         if self.settings.arch != "x86_64":
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation under {self.settings.arch} architecture at this time.")
