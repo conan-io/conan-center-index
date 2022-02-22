@@ -133,11 +133,15 @@ class CCTagConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         self.cpp_info.requires = [
             "boost::atomic", "boost::chrono", "boost::date_time", "boost::exception",
-            "boost::filesystem", "boost::serialization", "boost::stacktrace",
-            "boost::system", "boost::thread", "boost::timer", "boost::math_c99",
-            "eigen::eigen", "tbb::tbb", "opencv::opencv_core", "opencv::opencv_videoio",
+            "boost::filesystem", "boost::serialization", "boost::system",
+            "boost::thread", "boost::timer", "boost::math_c99", "eigen::eigen",
+            "tbb::tbb", "opencv::opencv_core", "opencv::opencv_videoio",
             "opencv::opencv_imgproc", "opencv::opencv_imgcodecs",
         ]
+        if self.settings.os == "Windows":
+            self.cpp_info.requires.append("boost::stacktrace_windbg")
+        else:
+            self.cpp_info.requires.append("boost::stacktrace_basic")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "CCTag"
