@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import glob
@@ -159,16 +160,8 @@ class ICUBase(ConanFile):
 
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
-
-            if self.settings.compiler == "Visual Studio":
-                flags = "-{}".format(self.settings.compiler.runtime)
-                if tools.Version(self.settings.compiler.version) >= "12":
-                    flags += " -FS"
-            else:
-                flags = "-{}{}".format(
-                    "MT" if self.settings.runtime == "static" else "MD",
-                    "d" if self.settings.runtime_type == "Debug" else "",
-                )
+            flags = "-{}".format(msvc_runtime_flag(self))
+            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
                 flags += " -FS"
             tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
