@@ -79,8 +79,7 @@ class LlhttpParserConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "llhttp")
         self.cpp_info.set_property("cmake_target_name", "llhttp::llhttp")
         self.cpp_info.set_property("pkg_config_name", "libllhttp")
-        suffix = "d" if self._is_msvc and self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["llhttp{}".format(suffix)]
+        self.cpp_info.libs = ["llhttp"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "llhttp"
