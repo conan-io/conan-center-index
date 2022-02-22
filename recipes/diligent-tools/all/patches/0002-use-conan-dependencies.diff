@@ -13,7 +13,7 @@ index 52b8694..f36f0a5 100644
 -    Diligent-GraphicsAccessories
 -    Diligent-GraphicsTools
      Diligent-TextureLoader
-+    CONAN_PKG::diligent-core
++    diligent-core::diligent-core
  )
  
  if (TARGET draco)
@@ -31,7 +31,7 @@ index 0b1de80..e69515c 100644
 -    Diligent-GraphicsTools
 -    Diligent-HLSL2GLSLConverterLib 
 -    Diligent-GraphicsEngineOpenGL-static
-+    CONAN_PKG::diligent-core
++    diligent-core::diligent-core
  )
  
  source_group("source" FILES ${SOURCE})
@@ -50,7 +50,7 @@ index 041f324..8c19675 100644
 -    Diligent-GraphicsAccessories
 -    Diligent-GraphicsTools
 -    imgui::imgui
-+     CONAN_PKG::diligent-core
++     diligent-core::diligent-core
 +     imgui::imgui
  )
  
@@ -64,7 +64,7 @@ index 6f23857..3aa07a8 100644
  target_link_libraries(NDKHelper 
  PRIVATE 
 -	Diligent-BuildSettings
-+        CONAN_PKG::diligent-core
++        diligent-core::diligent-core
  PUBLIC
      native_app_glue
  )
@@ -78,7 +78,7 @@ index 366c303..165ba72 100644
  PRIVATE 
 -    Diligent-BuildSettings
 -    Diligent-Common
-+    CONAN_PKG::diligent-core
++    diligent-core::diligent-core
  )
  
  if(PLATFORM_WIN32)
@@ -91,7 +91,7 @@ index a550fe0..e8f3a87 100644
  target_link_libraries(XCBKeySyms 
  PRIVATE 
 -    Diligent-BuildSettings
-+    CONAN_PKG::diligent-core
++    diligent-core::diligent-core
      xcb
  )
  
@@ -114,7 +114,7 @@ index 941a006..34d3242 100644
 -    LibTiff 
 -    ZLib
 +PRIVATE
-+    CONAN_PKG::diligent-core
++    diligent-core::diligent-core
 +    CONAN_PKG::libpng
 +    CONAN_PKG::libtiff
 +    CONAN_PKG::zlib
