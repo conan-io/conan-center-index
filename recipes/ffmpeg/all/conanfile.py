@@ -344,6 +344,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
+        if tools.is_apple_os(self.settings.os):
+            # relocatable shared libs
+            args.append("--install-name-dir=@rpath")
         args.append("--arch={}".format(self._target_arch))
         if self.settings.build_type == "Debug":
             args.extend([
