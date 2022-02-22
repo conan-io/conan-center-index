@@ -50,7 +50,7 @@ index 7a8e62f..041f324 100644
      Diligent-GraphicsEngineInterface
      Diligent-GraphicsAccessories
      Diligent-GraphicsTools
-+    CONAN_PKG::imgui
++    imgui::imgui
  )
  
  set_target_properties(Diligent-Imgui PROPERTIES
