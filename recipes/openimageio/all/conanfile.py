@@ -143,7 +143,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.0")
         if self.options.with_opencolorio:
@@ -155,7 +155,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.6")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.2.1")
+            self.requires("ffmpeg/4.4")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
@@ -170,7 +170,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_ptex:
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
