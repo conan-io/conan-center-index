@@ -1,5 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -71,6 +72,10 @@ class Libx265Conan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_numa", False):
             self.requires("libnuma/2.0.14")
+
+    def validate(self):
+        if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared not supported with static runtime")
 
     def build_requirements(self):
         if self.options.assembly:
