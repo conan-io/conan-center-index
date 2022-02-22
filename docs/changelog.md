@@ -1,5 +1,27 @@
 # Changelog
 
+### 22-February-2022 - 10:26 CET
+
+- [feature] Merge pull-request that bump dependencies automatically.
+- [feature] Notify about Visual Studio license status in ValidateInfrastructure.
+- [config] Upgrade Conan client version to 1.44.1.
+- [fix] Fix potential race condition calculating package IDs.
+
+### 16-February-2022 - 12:46 CET
+
+- [fix] Pin Artifactory client library version.
+
+### 10-February-2022 - 16:44 CET
+
+- [fix] Fix DSL parameters and TapaholesList name.
+- [feature] Added ConanReference string conversion in call-stacks.
+- [fix] Fix ValidateInfrastructure executors and labels count.
+
+### 04-February-2022 - 12:48 CET
+
+- [bugfix] Avoid race-conditions in Conan client instance.
+- [hotfix] Race condition reading/writing a file.
+
 ### 03-February-2022 - 17:01 CET
 
 - [feature] New label to identify pull-requests that are just bumping dependencies version.
