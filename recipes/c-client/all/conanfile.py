@@ -101,6 +101,8 @@ class CclientConan(ConanFile):
             "#include <ssl.h>\n#include <x509v3.h>"
         )
         target = "osx" if self.settings.os == "Macos" else "slx"
+        # NOTE: only one job is used, because there are issues with dependency
+        #       tracking in parallel builds
         args = ["IP=6", "-j1"]
         AutoToolsBuildEnvironment(self).make(target=target, args=args)
 
