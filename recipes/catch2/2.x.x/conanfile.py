@@ -111,7 +111,7 @@ class ConanRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
-        self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2")
+        self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2{}".format("WithMain" if self.options.with_main else ""))
         self.cpp_info.names["cmake_find_package"] = "Catch2"
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
