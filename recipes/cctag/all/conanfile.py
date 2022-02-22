@@ -33,12 +33,16 @@ class CCTagConan(ConanFile):
         "with_cuda": False,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -85,6 +89,8 @@ class CCTagConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # Cleanup RPATH if Apple in shared lib of install tree
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
