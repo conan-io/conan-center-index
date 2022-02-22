@@ -13,6 +13,7 @@ class NovelRTConan(ConanFile):
     description = "A cross-platform 2D game engine accompanied by a strong toolset for visual novels."
     topics = {"conan", "game", "engine" "gamedev", "visualnovel", "vn"}
     settings = "os", "compiler", "build_type", "arch"
+    build_requires = "cmake/3.19.8"
     requires = [
         ("freetype/2.10.1"),
         ("glfw/3.3.2"),
