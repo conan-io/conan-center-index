@@ -1,0 +1,120 @@
+commit 7b5536cfee83af507b9182ca7f8035b69d6af6bd
+Author: assiduous <assiduous@diligentgraphics.com>
+Date:   Thu Feb 17 07:57:41 2022 -0800
+
+    CMake: added install instructions for required Linux platform headers for Apple, Emscriptent and Android (fixed DiligentGraphics/DiligentTools#161)
+
+diff --git a/Platforms/Android/CMakeLists.txt b/Platforms/Android/CMakeLists.txt
+index 8d9ef237f..724e41faa 100644
+--- a/Platforms/Android/CMakeLists.txt
++++ b/Platforms/Android/CMakeLists.txt
+@@ -8,6 +8,7 @@ set(INTERFACE
+     interface/AndroidPlatformDefinitions.h
+     interface/AndroidPlatformMisc.hpp
+     interface/AndroidNativeWindow.h
++    ../Linux/interface/LinuxPlatformMisc.hpp
+ )
+ 
+ set(SOURCE
+@@ -34,8 +35,8 @@ PUBLIC
+ )
+ 
+ source_group("src" FILES ${SOURCE})
+-source_group("include" FILES ${INCLUDE})
+-source_group("interface" FILES ${PLATFORM_INTERFACE_HEADERS})
++source_group("interface\\android" FILES ${INTERFACE})
++source_group("interface\\common" FILES ${PLATFORM_INTERFACE_HEADERS})
+ 
+ set_target_properties(Diligent-AndroidPlatform PROPERTIES
+     FOLDER DiligentCore/Platforms
+@@ -43,4 +44,9 @@ set_target_properties(Diligent-AndroidPlatform PROPERTIES
+ 
+ if(DILIGENT_INSTALL_CORE)
+     install_core_lib(Diligent-AndroidPlatform)
++
++    get_target_relative_dir(Diligent-AndroidPlatform RELATIVE_PATH)
++    install(DIRECTORY    ../Linux/interface
++            DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/${RELATIVE_PATH}/../Linux"
++    )
+ endif()
+diff --git a/Platforms/Apple/CMakeLists.txt b/Platforms/Apple/CMakeLists.txt
+index 643c06aac..2d0f19c6d 100644
+--- a/Platforms/Apple/CMakeLists.txt
++++ b/Platforms/Apple/CMakeLists.txt
+@@ -16,6 +16,7 @@ set(INTERFACE
+     interface/AppleFileSystem.hpp
+     interface/ApplePlatformDefinitions.h
+     interface/ApplePlatformMisc.hpp
++    ../Linux/interface/LinuxPlatformMisc.hpp
+     ${APPLE_NATIVE_WINDOW_H}
+ )
+ 
+@@ -61,8 +62,8 @@ elseif(PLATFORM_TVOS)
+ endif()
+ 
+ source_group("src" FILES ${SOURCE})
+-source_group("include" FILES ${INCLUDE})
+-source_group("interface" FILES ${PLATFORM_INTERFACE_HEADERS})
++source_group("interface\\apple" FILES ${INTERFACE})
++source_group("interface\\common" FILES ${PLATFORM_INTERFACE_HEADERS})
+ 
+ set_target_properties(Diligent-ApplePlatform PROPERTIES
+     FOLDER DiligentCore/Platforms
+@@ -70,4 +71,9 @@ set_target_properties(Diligent-ApplePlatform PROPERTIES
+ 
+ if(DILIGENT_INSTALL_CORE)
+     install_core_lib(Diligent-ApplePlatform)
++
++    get_target_relative_dir(Diligent-ApplePlatform RELATIVE_PATH)
++    install(DIRECTORY    ../Linux/interface
++            DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/${RELATIVE_PATH}/../Linux"
++    )
+ endif()
+diff --git a/Platforms/Emscripten/CMakeLists.txt b/Platforms/Emscripten/CMakeLists.txt
+index 9d19518d9..4012f6bc3 100644
+--- a/Platforms/Emscripten/CMakeLists.txt
++++ b/Platforms/Emscripten/CMakeLists.txt
+@@ -8,6 +8,7 @@ set(INTERFACE
+     interface/EmscriptenPlatformDefinitions.h
+     interface/EmscriptenPlatformMisc.hpp
+     interface/EmscriptenNativeWindow.h
++    ../Linux/interface/LinuxPlatformMisc.hpp
+ )
+ 
+ set(SOURCE
+@@ -32,8 +33,8 @@ PUBLIC
+ )
+ 
+ source_group("src" FILES ${SOURCE})
+-source_group("include" FILES ${INCLUDE})
+-source_group("interface" FILES ${PLATFORM_INTERFACE_HEADERS})
++source_group("interface\\emscripten" FILES ${INTERFACE})
++source_group("interface\\common" FILES ${PLATFORM_INTERFACE_HEADERS})
+ 
+ set_target_properties(Diligent-EmscriptenPlatform PROPERTIES
+     FOLDER DiligentCore/Platforms
+@@ -41,4 +42,9 @@ set_target_properties(Diligent-EmscriptenPlatform PROPERTIES
+ 
+ if(DILIGENT_INSTALL_CORE)
+     install_core_lib(Diligent-EmscriptenPlatform)
++
++    get_target_relative_dir(Diligent-EmscriptenPlatform RELATIVE_PATH)
++    install(DIRECTORY    ../Linux/interface
++            DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/${RELATIVE_PATH}/../Linux"
++    )
+ endif()
+diff --git a/Platforms/Linux/CMakeLists.txt b/Platforms/Linux/CMakeLists.txt
+index 558673dd8..db113331c 100644
+--- a/Platforms/Linux/CMakeLists.txt
++++ b/Platforms/Linux/CMakeLists.txt
+@@ -32,8 +32,8 @@ PUBLIC
+ )
+ 
+ source_group("src" FILES ${SOURCE})
+-source_group("include" FILES ${INCLUDE})
+-source_group("interface" FILES ${PLATFORM_INTERFACE_HEADERS})
++source_group("interface\\linux" FILES ${INTERFACE})
++source_group("interface\\common" FILES ${PLATFORM_INTERFACE_HEADERS})
+ 
+ set_target_properties(Diligent-LinuxPlatform PROPERTIES
+     FOLDER DiligentCore/Platforms
