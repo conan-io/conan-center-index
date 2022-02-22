@@ -223,5 +223,5 @@ class FollyConan(ConanFile):
             Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
-        if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "12.0":
+        if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
