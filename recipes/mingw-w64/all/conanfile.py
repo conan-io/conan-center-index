@@ -14,6 +14,8 @@ class MingwConan(ConanFile):
     options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"], "gcc": ["10.3.0"]}
     default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
     no_copy_source = True
+    
+    deprecated = "mingw-builds"
 
     @property
     def _settings_build(self):

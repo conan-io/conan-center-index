@@ -1,0 +1,10 @@
+--- a/cmake/ftxui_install.cmake
++++ b/cmake/ftxui_install.cmake
+@@ -1,6 +1,7 @@
+ include(GNUInstallDirs)
+ install(TARGETS screen dom component
+     EXPORT ftxui-export
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ )
