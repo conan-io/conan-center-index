@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import glob
 import shutil
 
 class DiligentFxConan(ConanFile):
@@ -103,10 +104,19 @@ class DiligentFxConan(ConanFile):
                     os.path.join(self.package_folder, "res", "Shaders"))
 
     def package_info(self):
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
-        if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
+        bin_path = os.path.join(self.package_folder, "lib", "source_subfolder", str(self.settings.build_type))
+
+        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dll")):
+            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dylib")):
+            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.so")):
+            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+
+        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.lib")):
+            shutil.move(dll, os.path.join(self.package_folder, "lib"))
+        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.a")):
+            shutil.move(dll, os.path.join(self.package_folder, "lib"))
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
