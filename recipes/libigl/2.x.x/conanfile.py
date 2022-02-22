@@ -74,6 +74,7 @@ class LibiglConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self, parallel=False)
             self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
+            self._cmake.definitions["LIBIGL_INSTALL"] = True
             self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
 
             # All these dependencies are needed to build the examples or the tests
