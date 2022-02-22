@@ -19,11 +19,17 @@ class CCTagConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "serialize": [True, False],
+        "visual_debug": [True, False],
+        "no_cout": [True, False],
         "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "serialize": False,
+        "visual_debug": False,
+        "no_cout": True,
         "with_cuda": False,
     }
 
@@ -91,9 +97,9 @@ class CCTagConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["CCTAG_SERIALIZE"] = False
-        cmake.definitions["CCTAG_VISUAL_DEBUG"] = False
-        cmake.definitions["CCTAG_NO_COUT"] = True
+        cmake.definitions["CCTAG_SERIALIZE"] = self.options.serialize
+        cmake.definitions["CCTAG_VISUAL_DEBUG"] = self.options.visual_debug
+        cmake.definitions["CCTAG_NO_COUT"] = self.options.no_cout
         cmake.definitions["CCTAG_WITH_CUDA"] = self.options.with_cuda
         cmake.definitions["CCTAG_BUILD_APPS"] = False
         cmake.definitions["CCTAG_CUDA_CC_CURRENT_ONLY"] = False
