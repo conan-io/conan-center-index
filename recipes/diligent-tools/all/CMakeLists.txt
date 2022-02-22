@@ -6,4 +6,6 @@ include(BuildUtils.cmake)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+find_package(imgui REQUIRED)
+
 add_subdirectory(source_subfolder)
