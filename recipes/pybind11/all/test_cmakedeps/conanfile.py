@@ -38,3 +38,4 @@ class TestPackageConan(ConanFile):
             env.vars(self).save_script("launcher")
             test_path = os.path.join(self.source_folder, "test.py")
             self.run("{} {}".format(self._python_interpreter, test_path), env="launcher")
+
