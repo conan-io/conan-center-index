@@ -43,7 +43,7 @@ class FlacConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("ogg/1.3.4")
+        self.requires("ogg/1.3.5")
 
     def build_requirements(self):
         if self.settings.arch in ["x86", "x86_64"]:
