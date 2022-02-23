@@ -78,6 +78,15 @@ class MBedTLSConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                     strip_root = True, destination=self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if tools.Version(self.version) < "2.23.0":
+            # No warnings as errors
+            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            tools.replace_in_file(cmakelists, "-Werror", "")
+            tools.replace_in_file(cmakelists, "/WX", "")
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -86,7 +95,8 @@ class MBedTLSConan(ConanFile):
             if tools.Version(self.version) < "3.0.0":
                 self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
-            self._cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
+            if tools.Version(self.version) >= "2.23.0":
+                self._cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
             if tools.Version(self.version) < "3.0.0":
                 # relocatable shared libs on macOS
@@ -95,8 +105,7 @@ class MBedTLSConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
