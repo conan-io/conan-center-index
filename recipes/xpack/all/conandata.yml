@@ -1,0 +1,7 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/xyz347/xpack/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: ed94e2d896f841a949b34657b2a8d8bc7c360e781b7ab2a7cc710b14c2f55c9c
+  "1.0.1":
+    url: "https://github.com/xyz347/xpack/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: e1f60fdf64657c584a774271da68e6cc19c069f6853dfd9fadccea192d3e81cc
