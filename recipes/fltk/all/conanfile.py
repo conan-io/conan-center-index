@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-import os, shutil, glob
+import os
 
 required_conan_version = ">=1.43.0"
 
@@ -85,6 +85,7 @@ class FltkConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "FLTK.framework"))
+        tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")
