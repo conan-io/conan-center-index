@@ -279,6 +279,8 @@ class ArrowConan(ConanFile):
             self.requires("zstd/1.5.2")
         if self._with_re2():
             self.requires("re2/20211101")
+        if self._with_utf8proc():
+            self.requires("utf8proc/2.7.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

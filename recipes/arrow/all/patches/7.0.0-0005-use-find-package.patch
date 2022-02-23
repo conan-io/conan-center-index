@@ -240,6 +240,19 @@ index bc38952..2524a1a 100644
  
    if(NOT TARGET BZip2::BZip2)
      add_library(BZip2::BZip2 UNKNOWN IMPORTED)
+@@ -2390,11 +2414,7 @@ macro(build_utf8proc)
+ endmacro()
+ 
+ if(ARROW_WITH_UTF8PROC)
+-  resolve_dependency(utf8proc
+-                     REQUIRED_VERSION
+-                     "2.2.0"
+-                     PC_PACKAGE_NAMES
+-                     libutf8proc)
++  find_package(BZip2 REQUIRED CONFIG)
+ 
+   add_definitions(-DARROW_WITH_UTF8PROC)
+ 
 diff --git a/cpp/src/arrow/CMakeLists.txt b/cpp/src/arrow/CMakeLists.txt
 index b984bc1..9594107 100644
 --- a/cpp/src/arrow/CMakeLists.txt
