@@ -6,8 +6,10 @@ conan_basic_setup(TARGET)
 
 find_package(cppkafka CONFIG REQUIRED)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} cppkafka::cppkafka)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_EXTENSIONS OFF
+    CXX_STANDARD 11
+)

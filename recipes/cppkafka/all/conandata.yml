@@ -1,10 +1,4 @@
 sources:
-  "0.3.1":
-    url: "https://github.com/mfontanini/cppkafka/archive/refs/tags/v0.3.1.tar.gz"
-    sha256: "800e32c582ebc3813dbde40c2fccc90229b4d6590d63f75eecf3c81cb6884ad3"
-patches:
-  "0.3.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.3.1-0001-fix-dependencies.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.3.1-0002-remove-find-modules.patch"
+  "0.4.0":
+    url: "https://github.com/mfontanini/cppkafka/archive/refs/tags/0.4.0.tar.gz"
+    sha256: "f4f05eb7a180a856663b02ec0b777283275ef88e5523f3013fd51c6c4ab63b5a"

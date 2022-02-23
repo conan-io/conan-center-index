@@ -1,18 +1,19 @@
-#include <cppkafka/cppkafka.h>
+#include "cppkafka/cppkafka.h"
 #include <iostream>
 #include <string>
 
 using namespace cppkafka;
 
 int main() {
-    // Create the config
     try {
+        // Create the config
         Configuration kafkaConfig = {
             {"metadata.broker.list", "127.0.0.1:9092"},
             {"group.id", "xxx"},
             {"auto.offset.reset", "earliest"},
             {"enable.auto.commit", false}
         };
+
         // Create the producer
         Producer producer(kafkaConfig);
 
