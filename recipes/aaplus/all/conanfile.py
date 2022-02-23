@@ -60,9 +60,15 @@ class Aaplusconan(ConanFile):
             tools.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        compiler_version = tools.Version(self.settings.compiler.version)
         if minimum_version and tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "{} requires C++17, which your compiler does not support.".format(self.name)
+            )
+
+        if self.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
+            raise ConanInvalidConfiguration(
+                "AA+ cannot handle clang 10 and 11 due to filesystem beeing under experimental namespace"
             )
 
     def source(self):
