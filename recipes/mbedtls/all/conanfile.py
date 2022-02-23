@@ -88,6 +88,9 @@ class MBedTLSConan(ConanFile):
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
             self._cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
+            if tools.Version(self.version) < "3.0.0":
+                # relocatable shared libs on macOS
+                self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             self._cmake.configure()
         return self._cmake
 
