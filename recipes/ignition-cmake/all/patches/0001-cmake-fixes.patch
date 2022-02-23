@@ -19,4 +19,3 @@
 +      #set(IGN_ADD_fPIC_TO_LIBRARIES true)
      endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
    endif(CMAKE_UNAME)
- 
