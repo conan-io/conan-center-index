@@ -7,5 +7,3 @@ patches:
   "0.0.17":
     - base_path: "source_subfolder"
       patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.0.17-0002-print-variables.patch"
