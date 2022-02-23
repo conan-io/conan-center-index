@@ -25,8 +25,7 @@ class FltkConan(ConanFile):
         "with_threads": True,
         "with_gdiplus": True,
     }
-    # generators = "cmake", "cmake_find_package_multi"
-    generators = "cmake",
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
@@ -81,9 +80,9 @@ class FltkConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy(self._source_subfolder + "/COPYING", dst="licenses", keep_path=False, ignore_case=True)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "FLTK.framework"))
 
