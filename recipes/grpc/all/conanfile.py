@@ -354,6 +354,7 @@ class grpcConan(ConanFile):
                         "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
                         "abseil::absl_inlined_vector", "abseil::absl_statusor",
                         "c-ares::cares", "re2::re2", "zlib::zlib",
+                        "abseil::absl_random_random",
                     ],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                     "frameworks": corefoundation(),
