@@ -101,5 +101,6 @@ class KModConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libkmod")
         self.cpp_info.libs = ["kmod"]
         self.cpp_info.system_libs = ["pthread"]
