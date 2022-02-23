@@ -86,6 +86,7 @@ class MBedTLSConan(ConanFile):
             if tools.Version(self.version) < "3.0.0":
                 self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
+            self._cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
             self._cmake.configure()
         return self._cmake
