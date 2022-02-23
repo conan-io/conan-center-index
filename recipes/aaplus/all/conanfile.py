@@ -68,7 +68,7 @@ class Aaplusconan(ConanFile):
 
         if self.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
             raise ConanInvalidConfiguration(
-                "AA+ cannot handle clang 10 and 11 due to filesystem beeing under experimental namespace"
+                "AA+ cannot handle clang 10 and 11 due to filesystem being under experimental namespace"
             )
 
     def source(self):
