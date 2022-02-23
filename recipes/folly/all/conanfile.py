@@ -135,6 +135,15 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if tools.cross_building(self):
+                self._cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
+                self._cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
             self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             self._cmake.definitions["CXX_STD"] = self.settings.compiler.get_safe("cppstd") or "c++{}".format(self._minimum_cpp_standard)
             if self.settings.compiler == "Visual Studio":
