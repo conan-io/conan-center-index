@@ -55,6 +55,11 @@ class TaoCPPPEGTLConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if self.version == "3.0.0" and self.settings.compiler == "clang" and \
+           compiler_version >= "10" and compiler_version < "12":
+            raise ConanInvalidConfiguration("{} {} doesn't support filesystem experimental".format(self.name, self.version))
+
         if self.options.boost_filesystem and (self.options["boost"].header_only or self.options["boost"].without_filesystem):
             raise ConanInvalidConfiguration("{} requires non header-only boost with filesystem component".format(self.name))
 
