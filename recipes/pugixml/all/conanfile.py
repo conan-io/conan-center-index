@@ -52,7 +52,7 @@ class PugiXmlConan(ConanFile):
             del self.options.shared
 
     def validate(self):
-        if self.options.shared and self.options.wchar_mode:
+        if self.options.get_safe("shared") and self.options.wchar_mode:
             # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
             raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
 
