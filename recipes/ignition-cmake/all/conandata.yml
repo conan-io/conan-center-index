@@ -5,9 +5,9 @@ sources:
   "2.8.0":
     url: "https://github.com/ignitionrobotics/ign-cmake/archive/refs/tags/ignition-cmake2_2.8.0.tar.gz"
     sha256: "afb430b06adff0ee16616e4e308847eb3e4b10d1eb2c30148bdbb93fe8e82783"
-  "2.9.0": 
-      url: "https://github.com/ignitionrobotics/ign-cmake/archive/refs/tags/ignition-cmake2_2.9.0.tar.gz"
-      sha256: "39f8cd4f0b1f5f4da625354cc75e15796131717e8861b848d06dec0f51039cea"
+  "2.9.0":
+    url: "https://github.com/ignitionrobotics/ign-cmake/archive/refs/tags/ignition-cmake2_2.9.0.tar.gz"
+    sha256: "39f8cd4f0b1f5f4da625354cc75e15796131717e8861b848d06dec0f51039cea"
   "2.10.0":
     url: "https://github.com/ignitionrobotics/ign-cmake/archive/refs/tags/ignition-cmake2_2.10.0.tar.gz"
     sha256: "b6075d0835d50a7fe2e1cdfce9fabe74a76d3e5cf677ce1da203bfa88035e88a"
