@@ -81,7 +81,6 @@ class PyBind11Conan(ConanFile):
                 self.package_folder, "include", "pybind11"))
 
             self.cpp_info.builddirs = [cmake_base_path]
-
             for generator in ["cmake", "cmake_multi", "cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.build_modules[generator] = [os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"),
                                                           os.path.join(cmake_base_path, "pybind11Tools.cmake")]
