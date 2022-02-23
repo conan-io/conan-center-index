@@ -5,11 +5,11 @@ required_conan_version = ">=1.33.0"
 
 class Blend2dConan(ConanFile):
     name = "blend2d"
+    description = "2D Vector Graphics Engine Powered by a JIT Compiler"
+    topics = ("2d-graphics", "rasterization", "asmjit", "jit")
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://blend2d.com/"
-    description = "2D Vector Graphics Engine Powered by a JIT Compiler"
-    topics = ("2d-graphics", "rasterization", "asmjit", "jit")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,7 +43,6 @@ class Blend2dConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.options["asmjit"].shared = self.options.shared
 
     def requirements(self):
         self.requires("asmjit/cci.20220210")
