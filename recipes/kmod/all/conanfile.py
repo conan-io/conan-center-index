@@ -61,7 +61,7 @@ class KModConan(ConanFile):
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.environment.define("PKG_CONFIG_PATH", self.source_folder)  # is it really needed?
-        tc.environment.define("LIBS", "-lpthread")
+        tc.environment.define("LIBS", "-lpthread")  # FIXME: https://github.com/conan-io/conan/issues/10640 & https://github.com/conan-io/conan/issues/10341
         tc.environment.define("libzstd_LIBS", "-lzstd")
         tc.generate()
 
