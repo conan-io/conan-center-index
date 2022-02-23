@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools, errors
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -44,7 +45,14 @@ class NovelRTConan(ConanFile):
     }
     cmake = None
     unsupportedOS = ['AIX', 'Android', 'Arduino', 'Emscripten', 'FreeBSD', 'Macos', 'Neutrino', 'SunOS', 'WindowsCE', 'WindowsStore', 'iOS', 'tvOS', 'watchOS']
-    unsupportedCompilers = ['gcc', 'intel', 'mcst-lcc', 'qcc', 'sun-cc']
+    unsupportedCompilers = ['gcc', 'intel', 'mcst-lcc', 'qcc', 'sun-cc', 'msvc']
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "clang": "10",
+            "Visual Studio": "16"
+        }
 
     @property
     def _source_subfolder(self):
@@ -57,14 +65,15 @@ class NovelRTConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure_cmake(self):
-        cmake = CMake(self)
+    def configure_cmake(self, program):
+        if program:
+            cmake = CMake(self, cmake_program=program)
+        else:
+            cmake = CMake(self)
         cmake.definitions["NOVELRT_BUILD_DOCUMENTATION"] = "Off"
         cmake.definitions["NOVELRT_BUILD_TESTS"] = "Off"
         cmake.definitions["NOVELRT_BUILD_SAMPLES"] = "Off"
         cmake.definitions["NOVELRT_BUILD_INTEROP"] = "Off"
-        if self.settings.os == 'Windows':
-            cmake.generator = "Ninja"
         cmake.configure()
         return cmake
 
@@ -74,7 +83,13 @@ class NovelRTConan(ConanFile):
             self.copy("*.dll", dst="thirdparty", src="lib")
 
     def build(self):
-        self.cmake = self.configure_cmake()
+        cmakePath = self.deps_env_info["cmake"].CMAKE_ROOT
+        if self.settings.os == "Windows":
+            cmakePath += "\\bin\\cmake.exe"
+        else:
+            cmakePath += "/bin/cmake"
+        self.output.info(f"Overriding CMake to use version from Conan at: {cmakePath}")
+        self.cmake = self.configure_cmake(cmakePath)
         buildArgs = ['-j']
         self.cmake.build(args=buildArgs)
 
@@ -114,6 +129,10 @@ class NovelRTConan(ConanFile):
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support {self.settings.os} at this time.")
         if self.settings.compiler in self.unsupportedCompilers:
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation with {self.settings.compiler} at this time.")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if minimum_version and compiler_version < minimum_version:
+            raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation with {self.settings.compiler} {self.settings.compiler.version} as C++ 17 is required.")
         if self.settings.compiler == "clang":
             if self.settings.compiler.libcxx != "libstdc++11":
                 raise errors.ConanInvalidConfiguration(f"Please use libstdc++11 when compiling NovelRT with Clang.")
