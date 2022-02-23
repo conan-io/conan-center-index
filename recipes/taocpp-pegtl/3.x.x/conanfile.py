@@ -76,6 +76,10 @@ class TaoCPPPEGTLConan(ConanFile):
         if self.options.boost_filesystem:
             self.cpp_info.components["_taocpp-pegtl"].requires.append("boost::filesystem")
             self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_BOOST_FILESYSTEM")
+        else:
+            compiler_version = tools.Version(self.settings.compiler.version)
+            if self.settings.compiler == "clang" and compiler_version >= "10" and compiler_version < "12":
+                self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_STD_EXPERIMENTAL_FILESYSTEM")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "pegtl"
