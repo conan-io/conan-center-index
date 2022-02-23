@@ -1,5 +1,6 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -26,7 +27,6 @@ class MBedTLSConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -87,22 +87,22 @@ class MBedTLSConan(ConanFile):
             tools.replace_in_file(cmakelists, "-Werror", "")
             tools.replace_in_file(cmakelists, "/WX", "")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
-            self._cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-            if tools.Version(self.version) < "3.0.0":
-                self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
-            self._cmake.definitions["ENABLE_PROGRAMS"] = False
-            if tools.Version(self.version) >= "2.23.0":
-                self._cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
-            self._cmake.definitions["ENABLE_TESTING"] = False
-            if tools.Version(self.version) < "3.0.0":
-                # relocatable shared libs on macOS
-                self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-            self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
+        cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
+        if tools.Version(self.version) < "3.0.0":
+            cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+        cmake.definitions["ENABLE_PROGRAMS"] = False
+        if tools.Version(self.version) >= "2.23.0":
+            cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
+        cmake.definitions["ENABLE_TESTING"] = False
+        if tools.Version(self.version) < "3.0.0":
+            # relocatable shared libs on macOS
+            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
