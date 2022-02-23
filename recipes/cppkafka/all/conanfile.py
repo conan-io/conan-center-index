@@ -70,6 +70,12 @@ class CppKafkaConan(ConanFile):
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = not self.deps_cpp_info["librdkafka"].shared
+
+        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-D_GLIBCXX_USE_CXX11_ABI=0"
+        elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-D_GLIBCXX_USE_CXX11_ABI=1"
+
         cmake.configure(defs=opts, source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
