@@ -148,7 +148,6 @@ class DiligentCoreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_info(self):
         bin_path = os.path.join(self.package_folder, "lib", "source_subfolder", str(self.settings.build_type))
 
         for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dll")):
@@ -163,6 +162,7 @@ class DiligentCoreConan(ConanFile):
         for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.a")):
             shutil.move(dll, os.path.join(self.package_folder, "lib"))
 
+    def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
