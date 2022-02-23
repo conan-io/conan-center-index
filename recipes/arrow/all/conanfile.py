@@ -253,6 +253,8 @@ class ArrowConan(ConanFile):
             self.requires("gflags/2.2.2")
         if self._with_glog():
             self.requires("glog/0.5.0")
+        if self._with_grpc():
+            self.requires("grpc/1.43.0")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
@@ -370,6 +372,8 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["LLVM_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
         self._cmake.definitions["utf8proc_SOURCE"] = "SYSTEM"
+        if self._with_utf8proc():
+            self._cmake.definitions["ARROW_UTF8PROC_USE_SHARED"] = self.options["utf8proc"].shared
 
         self._cmake.definitions["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if self.settings.compiler == "Visual Studio":

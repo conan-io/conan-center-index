@@ -23,7 +23,7 @@ index 2d7baf1..c2e86e0 100644
  
  if(ARROW_MIMALLOC)
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index bc38952..2524a1a 100644
+index bc38952..8196e09 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
 @@ -953,14 +953,7 @@ else()
@@ -253,8 +253,43 @@ index bc38952..2524a1a 100644
  
    add_definitions(-DARROW_WITH_UTF8PROC)
  
+@@ -3554,33 +3574,12 @@ if(ARROW_WITH_GRPC)
+     message(STATUS "Forcing gRPC_SOURCE to Protobuf_SOURCE (${Protobuf_SOURCE})")
+     set(gRPC_SOURCE "${Protobuf_SOURCE}")
+   endif()
+-  resolve_dependency(gRPC
+-                     HAVE_ALT
+-                     TRUE
+-                     REQUIRED_VERSION
+-                     ${ARROW_GRPC_REQUIRED_VERSION}
+-                     PC_PACKAGE_NAMES
+-                     grpc++)
++  find_package(gRPC CONFIG REQUIRED)
+ 
+   # TODO: Don't use global includes but rather target_include_directories
+   get_target_property(GRPC_INCLUDE_DIR gRPC::grpc++ INTERFACE_INCLUDE_DIRECTORIES)
+   include_directories(SYSTEM ${GRPC_INCLUDE_DIR})
+ 
+-  if(GRPC_VENDORED)
+-    set(GRPCPP_PP_INCLUDE TRUE)
+-    # Examples need to link to static Arrow if we're using static gRPC
+-    set(ARROW_GRPC_USE_SHARED OFF)
+-  else()
+-    # grpc++ headers may reside in ${GRPC_INCLUDE_DIR}/grpc++ or ${GRPC_INCLUDE_DIR}/grpcpp
+-    # depending on the gRPC version.
+-    if(EXISTS "${GRPC_INCLUDE_DIR}/grpcpp/impl/codegen/config_protobuf.h")
+-      set(GRPCPP_PP_INCLUDE TRUE)
+-    elseif(EXISTS "${GRPC_INCLUDE_DIR}/grpc++/impl/codegen/config_protobuf.h")
+-      set(GRPCPP_PP_INCLUDE FALSE)
+-    else()
+-      message(FATAL_ERROR "Cannot find grpc++ headers in ${GRPC_INCLUDE_DIR}")
+-    endif()
+-  endif()
+ endif()
+ 
+ # ----------------------------------------------------------------------
 diff --git a/cpp/src/arrow/CMakeLists.txt b/cpp/src/arrow/CMakeLists.txt
-index b984bc1..9594107 100644
+index 84975e2..7779c08 100644
 --- a/cpp/src/arrow/CMakeLists.txt
 +++ b/cpp/src/arrow/CMakeLists.txt
 @@ -575,6 +575,10 @@ foreach(LIB_TARGET ${ARROW_LIBRARIES})
