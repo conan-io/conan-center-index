@@ -141,14 +141,10 @@ class ArrowConan(ConanFile):
         if self.options.with_llvm == False and self._with_llvm(True):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
 
-        if self._with_grpc():
-            raise ConanInvalidConfiguration("CCI has no grpc recipe (yet)")
         if self.options.with_backtrace:
             raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_flight_rpc:
-            raise ConanInvalidConfiguration("CCI has no flight_rpc recipe (yet)")
         if self.options.with_hiveserver2:
             raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
         if self.options.with_orc:
@@ -322,23 +318,34 @@ class ArrowConan(ConanFile):
 
         self._cmake.definitions["BOOST_SOURCE"] = "SYSTEM"
         self._cmake.definitions["Protobuf_SOURCE"] = "SYSTEM"
-        self._cmake.definitions["gRPC_SOURCE"] = "SYSTEM"
         if self._with_protobuf():
             self._cmake.definitions["ARROW_PROTOBUF_USE_SHARED"] = self.options["protobuf"].shared
+        self._cmake.definitions["gRPC_SOURCE"] = "SYSTEM"
+        if self._with_grpc():
+            self._cmake.definitions["ARROW_GRPC_USE_SHARED"] = self.options["grpc"].shared
         self._cmake.definitions["ARROW_HDFS"] = self.options.hdfs_bridgs
         self._cmake.definitions["ARROW_USE_GLOG"] = self._with_glog()
         self._cmake.definitions["GLOG_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_BACKTRACE"] = self.options.with_backtrace
         self._cmake.definitions["ARROW_WITH_BROTLI"] = self.options.with_brotli
         self._cmake.definitions["Brotli_SOURCE"] = "SYSTEM"
-        self._cmake.definitions["ARROW_BROTLI_USE_SHARED"] = "brotli" in self.options and not self.options["brotli"].shared
+        if self.options.with_brotli:
+            self._cmake.definitions["ARROW_BROTLI_USE_SHARED"] = self.options["brotli"].shared
         self._cmake.definitions["gflags_SOURCE"] = "SYSTEM"
+        if self._with_gflags():
+            self._cmake.definitions["ARROW_BROTLI_USE_SHARED"] = self.options["gflags"].shared
         self._cmake.definitions["ARROW_WITH_BZ2"] = self.options.with_bz2
         self._cmake.definitions["BZip2_SOURCE"] = "SYSTEM"
+        if self.options.with_bz2:
+            self._cmake.definitions["ARROW_BZ2_USE_SHARED"] = self.options["bzip2"].shared
         self._cmake.definitions["ARROW_WITH_LZ4"] = self.options.with_lz4
         self._cmake.definitions["Lz4_SOURCE"] = "SYSTEM"
+        if self.options.with_lz4:
+            self._cmake.definitions["ARROW_LZ4_USE_SHARED"] = self.options["lz4"].shared
         self._cmake.definitions["ARROW_WITH_SNAPPY"] = self.options.with_snappy
         self._cmake.definitions["Snappy_SOURCE"] = "SYSTEM"
+        if self.options.with_snappy:
+            self._cmake.definitions["ARROW_SNAPPY_USE_SHARED"] = self.options["snappy"].shared
         self._cmake.definitions["ARROW_WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["RE2_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ZLIB_SOURCE"] = "SYSTEM"
@@ -350,13 +357,18 @@ class ArrowConan(ConanFile):
             self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
+        if self.options.with_zstd:
+            self._cmake.definitions["ARROW_ZSTD_USE_SHARED"] = self.options["zstd"].shared
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_THRIFT"] = self._with_thrift()
         self._cmake.definitions["Thrift_SOURCE"] = "SYSTEM"
         self._cmake.definitions["THRIFT_VERSION"] = "1.0"  # a recent thrift does not require boost
+        if self._with_thrift():
+            self._cmake.definitions["ARROW_THRIFT_USE_SHARED"] = self.options["thrift"].shared
         self._cmake.definitions["ARROW_USE_OPENSSL"] = self._with_openssl()
         if self._with_openssl():
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+            self._cmake.definitions["ARROW_OPENSSL_USE_SHARED"] = self.options["openssl"].shared
         if self._with_boost():
             self._cmake.definitions["ARROW_BOOST_USE_SHARED"] = self.options["boost"].shared
         self._cmake.definitions["ARROW_S3"] = self.options.with_s3
@@ -453,6 +465,13 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
 
+        if self.options.with_flight_rpc:
+            self.cpp_info.components["libarrow_flight"].libs = [self._lib_name("arrow_flight")]
+            self.cpp_info.components["libarrow_flight"].names["cmake_find_package"] = "flight_rpc"
+            self.cpp_info.components["libarrow_flight"].names["cmake_find_package_multi"] = "flight_rpc"
+            self.cpp_info.components["libarrow_flight"].names["pkg_config"] = "flight_rpc"
+            self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
+
         if self.options.dataset_modules:
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
 
@@ -492,8 +511,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("backtrace::backtrace")
         if self.options.with_cuda:
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
-        if self.options.with_flight_rpc:
-            self.cpp_info.components["libarrow"].requires.append("flight::flight")
         if self.options.with_hiveserver2:
             self.cpp_info.components["libarrow"].requires.append("hiveserver2::hiveserver2")
         if self.options.with_json:
@@ -516,3 +533,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["libarrow"].requires.append("zstd::zstd")
+        if self.options.with_flight_rpc:
+            self.cpp_info.components["libarrow_flight"].requires.append("grpc::grpc")
+            self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
