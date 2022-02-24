@@ -71,11 +71,11 @@ class OpenEXRConan(ConanFile):
             self._cmake.definitions["INSTALL_OPENEXR_DOCS"] = False
         self._cmake.definitions["OPENEXR_BUILD_UTILS"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["CMAKE_SKIP_INSTALL_RPATH"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def _patch_files(self):
-
+    def _patch_sources(self):
         pkg_version = tools.Version(self.version)
         if pkg_version < "2.5.2" and self.settings.os == "Windows":
             # This fixes symlink creation on Windows.
@@ -97,7 +97,7 @@ class OpenEXRConan(ConanFile):
                                       "set(baselibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}_d${CMAKE_SHARED_LIBRARY_SUFFIX})")
 
     def build(self):
-        self._patch_files()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
