@@ -13,6 +13,7 @@ class KModConan(ConanFile):
     homepage = "https://github.com/kmod-project/kmod"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
+    tool_requires = 'libtool/2.4.6', 'pkgconf/1.7.4'
     options = {
         "fPIC": [True, False],
         "with_zstd": [True, False],
