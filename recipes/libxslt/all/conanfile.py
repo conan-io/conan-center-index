@@ -85,6 +85,12 @@ class LibxsltConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
+            # Relocatable shared libs on macOS
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "configure"),
+                "-install_name \\$rpath/",
+                "-install_name @rpath/"
+            )
             autotools = self._configure_autotools()
             autotools.make()
 
