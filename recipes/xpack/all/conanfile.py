@@ -10,7 +10,7 @@ class XpackConan(ConanFile):
     topics = ("xpack", "json", "reflection", "xml")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xyz347/xpack"
-    license = "MIT"
+    license = "Apache-2.0"
     no_copy_source = True
 
     @property
