@@ -158,7 +158,7 @@ class LibarchiveConan(ConanFile):
         self._cmake.definitions["ENABLE_TEST"] = False
         # too strict check
         self._cmake.definitions["ENABLE_WERROR"] = False
-        self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.get_safe("with_mbedtls")
         self._cmake.definitions["ENABLE_XATTR"] = self.options.with_xattr
 
         self._cmake.configure(build_folder=self._build_subfolder)
