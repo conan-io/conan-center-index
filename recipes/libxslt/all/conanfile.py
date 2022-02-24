@@ -33,8 +33,6 @@ class LibxsltConan(ConanFile):
         "plugins": False,
     }
 
-    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -46,6 +44,10 @@ class LibxsltConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _option_names(self):
+        return [name for name in self.default_options.keys() if name not in ["shared", "fPIC"]]
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
