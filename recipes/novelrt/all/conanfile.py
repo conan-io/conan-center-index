@@ -13,7 +13,7 @@ class NovelRTConan(ConanFile):
     description = "A cross-platform 2D game engine accompanied by a strong toolset for visual novels."
     topics = {"conan", "game", "engine" "gamedev", "visualnovel", "vn"}
     settings = "os", "compiler", "build_type", "arch"
-    build_requires = ("cmake/3.19.8")
+    tool_requires = ("cmake/3.19.8")
     requires = [
         ("freetype/2.10.1"),
         ("glfw/3.3.2"),
@@ -65,11 +65,15 @@ class NovelRTConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure_cmake(self, program):
-        if program:
-            cmake = CMake(self, cmake_program=program)
-        else:
-            cmake = CMake(self)
+    def configure_cmake(self):
+        cmakePath = self.deps_env_info["cmake"].CMAKE_ROOT
+        if cmakePath:
+            if self.settings.os == "Windows":
+                cmakePath += "\\bin\\cmake.exe"
+            else:
+                cmakePath += "/bin/cmake"
+            self.output.info(f"Overriding CMake to use version from Conan at: {cmakePath}")
+        cmake = CMake(self, cmake_program=cmakePath)
         cmake.definitions["NOVELRT_BUILD_DOCUMENTATION"] = "Off"
         cmake.definitions["NOVELRT_BUILD_TESTS"] = "Off"
         cmake.definitions["NOVELRT_BUILD_SAMPLES"] = "Off"
@@ -83,13 +87,7 @@ class NovelRTConan(ConanFile):
             self.copy("*.dll", dst="thirdparty", src="lib")
 
     def build(self):
-        cmakePath = self.deps_env_info["cmake"].CMAKE_ROOT
-        if self.settings.os == "Windows":
-            cmakePath += "\\bin\\cmake.exe"
-        else:
-            cmakePath += "/bin/cmake"
-        self.output.info(f"Overriding CMake to use version from Conan at: {cmakePath}")
-        self.cmake = self.configure_cmake(cmakePath)
+        self.cmake = self.configure_cmake()
         buildArgs = ['-j']
         self.cmake.build(args=buildArgs)
 
