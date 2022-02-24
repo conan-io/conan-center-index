@@ -6,14 +6,14 @@ sources:
     url: "https://github.com/libarchive/libarchive/archive/v3.5.2.tar.gz"
     sha256: "126058cb4cf50e36bcf83307f5d987bde2ecebabcae985b6a153116362d25b7b"
   "3.5.1":
-    url: "https://github.com/libarchive/libarchive/releases/download/3.5.1/libarchive-3.5.1.tar.gz"
-    sha256: "9015d109ec00bb9ae1a384b172bf2fc1dff41e2c66e5a9eeddf933af9db37f5a"
+    url: "https://github.com/libarchive/libarchive/archive/v3.5.1.tar.gz"
+    sha256: "6d92e669e259a55a0119c135873469778f2718acbe605717f9d341487b4d0cba"
   "3.4.3":
-    url: "https://github.com/libarchive/libarchive/releases/download/v3.4.3/libarchive-3.4.3.tar.gz"
-    sha256: "ee1e749213c108cb60d53147f18c31a73d6717d7e3d2481c157e1b34c881ea39"
+    url: "https://github.com/libarchive/libarchive/archive/v3.4.3.tar.gz"
+    sha256: "19556c1c67aacdff547fd719729630444dbc7161c63eca661a310676a022bb01"
   "3.4.0":
-    url: "https://github.com/libarchive/libarchive/releases/download/v3.4.0/libarchive-3.4.0.tar.gz"
-    sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
+    url: "https://github.com/libarchive/libarchive/archive/v3.4.0.tar.gz"
+    sha256: "c160d3c45010a51a924208f13f6b7b956dabdf8c5c60195df188a599028caa7c"
 patches:
   "3.4.0":
     - patch_file: "patches/msvc-no-we4061.patch"
