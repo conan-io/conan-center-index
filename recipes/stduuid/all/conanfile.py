@@ -31,6 +31,9 @@ class StduuidConan(ConanFile):
         if self.settings.os == "Linux" and tools.Version(self.version) <= "1.0":
             self.requires("libuuid/1.0.3")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -55,5 +58,7 @@ class StduuidConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=root_dir)
         self.copy(pattern="uuid.h", dst="include", src=include_dir)
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        if not self.options.with_cxx20_span:
+            self.cpp_info.includedirs.append(os.path.join(self.deps_cpp_info["ms-gsl"].include_paths[0], "gsl"))
+
