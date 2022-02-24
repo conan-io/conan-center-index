@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -46,6 +47,11 @@ class OpenEXRConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.cross_building(self):
+            # cross-build supported since https://github.com/AcademySoftwareFoundation/openexr/pull/606
+            raise ConanInvalidConfiguration("Cross-build not supported before openexr 2.5.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
