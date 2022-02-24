@@ -44,7 +44,7 @@ class KModConan(ConanFile):
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
-        tc.default_configure_install_args = True
+        tc.default_configure_install_args = True  # FIXME: https://github.com/conan-io/conan/issues/10650 (should be default)
         tc.configure_args.append("--with-zstd=%s" % yes_no(self.options.with_zstd))
         tc.configure_args.append("--with-xz=%s" % yes_no(self.options.with_xz))
         tc.configure_args.append("--with-zlib=%s" % yes_no(self.options.with_zlib))
@@ -61,9 +61,12 @@ class KModConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
-        tc.environment.define("PKG_CONFIG_PATH", self.source_folder)  # is it really needed?
-        tc.environment.define("LIBS", "-lpthread")  # FIXME: https://github.com/conan-io/conan/issues/10640 & https://github.com/conan-io/conan/issues/10341
-        tc.environment.define("libzstd_LIBS", "-lzstd")
+        tc.environment.define("PKG_CONFIG_PATH", self.source_folder)  # FIXME: https://github.com/conan-io/conan/issues/10639 (should work out of the box)
+        tc.environment.define("LIBS", "-lpthread")  # FIXME: https://github.com/conan-io/conan/issues/10341 (regression in 1.45, soname arguments are "eaten")
+        tc.environment.define("libzstd_LIBS", "-lzstd")  # FIXME: https://github.com/conan-io/conan/issues/10640 (zstd pkg-config includes itself)
+        tc.environment.define("zlib_LIBS", "-lz")  # FIXME: https://github.com/conan-io/conan/issues/10651 (command line is polluted by framework arguments)
+        tc.environment.define("libcrypto_LIBS", "-lcrypto -ldl -lrt -lpthread")
+        tc.environment.define("liblzma_LIBS", "-llzma")
         tc.generate()
 
     def requirements(self):
