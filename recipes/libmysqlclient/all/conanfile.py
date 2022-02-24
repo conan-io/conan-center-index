@@ -30,6 +30,7 @@ class LibMysqlClientCConan(ConanFile):
         "with_zlib": True,
     }
 
+    short_paths = True
     generators = "cmake"
 
     @property
