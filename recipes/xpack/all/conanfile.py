@@ -22,7 +22,7 @@ class XpackConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst=os.path.join("include", "xpack"), src=self._source_subfolder)
+        self.copy(pattern="*", dst=os.path.join("include", "xpack"), excludes=["example/*", "gtest/*"], src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
