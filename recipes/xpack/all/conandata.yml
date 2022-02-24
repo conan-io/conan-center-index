@@ -1,4 +1,4 @@
 sources:
-  "cci.20220223":
-    url: "https://github.com/xyz347/xpack/archive/43a521562e1441ad94668d6d780e5264e62d07d1.tar.gz"
-    sha256: 277615500c2dbfa62118433d732f4dee36363ff7129f7c7c77d0427dd408727f
+  "1.0.2":
+    url: "https://github.com/xyz347/xpack/archive/v1.0.2.tar.gz"
+    sha256: 50cf82e123ef0a0aeb8d39e21f5f067c259f17bd917493ed8d7b39cd33c80f07
