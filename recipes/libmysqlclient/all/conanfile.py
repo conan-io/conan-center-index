@@ -1,6 +1,8 @@
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -29,7 +31,6 @@ class LibMysqlClientCConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -159,8 +160,8 @@ class LibMysqlClientCConan(ConanFile):
 
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        tools.rename(sources_cmake, sources_cmake_orig)
-        tools.rename("CMakeLists.txt", sources_cmake)
+        rename(self, sources_cmake, sources_cmake_orig)
+        rename(self, "CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
                 "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
@@ -169,33 +170,32 @@ class LibMysqlClientCConan(ConanFile):
             "  INSTALL_DEBUG_SYMBOLS(",
             "  # INSTALL_DEBUG_SYMBOLS(")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DISABLE_SHARED"] = not self.options.shared
-        self._cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        self._cmake.definitions["WITHOUT_SERVER"] = True
-        self._cmake.definitions["WITH_UNIT_TESTS"] = False
-        self._cmake.definitions["ENABLED_PROFILING"] = False
-        self._cmake.definitions["WIX_DIR"] = False
+        cmake = CMake(self)
+        cmake.definitions["DISABLE_SHARED"] = not self.options.shared
+        cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        cmake.definitions["WITHOUT_SERVER"] = True
+        cmake.definitions["WITH_UNIT_TESTS"] = False
+        cmake.definitions["ENABLED_PROFILING"] = False
+        cmake.definitions["WIX_DIR"] = False
         if self._with_lz4:
-            self._cmake.definitions["WITH_LZ4"] = "system"
+            cmake.definitions["WITH_LZ4"] = "system"
 
         if self._with_zstd:
-            self._cmake.definitions["WITH_ZSTD"] = "system"
-            self._cmake.definitions["ZSTD_INCLUDE_DIR"] = self.deps_cpp_info["zstd"].include_paths[0]
+            cmake.definitions["WITH_ZSTD"] = "system"
+            cmake.definitions["ZSTD_INCLUDE_DIR"] = self.deps_cpp_info["zstd"].include_paths[0]
 
         if self._is_msvc:
-            self._cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
+            cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
 
         if self.options.with_ssl:
-            self._cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
+            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
         if self.options.with_zlib:
-            self._cmake.definitions["WITH_ZLIB"] = "system"
-        self._cmake.configure(source_dir=self._source_subfolder)
-        return self._cmake
+            cmake.definitions["WITH_ZLIB"] = "system"
+        cmake.configure(source_dir=self._source_subfolder)
+        return cmake
 
     def build(self):
         self._patch_files()
@@ -208,7 +208,7 @@ class LibMysqlClientCConan(ConanFile):
         with tools.run_environment(self):
             cmake.install()
         os.mkdir(os.path.join(self.package_folder, "licenses"))
-        tools.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
+        rename(self, os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
