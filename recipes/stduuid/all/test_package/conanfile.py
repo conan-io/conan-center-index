@@ -7,6 +7,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if self.deps_cpp_info["stduuid"].with_cxx20_span:
+            cmake.definitions["STDUUID_WITH_CXX20_SPAN"] = True
         cmake.configure()
         cmake.build()
 
