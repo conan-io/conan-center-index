@@ -52,6 +52,16 @@ class RTTRConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # No warnings as errors
+        for target in ["rttr_core", "rttr_core_lib", "rttr_core_s", "rttr_core_lib_s"]:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "rttr", "CMakeLists.txt"),
+                "set_compiler_warnings({})".format(target), "",
+            )
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -67,8 +77,7 @@ class RTTRConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
