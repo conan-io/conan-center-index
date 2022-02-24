@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -91,17 +92,19 @@ class LibxsltConan(ConanFile):
             static = "no" if self.options.shared else "yes"
 
             with tools.vcvars(self):
-                args = ["cscript",
-                        "configure.js",
-                        "compiler=msvc",
-                        "prefix=%s" % self.package_folder,
-                        "cruntime=/%s" % self.settings.compiler.runtime,
-                        "debug=%s" % debug,
-                        "static=%s" % static,
-                        'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                        'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths),
-                        'iconv=no',
-                        'xslt_debug=no']
+                args = [
+                    "cscript",
+                    "configure.js",
+                    "compiler=msvc",
+                    "prefix={}".format(self.package_folder),
+                    "cruntime=/{}".format(msvc_runtime_flag(self)),
+                    "debug={}".format(debug),
+                    "static={}".format(static),
+                    "include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)),
+                    "lib=\"{}\"".format(";".join(self.deps_cpp_info.lib_paths)),
+                    "iconv=no",
+                    "xslt_debug=no",
+                ]
                 for name in self._option_names:
                     cname = {"plugins": "modules"}.get(name, name)
                     value = getattr(self.options, name)
