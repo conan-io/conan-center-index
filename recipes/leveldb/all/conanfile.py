@@ -71,8 +71,8 @@ class LevelDBCppConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["LEVELDB_BUILD_TESTS"] = False
         cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
-        cmake.definitions["LEVELDB_WITH_SNAPPY"] = self.options.with_snappy
-        cmake.definitions["LEVELDB_WITH_CRC32C"] = self.options.with_crc32c
+        cmake.definitions["HAVE_SNAPPY"] = self.options.with_snappy
+        cmake.definitions["HAVE_CRC32C"] = self.options.with_crc32c
         cmake.configure()
         return cmake
 
