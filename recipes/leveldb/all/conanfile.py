@@ -29,7 +29,7 @@ class LevelDBCppConan(ConanFile):
         "with_crc32c": True,
     }
 
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -72,6 +72,8 @@ class LevelDBCppConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
         self._cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
+        self._cmake.definitions["LEVELDB_WITH_SNAPPY"] = self.options.with_snappy
+        self._cmake.definitions["LEVELDB_WITH_CRC32C"] = self.options.with_crc32c
         self._cmake.configure()
         return self._cmake
 
