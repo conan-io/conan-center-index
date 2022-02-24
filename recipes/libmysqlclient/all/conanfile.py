@@ -103,6 +103,11 @@ class LibMysqlClientCConan(ConanFile):
            tools.Version(self.settings.compiler.version) >= "13.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 13")
 
+    def build_requirements(self):
+        if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
+            # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
+            self.build_requires("cmake/3.22.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
