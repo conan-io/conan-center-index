@@ -88,7 +88,8 @@ class KModConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        self.run(os.path.join(self._source_subfolder, "autogen.sh"))
+        tools.save(os.path.join(self._source_subfolder, "libkmod", "docs", "gtk-doc.make"), "")
+        self.run("autoreconf -fiv", cwd=self._source_subfolder)
         autotools = Autotools(self)
         autotools.configure(build_script_folder=self._source_subfolder)
         autotools.make()
