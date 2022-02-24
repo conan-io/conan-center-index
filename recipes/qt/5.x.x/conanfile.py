@@ -858,11 +858,12 @@ Examples = bin/datadir/examples""")
         build_modules = []
 
         libsuffix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                libsuffix = "d"
-            elif tools.is_apple_os(self.settings.os):
-                libsuffix = "_debug"
+        if not self.options.multiconfiguration:
+            if self.settings.build_type == "Debug":
+                if self.settings.os == "Windows":
+                    libsuffix = "d"
+                elif tools.is_apple_os(self.settings.os):
+                    libsuffix = "_debug"
 
         def _get_corrected_reqs(requires):
             reqs = []
