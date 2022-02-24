@@ -1,6 +1,7 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -33,7 +34,6 @@ class LibxsltConan(ConanFile):
     }
 
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -145,10 +145,9 @@ class LibxsltConan(ConanFile):
                     targets = "libxslt{0} libexslt{0}".format("" if self.options.shared else "a")
                     self.run("nmake /f Makefile.msvc {}".format(targets))
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -159,8 +158,8 @@ class LibxsltConan(ConanFile):
         for name in self._option_names:
             value = getattr(self.options, name)
             args.append("--with-{}={}".format(name, yes_no(value)))
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
