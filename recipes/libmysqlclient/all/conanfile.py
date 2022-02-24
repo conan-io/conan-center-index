@@ -99,7 +99,7 @@ class LibMysqlClientCConan(ConanFile):
         #        current errors:
         #             error: expected unqualified-id MYSQL_VERSION_MAJOR=8
         #             error: no member named 'ptrdiff_t' in the global namespace
-        if self.version == "8.0.17" and self.setting.compiler == "apple-clang" and \
+        if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) >= "13.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 13")
 
