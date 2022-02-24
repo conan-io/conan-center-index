@@ -7,7 +7,7 @@ required_conan_version = ">=1.43.0"
 class TracyConan(ConanFile):
     name = "tracy"
     description = "C++ frame profiler"
-    topics = ("tracy", "profiler", "performance", "gamedev")
+    topics = ("profiler", "performance", "gamedev")
     homepage = "https://github.com/wolfpld/tracy"
     url = "https://github.com/conan-io/conan-center-index"
     license = ["BSD 3-clause"]
