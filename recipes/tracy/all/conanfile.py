@@ -10,7 +10,7 @@ class TracyConan(ConanFile):
     topics = ("profiler", "performance", "gamedev")
     homepage = "https://github.com/wolfpld/tracy"
     url = "https://github.com/conan-io/conan-center-index"
-    license = ["BSD 3-clause"]
+    license = ["BSD-3-Clause"]
     settings = "os", "compiler", "build_type", "arch"
 
     # Existing CMake tracy options with default value
