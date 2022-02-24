@@ -95,13 +95,13 @@ class LibMysqlClientCConan(ConanFile):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
-        # FIXME: patch libmysqlclient 8.0.17 to support apple-clang >= 13?
+        # FIXME: patch libmysqlclient 8.0.17 to support apple-clang >= 12?
         #        current errors:
         #             error: expected unqualified-id MYSQL_VERSION_MAJOR=8
         #             error: no member named 'ptrdiff_t' in the global namespace
         if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
-           tools.Version(self.settings.compiler.version) >= "13.0":
-            raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 13")
+           tools.Version(self.settings.compiler.version) >= "12.0":
+            raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
 
     def build_requirements(self):
         if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
