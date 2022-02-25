@@ -14,7 +14,7 @@ class TracyConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     # Existing CMake tracy options with default value
-    tracy_options = {
+    _tracy_options = {
         "enable": ([True, False], True),
         "callstack": ([True, False], False),
         "only_localhost": ([True, False], False),
@@ -30,12 +30,12 @@ class TracyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        **{k: v[0] for k, v in tracy_options.items()},
+        **{k: v[0] for k, v in _tracy_options.items()},
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        **{k: v[1] for k, v in tracy_options.items()},
+        **{k: v[1] for k, v in _tracy_options.items()},
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -69,7 +69,7 @@ class TracyConan(ConanFile):
 
         # Set all tracy options in the correct form
         # For example, TRACY_NO_EXIT
-        for opt in self.tracy_options.keys():
+        for opt in self._tracy_options.keys():
             switch = getattr(self.options, opt)
             opt = 'TRACY_' + opt.upper()
             self._cmake.definitions[opt] = switch
