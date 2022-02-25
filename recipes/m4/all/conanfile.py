@@ -50,7 +50,8 @@ class M4Conan(ConanFile):
             # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
             build_canonical_name = False
             host_canonical_name = False
-            autotools.flags.append("-FS")
+            if int(str(self.settings.compiler.version)) >= 12:
+                autotools.flags.append("-FS")
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:
             # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
