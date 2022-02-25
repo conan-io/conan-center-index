@@ -54,9 +54,14 @@ class FaacConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        # FIXME: libfaac depends on kissfft. Try to unvendor this dependency
+        pass
+
     def validate(self):
         if self._is_msvc:
-            raise ConanInvalidConfiguration("libfaac doesn't support builing with Visual Studio")
+            # FIXME: add msvc support since there are MSBuild files upstream
+            raise ConanInvalidConfiguration("libfaac conan-center recipe doesn't support building with Visual Studio yet")
         if self.options.with_mp4:
             # TODO: as mpv4v2 as a conan package
             raise ConanInvalidConfiguration("building with mp4v2 is not supported currently")
