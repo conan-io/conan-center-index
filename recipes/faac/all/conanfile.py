@@ -105,8 +105,6 @@ class FaacConan(ConanFile):
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "lib{}.a".format(self.name))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
