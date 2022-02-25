@@ -44,9 +44,15 @@ class FaacConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _has_mp4_option(self):
+        return tools.Version(self.version) < "1.29.1"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_mp4_option:
+            del self.options.with_mp4
 
     def configure(self):
         if self.options.shared:
@@ -62,7 +68,7 @@ class FaacConan(ConanFile):
         if self._is_msvc:
             # FIXME: add msvc support since there are MSBuild files upstream
             raise ConanInvalidConfiguration("libfaac conan-center recipe doesn't support building with Visual Studio yet")
-        if self.options.with_mp4:
+        if self.options.get_safe("with_mp4"):
             # TODO: as mpv4v2 as a conan package
             raise ConanInvalidConfiguration("building with mp4v2 is not supported currently")
 
@@ -82,9 +88,10 @@ class FaacConan(ConanFile):
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-mp4v2={}".format(yes_no(self.options.with_mp4)),
             "--enable-drm={}".format(yes_no(self.options.drm)),
         ]
+        if self._has_mp4_option:
+            args.append("--with-mp4v2={}".format(yes_no(self.options.with_mp4)))
         autotools.configure(configure_dir=self._source_subfolder, args=args)
         return autotools
 
