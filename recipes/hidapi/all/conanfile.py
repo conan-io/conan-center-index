@@ -84,9 +84,12 @@ class HidapiConan(ConanFile):
         else:
             with tools.chdir(self._source_subfolder):
                 self.run("./bootstrap")
-            if self.settings.os == "Macos":
-                tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
-                                      r"-install_name \$rpath/", "-install_name ")
+                # relocatable shared lib on macOS
+                tools.replace_in_file(
+                    "configure",
+                    "-install_name \\$rpath/",
+                    "-install_name @rpath/",
+                )
             autotools = self._configure_autotools()
             autotools.make()
 
