@@ -83,13 +83,9 @@ class HidapiConan(ConanFile):
             self._build_msvc()
         else:
             with tools.chdir(self._source_subfolder):
-                self.run("./bootstrap")
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
                 # relocatable shared lib on macOS
-                tools.replace_in_file(
-                    "configure",
-                    "-install_name \\$rpath/",
-                    "-install_name @rpath/",
-                )
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
