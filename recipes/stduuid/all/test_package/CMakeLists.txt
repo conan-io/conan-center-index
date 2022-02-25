@@ -8,8 +8,4 @@ find_package(stduuid REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} stduuid::stduuid)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
-
-if (STDUUID_WITH_CXX20_SPAN)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE STDUUID_WITH_CXX20_SPAN)
-endif()
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)

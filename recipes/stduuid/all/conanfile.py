@@ -39,7 +39,7 @@ class StduuidConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
-        version = Version( self.settings.compiler.version )
+        version = Version(self.settings.compiler.version)
         compiler = self.settings.compiler
         if self.settings.compiler.cppstd and \
            not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):

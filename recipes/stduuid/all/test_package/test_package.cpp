@@ -1,9 +1,6 @@
 #include <iostream>
 #include <cassert>
 
-#if not defined(__cpp_lib_span) or not defined(STDUUID_WITH_CXX20_SPAN)
-#include <gsl/span>
-#endif
 #include "uuid.h"
 
 using namespace std::string_literals;
