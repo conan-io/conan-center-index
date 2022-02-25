@@ -115,6 +115,8 @@ class FaacConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["faac"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
