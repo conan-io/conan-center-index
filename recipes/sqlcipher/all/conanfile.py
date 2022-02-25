@@ -64,7 +64,7 @@ class SqlcipherConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires("tcl/8.6.10")
+        self.build_requires("tcl/8.6.11")
         if self.settings.compiler != "Visual Studio":
             self.build_requires("gnu-config/cci.20201022")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
