@@ -141,7 +141,16 @@ class SqlcipherConan(ConanFile):
                     os.path.join(self._source_subfolder, "config.guess"))
         configure = os.path.join(self._source_subfolder, "configure")
         self._chmod_plus_x(configure)
+        # relocatable shared libs on macOS
         tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+        # avoid SIP issues on macOS when dependencies are shared
+        if tools.is_apple_os(self.settings.os):
+            libpaths = ":".join(self.deps_cpp_info.lib_paths)
+            tools.replace_in_file(
+                configure,
+                "#! /bin/sh\n",
+                "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+            )
         autotools = self._configure_autotools()
         autotools.make()
 
