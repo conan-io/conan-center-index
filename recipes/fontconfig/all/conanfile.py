@@ -142,6 +142,12 @@ class FontconfigConan(ConanFile):
                 meson = self._configure_meson()
                 meson.build()
         else:
+            # relocatable shared lib on macOS
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "configure"),
+                "-install_name \\$rpath/",
+                "-install_name @rpath/"
+            )
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.make()
