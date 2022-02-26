@@ -88,7 +88,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
@@ -255,7 +255,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def tbb():
-            return ["tbb::tbb"] if self.options.with_tbb else []
+            return ["onetbb::onetbb"] if self.options.with_tbb else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []

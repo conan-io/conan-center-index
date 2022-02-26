@@ -193,7 +193,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
@@ -563,7 +563,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def parallel():
-            return ["tbb::tbb"] if self.options.parallel == "tbb" else []
+            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
 
         def quirc():
             return ["quirc::quirc"] if self.options.with_quirc else []

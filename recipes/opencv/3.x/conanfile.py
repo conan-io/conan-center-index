@@ -98,7 +98,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
         if self.options.contrib:
@@ -331,7 +331,7 @@ class OpenCVConan(ConanFile):
 
         def parallel():
             if self.options.parallel:
-                return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
+                return ["onetbb::onetbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
         def xfeatures2d():
