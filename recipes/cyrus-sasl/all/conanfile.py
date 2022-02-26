@@ -103,6 +103,10 @@ class CyrusSaslConan(ConanFile):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config", "config.guess"))
 
+        configure = os.path.join(self._source_subfolder, "configure")
+        # relocatable shared libs on macOS
+        tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
