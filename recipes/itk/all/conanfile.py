@@ -68,7 +68,7 @@ class ITKConan(ConanFile):
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
         self.requires("openjpeg/2.4.0")
-        self.requires("tbb/2020.3")
+        self.requires("onetbb/2020.3")
         self.requires("zlib/1.2.11")
 
     @property
@@ -310,7 +310,7 @@ class ITKConan(ConanFile):
             "ITKCommon": {
                 "requires": [
                     "itksys", "ITKVNLInstantiation", "eigen::eigen",
-                    "tbb::tbb", "double-conversion::double-conversion",
+                    "onetbb::onetbb", "double-conversion::double-conversion",
                 ],
                 "system_libs": libm(),
             },
