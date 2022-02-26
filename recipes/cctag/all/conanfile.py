@@ -55,7 +55,7 @@ class CCTagConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.78.0")
         self.requires("eigen/3.4.0")
-        self.requires("tbb/2020.3")
+        self.requires("onetbb/2020.3")
         self.requires("opencv/4.5.3")
 
     @property
@@ -141,7 +141,7 @@ class CCTagConan(ConanFile):
             "boost::atomic", "boost::chrono", "boost::date_time", "boost::exception",
             "boost::filesystem", "boost::serialization", "boost::system",
             "boost::thread", "boost::timer", "boost::math_c99", "eigen::eigen",
-            "tbb::tbb", "opencv::opencv_core", "opencv::opencv_videoio",
+            "onetbb::onetbb", "opencv::opencv_core", "opencv::opencv_videoio",
             "opencv::opencv_imgproc", "opencv::opencv_imgcodecs",
         ]
         if self.settings.os == "Windows":
