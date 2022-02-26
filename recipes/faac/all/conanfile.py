@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import functools
 import os
 
@@ -13,6 +14,7 @@ class FaacConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/faac"
     license = "LGPL-2.0-only"
+    exports_sources = "patches/**"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -96,6 +98,7 @@ class FaacConan(ConanFile):
         return autotools
 
     def build(self):
+        apply_conandata_patches(self)
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
