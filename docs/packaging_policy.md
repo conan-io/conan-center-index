@@ -54,7 +54,7 @@ release/download webpage.
 
 * It is forbidden to run other conan client commands during build. In other words, if upstream build files call conan under the hood (through `cmake-conan` for example or any other logic), this logic must be neutralized.
 
-* Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compier.cppstd`, `compiler.runtime` etc).
+* Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
 
 * These env vars from profile should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`, `LDFLAGS`.
 
