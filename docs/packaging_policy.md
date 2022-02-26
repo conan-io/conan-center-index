@@ -40,9 +40,15 @@ release/download webpage.
 
 * Version range is not allowed.
 
-* Specifiy explicit RREV (recipe revision) of dependencies is not allowed.
+* Specify explicit RREV (recipe revision) of dependencies is not allowed.
 
 * Vendoring in library source code should be removed (best effort) to avoid potential ODR violations. If upstream takes care to rename symbols, it may be acceptable.
+
+* Only other conan-center recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()` of a conan-center recipe.
+
+* If a requirement is conditional, this condition must not depend on build context. Build requirements don't have this constraint.
+
+* Forcing options of dependencies inside a conan-center recipe should be avoided, except if it is mandatory for the library.
 
 ## Build
 
