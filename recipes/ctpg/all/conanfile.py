@@ -7,12 +7,15 @@ required_conan_version = ">=1.33.0"
 class CTPGConan(ConanFile):
     name = "ctpg"
     license = "MIT"
-    url = "https://github.com/conan-io/conan-center-index"
-    description = "Compile Time Parser Generator is a C++ single header library which takes a language description as a C++ code and turns it into a LR1 table parser with a deterministic finite automaton lexical analyzer, all in compile time."
+    description = (
+        "Compile Time Parser Generator is a C++ single header library which takes a language description as a C++ code "
+        "and turns it into a LR1 table parser with a deterministic finite automaton lexical analyzer, all in compile time."
+    )
     topics = ("regex", "parser", "grammar", "compile-time")
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/peter-winter/ctpg"
-    no_copy_source = True
     settings = "compiler",
+    no_copy_source = True
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
@@ -40,12 +43,17 @@ class CTPGConan(ConanFile):
         else:
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE*", "licenses", self._source_subfolder)
-        self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
-
-    def package_id(self):
-        self.info.header_only()
+        if tools.Version(self.version) >= "1.3.7":
+            self.copy("ctpg.hpp",
+                os.path.join("include", "ctpg"), 
+                os.path.join(self._source_subfolder, "include", "ctpg"))
+        else:
+            self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
