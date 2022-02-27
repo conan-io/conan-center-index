@@ -1,0 +1,9 @@
+sources:
+  "2.3.1":
+    url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
+    sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
+
+patches:
+  "2.3.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.3.1-0001-fix-cmake.patch"
