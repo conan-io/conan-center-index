@@ -117,11 +117,10 @@ class CclientConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.txt", "licenses")
+        self.copy("c-client/*.h", "include")
         if self._is_msvc:
-            self.copy("c-client/*.h", "include")
             self.copy("*.lib", "lib", "c-client")
         else:
-            self.copy("c-client/*.h", "include")
             self.copy("*.a", "lib", "c-client")
 
     def package_info(self):

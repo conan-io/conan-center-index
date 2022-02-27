@@ -1,6 +1,8 @@
 #include <c-client/c-client.h>
 #include <stddef.h>
 
+/* These symbols are left undefined in the library and are expected to be
+ * defined by a consumer */
 void mm_searched(MAILSTREAM* stream, unsigned long number) {}
 void mm_exists(MAILSTREAM* stream, unsigned long number) {}
 void mm_expunged(MAILSTREAM* stream, unsigned long number) {}
