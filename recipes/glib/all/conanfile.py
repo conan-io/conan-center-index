@@ -105,7 +105,8 @@ class GLibConan(ConanFile):
 
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
-        defs["tests"] = "false"
+        if tools.Version(self.version) >= "2.67.2":
+            defs["tests"] = "false"
 
         if tools.Version(self.version) >= "2.67.0":
             defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
