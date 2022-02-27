@@ -146,21 +146,15 @@ class DiligentCoreConan(ConanFile):
                      dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-        bin_path = os.path.join(self.package_folder, "lib", "source_subfolder", str(self.settings.build_type))
-
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dll")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dylib")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.so")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.lib")):
-            shutil.move(dll, os.path.join(self.package_folder, "lib"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.a")):
-            shutil.move(dll, os.path.join(self.package_folder, "lib"))
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so", dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
