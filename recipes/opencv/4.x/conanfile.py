@@ -296,7 +296,7 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(ade_cmake, 'if (ade_DIR)', replacement, strict=False)
             tools.replace_in_file(ade_cmake, "TARGET ade", "TARGET ade::ade")
             gapi_cmake = os.path.join(self._source_subfolder, "modules", "gapi", "CMakeLists.txt")
-            tools.replace_in_file(gapi_cmake, "ade", "ade::ade")
+            tools.replace_in_file(gapi_cmake, " ade)", " ade::ade)")
 
     def _configure_cmake(self):
         if self._cmake:
