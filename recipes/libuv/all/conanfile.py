@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+import os
+
 required_conan_version = ">=1.36.0"
 
 
@@ -68,8 +70,11 @@ class libuvConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE-docs", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libuv")
