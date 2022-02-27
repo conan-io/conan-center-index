@@ -148,6 +148,11 @@ class NetSnmpConan(ConanFile):
                 'LIBCRYPTO="-l${CRYPTO}"',
                 'LIBCRYPTO="-l${CRYPTO} -l%s"' % (crypto_link_flags,)
             )
+            tools.replace_in_file(
+                "configure",
+                'LIBS="-lcrypto  $LIBS"',
+                f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"'
+            )
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
