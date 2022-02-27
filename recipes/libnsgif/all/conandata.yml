@@ -1,0 +1,5 @@
+sources:
+  "1.0":
+    url: "http://source.netsurf-browser.org/libnsgif.git/snapshot/libnsgif-release/0.2.1.tar.gz"
+    sha256: "b6344043da2134751aea81b1552468893ed65deef02a8124fbeb5d36e497459e"
+    
