@@ -43,6 +43,8 @@ class GLibConan(ConanFile):
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
+        if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
+            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
 
     def configure(self):
         if self.options.shared:
@@ -97,7 +99,9 @@ class GLibConan(ConanFile):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        defs["internal_pcre"] = not self.options.with_pcre
+        
+        if tools.Version(self.version) < "2.69.0":
+            defs["internal_pcre"] = not self.options.with_pcre
 
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
