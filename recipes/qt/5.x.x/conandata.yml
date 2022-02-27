@@ -24,5 +24,7 @@ patches:
       base_path: "qt5/qtdeclarative"
     - patch_file: "patches/f830b86.diff"
       base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/fix-gcc-11.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty"
     - patch_file: "patches/dece6f5.diff"
       base_path: "qt5/qtbase"
