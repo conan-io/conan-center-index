@@ -1,8 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
-import shutil
 
 required_conan_version = ">=1.33.0"
 
