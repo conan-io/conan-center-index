@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -43,7 +44,6 @@ class DataFrameConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -76,7 +76,7 @@ class DataFrameConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self._is_msvc and self.options.shared and tools.Version(self.version) <= "1.19.0":
+        if self._is_msvc and self.options.shared and tools.Version(self.version) < "1.20.0":
             raise ConanInvalidConfiguration(
                 "dataframe {} doesn't support shared lib with Visual Studio".format(self.version)
             )
@@ -94,14 +94,17 @@ class DataFrameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if tools.Version(self.version) >= "1.14.0":
-            self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        if tools.Version(self.version) >= "1.20.0":
+            cmake.definitions["HMDF_TESTING"] = False
+            cmake.definitions["HMDF_EXAMPLES"] = False
+            cmake.definitions["HMDF_BENCHMARKS"] = False
+        elif tools.Version(self.version) >= "1.14.0":
+            cmake.definitions["ENABLE_TESTING"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -132,9 +135,11 @@ class DataFrameConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "rt"])
         if self._is_msvc:
             self.cpp_info.defines.append("_USE_MATH_DEFINES")
-            if tools.Version(self.version) <= "1.19.0" and not self.options.shared:
+            if tools.Version(self.version) < "1.20.0" and not self.options.shared:
                 # weird but required in those versions of dataframe
                 self.cpp_info.defines.append("LIBRARY_EXPORTS")
+        if tools.Version(self.version) >= "1.20.0" and self.options.shared:
+            self.cpp_info.defines.append("HMDF_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "DataFrame"
