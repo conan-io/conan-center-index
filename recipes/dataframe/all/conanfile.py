@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
+import textwrap
 
 required_conan_version = ">=1.43.0"
 
@@ -94,6 +95,23 @@ class DataFrameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't pollute RPATH
+        if tools.Version(self.version) < "1.20.0":
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                textwrap.dedent("""\
+                    include(AddInstallRPATHSupport)
+                    add_install_rpath_support(BIN_DIRS "${CMAKE_INSTALL_FULL_LIBDIR}"
+                                              LIB_DIRS "${CMAKE_INSTALL_FULL_BINDIR}"
+                                              INSTALL_NAME_DIR "${CMAKE_INSTALL_FULL_LIBDIR}"
+                                              USE_LINK_PATH)
+                """),
+                "",
+            )
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -107,8 +125,7 @@ class DataFrameConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
