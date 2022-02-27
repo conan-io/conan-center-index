@@ -39,6 +39,7 @@ class Sqlite3Conan(ConanFile):
         "max_blob_size": "ANY",
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
+        "enable_dbpage_vtab": [True, False],
     }
     default_options = {
         "shared": False,
@@ -64,6 +65,7 @@ class Sqlite3Conan(ConanFile):
         "max_blob_size": 1000000000,
         "build_executable": True,
         "enable_default_vfs": True,
+        "enable_dbpage_vtab": False,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -131,6 +133,8 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
         self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
+        self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
+        
         self._cmake.configure()
         return self._cmake
 
