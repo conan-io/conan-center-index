@@ -250,7 +250,7 @@ class ArrowConan(ConanFile):
         if self._with_glog():
             self.requires("glog/0.5.0")
         if self._with_grpc():
-            self.requires("grpc/1.43.0")
+            self.requires("grpc/1.44.0")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
