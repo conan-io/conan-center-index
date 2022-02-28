@@ -1,6 +1,6 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches
 import functools
 import os
 
@@ -14,7 +14,6 @@ class FaacConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/faac"
     license = "LGPL-2.0-only"
-    exports_sources = "patches/**"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,6 +48,10 @@ class FaacConan(ConanFile):
     @property
     def _has_mp4_option(self):
         return tools.Version(self.version) < "1.29.1"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
