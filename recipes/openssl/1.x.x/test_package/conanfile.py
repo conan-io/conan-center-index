@@ -35,4 +35,12 @@ class TestPackageConan(ConanFile):
         if not self._skip_test and not tools.cross_building(self):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
+            if self.settings.os == 'Macos' and self.options["openssl"].shared:
+                # Ensure we can run install_name_tool on the libraries
+                libssl_dylib = 'libssl.dylib'
+                libssl = os.path.join(self.deps_cpp_info["openssl"].rootpath, 'lib', libssl_dylib)
+                self.run(f'rm -f {libssl_dylib}')
+                self.run(f'cp {libssl} {libssl_dylib}')
+                long_rpath = 'poijfpeoifjperwonfjpnocjpnqoefjpneojntvqpeonijtpqeonrvtijpqvneoitjvqpneoitjnvpqeonijtvpqoeijrtvpqoeritjvpqeoijtqpevnoitjpqenotijqepo'
+                self.run(f'install_name_tool -add_rpath {long_rpath} {libssl_dylib}')
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
