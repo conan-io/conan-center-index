@@ -320,12 +320,12 @@ need to modify your project if the recipe changes the binaries, flags,... it pro
 
 To isolate from this changes there are different strategies you can follow:
 
-The minimum solution, involves small changes to you Conan client configuration by
+The minimum solution involves small changes to your Conan client configuration by
 
  * **Pin the version of every reference you consume in your project** using recipe revisions
    and lockfiles.
    
-For larger projects and teams it is recommended to add some infratructure to ensure stability by
+For larger projects and teams it is recommended to add some infrastructure to ensure stability by
 
  * **Cache recipes in your own Artifactory**: your project should use only this remote and
    new recipe revisions are only pushed to your Artifactory after they have been validated
