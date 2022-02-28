@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(aws-cdi-sdk REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} aws-cdi-sdk::aws-cdi-sdk)
+target_link_libraries(${PROJECT_NAME} AWS::aws-cdi-sdk)

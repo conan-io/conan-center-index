@@ -16,10 +16,6 @@ class AwsCdiSdkConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    default_options = {
-        "aws-libfabric:shared": True,
-        "aws-sdk-cpp:shared": True
-    }
 
     @property
     def _source_subfolder(self):
@@ -31,6 +27,10 @@ class AwsCdiSdkConan(ConanFile):
     def requirements(self):
         self.requires("aws-libfabric/1.9.1amzncdi1.0")
         self.requires("aws-sdk-cpp/1.8.130")
+
+    def configure(self):
+        self.options["aws-libfabric"].shared = True
+        self.options["aws-sdk-cpp"].shared = True
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -103,13 +103,18 @@ class AwsCdiSdkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.filenames["cmake_find_package"] = "aws-cdi-sdk"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-cdi-sdk"
+
         cppSdk = self.cpp_info.components["aws-cpp-sdk-cdi"]
         cppSdk.libs = ["aws-cpp-sdk-cdi"]
 
         cppSdk.requires = ["aws-sdk-cpp::monitoring", "aws-libfabric::aws-libfabric"]
         
         cppSdk.set_property("cmake_file_name", "aws-cpp-sdk-cdi")
-        cppSdk.set_property("cmake_target_name", "aws-cpp-sdk-cdi")
+        cppSdk.set_property("cmake_target_name", "AWS::aws-cpp-sdk-cdi")
         cppSdk.set_property("pkg_config_name", "aws-cpp-sdk-cdi")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
@@ -125,7 +130,7 @@ class AwsCdiSdkConan(ConanFile):
             cSdk.defines = ["_LINUX"]
 
         cSdk.set_property("cmake_file_name", "aws-cdi-sdk")
-        cSdk.set_property("cmake_target_name", "aws-cdi-sdk")
+        cSdk.set_property("cmake_target_name", "AWS::aws-cdi-sdk")
         cSdk.set_property("pkg_config_name", "aws-cdi-sdk")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
