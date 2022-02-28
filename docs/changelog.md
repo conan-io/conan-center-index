@@ -1,5 +1,10 @@
 # Changelog
 
+### 24-February-2022 - 14:03 CET
+
+- [fix] Fix encoding issues in `summary.html` file.
+- [fix] Specify branch discovery in DSL for cci multibranch job.
+
 ### 22-February-2022 - 10:26 CET
 
 - [feature] Merge pull-request that bump dependencies automatically.
