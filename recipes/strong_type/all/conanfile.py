@@ -6,7 +6,7 @@ class StrongtypeConan(ConanFile):
     name = "strong_type"
     license = "MIT"
     description = "Create new type from existing type without changing the interface."
-    topics = ("conan", "strong_type", "safety")
+    topics = ("strong_type", "safety")
     homepage = "https://github.com/Enhex/strong_type"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
