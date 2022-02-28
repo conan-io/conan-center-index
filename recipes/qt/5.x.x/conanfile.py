@@ -1205,6 +1205,23 @@ Examples = bin/datadir/examples""")
             _create_module("AxServer", ["Core", "Gui", "Widgets", "AxBase"])
             self.cpp_info.components["qtAxServer"].includedirs = [os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
+        
+        if self.options.qtscript:
+            _create_module("Script")
+            if self.options.widgets:
+                _create_module("ScriptTools", ["Gui", "Widgets", "Script"])
+        
+        if self.options.qtandroidextras:
+            _create_module("AndroidExtras")
+            
+        if self.options.qtwebview:
+            _create_module("WebView", ["Gui", "Quick"])
+            
+        if self.options.qtvirtualkeyboard:
+            _create_module("VirtualKeyboard", ["Qml", "Quick", "Gui"])
+        
+        if self.options.qtspeech:
+            _create_module("TextToSpeech")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
