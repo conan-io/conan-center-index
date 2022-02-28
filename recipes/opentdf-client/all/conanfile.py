@@ -30,12 +30,12 @@ class OpenTDFConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 14
+        return 17
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17",
+            "Visual Studio": "15",
             "gcc": "7",
             "clang": "11",
             "apple-clang": "11.0.0",
@@ -69,7 +69,7 @@ class OpenTDFConan(ConanFile):
         self.requires("zlib/1.2.11@")
         self.requires("ms-gsl/2.1.0@")
         self.requires("libxml2/2.9.10@")
-        self.requires("libarchive/3.5.2@")
+        self.requires("libarchive/3.5.1@")
         self.requires("nlohmann_json/3.10.4@")
         self.requires("jwt-cpp/0.4.0@")
 
