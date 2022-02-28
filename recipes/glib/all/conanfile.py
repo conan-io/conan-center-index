@@ -43,6 +43,8 @@ class GLibConan(ConanFile):
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
+        if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
+            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
 
     def configure(self):
         if self.options.shared:
@@ -66,7 +68,7 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.60.2")
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
@@ -79,10 +81,10 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.36.2")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.2")
+            self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.20.1")
+            self.requires("libgettext/0.21")
 
         if tools.is_apple_os(self.settings.os):
             self.requires("libiconv/1.16")
@@ -97,11 +99,14 @@ class GLibConan(ConanFile):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        defs["internal_pcre"] = not self.options.with_pcre
+        
+        if tools.Version(self.version) < "2.69.0":
+            defs["internal_pcre"] = not self.options.with_pcre
 
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
-        defs["tests"] = "false"
+        if tools.Version(self.version) >= "2.67.2":
+            defs["tests"] = "false"
 
         if tools.Version(self.version) >= "2.67.0":
             defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
