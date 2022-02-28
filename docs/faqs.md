@@ -308,7 +308,7 @@ For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`,
 intel-mkl/2021@mycompany/stable
 ```
 
-## How to _protect_ my project from breaking changes in recipes?
+## How to protect my project from breaking changes in recipes?
 
 This repository and the CI building recipes is continuosly pushing to new Conan versions,
 sometimes adopting new features as soon as they are released 
