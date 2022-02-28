@@ -1,8 +1,6 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version >= "1.33.0"
-
 class StrongtypeConan(ConanFile):
     name = "strong_type"
     license = "MIT"
@@ -17,7 +15,8 @@ class StrongtypeConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
