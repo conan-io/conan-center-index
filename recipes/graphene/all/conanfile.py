@@ -92,6 +92,8 @@ class LibnameConan(ConanFile):
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]
         self.cpp_info.components["graphene-1.0"].includedirs = [os.path.join("include", "graphene-1.0"), os.path.join("lib", "graphene-1.0", "include")]
         self.cpp_info.components["graphene-1.0"].names["pkg_config"] = "graphene-1.0"
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["graphene-1.0"].system_libs = ["m", "pthread"]
         if self.options.with_glib:
             self.cpp_info.components["graphene-1.0"].requires = ["glib::gobject-2.0"]
 
