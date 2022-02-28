@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class DecoTestConan(ConanFile):
+class StrongTypeTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
@@ -20,6 +20,6 @@ class DecoTestConan(ConanFile):
         self.copy('*.so*', dst='bin', src='lib')
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             os.chdir("bin")
             self.run(".%sexample" % os.sep)
