@@ -1,22 +1,7 @@
---- a/ogr/ogr_xerces_headers.h
-+++ b/ogr/ogr_xerces_headers.h
-@@ -33,9 +33,9 @@
- #pragma GCC system_header
- #endif
- 
--#include <util/PlatformUtils.hpp>
--#include <sax/InputSource.hpp>
--#include <util/BinInputStream.hpp>
-+#include <xercesc/util/PlatformUtils.hpp>
-+#include <xercesc/sax/InputSource.hpp>
-+#include <xercesc/util/BinInputStream.hpp>
- 
- #ifdef XERCES_CPP_NAMESPACE_USE
- XERCES_CPP_NAMESPACE_USE
 --- a/ogr/ogrsf_frmts/gml/xercesc_headers.h
 +++ b/ogr/ogrsf_frmts/gml/xercesc_headers.h
-@@ -39,13 +39,13 @@
- #define INFINITY INFINITY_XERCES
+@@ -33,13 +33,13 @@
+ #pragma GCC system_header
  #endif
  
 -#include <util/PlatformUtils.hpp>
@@ -34,12 +19,12 @@
 +#include <xercesc/sax2/Attributes.hpp>
 +#include <xercesc/sax/InputSource.hpp>
  
- #ifdef XERCES_CPP_NAMESPACE_USE
- XERCES_CPP_NAMESPACE_USE
+ using namespace XERCES_CPP_NAMESPACE;
+ 
 --- a/ogr/ogrsf_frmts/ili/xercesc_headers.h
 +++ b/ogr/ogrsf_frmts/ili/xercesc_headers.h
-@@ -39,14 +39,14 @@
- #define INFINITY INFINITY_XERCES
+@@ -33,14 +33,14 @@
+ #pragma GCC system_header
  #endif
  
 -#include <util/PlatformUtils.hpp>
@@ -59,5 +44,5 @@
 +#include <xercesc/util/XMLString.hpp>
 +#include <xercesc/sax2/Attributes.hpp>
  
- #ifdef XERCES_CPP_NAMESPACE_USE
- XERCES_CPP_NAMESPACE_USE
+ using namespace XERCES_CPP_NAMESPACE;
+ 
