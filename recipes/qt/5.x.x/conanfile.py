@@ -6,7 +6,6 @@ import configparser
 import glob
 import itertools
 import os
-import shutil
 import textwrap
 
 required_conan_version = ">=1.43.0"
@@ -887,7 +886,7 @@ Examples = bin/datadir/examples""")
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
-        def _create_plugin(pluginname, libname, type, requires):
+        def _create_plugin(pluginname, libname, plugintype, requires):
             componentname = "qt%s" % pluginname
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt5::{}".format(pluginname))
@@ -895,7 +894,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1192,7 +1191,7 @@ Examples = bin/datadir/examples""")
             _create_module("MacExtras")
 
         if self.options.qtxmlpatterns:
-             _create_module("XmlPatterns", ["Network"])
+            _create_module("XmlPatterns", ["Network"])
 
         if self.options.qtactiveqt:
             _create_module("AxBase", ["Gui", "Widgets"])
