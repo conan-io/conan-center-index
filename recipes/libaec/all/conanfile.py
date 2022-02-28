@@ -21,8 +21,6 @@ class LibaecConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     _cmake = None
 
@@ -33,6 +31,11 @@ class LibaecConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,19 +64,12 @@ class LibaecConan(ConanFile):
         if tools.Version(self.version) < "1.0.6":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "add_subdirectory(tests)", "")
-        if tools.Version(self.version) >= "1.0.6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "set(CMAKE_C_STANDARD 99)", "set(CMAKE_C_STANDARD 11)")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                                  "target_link_libraries(aec_static PUBLIC aec)", "")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                                  "target_link_libraries(aec_shared PUBLIC aec)", "")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
