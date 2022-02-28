@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -20,7 +19,7 @@ class LunaSVGConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
 

@@ -1,16 +1,19 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9916c67..c52af4e 100755
+index 9916c67..6433f13 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -13,7 +13,6 @@ add_library(lunasvg)
+@@ -13,7 +13,9 @@ add_library(lunasvg)
  add_subdirectory(include)
  add_subdirectory(source)
  add_subdirectory(3rdparty/software)
 -add_subdirectory(3rdparty/plutovg)
++
++find_package(plutovg CONFIG REQUIRED)
++target_link_libraries(lunasvg plutovg::plutovg)
  
  if(BUILD_SHARED_LIBS)
      target_compile_definitions(lunasvg PUBLIC LUNASVG_SHARED)
-@@ -24,16 +23,13 @@ if(LUNASVG_BUILD_EXAMPLES)
+@@ -24,16 +26,13 @@ if(LUNASVG_BUILD_EXAMPLES)
      add_subdirectory(example)
  endif()
  
