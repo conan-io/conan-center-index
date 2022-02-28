@@ -157,6 +157,8 @@ class GlslangConan(ConanFile):
             self._cmake.definitions["OVERRIDE_MSVCCRT"] = False
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
