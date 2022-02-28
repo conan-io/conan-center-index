@@ -101,7 +101,7 @@ class DiligentToolsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("*.hpp", src=self._source_subfolder, dst="include/DiligentTools", keep_path=True)        
-        self.copy(pattern="*.dll", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", src=self._build_subfolder, dst="bin", keep_path=False)
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
