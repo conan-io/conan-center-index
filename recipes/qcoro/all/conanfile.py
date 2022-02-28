@@ -59,7 +59,6 @@ class QCoroConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/6.2.2")
-        self.requires("expat/2.4.2", override=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
