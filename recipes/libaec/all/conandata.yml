@@ -14,4 +14,3 @@ patches:
   "1.0.6":
     - patch_file: "patches/1.0.6-0001-fix-library-builds.patch"
       base_path: "source_subfolder"
-  
