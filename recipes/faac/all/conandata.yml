@@ -9,6 +9,3 @@ patches:
   "1.30":
     - patch_file: "patches/001-fix-out-of-root-build.patch"
       base_path: "source_subfolder"
-  "1.28":
-    - patch_file: "patches/001-fix-out-of-root-build.patch"
-      base_path: "source_subfolder"
