@@ -52,7 +52,7 @@ class WaylandConan(ConanFile):
             self.requires("libffi/3.4.2")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.9.12")
-        self.requires("expat/2.4.2")
+        self.requires("expat/2.4.6")
 
     def build_requirements(self):
         self.build_requires("meson/0.59.3")
