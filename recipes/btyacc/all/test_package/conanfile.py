@@ -6,7 +6,7 @@ from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

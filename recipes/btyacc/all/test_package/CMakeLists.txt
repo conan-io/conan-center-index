@@ -5,9 +5,9 @@ project(test_package C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
-find_program(BTYACC_EXECUTABLE btyacc)
-if(NOT BTYACC_EXECUTABLE)
-  message(FATAL_ERROR "BTYACC_EXECUTABLE is required (Value: ${BTYACC_EXECUTABLE})")
+find_package(btyacc REQUIRED CONFIG)
+if(NOT DEFINED BTYACC_EXECUTABLE)
+  message(FATAL_ERROR "BTYACC_EXECUTABLE is not defined")
 endif()
 
 set(bin "${PROJECT_BINARY_DIR}")

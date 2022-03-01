@@ -1,5 +1,6 @@
 import functools
 import os
+import textwrap
 
 from conans import CMake, ConanFile, tools
 
@@ -50,13 +51,30 @@ class BtyaccConan(ConanFile):
     def build(self):
         self._configure_cmake().build()
 
+    @property
+    def _variables(self):
+        return os.path.join("bin", "conan-official-btyacc-variables.cmake")
+
     def package(self):
         self.copy("README", "licenses", self._source_subfolder)
         self.copy("README.BYACC", "licenses", self._source_subfolder)
         self._configure_cmake().install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        variables = os.path.join(self.package_folder, self._variables)
+        content = textwrap.dedent("""\
+            set(BTYACC_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/btyacc")
+            if(NOT EXISTS "${BTYACC_EXECUTABLE}")
+              set(BTYACC_EXECUTABLE "${BTYACC_EXECUTABLE}.exe")
+            endif()
+        """)
+        tools.save(variables, content)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
+        self.cpp_info.build_modules["cmake"] = [self._variables]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._variables]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = \
+            [self._variables]
+        self.cpp_info.builddirs = ["bin"]
