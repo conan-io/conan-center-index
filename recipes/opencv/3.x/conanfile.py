@@ -100,7 +100,7 @@ class OpenCVConan(ConanFile):
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
         if self.options.contrib:
             self.requires("freetype/2.11.1")
             self.requires("harfbuzz/3.2.0")

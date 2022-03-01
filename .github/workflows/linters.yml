@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
       - uses: actions/setup-python@v2.2.2
         with:
           python-version: "3.8"
@@ -30,4 +32,4 @@ jobs:
       - name: run lint
         run:  |
           echo "::add-matcher::.github/${{ matrix.hook }}.json"
-          python3 .github/runlint.py ${{ github.event.pull_request.number }}
+          python3 .github/runlint.py

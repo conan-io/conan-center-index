@@ -28,9 +28,6 @@ class StrawberryperlConan(ConanFile):
         self.copy(pattern="*", src=os.path.join("perl", "bin"), dst="bin")
         self.copy(pattern="*", src=os.path.join("perl", "lib"), dst="lib")
         self.copy(pattern="*", src=os.path.join("perl", "vendor", "lib"), dst="lib")
-        self.copy(pattern="*", src=os.path.join("c", "bin"), dst="bin")
-        self.copy(pattern="*", src=os.path.join("c", "lib"), dst="lib")
-        self.copy(pattern="*", src=os.path.join("c", "include"), dst="include")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):

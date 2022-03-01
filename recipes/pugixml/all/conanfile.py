@@ -2,14 +2,15 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class PugiXmlConan(ConanFile):
     name = "pugixml"
     description = "Light-weight, simple and fast XML parser for C++ with XPath support"
     topics = ("xml-parser", "xpath", "xml", "dom")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pugixml.org/"
-    license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = ("os", "arch", "compiler", "build_type")
@@ -43,25 +44,31 @@ class PugiXmlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared and self.options.wchar_mode:
-            # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
-            raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
+        if self.options.shared:
+            del self.options.fPIC
         if self.options.header_only:
             if self.settings.os != 'Windows':
                 del self.options.fPIC
             del self.options.shared
 
+    def validate(self):
+        if self.options.get_safe("shared") and self.options.wchar_mode:
+            # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
+            raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
+
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
-            self._cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -88,10 +95,6 @@ class PugiXmlConan(ConanFile):
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
             tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
 
     def package_info(self):
         if self.options.header_only:

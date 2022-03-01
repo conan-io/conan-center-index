@@ -38,8 +38,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 - Compilers: Visual Studio:
   
-  - 2017 (19.16.27035)
-  - 2019 (19.28.29333)
+  - 2017 (19.16.27045)
+  - 2019 (19.29.30139)
   
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
@@ -65,7 +65,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 ## MacOS
 
-- Compilers: Apple-clang versions 11.0.0, 12.0.0, 12.0.0, 13.0.0
+- Compilers: Apple-clang versions 11.0.3, 12.0.5, 13.0.0
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64, armv8
 - Build types: Release, Debug

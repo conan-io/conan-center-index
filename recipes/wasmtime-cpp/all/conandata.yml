@@ -1,4 +1,7 @@
 sources:
+  "0.34.0":
+    url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.34.0.tar.gz"
+    sha256: "275483f87dadc183ed54708ccaeb025f33c040b8b3aeff797df6f9cd99f0abd8"
   "0.32.0":
     url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.32.0.tar.gz"
     sha256: "5a3f5a3b21a228f9850420c5f1a1baec438617c957bd0c793d01c5db36aa8405"
