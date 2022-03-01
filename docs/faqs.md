@@ -28,7 +28,7 @@ This section gathers the most common questions from the community related to pac
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
-  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
+  * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
