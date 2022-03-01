@@ -74,7 +74,7 @@ index a26f9b7..3cd8f72 100644
  set_target_properties(aec_client PROPERTIES OUTPUT_NAME aec)
  target_link_libraries(aec_client PUBLIC aec)
 +if (MSVC)
-+  target_compile_options(aec_client PUBLIC /FS)
++  target_compile_options(aec_client PUBLIC /FS /Z7)
 +endif()
  
  include(GNUInstallDirs)
