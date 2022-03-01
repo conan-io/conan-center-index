@@ -51,7 +51,7 @@ class GLibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows" and not self.options.shared and tools.Version(self.version) <= "2.71.1":
+        if self.settings.os == "Windows" and not self.options.shared and tools.Version(self.version) < "2.71.1":
             raise ConanInvalidConfiguration(
                 "glib < 2.71.1 can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
