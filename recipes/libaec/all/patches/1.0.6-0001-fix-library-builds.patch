@@ -12,7 +12,7 @@ index 6f75ead..c974cce 100644
  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
  include(CTest)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index a26f9b7..36fc902 100644
+index a26f9b7..3cd8f72 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -10,12 +10,17 @@ target_include_directories(aec
@@ -62,7 +62,7 @@ index a26f9b7..36fc902 100644
  add_library(sz_shared SHARED "$<TARGET_OBJECTS:sz>" "$<TARGET_OBJECTS:aec>")
  target_link_libraries(sz_shared PUBLIC sz)
  set_target_properties(sz_shared
-@@ -46,6 +58,8 @@ set_target_properties(sz_shared
+@@ -46,11 +58,16 @@ set_target_properties(sz_shared
    OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,szip,sz>
    PUBLIC_HEADER ../include/szlib.h)
  
@@ -71,7 +71,15 @@ index a26f9b7..36fc902 100644
  # Simple client for testing and benchmarking.
  # Can also be used stand-alone
  add_executable(aec_client aec.c)
-@@ -61,23 +75,14 @@ if(UNIX)
+ set_target_properties(aec_client PROPERTIES OUTPUT_NAME aec)
+ target_link_libraries(aec_client PUBLIC aec)
++if (MSVC)
++  target_compile_options(aec_client PUBLIC /FS)
++endif()
+ 
+ include(GNUInstallDirs)
+ if(UNIX)
+@@ -61,23 +78,14 @@ if(UNIX)
      PROPERTIES
      COMPILE_DEFINITIONS
      "HAVE_VISIBILITY=$<BOOL:${COMPILER_HAS_HIDDEN_VISIBILITY}>;BUILDING_LIBAEC")
