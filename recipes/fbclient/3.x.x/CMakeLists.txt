@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 
 project(fbclient VERSION "${CONAN_fbclient_VERSION}" LANGUAGES CXX)
 
@@ -6,7 +6,7 @@ if(NOT WIN32 AND NOT APPLE)
   enable_language(C)
 endif()
 if(APPLE)
-  enable_language(OBJC)
+  enable_language(OBJC) # needs CMake 3.16
 endif()
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
