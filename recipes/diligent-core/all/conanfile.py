@@ -154,6 +154,9 @@ class DiligentCoreConan(ConanFile):
         self.copy(pattern="*.so", dst="lib", keep_path=False)
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
 
+        self.copy("File2String",     src="build_subfolder/bin", dst="bin", keep_path=False)
+        self.copy("File2String.exe", src="build_subfolder/bin", dst="bin", keep_path=False)
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
