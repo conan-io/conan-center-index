@@ -5,8 +5,14 @@ include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 if (MSVC)
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Z7")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Z7")
+	add_compile_options("$<$<CONFIG:DEBUG>:/Z7>")
 endif ()
 
 add_subdirectory("source_subfolder")
+
+if (MSVC)
+	target_link_options(H5detect PRIVATE "$<$<CONFIG:DEBUG>:/DEBUG:NONE>")
+	target_link_options(H5make_libsettings PRIVATE "$<$<CONFIG:DEBUG>:/DEBUG:NONE>")
+	target_link_options(mirror_server PRIVATE "$<$<CONFIG:DEBUG>:/DEBUG:NONE>")
+	target_link_options(mirror_server_stop PRIVATE "$<$<CONFIG:DEBUG>:/DEBUG:NONE>")
+endif ()
