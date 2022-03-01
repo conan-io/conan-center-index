@@ -89,8 +89,8 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def build(self):
-        self._build_with_qmake()
-        self._build_with_meson()
+        #self._build_with_qmake()
+        #self._build_with_meson()
         self._build_with_cmake_find_package_multi()
 
     def _test_with_qmake(self):
