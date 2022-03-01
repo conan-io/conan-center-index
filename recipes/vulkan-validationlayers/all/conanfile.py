@@ -82,11 +82,11 @@ class VulkanValidationLayersConan(ConanFile):
         self.requires("vulkan-headers/{}".format(self._get_compatible_vulkan_headers_version))
         # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
         if self._greater_equal_semver(self.version, "1.2.173"):
-            self.requires("robin-hood-hashing/3.11.3")
+            self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.19.0")
+            self.requires("wayland/1.20.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
