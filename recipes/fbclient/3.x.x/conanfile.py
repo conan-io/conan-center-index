@@ -75,3 +75,5 @@ class FbClientConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "m"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("pthread")
+        elif self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["Foundation", "Security"]
