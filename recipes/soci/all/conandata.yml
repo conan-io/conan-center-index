@@ -1,4 +1,7 @@
 sources:
+  "4.0.3":
+    url: "https://github.com/SOCI/soci/archive/v4.0.3.tar.gz"
+    sha256: ""
   "4.0.2":
     url: "https://github.com/SOCI/soci/archive/v4.0.2.tar.gz"
     sha256: "f293192a412ed82693d17dfe46e2734b140bff835bc3259e3cbd7c315e5e2d74"
