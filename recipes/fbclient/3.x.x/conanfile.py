@@ -46,6 +46,9 @@ class FbClientConan(ConanFile):
         if self.settings.os == "Macos":
             self.requires("libiconv/1.16")
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.16.9")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
