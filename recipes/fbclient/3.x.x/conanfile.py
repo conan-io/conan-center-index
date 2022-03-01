@@ -41,6 +41,10 @@ class FbClientConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if self.settings.os == "Macos":
+            self.requires("libiconv/1.16")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -76,4 +80,5 @@ class FbClientConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Macos":
+            self.cpp_info.requires.append("Iconv::Iconv")
             self.cpp_info.frameworks = ["Foundation", "Security"]

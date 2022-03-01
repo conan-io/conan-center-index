@@ -53,6 +53,8 @@ find_package(ZLIB REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
 if(APPLE)
+  find_package(Iconv REQUIRED CONFIG)
+
   find_library(FOUNDATION_FRAMEWORK Foundation)
   if(NOT FOUNDATION_FRAMEWORK)
     message(FATAL_ERROR "Foundation not found (${FOUNDATION_FRAMEWORK})")
@@ -205,7 +207,7 @@ else()
     )
     target_link_libraries(
         fbclient PRIVATE
-        "${FOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}"
+        "${FOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}" Iconv::Iconv
     )
   else()
     target_sources(
