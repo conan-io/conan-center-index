@@ -52,6 +52,18 @@ find_package(libtommath REQUIRED CONFIG)
 find_package(ZLIB REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
+if(APPLE)
+  find_library(FOUNDATION_FRAMEWORK Foundation)
+  if(NOT FOUNDATION_FRAMEWORK)
+    message(FATAL_ERROR "Foundation not found (${FOUNDATION_FRAMEWORK})")
+  endif()
+
+  find_library(SECURITY_FRAMEWORK Security)
+  if(NOT SECURITY_FRAMEWORK)
+    message(FATAL_ERROR "Security not found (${SECURITY_FRAMEWORK})")
+  endif()
+endif()
+
 # ---- Library ----
 
 add_library(
@@ -190,6 +202,10 @@ else()
         "${src}/common/os/darwin/mac_utils.m"
         "${src}/common/os/darwin/mod_loader.cpp"
         "${src}/yvalve/config/os/darwin/config_root.cpp"
+    )
+    target_link_libraries(
+        fbclient PRIVATE
+        "${FOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}"
     )
   else()
     target_sources(
