@@ -62,7 +62,7 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if tools.Version(self.version) <= "2.71.1":
+            if tools.Version(self.version) < "2.71.1":
                 self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
