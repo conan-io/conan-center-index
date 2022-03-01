@@ -27,7 +27,6 @@ class FbClientConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_find_package_multi"
-    requires = "libtommath/1.2.0", "zlib/1.2.11"
     # NOTE: The cpp files are from epp files pre-processed using the gpre tool
     #       See https://github.com/conan-io/conan-center-index/issues/9307
     exports_sources = "CMakeLists.txt", "array.cpp", "blob.cpp"
@@ -42,6 +41,8 @@ class FbClientConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("libtommath/1.2.0")
+        self.requires("zlib/1.2.11")
         if self.settings.os == "Macos":
             self.requires("libiconv/1.16")
 
