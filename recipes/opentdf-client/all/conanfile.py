@@ -53,19 +53,9 @@ class OpenTDFConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
-    def configure(self):
-        if str(self.settings.arch).startswith('arm'):
-            self.options["openssl"].no_asm = True
-            self.options["libxml2"].zlib = False
-            self.options["libxml2"].lzma = False
-            self.options["libxml2"].icu = False
-
     def requirements(self):
         self.requires("openssl/1.1.1l@")
-        if str(self.settings.arch).startswith('arm'):
-            self.requires("boost/1.74.0@")
-        else:
-            self.requires("boost/1.76.0@")
+        self.requires("boost/1.76.0@")
         self.requires("zlib/1.2.11@")
         self.requires("ms-gsl/2.1.0@")
         self.requires("libxml2/2.9.10@")
