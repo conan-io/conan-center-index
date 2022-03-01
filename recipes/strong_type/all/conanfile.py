@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version >= "1.33.0"
+
 class StrongtypeConan(ConanFile):
     name = "strong_type"
     license = "MIT"
@@ -39,8 +41,8 @@ class StrongtypeConan(ConanFile):
                 self.name, compiler, tools.Version(self.settings.compiler.version.value)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
