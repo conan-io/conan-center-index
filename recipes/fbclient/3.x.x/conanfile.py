@@ -60,7 +60,8 @@ class FbClientConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["CONAN_fbclient_VERSION"] = self.version
         if self.settings.os == "Macos":
-            cmake.definitions["CMAKE_OBJC_COMPILER"] = tools.XCRun(self).cc
+            cmake.definitions["CMAKE_OBJC_COMPILER"] = \
+                tools.XCRun(self.settings).cc
         cmake.configure()
         return cmake
 
