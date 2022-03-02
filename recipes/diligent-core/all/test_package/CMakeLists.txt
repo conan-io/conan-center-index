@@ -4,7 +4,12 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(FILE2STRING_PATH "${CONAN_BIN_DIRS_DILIGENT-CORE}/File2String")
+if(WIN32)
+  set(FILE2STRING_PATH "${CONAN_BIN_DIRS_DILIGENT-CORE}/File2String.exe")
+else()
+  set(FILE2STRING_PATH "${CONAN_BIN_DIRS_DILIGENT-CORE}/File2String")
+endif()
+
 set(FILE "${CONAN_RES_DIRS_DILIGENT}/HLSLDefinitions.fxh")
 set(CONVERTED_FILE "${PROJECT_BINARY_DIR}/HLSLDefinitions.h")
 
