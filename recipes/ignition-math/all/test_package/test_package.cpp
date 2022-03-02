@@ -1,7 +1,8 @@
 #include <iostream>
 #include <ignition/math/Angle.hh>
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  ignition::math::Angle a;
+    std::cout << "hello world from ignition_math\n";
+    ignition::math::Angle a;
 }
