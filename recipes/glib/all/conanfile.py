@@ -38,7 +38,7 @@ class GLibConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc"
 
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
@@ -51,9 +51,9 @@ class GLibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows" and not self.options.shared:
+        if self.settings.os == "Windows" and not self.options.shared and tools.Version(self.version) < "2.71.1":
             raise ConanInvalidConfiguration(
-                "glib can not be built as static library on Windows. "
+                "glib < 2.71.1 can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
         if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
@@ -62,7 +62,8 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.shared = True
+            if tools.Version(self.version) < "2.71.1":
+                self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
