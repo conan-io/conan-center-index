@@ -39,6 +39,15 @@ class EnjinCppSdk(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11",
+        }
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
 
@@ -47,26 +56,43 @@ class EnjinCppSdk(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "17")
-
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
         if self.options.with_default_http_client:
             self.requires("cpp-httplib/0.8.5")
-            self.options["cpp-httplib"].with_openssl = True
 
         if self.options.with_default_ws_client:
             self.requires("ixwebsocket/11.0.4")
 
         self.requires("rapidjson/1.1.0")
         self.requires("spdlog/1.8.2")
-        self.options["spdlog"].header_only = True
 
     def validate(self):
+        compiler = self.settings.compiler
+
+        # Validations for minimum required C++ standard
+        if compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+
+        minimum_version = self._minimum_compilers_version.get(str(compiler), False)
+        if not minimum_version:
+            self.output.warn("C++17 support is required. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++17 support is required, which your compiler does not support.")
+
+        # Validations for OS
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("macOS is not supported at this time. Contributions are welcomed.")
+
+        # Validations for dependencies
+        if not self.options["spdlog"].header_only:
+            raise ConanInvalidConfiguration(f"{self.name} requires spdlog:header_only=True to be enabled.")
+
+        if self.options.with_default_http_client and not self.options["cpp-httplib"].with_openssl:
+            raise ConanInvalidConfiguration(f"{self.name} requires cpp-httplib:with_openssl=True when using "
+                                            f"with_default_http_client=True.")
 
     def package_id(self):
         if self.options.shared:
