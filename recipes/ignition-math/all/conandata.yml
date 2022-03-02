@@ -14,7 +14,6 @@ sources:
 patches:
   "6.7.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-Define-time_regex-locally.patch"
       patch_file: "patches/0001-ign-math-6.7.0-cmake-fixes.patch"
   "6.8.0":
     - base_path: "source_subfolder"
