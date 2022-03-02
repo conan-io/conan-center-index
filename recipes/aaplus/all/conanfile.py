@@ -12,7 +12,7 @@ class Aaplusconan(ConanFile):
         "AA+ is a C++ implementation for the algorithms as presented in the "
         "book \"Astronomical Algorithms\" by Jean Meeus"
     )
-    license = "?"
+    license = "Unlicense"
     topics = ("aa+", "astronomy", "astronomical-algorithms", "orbital-mechanics")
     homepage = "http://www.naughter.com/aa.html"
     url = "https://github.com/conan-io/conan-center-index"
