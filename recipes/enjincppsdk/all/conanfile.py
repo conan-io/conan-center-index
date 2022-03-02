@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.43.0"
@@ -46,6 +47,8 @@ class EnjinCppSdk(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        tools.check_min_cppstd(self, "17")
+
         if self.options.shared:
             del self.options.fPIC
 
@@ -62,8 +65,8 @@ class EnjinCppSdk(ConanFile):
         self.options["spdlog"].header_only = True
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("macOS is not supported at this time. Contributions are welcomed.")
 
     def package_id(self):
         if self.options.shared:
