@@ -90,6 +90,8 @@ class LibrasterliteConan(ConanFile):
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared libs on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
