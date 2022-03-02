@@ -93,8 +93,11 @@ class LibaecConan(ConanFile):
         if self.settings.os == "Windows" and tools.Version(self.version) >= "1.0.6" and not self.options.shared:
             aec_name = "aec_static" 
         szip_name = "sz"
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "1.0.6":
-            szip_name = "szip" if self.options.shared else "szip_static"
+        if self.settings.os == "Windows":
+            if tools.Version(self.version) >= "1.0.6":
+                szip_name = "szip" if self.options.shared else "szip_static"
+            elif self.options.shared:
+                szip_name = "szip"
         self.cpp_info.libs = [aec_name, szip_name,]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
