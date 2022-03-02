@@ -153,6 +153,7 @@ class DiligentCoreConan(ConanFile):
         self.copy(pattern="*.dylib", dst="lib", keep_path=False)
         self.copy(pattern="*.so", dst="lib", keep_path=False)
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String",     src="build_subfolder/bin", dst="bin", keep_path=False)
         self.copy("File2String.exe", src="build_subfolder/bin", dst="bin", keep_path=False)
