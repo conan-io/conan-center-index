@@ -588,9 +588,11 @@ class OpenSSLConan(ConanFile):
 """
         cflags = []
         cxxflags = []
+        lflags = []
         env_build = self._get_env_build()
         cflags.extend(env_build.vars_dict["CFLAGS"])
         cxxflags.extend(env_build.vars_dict["CXXFLAGS"])
+        lflags.extend(env_build.vars_dict["LDFLAGS"])
 
         cc = self._tool("CC", "cc")
         cxx = self._tool("CXX", "cxx")
@@ -612,7 +614,6 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Windows":
             includes = includes.replace('\\', '/') # OpenSSL doesn't like backslashes
 
-        lflags = env_build.link_flags
         if self.settings.os == "Macos":
             lflags.append("-headerpad_max_install_names")
         if self._asm_target:
