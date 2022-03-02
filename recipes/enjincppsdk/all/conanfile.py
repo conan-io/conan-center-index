@@ -59,6 +59,11 @@ class EnjinCppSdk(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+        if self.options.with_default_http_client:
+            self.options["cpp-httplib"].with_openssl = True
+
+        self.options["spdlog"].header_only = True
+
     def requirements(self):
         if self.options.with_default_http_client:
             self.requires("cpp-httplib/0.8.5")
