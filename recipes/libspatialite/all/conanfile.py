@@ -166,6 +166,14 @@ class LibspatialiteConan(ConanFile):
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # avoid SIP issues on macOS when dependencies are shared
+            if tools.is_apple_os(self.settings.os):
+                libpaths = ":".join(self.deps_cpp_info.lib_paths)
+                tools.replace_in_file(
+                    "configure",
+                    "#! /bin/sh\n",
+                    "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+                )
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.make()
