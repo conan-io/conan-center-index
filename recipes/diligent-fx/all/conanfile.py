@@ -98,26 +98,15 @@ class DiligentFxConan(ConanFile):
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
                      dst=os.path.join(self.package_folder, "include", "DiligentFx"))
-        #tools.rename(src=os.path.join(self.package_folder, "Shaders"),
-        #             dst=os.path.join(self.package_folder, "res"))
         shutil.move(os.path.join(self.package_folder, "Shaders"), 
                     os.path.join(self.package_folder, "res", "Shaders"))
 
+        self.copy(pattern="*.dll", src=self._build_subfolder, dst="bin", keep_path=False)
+        self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
+
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "lib", "source_subfolder", str(self.settings.build_type))
-
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dll")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.dylib")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.so")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
-
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.lib")):
-            shutil.move(dll, os.path.join(self.package_folder, "lib"))
-        for dll in glob.glob(os.path.join(self.package_folder, bin_path, "*.a")):
-            shutil.move(dll, os.path.join(self.package_folder, "lib"))
-
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
