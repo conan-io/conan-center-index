@@ -43,7 +43,7 @@ class LibrttopoConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("geos/3.9.1")
+        self.requires("geos/3.10.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
