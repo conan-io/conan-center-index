@@ -1,5 +1,6 @@
 [generators]
 cmake
+virtualenv
 virtualrunenv
 
 [requires]

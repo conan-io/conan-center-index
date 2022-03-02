@@ -58,7 +58,7 @@ xz_utils/5.2.4.dssl2
 zlib/1.2.11
 
 [options]
-Tevian:shared=True
+tevian:shared=True
 axtls:shared=True
 boost:shared=True
 bzip2:build_executable=True
