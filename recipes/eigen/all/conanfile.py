@@ -8,9 +8,8 @@ class EigenConan(ConanFile):
     name = "eigen"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://eigen.tuxfamily.org"
-    description = "Eigen is a C++ template library for linear algebra: matrices, vectors, \
-                   numerical solvers, and related algorithms."
-    license = ("MPL-2.0", "LGPL-3.0-or-later")
+    description = "Eigen is a C++ template library for linear algebra: matrices, vectors," \
+                  " numerical solvers, and related algorithms."
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
 
     settings = "os", "arch", "compiler", "build_type"
@@ -24,6 +23,9 @@ class EigenConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
