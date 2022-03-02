@@ -1,0 +1,100 @@
+from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.43.0"
+
+
+class EnjinCppSdk(ConanFile):
+    name = "enjincppsdk"
+    description = "A C++ SDK for development on the Enjin blockchain platform."
+    license = "Apache-2.0"
+    topics = ("enjin", "sdk", "blockchain")
+    homepage = "https://github.com/enjin/enjin-cpp-sdk"
+    url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "compiler", "arch", "build_type"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_default_http_client": [True, False],
+        "with_default_ws_client": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False,
+        "with_default_http_client": False,
+        "with_default_ws_client": False,
+    }
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.with_default_http_client:
+            self.requires("cpp-httplib/0.8.5")
+            self.options["cpp-httplib"].with_openssl = True
+
+        if self.options.with_default_ws_client:
+            self.requires("ixwebsocket/11.0.4")
+
+        self.requires("rapidjson/1.1.0")
+        self.requires("spdlog/1.8.2")
+        self.options["spdlog"].header_only = True
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+
+    def package_id(self):
+        if self.options.shared:
+            self.info.shared_library_package_id()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENJINSDK_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ENJINSDK_BUILD_TESTS"] = False
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "enjinsdk"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_target_name", "enjinsdk::enjinsdk")
+        self.cpp_info.names["cmake_find_package"] = "enjinsdk"
+        self.cpp_info.names["cmake_find_package_multi"] = "enjinsdk"
+        self.cpp_info.libs = tools.collect_libs(self)
