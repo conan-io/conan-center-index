@@ -90,7 +90,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         self._build_with_qmake()
-        #self._build_with_meson()
+        self._build_with_meson()
         self._build_with_cmake_find_package_multi()
 
     def _test_with_qmake(self):
@@ -115,5 +115,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):
             self._test_with_qmake()
-            #self._test_with_meson()
+            self._test_with_meson()
             self._test_with_cmake_find_package_multi()
