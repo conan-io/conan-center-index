@@ -43,9 +43,8 @@ class EnjinCppSdk(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "gcc": "8",
+            "gcc": "9",
             "clang": "9",
-            "apple-clang": "11",
         }
 
     def export_sources(self):
@@ -75,9 +74,13 @@ class EnjinCppSdk(ConanFile):
         self.requires("spdlog/1.8.2")
 
     def validate(self):
-        compiler = self.settings.compiler
+        # Validations for OS
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("macOS is not supported at this time. Contributions are welcomed.")
 
         # Validations for minimum required C++ standard
+        compiler = self.settings.compiler
+
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
@@ -86,10 +89,6 @@ class EnjinCppSdk(ConanFile):
             self.output.warn("C++17 support is required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support is required, which your compiler does not support.")
-
-        # Validations for OS
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("macOS is not supported at this time. Contributions are welcomed.")
 
         # Validations for dependencies
         if not self.options["spdlog"].header_only:
