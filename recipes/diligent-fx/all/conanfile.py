@@ -41,9 +41,9 @@ class DiligentFxConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
-    #def validate(self):
-    #    if self.options["spirv-cross"].namespace != 'diligent_spirv_cross':
-    #        raise ConanInvalidConfiguration("spirv-cross namespace option must be set to diligent_spirv_cross")
+    def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Can't build as a shared lib")
 
     def config_options(self):
         if self.settings.os == "Windows":
