@@ -56,27 +56,27 @@ class Librasterlite2Conan(ConanFile):
 
     def requirements(self):
         self.requires("cairo/1.17.4")
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         self.requires("giflib/5.2.1")
-        self.requires("libcurl/7.78.0")
+        self.requires("libcurl/7.80.0")
         self.requires("libgeotiff/1.7.0")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.3.0")
         self.requires("libxml2/2.9.12")
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.38.0")
         self.requires("zlib/1.2.11")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.2")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_lz4:
             self.requires("lz4/1.9.3")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
