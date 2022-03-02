@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.1)
 
 project(fbclient VERSION "${CONAN_fbclient_VERSION}" LANGUAGES CXX)
 
 if(NOT WIN32 AND NOT APPLE)
   enable_language(C)
-endif()
-if(APPLE)
-  enable_language(OBJC) # needs CMake 3.16
 endif()
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
@@ -208,6 +205,10 @@ else()
     target_link_libraries(
         fbclient PRIVATE
         "${FOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}" Iconv::Iconv
+    )
+    set_source_files_properties(
+        "${src}/common/os/darwin/mac_utils.m" PROPERTIES
+        COMPILE_FLAGS "-x objective-c"
     )
   else()
     target_sources(
