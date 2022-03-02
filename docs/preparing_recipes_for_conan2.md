@@ -45,7 +45,7 @@ properties model work, please check the [Conan documentation](https://docs.conan
 ### Update required_conan_version to ">=1.43.0"
 
 If you set the property ``cmake_target_name`` in the recipe, the Conan minimum
-required version should be updated to 1.43. 
+required version should be updated to 1.43.
 
 ```python
 
@@ -82,7 +82,7 @@ take into account:
 * The value of the ``.names`` attribute value in recipes is just a part of the final
   target name for CMake generators. Conan will complete the rest of the target name by
   pre-pending a namespace (with ``::`` separator) to the ``.names`` value. This namespace takes
-  the same value as the ``.names`` value. Let's see an example: 
+  the same value as the ``.names`` value. Let's see an example:
 
 ```python
 class SomePkgConan(ConanFile):
@@ -99,7 +99,7 @@ This recipe generates the target ``some-pkg::some-pkg`` for both the
 remember that if no ``.names`` attribute were set, Conan would create the target
 ``somepkg::somepkg`` for both generators by default.
 
-As we explained before, the ``cmake_target_name`` sets the **complete target name**, so, 
+As we explained before, the ``cmake_target_name`` sets the **complete target name**, so,
 to translate this information to the new model we should add the following lines:
 
 ```python
@@ -110,7 +110,7 @@ class SomePkgConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "some-pkg"
         self.cpp_info.names["cmake_find_package_multi"] = "some-pkg"
         # CMakeDeps does NOT add any namespace automatically
-        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg") 
+        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg")
         ...
 ```
 
@@ -126,11 +126,11 @@ class SomePkgConan(ConanFile):
     ...
     def package_info(self):
         # These generators fallback the filenames for the .cmake files
-        # in the .names attribute value and generate 
+        # in the .names attribute value and generate
         self.cpp_info.names["cmake_find_package"] = "some-pkg" # generates module file Findsome-pkg.cmake
         self.cpp_info.names["cmake_find_package_multi"] = "some-pkg" # generates config file some-pkg-config.cmake
 
-        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg") 
+        self.cpp_info.set_property("cmake_target_name", "some-pkg::some-pkg")
         self.cpp_info.set_property("cmake_file_name", "some-pkg") # generates config file some-pkg-config.cmake
         ...
 ```
@@ -171,17 +171,17 @@ class ExpatConan(ConanFile):
 
         # creates EXPAT::EXPAT target for module files FindEXPAT.cmake
         self.cpp_info.set_property("cmake_target_name", "EXPAT::EXPAT")
-        # creates expat::expat target for config files expat-config.cmake 
-        self.cpp_info.set_property("cmake_module_target_name", "expat::expat") 
+        # creates expat::expat target for config files expat-config.cmake
+        self.cpp_info.set_property("cmake_module_target_name", "expat::expat")
 
         # generates module file FindEXPAT.cmake
-        self.cpp_info.set_property("cmake_file_name", "EXPAT") 
+        self.cpp_info.set_property("cmake_file_name", "EXPAT")
         # generates config file expat-config.cmake
-        self.cpp_info.set_property("cmake_module_file_name", "expat") 
+        self.cpp_info.set_property("cmake_module_file_name", "expat")
 
         # config is the default for CMakeDeps
         # we set cmake_find_mode to both to generate both module and config files
-        self.cpp_info.set_property("cmake_find_mode", "both") 
+        self.cpp_info.set_property("cmake_find_mode", "both")
         ...
 ```
 
@@ -230,7 +230,7 @@ class GlewConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "glew") # generates glew-config.cmake
 
         # generate both modules and config files
-        self.cpp_info.set_property("cmake_find_mode", "both") 
+        self.cpp_info.set_property("cmake_find_mode", "both")
         ...
 ```
 
@@ -255,7 +255,7 @@ class KtxConan(ConanFile):
 
     def package_info(self):
         # changes namespace to KTX::
-        self.cpp_info.names["cmake_find_package"] = "KTX" 
+        self.cpp_info.names["cmake_find_package"] = "KTX"
         ...
         # the target inherits the KTX:: namespace and sets the target KTX::ktx
         self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
@@ -282,7 +282,7 @@ class KtxConan(ConanFile):
     ...
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "KTX" 
+        self.cpp_info.names["cmake_find_package"] = "KTX"
         ...
         # FIXME: Remove the libktx component in Conan 2.0, this is just needed for
         # compatibility with current generators
@@ -302,11 +302,11 @@ class KtxConan(ConanFile):
 ```
 
 * **Use build modules to create aliases with arbitray names for targets**. Similar to the
-  previous example, some recipes use a build module with an alias to set an arbitray
+  previous example, some recipes use a build module with an alias to set an arbitrary
   target name. Let's see the example of the [tensorflow-lite
   recipe](https://github.com/conan-io/conan-center-index/blob/03b24bf128cbf15d23ed988b8d8ca0c0ba87d307/recipes/tensorflow-lite/all/conanfile.py),
   that uses this workaround to define a ``tensorflow::tensorflowlite`` target.
-  
+
 ```python
 class TensorflowLiteConan(ConanFile):
     name = "tensorflow-lite"
@@ -341,6 +341,42 @@ class TensorflowLiteConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
         ...
 ```
+
+
+### Translating .build_modules to cmake_build_modules
+
+Previously we saw that some recipes use a build module with an alias to set an arbitrary target name.
+But sometimes the declared ".build_modules" come from the original package that declares useful CMake functions, variables
+etc. We need to use the property `cmake_build_modules` to declare a list of cmake files instead of using `cpp_info.build_modules`:
+
+```python
+class PyBind11Conan(ConanFile):
+    name = "pybind11"
+    ...
+
+    def package_info(self):
+        ...
+        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+            self.cpp_info.components["main"].build_modules[generator].append(os.path.join("lib", "cmake", "pybind11", "pybind11Common.cmake"))
+        ...
+
+```
+
+To translate this information to the new model we declare the `cmake_build_modules` property in the `root cpp_info` object:
+
+```python
+class PyBind11Conan(ConanFile):
+    name = "pybind11"
+    ...
+
+    def package_info(self):
+        ...
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "pybind11", "pybind11Common.cmake")])
+        ...
+
+```
+
+
 
 ### PkgConfigDeps
 

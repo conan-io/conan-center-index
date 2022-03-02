@@ -41,3 +41,6 @@ sources:
   2.4.0:
     url: https://github.com/bernedom/SI/archive/2.4.0.tar.gz
     sha256: 84e13b52520808d9a55a073b1bb98376be03dc3b09ddee862a1418ef543e9f2d
+  2.4.1:
+    url: https://github.com/bernedom/SI/archive/2.4.1.tar.gz
+    sha256: 6bfdbebb549da1b2db93b55c1c7f8228a0cdc6144a815319918237ca8601ad3a    

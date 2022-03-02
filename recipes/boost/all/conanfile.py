@@ -1255,7 +1255,7 @@ class BoostConan(ConanFile):
     @property
     def _toolset(self):
         if self._is_msvc:
-            return "msvc"
+            return "clang-win" if self.settings.compiler.toolset == "ClangCL" else "msvc"
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
         elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
