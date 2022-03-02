@@ -9,7 +9,6 @@ required_conan_version = ">=1.43.0"
 
 class Ntv2Conan(ConanFile):
     name = "ntv2"
-    version = "16.1"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aja-video/ntv2"
@@ -49,7 +48,7 @@ class Ntv2Conan(ConanFile):
                 f"*.{suffix}", src=os.path.join("ajalibraries", "ajantv2"), dst="lib", keep_path=False)
         if self.settings.os == "Windows" and self.options.shared:
             self.copy(
-                f"*.dll", src=os.path.join("ajalibraries", "ajantv2"), dst="bin", keep_path=False)
+                "*.dll", src=os.path.join("ajalibraries", "ajantv2"), dst="bin", keep_path=False)
         for lib in ["ajaanc", "ajacc", "ajantv2"]:
             self.copy("*", src=os.path.join(self._source_subfolder,
                       "ajalibraries", lib, "includes"), dst=os.path.join("include", lib))
