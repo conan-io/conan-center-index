@@ -102,7 +102,11 @@ class AwsCdiSdkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    def package_info(self):
+    def package_info(self):        
+        self.cpp_info.set_property("cmake_file_name", "aws-cdi-sdk")
+        
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: Remove the namespace on CMake targets
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.filenames["cmake_find_package"] = "aws-cdi-sdk"
@@ -113,7 +117,6 @@ class AwsCdiSdkConan(ConanFile):
 
         cppSdk.requires = ["aws-sdk-cpp::monitoring", "aws-libfabric::aws-libfabric"]
         
-        cppSdk.set_property("cmake_file_name", "aws-cpp-sdk-cdi")
         cppSdk.set_property("cmake_target_name", "AWS::aws-cpp-sdk-cdi")
         cppSdk.set_property("pkg_config_name", "aws-cpp-sdk-cdi")
 
@@ -129,7 +132,6 @@ class AwsCdiSdkConan(ConanFile):
         if self.settings.os == "Linux":
             cSdk.defines = ["_LINUX"]
 
-        cSdk.set_property("cmake_file_name", "aws-cdi-sdk")
         cSdk.set_property("cmake_target_name", "AWS::aws-cdi-sdk")
         cSdk.set_property("pkg_config_name", "aws-cdi-sdk")
 
