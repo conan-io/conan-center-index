@@ -28,29 +28,31 @@ sources:
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
   "9.0.0":
-    - patch_file: "patches/use-cmake-targets-9.0.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-9.0.0.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-configure-proj-pc.patch"
       base_path: "source_subfolder"
   "8.2.1":
-    - patch_file: "patches/use-cmake-targets-8.2.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
       base_path: "source_subfolder"
   "8.2.0":
-    - patch_file: "patches/use-cmake-targets-8.2.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
       base_path: "source_subfolder"
   "8.1.1":
-    - patch_file: "patches/use-cmake-targets-8.1.1.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.1.1.patch"
       base_path: "source_subfolder"
   "8.1.0":
-    - patch_file: "patches/use-cmake-targets-8.1.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.1.0.patch"
       base_path: "source_subfolder"
   "8.0.1":
-    - patch_file: "patches/use-cmake-targets-8.0.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
       base_path: "source_subfolder"
   "8.0.0":
-    - patch_file: "patches/use-cmake-targets-8.0.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
       base_path: "source_subfolder"
   "7.2.1":
-    - patch_file: "patches/use-cmake-targets-7.2.1.patch"
+    - patch_file: "patches/0001-use-cmake-targets-7.2.1.patch"
       base_path: "source_subfolder"
   "6.3.1":
-    - patch_file: "patches/use-cmake-targets-6.x.x.patch"
+    - patch_file: "patches/0001-use-cmake-targets-6.x.x.patch"
       base_path: "source_subfolder"
