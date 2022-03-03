@@ -93,11 +93,8 @@ class ConanXOrg(ConanFile):
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3"]:
+                     "xcb-dri3", "uuid"]:
             self._fill_cppinfo_from_pkgconfig(name)
         if self.settings.os == "Linux":
-            if "-luuid" not in self.cpp_info.components["sm"].sharedlinkflags:
-                self.cpp_info.components["sm"].sharedlinkflags.append("-luuid")
-            if "-luuid" not in self.cpp_info.components["sm"].exelinkflags:
-                self.cpp_info.components["sm"].exelinkflags.append("-luuid")
+            self.cpp_info.components["sm"].requires.append("uuid")
 
