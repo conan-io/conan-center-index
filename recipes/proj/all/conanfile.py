@@ -88,7 +88,7 @@ class ProjConan(ConanFile):
         tools.replace_in_file(cmakelists, "/W4", "")
 
         # Let CMake install shared lib with a clean rpath !
-        if tools.Version(self.version) >= "7.1.0":
+        if tools.Version(self.version) >= "7.1.0" and tools.Version(self.version) < "9.0.0":
             tools.replace_in_file(cmakelists,
                                   "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                                   "")
