@@ -1,5 +1,7 @@
+from conan.tools.files import rename
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from contextlib import contextmanager
+import functools
 import os
 import shutil
 
@@ -11,19 +13,22 @@ class LibMP3LameConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "LAME is a high quality MPEG Audio Layer III (MP3) encoder licensed under the LGPL."
     homepage = "http://lame.sourceforge.net"
-    topics = ("conan", "libmp3lame", "multimedia", "audio", "mp3", "decoder", "encoding", "decoding")
+    topics = ("libmp3lame", "multimedia", "audio", "mp3", "decoder", "encoding", "decoding")
     license = "LGPL-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    exports_sources = ["patches/**"]
-    _autotools = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _source_subfolder(self):
@@ -31,7 +36,15 @@ class LibMP3LameConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,31 +89,31 @@ class LibMP3LameConan(ConanFile):
             command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
             self.run(command)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if not self._autotools:
-            args = ["--disable-frontend"]
-            if self.options.shared:
-                args.extend(["--disable-static", "-enable-shared"])
-            else:
-                args.extend(["--disable-shared", "--enable-static"])
-            if self.settings.build_type == "Debug":
-                args.append("--enable-debug")
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--disable-frontend",
+        ]
+        if self.settings.build_type == "Debug":
+            args.append("--enable-debug")
+        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
+            autotools.flags.extend(["-mmmx", "-msse"])
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
-                self._autotools.flags.extend(["-mmmx", "-msse"])
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
-    def _build_configure(self):
+    def _build_autotools(self):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                              "-install_name \\$rpath/",
+                              "-install_name @rpath/")
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -109,7 +122,7 @@ class LibMP3LameConan(ConanFile):
         if self._is_msvc:
             self._build_vs()
         else:
-            self._build_configure()
+            self._build_autotools()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
@@ -119,7 +132,7 @@ class LibMP3LameConan(ConanFile):
             self.copy(name, src=os.path.join(self._source_subfolder, "output"), dst="lib")
             if self.options.shared:
                 self.copy(pattern="*.dll", src=os.path.join(self._source_subfolder, "output"), dst="bin")
-            tools.rename(os.path.join(self.package_folder, "lib", name),
+            rename(self, os.path.join(self.package_folder, "lib", name),
                          os.path.join(self.package_folder, "lib", "mp3lame.lib"))
         else:
             autotools = self._configure_autotools()
