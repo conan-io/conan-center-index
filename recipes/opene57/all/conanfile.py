@@ -76,11 +76,10 @@ class Opene57Conan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
-    def build_requirements(self):
+    def requirements(self):
         if self.options.with_tools:
             self.build_requires("boost/1.78.0")
 
-    def requirements(self):
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
             self.requires("icu/70.1")
 
