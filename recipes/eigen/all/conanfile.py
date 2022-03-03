@@ -19,7 +19,7 @@ class EigenConan(ConanFile):
     default_options = {
         "MPL2_only": False,
     }
-    license = ("MPL-2.0", "LGPL-3.0-or-later")
+    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
 
     @property
     def _source_subfolder(self):
