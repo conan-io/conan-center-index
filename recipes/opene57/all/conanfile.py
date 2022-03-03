@@ -97,7 +97,7 @@ class Opene57Conan(ConanFile):
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
         self._cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_MT"] = "MT" in msvc_runtime_flag(self)
         else:
             self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
