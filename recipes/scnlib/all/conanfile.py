@@ -18,11 +18,15 @@ class ScnlibConan(ConanFile):
         "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_exceptions": [True, False],
+        "with_rtti": [True, False],
     }
     default_options = {
         "header_only": False,
         "shared": False,
         "fPIC": True,
+        "with_exceptions": True,
+        "with_rtti": True,
     }
 
     generators = "cmake"
@@ -55,6 +59,10 @@ class ScnlibConan(ConanFile):
             "Visual Studio": "15",
         }
 
+    def requirements(self):
+        if tools.Version(self.version) >= "1.0":
+            self.requires("fast_float/3.4.0")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
@@ -79,6 +87,11 @@ class ScnlibConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SCN_INSTALL"] = True
+        self._cmake.definitions["SCN_USE_EXCEPTIONS"] = self.options.with_exceptions
+        self._cmake.definitions["SCN_USE_RTTI"] = self.options.with_rtti
+        if tools.Version(self.version) >= "1.0":
+            self._cmake.definitions["SCN_USE_BUNDLED_FAST_FLOAT"] = False
+        self._cmake.definitions["SCN_INSTALL"] = True
         self._cmake.configure()
         return self._cmake
 
@@ -99,6 +112,10 @@ class ScnlibConan(ConanFile):
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
+        if tools.Version(self.version) >= "1.0":
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "include", "scn", "detail"), "*.cmake")
+            tools.rmdir(os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
+            tools.rmdir(os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
 
     def package_info(self):
         target = "scn-header-only" if self.options.header_only else "scn"
@@ -110,6 +127,8 @@ class ScnlibConan(ConanFile):
         else:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
+        if tools.Version(self.version) >= "1.0":
+            self.cpp_info.components["_scnlib"].requires = ["fast_float::fast_float"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "scn"
