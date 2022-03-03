@@ -8,13 +8,17 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    test_type = "build_requires", "requires"
+    test_type = "explicit"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
     def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
