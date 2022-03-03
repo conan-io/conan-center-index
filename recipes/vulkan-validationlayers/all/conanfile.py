@@ -1,8 +1,10 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException, ConanInvalidConfiguration
+import functools
 import glob
 import os
 import shutil
+import yaml
 
 required_conan_version = ">=1.35.0"
 
@@ -36,6 +38,22 @@ class VulkanValidationLayersConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _dependencies_filename(self):
+        return f"dependencies-{self.version}.yml"
+
+    @property
+    @functools.lru_cache(1)
+    def _dependencies_versions(self):
+        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
+        if not os.path.isfile(dependencies_filepath):
+            raise ConanException(f"Cannot find {dependencies_filepath}")
+        cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return cached_dependencies
+
+    def export(self):
+        self.copy(self._dependencies_filename, src="dependencies", dst="dependencies")
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -46,22 +64,6 @@ class VulkanValidationLayersConan(ConanFile):
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
-
-    @property
-    def _get_compatible_spirv_tools_version(self):
-        return {
-            "1.3.204.1": "1.3.204.0",
-            "1.2.198.0": "2021.4",
-            "1.2.189.2": "2021.3",
-            "1.2.182": "2021.2",
-            "1.2.154.0": "2020.5",
-        }.get(str(self.version), self.version)
-
-    @property
-    def _get_compatible_vulkan_headers_version(self):
-        return {
-            "1.2.189.2": "1.2.189",
-        }.get(str(self.version), self.version)
 
     @staticmethod
     def _greater_equal_semver(v1, v2):
@@ -76,8 +78,8 @@ class VulkanValidationLayersConan(ConanFile):
 
     def requirements(self):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not hasattr(self, "settings_build"))
-        self.requires("vulkan-headers/{}".format(self._get_compatible_vulkan_headers_version))
+        self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
+        self.requires(self._require("vulkan-headers"))
         # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
         if self._greater_equal_semver(self.version, "1.2.173"):
             self.requires("robin-hood-hashing/3.11.5")
@@ -85,6 +87,11 @@ class VulkanValidationLayersConan(ConanFile):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.20.0")
+
+    def _require(self, recipe_name):
+        if recipe_name not in self._dependencies_versions:
+            raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
+        return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
