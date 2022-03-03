@@ -11,7 +11,7 @@ class ThrustConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
     options = {"device_system": ["cuda", "cpp", "omp", "tbb"]}
-    default_options = {"device_system": "cuda"}
+    default_options = {"device_system": "tbb"}
 
     @property
     def _source_subfolder(self):
