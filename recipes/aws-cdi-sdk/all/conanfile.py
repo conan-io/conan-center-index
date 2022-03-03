@@ -39,7 +39,8 @@ class AwsCdiSdkConan(ConanFile):
             raise ConanInvalidConfiguration("Cannot build with static dependencies")
         if not getattr(self.options["aws-sdk-cpp"], "monitoring"):
             raise ConanInvalidConfiguration("This package requires the monitoring AWS SDK")
-        tools.check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
