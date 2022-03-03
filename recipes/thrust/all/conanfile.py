@@ -19,7 +19,7 @@ class ThrustConan(ConanFile):
 
     def requirements(self):
         if self.options.device_system == "tbb":
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         elif self.options.device_system != "cpp":
             self.output.warn('Conan package for {0} is not available,'
                              ' this package will use {0} from system.'
