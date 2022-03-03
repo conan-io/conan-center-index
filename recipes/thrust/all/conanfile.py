@@ -19,16 +19,14 @@ class ThrustConan(ConanFile):
 
     def requirements(self):
         if self.options.device_system == "tbb":
-            self.requires("tbb/2020.1")
+            self.requires("tbb/2020.3")
         elif self.options.device_system != "cpp":
             self.output.warn('Conan package for {0} is not available,'
                              ' this package will use {0} from system.'
                              .format(str(self.options.device_system).upper()))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
