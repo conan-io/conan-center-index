@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 64f3b131..90eac360 100644
+index 64f3b131..32b21a8c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -143,7 +143,7 @@ else()
@@ -20,24 +20,6 @@ index 64f3b131..90eac360 100644
  
    set(HAVE_NEON FALSE)
  
-@@ -216,7 +216,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
-     endif(CLANG)
-   endif(MSVC)
- 
--elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64.*|AARCH64.*")
-+elseif(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64.*|AARCH64.*")
- 
-   set(HAVE_AVX FALSE)
-   set(HAVE_AVX2 FALSE)
-@@ -226,7 +226,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64.*|AARCH64.*")
-   add_definitions("-DHAVE_NEON")
-   set(HAVE_NEON TRUE)
- 
--elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
-+elseif(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
- 
-   set(HAVE_AVX FALSE)
-   set(HAVE_AVX2 FALSE)
 @@ -239,7 +239,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
      add_definitions("-DHAVE_NEON")
    endif()
