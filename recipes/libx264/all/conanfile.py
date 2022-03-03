@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
@@ -11,8 +12,9 @@ class LibX264Conan(ConanFile):
     homepage = "https://www.videolan.org/developers/x264.html"
     description = "x264 is a free software library and application for encoding video streams into the " \
                   "H.264/MPEG-4 AVC compression format"
-    topics = ("conan", "libx264", "video", "encoding")
+    topics = ("libx264", "video", "encoding")
     license = "GPL-2.0"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,7 +32,7 @@ class LibX264Conan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _source_subfolder(self):
@@ -79,6 +81,7 @@ class LibX264Conan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         args = [
             "--bit-depth=%s" % str(self.options.bit_depth),
             "--disable-cli",
@@ -115,9 +118,9 @@ class LibX264Conan(ConanFile):
                 args.append("--cross-prefix={}".format("{}/bin/{}-linux-{}-".format(ndk_root, arch, abi)))
         if self._is_msvc:
             self._override_env["CC"] = "cl -nologo"
-            self._autotools.flags.append("-%s" % str(self.settings.compiler.runtime))
-            # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
-            self._autotools.flags.append("-FS")
+            self._autotools.flags.append("-{}".format(msvc_runtime_flag(self)))
+            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
+                self._autotools.flags.append("-FS")
         build_canonical_name = None
         host_canonical_name = None
         if self._is_msvc:
@@ -129,6 +132,10 @@ class LibX264Conan(ConanFile):
 
     def build(self):
         with self._build_context():
+            # relocatable shared lib on macOS
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                                  "-install_name \\$(DESTDIR)\\$(libdir)/",
+                                  "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
@@ -144,6 +151,7 @@ class LibX264Conan(ConanFile):
                          os.path.join(self.package_folder, "lib", "x264.lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "x264")
         self.cpp_info.libs = ["x264"]
         if self._is_msvc and self.options.shared:
             self.cpp_info.defines.append("X264_API_IMPORTS")
@@ -151,4 +159,6 @@ class LibX264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
         elif self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["dl", "m"])
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "x264"
