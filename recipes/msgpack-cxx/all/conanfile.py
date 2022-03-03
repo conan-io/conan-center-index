@@ -17,13 +17,9 @@ class MsgpackCXXConan(ConanFile):
     
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "use_boost": [True, False]
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "use_boost": True
     }
 
@@ -36,13 +32,13 @@ class MsgpackCXXConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
+    def configure_options(self):
         # No boost was added in 4.1.0
-        if self.version < "4.1.0" and not self.options.use_boost:
-            raise ConanInvalidConfiguration("Only msgpack-cxx 4.1.0 and greater support not using boost")
+        if tools.Version(self.version):
+            del self.options.use_boost
 
     def requirements(self):
-        if self.options.use_boost:
+        if self.options.get_safe("use_boost", True):
             self.requires("boost/1.78.0")
 
     def package_id(self):
