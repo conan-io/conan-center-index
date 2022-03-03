@@ -50,13 +50,7 @@ class Opene57Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        self.options['xerces-c'].shared = self.options.shared
-
-        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
-            self.options['icu'].shared = self.options.shared
-
         if self.options.with_tools:
-            self.options['boost'].shared = self.options.shared
             self.options['boost'].multithreading = True
 
     def config_options(self):
