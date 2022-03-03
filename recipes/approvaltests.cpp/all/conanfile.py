@@ -12,7 +12,7 @@ class ApprovalTestsCppConan(ConanFile):
     description = "Approval Tests allow you to verify a chunk of output " \
                   "(such as a file) in one operation as opposed to writing " \
                   "test assertions for each element."
-    topics = ("conan", "testing", "unit-testing", "header-only")
+    topics = ("testing", "unit-testing", "header-only")
     options = {
         "with_boosttest": [True, False],
         "with_catch2": [True, False],
@@ -30,16 +30,18 @@ class ApprovalTestsCppConan(ConanFile):
     no_copy_source = True
     settings = "compiler"
 
+    @property
+    def _header_file(self):
+        return "ApprovalTests.hpp"
+
     def configure(self):
         if not self._boost_test_supported():
             del self.options.with_boosttest
         if not self._cpputest_supported():
             del self.options.with_cpputest
-        self._validate_compiler_settings()
 
-    @property
-    def _header_file(self):
-        return "ApprovalTests.hpp"
+    def validate(self):
+        self._validate_compiler_settings()
 
     def requirements(self):
         if self.options.get_safe("with_boosttest"):
@@ -52,6 +54,9 @@ class ApprovalTestsCppConan(ConanFile):
             self.requires("doctest/2.4.6")
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
@@ -69,9 +74,6 @@ class ApprovalTestsCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
         self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
-
-    def package_id(self):
-        self.info.header_only()
 
     def _boost_test_supported(self):
         return Version(self.version) >= "8.6.0"
