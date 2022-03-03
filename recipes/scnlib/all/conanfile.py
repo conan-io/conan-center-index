@@ -106,7 +106,13 @@ class ScnlibConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.options.header_only:
             self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
-            self.copy("*", dst=os.path.join("include", "scn", "detail"), src=os.path.join(self._source_subfolder, "src"))
+            if tools.Version(self.version) >= "1.0":
+                self.copy("reader_*.cpp", dst=os.path.join("include", "scn", "reader"), src=os.path.join(self._source_subfolder, "src"))
+                self.copy("vscan.cpp", dst=os.path.join("include", "scn", "scan"), src=os.path.join(self._source_subfolder, "src"))
+                self.copy("locale.cpp", dst=os.path.join("include", "scn", "detail"), src=os.path.join(self._source_subfolder, "src"))
+                self.copy("file.cpp", dst=os.path.join("include", "scn", "detail"), src=os.path.join(self._source_subfolder, "src"))
+            else:
+                self.copy("*.cpp", dst=os.path.join("include", "scn", "detail"), src=os.path.join(self._source_subfolder, "src"))
         else:
             cmake = self._configure_cmake()
             cmake.install()
