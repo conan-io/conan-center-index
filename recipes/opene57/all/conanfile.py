@@ -128,8 +128,3 @@ class Opene57Conan(ConanFile):
         self.cpp_info.defines.append(f"E57_REFIMPL_REVISION_ID={self.name}-{self.version}")
         self.cpp_info.defines.append("XERCES_STATIC_LIBRARY")
 
-        self.cpp_info.set_property("cmake_target_name", "opene57")
-        self.cpp_info.set_property("cmake_target_name", "opene57")
-        # TODO: To remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "opene57"
-        self.cpp_info.names["cmake_find_package_multi"] = "opene57"
