@@ -59,6 +59,10 @@ class FbClientConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CONAN_fbclient_VERSION"] = self.version
+        # HACK: CMAKE_SYSTEM_PROCESSOR is not defined for M1 builds and the
+        #       Configure.cmake script depends on it being defined
+        if self.settings.arch == "armv8" and self.settings.os == "Macos":
+            cmake.definitions["CONAN_CMAKE_SYSTEM_PROCESSOR"] = "armv8"
         cmake.configure()
         return cmake
 
