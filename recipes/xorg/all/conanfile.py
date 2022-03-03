@@ -64,7 +64,7 @@ class ConanXOrg(ConanFile):
                             "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                            "xkeyboard-config-devel", "xcb-util-devel", "uuid-devel"]
+                            "xkeyboard-config-devel", "xcb-util-devel", "libuuid-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                             "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
@@ -72,7 +72,7 @@ class ConanXOrg(ConanFile):
                             "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "util-linux-libs"]
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "uuid-devel"]
+                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "libuuid-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
         
@@ -93,7 +93,7 @@ class ConanXOrg(ConanFile):
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3", "uuid"]:
+                     "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             self._fill_cppinfo_from_pkgconfig(name)
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")
