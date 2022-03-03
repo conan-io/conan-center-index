@@ -172,11 +172,6 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
 
-        if self.settings.os == 'Windows':
-            self.cpp_info.defines.append("FILE2STRING_PATH=%s" % os.path.join(self.cpp_info.rootpath, "bin", "File2String.exe")
-        else:
-            self.cpp_info.defines.append("FILE2STRING_PATH=%s" % os.path.join(self.cpp_info.rootpath, "bin", "File2String")
-
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
