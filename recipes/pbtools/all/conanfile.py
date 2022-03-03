@@ -1,12 +1,10 @@
 import glob
-import os
 
 from conans import ConanFile, CMake, tools
 
 
 class PbtoolsConan(ConanFile):
     name = "pbtools"
-    version = "0.43.0"
     license = "MIT"
     author = "Erik Moqvist erik.moqvist@gmail.com"
     url = "https://github.com/eerimoq/pbtools"
@@ -22,7 +20,7 @@ class PbtoolsConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=glob.glob(self.name + "-*/")[0] + '/lib')
+        cmake.configure(source_folder=f'pbtools-{self.version}/lib')
         cmake.build()
         cmake.install()
 
