@@ -1,6 +1,9 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class ThrustConan(ConanFile):
     name = "thrust"
     license = "Apache-2.0"
