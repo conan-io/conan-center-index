@@ -56,7 +56,7 @@ class ScnlibConan(ConanFile):
         return {
             "gcc": "5",
             "clang": "6.0",
-            "Visual Studio": "15",
+            "Visual Studio": "16" if tools.Version(self.version) >= "1.0" else "15",
         }
 
     def requirements(self):
