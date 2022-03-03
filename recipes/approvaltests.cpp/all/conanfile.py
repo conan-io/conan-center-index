@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, tools
 from conans.tools import Version, ConanInvalidConfiguration
+from conan.tools.files import rename
+
+
+required_conan_version = ">=1.43.0"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -64,8 +66,7 @@ class ApprovalTestsCppConan(ConanFile):
             filename = url[url.rfind("/") + 1:]
             tools.download(url, filename)
             tools.check_sha256(filename, source["sha256"])
-        os.rename("ApprovalTests.v.{}.hpp".format(self.version),
-                  self._header_file)
+        rename(self, "ApprovalTests.v.{}.hpp".format(self.version), self._header_file)
 
     def package(self):
         self.copy(self._header_file, dst="include")
