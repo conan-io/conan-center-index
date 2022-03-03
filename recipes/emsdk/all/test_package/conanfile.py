@@ -6,7 +6,7 @@ required_conan_version = ">=1.36.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    test_type = "build_requires"
+    test_type = "explicit"
     generators = "cmake"
 
     @property
@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows":
             self.build_requires("make/4.3")
 
