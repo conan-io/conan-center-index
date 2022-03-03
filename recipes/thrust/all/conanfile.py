@@ -33,8 +33,10 @@ class ThrustConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*", src=os.path.join(self._source_subfolder, "thrust"),
-                  dst=os.path.join("include", "thrust"))
+        self.copy("*.h", src=os.path.join(self._source_subfolder, "thrust"),
+                      dst=os.path.join("include", "thrust"))
+        self.copy("*.inl", src=os.path.join(self._source_subfolder, "thrust"),
+                      dst=os.path.join("include", "thrust"))
 
     def package_id(self):
         self.info.header_only()
