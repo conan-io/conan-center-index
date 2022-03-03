@@ -6,7 +6,6 @@ from conans import ConanFile, CMake, tools
 class PbtoolsConan(ConanFile):
     name = "pbtools"
     description = "A Google Protocol Buffers C library"
-    author = "Erik Moqvist erik.moqvist@gmail.com"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eerimoq/pbtools"
     license = "MIT"
