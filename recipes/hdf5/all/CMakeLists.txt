@@ -10,5 +10,3 @@ if (MSVC)
 endif ()
 
 add_subdirectory("source_subfolder")
-
-endif ()
