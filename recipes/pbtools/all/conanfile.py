@@ -23,7 +23,7 @@ class PbtoolsConan(ConanFile):
         cmake.install()
 
     def package(self):
-        pass
+        self.copy(pattern="LICENSE", dst="licenses", src=f'pbtools-{self.version}')
 
     def package_info(self):
         self.cpp_info.libs = ["pbtools"]
