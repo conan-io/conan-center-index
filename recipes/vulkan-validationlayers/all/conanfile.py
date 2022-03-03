@@ -30,9 +30,7 @@ class VulkanValidationLayersConan(ConanFile):
     }
 
     short_paths = True
-
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -118,23 +116,22 @@ class VulkanValidationLayersConan(ConanFile):
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
-        self._cmake.definitions["USE_CCACHE"] = False
+        cmake = CMake(self)
+        cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
+        cmake.definitions["USE_CCACHE"] = False
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
-            self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
-            self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
-        self._cmake.definitions["BUILD_WERROR"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["INSTALL_TESTS"] = False
-        self._cmake.definitions["BUILD_LAYERS"] = True
-        self._cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = True
-        self._cmake.configure()
-        return self._cmake
+            cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
+            cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
+            cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+        cmake.definitions["BUILD_WERROR"] = False
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.definitions["INSTALL_TESTS"] = False
+        cmake.definitions["BUILD_LAYERS"] = True
+        cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = True
+        cmake.configure()
+        return cmake
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
