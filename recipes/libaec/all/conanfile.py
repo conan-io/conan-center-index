@@ -32,6 +32,10 @@ class LibaecConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -48,11 +52,14 @@ class LibaecConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        # libaec/1.0.6 uses "restrict" keyword which seems to be supported since Visual Studio 16.
-        if tools.Version(self.version) >= "1.0.6" and  \
-            self.settings.compiler == "Visual Studio" and \
-            tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("{} does not support Visual Studio {}".format(self.name, self.settings.compiler.version))
+        if tools.Version(self.version) >= "1.0.6" and self._is_msvc:
+            # libaec/1.0.6 uses "restrict" keyword which seems to be supported since Visual Studio 16.
+            if tools.Version(self.settings.compiler.version) < "16":
+                raise ConanInvalidConfiguration("{} does not support Visual Studio {}".format(self.name, self.settings.compiler.version))
+            # In libaec/1.0.6, fail to build aec_client command with debug and shared settings in Visual Studio.
+            # Temporary, this recipe doesn't support these settings.
+            if self.options.shared and self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration("{} does not support debug and shared build in Visual Studio(currently)".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
