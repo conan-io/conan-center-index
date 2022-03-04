@@ -74,6 +74,7 @@ class Llvm(ConanFile):
         cmake = CMake(self, parallel=False);
         cmake.configure(
             defs = {
+                'LLVM_ENABLE_LLD': True,
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_BINDINGS': False,
             },
