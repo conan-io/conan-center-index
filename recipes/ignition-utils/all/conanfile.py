@@ -10,7 +10,7 @@ class IgnitionUitlsConan(ConanFile):
     name = "ignition-utils"
     license = "Apache-2.0"
     homepage = "https://github.com/conan-io/conan-center-index"
-    url = "https://github.com/ignitionrobotics/ign-Uitls"
+    url = "https://ignitionrobotics.org/libs/utils"
     description = "Provides general purpose classes and functions designed for robotic applications.."
     topics = ("ignition", "robotics", "utils")
     settings = "os", "compiler", "build_type", "arch"
@@ -18,7 +18,6 @@ class IgnitionUitlsConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/**"
-
     _cmake = None
 
     @property
@@ -64,19 +63,11 @@ class IgnitionUitlsConan(ConanFile):
                     )
                 )
     
+    def requirements(self):
+        self.requires("cli11/2.1.2")
+
     def build_requirements(self):
         self.build_requires("ignition-cmake/2.5.0")
-    
-    def package_id(self):
-        self.info.header_only()
-
-    def _configure_cmake(self):
-        if self._cmake is not None:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -86,6 +77,15 @@ class IgnitionUitlsConan(ConanFile):
             self._source_subfolder,
         )
 
+    def _configure_cmake(self):
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["IGN_UTILS_VENDOR_CLI11"] = True
+        self._cmake.configure()
+        return self._cmake
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -94,6 +94,9 @@ class IgnitionUitlsConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*.hpp", 
+                    src=os.path.join(self._source_subfolder, "cli", "include", "external-cli", "ignition", "utils", "cli"),
+                     dst="include/ignition/utils1/ignition/utils/cli")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -115,10 +118,10 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-utils"].names["cmake_find_package"] = "ignition-utils{}".format(version_major)
         self.cpp_info.components["libignition-utils"].names["cmake_find_package_multi"] = "ignition-utils{}".format(version_major)
         self.cpp_info.components["libignition-utils"].names["pkg_config"] = "ignition-utils{}".format(version_major)
-        #self.cpp_info.libs = tools.collect_libs(self)
-        #self.env_info.LD_LIBRARY_PATH.extend([
-        #    os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        #])
-        #self.env_info.PATH.extend([
-        #    os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        #])
+        self.cpp_info.components["libignition-utils"].requires = ["cli11::cli11"]
+        self.env_info.LD_LIBRARY_PATH.extend([
+            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
+        ])
+        self.env_info.PATH.extend([
+            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
+        ])
