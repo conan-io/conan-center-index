@@ -41,7 +41,7 @@ class QtConan(ConanFile):
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
     "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d",
-    "qtknx", "qtmqtt", "qtcoap"]
+    "qtknx", "qtmqtt", "qtcoap", "qtopcua"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
