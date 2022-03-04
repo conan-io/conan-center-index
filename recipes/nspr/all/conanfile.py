@@ -1,10 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import conan.tools.files
-from contextlib import contextmanager
 import os
 import contextlib
-import os
 
 required_conan_version = ">=1.33.0"
 
