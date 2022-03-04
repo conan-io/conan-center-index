@@ -1,3 +1,5 @@
+fixed by https://github.com/OSGeo/PROJ/pull/3087
+
 --- a/cmake/ProjUtilities.cmake
 +++ b/cmake/ProjUtilities.cmake
 @@ -98,7 +98,7 @@ function(configure_proj_pc)
@@ -5,7 +7,7 @@
    else()
      set(cxx_libs "${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
 -    list(REMOVE_ITEM cxx_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
-+    list(REMOVE_ITEM cxx_libs "${CMAKE_C_IMPLICIT_LINK_LIBRARIES}")
++    list(REMOVE_ITEM cxx_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} CMake_3.19_quirk)
      foreach(lib IN LISTS cxx_libs)
        list(APPEND EXTRA_LIBS "-l${lib}")
      endforeach()
