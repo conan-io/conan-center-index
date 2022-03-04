@@ -155,3 +155,4 @@ class GetTextConan(ConanFile):
         self.env_info.AUTOPOINT = autopoint
 
         self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)
+
