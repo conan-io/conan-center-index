@@ -34,6 +34,10 @@ class NsprConan(ConanFile):
     _autotools = None
 
     @property
+    def _is_msvc(self):
+        return self.settings.compiler in ["Visual Studio", "msvc"]
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -73,7 +77,7 @@ class NsprConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl", "CXX": "cl", "LD": "link"}):
                     yield
@@ -96,7 +100,7 @@ class NsprConan(ConanFile):
             "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             conf_args.extend([
                 "{}-pc-mingw32".format("x86_64" if self.settings.arch == "x86_64" else "x86"),
                 "--enable-static-rtl" if "MT" in str(self.settings.compiler.runtime) else "--disable-static-rtl",
@@ -140,8 +144,8 @@ class NsprConan(ConanFile):
             if self.options.shared:
                 os.mkdir(os.path.join(self.package_folder, "bin"))
             for lib in self._library_names:
-                libsuffix = "lib" if self.settings.compiler == "Visual Studio" else "a"
-                libprefix = "" if self.settings.compiler == "Visual Studio" else "lib"
+                libsuffix = "lib" if self._is_msvc else "a"
+                libprefix = "" if self._is_msvc else "lib"
                 if self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "{}{}_s.{}".format(libprefix, lib, libsuffix)))
                     os.rename(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
