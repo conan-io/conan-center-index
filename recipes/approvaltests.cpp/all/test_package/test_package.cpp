@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "ApprovalTests.hpp"
+#include "utilities/Grid.h"
 
 
 int main(void) {
