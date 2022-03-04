@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -10,7 +11,7 @@ class CityhashConan(ConanFile):
     name = "cityhash"
     description = "CityHash, a family of hash functions for strings."
     license = "MIT"
-    topics = ("conan", "cityhash", "hash")
+    topics = ("cityhash", "hash")
     homepage = "https://github.com/google/cityhash"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -24,15 +25,21 @@ class CityhashConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +50,7 @@ class CityhashConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("cityhash does not support shared builds with Visual Studio")
 
     def build_requirements(self):
@@ -57,38 +64,41 @@ class CityhashConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.vcvars(self):
                 env = {
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ]
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
-            self._autotools.flags.append("-FS")
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        if self._is_msvc:
+            autotools.cxx_flags.append("-EHsc")
+            if not (self.settings.compiler == "Visual Studio" and \
+                    tools.Version(self.settings.compiler.version) < "12"):
+                autotools.flags.append("-FS")
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared lib on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
