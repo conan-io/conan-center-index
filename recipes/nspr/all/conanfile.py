@@ -103,8 +103,8 @@ class NsprConan(ConanFile):
         if self._is_msvc:
             conf_args.extend([
                 "{}-pc-mingw32".format("x86_64" if self.settings.arch == "x86_64" else "x86"),
-                "--enable-static-rtl" if "MT" in str(self.settings.compiler.runtime) else "--disable-static-rtl",
-                "--enable-debug-rtl" if "d" in str(self.settings.compiler.runtime) else "--disable-debug-rtl",
+                "--enable-static-rtl={}".format(yes_no("MT" in self.settings.compiler.runtime)),
+                "--enable-debug-rtl={}".format(yes_no("d" in self.settings.compiler.runtime)),
             ])
         elif self.settings.os == "Android":
             conf_args.extend([
