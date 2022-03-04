@@ -21,6 +21,6 @@ int main(int argc, char *argv[]) {
     PR_Initialize(primordial, argc, argv, 0);
 
     PR_ProcessExit(0);
-    fprintf(stderr, "PR_ProcessExit faile\n");
+    fprintf(stderr, "PR_ProcessExit failed\n");
     return 1;
 }
