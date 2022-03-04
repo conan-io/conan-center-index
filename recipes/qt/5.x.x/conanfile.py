@@ -6,7 +6,6 @@ import configparser
 import glob
 import itertools
 import os
-import shutil
 import textwrap
 
 required_conan_version = ">=1.43.0"
@@ -887,7 +886,7 @@ Examples = bin/datadir/examples""")
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
-        def _create_plugin(pluginname, libname, type, requires):
+        def _create_plugin(pluginname, libname, plugintype, requires):
             componentname = "qt%s" % pluginname
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt5::{}".format(pluginname))
@@ -895,7 +894,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1192,7 +1191,7 @@ Examples = bin/datadir/examples""")
             _create_module("MacExtras")
 
         if self.options.qtxmlpatterns:
-             _create_module("XmlPatterns", ["Network"])
+            _create_module("XmlPatterns", ["Network"])
 
         if self.options.qtactiveqt:
             _create_module("AxBase", ["Gui", "Widgets"])
@@ -1205,6 +1204,23 @@ Examples = bin/datadir/examples""")
             _create_module("AxServer", ["Core", "Gui", "Widgets", "AxBase"])
             self.cpp_info.components["qtAxServer"].includedirs = [os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
+        
+        if self.options.qtscript:
+            _create_module("Script")
+            if self.options.widgets:
+                _create_module("ScriptTools", ["Gui", "Widgets", "Script"])
+        
+        if self.options.qtandroidextras:
+            _create_module("AndroidExtras")
+            
+        if self.options.qtwebview:
+            _create_module("WebView", ["Gui", "Quick"])
+            
+        if self.options.qtvirtualkeyboard:
+            _create_module("VirtualKeyboard", ["Qml", "Quick", "Gui"])
+        
+        if self.options.qtspeech:
+            _create_module("TextToSpeech")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
