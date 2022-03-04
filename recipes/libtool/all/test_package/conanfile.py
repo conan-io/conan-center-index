@@ -80,6 +80,7 @@ class TestPackageConan(ConanFile):
         """ Test library using ltdl library"""
         lib_suffix = {
             "Linux": "so",
+            "FreeBSD": "so",
             "Macos": "dylib",
             "Windows": "dll",
         }[str(self.settings.os)]
