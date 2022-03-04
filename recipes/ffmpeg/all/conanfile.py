@@ -472,6 +472,8 @@ class FFMpegConan(ConanFile):
             if self.options.postproc:
                 self.cpp_info.components["avfilter"].requires.append("postproc")
             self.cpp_info.components["avfilter"].names["pkg_config"] = "libavfilter"
+            if tools.is_apple_os(self.settings):
+                self.cpp_info["avfilter"].frameworks.extend(["Metal"])
             self._set_component_version("avfilter")
 
         if self.options.avformat:
