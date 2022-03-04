@@ -139,3 +139,4 @@ class EmSDKConan(ConanFile):
             "bin/upstream/emscripten/tests/cmake/target_library",
             "bin/upstream/lib/cmake/llvm",
         ]
+
