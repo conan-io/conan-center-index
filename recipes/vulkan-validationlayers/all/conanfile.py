@@ -115,6 +115,10 @@ class VulkanValidationLayersConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
+        # but it can't be modeled right now in spirv-tools recipe
+        if not os.path.exists("SPIRV-Tools-optConfig.cmake"):
+            shutil.copy("SPIRV-ToolsConfig.cmake", "SPIRV-Tools-optConfig.cmake")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
