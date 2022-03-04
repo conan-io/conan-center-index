@@ -154,4 +154,8 @@ class GetTextConan(ConanFile):
         self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = autopoint
 
+        gettext_datadir = tools.unix_path(os.path.join(self.package_folder, "res", "gettext"))
+        self.output.info("Setting gettext_datadir environment variable: {}".format(gettext_datadir))
+        self.env_info.gettext_datadir = gettext_datadir
+
         self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)
