@@ -132,3 +132,4 @@ class PkgConfConan(ConanFile):
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "libpkgconf"
+
