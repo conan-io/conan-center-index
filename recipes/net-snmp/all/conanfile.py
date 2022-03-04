@@ -1,7 +1,6 @@
 import functools
 import os
 import stat
-from contextlib import contextmanager
 
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
@@ -18,9 +17,9 @@ class NetSnmpConan(ConanFile):
     )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.net-snmp.org/"
-    topics = ("snmp",)
+    topics = "snmp"
     license = "BSD-3-Clause"
-    settings = ("os", "arch", "compiler", "build_type")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,8 +30,8 @@ class NetSnmpConan(ConanFile):
         "fPIC": True,
         "with_ipv6": True,
     }
-    requires = ("openssl/1.1.1m",)
-    exports_sources = ("patches/*",)
+    requires = "openssl/1.1.1m"
+    exports_sources = "patches/*"
 
     @property
     def _settings_build(self):
@@ -170,8 +169,8 @@ class NetSnmpConan(ConanFile):
         self.copy("netsnmp.dll", "bin", fr"win32\bin\{cfg}")
         self.copy("netsnmp.lib", "lib", fr"win32\lib\{cfg}")
         self.copy("include/net-snmp/*.h")
-        for dir in ["", "agent/", "library/"]:
-            self.copy(f"net-snmp/{dir}*.h", "include", "win32")
+        for directory in ["", "agent/", "library/"]:
+            self.copy(f"net-snmp/{directory}*.h", "include", "win32")
         self.copy("COPYING", "licenses")
 
     def _remove(self, path):
