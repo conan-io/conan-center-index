@@ -193,3 +193,4 @@ class NetSnmpConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["netsnmp"]
+        self.cpp_info.requires = ["openssl::openssl"]
