@@ -5,12 +5,12 @@ This document gathers all the relevant information regarding the general lines t
 <!-- toc -->
 ## Contents
 
-* [Sources](#sources)
-* [Dependencies](#dependencies)
-* [Build](#build)
-* [Package](#package)
-* [Settings](#settings)
-* [Options](#options)<!-- endToc -->
+  * [Sources](#sources)
+  * [Dependencies](#dependencies)
+  * [Build](#build)
+  * [Package](#package)
+  * [Settings](#settings)
+  * [Options](#options)<!-- endToc -->
 
 ## Sources
 
