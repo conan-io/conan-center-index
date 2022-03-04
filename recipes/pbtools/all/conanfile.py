@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class PbtoolsConan(ConanFile):
@@ -12,6 +13,10 @@ class PbtoolsConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
     generators = "cmake"
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("This library is not compatible with Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
