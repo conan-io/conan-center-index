@@ -34,19 +34,11 @@ class NetSnmpConan(ConanFile):
     exports_sources = "patches/*"
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _is_msvc(self):
-        return self._settings_build.compiler in ("Visual Studio", "msvc")
-
-    @property
-    def _is_debug(self):
-        return self.settings.build_type == "Debug"
+        return self.settings.compiler in ("Visual Studio", "msvc")
 
     def validate(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc:
+        if self.settings.os == "Windows" and not self._is_msvc:
             raise ConanInvalidConfiguration(
                 "net-snmp is setup to build only with MSVC on Windows"
             )
@@ -67,6 +59,10 @@ class NetSnmpConan(ConanFile):
     def build_requirements(self):
         if self._is_msvc:
             self.build_requires("strawberryperl/5.30.0.1")
+
+    @property
+    def _is_debug(self):
+        return self.settings.build_type == "Debug"
 
     def _patch_msvc(self):
         ssl_info = self.deps_cpp_info["openssl"]
