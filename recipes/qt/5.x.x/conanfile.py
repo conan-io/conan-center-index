@@ -539,7 +539,7 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
 
         for module in self._submodules:
-            if not self.options.get_safe(module):
+            if module in self.options and not self.options.get_safe(module):
                 args.append("-skip " + module)
 
         args.append("--zlib=system")
