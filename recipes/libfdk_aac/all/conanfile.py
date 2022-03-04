@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, VisualStudioBuildEnvironment, tools
 import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -25,9 +26,6 @@ class LibFDKAACConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-
-    _cmake = None
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -63,15 +61,14 @@ class LibFDKAACConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_PROGRAMS"] = False
-        self._cmake.definitions["FDK_AAC_INSTALL_CMAKE_CONFIG_MODULE"] = False
-        self._cmake.definitions["FDK_AAC_INSTALL_PKGCONFIG_MODULE"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_PROGRAMS"] = False
+        cmake.definitions["FDK_AAC_INSTALL_CMAKE_CONFIG_MODULE"] = False
+        cmake.definitions["FDK_AAC_INSTALL_PKGCONFIG_MODULE"] = False
+        cmake.configure()
+        return cmake
 
     @contextlib.contextmanager
     def _msvc_build_environment(self):
@@ -108,6 +105,8 @@ class LibFDKAACConan(ConanFile):
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared lib on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             if self.settings.os == "Android" and tools.os_info.is_windows:
                 # remove escape for quotation marks, to make ndk on windows happy
                 tools.replace_in_file("configure",
@@ -115,17 +114,17 @@ class LibFDKAACConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.make()
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         if self._use_cmake:
