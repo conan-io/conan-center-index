@@ -40,7 +40,8 @@ class QtConan(ConanFile):
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
-    "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d"]
+    "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d",
+    "qtknx", "qtmqtt", "qtcoap"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -262,7 +263,8 @@ class QtConan(ConanFile):
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s is not present in recipe options : (%s)" % (m, ",".join(self._submodules))
 
         for m in self._submodules:
-            assert m in submodules_tree, "module %s is not present in qtmodules%s.conf : (%s)" % (m, self.version, ",".join(submodules_tree))
+            if m not in submodules_tree:
+                delattr(self.options, m)
 
         def _enablemodule(mod):
             if mod != "qtbase":
