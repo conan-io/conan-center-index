@@ -76,6 +76,18 @@ class LibVPXConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # relocatable shared lib on macOS
+        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
+                              "-dynamiclib",
+                              "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
+        # No whole optimization for msvc
+        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "gen_msvs_vcxproj.sh"),
+                              "tag_content WholeProgramOptimization true",
+                              "tag_content WholeProgramOptimization false")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -158,12 +170,7 @@ class LibVPXConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # relocatable shared lib on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
-                              "-dynamiclib",
-                              "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
+        self._patch_sources()
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.make()
