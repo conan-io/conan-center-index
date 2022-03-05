@@ -101,7 +101,7 @@ class CrashpadConan(ConanFile):
     def _gn_arch(self):
         return {
             "x86_64": "x64",
-            "armv8": "aarch64",
+            "armv8": "arm64",
             "x86": "x86",
         }.get(str(self.settings.arch), str(self.settings.arch))
 
