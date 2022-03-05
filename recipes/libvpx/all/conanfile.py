@@ -193,6 +193,10 @@ class LibVPXConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
         self.cpp_info.libs = ["vpx"]
+        if not self.options.shared:
+            libcxx = tools.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "vpx"
