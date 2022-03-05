@@ -27,10 +27,10 @@ class DawJsonLinkConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if tools.Version(self.version) <= "2.10.2":
+        if tools.Version(self.version) < "2.11.0":
             self.requires("daw_header_libraries/1.29.7")
         else:
-            self.requires("daw_header_libraries/2.5.3")
+            self.requires("daw_header_libraries/2.23.0")
         self.requires("daw_utf_range/2.2.0")
 
     def validate(self):
