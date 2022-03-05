@@ -64,13 +64,13 @@ class M4Conan(ConanFile):
                 autotools.flags.extend(["-rtlib=compiler-rt", "-Wno-unused-command-line-argument"])
         if self.settings.os == 'Windows':
             conf_args.extend(["ac_cv_func__set_invalid_parameter_handler=yes"])
-        conf_args.extend(["HELP2MAN=/bin/true"])
 
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return autotools
 
     @contextmanager
     def _build_context(self):
+        env = dict()
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env = {
@@ -83,9 +83,8 @@ class M4Conan(ConanFile):
                     "RANLIB": ":",
                     "STRIP": ":",
                 }
-                with tools.environment_append(env):
-                    yield
-        else:
+        env["PATH"] = [os.path.abspath(self._source_subfolder)]
+        with tools.environment_append(env):
             yield
 
     def _patch_sources(self):
@@ -93,6 +92,10 @@ class M4Conan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        with tools.chdir(self._source_subfolder):
+            tools.save("help2man", '#!/usr/bin/env bash\n:')
+            if os.name == 'posix':
+                os.chmod("help2man", os.stat("help2man").st_mode | 0o111)
         self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
