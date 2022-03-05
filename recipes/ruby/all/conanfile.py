@@ -130,6 +130,7 @@ class RubyConan(ConanFile):
         build_script_folder = self._source_subfolder
         if self._is_msvc:
             build_script_folder = os.path.join(build_script_folder, "win32")
+            tools.replace_in_file(os.path.join(build_script_folder, "configure.bat"), "@echo off", "")
 
         with tools.vcvars(self):
             at.configure(build_script_folder=build_script_folder)
