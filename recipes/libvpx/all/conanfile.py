@@ -2,7 +2,6 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 required_conan_version = ">=1.36.0"
 
@@ -176,23 +175,25 @@ class LibVPXConan(ConanFile):
             autotools.make()
 
     def package(self):
+        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst='licenses')
         if self._is_msvc:
-            name = "vpxmt.lib" if "MT" in msvc_runtime_flag(self) else "vpxmd.lib"
-            if self.settings.arch == 'x86_64':
-                libdir = os.path.join(self.package_folder, 'lib', 'x64')
-            elif self.settings.arch == 'x86':
-                libdir = os.path.join(self.package_folder, 'lib', 'Win32')
-            shutil.move(os.path.join(libdir, name), os.path.join(self.package_folder, 'lib', 'vpx.lib'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+            # don't trust install target
+            tools.rmdir(os.path.join(self.package_folder, "lib"))
+            libdir = os.path.join(
+                "Win32" if self.settings.arch == "x86" else "x64",
+                "Debug" if self.settings.build_type == "Debug" else "Release",
+            )
+            self.copy("vpx*.lib", src=libdir, dst="lib")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
-        self.cpp_info.libs = ["vpx"]
+        suffix = msvc_runtime_flag(self).lower() if self._is_msvc else ""
+        self.cpp_info.libs = [f"vpx{suffix}"]
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)
             if libcxx:
