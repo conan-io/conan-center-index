@@ -22,14 +22,9 @@ class XXSDSSDSLLite(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
         source = self.conan_data["sources"][self.version]
-        tools.get(**source)
-        extracted_folder = "sdsl-lite-"
-        if self.version.startswith("cci"):
-            extracted_folder += os.path.splitext(os.path.basename(source["url"]))[0]
-        else:
-            extracted_folder += self.version
-        os.rename(extracted_folder, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
