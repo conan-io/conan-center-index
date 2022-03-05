@@ -387,6 +387,7 @@ class QtConan(ConanFile):
             self.requires("wayland/1.20.0")
 
     def source(self):
+        os.environ["CONAN_VERBOSE_TRACEBACK"] = "1"
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination="qt5")
 
