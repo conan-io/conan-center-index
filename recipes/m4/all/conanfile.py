@@ -27,7 +27,7 @@ class M4Conan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc"
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -46,7 +46,7 @@ class M4Conan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         build_canonical_name = None
         host_canonical_name = None
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
             build_canonical_name = False
             host_canonical_name = False
@@ -70,10 +70,10 @@ class M4Conan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        env = dict()
-        if self.settings.compiler == "Visual Studio":
+        env = {"PATH": [os.path.abspath(self._source_subfolder)]}
+        if self._is_msvc:
             with tools.vcvars(self.settings):
-                env = {
+                env.update({
                     "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -82,10 +82,12 @@ class M4Conan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                }
-        env["PATH"] = [os.path.abspath(self._source_subfolder)]
-        with tools.environment_append(env):
-            yield
+                })
+                with tools.environment_append(env):
+                    yield
+        else:
+            with tools.environment_append(env):
+                yield
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
