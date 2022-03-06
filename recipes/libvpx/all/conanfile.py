@@ -2,6 +2,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import re
 
 required_conan_version = ">=1.36.0"
 
@@ -82,10 +83,15 @@ class LibVPXConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "Makefile"),
                               "-dynamiclib",
                               "-dynamiclib -install_name @rpath/$$(LIBVPX_SO)")
-        # No whole optimization for msvc
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "make", "gen_msvs_vcxproj.sh"),
-                              "tag_content WholeProgramOptimization true",
-                              "tag_content WholeProgramOptimization false")
+        # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
+        if self._is_msvc:
+            lto = any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", "")))
+            if not lto:
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "build", "make", "gen_msvs_vcxproj.sh"),
+                    "tag_content WholeProgramOptimization true",
+                    "tag_content WholeProgramOptimization false",
+                )
 
     def _configure_autotools(self):
         if self._autotools:
