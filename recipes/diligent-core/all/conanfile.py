@@ -156,6 +156,7 @@ class DiligentCoreConan(ConanFile):
         self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
