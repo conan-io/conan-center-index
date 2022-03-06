@@ -26,8 +26,8 @@ class Nghttp2Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_app": True,
-        "with_hpack": True,
+        "with_app": False,
+        "with_hpack": False,
         "with_jemalloc": False,
         "with_asio": False,
     }
