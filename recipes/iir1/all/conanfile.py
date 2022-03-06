@@ -76,7 +76,7 @@ class Iir1Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions['IIR1_NO_EXCEPTIONS'] = self.options.noexceptions
+        self._cmake.definitions['IIR1_NO_EXCEPTIONS'] = self.options.get_safe("noexceptions", False)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
