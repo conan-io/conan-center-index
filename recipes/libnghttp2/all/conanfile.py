@@ -109,7 +109,7 @@ class Nghttp2Conan(ConanFile):
 
         if tools.is_apple_os(self.settings.os):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
-            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+            cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 
         cmake.configure()
         return cmake
