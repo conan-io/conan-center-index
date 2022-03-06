@@ -61,6 +61,14 @@ class LibevConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # relocatable shared lib on macOS
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "configure"),
+            "-install_name \\$rpath/",
+            "-install_name @rpath/",
+        )
+
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -73,6 +81,7 @@ class LibevConan(ConanFile):
         return autotools
 
     def build(self):
+        self._patch_sources()
         autotools = self._configure_autotools()
         autotools.make()
 
