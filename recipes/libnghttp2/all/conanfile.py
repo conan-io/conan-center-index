@@ -1,6 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
+import os
+
+required_conan_version = ">=1.36.0"
 
 
 class Nghttp2Conan(ConanFile):
@@ -10,33 +13,43 @@ class Nghttp2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "pkg_config"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_app": [True, False],
-               "with_hpack": [True, False],
-               "with_jemalloc": [True, False],
-               "with_asio": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_app": True,
-                       "with_hpack": True,
-                       "with_jemalloc": False,
-                       "with_asio": False}
 
-    _source_subfolder = "source_subfolder"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_app": [True, False],
+        "with_hpack": [True, False],
+        "with_jemalloc": [True, False],
+        "with_asio": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_app": True,
+        "with_hpack": True,
+        "with_jemalloc": False,
+        "with_asio": False,
+    }
+
+    generators = "cmake", "pkg_config"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def validate(self):
-        if self.options.with_asio and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
     def configure(self):
         if self.options.shared:
@@ -57,25 +70,32 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_asio:
             self.requires("boost/1.77.0")
 
+    def validate(self):
+        if self.options.with_asio and self._is_msvc:
+            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("gcc >= 6.0 required")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["ENABLE_SHARED_LIB"] = "ON" if self.options.shared else "OFF"
-        cmake.definitions["ENABLE_STATIC_LIB"] = "OFF" if self.options.shared else "ON"
-        cmake.definitions["ENABLE_HPACK_TOOLS"] = "ON" if self.options.with_hpack else "OFF"
-        cmake.definitions["ENABLE_APP"] = "ON" if self.options.with_app else "OFF"
-        cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
-        cmake.definitions["ENABLE_PYTHON_BINDINGS"] = "OFF"
-        cmake.definitions["ENABLE_FAILMALLOC"] = "OFF"
+        cmake.definitions["ENABLE_SHARED_LIB"] = self.options.shared
+        cmake.definitions["ENABLE_STATIC_LIB"] = not self.options.shared
+        cmake.definitions["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
+        cmake.definitions["ENABLE_APP"] = self.options.with_app
+        cmake.definitions["ENABLE_EXAMPLES"] = False
+        cmake.definitions["ENABLE_PYTHON_BINDINGS"] = False
+        cmake.definitions["ENABLE_FAILMALLOC"] = False
         # disable unneeded auto-picked dependencies
-        cmake.definitions["WITH_LIBXML2"] = "OFF"
-        cmake.definitions["WITH_JEMALLOC"] = "ON" if self.options.with_jemalloc else "OFF"
-        cmake.definitions["WITH_SPDYLAY"] = "OFF"
+        cmake.definitions["WITH_LIBXML2"] = False
+        cmake.definitions["WITH_JEMALLOC"] = self.options.with_jemalloc
+        cmake.definitions["WITH_SPDYLAY"] = False
 
-        cmake.definitions["ENABLE_ASIO_LIB"] = "ON" if self.options.with_asio else "OFF"
+        cmake.definitions["ENABLE_ASIO_LIB"] = self.options.with_asio
 
         if tools.Version(self.version) >= "1.42.0":
             # backward-incompatible change in 1.42.0
@@ -91,7 +111,7 @@ class Nghttp2Conan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if not self.options.shared:
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
@@ -131,16 +151,15 @@ class Nghttp2Conan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        cmake.patch_config_paths()
-
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libnghttp2")
         suffix = "_static" if tools.Version(self.version) > "1.39.2" and not self.options.shared else ""
         self.cpp_info.libs = ["nghttp2" + suffix]
         if self.options.with_asio:
             self.cpp_info.libs.insert(0, "nghttp2_asio")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             if not self.options.shared:
                 self.cpp_info.defines.append("NGHTTP2_STATICLIB")
