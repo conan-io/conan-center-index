@@ -57,19 +57,22 @@ class Nghttp2Conan(ConanFile):
         if not (self.options.with_app or self.options.with_hpack or self.options.with_asio):
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
+        if not self.options.with_app:
+            del self.options.with_jemalloc
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
-        if self.options.with_app:
+        if self.options.with_app or self.options.with_asio:
             self.requires("openssl/1.1.1m")
+        if self.options.with_app:
             self.requires("c-ares/1.18.1")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
             self.requires("libxml2/2.9.12")
+            self.requires("zlib/1.2.11")
+            if self.options.with_jemalloc:
+                self.requires("jemalloc/5.2.1")
         if self.options.with_hpack:
             self.requires("jansson/2.14")
-        if self.options.with_jemalloc:
-            self.requires("jemalloc/5.2.1")
         if self.options.with_asio:
             self.requires("boost/1.78.0")
 
@@ -95,7 +98,7 @@ class Nghttp2Conan(ConanFile):
         cmake.definitions["ENABLE_FAILMALLOC"] = False
         # disable unneeded auto-picked dependencies
         cmake.definitions["WITH_LIBXML2"] = False
-        cmake.definitions["WITH_JEMALLOC"] = self.options.with_jemalloc
+        cmake.definitions["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
         cmake.definitions["WITH_SPDYLAY"] = False
 
         cmake.definitions["ENABLE_ASIO_LIB"] = self.options.with_asio
@@ -158,11 +161,34 @@ class Nghttp2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libnghttp2")
+        self.cpp_info.components["nghttp2"].set_property("pkg_config_name", "libnghttp2")
         suffix = "_static" if tools.Version(self.version) > "1.39.2" and not self.options.shared else ""
-        self.cpp_info.libs = ["nghttp2" + suffix]
+        self.cpp_info.components["nghttp2"].libs = [f"nghttp2{suffix}"]
+        if self._is_msvc and not self.options.shared:
+            self.cpp_info.components["nghttp2"].defines.append("NGHTTP2_STATICLIB")
+
         if self.options.with_asio:
-            self.cpp_info.libs.insert(0, "nghttp2_asio")
-        if self._is_msvc:
-            if not self.options.shared:
-                self.cpp_info.defines.append("NGHTTP2_STATICLIB")
+            self.cpp_info.components["nghttp2_asio"].set_property("pkg_config_name", "libnghttp2_asio")
+            self.cpp_info.components["nghttp2_asio"].libs = ["nghttp2_asio"]
+            self.cpp_info.components["nghttp2_asio"].requires = [
+                "nghttp2", "boost::headers", "openssl::openssl",
+            ]
+
+        if self.options.with_app:
+            self.cpp_info.components["nghttp2_app"].requires = [
+                "openssl::openssl", "c-ares::c-ares", "libev::libev",
+                "libevent::libevent", "libxml2::libxml2", "zlib::zlib",
+            ]
+            if self.options.with_jemalloc:
+                self.cpp_info.components["nghttp2_app"].requires.append("jemalloc::jemalloc")
+
+        if self.options.with_hpack:
+            self.cpp_info.components["nghttp2_hpack"].requires = ["jansson::jansson"]
+
+        if self.options.with_app or self.options.with_hpack:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
+
+        # trick for internal conan usage to pick up in downsteam pc files the pc file including all libs components
+        self.cpp_info.set_property("pkg_config_name", "libnghttp2_asio" if self.options.with_asio else "libnghttp2")
