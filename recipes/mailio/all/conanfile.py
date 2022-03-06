@@ -26,7 +26,7 @@ class mailioConan(ConanFile):
     _cmake = None
 
     _compiler_required_cpp17 = {
-        "gcc": "7",
+        "gcc": "8.3",
         "clang": "6",
         "Visual Studio": "15",
         "apple-clang": "10",
