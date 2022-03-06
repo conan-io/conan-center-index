@@ -97,6 +97,7 @@ class DiligentCoreConan(ConanFile):
         self.requires("vulkan-headers/1.2.198")
         self.requires("volk/1.2.198")
         self.requires("glslang/11.7.0")
+        self.requires("xxhash/0.8.0")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
