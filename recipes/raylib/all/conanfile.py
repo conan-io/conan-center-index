@@ -1,3 +1,4 @@
+from json import tool
 from conans import ConanFile, CMake, tools
 import os
 import textwrap
@@ -17,13 +18,19 @@ class RaylibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_examples": [True, False],
+        "use_external_glfw": ["OFF","ON","IF_POSSIBLE"],
+        "opengl_version":["OFF","3.3","2.1","1.1","ES 2.0"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_examples": False,
+        "use_external_glfw": "ON",
+        "opengl_version" :"OFF"
     }
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
@@ -50,32 +57,43 @@ class RaylibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("glfw/3.3.6")
-        self.requires("opengl/system")
+        
+        if self.options.use_external_glfw in ["ON","IF_POSSIBLE"] and self.settings.os != "Android":
+            self.requires("glfw/3.3.6")
+        
+        if self.settings.os != "Android":
+            self.requires("opengl/system")
+        
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-
+ 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _patch_sources(self):
-        # avoid symbols conflicts with Win SDK
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "core.c"),
-                              "#define GLFW_EXPOSE_NATIVE_WIN32", "")
+
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = self.options.build_examples
+
+        if self.settings.os == "Android":
+            self._cmake.definitions["PLATFORM"] = "Android"
+            self._cmake.definitions["USE_EXTERNAL_GLFW"] = "OFF"
+            self._cmake.definitions["OPENGL_VERSION"] = "ES 2.0"
+        else:
+            self._cmake.definitions["USE_EXTERNAL_GLFW"] = self.options.use_external_glfw
+            self._cmake.definitions["OPENGL_VERSION"] = self.options.opengl_version            
+        
         self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["USE_EXTERNAL_GLFW"] = "ON"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -105,15 +123,20 @@ class RaylibConan(ConanFile):
         tools.save(module_file, content)
 
     @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "raylib")
         self.cpp_info.set_property("cmake_target_name", "raylib")
         self.cpp_info.set_property("pkg_config_name", "raylib")
         libname = "raylib"
-        if self._is_msvc and not self.options.shared:
+        if self._is_msvc and not self.options.shared and self.version == '3.5.0':
             libname += "_static"
         self.cpp_info.libs = [libname]
         if self._is_msvc and self.options.shared:
@@ -123,6 +146,8 @@ class RaylibConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("winmm")
 
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

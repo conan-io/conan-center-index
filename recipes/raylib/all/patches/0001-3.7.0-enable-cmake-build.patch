@@ -1,0 +1,50 @@
+diff --git a/cmake/LibraryConfigurations.cmake b/cmake/LibraryConfigurations.cmake
+index 2d4767a9..05f1580a 100644
+--- a/cmake/LibraryConfigurations.cmake
++++ b/cmake/LibraryConfigurations.cmake
+@@ -41,7 +41,7 @@ elseif (${PLATFORM} MATCHES "Android")
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     
+     add_definitions(-DANDROID -D__ANDROID_API__=21)
+-    include_directories(external/android/native_app_glue)
++	include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libatomic.a -Wl,--build-id -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--warn-shared-textrel -Wl,--fatal-warnings -uANativeActivity_onCreate")
+     
+     find_library(OPENGL_LIBRARY OpenGL)
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index ad391edd..bd46d40c 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -66,6 +66,7 @@ endif ()
+ if (${PLATFORM} MATCHES "Android")
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/rlgl_standalone.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/standard_lighting.c)
++	list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/opengl_interop.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_picking.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_vr_simulator.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_camera_free.c)
+diff --git a/src/core.c b/src/core.c
+index f4bd6acc..a1664995 100644
+--- a/src/core.c
++++ b/src/core.c
+@@ -195,7 +195,7 @@
+ 
+     // Support retrieving native window handlers
+     #if defined(_WIN32)
+-        #define GLFW_EXPOSE_NATIVE_WIN32
++
+         #include "GLFW/glfw3native.h"       // WARNING: It requires customization to avoid windows.h inclusion!
+ 
+         #if defined(SUPPORT_WINMM_HIGHRES_TIMER) && !defined(SUPPORT_BUSY_WAIT_LOOP)
+@@ -4354,7 +4354,11 @@ static bool InitGraphicsDevice(int width, int height)
+     // Load OpenGL extensions
+     // NOTE: GLFW loader function is required by GLAD but only used for OpenGL 2.1 and 3.3,
+     // OpenGL ES 2.0 extensions (and entry points) are loaded manually using eglGetProcAddress()
++#if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
+     rlLoadExtensions(glfwGetProcAddress);
++#else
++    rlLoadExtensions(eglGetProcAddress);
++#endif
+ 
+     // Initialize OpenGL context (states and resources)
+     // NOTE: CORE.Window.screen.width and CORE.Window.screen.height not used, just stored as globals in rlgl
