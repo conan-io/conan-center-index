@@ -32,7 +32,7 @@ class Nghttp2Conan(ConanFile):
         "with_asio": False,
     }
 
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
     @property
     def _source_subfolder(self):
@@ -106,12 +106,6 @@ class Nghttp2Conan(ConanFile):
         if tools.Version(self.version) >= "1.42.0":
             # backward-incompatible change in 1.42.0
             cmake.definitions["STATIC_LIB_SUFFIX"] = "_static"
-
-        if self.options.with_app:
-            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        if self.options.with_asio:
-            cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
-        cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
 
         cmake.configure()
         return cmake
