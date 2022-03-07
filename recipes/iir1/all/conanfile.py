@@ -52,7 +52,7 @@ class Iir1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version == "1.9.0":
+        if tools.Version(self.version) < "1.9.1":
             del self.options.noexceptions
 
     def configure(self):
