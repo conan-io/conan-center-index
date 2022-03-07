@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -97,8 +98,8 @@ class NsprConan(ConanFile):
         if self._is_msvc:
             conf_args.extend([
                 "{}-pc-mingw32".format("x86_64" if self.settings.arch == "x86_64" else "x86"),
-                "--enable-static-rtl={}".format(yes_no("MT" in self.settings.compiler.runtime)),
-                "--enable-debug-rtl={}".format(yes_no("d" in self.settings.compiler.runtime)),
+                "--enable-static-rtl={}".format(yes_no("MT" in msvc_runtime_flag(self))),
+                "--enable-debug-rtl={}".format(yes_no("d" in msvc_runtime_flag(self))),
             ])
         elif self.settings.os == "Android":
             conf_args.extend([
