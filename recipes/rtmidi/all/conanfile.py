@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class RtMidiConan(ConanFile):
@@ -75,7 +75,7 @@ class RtMidiConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "rtmidi"
+        self.cpp_info.set_property("pkg_config_name", "rtmidi")
         self.cpp_info.names["cmake_find_package"] = "RtMidi"
         self.cpp_info.names["cmake_find_package_multi"] = "RtMidi"
         self.cpp_info.components["librtmidi"].names["cmake_find_package"] = "rtmidi"
