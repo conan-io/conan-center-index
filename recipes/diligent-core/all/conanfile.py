@@ -145,8 +145,8 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        conan.tools.files.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
-                     dst=os.path.join(self.package_folder, "include", "DiligentCore"))
+        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+        dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         tools.rmdir(os.path.join(self.package_folder, "lib"))
