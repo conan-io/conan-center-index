@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class PCRE2Conan(ConanFile):
@@ -99,6 +99,8 @@ class PCRE2Conan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        if tools.Version(self.version) >= "10.38":
+            cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         cmake.definitions["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
         cmake.definitions["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
         cmake.definitions["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
@@ -125,31 +127,36 @@ class PCRE2Conan(ConanFile):
         self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        cmake.patch_config_paths()
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "man"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "PCRE2")
         self.cpp_info.set_property("pkg_config_name", "libpcre2")
         if self.options.build_pcre2_8:
             # pcre2-8
+            self.cpp_info.components["pcre2-8"].set_property("cmake_target_name", "PCRE2::8BIT")
             self.cpp_info.components["pcre2-8"].set_property("pkg_config_name", "libpcre2-8")
             self.cpp_info.components["pcre2-8"].libs = [self._lib_name("pcre2-8")]
             if not self.options.shared:
                 self.cpp_info.components["pcre2-8"].defines.append("PCRE2_STATIC")
             # pcre2-posix
+            self.cpp_info.components["pcre2-posix"].set_property("cmake_target_name", "PCRE2::POSIX")
             self.cpp_info.components["pcre2-posix"].set_property("pkg_config_name", "libpcre2-posix")
             self.cpp_info.components["pcre2-posix"].libs = [self._lib_name("pcre2-posix")]
             self.cpp_info.components["pcre2-posix"].requires = ["pcre2-8"]
         # pcre2-16
         if self.options.build_pcre2_16:
+            self.cpp_info.components["pcre2-16"].set_property("cmake_target_name", "PCRE2::16BIT")
             self.cpp_info.components["pcre2-16"].set_property("pkg_config_name", "libpcre2-16")
             self.cpp_info.components["pcre2-16"].libs = [self._lib_name("pcre2-16")]
             if not self.options.shared:
                 self.cpp_info.components["pcre2-16"].defines.append("PCRE2_STATIC")
         # pcre2-32
         if self.options.build_pcre2_32:
+            self.cpp_info.components["pcre2-32"].set_property("cmake_target_name", "PCRE2::32BIT")
             self.cpp_info.components["pcre2-32"].set_property("pkg_config_name", "libpcre2-32")
             self.cpp_info.components["pcre2-32"].libs = [self._lib_name("pcre2-32")]
             if not self.options.shared:
@@ -166,11 +173,26 @@ class PCRE2Conan(ConanFile):
             if self.options.with_bzip2:
                 self.cpp_info.components["pcre2-8"].requires.append("bzip2::bzip2")
 
-        # TODO: to remove in conan v2 once pkg_config generator removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generator removed
+        self.cpp_info.names["cmake_find_package"] = "PCRE2"
+        self.cpp_info.names["cmake_find_package_multi"] = "PCRE2"
         self.cpp_info.names["pkg_config"] = "libpcre2"
+        if self.options.build_pcre2_8:
+            self.cpp_info.components["pcre2-8"].names["cmake_find_package"] = "8BIT"
+            self.cpp_info.components["pcre2-8"].names["cmake_find_package_multi"] = "8BIT"
+            self.cpp_info.components["pcre2-posix"].names["cmake_find_package"] = "POSIX"
+            self.cpp_info.components["pcre2-posix"].names["cmake_find_package_multi"] = "POSIX"
+        if self.options.build_pcre2_16:
+            self.cpp_info.components["pcre2-16"].names["cmake_find_package"] = "16BIT"
+            self.cpp_info.components["pcre2-16"].names["cmake_find_package_multi"] = "16BIT"
+        if self.options.build_pcre2_32:
+            self.cpp_info.components["pcre2-32"].names["cmake_find_package"] = "32BIT"
+            self.cpp_info.components["pcre2-32"].names["cmake_find_package_multi"] = "32BIT"
 
     def _lib_name(self, name):
         libname = name
+        if tools.Version(self.version) >= "10.38" and self._is_msvc and not self.options.shared:
+            libname += "-static"
         if self.settings.os == "Windows":
             if self.settings.build_type == "Debug":
                 libname += "d"

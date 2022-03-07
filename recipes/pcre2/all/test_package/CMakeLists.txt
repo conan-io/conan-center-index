@@ -4,7 +4,7 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(pcre2 REQUIRED CONFIG)
+find_package(PCRE2 REQUIRED 8BIT CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} pcre2::pcre2)
+target_link_libraries(${PROJECT_NAME} PCRE2::8BIT)
