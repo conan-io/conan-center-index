@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class StrongTypeTestConan(ConanFile):
+class EnhexStrongTypeTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 

@@ -2,8 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-class StrongtypeConan(ConanFile):
-    name = "strong_type"
+class EnhexStrongTypeConan(ConanFile):
+    name = "enhex-strong_type"
     license = "MIT"
     description = "Create new type from existing type without changing the interface."
     topics = ("strong_type", "safety")
