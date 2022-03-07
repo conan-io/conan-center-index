@@ -75,6 +75,9 @@ class RtMidiConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        if(tools.Version(self.version) >= "5.0.0"):
+            self.cpp_info.components["librtmidi"].includedirs.append(os.path.join("include", "rtmidi"))
+
         self.cpp_info.set_property("cmake_file_name", "RtMidi")
         self.cpp_info.set_property("cmake_target_name", "RtMidi::rtmidi")
         self.cpp_info.components["librtmidi"].set_property("cmake_target_name", "RtMidi::rtmidi")
