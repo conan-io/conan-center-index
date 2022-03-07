@@ -1,4 +1,5 @@
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import contextlib
@@ -71,7 +72,7 @@ class NsprConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination="tmp", strip_root=True)
-        os.rename(os.path.join("tmp", "nspr"), self._source_subfolder)
+        rename(self, os.path.join("tmp", "nspr"), self._source_subfolder)
         tools.rmdir("tmp")
 
     @contextlib.contextmanager
@@ -150,8 +151,8 @@ class NsprConan(ConanFile):
                 libprefix = "" if self._is_msvc else "lib"
                 if self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "{}{}_s.{}".format(libprefix, lib, libsuffix)))
-                    os.rename(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
-                              os.path.join(self.package_folder, "bin", "{}.dll".format(lib)))
+                    rename(self, os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
+                                 os.path.join(self.package_folder, "bin", "{}.dll".format(lib)))
                 else:
                     os.unlink(os.path.join(self.package_folder, "lib", "{}{}.{}".format(libprefix, lib, libsuffix)))
                     os.unlink(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)))
