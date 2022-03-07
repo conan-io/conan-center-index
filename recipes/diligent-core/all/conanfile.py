@@ -86,11 +86,10 @@ class DiligentCoreConan(ConanFile):
         self.requires("libpng/1.6.37")
 
         self.requires("spirv-cross/cci.20210930")
-        self.requires("spirv-headers/1.2.198.0")
-        self.requires("spirv-tools/2021.4")
+        self.requires("spirv-tools/1.3.204.0")
         self.requires("vulkan-headers/1.2.198")
         self.requires("volk/1.2.198")
-        self.requires("glslang/11.7.0")
+        self.requires("glslang/1.3.204.0")
         self.requires("xxhash/0.8.0")
 
         if self.settings.compiler == "apple-clang":
