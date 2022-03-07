@@ -123,6 +123,12 @@ class NsprConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            # relocatable shared libs on macOS
+            tools.replace_in_file(
+                "configure",
+                "-install_name @executable_path/",
+                "-install_name @rpath/"
+            )
             with self._build_context():
                 autotools = self._configure_autotools()
                 autotools.make()
