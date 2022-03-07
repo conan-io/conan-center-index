@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import shutil
 
@@ -25,8 +26,6 @@ class OdbcConan(ConanFile):
         "fPIC": True,
         "with_libiconv": True,
     }
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -57,24 +56,23 @@ class OdbcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        static_flag = "no" if self.options.shared else "yes"
-        shared_flag = "yes" if self.options.shared else "no"
-        libiconv_flag = "yes" if self.options.with_libiconv else "no"
-        args = ["--enable-static=%s" % static_flag,
-                "--enable-shared=%s" % shared_flag,
-                "--enable-ltdl-install",
-                "--enable-iconv=%s" % libiconv_flag,
-                "--sysconfdir=/etc"]
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-ltdl-install",
+            "--enable-iconv={}".format(yes_no(self.options.with_libiconv)),
+            "--sysconfdir=/etc",
+        ]
         if self.options.with_libiconv:
             libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-            args.append("--with-libiconv-prefix=%s" % libiconv_prefix)
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+            args.append("--with-libiconv-prefix={}".format(libiconv_prefix))
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
 
     @property
     def _user_info_build(self):
