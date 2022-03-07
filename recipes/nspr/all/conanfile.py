@@ -1,10 +1,11 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import os
 import contextlib
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
+
 
 class NsprConan(ConanFile):
     name = "nspr"
@@ -177,6 +178,7 @@ class NsprConan(ConanFile):
         return ["plds4", "plc4", "nspr4"]
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "nspr")
         libs = self._library_names
         if self.settings.os == "Windows" and not self.options.shared:
             libs = list("{}_s".format(l) for l in libs)
