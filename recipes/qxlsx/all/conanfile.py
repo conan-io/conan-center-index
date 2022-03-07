@@ -1,5 +1,6 @@
-import os
 from conans import CMake, ConanFile, tools
+import functools
+import os
 
 required_conan_version = ">=1.43.0"
 
@@ -12,7 +13,7 @@ class QXlsxConan(ConanFile):
     homepage = "https://github.com/QtExcel/QXlsx"
     url = "https://github.com/conan-io/conan-center-index"
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -23,13 +24,15 @@ class QXlsxConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package_multi"
-    exports_sources = "CMakeLists.txt", "patches/*"
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,16 +49,11 @@ class QXlsxConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                 destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
-        self._cmake.definitions["QXLSX_PARENTPATH"] = os.path.join(self._source_subfolder, "QXlsx")
-        self._cmake.definitions["QXLSX_HEADERPATH"] = os.path.join(self._source_subfolder, "QXlsx", "header")
-        self._cmake.definitions["QXLSX_SOURCEPATH"] = os.path.join(self._source_subfolder, "QXlsx", "source")
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -70,8 +68,16 @@ class QXlsxConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.set_property("cmake_file_name", "QXlsx")
+        self.cpp_info.set_property("cmake_target_name", "QXlsx::Core")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["qxlsx_core"].libs = ["QXlsx"]
+        self.cpp_info.components["qxlsx_core"].includedirs = [os.path.join("include", "QXlsx")]
+        self.cpp_info.components["qxlsx_core"].requires = ["qt::qtCore", "qt::qtGui"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "QXlsx"
         self.cpp_info.names["cmake_find_package_multi"] = "QXlsx"
-
+        self.cpp_info.components["qxlsx_core"].names["cmake_find_package"] = "Core"
+        self.cpp_info.components["qxlsx_core"].names["cmake_find_package_multi"] = "Core"
+        self.cpp_info.components["qxlsx_core"].set_property("cmake_target_name", "QXlsx::Core")
