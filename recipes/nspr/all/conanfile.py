@@ -33,7 +33,7 @@ class NsprConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler in ["Visual Studio", "msvc"]
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _source_subfolder(self):
@@ -163,7 +163,7 @@ class NsprConan(ConanFile):
                 else:
                     os.unlink(os.path.join(self.package_folder, "lib", "lib{}.{}".format(lib, shared_ext)))
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             if self.settings.build_type == "Debug":
                 for lib in self._library_names:
                     os.unlink(os.path.join(self.package_folder, "lib", "{}.pdb".format(lib)))
