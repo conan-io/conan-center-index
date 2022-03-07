@@ -76,6 +76,10 @@ class mailioConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
+    def build_requirements(self):
+        # mailio requires cmake >= 3.16.3
+        self.build_requires("cmake/3.22.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
