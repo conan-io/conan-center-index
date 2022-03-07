@@ -3,6 +3,7 @@ from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -15,6 +16,7 @@ class NsprConan(ConanFile):
     topics = ("nspr", "libc")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,10 +30,6 @@ class NsprConan(ConanFile):
         "with_mozilla": True,
         "win32_target": "winnt",
     }
-
-    generators = "cmake"
-
-    _autotools = None
 
     @property
     def _is_msvc(self):
@@ -84,10 +82,9 @@ class NsprConan(ConanFile):
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-mozilla={}".format(yes_no(self.options.with_mozilla)),
@@ -112,15 +109,15 @@ class NsprConan(ConanFile):
             ])
         elif self.settings.os == "Windows":
             conf_args.append("--enable-win32-target={}".format(self.options.win32_target))
-        env = self._autotools.vars
+        env = autotools.vars
         if self.settings.os == "Macos":
             if self.settings.arch == "armv8":
                 # conan adds `-arch`, which conflicts with nspr's apple silicon support
                 env["CFLAGS"] = env["CFLAGS"].replace("-arch arm64", "")
                 env["CXXFLAGS"] = env["CXXFLAGS"].replace("-arch arm64", "")
 
-        self._autotools.configure(args=conf_args, vars=env)
-        return self._autotools
+        autotools.configure(args=conf_args, vars=env)
+        return autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
