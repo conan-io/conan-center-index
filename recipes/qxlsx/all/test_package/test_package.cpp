@@ -1,6 +1,6 @@
 #include <iostream>
 #include <QBuffer>
-#include <QXlsx/xlsxdocument.h>
+#include <xlsxdocument.h>
 
 int main() {
 	QBuffer device;
