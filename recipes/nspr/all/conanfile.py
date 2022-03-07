@@ -53,7 +53,7 @@ class NsprConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-    
+
     def validate(self):
         # https://bugzilla.mozilla.org/show_bug.cgi?id=1658671
         if tools.Version(self.version) < "4.29":
@@ -93,9 +93,6 @@ class NsprConan(ConanFile):
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--disable-cplus",
-            "--enable-64bit" if self.settings.arch in ("armv8", "x86_64") else "--disable-64bit",
-            "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]
         if self._is_msvc:
             conf_args.extend([
