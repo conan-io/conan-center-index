@@ -71,7 +71,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('crc32c/1.1.1')
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.78.0')
-        self.requires('openssl/1.1.1l')
+        self.requires('openssl/1.1.1m')
         # TODO: Add googleapis once it is available in CCI (now it is embedded)
 
     def _configure_cmake(self):
