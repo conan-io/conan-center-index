@@ -61,17 +61,17 @@ class NsprConan(ConanFile):
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("NSPR does not support mac M1 before 4.29")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination="tmp", strip_root=True)
-        os.rename(os.path.join("tmp", "nspr"), self._source_subfolder)
-        tools.rmdir("tmp")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.build_requires("mozilla-build/3.3")
             if not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination="tmp", strip_root=True)
+        os.rename(os.path.join("tmp", "nspr"), self._source_subfolder)
+        tools.rmdir("tmp")
 
     @contextlib.contextmanager
     def _build_context(self):
