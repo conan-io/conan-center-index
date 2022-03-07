@@ -189,7 +189,7 @@ class NsprConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 self.cpp_info.defines.append("_M_X64")
         self.cpp_info.includedirs.append(os.path.join("include", "nspr"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
