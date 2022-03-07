@@ -87,8 +87,8 @@ class DiligentCoreConan(ConanFile):
 
         self.requires("spirv-cross/cci.20210930")
         self.requires("spirv-tools/1.3.204.0")
-        self.requires("vulkan-headers/1.2.198")
-        self.requires("volk/1.2.198")
+        self.requires("vulkan-headers/1.3.204")
+        self.requires("volk/1.3.204")
         self.requires("glslang/1.3.204.0")
         self.requires("xxhash/0.8.0")
 
