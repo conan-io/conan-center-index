@@ -1,24 +1,23 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import conan.tools.files
-from contextlib import contextmanager
 import os
+import contextlib
 
-required_conan_version = ">=1.33"
+required_conan_version = ">=1.33.0"
 
 class NsprConan(ConanFile):
     name = "nspr"
     homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSPR"
     description = "Netscape Portable Runtime (NSPR) provides a platform-neutral API for system level and libc-like functions."
-    topics = ("conan", "nspr", "libc")
+    topics = ("nspr", "libc")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "arch", "build_type"
     license = "MPL-2.0"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_mozilla": [True, False],
-        "win32_target": ["winnt", "win95"]
+        "win32_target": ["winnt", "win95"],
     }
     default_options = {
         "shared": False,
@@ -26,9 +25,14 @@ class NsprConan(ConanFile):
         "with_mozilla": True,
         "win32_target": "winnt",
     }
+
     generators = "cmake"
 
     _autotools = None
+
+    @property
+    def _is_msvc(self):
+        return self.settings.compiler in ["Visual Studio", "msvc"]
 
     @property
     def _source_subfolder(self):
@@ -45,10 +49,10 @@ class NsprConan(ConanFile):
             del self.options.win32_target
 
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
     
     def validate(self):
         # https://bugzilla.mozilla.org/show_bug.cgi?id=1658671
@@ -58,19 +62,20 @@ class NsprConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True)
-        conan.tools.files.rename(self, "nspr", self._source_subfolder)
+                  destination="tmp", strip_root=True)
+        os.rename(os.path.join("tmp", "nspr"), self._source_subfolder)
+        tools.rmdir("tmp")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" :
+        if self._settings_build.os == "Windows":
             self.build_requires("mozilla-build/3.3")
             if not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+        if self._is_msvc:
+            with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl", "CXX": "cl", "LD": "link"}):
                     yield
         else:
@@ -79,30 +84,34 @@ class NsprConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
-            "--with-mozilla" if self.options.with_mozilla else "--without-mozilla",
+            "--with-mozilla={}".format(yes_no(self.options.with_mozilla)),
+            "--enable-64bit={}".format(yes_no(self.settings.arch in ("armv8", "x86_64", "mips64", "ppc64", "ppc64le"))),
+            "--enable-strip={}".format(yes_no(self.settings.build_type not in ("Debug", "RelWithDebInfo"))),
+            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--disable-cplus",
             "--enable-64bit" if self.settings.arch in ("armv8", "x86_64") else "--disable-64bit",
             "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             conf_args.extend([
                 "{}-pc-mingw32".format("x86_64" if self.settings.arch == "x86_64" else "x86"),
-                "--enable-static-rtl" if "MT" in str(self.settings.compiler.runtime) else "--disable-static-rtl",
-                "--enable-debug-rtl" if "d" in str(self.settings.compiler.runtime) else "--disable-debug-rtl",
+                "--enable-static-rtl={}".format(yes_no("MT" in self.settings.compiler.runtime)),
+                "--enable-debug-rtl={}".format(yes_no("d" in self.settings.compiler.runtime)),
             ])
         elif self.settings.os == "Android":
             conf_args.extend([
-                "--with-android-ndk={}".format(os.environ["NDK_ROOT"]),
+                "--with-android-ndk={}".format(tools.get_env(["NDK_ROOT"])),
                 "--with-android-version={}".format(self.settings.os.api_level),
-                "--with-android-platform={}".format(os.environ["ANDROID_PLATFORM"]),
-                "--with-android-toolchain={}".format(os.environ["ANDROID_TOOLCHAIN"]),
+                "--with-android-platform={}".format(tools.get_env("ANDROID_PLATFORM")),
+                "--with-android-toolchain={}".format(tools.get_env("ANDROID_TOOLCHAIN")),
             ])
         elif self.settings.os == "Windows":
             conf_args.append("--enable-win32-target={}".format(self.options.win32_target))
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-
         env = self._autotools.vars
         if self.settings.os == "Macos":
             if self.settings.arch == "armv8":
@@ -132,8 +141,8 @@ class NsprConan(ConanFile):
             if self.options.shared:
                 os.mkdir(os.path.join(self.package_folder, "bin"))
             for lib in self._library_names:
-                libsuffix = "lib" if self.settings.compiler == "Visual Studio" else "a"
-                libprefix = "" if self.settings.compiler == "Visual Studio" else "lib"
+                libsuffix = "lib" if self._is_msvc else "a"
+                libprefix = "" if self._is_msvc else "lib"
                 if self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "{}{}_s.{}".format(libprefix, lib, libsuffix)))
                     os.rename(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
@@ -184,3 +193,9 @@ class NsprConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
+
+        aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
+
+        self.cpp_info.resdirs = ["res"]
