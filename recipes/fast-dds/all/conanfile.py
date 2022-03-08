@@ -20,11 +20,13 @@ class FastDDSConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [True, False],
+        "with_stats": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": False,
+        "with_stats": False,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -101,6 +103,11 @@ class FastDDSConan(ConanFile):
         self._cmake.definitions["NO_TLS"] = not self.options.with_ssl
         self._cmake.definitions["SECURITY"] = self.options.with_ssl
         self._cmake.definitions["EPROSIMA_INSTALLER_MINION"] = False
+        self._cmake.definitions["LOG_NO_INFO"] = False
+        self._cmake.definitions["LOG_NO_WARNING"] = False
+        self._cmake.definitions["LOG_NO_ERROR"] = False
+        if self.options.with_stats:
+            self._cmake.definitions["FASTDDS_STATISTICS"] = True
         self._cmake.configure()
         return self._cmake
 
