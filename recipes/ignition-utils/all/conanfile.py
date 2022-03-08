@@ -37,6 +37,10 @@ class IgnitionUitlsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
     
     def config_options(self):
         if self.settings.os == "Windows":
