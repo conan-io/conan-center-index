@@ -8,7 +8,7 @@ class LibMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A MySQL client library for C development."
-    topics = ("conan", "mysql", "sql", "connector", "database")
+    topics = ("mysql", "sql", "connector", "database")
     homepage = "https://dev.mysql.com/downloads/mysql/"
     license = "GPL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -183,5 +183,5 @@ class LibMysqlClientCConan(ConanFile):
             stdcpp_library = tools.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append('m')
