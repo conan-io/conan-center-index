@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-import glob
 import shutil
 
 class DiligentFxConan(ConanFile):
@@ -9,8 +8,8 @@ class DiligentFxConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DiligentGraphics/DiligentFx/"
     description = "DiligentFX is the Diligent Engine's high-level rendering framework."
-    license = ("Apache 2.0")
-    topics = ("graphics")
+    license = ("Apache-2.0")
+    topics = ("graphics", "game-engine", "renderer", "graphics-library")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
     "fPIC":         [True, False],
@@ -60,7 +59,8 @@ class DiligentFxConan(ConanFile):
     def requirements(self):
         self.requires("diligent-tools/cci.20211009")
 
-    def diligent_platform(self):
+    @property
+    def _diligent_platform(self):
         if self.settings.os == "Windows":
             return "PLATFORM_WIN32"
         elif self.settings.os == "Macos":
@@ -83,7 +83,7 @@ class DiligentFxConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
 
-        self._cmake.definitions[self.diligent_platform()] = True
+        self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
