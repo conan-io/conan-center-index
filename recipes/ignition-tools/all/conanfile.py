@@ -77,7 +77,7 @@ class IgnitionUitlsConan(ConanFile):
         version_minor = version_data_array[1]
         version_patch = version_data_array[2]
         conan.tools.files.rename(
-             "ign-tools-ignition-tools_{}.{}.{}".format(version_major, version_minor, version_patch),
+             self, "ign-tools-ignition-tools_{}.{}.{}".format(version_major, version_minor, version_patch),
              self._source_subfolder
             )
 
