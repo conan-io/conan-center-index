@@ -71,9 +71,13 @@ class IgnitionUitlsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
+        version_data_array = self.version.split(".")
+        assert(len(version_data_array)<=3)
+        version_major = version_data_array[0]
+        version_minor = version_data_array[1]
+        version_patch = version_data_array[2]
         os.rename(
-             "ign-tools-ignition-tools_{}.{}.{}".format(version_major, "0", "0"),
+             "ign-tools-ignition-tools_{}.{}.{}".format(version_major, version_minor, version_patch),
              self._source_subfolder
             )
 
@@ -82,8 +86,6 @@ class IgnitionUitlsConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
-        #self._cmake.definitions["IGN_UTILS_VENDOR_CLI11"] = True
-        self._cmake.definitions["CMAKE_FIND_DEBUG_MODE"] = "1"
         self._cmake.configure()
         return self._cmake
 
@@ -95,18 +97,11 @@ class IgnitionUitlsConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cli_header_src = os.path.join(self._source_subfolder, "cli", "include")
-        #if int(tools.Version(self.version).minor) is 0:
-        #    cli_header_src = os.path.join(cli_header_src, "ignition", "tools", "cli")
-        #else:
-        #    cli_header_src = os.path.join(cli_header_src, "external-cli", "ignition", "tools", "cli")
-        #self.copy("*.hpp", src=cli_header_src,
-        #             dst="include/ignition/utils1/ignition/tools/cli")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        #tools.rmdir(os.path.join(self.package_folder, "share"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:

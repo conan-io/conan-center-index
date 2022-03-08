@@ -1,7 +1,5 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8437a6e..8e429e1 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+--- CMakeLists.txt
++++ CMakeLists.txt
 @@ -251,7 +251,7 @@ else (build_errors)
    ########################################
    # Make the package config files
@@ -11,10 +9,9 @@ index 8437a6e..8e429e1 100644
      ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc @ONLY)
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc
      DESTINATION ${LIB_INSTALL_DIR}/pkgconfig
-diff --git a/doc/CMakeLists.txt b/doc/CMakeLists.txt
-index b127c70..84a37c7 100644
---- a/doc/CMakeLists.txt
-+++ b/doc/CMakeLists.txt
+
+--- doc/CMakeLists.txt
++++ doc/CMakeLists.txt
 @@ -1,8 +1,8 @@
  find_package(Doxygen)
  
