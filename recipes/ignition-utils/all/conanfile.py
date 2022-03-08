@@ -2,6 +2,7 @@ import os, glob
 
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import conan.tools.files
 
 required_conan_version = ">=1.29.1"
 
@@ -9,8 +10,8 @@ required_conan_version = ">=1.29.1"
 class IgnitionUitlsConan(ConanFile):
     name = "ignition-utils"
     license = "Apache-2.0"
-    homepage = "https://github.com/conan-io/conan-center-index"
-    url = "https://ignitionrobotics.org/libs/utils"
+    homepage = "https://ignitionrobotics.org/libs/utils"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Provides general purpose classes and functions designed for robotic applications.."
     topics = ("ignition", "robotics", "utils")
     settings = "os", "compiler", "build_type", "arch"
@@ -72,10 +73,10 @@ class IgnitionUitlsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         version_major = self.version.split(".")[0]
-        os.rename(
-            "ign-utils-ignition-utils{}_{}".format(version_major, self.version),
-            self._source_subfolder,
-        )
+        conan.tools.files.rename(
+             self, "ign-utils-ignition-utils{}_{}".format(version_major, self.version),
+             self._source_subfolder
+            )
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -94,8 +95,12 @@ class IgnitionUitlsConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", 
-                    src=os.path.join(self._source_subfolder, "cli", "include", "external-cli", "ignition", "utils", "cli"),
+        cli_header_src = os.path.join(self._source_subfolder, "cli", "include")
+        if int(tools.Version(self.version).minor) is 0:
+            cli_header_src = os.path.join(cli_header_src, "ignition", "utils", "cli")
+        else:
+            cli_header_src = os.path.join(cli_header_src, "external-cli", "ignition", "utils", "cli")
+        self.copy("*.hpp", src=cli_header_src,
                      dst="include/ignition/utils1/ignition/utils/cli")
         cmake = self._configure_cmake()
         cmake.install()
