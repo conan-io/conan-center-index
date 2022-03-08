@@ -31,6 +31,10 @@ class OdbcConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -56,6 +60,20 @@ class OdbcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+        # relocatable shared libs on macOS
+        for configure in [
+            os.path.join(self._source_subfolder, "configure"),
+            os.path.join(self._source_subfolder, "libltdl", "configure"),
+        ]:
+            tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self)
@@ -74,17 +92,8 @@ class OdbcConan(ConanFile):
         autotools.configure(configure_dir=self._source_subfolder, args=args)
         return autotools
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+        self._patch_sources()
         autotools = self._configure_autotools()
         autotools.make()
 
