@@ -1,15 +1,15 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/ignitionrobotics/ign-utils/archive/refs/tags/ignition-utils1_1.0.0.tar.gz"
-    sha256: "bd024164f12f66e125b544602ec481f6760d5a710aeb62d34a015fb598ee5a0a"
+  #"1.0.0":
+  #  url: "https://github.com/ignitionrobotics/ign-utils/archive/refs/tags/ignition-utils1_1.0.0.tar.gz"
+  #  sha256: "bd024164f12f66e125b544602ec481f6760d5a710aeb62d34a015fb598ee5a0a"
   "1.2.0":
     url: "https://github.com/ignitionrobotics/ign-utils/archive/refs/tags/ignition-utils1_1.2.0.tar.gz"
     sha256: "fba9d1d3cdafa73148697433bba206aa1251d24c0afa22f09bb3289092021449"
 
 patches:
-  "1.0.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-ign-utils-1.0.0-cmake-fixes.patch"
+  #"1.0.0":
+  #  - base_path: "source_subfolder"
+  #    patch_file: "patches/0001-ign-utils-1.0.0-cmake-fixes.patch"
   "1.2.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0002-ign-utils-1.2.0-cmake-fixes.patch"
