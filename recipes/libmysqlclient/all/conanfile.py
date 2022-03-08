@@ -31,7 +31,7 @@ class LibMysqlClientCConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     @property
     def _source_subfolder(self):
@@ -79,6 +79,8 @@ class LibMysqlClientCConan(ConanFile):
             self.requires("zstd/1.5.2")
         if self._with_lz4:
             self.requires("lz4/1.9.3")
+        if self.settings.os == "FreeBSD":
+            self.requires("libunwind/1.5.0")
 
     def validate(self):
         def loose_lt_semver(v1, v2):
@@ -108,6 +110,8 @@ class LibMysqlClientCConan(ConanFile):
         if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.build_requires("cmake/3.22.0")
+        if self.settings.os == "FreeBSD":
+            self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
