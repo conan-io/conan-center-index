@@ -12,7 +12,7 @@ class LibMysqlClientCConan(ConanFile):
     homepage = "https://dev.mysql.com/downloads/mysql/"
     license = "GPL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_ssl": True, "with_zlib": True}
@@ -41,6 +41,8 @@ class LibMysqlClientCConan(ConanFile):
             self.requires("zstd/1.5.0")
         if self._with_lz4:
             self.requires("lz4/1.9.3")
+        if self.settings.os == "FreeBSD":
+            self.requires("libunwind/1.5.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
