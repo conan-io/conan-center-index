@@ -163,6 +163,12 @@ class LibpqConan(ConanFile):
                         if not self.options.shared:
                             self.run("perl build.pl libpgport")
         else:
+            # relocatable shared lib on macOS
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "Makefile.shlib"),
+                "-install_name '$(libdir)/",
+                "-install_name '@rpath/",
+            )
             # avoid SIP issues on macOS when dependencies are shared
             if tools.is_apple_os(self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
