@@ -82,4 +82,4 @@ sources:
     sha256: "ee481970b951d54146fea4fa1c6b021dd0a083455392843c2a8d1fbcaf68acc1"
   "2.71.3":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.71.3/glib-2.71.3.tar.gz"
-    sha256: "ee481970b951d54146fea4fa1c6b021dd0a083455392843c2a8d1fbcaf68acc1"
+    sha256: "08e17cf608f5ac3462092bff13828c1c0aab37c5b4827d4e17b948215b4e40ea"
