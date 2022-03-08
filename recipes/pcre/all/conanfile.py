@@ -133,6 +133,9 @@ class PCREConan(ConanFile):
         cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
         if self._is_msvc:
             cmake.definitions["PCRE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        if tools.is_apple_os(self.settings.os):
+            # Generate a relocatable shared lib on Macos
+            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
