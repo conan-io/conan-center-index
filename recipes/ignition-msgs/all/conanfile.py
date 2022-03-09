@@ -75,8 +75,10 @@ class IgnitionUitlsConan(ConanFile):
             self.requires("ignition-math/6.7.0")
         self.requires("protobuf/3.19.2")
         self.requires("tinyxml2/9.0.0")
+        self.requires("doxygen/1.9.2")
 
     def build_requirements(self):
+        self.build_requires("cmake/3.15.7")
         if int(self.version.split(".")[0]) > 5:
             self.build_requires("ignition-cmake/2.5.0")
         else:
@@ -140,6 +142,7 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-msgs"].requires = ["ignition-math::ignition-math"]
         self.cpp_info.components["libignition-msgs"].requires.append("protobuf::protobuf")
         self.cpp_info.components["libignition-msgs"].requires.append("tinyxml2::tinyxml2")
+        self.cpp_info.components["libignition-msgs"].requires.append("doxygen::doxygen")
         self.env_info.LD_LIBRARY_PATH.extend([
             os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
         ])
