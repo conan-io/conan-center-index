@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
+import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Assimp(ConanFile):
@@ -91,9 +92,7 @@ class Assimp(ConanFile):
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -102,6 +101,11 @@ class Assimp(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -141,8 +145,6 @@ class Assimp(ConanFile):
 
     def requirements(self):
         # TODO: unvendor others libs:
-        # - clipper (required by IFC importer): can't be unvendored because CCI
-        #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
         # - openddlparser
         if tools.Version(self.version) < "5.1.0":
@@ -150,8 +152,12 @@ class Assimp(ConanFile):
         else:
             self.requires("pugixml/1.11")
 
-        self.requires("minizip/1.2.11")
+        self.requires("zlib/1.2.11")
+        self.requires("stb/cci.20210910")
+        if tools.Version(self.version) < "5.1.6":
+            self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
+        self.requires("clipper/4.8.8")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.1.31")
         if self._depends_on_poly2tri:
@@ -187,45 +193,48 @@ class Assimp(ConanFile):
             tools.replace_in_file(os.path.join(
                 self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        vendors = ["poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]
+        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "stb", "zlib", "clipper"]
         if tools.Version(self.version) < "5.1.0":
             vendors.append("irrXML")
         else:
             vendors.extend(["pugixml", "draco"])
+        if tools.Version(self.version) < "5.1.6":
+            vendors.extend(["unzip"])
         for vendor in vendors:
             tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         if tools.Version(self.version) >= "5.1.0":
-            self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
-            self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
-            self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
+            cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
+            cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
+            cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
         else:
-            self._cmake.definitions["HUNTER_ENABLED"] = False
-            self._cmake.definitions["IGNORE_GIT_HASH"] = True
-            self._cmake.definitions["SYSTEM_IRRXML"] = True
+            cmake.definitions["HUNTER_ENABLED"] = False
+            cmake.definitions["IGNORE_GIT_HASH"] = True
+            cmake.definitions["SYSTEM_IRRXML"] = True
 
-        self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
-        self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
-        self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
-        self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
-        self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
+        if tools.Version(self.version) >= "5.1.6":
+            cmake.definitions["ASSIMP_BUILD_MINIZIP"] = True
+
+        cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
+        cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
+        cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
+        cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
+        cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
+        cmake.definitions["ASSIMP_BUILD_TESTS"] = False
+        cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
+        cmake.definitions["ASSIMP_INSTALL_PDB"] = False
+        cmake.definitions["ASSIMP_NO_EXPORT"] = False
 
         for option, (definition, _) in self._format_option_map.items():
             value = self.options.get_safe(option)
             if value is not None:
-                self._cmake.definitions[definition] = value
+                cmake.definitions[definition] = value
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
