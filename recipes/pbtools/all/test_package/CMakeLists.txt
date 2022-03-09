@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(pbtools REQUIRED CONFIG)
 
-add_executable(test_package test_package.c)
+add_executable(test_package test_package.c hello_world.c)
 target_link_libraries(test_package pbtools::pbtools)

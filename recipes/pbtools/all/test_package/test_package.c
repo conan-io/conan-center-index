@@ -1,31 +1,45 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include "hello_world.h"
 
-#include "pbtools.h"
-
-
-struct foo_t {
-    struct pbtools_message_base_t base;
-    int32_t bar;
-};
-
-void foo_init(struct foo_t * foo_p, struct pbtools_heap_t *heap_p) {
-    foo_p->base.heap_p = heap_p;
-    foo_p->bar = 0;
-}
-
-void foo_encode_inner(struct pbtools_encoder_t *encoder_p, struct foo_t *foo_p) {
-    pbtools_encoder_write_int32(encoder_p, 1, foo_p->bar);
-}
-
-int main() {
+int main(int argc, const char *argv[])
+{
     int size;
     uint8_t workspace[64];
     uint8_t encoded[16];
-    struct foo_t *foo_p;
+    struct hello_world_foo_t *foo_p;
 
-    foo_p = pbtools_message_new(&workspace[0], sizeof(workspace), sizeof(struct foo_t), (pbtools_message_init_t)foo_init);
-    foo_p->bar = 42;
-    pbtools_message_encode(&foo_p->base, &encoded[0], sizeof(encoded), (pbtools_message_encode_inner_t)foo_encode_inner);
+    /* Encode. */
+    foo_p = hello_world_foo_new(&workspace[0], sizeof(workspace));
 
-    return EXIT_SUCCESS;
+    if (foo_p == NULL) {
+        return (EXIT_FAILURE);
+    }
+
+    foo_p->bar = 78;
+    size = hello_world_foo_encode(foo_p, &encoded[0], sizeof(encoded));
+
+    if (size < 0) {
+        return (EXIT_FAILURE);
+    }
+
+    printf("Successfully encoded Foo into %d bytes.\n", size);
+
+    /* Decode. */
+    foo_p = hello_world_foo_new(&workspace[0], sizeof(workspace));
+
+    if (foo_p == NULL) {
+        return (EXIT_FAILURE);
+    }
+
+    size = hello_world_foo_decode(foo_p, &encoded[0], size);
+
+    if (size < 0) {
+        return (EXIT_FAILURE);
+    }
+
+    printf("Successfully decoded %d bytes into Foo.\n", size);
+    printf("Foo.bar: %d\n", foo_p->bar);
+
+    return (EXIT_SUCCESS);
 }
