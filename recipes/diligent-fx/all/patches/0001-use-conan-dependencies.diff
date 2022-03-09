@@ -11,8 +11,8 @@ index 7d56e79..46b1113 100644
 -    Diligent-GraphicsEngine
 -    Diligent-GraphicsTools
 -    Diligent-AssetLoader
-+    CONAN_PKG::diligent-core
-+    CONAN_PKG::diligent-tools
++    diligent-core::diligent-core
++    diligent-tools::diligent-tools
  )
  set_common_target_properties(DiligentFX)
  
