@@ -69,13 +69,18 @@ class IgnitionUitlsConan(ConanFile):
     
     def requirements(self):
         if int(self.version.split(".")[0]) > 5:
-            self.requires("ignition-math/6.7.0@gg/cc-testing")
+            self.requires("ignition-math/6.7.0")
         else:
-            self.requires("ignition-math/6.7.0@gg/cc-testing")
-        self.requires("protobuf/3.19.2@gg/cc-testing")
+            #TODO: use ignition-math/6.9.0 when available on CCI
+            self.requires("ignition-math/6.7.0")
+        self.requires("protobuf/3.19.2")
 
     def build_requirements(self):
-        self.build_requires("ignition-cmake/2.10.0@ar/thirdparty")
+        if int(self.version.split(".")[0]) > 5:
+            self.build_requires("ignition-cmake/2.5.0")
+        else:
+            #TODO: use ignition-cmake/2.10.0 when available on CCI
+            self.build_requires("ignition-cmake/2.5.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
