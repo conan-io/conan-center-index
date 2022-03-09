@@ -30,5 +30,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0012-API250014-separate-release-flags.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0013-API250014-use-vulkan-headers-in-archiver.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/0005-spirv-cross-namespace-override.patch"
       base_path: "source_subfolder"
