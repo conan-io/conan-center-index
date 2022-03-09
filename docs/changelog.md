@@ -6,7 +6,7 @@
 - [feature] Get requirements from `conan info --dry-build` command.
 - [feature] Use reference with recipe revision for `conan info` commands.
 - [feature] Add possibility to load the configuration from file.
-- [feature] Fix DSL typo for access request job.
+- [fix] Fix DSL typo for access request job.
 - [fix] Removed retries from pull-request builds (introduced long ago to avoid timeout issues).
 - [refactor] Completely remove resource locking for executors.
 
