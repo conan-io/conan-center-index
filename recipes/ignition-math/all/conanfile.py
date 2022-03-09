@@ -131,3 +131,7 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components["libignition-math-all"].requires = ["libignition-math-eigen3"]
         self.cpp_info.components["libignition-math-all"].names["cmake_find_package"] = "ignition-math{}-all".format(version_major)
         self.cpp_info.components["libignition-math-all"].names["cmake_find_package_multi"] = "ignition-math{}-all".format(version_major)
+    
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
