@@ -99,7 +99,7 @@ class IgnitionUitlsConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
         #self._cmake.definitions["IGN_UTILS_VENDOR_CLI11"] = True
-        self._cmake.definitions["CMAKE_FIND_DEBUG_MODE"] = "1"
+        #self._cmake.definitions["CMAKE_FIND_DEBUG_MODE"] = "1"
         self._cmake.configure()
         return self._cmake
 
