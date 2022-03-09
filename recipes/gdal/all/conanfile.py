@@ -394,10 +394,6 @@ class GdalConan(ConanFile):
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
             if self.options.tools:
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build tools")
-        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
-        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
-           tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
 
     def _validate_dependency_graph(self):
         if tools.Version(self.deps_cpp_info["libtiff"].version) < "4.0.0":
