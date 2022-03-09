@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -83,19 +84,18 @@ class PhysXConan(ConanFile):
         if self.settings.os == "Windows" and not self._is_msvc:
             raise ConanInvalidConfiguration("{} only supports Visual Studio on Windows".format(self.name))
 
-        if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) < 9:
-                raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 9:
+            raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
 
+        if self._is_msvc:
             allowed_runtimes = ["MDd", "MTd"] if build_type == "Debug" else ["MD", "MT"]
-            if self.settings.compiler.runtime not in allowed_runtimes:
-                raise ConanInvalidConfiguration("Visual Studio Compiler runtime {0}" \
-                                                "is required for {1} build type".format(allowed_runtimes, build_type))
-        elif str(self.settings.compiler) == "msvc":
-            allowed_runtime_type = "Debug" if build_type == "Debug" else "Release"
-            if self.settings.compiler.runtime_type != allowed_runtime_type:
-                raise ConanInvalidConfiguration("msvc Compiler runtime_type {0}" \
-                                                "is required for {1} build type".format(allowed_runtime_type, build_type))
+            if msvc_runtime_flag(self) not in allowed_runtimes:
+                raise ConanInvalidConfiguration(
+                    "Visual Studio runtime {0} is required for {1} build type".format(
+                        " or ".join(allowed_runtimes),
+                        build_type,
+                    )
+                )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -213,14 +213,8 @@ class PhysXConan(ConanFile):
         self._cmake.definitions["NV_APPEND_CONFIG_NAME"] = False
         self._cmake.definitions["NV_USE_GAMEWORKS_OUTPUT_DIRS"] = False
         if self._is_msvc:
-            if self.settings.compiler == "Visual Studio":
-                is_static_runtime = str(self.settings.compiler.runtime).startswith("MT")
-                is_debug_runtime = str(self.settings.compiler.runtime).endswith("d")
-            else:
-                is_static_runtime = self.settings.compiler.runtime == "static"
-                is_debug_runtime = self.settings.compiler.runtime_type == "Debug"
-            self._cmake.definitions["NV_USE_STATIC_WINCRT"] = is_static_runtime
-            self._cmake.definitions["NV_USE_DEBUG_WINCRT"] = is_debug_runtime
+            self._cmake.definitions["NV_USE_STATIC_WINCRT"] = "MT" in msvc_runtime_flag(self)
+            self._cmake.definitions["NV_USE_DEBUG_WINCRT"] = "d" in msvc_runtime_flag(self)
         self._cmake.definitions["NV_FORCE_64BIT_SUFFIX"] = False
         self._cmake.definitions["NV_FORCE_32BIT_SUFFIX"] = False
         self._cmake.definitions["PX_ROOT_LIB_DIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
