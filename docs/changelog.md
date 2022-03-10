@@ -1,5 +1,15 @@
 # Changelog
 
+### 09-March-2022 - 13:37 CET
+
+- [feature] Merge pull-requests that bump version automatically.
+- [feature] Get requirements from `conan info --dry-build` command.
+- [feature] Use reference with recipe revision for `conan info` commands.
+- [feature] Add possibility to load the configuration from file.
+- [fix] Fix DSL typo for access request job.
+- [fix] Removed retries from pull-request builds (introduced long ago to avoid timeout issues).
+- [refactor] Completely remove resource locking for executors.
+
 ### 24-February-2022 - 14:03 CET
 
 - [fix] Fix encoding issues in `summary.html` file.
