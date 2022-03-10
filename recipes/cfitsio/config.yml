@@ -1,9 +1,9 @@
 versions:
-  "3.470":
-    folder: all
-  "3.480":
+  "4.0.0":
     folder: all
   "3.490":
     folder: all
-  "4.0.0":
+  "3.480":
+    folder: all
+  "3.470":
     folder: all

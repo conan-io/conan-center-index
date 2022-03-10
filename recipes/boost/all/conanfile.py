@@ -660,7 +660,7 @@ class BoostConan(ConanFile):
         raise Exception("couldn't locate Python.h - make sure you have installed python development files")
 
     @property
-    def _python_libraries(self):
+    def _python_library_dir(self):
         """
         attempt to find python development library
         :return: the full path to the python library to be linked with
@@ -702,7 +702,7 @@ class BoostConan(ConanFile):
                 self.output.info("checking {}".format(python_lib))
                 if os.path.isfile(python_lib):
                     self.output.info("found python library: {}".format(python_lib))
-                    return python_lib.replace("\\", "/")
+                    return libdir.replace("\\", "/")
         raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
@@ -1187,11 +1187,11 @@ class BoostConan(ConanFile):
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
-            contents += '\nusing python : {version} : "{executable}" : "{includes}" : "{libraries}" ;'\
+            contents += '\nusing python : {version} : "{executable}" : "{includes}" : "{library_dir}" ;'\
                 .format(version=self._python_version,
                         executable=self._python_executable,
                         includes=self._python_includes,
-                        libraries=self._python_libraries)
+                        library_dir=self._python_library_dir)
 
         if not self.options.without_mpi:
             # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
@@ -1255,7 +1255,7 @@ class BoostConan(ConanFile):
     @property
     def _toolset(self):
         if self._is_msvc:
-            return "msvc"
+            return "clang-win" if self.settings.compiler.toolset == "ClangCL" else "msvc"
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
         elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":

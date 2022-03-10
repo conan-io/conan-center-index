@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -6,7 +7,7 @@ import glob
 import shutil
 import re
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class FFMpegConan(ConanFile):
@@ -18,6 +19,7 @@ class FFMpegConan(ConanFile):
     homepage = "https://ffmpeg.org"
     topics = ("ffmpeg", "multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",
              "transcoding", "multiplexer", "demultiplexer", "streaming")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -99,34 +101,8 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": True,
         "with_programs": True,
     }
-    generators = "pkg_config"
 
-    _dependencies = {
-        "avformat": ["avcodec"],
-        "avdevice": ["avcodec", "avformat"],
-        "avfilter": ["avformat"],
-        "with_bzip2": ["avformat"],
-        "with_ssl": ["avformat"],
-        "with_zlib": ["avcodec"],
-        "with_lzma": ["avcodec"],
-        "with_libiconv": ["avcodec"],
-        "with_openjpeg": ["avcodec"],
-        "with_openh264": ["avcodec"],
-        "with_vorbis": ["avcodec"],
-        "with_opus": ["avcodec"],
-        "with_libx264": ["avcodec"],
-        "with_libx265": ["avcodec"],
-        "with_libvpx": ["avcodec"],
-        "with_libmp3lame": ["avcodec"],
-        "with_libfdk_aac": ["avcodec"],
-        "with_libwebp": ["avcodec"],
-        "with_freetype": ["avfilter"],
-        "with_zeromq": ["avfilter", "avformat"],
-        "with_libalsa": ["avdevice"],
-        "with_xcb": ["avdevice"],
-        "with_pulse": ["avdevice"],
-        "with_sdl": ["with_programs"]
-    }
+    generators = "pkg_config"
     _autotools = None
 
     @property
@@ -134,8 +110,41 @@ class FFMpegConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _dependencies(self):
+        return {
+            "avformat": ["avcodec"],
+            "avdevice": ["avcodec", "avformat"],
+            "avfilter": ["avformat"],
+            "with_bzip2": ["avformat"],
+            "with_ssl": ["avformat"],
+            "with_zlib": ["avcodec"],
+            "with_lzma": ["avcodec"],
+            "with_libiconv": ["avcodec"],
+            "with_openjpeg": ["avcodec"],
+            "with_openh264": ["avcodec"],
+            "with_vorbis": ["avcodec"],
+            "with_opus": ["avcodec"],
+            "with_libx264": ["avcodec"],
+            "with_libx265": ["avcodec"],
+            "with_libvpx": ["avcodec"],
+            "with_libmp3lame": ["avcodec"],
+            "with_libfdk_aac": ["avcodec"],
+            "with_libwebp": ["avcodec"],
+            "with_freetype": ["avfilter"],
+            "with_zeromq": ["avfilter", "avformat"],
+            "with_libalsa": ["avdevice"],
+            "with_xcb": ["avdevice"],
+            "with_pulse": ["avdevice"],
+            "with_sdl": ["with_programs"],
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -244,7 +253,7 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_os(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             return "win32"
         else:
             _, _, target_os = tools.get_gnu_triplet(
@@ -255,7 +264,7 @@ class FFMpegConan(ConanFile):
             return target_os
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio" and self.options.with_libx264 and not self.options["libx264"].shared:
+        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -270,7 +279,7 @@ class FFMpegConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.vcvars(self):
                 yield
         else:
@@ -335,6 +344,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
+        if tools.is_apple_os(self.settings.os):
+            # relocatable shared libs
+            args.append("--install-name-dir=@rpath")
         args.append("--arch={}".format(self._target_arch))
         if self.settings.build_type == "Debug":
             args.extend([
@@ -357,10 +369,10 @@ class FFMpegConan(ConanFile):
         if tools.is_apple_os(self.settings.os) and self.settings.os.version:
             extra_cflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
             extra_ldflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
-            if tools.Version(str(self.settings.compiler.version)) <= 12:
+            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
         if tools.cross_building(self):
@@ -396,22 +408,21 @@ class FFMpegConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             if self.options.shared:
                 # ffmpeg created `.lib` files in the `/bin` folder
                 for fn in os.listdir(os.path.join(self.package_folder, "bin")):
                     if fn.endswith(".lib"):
-                        tools.rename(os.path.join(self.package_folder, "bin", fn),
+                        rename(self, os.path.join(self.package_folder, "bin", fn),
                                      os.path.join(self.package_folder, "lib", fn))
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files
                 with tools.chdir(os.path.join(self.package_folder, "lib")):
                     for lib in glob.glob("*.a"):
-                        tools.rename(lib, lib[3:-2] + ".lib")
+                        rename(self, lib, lib[3:-2] + ".lib")
 
     def _read_component_version(self, component_name):
-        result = dict()
         version_file_name = os.path.join(self.package_folder,
                                          "include", "lib%s" % component_name,
                                          "version.h")
@@ -441,6 +452,7 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["programs"].requires = ["sdl::libsdl2"]
 
         if self.options.avdevice:
+            self.cpp_info.components["avdevice"].set_property("pkg_config_name", "libavdevice")
             self.cpp_info.components["avdevice"].libs = ["avdevice"]
             self.cpp_info.components["avdevice"].requires = ["avutil"]
             if self.options.avfilter:
@@ -455,10 +467,10 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["avdevice"].requires.append("swresample")
             if self.options.postproc:
                 self.cpp_info.components["avdevice"].requires.append("postproc")
-            self.cpp_info.components["avdevice"].names["pkg_config"] = "libavdevice"
             self._set_component_version("avdevice")
 
         if self.options.avfilter:
+            self.cpp_info.components["avfilter"].set_property("pkg_config_name", "libavfilter")
             self.cpp_info.components["avfilter"].libs = ["avfilter"]
             self.cpp_info.components["avfilter"].requires = ["avutil"]
             if self.options.swscale:
@@ -471,47 +483,46 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["avfilter"].requires.append("swresample")
             if self.options.postproc:
                 self.cpp_info.components["avfilter"].requires.append("postproc")
-            self.cpp_info.components["avfilter"].names["pkg_config"] = "libavfilter"
             self._set_component_version("avfilter")
 
         if self.options.avformat:
+            self.cpp_info.components["avformat"].set_property("pkg_config_name", "libavformat")
             self.cpp_info.components["avformat"].libs = ["avformat"]
             self.cpp_info.components["avformat"].requires = ["avutil"]
             if self.options.avcodec:
                 self.cpp_info.components["avformat"].requires.append("avcodec")
             if self.options.swresample:
                 self.cpp_info.components["avformat"].requires.append("swresample")
-            self.cpp_info.components["avformat"].names["pkg_config"] = "libavformat"
             self._set_component_version("avformat")
 
         if self.options.avcodec:
+            self.cpp_info.components["avcodec"].set_property("pkg_config_name", "libavcodec")
             self.cpp_info.components["avcodec"].libs = ["avcodec"]
             self.cpp_info.components["avcodec"].requires = ["avutil"]
             if self.options.swresample:
                 self.cpp_info.components["avcodec"].requires.append("swresample")
-            self.cpp_info.components["avcodec"].names["pkg_config"] = "libavcodec"
             self._set_component_version("avcodec")
 
         if self.options.swscale:
+            self.cpp_info.components["swscale"].set_property("pkg_config_name", "libswscale")
             self.cpp_info.components["swscale"].libs = ["swscale"]
             self.cpp_info.components["swscale"].requires = ["avutil"]
-            self.cpp_info.components["swscale"].names["pkg_config"] = "libswscale"
             self._set_component_version("swscale")
 
         if self.options.swresample:
+            self.cpp_info.components["swresample"].set_property("pkg_config_name", "libswresample")
             self.cpp_info.components["swresample"].libs = ["swresample"]
-            self.cpp_info.components["swresample"].names["pkg_config"] = "libswresample"
             self.cpp_info.components["swresample"].requires = ["avutil"]
             self._set_component_version("swresample")
 
         if self.options.postproc:
+            self.cpp_info.components["postproc"].set_property("pkg_config_name", "libpostproc")
             self.cpp_info.components["postproc"].libs = ["postproc"]
             self.cpp_info.components["postproc"].requires = ["avutil"]
-            self.cpp_info.components["postproc"].names["pkg_config"] = "libpostproc"
             self._set_component_version("postproc")
 
+        self.cpp_info.components["avutil"].set_property("pkg_config_name", "libavutil")
         self.cpp_info.components["avutil"].libs = ["avutil"]
-        self.cpp_info.components["avutil"].names["pkg_config"] = "libavutil"
         self._set_component_version("avutil")
 
         if self.settings.os in ("FreeBSD", "Linux"):

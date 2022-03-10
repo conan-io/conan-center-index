@@ -1,9 +1,9 @@
 versions:
-  "4.24":
-    folder: all
-  "4.27":
+  "4.32":
     folder: all
   "4.29":
     folder: all
-  "4.32":
+  "4.27":
+    folder: all
+  "4.24":
     folder: all

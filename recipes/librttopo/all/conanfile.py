@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
+import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibrttopoConan(ConanFile):
@@ -26,7 +27,6 @@ class LibrttopoConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -43,24 +43,23 @@ class LibrttopoConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("geos/3.9.1")
+        self.requires("geos/3.10.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         librttopo_version = tools.Version(self.version)
-        self._cmake.definitions["LIBRTGEOM_VERSION_MAJOR"] = librttopo_version.major
-        self._cmake.definitions["LIBRTGEOM_VERSION_MINOR"] = librttopo_version.minor
-        self._cmake.definitions["LIBRTGEOM_VERSION_PATCH"] = librttopo_version.patch
+        cmake.definitions["LIBRTGEOM_VERSION_MAJOR"] = librttopo_version.major
+        cmake.definitions["LIBRTGEOM_VERSION_MINOR"] = librttopo_version.minor
+        cmake.definitions["LIBRTGEOM_VERSION_PATCH"] = librttopo_version.patch
         geos_version = tools.Version(self.deps_cpp_info["geos"].version)
-        self._cmake.definitions["RTGEOM_GEOS_VERSION"] = "{}{}".format(geos_version.major, geos_version.minor)
-        self._cmake.configure()
-        return self._cmake
+        cmake.definitions["RTGEOM_GEOS_VERSION"] = "{}{}".format(geos_version.major, geos_version.minor)
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -72,7 +71,10 @@ class LibrttopoConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "rttopo"
+        self.cpp_info.set_property("pkg_config_name", "rttopo")
         self.cpp_info.libs = ["rttopo"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "rttopo"

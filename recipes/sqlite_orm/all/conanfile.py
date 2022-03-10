@@ -32,7 +32,7 @@ class SqliteOrmConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def requirements(self):
-        self.requires("sqlite3/3.36.0")
+        self.requires("sqlite3/3.37.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
