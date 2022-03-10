@@ -6,6 +6,9 @@ set(root "${PROJECT_SOURCE_DIR}/source_subfolder")
 set(src "${root}/src")
 set(bin "${PROJECT_BINARY_DIR}")
 
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_basic_setup(TARGETS KEEP_RPATHS)
+
 # ---- Config headers ----
 
 include(compile-checks.cmake)
