@@ -90,6 +90,7 @@ class Assimp(ConanFile):
         "with_xgl": ("ASSIMP_BUILD_XGL_IMPORTER", "5.0.0"),
         "with_m3d": ("ASSIMP_BUILD_M3D_IMPORTER", "5.1.0"),
         "with_m3d_exporter": ("ASSIMP_BUILD_M3D_EXPORTER", "5.1.0"),
+        "with_iqm": ("ASSIMP_BUILD_IQM_IMPORTER", "5.2.0"),
     }
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
