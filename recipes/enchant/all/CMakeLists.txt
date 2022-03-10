@@ -90,6 +90,7 @@ set_target_properties(
 # There is only this provider in CCI for now
 enable_language(CXX)
 add_provider(enchant_hunspell "${root}/providers/enchant_hunspell.cpp")
+target_compile_features(enchant_hunspell PRIVATE cxx_std_11)
 
 find_package(hunspell REQUIRED CONFIG)
 target_link_libraries(enchant_hunspell PRIVATE hunspell::hunspell glib::glib-2.0)
