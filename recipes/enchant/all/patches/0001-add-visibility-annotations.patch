@@ -1,0 +1,283 @@
+--- src/enchant.h
++++ src/enchant.h
+@@ -30,6 +30,7 @@
+ #ifndef ENCHANT_H
+ #define ENCHANT_H
+ 
++#include "enchant_export.h" /* for ENCHANT_EXPORT */
+ #include <stdint.h> /* for uint32_t */
+ #include <sys/types.h> /* for size_t, ssize_t */
+ 
+@@ -41,7 +42,7 @@
+ typedef struct str_enchant_broker EnchantBroker;
+ typedef struct str_enchant_dict   EnchantDict;
+ 
+-const char *enchant_get_version (void);
++ENCHANT_EXPORT const char *enchant_get_version (void);
+ 
+ /**
+  * enchant_broker_init
+@@ -49,7 +50,7 @@
+  * Returns: A new broker object capable of requesting
+  * dictionaries from providers.
+  */
+-EnchantBroker *enchant_broker_init (void);
++ENCHANT_EXPORT EnchantBroker *enchant_broker_init (void);
+ 
+ /**
+  * enchant_broker_free
+@@ -57,7 +58,7 @@
+  *
+  * Destroys the broker object. Must only be called once per broker init
+  */
+-void enchant_broker_free (EnchantBroker * broker);
++ENCHANT_EXPORT void enchant_broker_free (EnchantBroker * broker);
+ 
+ /**
+  * enchant_broker_request_dict
+@@ -66,7 +67,7 @@
+  *
+  * Returns: An #EnchantDict, or %null if no suitable dictionary could be found. This dictionary is reference counted.
+  */
+-EnchantDict *enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
++ENCHANT_EXPORT EnchantDict *enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
+ 
+ /**
+  * enchant_broker_request_pwl_dict
+@@ -78,7 +79,7 @@
+  *
+  * Returns: An EnchantDict. This dictionary is reference counted.
+  */
+-EnchantDict *enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
++ENCHANT_EXPORT EnchantDict *enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
+ 
+ /**
+  * enchant_broker_free_dict
+@@ -87,7 +88,7 @@
+  *
+  * Releases the dictionary when you are done using it. Must only be called once per dictionary request
+  */
+-void enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
++ENCHANT_EXPORT void enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
+ 
+ /**
+  * enchant_broker_dict_exists
+@@ -96,7 +97,7 @@
+  *
+  * Return existance of the requested dictionary (1 == true, 0 == false)
+  */
+-int enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag);
++ENCHANT_EXPORT int enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag);
+ 
+ /**
+  * enchant_broker_set_ordering
+@@ -110,7 +111,7 @@
+  * be used as a language tag to declare a default ordering for any
+  * language that does not explictly declare an ordering.
+  */
+-void enchant_broker_set_ordering (EnchantBroker * broker,
++ENCHANT_EXPORT void enchant_broker_set_ordering (EnchantBroker * broker,
+ 				  const char * const tag,
+ 				  const char * const ordering);
+ /**
+@@ -121,7 +122,7 @@
+  * WARNING: error is transient and is likely cleared as soon as the
+  * next broker operation happens
+  */
+-const char *enchant_broker_get_error (EnchantBroker * broker);
++ENCHANT_EXPORT const char *enchant_broker_get_error (EnchantBroker * broker);
+ 
+ /**
+  * EnchantBrokerDescribeFn
+@@ -146,7 +147,7 @@
+  * Enumerates the Enchant providers and tells
+  * you some rudimentary information about them.
+  */
+-void enchant_broker_describe (EnchantBroker * broker,
++ENCHANT_EXPORT void enchant_broker_describe (EnchantBroker * broker,
+ 			      EnchantBrokerDescribeFn fn,
+ 			      void * user_data);
+ 
+@@ -161,7 +162,7 @@
+  *
+  * Returns: 0 if the word is correctly spelled, positive if not, negative if error
+  */
+-int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_suggest
+@@ -175,7 +176,7 @@
+  *
+  * Returns: A %null terminated list of UTF-8 encoded suggestions, or %null
+  */
+-char **enchant_dict_suggest (EnchantDict * dict, const char *const word,
++ENCHANT_EXPORT char **enchant_dict_suggest (EnchantDict * dict, const char *const word,
+ 			     ssize_t len, size_t * out_n_suggs);
+ 
+ /**
+@@ -187,7 +188,7 @@
+  * Remarks: if the word exists in the exclude dictionary, it will be removed from the
+  *          exclude dictionary
+  */
+-void enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT void enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_add_to_session
+@@ -196,7 +197,7 @@
+  * @len: The byte length of @word, or -1 for strlen (@word)
+  *
+  */
+-void enchant_dict_add_to_session (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT void enchant_dict_add_to_session (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_remove
+@@ -206,7 +207,7 @@
+  * @len: The byte length of @word, or -1 for strlen (@word)
+  *
+  */
+-void enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT void enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_remove_from_session
+@@ -215,7 +216,7 @@
+  * @len: The byte length of @word, or -1 for strlen (@word)
+  *
+  */
+-void enchant_dict_remove_from_session (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT void enchant_dict_remove_from_session (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_is_added
+@@ -223,7 +224,7 @@
+  * @word: The word you wish to see if it has been added (to your session or dict) in UTF8 encoding
+  * @len: the byte length of @word, or -1 for strlen (@word)
+  */
+-int enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT int enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_is_removed
+@@ -231,7 +232,7 @@
+  * @word: The word you wish to see if it has been removed (from your session or dict) in UTF8 encoding
+  * @len: the byte length of @word, or -1 for strlen (@word)
+  */
+-int enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len);
++ENCHANT_EXPORT int enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len);
+ 
+ /**
+  * enchant_dict_store_replacement
+@@ -245,7 +246,7 @@
+  * that future occurrences of @mis will be replaced with @cor. So it might
+  * bump @cor up in the suggestion list.
+  */
+-void enchant_dict_store_replacement (EnchantDict * dict,
++ENCHANT_EXPORT void enchant_dict_store_replacement (EnchantDict * dict,
+ 				     const char *const mis, ssize_t mis_len,
+ 				     const char *const cor, ssize_t cor_len);
+ 
+@@ -256,7 +257,7 @@
+  *
+  * Releases the string list
+  */
+-void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
++ENCHANT_EXPORT void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
+ 
+ /**
+  * enchant_dict_get_error
+@@ -266,7 +267,7 @@
+  * WARNING: error is transient. It will likely be cleared as soon as
+  * the next dictionary operation is called.
+  */
+-const char *enchant_dict_get_error (EnchantDict * dict);
++ENCHANT_EXPORT const char *enchant_dict_get_error (EnchantDict * dict);
+ 
+ /**
+  * enchant_dict_get_extra_word_characters
+@@ -282,7 +283,7 @@
+  * Note that for some back-ends the result may be a guess, in which case it
+  * may include characters not actually allowed in the given dictionary.
+  */
+-const char *enchant_dict_get_extra_word_characters (EnchantDict * dict);
++ENCHANT_EXPORT const char *enchant_dict_get_extra_word_characters (EnchantDict * dict);
+ 
+ /**
+  * enchant_dict_is_word_character
+@@ -304,7 +305,7 @@
+  * If @dict is %null, a built-in implementation is used (FIXME: We should document
+  * behavior for this). If @n is not 0, 1 or 2, then a false flag is returned.
+  */
+-int enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc, size_t n);
++ENCHANT_EXPORT int enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc, size_t n);
+ 
+ /**
+  * EnchantDictDescribeFn
+@@ -330,7 +331,7 @@
+  *
+  * Describes an individual dictionary
+  */
+-void enchant_dict_describe (EnchantDict * dict,
++ENCHANT_EXPORT void enchant_dict_describe (EnchantDict * dict,
+ 			    EnchantDictDescribeFn fn,
+ 			    void * user_data);
+ 
+@@ -343,7 +344,7 @@
+  * Enumerates the dictionaries available from
+  * all Enchant providers.
+  */
+-void enchant_broker_list_dicts (EnchantBroker * broker,
++ENCHANT_EXPORT void enchant_broker_list_dicts (EnchantBroker * broker,
+ 				EnchantDictDescribeFn fn,
+ 				void * user_data);
+ 
+@@ -355,7 +356,7 @@
+  * auto-detection does not work.
+  *
+  */
+-void enchant_set_prefix_dir(const char *);
++ENCHANT_EXPORT void enchant_set_prefix_dir(const char *);
+ 
+ #ifdef __cplusplus
+ }
+--- src/enchant-provider.h
++++ src/enchant-provider.h
+@@ -62,7 +62,7 @@
+  *
+  * The returned string must be free'd.
+  */
+-char *enchant_get_user_config_dir (void);
++ENCHANT_EXPORT char *enchant_get_user_config_dir (void);
+ 
+ /**
+   * enchant_get_conf_dirs
+@@ -89,7 +89,7 @@
+  *
+  * The return value must be free'd.
+  */
+-char *enchant_get_prefix_dir(void);
++ENCHANT_EXPORT char *enchant_get_prefix_dir(void);
+ 
+ /**
+  * enchant_relocate
+--- providers/enchant_hunspell.cpp
++++ providers/enchant_hunspell.cpp
+@@ -42,6 +42,7 @@
+ #include <string>
+ #include <vector>
+ 
++#include <enchant_module_export.h>
+ #include "enchant-provider.h"
+ #include "unused-parameter.h"
+ 
+@@ -503,7 +504,7 @@
+ 	return "Hunspell Provider";
+ }
+ 
+-EnchantProvider *init_enchant_provider (void);
++ENCHANT_MODULE_EXPORT EnchantProvider *init_enchant_provider (void);
+ 
+ EnchantProvider *
+ init_enchant_provider (void)
