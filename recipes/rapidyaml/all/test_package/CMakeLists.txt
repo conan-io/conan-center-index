@@ -6,7 +6,9 @@ conan_basic_setup(TARGETS)
 
 find_package(ryml REQUIRED CONFIG)
 
-set(CMAKE_CXX_STANDARD 11)
-
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ryml::ryml)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if (RYML_USE_PARSE_IN_ARENA)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE RYML_USE_PARSE_IN_ARENA)
+endif()
