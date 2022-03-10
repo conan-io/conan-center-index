@@ -87,7 +87,9 @@ class Assimp(ConanFile):
         "with_x_exporter": ("ASSIMP_BUILD_X_EXPORTER", "5.0.0"),
         "with_x3d": ("ASSIMP_BUILD_X3D_IMPORTER", "5.0.0"),
         "with_x3d_exporter": ("ASSIMP_BUILD_X3D_EXPORTER", "5.0.0"),
-        "with_xgl": ("ASSIMP_BUILD_XGL_IMPORTER", "5.0.0")
+        "with_xgl": ("ASSIMP_BUILD_XGL_IMPORTER", "5.0.0"),
+        "with_m3d": ("ASSIMP_BUILD_M3D_IMPORTER", "5.1.0"),
+        "with_m3d_exporter": ("ASSIMP_BUILD_M3D_EXPORTER", "5.1.0"),
     }
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
@@ -146,7 +148,6 @@ class Assimp(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
-        # - openddlparser
         if tools.Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
@@ -154,10 +155,10 @@ class Assimp(ConanFile):
 
         self.requires("zlib/1.2.11")
         self.requires("stb/cci.20210910")
-        if tools.Version(self.version) < "5.1.6":
-            self.requires("minizip/1.2.11")
+        self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
         self.requires("clipper/4.8.8")
+        self.requires("openddl-parser/cci.20211217")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.1.31")
         if self._depends_on_poly2tri:
@@ -193,13 +194,11 @@ class Assimp(ConanFile):
             tools.replace_in_file(os.path.join(
                 self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "stb", "zlib", "clipper"]
+        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "unzip", "stb", "zlib", "clipper", "openddlparser"]
         if tools.Version(self.version) < "5.1.0":
             vendors.append("irrXML")
         else:
             vendors.extend(["pugixml", "draco"])
-        if tools.Version(self.version) < "5.1.6":
-            vendors.extend(["unzip"])
         for vendor in vendors:
             tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
@@ -215,9 +214,6 @@ class Assimp(ConanFile):
             cmake.definitions["IGNORE_GIT_HASH"] = True
             cmake.definitions["SYSTEM_IRRXML"] = True
 
-        if tools.Version(self.version) >= "5.1.6":
-            cmake.definitions["ASSIMP_BUILD_MINIZIP"] = True
-
         cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
         cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
         cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
@@ -227,6 +223,8 @@ class Assimp(ConanFile):
         cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
         cmake.definitions["ASSIMP_INSTALL_PDB"] = False
         cmake.definitions["ASSIMP_NO_EXPORT"] = False
+
+        cmake.definitions["ASSIMP_BUILD_MINIZIP"] = False
 
         for option, (definition, _) in self._format_option_map.items():
             value = self.options.get_safe(option)

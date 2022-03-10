@@ -31,6 +31,8 @@ patches:
   "5.1.6":
     - patch_file: "patches/0004-unvendor-deps-5.1.6.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-unzip.patch"
+      base_path: "source_subfolder"
   "5.2.2":
     - patch_file: "patches/0005-unvendor-deps-5.2.x.patch"
       base_path: "source_subfolder"

@@ -1,17 +1,5 @@
-diff -Naur a/.vscode/settings.json b/.vscode/settings.json
---- a/.vscode/settings.json	1969-12-31 19:00:00.000000000 -0500
-+++ b/.vscode/settings.json	2022-03-09 13:28:42.456669800 -0500
-@@ -0,0 +1,6 @@
-+{
-+    "files.associations": {
-+        "*.ruleset": "xml",
-+        "ctime": "cpp"
-+    }
-+}
-\ No newline at end of file
-diff -Naur a/code/AssetLib/3MF/D3MFExporter.cpp b/code/AssetLib/3MF/D3MFExporter.cpp
---- a/code/AssetLib/3MF/D3MFExporter.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/3MF/D3MFExporter.cpp	2022-03-09 12:48:19.765415500 -0500
+--- a/code/AssetLib/3MF/D3MFExporter.cpp
++++ b/code/AssetLib/3MF/D3MFExporter.cpp
 @@ -57,7 +57,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #include <zip/zip.h>
@@ -21,31 +9,8 @@ diff -Naur a/code/AssetLib/3MF/D3MFExporter.cpp b/code/AssetLib/3MF/D3MFExporter
  #endif
  
  namespace Assimp {
-diff -Naur a/code/AssetLib/Assbin/AssbinFileWriter.cpp b/code/AssetLib/Assbin/AssbinFileWriter.cpp
---- a/code/AssetLib/Assbin/AssbinFileWriter.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/Assbin/AssbinFileWriter.cpp	2022-03-09 13:29:29.391722800 -0500
-@@ -289,15 +289,15 @@
-     size_t Read(void * /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) override {
-         return 0;
-     }
--    
-+
-     aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) override {
-         return aiReturn_FAILURE;
-     }
--    
-+
-     size_t Tell() const override {
-         return cursor;
-     }
--    
-+
-     void Flush() override {
-         // not implemented
-     }
-diff -Naur a/code/AssetLib/Blender/BlenderTessellator.h b/code/AssetLib/Blender/BlenderTessellator.h
---- a/code/AssetLib/Blender/BlenderTessellator.h	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/Blender/BlenderTessellator.h	2022-03-09 13:29:03.813351700 -0500
+--- a/code/AssetLib/Blender/BlenderTessellator.h
++++ b/code/AssetLib/Blender/BlenderTessellator.h
 @@ -147,7 +147,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <poly2tri/poly2tri.h>
@@ -55,9 +20,8 @@ diff -Naur a/code/AssetLib/Blender/BlenderTessellator.h b/code/AssetLib/Blender/
  #endif
  
  namespace Assimp
-diff -Naur a/code/AssetLib/IFC/IFCGeometry.cpp b/code/AssetLib/IFC/IFCGeometry.cpp
---- a/code/AssetLib/IFC/IFCGeometry.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/IFC/IFCGeometry.cpp	2022-03-09 16:22:05.580615900 -0500
+--- a/code/AssetLib/IFC/IFCGeometry.cpp
++++ b/code/AssetLib/IFC/IFCGeometry.cpp
 @@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
@@ -69,9 +33,8 @@ diff -Naur a/code/AssetLib/IFC/IFCGeometry.cpp b/code/AssetLib/IFC/IFCGeometry.c
  #endif
  
  #include <memory>
-diff -Naur a/code/AssetLib/IFC/IFCOpenings.cpp b/code/AssetLib/IFC/IFCOpenings.cpp
---- a/code/AssetLib/IFC/IFCOpenings.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/IFC/IFCOpenings.cpp	2022-03-09 12:51:55.581687200 -0500
+--- a/code/AssetLib/IFC/IFCOpenings.cpp
++++ b/code/AssetLib/IFC/IFCOpenings.cpp
 @@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
@@ -83,18 +46,8 @@ diff -Naur a/code/AssetLib/IFC/IFCOpenings.cpp b/code/AssetLib/IFC/IFCOpenings.c
  #endif
  
  #include <iterator>
-diff -Naur a/code/AssetLib/M3D/M3DWrapper.h b/code/AssetLib/M3D/M3DWrapper.h
---- a/code/AssetLib/M3D/M3DWrapper.h	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/M3D/M3DWrapper.h	2022-03-09 16:16:14.770413300 -0500
-@@ -48,7 +48,7 @@
- #define AI_M3DWRAPPER_H_INC
- 
- #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
--#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)  
-+#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)
- 
- #include <memory>
- #include <vector>
+--- a/code/AssetLib/M3D/M3DWrapper.h
++++ b/code/AssetLib/M3D/M3DWrapper.h
 @@ -59,7 +59,7 @@
  
  // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
@@ -104,9 +57,8 @@ diff -Naur a/code/AssetLib/M3D/M3DWrapper.h b/code/AssetLib/M3D/M3DWrapper.h
  
  #include "m3d.h"
  
-diff -Naur a/code/AssetLib/MMD/MMDPmxParser.cpp b/code/AssetLib/MMD/MMDPmxParser.cpp
---- a/code/AssetLib/MMD/MMDPmxParser.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/MMD/MMDPmxParser.cpp	2022-03-09 12:52:21.727255900 -0500
+--- a/code/AssetLib/MMD/MMDPmxParser.cpp
++++ b/code/AssetLib/MMD/MMDPmxParser.cpp
 @@ -45,7 +45,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8.h>
@@ -116,9 +68,8 @@ diff -Naur a/code/AssetLib/MMD/MMDPmxParser.cpp b/code/AssetLib/MMD/MMDPmxParser
  #endif
  #include <assimp/Exceptional.h>
  
-diff -Naur a/code/AssetLib/SIB/SIBImporter.cpp b/code/AssetLib/SIB/SIBImporter.cpp
---- a/code/AssetLib/SIB/SIBImporter.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/SIB/SIBImporter.cpp	2022-03-09 12:52:46.741545800 -0500
+--- a/code/AssetLib/SIB/SIBImporter.cpp
++++ b/code/AssetLib/SIB/SIBImporter.cpp
 @@ -62,7 +62,7 @@
  #include <utf8.h>
  #else
@@ -128,9 +79,8 @@ diff -Naur a/code/AssetLib/SIB/SIBImporter.cpp b/code/AssetLib/SIB/SIBImporter.c
  #endif
  #include <assimp/importerdesc.h>
  #include <assimp/scene.h>
-diff -Naur a/code/AssetLib/STEPParser/STEPFileEncoding.cpp b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
---- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp	2022-03-09 12:53:13.194932000 -0500
+--- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp
++++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
 @@ -48,7 +48,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8.h>
@@ -140,9 +90,8 @@ diff -Naur a/code/AssetLib/STEPParser/STEPFileEncoding.cpp b/code/AssetLib/STEPP
  #endif
  
  #include <memory>
-diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
---- a/code/CMakeLists.txt	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/CMakeLists.txt	2022-03-09 17:06:29.046328200 -0500
+--- a/code/CMakeLists.txt
++++ b/code/CMakeLists.txt
 @@ -887,7 +887,7 @@
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(pugixml)
@@ -170,6 +119,15 @@ diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
    SET( Poly2Tri_SRCS
      ../contrib/poly2tri/poly2tri/common/shapes.cc
      ../contrib/poly2tri/poly2tri/common/shapes.h
+@@ -941,7 +941,7 @@
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(minizip)
+   find_package(minizip CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( unzip_SRCS
+     ../contrib/unzip/crypt.c
+     ../contrib/unzip/crypt.h
 @@ -959,7 +959,7 @@
    IF(ASSIMP_HUNTER_ENABLED)
      hunter_add_package(zip)
@@ -179,6 +137,15 @@ diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
      SET( ziplib_SRCS
        ../contrib/zip/src/miniz.h
        ../contrib/zip/src/zip.c
+@@ -981,7 +981,7 @@
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(openddlparser)
+   find_package(openddlparser CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET ( openddl_parser_SRCS
+     ../contrib/openddlparser/code/OpenDDLParser.cpp
+     ../contrib/openddlparser/code/DDLNode.cpp
 @@ -1036,6 +1036,7 @@
      ../contrib/Open3DGC/o3dgcVector.inl
    )
@@ -204,6 +171,15 @@ diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
    SET( stb_SRCS
      ../contrib/stb/stb_image.h
    )
+@@ -1092,7 +1092,7 @@
+ endif ()
+ 
+ IF(NOT ASSIMP_HUNTER_ENABLED)
+-  if (UNZIP_FOUND)
++  if (1)
+     SET (unzip_compile_SRCS "")
+   else ()
+     SET (unzip_compile_SRCS ${unzip_SRCS})
 @@ -1164,12 +1164,6 @@
  
  TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
@@ -226,9 +202,8 @@ diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
    if (ASSIMP_BUILD_DRACO)
      target_link_libraries(assimp ${draco_LIBRARIES})
    endif()
-diff -Naur a/code/Common/Assimp.cpp b/code/Common/Assimp.cpp
---- a/code/Common/Assimp.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/Common/Assimp.cpp	2022-03-09 16:16:11.132821200 -0500
+--- a/code/Common/Assimp.cpp
++++ b/code/Common/Assimp.cpp
 @@ -1290,7 +1290,7 @@
  #   endif
  
@@ -238,9 +213,8 @@ diff -Naur a/code/Common/Assimp.cpp b/code/Common/Assimp.cpp
  
  #   if _MSC_VER
  #       pragma warning(pop)
-diff -Naur a/code/Common/BaseImporter.cpp b/code/Common/BaseImporter.cpp
---- a/code/Common/BaseImporter.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/Common/BaseImporter.cpp	2022-03-09 13:29:44.132051900 -0500
+--- a/code/Common/BaseImporter.cpp
++++ b/code/Common/BaseImporter.cpp
 @@ -331,7 +331,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #include <utf8.h>
@@ -250,9 +224,8 @@ diff -Naur a/code/Common/BaseImporter.cpp b/code/Common/BaseImporter.cpp
  #endif
  
  // ------------------------------------------------------------------------------------------------
-diff -Naur a/code/Pbrt/PbrtExporter.cpp b/code/Pbrt/PbrtExporter.cpp
---- a/code/Pbrt/PbrtExporter.cpp	2022-01-09 17:45:44.000000000 -0500
-+++ b/code/Pbrt/PbrtExporter.cpp	2022-03-09 16:16:00.415468300 -0500
+--- a/code/Pbrt/PbrtExporter.cpp
++++ b/code/Pbrt/PbrtExporter.cpp
 @@ -83,7 +83,7 @@
  #include <sstream>
  #include <string>
