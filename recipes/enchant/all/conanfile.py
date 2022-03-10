@@ -1,6 +1,7 @@
 import functools
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -20,6 +21,12 @@ class EnchantConan(ConanFile):
     requires = "glib/2.71.3", "hunspell/1.7.0"
     exports_sources = \
         "CMakeLists.txt", "compile-checks.cmake", "configmake.h", "patches/*"
+
+    def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(
+                "enchant is not supported on macOS yet"
+            )
 
     @property
     def _source_subfolder(self):
