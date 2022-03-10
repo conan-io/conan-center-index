@@ -1,0 +1,8 @@
+sources:
+  "0.8.0":
+    url: "https://github.com/eclipse-cyclonedds/cyclonedds/archive/refs/tags/0.8.0.tar.gz"
+    sha256: e883c7b3c35fab13b227fdd5868b6cce999ba01ebb3b675213b5a3bfc3c7afad
+patches:
+  "0.8.0":
+    - base_path: source_subfolder
+      patch_file: patches/gcc5.patch

@@ -1,0 +1,12 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -127,9 +127,6 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+   if(${WERROR})
+     add_compile_options(-Werror)
+   endif()
+-  if("${CMAKE_GENERATOR}" STREQUAL "Ninja")
+-    add_compile_options(-fdiagnostics-color=always)
+-  endif()
+ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+   #message(STATUS msvc)
+   add_compile_options(/W3)
