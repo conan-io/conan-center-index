@@ -35,19 +35,23 @@ versions:
   #   folder: all
   "2.68.3":
     folder: all
-  "2.69.0":
-    folder: all
-  "2.69.1":
-    folder: all
-  "2.69.2":
-    folder: all
+  # "2.69.0":
+  #   folder: all
+  # "2.69.1":
+  #   folder: all
+  # "2.69.2":
+  #   folder: all
   "2.69.3":
     folder: all
-  "2.70.0":
-    folder: all
-  "2.70.1":
+  # "2.70.0":
+  #   folder: all
+  # "2.70.1":
+  #   folder: all
+  "2.70.4":
     folder: all
   "2.71.1":
     folder: all
   "2.71.2":
+    folder: all
+  "2.71.3":
     folder: all
