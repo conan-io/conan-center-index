@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools
 
+required_conan_version = ">=1.33.0"
 
 class XXSDSSDSLLite(ConanFile):
     name = "xxsds-sdsl-lite"
@@ -22,11 +23,8 @@ class XXSDSSDSLLite(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        source = self.conan_data["sources"][self.version]
-        tools.get(**source)
-        extracted_folder = "sdsl-lite-" + \
-            os.path.splitext(os.path.basename(source["url"]))[0]
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

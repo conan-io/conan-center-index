@@ -1,0 +1,23 @@
+From 71fdd3961c1311319709b976bf9065b1bb010800 Mon Sep 17 00:00:00 2001
+From: ericLemanissier <ericLemanissier@users.noreply.github.com>
+Date: Fri, 18 Feb 2022 14:58:28 +0100
+Subject: [PATCH] Don't override PREFIX target property
+
+PREFIX is by default "lib", which most of the libraries use.
+this changes makes the library files libftxui-foo.a
+as ArthurSonzogni/FTXUI#140 intended originally
+---
+ cmake/ftxui_set_options.cmake |  2 +-
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/cmake/ftxui_set_options.cmake b/cmake/ftxui_set_options.cmake
+index 9021cbcc..46e806c7 100644
+--- a/cmake/ftxui_set_options.cmake
++++ b/cmake/ftxui_set_options.cmake
+@@ -1,5 +1,5 @@
+ function(ftxui_set_options library)
+-  set_target_properties(${library} PROPERTIES PREFIX "ftxui-")
++  set_target_properties(${library} PROPERTIES OUTPUT_NAME "ftxui-${library}")
+ 
+ 
+   target_include_directories(${library}

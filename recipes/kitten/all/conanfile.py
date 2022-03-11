@@ -1,9 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-import os.path
+import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
+
 
 class KittenConan(ConanFile):
     name = "kitten"
@@ -12,35 +12,49 @@ class KittenConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     topics = ("category-theory", "composition", "monadic-interface", "declarative-programming")
+
+    settings = "os", "arch", "compiler", "build_type"
+
+    no_copy_source = True
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    no_copy_source = True
-    settings = "os", "compiler", "build_type", "arch"
-
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _has_support_for_cpp17(self):
-        supported_compilers = [("apple-clang", 10), ("clang", 5), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "Visual Studio": "15.7",
+            "apple-clang": "10",
+        }
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
-        if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration("Kitten requires support for C++17")
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and loose_lt_semver(str(self.settings.compiler.version), min_version):
+            raise ConanInvalidConfiguration(
+                "{} requires C++17, which your compiler does not support.".format(self.name)
+            )
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -61,9 +75,14 @@ class KittenConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "kitten")
+        self.cpp_info.set_property("cmake_target_name", "rvarago::kitten")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "kitten"
         self.cpp_info.filenames["cmake_find_package_multi"] = "kitten"
         self.cpp_info.names["cmake_find_package"] = "rvarago"
         self.cpp_info.names["cmake_find_package_multi"] = "rvarago"
         self.cpp_info.components["libkitten"].names["cmake_find_package"] = "kitten"
         self.cpp_info.components["libkitten"].names["cmake_find_package_multi"] = "kitten"
+        self.cpp_info.components["libkitten"].set_property("cmake_target_name", "rvarago::kitten")

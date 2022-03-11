@@ -63,22 +63,17 @@ class LibdeflateConan(ConanFile):
                     target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
                     self.run("nmake /f Makefile.msc {}".format(target))
 
-    @property
-    def _make_program(self):
-        return tools.unix_path(tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make")))
-
     def _build_make(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "-O2", "")
+        makefile = os.path.join(self._source_subfolder, "Makefile")
+        tools.replace_in_file(makefile, "-O2", "")
+        tools.replace_in_file(
+            makefile,
+            "-install_name $(SHARED_LIB)",
+            "-install_name @rpath/$(SHARED_LIB)", # relocatable shared lib on Macos
+        )
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
-            with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
-                if self.settings.os == "Windows":
-                    suffix = ".dll" if self.options.shared else "static.lib"
-                elif tools.is_apple_os(self.settings.os):
-                    suffix = ".dylib" if self.options.shared else ".a"
-                else:
-                    suffix = ".so" if self.options.shared else ".a"
-                target = "libdeflate{}".format(suffix)
-                self.run("{0} -f Makefile {1}".format(self._make_program, target), win_bash=tools.os_info.is_windows)
+            autotools.make()
 
     def build(self):
         if self._is_msvc:
@@ -86,14 +81,31 @@ class LibdeflateConan(ConanFile):
         else:
             self._build_make()
 
+    def _package_windows(self):
+        self.copy("libdeflate.h", dst="include", src=self._source_subfolder)
+        if self.options.shared:
+            self.copy("*deflate.lib", dst="lib", src=self._source_subfolder)
+            self.copy("*deflate.dll", dst="bin", src=self._source_subfolder)
+        else:
+            self.copy("*deflatestatic.lib", dst="lib", src=self._source_subfolder)
+
+    def _package_make(self):
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        with tools.chdir(self._source_subfolder):
+            autotools.install(args=["PREFIX={}".format(self.package_folder)])
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(
+            os.path.join(self.package_folder, "lib"),
+            "*.a" if self.options.shared else "*.[so|dylib]*",
+        )
+
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("libdeflate.h", src=self._source_subfolder, dst="include")
-        self.copy("*.lib", src=self._source_subfolder, dst="lib")
-        self.copy("*.dll", src=self._source_subfolder, dst="bin")
-        self.copy("*.a", src=self._source_subfolder, dst="lib")
-        self.copy("*.so*", src=self._source_subfolder, dst="lib", symlinks=True)
-        self.copy("*.dylib", src=self._source_subfolder, dst="lib", symlinks=True)
+        if self.settings.os == "Windows":
+            self._package_windows()
+        else:
+            self._package_make()
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libdeflate")

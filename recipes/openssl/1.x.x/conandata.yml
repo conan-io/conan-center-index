@@ -95,3 +95,34 @@ sources:
       "https://www.openssl.org/source/openssl-1.1.1m.tar.gz",
       "https://www.openssl.org/source/old/openssl-1.1.1m.tar.gz"
     ]
+patches:
+  1.0.2s:
+    - patch_file: patches/1.0.2u-darwin-arm64.patch
+      base_path: source_subfolder
+  1.0.2t:
+    - patch_file: patches/1.0.2u-darwin-arm64.patch
+      base_path: source_subfolder
+  1.0.2u:
+    - patch_file: patches/1.0.2u-darwin-arm64.patch
+      base_path: source_subfolder
+  1.1.1g:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1h:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1i:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1j:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1k:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1l:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder
+  1.1.1m:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      base_path: source_subfolder

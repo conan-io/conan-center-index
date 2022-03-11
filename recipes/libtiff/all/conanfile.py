@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -92,7 +93,7 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.8")
+            self.requires("libdeflate/1.9")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
@@ -102,9 +103,9 @@ class LibtiffConan(ConanFile):
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.2.1")
+            self.requires("libwebp/1.2.2")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
@@ -120,13 +121,13 @@ class LibtiffConan(ConanFile):
 
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
         if self.options.jbig:
-            tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
+            rename(self, os.path.join(self.build_folder, "Findjbig.cmake"),
                          os.path.join(self.build_folder, "ConanFindjbig.cmake"))
         else:
             os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
         if self._has_zstd_option:
             if self.options.zstd:
-                tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
+                rename(self, os.path.join(self.build_folder, "Findzstd.cmake"),
                              os.path.join(self.build_folder, "ConanFindzstd.cmake"))
             else:
                 os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))

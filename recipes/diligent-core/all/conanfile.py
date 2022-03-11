@@ -97,7 +97,7 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.0")        
+                self.requires("xkbcommon/1.3.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
@@ -144,18 +144,34 @@ class DiligentCoreConan(ConanFile):
                      dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_info(self):
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
-        if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so", dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
+        self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+
+    def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
-        # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Linux", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngine", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineVulkan", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineOpenGL", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))

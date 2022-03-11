@@ -1,0 +1,103 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5df20ca..c14c93c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,7 +40,7 @@ if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" OR
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wextra -Woverloaded-virtual -pedantic -std=c++11 -fPIC ${OPT}")
+ else()
+     # TODO: Windows support.
+-    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
++    message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
+ endif()
+ 
+ set(CMAKE_CXX_STANDARD 11)
+@@ -121,7 +121,6 @@ endif()
+ add_subdirectory(include)
+ add_subdirectory(stdlib)
+ add_subdirectory(third_party/md5)
+-add_subdirectory(third_party/rapidyaml/rapidyaml ryml)
+ add_subdirectory(core)
+ add_subdirectory(cpp)
+ add_subdirectory(cmd)
+diff --git a/core/CMakeLists.txt b/core/CMakeLists.txt
+index e62a858..c0389f8 100644
+--- a/core/CMakeLists.txt
++++ b/core/CMakeLists.txt
+@@ -17,7 +17,8 @@ set(LIBJSONNET_HEADERS
+     unicode.h
+     vm.h)
+ 
+-set(LIBJSONNET_SOURCE
++install(FILES ../include/libjsonnet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++set(LIBJSONNET_SOURCE $<TARGET_OBJECTS:md5>
+     desugarer.cpp
+     formatter.cpp
+     lexer.cpp
+@@ -28,6 +29,7 @@ set(LIBJSONNET_SOURCE
+     string_utils.cpp
+     vm.cpp)
+ 
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet SHARED ${LIBJSONNET_HEADERS} ${LIBJSONNET_SOURCE})
+ add_dependencies(libjsonnet md5 stdlib)
+ target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json ryml)
+@@ -47,10 +49,10 @@ set_target_properties(libjsonnet PROPERTIES OUTPUT_NAME jsonnet
+ install(TARGETS libjsonnet
+ 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+ 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ target_include_directories(libjsonnet INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet_static STATIC ${LIBJSONNET_SOURCE})
+diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
+index eb7686c..cbf21bb 100644
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -4,13 +4,15 @@ set(LIBJSONNETPP_HEADERS
+     ../include/libjsonnet++.h
+ )
+ 
++install(FILES ${LIBJSONNETPP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ set(LIBJSONNETPP_SOURCE
+     libjsonnet++.cpp
+ )
+ 
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
+ add_dependencies(libjsonnet++ jsonnet)
+-# target_link_libraries(libjsonnet libjsonnet)
++target_link_libraries(libjsonnet++ libjsonnet)
+ 
+ # CMake prepends CMAKE_SHARED_LIBRARY_PREFIX to shared libraries, so without
+ # this step the output would be |liblibjsonnet|.
+@@ -21,10 +23,10 @@ set_target_properties(libjsonnet++ PROPERTIES OUTPUT_NAME jsonnet++
+ install(TARGETS libjsonnet++
+ 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+ 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ target_include_directories(libjsonnet++ INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet++_static STATIC ${LIBJSONNETPP_SOURCE})
+diff --git a/stdlib/CMakeLists.txt b/stdlib/CMakeLists.txt
+index a481d9f..00ff502 100644
+--- a/stdlib/CMakeLists.txt
++++ b/stdlib/CMakeLists.txt
+@@ -5,7 +5,7 @@ add_executable(to_c_array to_c_array.cpp)
+ # Custom command that will only build stdlib when it changes.
+ add_custom_command(
+ 	OUTPUT ${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+-	COMMAND ${GLOBAL_OUTPUT_PATH}/to_c_array
++	COMMAND to_c_array
+ 			    ${PROJECT_SOURCE_DIR}/stdlib/std.jsonnet
+ 					${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+ 	DEPENDS to_c_array std.jsonnet)

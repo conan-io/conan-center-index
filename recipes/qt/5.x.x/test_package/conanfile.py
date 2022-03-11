@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
         if self._settings_build.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
-            self.build_requires("meson/0.59.0")
+            self.build_requires("meson/0.59.3")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
@@ -106,14 +106,14 @@ class TestPackageConan(ConanFile):
             self.output.info("Testing Meson")
             shutil.copy("qt.conf", "meson_folder")
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
-    
+
     def _test_with_cmake_find_package_multi(self):
         self.output.info("Testing CMake_find_package_multi")
         shutil.copy("qt.conf", "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake_find_package_multi()

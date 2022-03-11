@@ -1,9 +1,8 @@
 from conans import ConanFile, CMake, tools
-from conan.tools.files import rename
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CerealConan(ConanFile):
@@ -13,12 +12,18 @@ class CerealConan(ConanFile):
     topics = ("cereal", "header-only", "serialization", "cpp11")
     homepage = "https://github.com/USCiLab/cereal"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "thread_safe": [True, False],
+    }
+    default_options = {
+        "thread_safe": False,
+    }
+
+    no_copy_source = True
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"thread_safe": [True, False]}
-    default_options = {"thread_safe": False}
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -28,8 +33,8 @@ class CerealConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        rename(self, self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -45,8 +50,9 @@ class CerealConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            os.path.join(self.package_folder, self._module_file_rel_path),
             {"cereal": "cereal::cereal"}
         )
 
@@ -63,19 +69,18 @@ class CerealConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
-    def _module_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        module_target_rel_path = os.path.join(self._module_subfolder, self._module_file)
-        self.cpp_info.build_modules["cmake_find_package"] = [module_target_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_target_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "cereal")
+        self.cpp_info.set_property("cmake_target_name", "cereal::cereal")
+        self.cpp_info.set_property("cmake_target_aliases", ["cereal"]) # target before 1.3.1
         if self.options.thread_safe:
             self.cpp_info.defines = ["CEREAL_THREAD_SAFE=1"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

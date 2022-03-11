@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
@@ -127,6 +128,10 @@ class LibiconvConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # relocatable shared libs on macOS
+        for configure in ["configure", os.path.join("libcharset", "configure")]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, configure),
+                                  "-install_name \\$rpath/", "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
@@ -145,7 +150,7 @@ class LibiconvConan(ConanFile):
 
         if self._is_msvc and self.options.shared:
             for import_lib in ["iconv", "charset"]:
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
 
     def package_info(self):

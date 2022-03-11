@@ -33,14 +33,18 @@ class ProjConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,8 +58,8 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.10.4")
-        self.requires("sqlite3/3.37.1")
+        self.requires("nlohmann_json/3.10.5")
+        self.requires("sqlite3/3.37.2")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_curl"):
@@ -63,7 +67,7 @@ class ProjConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.37.1")
+            self.build_requires("sqlite3/3.37.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -71,6 +75,7 @@ class ProjConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        # we should inject build env vars if 2 profile, here it's host env vars !
         with tools.run_environment(self):
             cmake = self._configure_cmake()
             cmake.build()
@@ -78,13 +83,46 @@ class ProjConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(cmakelists, "/W4", "")
+
+        # Let CMake install shared lib with a clean rpath !
+        if tools.Version(self.version) >= "7.1.0":
+            tools.replace_in_file(cmakelists,
+                                  "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
+                                  "")
+
         # Trick to find sqlite3 executable for build machine
-        sqlite3_exe_build_context_paths = " ".join("\"{}\"".format(path.replace("\\", "/")) for path in self.deps_env_info["sqlite3"].PATH)
-        tools.replace_in_file(cmakelists,
-                              "find_program(EXE_SQLITE3 sqlite3)",
-                              "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe_build_context_paths))
+        # TODO: shouldn't be necessary in conan v2 with VirtualBuildEnv?
+        sqlite3_exe = " ".join("\"{}\"".format(path.replace("\\", "/")) for path in self.deps_env_info["sqlite3"].PATH)
+        tools.replace_in_file(
+            cmakelists,
+            "find_program(EXE_SQLITE3 sqlite3)",
+            "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe),
+        )
+
+        # Agressive workaround against SIP on macOS, to handle sqlite3 executable
+        # linked to shared sqlite3 lib
+        if tools.is_apple_os(self._settings_build.os):
+            # TODO: no hope for 2 profiles, wait for stable self.dependencies
+            #       because we want absolute lib paths of build profile actually
+            if not hasattr(self, "settings_build"):
+                if tools.Version(self.version) < "8.1.0":
+                    cmake_sqlite_call = "CMakeLists.txt"
+                    pattern = "${EXE_SQLITE3}"
+                else:
+                    cmake_sqlite_call = "generate_proj_db.cmake"
+                    pattern = "\"${EXE_SQLITE3}\""
+                lib_paths = self.deps_cpp_info["sqlite3"].lib_paths
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "data", cmake_sqlite_call),
+                    "COMMAND {}".format(pattern),
+                    "COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={}\" {}".format(
+                        ":".join(lib_paths), pattern
+                    ),
+                )
+
         # unvendor nlohmann_json
         if tools.Version(self.version) < "8.1.0":
             tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))

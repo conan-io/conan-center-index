@@ -1,18 +1,21 @@
-import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+import functools
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class LevelDBCppConan(ConanFile):
     name = "leveldb"
-    description = "LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values."
+    description = (
+        "LevelDB is a fast key-value storage library written at Google that "
+        "provides an ordered mapping from string keys to string values."
+    )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/leveldb"
     topics = ("leveldb", "google", "db")
     license = ("BSD-3-Clause",)
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,11 +30,16 @@ class LevelDBCppConan(ConanFile):
         "with_crc32c": True,
     }
 
-    _cmake = None
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,28 +55,30 @@ class LevelDBCppConan(ConanFile):
 
     def requirements(self):
         if self.options.with_snappy:
-            self.requires("snappy/1.1.8")
+            self.requires("snappy/1.1.9")
         if self.options.with_crc32c:
-            self.requires("crc32c/1.1.1")
+            self.requires("crc32c/1.1.2")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
-        self._cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
-        self._cmake.configure()
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        cmake = CMake(self)
+        cmake.definitions["LEVELDB_BUILD_TESTS"] = False
+        cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
+        cmake.definitions["HAVE_SNAPPY"] = self.options.with_snappy
+        cmake.definitions["HAVE_CRC32C"] = self.options.with_crc32c
+        cmake.configure()
+        return cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -77,10 +87,12 @@ class LevelDBCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared:
-            if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["pthread"]
+        self.cpp_info.set_property("cmake_file_name", "leveldb")
+        self.cpp_info.set_property("cmake_target_name", "leveldb::leveldb")
+        self.cpp_info.libs = ["leveldb"]
+        if self.options.shared:
+            self.cpp_info.defines.append("LEVELDB_SHARED_LIBRARY")
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")

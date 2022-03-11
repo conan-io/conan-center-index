@@ -14,8 +14,6 @@ class Re2CConan(ConanFile):
     license = "Unlicense"
     settings = "os", "arch", "build_type", "compiler"
 
-    exports_sources = "patches/**"
-
     _autotools = None
 
     @property
@@ -25,6 +23,10 @@ class Re2CConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":

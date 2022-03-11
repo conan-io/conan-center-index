@@ -12,7 +12,6 @@ class RapidYAMLConan(ConanFile):
     homepage = "https://github.com/biojppm/rapidyaml"
     license = "MIT",
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,8 +22,7 @@ class RapidYAMLConan(ConanFile):
         "fPIC": True,
         "with_default_callbacks": True,
     }
-
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _compiler_required_cpp11 = {
         "Visual Studio": "13",
@@ -38,6 +36,11 @@ class RapidYAMLConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,6 +48,9 @@ class RapidYAMLConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("c4core/0.1.8")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -73,6 +79,8 @@ class RapidYAMLConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -87,8 +95,7 @@ class RapidYAMLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
-        # TODO: create c4core recipe
-        self.cpp_info.libs = ["ryml", "c4core"]
+        self.cpp_info.libs = ["ryml"]
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"

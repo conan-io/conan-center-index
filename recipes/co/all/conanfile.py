@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -12,6 +11,9 @@ class CoConan(ConanFile):
     license = "MIT"
     description = "A go-style coroutine library in C++11 and more."
     topics = ("co", "coroutine", "c++11")
+
+    deprecated = "cocoyaxi"
+
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 

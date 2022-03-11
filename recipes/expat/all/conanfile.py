@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 import os
 
@@ -35,6 +36,10 @@ class ExpatConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -69,6 +74,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["BUILD_shared"] = self.options.shared
             self._cmake.definitions["BUILD_tests"] = "Off"
             self._cmake.definitions["BUILD_tools"] = "Off"
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
             # These options were renamed in 2.2.8 to be more consistent
             self._cmake.definitions["EXPAT_BUILD_DOCS"] = "Off"
@@ -78,8 +85,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
             # EXPAT_CHAR_TYPE was added in 2.2.8
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+            if self._is_msvc:
+                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         if tools.Version(self.version) >= "2.2.10":
             self._cmake.definitions["EXPAT_BUILD_PKGCONFIG"] = False
 

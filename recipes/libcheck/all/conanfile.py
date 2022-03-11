@@ -1,14 +1,17 @@
 from conans import CMake, ConanFile, tools
 import os
 
+required_conan_version = ">=1.43.0"
+
 
 class LibCheckConan(ConanFile):
     name = "libcheck"
     description = "A unit testing framework for C"
-    topics = "conan", "libcheck", "unit", "testing", "framework", "C"
-    license = "https://github.com/libcheck/check"
+    topics = ("libcheck", "unit", "testing", "framework", "C")
+    license = "LGPL-2.1-or-later"
     homepage = "https://github.com/libcheck/check"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,9 +24,7 @@ class LibCheckConan(ConanFile):
         "with_subunit": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
-
     _cmake = None
 
     @property
@@ -33,6 +34,15 @@ class LibCheckConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,28 +89,31 @@ class LibCheckConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "check"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "check"
-        self.cpp_info.filenames["pkg_config"] = "check"
+        target = "checkShared" if self.options.shared else "check"
+        self.cpp_info.set_property("cmake_file_name", "check")
+        self.cpp_info.set_property("cmake_target_name", "Check::{}".format(target))
+        self.cpp_info.set_property("pkg_config_name", "check")
 
-        self.cpp_info.names["cmake_find_package"] = "Check"
-        self.cpp_info.names["cmake_find_package_multi"] = "Check"
-
-        libsuffix = ""
-        if self.options.shared:
-            if self.settings.compiler == "Visual Studio":
-                libsuffix = "Dynamic"
-
-        self.cpp_info.components["liblibcheck"].libs = ["check" + libsuffix]
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        libsuffix = "Dynamic" if self._is_msvc and self.options.shared else ""
+        self.cpp_info.components["liblibcheck"].libs = ["check{}".format(libsuffix)]
         if self.options.with_subunit:
             self.cpp_info.components["liblibcheck"].requires.append("subunit::libsubunit")
         if not self.options.shared:
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["liblibcheck"].system_libs = ["m", "pthread", "rt"]
-
-        self.cpp_info.components["liblibcheck"].names["cmake_find_package"] = "checkShared" if self.options.shared else "check"
-        self.cpp_info.components["liblibcheck"].names["cmake_find_package_multi"] = "checkShared" if self.options.shared else "check"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "check"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "check"
+        self.cpp_info.names["cmake_find_package"] = "Check"
+        self.cpp_info.names["cmake_find_package_multi"] = "Check"
+        self.cpp_info.names["pkg_config"] = "check"
+        self.cpp_info.components["liblibcheck"].names["cmake_find_package"] = target
+        self.cpp_info.components["liblibcheck"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["liblibcheck"].set_property("cmake_target_name", "Check::{}".format(target))
+        self.cpp_info.components["liblibcheck"].set_property("pkg_config_name", "check")
