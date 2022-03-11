@@ -226,7 +226,7 @@ class XmlSecConan(ConanFile):
         else:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_NO_XSLT=1")
         self.cpp_info.components["libxmlsec"].defines.extend(["XMLSEC_NO_SIZE_T", "XMLSEC_NO_GOST=1", "XMLSEC_NO_CRYPTO_DYNAMIC_LOADING=1"])
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libxmlsec"].system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
             self.cpp_info.components["libxmlsec"].system_libs = ["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"]
