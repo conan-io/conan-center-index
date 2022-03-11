@@ -60,7 +60,7 @@ class LibmetalinkConan(ConanFile):
 
     def requirements(self):
         if self.options.xml_backend == "expat":
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.6")
         if self.options.xml_backend == "libxml2":
             self.requires("libxml2/2.9.12")
 
