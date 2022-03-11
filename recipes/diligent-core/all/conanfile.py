@@ -60,6 +60,8 @@ class DiligentCoreConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+        if self.version == "250014" and self.settings.compiler == 'Visual Studio' and self.settings.build_type == 'Debug':
+            raise ConanInvalidConfiguration("Can't build Visual Studio in Debug mode")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
