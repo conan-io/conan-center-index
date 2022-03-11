@@ -23,9 +23,10 @@ class QtADS(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
+    _qt_version = "5.15.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,7 +37,7 @@ class QtADS(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/5.15.2")
+        self.requires(f"qt/{self._qt_version}")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
@@ -56,7 +57,15 @@ class QtADS(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def _patch_sources(self):
+        tools.replace_in_file(
+            f"{self.source_folder}/src/ads_globals.cpp",
+            "#include <qpa/qplatformnativeinterface.h>",
+            f"#include <{self._qt_version}/QtGui/qpa/qplatformnativeinterface.h>"
+        )
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
