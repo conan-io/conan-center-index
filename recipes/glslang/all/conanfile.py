@@ -160,6 +160,7 @@ class GlslangConan(ConanFile):
             # Generate a relocatable shared lib on Macos
             self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         return self._cmake
 
     def package(self):
