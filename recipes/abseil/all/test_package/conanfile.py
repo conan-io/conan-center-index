@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CXX20_SUPPORTED"] = tools.Version(self.deps_cpp_info["abseil"].version) > "20200923.3"
+        cmake.definitions["CXX20_SUPPORTED"] = tools.Version(self.deps_cpp_info["abseil"].version) > "20210324.2"
         cmake.configure()
         cmake.build()
 
