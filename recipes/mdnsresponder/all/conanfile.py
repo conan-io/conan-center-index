@@ -125,8 +125,14 @@ class MdnsResponderConan(ConanFile):
         dns_sd_rc = os.path.join(self._source_subfolder, "Clients", "DNS-SD.VisualStudio", "dns-sd.rc")
         for rc in [dll_rc, dns_sd_rc]:
             tools.replace_in_file(rc, "afxres.h", "winres.h")
+
         msbuild = MSBuild(self)
-        msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
+        try:
+            msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
+        except Exception as e:
+            log = tools.load(os.path.join(self._source_subfolder, "UpgradeLog.htm"))
+            self.output.info(log)
+            raise e
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
