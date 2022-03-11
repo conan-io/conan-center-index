@@ -78,6 +78,19 @@ class LibmetalinkConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # Support more configurations
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+        # Relocatable shared lib for Apple platforms
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "configure"),
+            "-install_name \\$rpath/",
+            "-install_name @rpath/",
+        )
+
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -94,10 +107,7 @@ class LibmetalinkConan(ConanFile):
         return autotools
 
     def build(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+        self._patch_sources()
         with tools.run_environment(self):
             autotools = self._configure_autotools()
             autotools.make()
