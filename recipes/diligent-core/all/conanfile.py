@@ -21,7 +21,7 @@ class DiligentCoreConan(ConanFile):
         "shared": False	,
         "fPIC": True,
     }
-    generators = "cmake_find_package", "cmake"
+    generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
