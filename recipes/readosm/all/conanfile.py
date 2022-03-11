@@ -89,6 +89,8 @@ class ReadosmConan(ConanFile):
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # Relocatable shared lib for Apple platforms
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
