@@ -71,8 +71,12 @@ class DiligentCoreConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def _patch_sources(self):
