@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -24,8 +25,6 @@ class ReadosmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -93,18 +92,17 @@ class ReadosmConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make()
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--disable-gcov",
         ]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=args)
-        return self._autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.configure(args=args)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
