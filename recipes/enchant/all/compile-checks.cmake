@@ -1,5 +1,6 @@
 # ---- Autotools style compile checks ----
 
+set(DLADDR_LIBRARIES "")
 set(ENABLE_RELOCATABLE 1)
 
 # Shortcircuit logic for Windows
@@ -8,6 +9,7 @@ if(WIN32)
 endif()
 
 include(CheckFunctionExists)
+include(CheckLibraryExists)
 include(CheckTypeSize)
 
 macro(to_define name)
@@ -19,6 +21,14 @@ macro(check_function function)
   to_define("${function}")
   check_function_exists("${function}" "HAVE_${to_define_result}")
 endmacro()
+
+check_library_exists(dl dladdr "" HAVE_DLADDR_IN_DL)
+if(HAVE_DLADDR_IN_DL)
+  set(HAVE_DLADDR 1)
+  set(DLADDR_LIBRARIES dl)
+else()
+  check_function(dladdr)
+endif()
 
 check_function(flock)
 

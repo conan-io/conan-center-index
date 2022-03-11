@@ -16,7 +16,9 @@ include(compile-checks.cmake)
 set_directory_properties(PROPERTIES CMAKE_CONFIGURE_DEPENDS config.h.in)
 file(READ "${root}/config.h.in" content)
 string(REGEX REPLACE "#[ \t]*undef ([^\r\n ]+)" "#cmakedefine \\1 @\\1@" content "${content}")
-string(CONFIGURE "${content}" content @ONLY)
+string(CONFIGURE "${content}
+#cmakedefine HAVE_DLADDR @HAVE_DLADDR@
+" content @ONLY)
 file(
     WRITE "${bin}/config.h.tmp" "${content}"
     "#define ENCHANT_MAJOR_VERSION \"${PROJECT_VERSION_MAJOR}\"\n"
@@ -75,7 +77,7 @@ add_library(
 
 target_compile_definitions(enchant PRIVATE NO_XMALLOC=1 PIC=1 ENABLE_COSTLY_RELOCATABLE=1)
 target_include_directories(enchant PUBLIC "${bin}" "${src}" "${root}/lib")
-target_link_libraries(enchant PRIVATE glib::glib-2.0 glib::gmodule-2.0)
+target_link_libraries(enchant PRIVATE glib::glib-2.0 glib::gmodule-2.0 ${DLADDR_LIBRARIES})
 
 generate_export_header(enchant)
 target_set_visibility(enchant)
