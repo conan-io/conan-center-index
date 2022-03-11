@@ -90,6 +90,10 @@ class EnjinCppSdk(ConanFile):
         elif tools.Version(compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support is required, which your compiler does not support.")
 
+        if compiler == "clang" and compiler.libxx in ["libstdc++", "libstdc++11"] and compiler.version == "11":
+            raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing "
+                                            "C++17 support")
+
         # Validations for dependencies
         if not self.options["spdlog"].header_only:
             raise ConanInvalidConfiguration(f"{self.name} requires spdlog:header_only=True to be enabled.")
