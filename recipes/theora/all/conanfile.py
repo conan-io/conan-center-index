@@ -1,10 +1,12 @@
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
+import functools
 import os
+import re
 import shutil
 import stat
-import re
-from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class TheoraConan(ConanFile):
@@ -12,20 +14,37 @@ class TheoraConan(ConanFile):
     description = "Theora is a free and open video compression format from the Xiph.org Foundation"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/theora"
-    topics = ("conan", "theora", "video", "video-compressor", "video-format")
+    topics = ("theora", "video", "video-compressor", "video-format")
     license = "BSD-3-Clause"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
-    _autotools = None
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -37,12 +56,8 @@ class TheoraConan(ConanFile):
     def requirements(self):
         self.requires("ogg/1.3.4")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._is_msvc:
             self.build_requires("gnu-config/cci.20201022")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
@@ -56,7 +71,7 @@ class TheoraConan(ConanFile):
         tools.download(url, filename)
         tools.check_sha256(filename, source["sha256"])
 
-        shutil.move(filename, os.path.join(self._source_subfolder, 'lib', filename))
+        shutil.move(filename, os.path.join(self._source_subfolder, "lib", filename))
 
     def _build_msvc(self):
         def format_libs(libs):
@@ -73,7 +88,7 @@ class TheoraConan(ConanFile):
             tools.replace_in_file(vcproj_path,
                                   "libogg.lib",
                                   format_libs(self.deps_cpp_info["ogg"].libs))
-        if "MT" in self.settings.compiler.runtime:
+        if "MT" in msvc_runtime_flag(self):
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
@@ -92,23 +107,20 @@ class TheoraConan(ConanFile):
                 vcxproj = "{}_{}.vcxproj".format(project, config)
                 msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            configure_args = ['--disable-examples']
-            if self.options.shared:
-                configure_args.extend(['--disable-static', '--enable-shared'])
-            else:
-                configure_args.extend(['--disable-shared', '--enable-static'])
-            self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
-        return self._autotools
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--disable-examples",
+        ]
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
 
     def build(self):
-        if self.settings.compiler == 'Visual Studio':
+        if self._is_msvc:
             self._build_msvc()
         else:
             shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
@@ -124,7 +136,7 @@ class TheoraConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == 'Visual Studio':
+        if self._is_msvc:
             include_folder = os.path.join(self._source_subfolder, "include")
             self.copy(pattern="*.h", dst="include", src=include_folder)
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
@@ -137,25 +149,27 @@ class TheoraConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "theora_full_package" # to avoid conflicts with _theora component
+        self.cpp_info.set_property("pkg_config_name", "theora_full_package") # to avoid conflicts with _theora component
 
-        self.cpp_info.components["_theora"].names["pkg_config"] = "theora"
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["_theora"].libs = ["libtheora" if self.options.shared else "libtheora_static"]
-        else:
-            self.cpp_info.components["_theora"].libs = ["theora"]
+        self.cpp_info.components["_theora"].set_property("pkg_config_name", "theora")
+        prefix = "lib" if self._is_msvc else ""
+        suffix = "_static" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.components["_theora"].libs = [f"{prefix}theora{suffix}"]
         self.cpp_info.components["_theora"].requires = ["ogg::ogg"]
 
-        self.cpp_info.components["theoradec"].names["pkg_config"] = "theoradec"
+        self.cpp_info.components["theoradec"].set_property("pkg_config_name", "theoradec")
         self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.components["theoradec"].requires.append("_theora")
         else:
             self.cpp_info.components["theoradec"].libs = ["theoradec"]
 
-        self.cpp_info.components["theoraenc"].names["pkg_config"] = "theoraenc"
+        self.cpp_info.components["theoraenc"].set_property("pkg_config_name", "theoraenc")
         self.cpp_info.components["theoraenc"].requires = ["theoradec", "ogg::ogg"]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.components["theoradec"].requires.append("_theora")
         else:
             self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "theora_full_package"
