@@ -2,6 +2,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -30,7 +31,6 @@ class XmlSecConan(ConanFile):
     }
 
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -139,12 +139,11 @@ class XmlSecConan(ConanFile):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if not self.options.shared:
-            self._autotools.defines.append("XMLSEC_STATIC")
+            autotools.defines.append("XMLSEC_STATIC")
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-crypto-dl={}".format(yes_no(False)),
@@ -158,9 +157,9 @@ class XmlSecConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.libs = []
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.libs = []
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         if self._is_msvc:
