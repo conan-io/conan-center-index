@@ -1,7 +1,6 @@
 import os
-from conans import ConanFile, tools
+from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import rename
 
 required_conan_version = ">=1.43.0"
 
@@ -16,6 +15,9 @@ class UTConan(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
+    options = { "disable_module": [True, False], }
+    default_options = { "disable_module": False, }
+    _cmake = None
 
     @property
     def _minimum_cpp_standard(self):
@@ -31,9 +33,9 @@ class UTConan(ConanFile):
             "Visual Studio": "16",
         }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def config_options(self):
+        if tools.Version(self.version) <= "1.1.8":
+            del self.options.disable_module
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -54,19 +56,34 @@ class UTConan(ConanFile):
                         self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        rename("ut-" + self.version, self._source_subfolder)
-        tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        if tools.Version(self.version) <= "1.1.8":
+            tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
                        sha256="c9bff75738922193e67fa726fa225535870d2aa1059f914"
                        "52c411736284ad566")
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BOOST_UT_BUILD_BENCHMARKS"] = False
+        self._cmake.definitions["BOOST_UT_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BOOST_UT_BUILD_TESTS"] = False
+        self._cmake.definitions["PROJECT_DISABLE_VERSION_SUFFIX"] = True
+        if self.options.get_safe("disable_module"):
+            self._cmake.definitions["BOOST_UT_DISABLE_MODULE"] = self.options.disable_module
+        self._cmake.configure()
+        return self._cmake
     
     def build(self):
-        pass
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
-        self.copy(os.path.join("include", "boost", "ut.hpp"),
-                  src=self._source_subfolder)
+        self.copy("LICENSE" if tools.Version(self.version) <= "1.1.8" else "LICENSE.md", dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_id(self):
         self.info.header_only()
@@ -81,3 +98,13 @@ class UTConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
+
+        if self.options.get_safe("disable_module"):
+            self.cpp_info.components["ut"].defines = ["BOOST_UT_DISABLE_MODULE"]
+
+        if tools.Version(self.version) > "1.1.8":
+            include_path_version = self.version
+            # There was a typo in the project version number in version 1.1.9.
+            if tools.Version(self.version) == "1.1.9":
+                include_path_version = "1.1.8"
+            self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + include_path_version, "include")]
