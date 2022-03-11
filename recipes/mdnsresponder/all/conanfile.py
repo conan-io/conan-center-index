@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files.symlinks import absolute_to_relative_symlinks
 import os
 
 required_conan_version = ">=1.33.0"
@@ -148,6 +149,7 @@ class MdnsResponderConan(ConanFile):
         tools.rename(os.path.join(self.package_folder, "sbin", "mdnsd"),
                      os.path.join(self.package_folder, "bin", "mdnsd"))
         tools.rmdir(os.path.join(self.package_folder, "sbin"))
+        absolute_to_relative_symlinks(self, self.package_folder)
 
     def _msvc_build_folder(self, *argv):
         return os.path.join(self._source_subfolder, *argv, self._msvc_platform, str(self.settings.build_type))
