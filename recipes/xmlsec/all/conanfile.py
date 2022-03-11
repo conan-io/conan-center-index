@@ -21,11 +21,17 @@ class XmlSecConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_nss": [True, False],
+        "with_gcrypt": [True, False],
+        "with_gnutls": [True, False],
         "with_xslt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_nss": False,
+        "with_gcrypt": False,
+        "with_gnutls": False,
         "with_openssl": True,
         "with_xslt": False,
     }
@@ -62,7 +68,13 @@ class XmlSecConan(ConanFile):
             self.requires("libxslt/1.1.34")
 
     def validate(self):
-        if not self.options.with_openssl:
+        if self.options.with_nss:
+            raise ConanInvalidConfiguration("xmlsec with nss not supported yet in this recice")
+        if self.options.with_gcrypt:
+            raise ConanInvalidConfiguration("xmlsec with gcrypt not supported yet in this recice")
+        if self.options.with_gnutls:
+            raise ConanInvalidConfiguration("xmlsec with gnutls not supported yet in this recice")
+        if not (self.options.with_openssl or self.options.with_nss or self.options.with_gcrypt or self.options.with_gnutls):
             raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
 
     def build_requirements(self):
@@ -150,6 +162,10 @@ class XmlSecConan(ConanFile):
             "--enable-apps-crypto-dl={}".format(yes_no(False)),
             "--with-libxslt={}".format(yes_no(self.options.with_xslt)),
             "--with-openssl={}".format(yes_no(self.options.with_openssl)),
+            "--with-nss={}".format(yes_no(self.options.with_nss)),
+            "--with-nspr={}".format(yes_no(self.options.with_nss)),
+            "--with-gcrypt={}".format(yes_no(self.options.with_gcrypt)),
+            "--with-gnutls={}".format(yes_no(self.options.with_gnutls)),
             "--enable-mscrypto={}".format(yes_no(False)),   # Built on mingw
             "--enable-mscng={}".format(yes_no(False)),      # Build on mingw
             "--enable-docs=no",
