@@ -18,7 +18,7 @@ class DiligentCoreConan(ConanFile):
         "fPIC":   [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
     }
     generators = "cmake_find_package", "cmake"
