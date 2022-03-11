@@ -6,3 +6,5 @@ patches:
   "0.8.0":
     - base_path: source_subfolder
       patch_file: patches/gcc5.patch
+    - base_path: source_subfolder
+      patch_file: patches/remove_pdb_install.patch

@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 from conan.tools.files import rename, apply_conandata_patches
+from conans.errors import ConanInvalidConfiguration
 
 
 class CycloneDDSConan(ConanFile):
@@ -23,7 +24,7 @@ class CycloneDDSConan(ConanFile):
     }
     default_options = {
         "enable_ssl": False,
-        "enable_security": True,
+        "enable_security": False,
         "enable_lifespan": True,
         "enable_deadline_missed": True,
         "enable_type_discovery": True,
@@ -57,6 +58,10 @@ class CycloneDDSConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        else:
+            if self.options.enable_security:
+                raise ConanInvalidConfiguration(
+                    "CycloneDDS security extension requires shared=True")
 
     def requirements(self):
         if self.options.enable_ssl:
