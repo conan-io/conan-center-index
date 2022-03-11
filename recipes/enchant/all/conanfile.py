@@ -19,7 +19,7 @@ class EnchantConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     requires = "glib/2.71.3", "hunspell/1.7.0"
     exports_sources = \
-        "CMakeLists.txt", "compile-checks.cmake", "configmake.h", "patches/*"
+        "CMakeLists.txt", "configure.cmake", "configmake.h", "patches/*"
 
     @property
     def _source_subfolder(self):
