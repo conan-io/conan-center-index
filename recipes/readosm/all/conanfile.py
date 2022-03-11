@@ -54,7 +54,7 @@ class ReadosmConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.3")
+        self.requires("expat/2.4.6")
         self.requires("zlib/1.2.11")
 
     def build_requirements(self):
