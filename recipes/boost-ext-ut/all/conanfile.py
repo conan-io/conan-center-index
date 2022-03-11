@@ -1,15 +1,16 @@
+import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
+from conans.tools import rename
 
 required_conan_version = ">=1.43.0"
 
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
-    description = ("C++17/20 single header/single module, "
+    description = ("C++20 single header/single module, "
                    "macro-free micro Unit Testing Framework")
-    topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("ut", "header-only", "unit-test", "test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
     license = "BSL-1.0"
@@ -18,7 +19,7 @@ class UTConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17 if self.settings.compiler in ["clang", "gcc"] else 20
+        return 17 if self.settings.compiler in ["clang", "gcc"] and tools.Version(self.version) <= "1.1.8" else 20
 
     @property
     def _minimum_compilers_version(self):
@@ -54,10 +55,13 @@ class UTConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ut-" + self.version, self._source_subfolder)
+        rename("ut-" + self.version, self._source_subfolder)
         tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
                        sha256="c9bff75738922193e67fa726fa225535870d2aa1059f914"
                        "52c411736284ad566")
+    
+    def build(self):
+        pass
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
