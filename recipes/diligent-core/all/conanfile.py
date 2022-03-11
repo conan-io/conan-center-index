@@ -18,7 +18,7 @@ class DiligentCoreConan(ConanFile):
         "fPIC":   [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": False	,
         "fPIC": True,
     }
     generators = "cmake_find_package", "cmake"
@@ -72,7 +72,7 @@ class DiligentCoreConan(ConanFile):
                 self.info.settings.compiler.runtime = "MT/MTd"
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" or self.options.shared:
             del self.options.fPIC
 
     def _patch_sources(self):
