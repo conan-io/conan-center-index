@@ -16,10 +16,12 @@ class ZstdConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "threading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "threading": True,
     }
 
     generators = "cmake"
@@ -58,6 +60,7 @@ class ZstdConan(ConanFile):
         self._cmake.definitions["ZSTD_BUILD_PROGRAMS"] = False
         self._cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
         if tools.Version(self.version) < "1.4.3":
             # Generate a relocatable shared lib on Macos
             self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"

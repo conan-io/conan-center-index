@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class PCREConan(ConanFile):
@@ -148,28 +148,28 @@ class PCREConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "PCRE"
         if self.options.build_pcre_8:
             # pcre
-            self.cpp_info.components["libpcre"].names["pkg_config"] = "libpcre"
+            self.cpp_info.components["libpcre"].set_property("pkg_config_name", "libpcre")
             self.cpp_info.components["libpcre"].libs = [self._lib_name("pcre")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre"].defines.append("PCRE_STATIC=1")
             # pcreposix
-            self.cpp_info.components["libpcreposix"].names["pkg_config"] = "libpcreposix"
+            self.cpp_info.components["libpcreposix"].set_property("pkg_config_name", "libpcreposix")
             self.cpp_info.components["libpcreposix"].libs = [self._lib_name("pcreposix")]
             self.cpp_info.components["libpcreposix"].requires = ["libpcre"]
             # pcrecpp
             if self.options.build_pcrecpp:
-                self.cpp_info.components["libpcrecpp"].names["pkg_config"] = "libpcrecpp"
+                self.cpp_info.components["libpcrecpp"].set_property("pkg_config_name", "libpcrecpp")
                 self.cpp_info.components["libpcrecpp"].libs = [self._lib_name("pcrecpp")]
                 self.cpp_info.components["libpcrecpp"].requires = ["libpcre"]
         # pcre16
         if self.options.build_pcre_16:
-            self.cpp_info.components["libpcre16"].names["pkg_config"] = "libpcre16"
+            self.cpp_info.components["libpcre16"].set_property("pkg_config_name", "libpcre16")
             self.cpp_info.components["libpcre16"].libs = [self._lib_name("pcre16")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre16"].defines.append("PCRE_STATIC=1")
         # pcre32
         if self.options.build_pcre_32:
-            self.cpp_info.components["libpcre32"].names["pkg_config"] = "libpcre32"
+            self.cpp_info.components["libpcre32"].set_property("pkg_config_name", "libpcre32")
             self.cpp_info.components["libpcre32"].libs = [self._lib_name("pcre32")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre32"].defines.append("PCRE_STATIC=1")

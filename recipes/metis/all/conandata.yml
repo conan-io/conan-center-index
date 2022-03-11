@@ -1,0 +1,16 @@
+sources:
+  "5.1.1":
+    url: "https://github.com/KarypisLab/METIS/archive/refs/tags/v5.1.1-DistDGL-v0.5.tar.gz"
+    sha256: "cedf0b32d32a8496bac7eb078b2b8260fb00ddb8d50c27e4082968a01bc33331"
+patches:
+  "5.1.1":
+    - patch_file: "patches/001-add-gklib-system-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002-support-pure-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-remove-programs.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/004-use-conan-gklib.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/005-fix-install.patch"
+      base_path: "source_subfolder"

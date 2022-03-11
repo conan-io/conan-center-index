@@ -59,17 +59,17 @@ class PulseAudioConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.16")
         self.requires("libsndfile/1.0.31")
-        self.requires("libcap/2.50")
+        self.requires("libcap/2.62")
         if self.options.with_alsa:
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
         if self.options.with_glib:
-            self.requires("glib/2.69.0")
+            self.requires("glib/2.70.1")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.9")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1m")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
@@ -81,7 +81,7 @@ class PulseAudioConan(ConanFile):
                                             % self.options["fftw"].precision)
 
     def build_requirements(self):
-        self.build_requires("gettext/0.20.1")
+        self.build_requires("gettext/0.21")
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
 

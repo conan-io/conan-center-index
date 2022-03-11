@@ -65,22 +65,33 @@ class GlslangConan(ConanFile):
             "11.6.0": "2021.3",
             "11.5.0": "2021.2",
             "8.13.3559": "2020.5",
-        }.get(str(self.version), False)
+        }.get(str(self.version), self.version)
 
     def requirements(self):
         if self.options.enable_optimizer:
             self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
         # see https://github.com/KhronosGroup/glslang/issues/2283
-        if self.options.shared and (self.settings.os == "Windows" or (tools.Version(self.version) < "11.0.0" and tools.is_apple_os(self.settings.os))):
-            raise ConanInvalidConfiguration("glslang {} shared library build is broken on {}".format(self.version, self.settings.os))
+        glslang_version = tools.Version(self.version)
+        if (self.options.shared and
+            (self.settings.os == "Windows" or \
+             (glslang_version >= "7.0.0" and glslang_version < "11.0.0" and tools.is_apple_os(self.settings.os)))
+           ):
+            raise ConanInvalidConfiguration(
+                "glslang {} shared library build is broken on {}".format(
+                    self.version, self.settings.os,
+                )
+            )
 
         if self.options.enable_optimizer and self.options["spirv-tools"].shared:
-            raise ConanInvalidConfiguration("glslang with enable_optimizer requires static spirv-tools, because SPIRV-Tools-opt is not built if shared")
+            raise ConanInvalidConfiguration(
+                "glslang with enable_optimizer requires static spirv-tools, "
+                "because SPIRV-Tools-opt is not built if shared"
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -105,7 +116,8 @@ class GlslangConan(ConanFile):
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
                 {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
-            if tools.Version(self.version) < "11.0.0":
+            glslang_version = tools.Version(self.version)
+            if glslang_version >= "7.0.0" and glslang_version < "11.0.0":
                 cmake_files_to_fix.append({"target": "glslang"    , "relpath": os.path.join("glslang", "CMakeLists.txt")})
             else:
                 cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
@@ -124,7 +136,8 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
         self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
-        if tools.Version(self.version) >= "8.13.3743":
+        glslang_version = tools.Version(self.version)
+        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
             self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
             self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
             self._cmake.definitions["ENABLE_GLSLANG_WEBMIN_DEVEL"] = False
@@ -134,16 +147,18 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["ENABLE_EMSCRIPTEN_SINGLE_FILE"] = False
         self._cmake.definitions["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
         self._cmake.definitions["ENABLE_HLSL"] = self.options.hlsl
-        if tools.Version(self.version) >= "8.13.3743":
+        if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
             self._cmake.definitions["ENABLE_RTTI"] = False
         self._cmake.definitions["ENABLE_OPT"] = self.options.enable_optimizer
         self._cmake.definitions["ENABLE_PCH"] = True
         self._cmake.definitions["ENABLE_CTEST"] = False
         self._cmake.definitions["USE_CCACHE"] = False
-        if tools.Version(self.version) >= "11.6.0" and self.settings.os == "Windows":
+        if (glslang_version < "7.0.0" or glslang_version >= "11.6.0") and self.settings.os == "Windows":
             self._cmake.definitions["OVERRIDE_MSVCCRT"] = False
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -164,7 +179,8 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
 
-        if tools.Version(self.version) >= "11.0.0":
+        glslang_version = tools.Version(self.version)
+        if (glslang_version < "7.0.0" or glslang_version >= "11.0.0"):
             if self.options.shared:
                 self.cpp_info.components["glslang-core"].defines.append("GLSLANG_IS_SHARED_LIBRARY")
             else:
@@ -187,6 +203,7 @@ class GlslangConan(ConanFile):
         self.cpp_info.components["osdependent"].libs = ["OSDependent" + lib_suffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["osdependent"].system_libs.append("pthread")
+
         # OGLCompiler
         self.cpp_info.components["oglcompiler"].names["cmake_find_package"] = "OGLCompiler"
         self.cpp_info.components["oglcompiler"].names["cmake_find_package_multi"] = "OGLCompiler"
@@ -200,6 +217,7 @@ class GlslangConan(ConanFile):
         if self.options.enable_optimizer:
             self.cpp_info.components["spirv"].requires.append("spirv-tools::spirv-tools-opt")
             self.cpp_info.components["spirv"].defines.append("ENABLE_OPT")
+
         # HLSL
         if self.options.hlsl:
             self.cpp_info.components["hlsl"].names["cmake_find_package"] = "HLSL"
@@ -207,6 +225,7 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["hlsl"].libs = ["HLSL" + lib_suffix]
             self.cpp_info.components["glslang-core"].requires.append("hlsl")
             self.cpp_info.components["glslang-core"].defines.append("ENABLE_HLSL")
+
         # SPVRemapper
         if self.options.spv_remapper:
             self.cpp_info.components["spvremapper"].names["cmake_find_package"] = "SPVRemapper"

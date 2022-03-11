@@ -2,7 +2,7 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class VulkanLoaderConan(ConanFile):
@@ -141,9 +141,10 @@ class VulkanLoaderConan(ConanFile):
         if self.deps_cpp_info["vulkan-headers"].version != self.version:
             self.output.warn("vulkan-headers version is different than vulkan-loader. Several symbols might be missing.")
 
-        self.cpp_info.names["cmake_find_package"] = "Vulkan"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
-        self.cpp_info.names["pkg_config"] = "vulkan"
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Vulkan")
+        self.cpp_info.set_property("cmake_target_name", "Vulkan::Vulkan")
+        self.cpp_info.set_property("pkg_config_name", "vulkan")
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["vulkan" + suffix]
         self.cpp_info.includedirs = self.deps_cpp_info["vulkan-headers"].include_paths # allow to properly set Vulkan_INCLUDE_DIRS in cmake_find_package(_multi) generators
@@ -155,3 +156,8 @@ class VulkanLoaderConan(ConanFile):
         vulkan_sdk_path = self.package_folder
         self.output.info("Create VULKAN_SDK environment variable: {}".format(vulkan_sdk_path))
         self.env_info.VULKAN_SDK = vulkan_sdk_path
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Vulkan"
+        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
+        self.cpp_info.names["pkg_config"] = "vulkan"

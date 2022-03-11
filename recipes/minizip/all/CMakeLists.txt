@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4)
 project(minizip C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 option(ENABLE_BZIP2 "Build minizip with bzip2 support" ON)
 option(BUILD_TOOLS "Build minizip tool" OFF)

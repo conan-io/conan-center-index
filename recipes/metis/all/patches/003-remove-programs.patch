@@ -1,0 +1,8 @@
+Do not build programs
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -44,4 +44,3 @@ endif ()
+ 
+ # Recursively look for CMakeLists.txt in subdirs.
+ add_subdirectory("libmetis")
+-add_subdirectory("programs")

@@ -55,12 +55,15 @@ Prefer the following order of documented methods in python code (`conanfile.py`,
 - export_sources
 - config_options
 - configure
+- layout
 - requirements
 - package_id
+- validate
 - build_id
 - build_requirements
 - system_requirements
 - source
+- generate
 - imports
 - build
 - package

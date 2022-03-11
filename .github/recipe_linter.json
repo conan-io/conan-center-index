@@ -19,7 +19,7 @@
             "severity": "warning",
             "pattern": [
                 {
-                    "regexp": "(\\S+):(\\d+):(\\d+):\\s(W\\d+):\\s(.+)\\s\\((\\S+)\\)",
+                    "regexp": "(\\S+):(\\d+):(\\d+):\\s(W(?!0511)\\d+):\\s(.+)\\s\\((\\S+)\\)",
                     "file": 1,
                     "line": 2,
                     "column": 3,
