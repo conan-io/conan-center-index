@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class WtConan(ConanFile):
@@ -13,7 +13,7 @@ class WtConan(ConanFile):
     homepage = "https://github.com/emweb/wt"
     topics = ("conan", "wt", "web", "webapp")
     license = "GPL-2.0-only"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["patches/*", "CMakeLists.txt"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -54,7 +54,7 @@ class WtConan(ConanFile):
         "connector_http": True,
         "connector_isapi": True,
         "connector_fcgi": False
-        }
+    }
 
     _cmake = None
 
@@ -95,13 +95,13 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.76.0")
         if self.options.connector_http:
             self.requires("zlib/1.2.11")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.34.1")
+            self.requires("sqlite3/3.35.5")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.17")
         if self.options.get_safe("with_postgres"):
@@ -117,9 +117,8 @@ class WtConan(ConanFile):
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -204,6 +203,11 @@ class WtConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
         if self.settings.os != "Windows":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 

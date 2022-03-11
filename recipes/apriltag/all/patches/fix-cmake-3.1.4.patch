@@ -1,0 +1,43 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,7 +1,7 @@
+ cmake_minimum_required(VERSION 3.1)
+ project(apriltag)
+ 
+-find_package(OpenCV QUIET)
++#find_package(OpenCV QUIET)
+ 
+ include_directories(.)
+ aux_source_directory(common COMMON_SRC)
+@@ -10,9 +10,9 @@
+-set(CMAKE_BUILD_TYPE Release)
++#set(CMAKE_BUILD_TYPE Release)
+-
+ # Library
+ file(GLOB TAG_FILES ${PROJECT_SOURCE_DIR}/tag*.c)
+ set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
+-add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
++add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
++set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
+ if (MSVC)
+     # FindThreads will not find pthread.h with MSVC
+     # winmm is necessary for __imp_timeGetTime
+@@ -103,4 +103,4 @@
+ # Examples
+-# apriltag_demo
+ add_executable(apriltag_demo example/apriltag_demo.c)
++set_target_properties(apriltag_demo PROPERTIES C_STANDARD 99)
+ target_link_libraries(apriltag_demo apriltag)
+@@ -108,10 +108,10 @@
+-# opencv_demo
++if(0)
+ if(OpenCV_FOUND)
+     add_executable(opencv_demo example/opencv_demo.cc)
+     target_link_libraries(opencv_demo apriltag ${OpenCV_LIBRARIES})
+     set_target_properties(opencv_demo PROPERTIES CXX_STANDARD 11)
+     install(TARGETS opencv_demo RUNTIME DESTINATION bin)
+ endif(OpenCV_FOUND)
+-
++endif()
+ # install example programs
+ install(TARGETS apriltag_demo RUNTIME DESTINATION bin)

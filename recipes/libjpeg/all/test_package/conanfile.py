@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             return
         img_name = os.path.join(self.source_folder, "testimg.jpg")
         out_img = os.path.join(self.build_folder, "outimg.jpg")

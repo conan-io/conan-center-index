@@ -16,9 +16,15 @@ patches:
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
       base_path: "source_subfolder"
   "1.10.6":
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.6.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
       base_path: "source_subfolder"
   "1.10.5":
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/build-either-static-or-shared-1.10.5.patch"

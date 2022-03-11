@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/GoogleCloudPlatform/functions-framework-cpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "005f2fbe3b8be9f6f0bf7a4a5d218a23b0f62d854a5e84c56872dd3a4d2820f7"

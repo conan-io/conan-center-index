@@ -3,6 +3,6 @@
 
 int main()
 {
-    std::cout << "OpenColorIO " << OpenColorIO::GetVersion() << "\n";
+    std::cout << "OpenColorIO " << OCIO_NAMESPACE::GetVersion() << "\n";
     return 0;
 }

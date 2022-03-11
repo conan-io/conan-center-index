@@ -1,20 +1,21 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
 import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class NCursesConan(ConanFile):
     name = "ncurses"
     description = "The ncurses (new curses) library is a free software emulation of curses in System V Release 4.0 (SVr4), and more"
-    topics = ("conan", "ncurses", "terminal", "screen", "tui")
+    topics = ("ncurses", "terminal", "screen", "tui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/ncurses"
     license = "X11"
-    exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -40,11 +41,16 @@ class NCursesConan(ConanFile):
         "with_pcre2": False,
     }
 
-    _autotools = None
+    generators = "pkg_config"
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _with_ticlib(self):
@@ -67,23 +73,15 @@ class NCursesConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio":
-                if "MT" in str(self.settings.compiler.runtime):
-                    raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if not self.options.with_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
         if not self.options.with_widec:
             del self.options.with_extended_colors
-        if self.settings.os == "Windows":
-            if self._with_tinfo:
-                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
-            if self.options.shared and self._with_ticlib:
-                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def requirements(self):
         if self.options.with_pcre2:
-            self.requires("pcre2/10.33")
+            self.requires("pcre2/10.37")
         if self.settings.compiler == "Visual Studio":
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.23.2")
@@ -91,28 +89,42 @@ class NCursesConan(ConanFile):
                 self.requires("naive-tsearch/0.1.1")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def validate(self):
+        if any("arm" in arch for arch in (self.settings.arch, self._settings_build.arch)) and tools.cross_building(self):
+            # FIXME: Cannot build ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
+            # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
+            raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
+        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
+        if self.settings.os == "Windows":
+            if self._with_tinfo:
+                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
+            if self.options.shared and self._with_ticlib:
+                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ncurses-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        build = None
-        host = None
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
-            "--enable-widec" if self.options.with_widec else "--disable-widec",
-            "--enable-ext-colors" if self.options.get_safe("with_extended_colors", False) else "--disable-ext-colors",
-            "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
-            "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
-            "--with-cxx-binding" if self.options.with_cxx else "--without-cxx-binding",
-            "--with-progs" if self.options.with_progs else "--without-progs",
-            "--with-termlib" if self._with_tinfo else "--without-termlib",
-            "--with-ticlib" if self._with_ticlib else "--without-ticlib",
+            "--with-shared={}".format(yes_no(self.options.shared)),
+            "--with-cxx-shared={}".format(yes_no(self.options.shared)),
+            "--with-normal={}".format(yes_no(not self.options.shared)),
+            "--enable-widec={}".format(yes_no(self.options.with_widec)),
+            "--enable-ext-colors={}".format(yes_no(self.options.get_safe("with_extended_colors", False))),
+            "--enable-reentrant={}".format(yes_no(self.options.with_reentrant)),
+            "--with-pcre2={}".format(yes_no(self.options.with_pcre2)),
+            "--with-cxx-binding={}".format(yes_no(self.options.with_cxx)),
+            "--with-progs={}".format(yes_no(self.options.with_progs)),
+            "--with-termlib={}".format(yes_no(self._with_tinfo)),
+            "--with-ticlib={}".format(yes_no(self._with_ticlib)),
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -122,13 +134,11 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--disable-pc-files",
         ]
-        if self.options.shared:
-            conf_args.extend(["--with-shared", "--without-normal", "--with-cxx-shared",])
-        else:
-            conf_args.extend(["--without-shared", "--with-normal", "--without-cxx-shared"])
+        build = None
+        host = None
         if self.settings.os == "Windows":
             conf_args.extend([
                 "--disable-macros",
@@ -139,25 +149,34 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
+            build = host = "{}-w64-mingw32-msvc".format(self.settings.arch)
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
                 "ac_cv_func_setvbuf_reversed=no",
             ])
-            build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
-            self._autotools.flags.append("-FS")
-            self._autotools.cxx_flags.append("-EHsc")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
-        return self._autotools
+            autotools.cxx_flags.append("-EHsc")
+            if tools.Version(self.settings.compiler.version) >= 12:
+                autotools.flags.append("-FS")
+        if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
+            # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
+            autotools.libs.extend(["mingwex", "ssp"])
+        if build:
+            conf_args.append(f"ac_cv_build={build}")
+        if host:
+            conf_args.append(f"ac_cv_host={host}")
+            conf_args.append(f"ac_cv_target={host}")
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
+        return autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                msvc_env = {
+            with tools.vcvars(self):
+                env = {
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
@@ -167,14 +186,13 @@ class NCursesConan(ConanFile):
                     "AR": "lib -nologo",
                     "RANLIB": ":",
                 }
-                with tools.environment_append(msvc_env):
+                with tools.environment_append(env):
                     yield
         else:
             yield
 
     def build(self):
         self._patch_sources()
-        # return
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -182,7 +200,6 @@ class NCursesConan(ConanFile):
     @property
     def _major_version(self):
         return tools.Version(self.version).major
-
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file):
@@ -228,10 +245,7 @@ class NCursesConan(ConanFile):
         res = self._suffix
         if self.options.shared:
             if self.settings.os == "Windows":
-                if self.settings.compiler == "Visual Studio":
-                    res += ".dll.lib"
-                else:
-                    res += ".dll.a"
+                res += ".dll"
         return res
 
     def package_id(self):
@@ -306,7 +320,7 @@ class NCursesConan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
 
-        terminfo = os.path.join(self.package_folder, "bin", "share", "terminfo")
+        terminfo = os.path.join(self.package_folder, "res", "terminfo")
         self.output.info("Setting TERMINFO environment variable: {}".format(terminfo))
         self.env_info.TERMINFO = terminfo
 

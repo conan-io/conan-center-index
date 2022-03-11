@@ -1,4 +1,13 @@
 sources:
+  "2.4.8":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.8.tar.gz"
+    sha256: "9a8040a197e4b5e032524bc7183f68faa7b2f759c67b983b40018a7726561cac"
+  "2.4.7":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.7.tar.gz"
+    sha256: "ef3952fee5b83991fbd9aa77212c45171393b2dfd14001b2d1c7b97861934afa"
+  "2.4.6":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.6.tar.gz"
+    sha256: "e74798d4b387c85272b05ee574d991cbe1fb844680a1fc3d68818a02b5f59299"
   "2.3.2":
     url: "https://github.com/SanderMertens/flecs/archive/v2.3.2.tar.gz"
     sha256: "ff2690953941b3f08d4e934e299fa8902e46ce8532edd176388d467ace33eebf"

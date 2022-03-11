@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class Libx265Conan(ConanFile):
     name = "libx265"
@@ -47,22 +49,26 @@ class Libx265Conan(ConanFile):
             del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_numa
+        # FIXME: Disable assembly by default if host is arm and compiler apple-clang for the moment.
+        # Indeed, apple-clang is not able to understand some asm instructions of libx265
+        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch:
+            self.options.assembly = False
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self.options.assembly:
-            self.build_requires("nasm/2.14")
-
     def requirements(self):
         if self.options.get_safe("with_numa", False):
             self.requires("libnuma/2.0.14")
 
+    def build_requirements(self):
+        if self.options.assembly:
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.build_requires("nasm/2.15.05")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("x265-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -82,6 +88,15 @@ class Libx265Conan(ConanFile):
             self._cmake.definitions["STATIC_LINK_CRT"] = "T" in str(self.settings.compiler.runtime)
         if self.settings.os == "Linux":
             self._cmake.definitions["PLATFORM_LIBS"] = "dl"
+        if tools.cross_building(self.settings):
+            # FIXME: too specific and error prone, should be delegated to CMake helper
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+        if "arm" in self.settings.arch:
+            self._cmake.definitions["CROSS_COMPILE_ARM"] = tools.cross_building(self.settings)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

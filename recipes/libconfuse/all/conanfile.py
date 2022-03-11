@@ -1,9 +1,11 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from contextlib import contextmanager
+import contextlib
 import os
 
+required_conan_version = ">=1.33.0"
 
-class LibConfuse(ConanFile):
+
+class LibConfuseConan(ConanFile):
     name = "libconfuse"
     description = "Small configuration file parser library for C"
     topics = ("conan", "libconfuse", "configuration", "parser")
@@ -26,6 +28,10 @@ class LibConfuse(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -36,19 +42,20 @@ class LibConfuse(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("confuse-{}".format(self.version), self._source_subfolder)
-
     def build_requirements(self):
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
+            self._autotools.flags.append("-FS")
         conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
@@ -57,10 +64,10 @@ class LibConfuse(ConanFile):
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl -nologo",
                                                "CXX": "cl -nologo",
                                                "LD": "link"}):
@@ -91,10 +98,10 @@ class LibConfuse(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libconfuse.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "confuse.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "confuse.lib"))
 
     def package_info(self):
-        lib = "confuse"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll.{}".format("lib" if self.settings.compiler == "Visual Studio" else "a")
-        self.cpp_info.libs = [lib]
         self.cpp_info.names["pkg_config"] = "libconfuse"
+        self.cpp_info.libs = ["confuse"]

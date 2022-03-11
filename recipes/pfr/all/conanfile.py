@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class LibnameConan(ConanFile):
+class PfrConan(ConanFile):
     name = "pfr"
     description = "std::tuple like methods for user defined types without any macro or boilerplate code"
     topics = ("conan", "boost", "pfr", "reflection", "magic_get")
@@ -59,7 +59,8 @@ class LibnameConan(ConanFile):
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern=os.path.join(self._source_subfolder, "LICENSE_1_0.txt"), dst="licenses", src=self.source_folder)
+        self.copy(pattern=os.path.join(self._source_subfolder,
+                  "LICENSE_1_0.txt"), dst="licenses", src=self.source_folder)
         self.copy(pattern="*", dst="include", src=include_folder)
 
     def package_id(self):

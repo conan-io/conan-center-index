@@ -55,17 +55,18 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("openssl/1.1.1i")
+        self.requires("boost/1.77.0")
+        self.requires("openssl/1.1.1k")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
+    def package_id(self):
+        self.info.requires["boost"].minor_mode()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -133,7 +134,7 @@ class CppRestSDKConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.components["cpprest"].frameworks.extend(["CoreFoundation", "Security"])
         if not self.options.shared:
-            self.cpp_info.components["cpprest"].defines.append("_NO_ASYNCRTIMP")
+            self.cpp_info.components["cpprest"].defines.extend(["_NO_ASYNCRTIMP", "_NO_PPLXIMP"])
         # cpprestsdk_zlib_internal
         if self.options.with_compression:
             self.cpp_info.components["cpprestsdk_zlib_internal"].includedirs = []

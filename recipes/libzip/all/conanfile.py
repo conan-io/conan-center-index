@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibZipConan(ConanFile):
     name = "libzip"
@@ -10,7 +12,7 @@ class LibZipConan(ConanFile):
     homepage = "https://github.com/nih-at/libzip"
     license = "BSD-3-Clause"
     topics = ("conan", "zip", "libzip", "zip-archives", "zip-editing")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -19,7 +21,8 @@ class LibZipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
-        "crypto": [False, "win32", "openssl", "mbedtls", "auto"]
+        "crypto": [False, "win32", "openssl", "mbedtls", "auto"],
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
@@ -27,7 +30,8 @@ class LibZipConan(ConanFile):
         "with_bzip2": True,
         "with_lzma": True,
         "with_zstd": True,
-        "crypto": "auto"
+        "crypto": "openssl",
+        "tools": True,
     }
     _cmake = None
 
@@ -36,22 +40,29 @@ class LibZipConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _crypto(self):
-        if self.options.crypto == "auto":
-            return "win32" if self.settings.os == "Windows" else "openssl"
-        return self.options.crypto
+    def _has_zstd_support(self):
+        return tools.Version(self.version) >= "1.8.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_zstd_support:
+            del self.options.zstd
+        # Default crypto backend on windows
+        if self.settings.os == "Windows":
+            self.options.crypto = "win32"
 
     def configure(self):
-        if self._crypto == "win32" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+        # Deprecate "auto" value of crypto option
+        if self.options.crypto == "auto":
+            crypto_value = "win32" if self.settings.os == "Windows" else "openssl"
+            self.output.warn("'auto' value of 'crypto' option is deprecated, fallback to default value on {}: {}".format(self.settings.os, crypto_value))
+            self.options.crypto = crypto_value
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -62,45 +73,59 @@ class LibZipConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
 
-        if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/1.5.0")
 
-        if self._crypto == "openssl":
+        if self.options.crypto == "openssl":
             self.requires("openssl/1.1.1k")
-        elif self._crypto == "mbedtls":
+        elif self.options.crypto == "mbedtls":
             self.requires("mbedtls/2.25")
 
-    def package_id(self):
-        self.info.options.crypto = self._crypto
+    def validate(self):
+        if self.options.crypto == "win32" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Honor zstd enabled
+        if self._has_zstd_support:
+            top_cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            lib_cmakelists = os.path.join(self._source_subfolder, "lib", "CMakeLists.txt")
+            tools.replace_in_file(top_cmakelists, "find_package(Zstd)", "find_package(zstd)")
+            tools.replace_in_file(top_cmakelists, "Zstd_FOUND", "zstd_FOUND")
+            tools.replace_in_file(lib_cmakelists, "Zstd::Zstd", "zstd::zstd")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["BUILD_REGRESS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_DOC"] = False
 
         self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
         self._cmake.definitions["ENABLE_BZIP2"] = self.options.with_bzip2
-        self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
+        if self._has_zstd_support:
+            self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
 
         self._cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
         self._cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
 
-        self._cmake.definitions["ENABLE_MBEDTLS"] = self._crypto == "mbedtls"
-        self._cmake.definitions["ENABLE_OPENSSL"] = self._crypto == "openssl"
-        self._cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self._crypto == "win32"
+        self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
+        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
+        self._cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
 
         self._cmake.configure()
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -121,20 +146,21 @@ class LibZipConan(ConanFile):
         self.cpp_info.components["_libzip"].libs = ["zip"]
         if self.settings.os == "Windows":
             self.cpp_info.components["_libzip"].system_libs = ["advapi32"]
-            if self._crypto == "win32":
+            if self.options.crypto == "win32":
                 self.cpp_info.components["_libzip"].system_libs.append("bcrypt")
         self.cpp_info.components["_libzip"].requires = ["zlib::zlib"]
         if self.options.with_bzip2:
             self.cpp_info.components["_libzip"].requires.append("bzip2::bzip2")
         if self.options.with_lzma:
             self.cpp_info.components["_libzip"].requires.append("xz_utils::xz_utils")
-        if self.options.with_zstd:
+        if self.options.get_safe("with_zstd"):
             self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
-        if self._crypto == "openssl":
-            self.cpp_info.components["_libzip"].requires.append("openssl::openssl")
-        elif self._crypto == "mbedtls":
+        if self.options.crypto == "openssl":
+            self.cpp_info.components["_libzip"].requires.append("openssl::crypto")
+        elif self.options.crypto == "mbedtls":
             self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

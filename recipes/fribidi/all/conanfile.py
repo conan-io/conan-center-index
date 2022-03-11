@@ -1,6 +1,7 @@
 from conans import tools, ConanFile, Meson
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class FriBiDiCOnan(ConanFile):
@@ -35,21 +36,20 @@ class FriBiDiCOnan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("meson/0.53.0")
+        self.build_requires("meson/0.59.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("fribidi-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
         if self._meson:
@@ -57,11 +57,14 @@ class FriBiDiCOnan(ConanFile):
         self._meson = Meson(self)
         self._meson.options["deprecated"] = self.options.with_deprecated
         self._meson.options["docs"] = False
+        if tools.Version(self.version) >= "1.0.10":
+            self._meson.options["bin"] = False
+            self._meson.options["tests"] = False
         self._meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._meson
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
@@ -77,9 +80,8 @@ class FriBiDiCOnan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             lib_a = os.path.join(self.package_folder, "lib", "libfribidi.a")
             if os.path.isfile(lib_a):
-                os.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
-            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-                os.unlink(pdb)
+                tools.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -87,4 +89,9 @@ class FriBiDiCOnan(ConanFile):
         self.cpp_info.libs = ["fribidi"]
         self.cpp_info.includedirs.append(os.path.join("include", "fribidi"))
         if not self.options.shared:
-            self.cpp_info.defines.append("FRIBIDI_STATIC")
+            if tools.Version(self.version) >= "1.0.10":
+                self.cpp_info.defines.append("FRIBIDI_LIB_STATIC")
+            else:
+                self.cpp_info.defines.append("FRIBIDI_STATIC")
+
+        self.cpp_info.names["pkg_config"] = "fribidi"

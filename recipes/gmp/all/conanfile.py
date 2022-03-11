@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
 import stat
 
@@ -11,21 +12,37 @@ class GmpConan(ConanFile):
     name = "gmp"
     description = "GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating-point numbers."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "gmp", "math")
+    topics = ("gmp", "math", "arbitrary", "precision", "integer")
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "disable_assembly": [True, False], "enable_fat": [True, False],
-               "run_checks": [True, False], "enable_cxx": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "enable_fat": False, "run_checks": False, "enable_cxx": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "disable_assembly": [True, False],
+        "enable_fat": [True, False],
+        "run_checks": [True, False],
+        "enable_cxx": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "disable_assembly": True,
+        "enable_fat": False,
+        "run_checks": False,
+        "enable_cxx": True,
+    }
+
     exports_sources = "patches/*"
 
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,20 +65,19 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def build_requirements(self):
-        self.build_requires("m4/1.4.18")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        self.build_requires("m4/1.4.19")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("yasm/1.3.0")
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if tools.is_apple_os(self.settings.os):
             configure_file = os.path.join(self._source_subfolder, "configure")
             tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
@@ -83,15 +99,16 @@ class GmpConan(ConanFile):
                 "gmp_cv_asm_label_suffix=:",
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
-            self._autotools.flags.append("-FS")
-            # self._autotools.cxx_flags.append("-EHsc")
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+            if tools.Version(self.settings.compiler.version) >= 12:
+                autotools.flags.append("-FS")
+            autotools.cxx_flags.append("-EHsc")
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        return autotools
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 yasm_machine = {
                     "x86": "x86",
                     "x86_64": "amd64",
@@ -102,7 +119,7 @@ class GmpConan(ConanFile):
                     "CXX": "cl -nologo",
                     "AR": "{} lib".format(self.deps_user_info["automake"].ar_lib.replace("\\", "/")),
                     "LD": "link -nologo",
-                    "NM": "python {}/{}".format(self.build_folder.replace("\\", "/"), "dumpbin_nm.py"),
+                    "NM": "python {}".format(tools.unix_path(os.path.join(self.build_folder, "dumpbin_nm.py"))),
                 }
                 with tools.environment_append(env):
                     yield

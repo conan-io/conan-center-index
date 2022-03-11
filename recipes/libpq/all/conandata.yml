@@ -1,4 +1,10 @@
 sources:
+  "13.4":
+    url: "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz"
+    sha256: "59d7bc523e78570c549876fed297ec3e46dd307e90f5b1d22f49181191cf203e"
+  "13.3":
+    url: "https://ftp.postgresql.org/pub/source/v13.3/postgresql-13.3.tar.gz"
+    sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
   "13.2":
     url: "https://ftp.postgresql.org/pub/source/v13.2/postgresql-13.2.tar.gz"
     sha256: "3386a40736332aceb055c7c9012ecc665188536d874d967fcc5a33e7992f8080"
@@ -38,3 +44,13 @@ sources:
   "9.6.19":
     url: "https://ftp.postgresql.org/pub/source/v9.6.19/postgresql-9.6.19.tar.gz"
     sha256: "1840c1f84560ed169079c93610c46c42c4c590181352244e0d8966633a88f358"
+patches:
+  "9.6.19":
+    - patch_file: "patches/9.6.19/001-Use-return-instead-of-exit-in-configure.patch"
+      base_path: "source_subfolder"
+      # url: https://www.postgresql.org/message-id/09A4B554-82B1-4536-B191-2461342EE0BB%40icloud.com
+      # patch_source: https://www.postgresql.org/message-id/attachment/45881/0002-Use-return-instead-of-exit-in-configure.patch
+      # patch_type: portability
+  "13.3":
+    - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
+      base_path: "source_subfolder"

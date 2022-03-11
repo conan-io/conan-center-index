@@ -1,7 +1,10 @@
 sources:
-  "0.8.1":
-    url: "https://github.com/yixuan/spectra/archive/v0.8.1.tar.gz"
-    sha256: "339ae9221309a128b8d937ca59b77d9b30aeceacb4ef2d2df13f6f7cde7fa3f3"
+  "1.0.0":
+    url: "https://github.com/yixuan/spectra/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "45228b7d77b916b5384245eb13aa24bc994f3b0375013a8ba6b85adfd2dafd67"
   "0.9.0":
     url: "https://github.com/yixuan/spectra/archive/v0.9.0.tar.gz"
     sha256: "2966757d432e8fba5958c2a05ad5674ce34eaae3718dd546c1ba8760b80b7a3d"
+  "0.8.1":
+    url: "https://github.com/yixuan/spectra/archive/v0.8.1.tar.gz"
+    sha256: "339ae9221309a128b8d937ca59b77d9b30aeceacb4ef2d2df13f6f7cde7fa3f3"

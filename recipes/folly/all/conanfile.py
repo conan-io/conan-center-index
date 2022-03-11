@@ -9,7 +9,7 @@ required_conan_version = ">=1.32.0"
 class FollyConan(ConanFile):
     name = "folly"
     description = "An open-source C++ components library developed and used at Facebook"
-    topics = ("conan", "folly", "facebook", "components", "core", "efficiency")
+    topics = ("folly", "facebook", "components", "core", "efficiency")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/folly"
     license = "Apache-2.0"
@@ -47,6 +47,48 @@ class FollyConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+    # Freeze CMake version below 3.17.0 to fix the Linux build
+    def build_requirements(self):
+        self.build_requires("cmake/3.16.9")
+
+    def requirements(self):
+        self.requires("boost/1.75.0")
+        self.requires("bzip2/1.0.8")
+        self.requires("double-conversion/3.1.5")
+        self.requires("gflags/2.2.2")
+        self.requires("glog/0.4.0")
+        self.requires("libevent/2.1.12")
+        self.requires("lz4/1.9.3")
+        self.requires("openssl/1.1.1l")
+        self.requires("snappy/1.1.8")
+        self.requires("zlib/1.2.11")
+        self.requires("zstd/1.4.9")
+        self.requires("libdwarf/20191104")
+        self.requires("libsodium/1.0.18")
+        self.requires("xz_utils/5.2.5")
+        # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
+        if self.settings.os == "Linux":
+            self.requires("libiberty/9.1.0")
+            self.requires("libunwind/1.5.0")
+        if Version(self.version) >= "2020.08.10.00":
+            self.requires("fmt/7.0.3")
+
+    @property
+    def _required_boost_components(self):
+        return ["context", "filesystem", "program_options", "regex", "system", "thread"]
+
+    def validate(self):
+        if tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-compilation not yet supported. Contributions are welcome")
+            
+        if self.options["boost"].header_only:
+            raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
+
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if miss_boost_required_comp:
+            raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
+            
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
@@ -64,48 +106,9 @@ class FollyConan(ConanFile):
         if self.version == "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
-    # Freeze max. CMake version at 3.16.2 to fix the Linux build
-    def build_requirements(self):
-        self.build_requires("cmake/3.16.2")
-
-    def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("bzip2/1.0.8")
-        self.requires("double-conversion/3.1.5")
-        self.requires("gflags/2.2.2")
-        self.requires("glog/0.4.0")
-        self.requires("libevent/2.1.12")
-        self.requires("lz4/1.9.3")
-        self.requires("openssl/1.1.1i")
-        self.requires("snappy/1.1.8")
-        self.requires("zlib/1.2.11")
-        self.requires("zstd/1.4.8")
-        self.requires("libdwarf/20191104")
-        self.requires("libsodium/1.0.18")
-        self.requires("xz_utils/5.2.5")
-        # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
-        if self.settings.os == "Linux":
-            self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.5.0")
-        if Version(self.version) >= "2020.08.10.00":
-            self.requires("fmt/7.0.3")
-
-    @property
-    def _required_boost_components(self):
-        return ["context", "filesystem", "program_options", "regex", "system", "thread"]
-
-    def validate(self):
-        if self.options["boost"].header_only:
-            raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
-
-        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
-        if miss_boost_required_comp:
-            raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:

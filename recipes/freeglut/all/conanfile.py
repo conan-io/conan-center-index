@@ -21,6 +21,7 @@ class freeglutConan(ConanFile):
         "gles": [True, False],
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
+        "replace_glut": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,6 +29,7 @@ class freeglutConan(ConanFile):
         "gles": False,
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
+        "replace_glut": True,
     }
     _cmake = None
 
@@ -85,6 +87,7 @@ class freeglutConan(ConanFile):
         self._cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
         self._cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
         self._cmake.definitions["INSTALL_PDB"] = False
+        self._cmake.definitions["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
         self._cmake.configure(build_folder=self._build_subfolder)

@@ -1,10 +1,25 @@
 sources:
-  1.5.1:
-    sha256: 2b6a0ce1c02b9fe7b9ef727369168fe579e5256f1ea013993acdb8d8f06b7e89
-    url: https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.1.corrected.tar.gz
-  1.5.3:
-    sha256: eece8a9e147d37997d425d5d2eeb2e757ad25adc30d6651467094f3b18609b5a
-    url: https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.3.tar.gz
-  1.5.4:
-    sha256: fc026b6566167f6db03dc48779f0f986f9ff8c93ed651a557f28cfbe2dff4ede
-    url: https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.4.tar.gz
+  "1.2.198.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.2.198.0.tar.gz"
+    sha256: "3301a23aca0434336a643e433dcacacdd60000ab3dd35dc0078a297c06124a12"
+  "cci.20211010":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/814e728b30ddd0f4509233099a3ad96fd4318c07.tar.gz"
+    sha256: "c262d3c0c36ad5c87fbe3572aa292d2aed4dcd9b1ca4868eff9ec180e3f994f2"
+  "cci.20210811":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/e71feddb3f17c5586ff7f4cfb5ed1258b800574b.tar.gz"
+    sha256: "9eb56548460fd8850250ebf78071528fb66c2a5db2ef535edc1d493b2581ec66"
+  "cci.20210616":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/07f259e68af3a540038fa32df522554e74f53ed5.tar.gz"
+    sha256: "ce7d299c9e688fe536e106605235dbb7f81613daa7995d4d99d002c808f126f8"
+  "cci.20210414":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/dafead1765f6c1a5f9f8a76387dcb2abe4e54acd.tar.gz"
+    sha256: "e1c8530c95fc8c70fa6a7cbc269ebd1b10da3872efa0e3c6eb82452c3e180cda"
+  "1.5.4":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.4.tar.gz"
+    sha256: "fc026b6566167f6db03dc48779f0f986f9ff8c93ed651a557f28cfbe2dff4ede"
+  "1.5.3":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.3.tar.gz"
+    sha256: "eece8a9e147d37997d425d5d2eeb2e757ad25adc30d6651467094f3b18609b5a"
+  "1.5.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.1.corrected.tar.gz"
+    sha256: "2b6a0ce1c02b9fe7b9ef727369168fe579e5256f1ea013993acdb8d8f06b7e89"

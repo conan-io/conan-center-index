@@ -2,35 +2,47 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class LibSELinuxConan(ConanFile):
     name = "libselinux"
-    description = "Security-enhanced Linux is a patch of the Linux kernel and a number of utilities with enhanced security functionality designed to add mandatory access controls to Linux"
-    topics = ("conan", "selinux", "security-enhanced linux")
+    description = (
+        "Security-enhanced Linux is a patch of the Linux kernel and a number "
+        "of utilities with enhanced security functionality designed to add "
+        "mandatory access controls to Linux"
+    )
+    topics = ("selinux", "security-enhanced linux")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SELinuxProject/selinux"
     license = "Unlicense"  # This library (libselinux) is public domain software, i.e. not copyrighted
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    exports_sources = "patches/**"
-
-    def _get_subfolders(self):
-        _sepol_subfolder = "libsepol-%s" % self.version
-        _selinux_subfolder = "libselinux-%s" % self.version
-        return _sepol_subfolder, _selinux_subfolder
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux is supported")
 
     def requirements(self):
-        self.requires("pcre2/10.36")
+        self.requires("pcre2/10.37")
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux is supported")
 
     def build_requirements(self):
         self.build_requires("flex/2.6.4")
@@ -47,10 +59,16 @@ class LibSELinuxConan(ConanFile):
     def _selinux_soversion(self):
         return "1"
 
+    @property
+    def _subfolders(self):
+        _sepol_subfolder = "libsepol-%s" % self.version
+        _selinux_subfolder = "libselinux-%s" % self.version
+        return _sepol_subfolder, _selinux_subfolder
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        _sepol_subfolder, _selinux_subfolder = self._get_subfolders()
+        _sepol_subfolder, _selinux_subfolder = self._subfolders
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
                                 self.deps_cpp_info["pcre2"].includedirs[0])
         pcre_libs = ' '.join(["-l%s" % lib for lib in self.deps_cpp_info["pcre2"].libs])
@@ -67,7 +85,7 @@ class LibSELinuxConan(ConanFile):
             env_build.make(args=args)
 
     def package(self):
-        _sepol_subfolder, _selinux_subfolder = self._get_subfolders()
+        _sepol_subfolder, _selinux_subfolder = self._subfolders
         self.copy(pattern="LICENSE", dst="licenses", src=_selinux_subfolder)
         for library in [_sepol_subfolder, _selinux_subfolder]:
             self.copy(pattern="*.h", dst="include", src=os.path.join(library, "include"), keep_path=True)

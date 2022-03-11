@@ -1,0 +1,22 @@
+diff --git a/recipes/llvm-core/all/conanfile.py b/recipes/llvm-core/all/conanfile.py
+index bff27b41..f70578d8 100644
+--- a/recipes/llvm-core/all/conanfile.py
++++ b/recipes/llvm-core/all/conanfile.py
+@@ -184,13 +184,11 @@
+             self.requires('libxml2/2.9.10')
+ 
+     def validate(self):
+-        if self.options.shared:  # Shared builds disabled just due to the CI
+-            message = 'Shared builds not currently supported'
++        if self.options.shared:
++            del self.options.fPIC
++        if self.settings.os == 'Windows' and self.options.shared:
++            message = 'Shared builds not supported on Windows'
+             raise ConanInvalidConfiguration(message)
+-            # del self.options.fPIC
+-        # if self.settings.os == 'Windows' and self.options.shared:
+-        #     message = 'Shared builds not supported on Windows'
+-        #     raise ConanInvalidConfiguration(message)
+         if self.options.exceptions and not self.options.rtti:
+             message = 'Cannot enable exceptions without rtti support'
+             raise ConanInvalidConfiguration(message)

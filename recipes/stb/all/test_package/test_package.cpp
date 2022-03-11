@@ -1,3 +1,5 @@
+#define STBI_WINDOWS_UTF8
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
@@ -7,11 +9,9 @@
 #define STB_DEFINE
 #include "stb.h"
 
-#define PNGSUITE_PRIMARY
-
 float hdr_data[200][200][3];
 
-void dummy_write(void *context, void *data, int len)
+void dummy_write(void* context, void* data, int len)
 {
     static char dummy[1024];
     if (len > 1024)
@@ -19,21 +19,24 @@ void dummy_write(void *context, void *data, int len)
     memcpy(dummy, data, len);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     int w, h;
 
-    if (argc > 1)
-    {
+    if (argc > 1) {
         int i, n;
 
-        for (i = 1; i < argc; ++i)
-        {
+        for (i = 1; i < argc; ++i) {
             int res;
             int w2, h2, n2;
-            unsigned char *data;
+            unsigned char* data;
             printf("%s\n", argv[i]);
-            res = stbi_info(argv[1], &w2, &h2, &n2);
+            res = stbi_info(argv[i], &w2, &h2, &n2);
+            data = stbi_load(argv[i], &w, &h, &n, 0);
+            if (data)
+                free(data);
+            else
+                printf("Failed &n\n");
             data = stbi_load(argv[i], &w, &h, &n, 4);
             if (data)
                 free(data);
@@ -58,8 +61,7 @@ int main(int argc, char **argv)
             assert(data);
             assert(w == w2 && h == h2 && n == n2);
             assert(res);
-            if (data)
-            {
+            if (data) {
                 char fname[512];
                 stb_splitpath(fname, argv[i], STB_FILE);
                 stbi_write_png(stb_sprintf("output/%s.png", fname), w, h, 4, data, w * 4);
@@ -69,26 +71,21 @@ int main(int argc, char **argv)
                 stbi_write_bmp_to_func(dummy_write, 0, w, h, 4, data);
                 stbi_write_tga_to_func(dummy_write, 0, w, h, 4, data);
                 free(data);
-            }
-            else
+            } else
                 printf("FAILED 4\n");
         }
-    }
-    else
-    {
-        int i, nope = 0;
+    } else {
+        int i;
 #ifdef PNGSUITE_PRIMARY
-        char **files = stb_readdir_files("../../../pngsuite/primary");
+        char** files = stb_readdir_files("pngsuite/primary");
 #else
-        char **files = stb_readdir_files("../../images");
+        char** files = stb_readdir_files("images");
 #endif
-        for (i = 0; i < stb_arr_len(files); ++i)
-        {
+        for (i = 0; i < stb_arr_len(files); ++i) {
             int n;
-            char **failed = NULL;
-            unsigned char *data;
+            char** failed = NULL;
+            unsigned char* data;
             printf(".");
-            //printf("%s\n", files[i]);
             data = stbi_load(files[i], &w, &h, &n, 0);
             if (data)
                 free(data);
@@ -114,21 +111,18 @@ int main(int argc, char **argv)
                 ;
             else
                 stb_arr_push(failed, "4");
-            if (data)
-            {
+            if (data) {
                 char fname[512];
 
 #ifdef PNGSUITE_PRIMARY
                 int w2, h2;
-                unsigned char *data2;
+                unsigned char* data2;
                 stb_splitpath(fname, files[i], STB_FILE_EXT);
-                data2 = stbi_load(stb_sprintf("../../../pngsuite/primary_check/%s", fname), &w2, &h2, 0, 4);
+                data2 = stbi_load(stb_sprintf("pngsuite/primary_check/%s", fname), &w2, &h2, 0, 4);
                 if (!data2)
                     printf("FAILED: couldn't load 'pngsuite/primary_check/%s\n", fname);
-                else
-                {
-                    if (w != w2 || h != w2 || 0 != memcmp(data, data2, w * h * 4))
-                    {
+                else {
+                    if (w != w2 || h != w2 || 0 != memcmp(data, data2, w * h * 4)) {
                         int x, y, c;
                         if (w == w2 && h == h2)
                             for (y = 0; y < h; ++y)
@@ -145,8 +139,7 @@ int main(int argc, char **argv)
 #endif
                 free(data);
             }
-            if (failed)
-            {
+            if (failed) {
                 int j;
                 printf("FAILED: ");
                 for (j = 0; j < stb_arr_len(failed); ++j)

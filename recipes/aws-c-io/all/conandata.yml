@@ -1,0 +1,10 @@
+sources:
+  "0.10.13":
+    url: "https://github.com/awslabs/aws-c-io/archive/v0.10.13.tar.gz"
+    sha256: "ee34a93190e35a5c372ba73661dd69c48986e051a4b26dedb62bc5aa78f1660f"
+  "0.10.9":
+    url: "https://github.com/awslabs/aws-c-io/archive/v0.10.9.tar.gz"
+    sha256: "c64464152abe8b7e23f10bc026ed54a15eaf0ec0aae625d28e2caf4489090327"
+  "0.10.5":
+    url: "https://github.com/awslabs/aws-c-io/archive/v0.10.5.tar.gz"
+    sha256: "59abd4606661790cc0b777807938f3134cce77c03383015781498cfbfd191811"

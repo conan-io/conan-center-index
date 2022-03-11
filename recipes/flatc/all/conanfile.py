@@ -12,7 +12,7 @@ class FlatcConan(ConanFile):
     homepage = "http://google.github.io/flatbuffers/"
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser", "installer")
     description = "Memory Efficient Serialization Library"
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
     exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake"
 
@@ -50,7 +50,7 @@ class FlatcConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        extension = ".exe" if self.settings.os_build == "Windows" else ""
+        extension = ".exe" if self.settings.os == "Windows" else ""
         bin_dir = os.path.join(self._build_subfolder, "bin")
         self.copy(pattern="flatc" + extension, dst="bin", src=bin_dir)
         self.copy(pattern="flathash" + extension, dst="bin", src=bin_dir)

@@ -1,0 +1,10 @@
+--- a/api/omdocument.cc
++++ b/api/omdocument.cc
+@@ -38,6 +38,7 @@
+ #include <xapian/valueiterator.h>
+ 
+ #include <algorithm>
++#include <limits>
+ #include <string>
+ 
+ using namespace std;

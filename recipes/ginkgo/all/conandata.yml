@@ -2,9 +2,16 @@ sources:
   "1.3.0":
     sha256: 1b0e907b4046cdf7cef16d1730c12ba812b38f2764f49f74f454239a27f63596
     url: https://github.com/ginkgo-project/ginkgo/archive/v1.3.0.tar.gz
+  "1.4.0":
+    sha256: 6dcadbd3e93f6ec58ef6cda5b980fbf51ea3c7c13e27952ef38804058ac93f08
+    url: https://github.com/ginkgo-project/ginkgo/archive/v1.4.0.tar.gz
 patches:
   "1.3.0":
     - patch_file: "patches/cmake-fixes.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/windows-iterator.patch"
       base_path: "source_subfolder"
+  "1.4.0":
+    - patch_file: "patches/windows-symbols.patch"
+      base_path: "source_subfolder"
+

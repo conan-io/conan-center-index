@@ -1,0 +1,10 @@
+--- a/iceoryx_utils/cmake/IceoryxPackageHelper.cmake
++++ b/iceoryx_utils/cmake/IceoryxPackageHelper.cmake
+@@ -78,6 +78,7 @@ Macro(install_target_directories_and_header)
+     TARGETS ${INSTALL_TARGETS}
+     EXPORT ${TARGETS_EXPORT_NAME}
+     RUNTIME DESTINATION ${DESTINATION_BINDIR} COMPONENT bin
++    BUNDLE DESTINATION ${DESTINATION_BINDIR} COMPONENT bin
+     LIBRARY DESTINATION ${DESTINATION_LIBDIR} COMPONENT bin
+     ARCHIVE DESTINATION ${DESTINATION_LIBDIR} COMPONENT bin
+     )

@@ -1,14 +1,14 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanException
 import os
 import shutil
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             lzip = os.path.join(self.deps_cpp_info["lzip"].bin_paths[0], "lzip")
             self.run("{} --version".format(lzip))
 

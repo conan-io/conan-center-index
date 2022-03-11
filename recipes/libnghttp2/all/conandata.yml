@@ -1,42 +1,44 @@
 sources:
-  "1.39.2":
-    sha256: 92a23e4522328c8565028ee0c7270e74add7990614fd1148f2a79d873bc2a1d0
-    url: https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.bz2
-  "1.40.0":
-    sha256: 82758e13727945f2408d0612762e4655180b039f058d5ff40d055fa1497bd94f
-    url: https://github.com/nghttp2/nghttp2/releases/download/v1.40.0/nghttp2-1.40.0.tar.bz2
-  "1.42.0":
-    sha256: 10473848c2636fa9de6b469b04d0a0336cf8268486f7a6bde7cb2d0634736624
-    url: https://github.com/nghttp2/nghttp2/releases/download/v1.42.0/nghttp2-1.42.0.tar.bz2
+  "1.45.1":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.45.1.tar.gz"
+    sha256: "6289eed7e83988428c6b24e46ada52a37fab82f20d4afa257b5627267c2a141b"
   "1.43.0":
     url: "https://github.com/nghttp2/nghttp2/archive/v1.43.0.tar.gz"
     sha256: "f4a9be08d22f5ad9b4bf36c491f1be58e54dc35a1592eaf4e3f79567e4894d0c"
+  "1.42.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.42.0/nghttp2-1.42.0.tar.bz2"
+    sha256: "10473848c2636fa9de6b469b04d0a0336cf8268486f7a6bde7cb2d0634736624"
+  "1.40.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.40.0/nghttp2-1.40.0.tar.bz2"
+    sha256: "82758e13727945f2408d0612762e4655180b039f058d5ff40d055fa1497bd94f"
+  "1.39.2":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.bz2"
+    sha256: "92a23e4522328c8565028ee0c7270e74add7990614fd1148f2a79d873bc2a1d0"
 patches:
+  "1.45.1":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-findLibevent.cmake"
+      base_path: "source_subfolder"
+  "1.43.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-findLibevent.cmake"
+      base_path: "source_subfolder"
+  "1.42.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-findLibevent.cmake"
+      base_path: "source_subfolder"
+  "1.40.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-findLibevent.cmake"
+      base_path: "source_subfolder"
   "1.39.2":
     - patch_file: "patches/fix-addNghttp2IncludesPathCMake.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-findJemalloc.cmake"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
-  "1.40.0":
-    - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/nghttp_static_include_directories.patch"
-      base_path: "source_subfolder"
-  "1.42.0":
-    - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/nghttp_static_include_directories_1.42.0.patch"
-      base_path: "source_subfolder"
-  "1.43.0":
-    - patch_file: "patches/fix-findJemalloc.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-findLibevent.cmake"
-      base_path: "source_subfolder"
-    - patch_file: "patches/nghttp_static_include_directories_1.42.0.patch"
       base_path: "source_subfolder"

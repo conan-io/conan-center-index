@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class SdbusCppConan(ConanFile):
@@ -25,7 +25,7 @@ class SdbusCppConan(ConanFile):
         "fPIC": True,
         "with_code_gen": False,
     }
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ("CMakeLists.txt", "patches/**")
     generators = ("cmake", "pkg_config")
     _cmake = None
 
@@ -67,17 +67,16 @@ class SdbusCppConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
         if self.options.with_code_gen:
-            self.build_requires("expat/2.2.10")
+            self.build_requires("expat/2.4.1")
 
     def requirements(self):
-        self.requires("libsystemd/247.2")
+        self.requires("libsystemd/249.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        src_folder = "{}-{}".format(self.name, self.version)
-        os.rename(src_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -91,21 +90,11 @@ class SdbusCppConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        cmake_file = os.path.join(self._source_subfolder,
-                                  "tools", "CMakeLists.txt")
-        tools.replace_in_file(
-            cmake_file,
-            "target_link_libraries (sdbus-c++-xml2cpp ${EXPAT_LIBRARIES})",
-            """
-            target_link_libraries (sdbus-c++-xml2cpp ${EXPAT_LIBRARIES})
-            target_include_directories(sdbus-c++-xml2cpp PRIVATE
-                ${EXPAT_INCLUDE_DIRS})
-            """)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
-        if self.options.with_code_gen:
-            # FIXME: remove after https://github.com/Kistler-Group/sdbus-cpp/pull/136
-            self._patch_sources()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

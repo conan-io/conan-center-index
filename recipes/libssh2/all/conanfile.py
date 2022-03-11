@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Libssh2Conan(ConanFile):
     name = "libssh2"
@@ -9,8 +11,7 @@ class Libssh2Conan(ConanFile):
     homepage = "https://libssh2.org"
     topics = ("libssh", "ssh", "shell", "ssh2", "connection")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -19,8 +20,8 @@ class Libssh2Conan(ConanFile):
         "enable_crypt_none": [True, False],
         "enable_mac_none": [True, False],
         "crypto_backend": ["openssl", "mbedtls"],
+        "enable_debug_logging": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -28,8 +29,11 @@ class Libssh2Conan(ConanFile):
         "enable_crypt_none": False,
         "enable_mac_none": False,
         "crypto_backend": "openssl",
+        "enable_debug_logging": False,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -50,13 +54,20 @@ class Libssh2Conan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.crypto_backend == "openssl":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1l")
         elif self.options.crypto_backend == "mbedtls":
-            self.requires("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.25.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libssh2-%s" % (self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)",
+                              "list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -65,6 +76,7 @@ class Libssh2Conan(ConanFile):
         self._cmake.definitions["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_CRYPT_NONE"] = self.options.enable_crypt_none
         self._cmake.definitions["ENABLE_MAC_NONE"] = self.options.enable_mac_none
+        self._cmake.definitions["ENABLE_DEBUG_LOGGING"] = self.options.enable_debug_logging
         if self.options.crypto_backend == "openssl":
             self._cmake.definitions["CRYPTO_BACKEND"] = "OpenSSL"
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
@@ -76,21 +88,14 @@ class Libssh2Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
-        if os.path.exists(os.path.join(self.package_folder, "lib64")):
-            # rhel installs libraries into lib64
-            os.rename(os.path.join(self.package_folder, "lib64"),
-                      os.path.join(self.package_folder, "lib"))
-
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -98,10 +103,12 @@ class Libssh2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Libssh2"
         self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
+        self.cpp_info.names["pkg_config"] = "libssh2"
         self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
         self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
+        self.cpp_info.components["_libssh2"].names["pkg_config"] = "libssh2"
         self.cpp_info.components["_libssh2"].libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if self.settings.os == "Windows":
             self.cpp_info.components["_libssh2"].system_libs.append("ws2_32")
         elif self.settings.os == "Linux":
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])

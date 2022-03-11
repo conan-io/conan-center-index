@@ -1,7 +1,13 @@
 sources:
+  "0.1.12":
+    url: "https://github.com/awslabs/aws-checksums/archive/v0.1.12.tar.gz"
+    sha256: "394723034b81cc7cd528401775bc7aca2b12c7471c92350c80a0e2fb9d2909fe"
+  "0.1.11":
+    url: "https://github.com/awslabs/aws-checksums/archive/v0.1.11.tar.gz"
+    sha256: "9312e305428655bcea1f81524c3a8f617ce5299b903187047078929e850fb6d4"
   "0.1.5":
-    sha256: "6e6bed6f75cf54006b6bafb01b3b96df19605572131a2260fddaf0e87949ced0"
     url: "https://github.com/awslabs/aws-checksums/archive/v0.1.5.tar.gz"
+    sha256: "6e6bed6f75cf54006b6bafb01b3b96df19605572131a2260fddaf0e87949ced0"
 patches:
   "0.1.5":
     - base_path: "source_subfolder"

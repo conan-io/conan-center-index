@@ -1,0 +1,4 @@
+sources:
+  "0.8.1":
+    url: "https://github.com/symengine/symengine/releases/download/v0.8.1/symengine-0.8.1.tar.gz"
+    sha256: "41eb6ae6901c09e53d7f61f0758f9201e81fc534bfeecd4b2bd4b4e6f6768693"

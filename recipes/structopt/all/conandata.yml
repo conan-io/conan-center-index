@@ -1,4 +1,7 @@
 sources:
+  "0.1.2":
+    url: "https://github.com/p-ranav/structopt/archive/v0.1.2.tar.gz"
+    sha256: "904fb2e38cb1f547149b4bcd2a67f8bc4387dad1cd9a57d15c0a898faddd21b3"
   "0.1.1":
     url: "https://github.com/p-ranav/structopt/archive/v0.1.1.tar.gz"
     sha256: "a813250b3325e462df613fe6b0730a5f93012b1a5a09810f88943ebac5b178bb"

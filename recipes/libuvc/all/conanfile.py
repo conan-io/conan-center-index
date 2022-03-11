@@ -2,7 +2,8 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class LibuvcConan(ConanFile):
     name = "libuvc"
@@ -42,16 +43,15 @@ class LibuvcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libusb/1.0.23")
+        self.requires("libusb/1.0.24")
         if self.options.jpeg_turbo:
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.1.0")
         else:
             self.requires("libjpeg/9d")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:

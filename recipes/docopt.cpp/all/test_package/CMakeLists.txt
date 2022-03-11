@@ -8,9 +8,8 @@ find_package(docopt REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-# TODO: remove docopt:: namespace when fixed in conanfile
-if(DOCOPTCPP_SHARED)
-  target_link_libraries(${PROJECT_NAME} docopt::docopt)
+if(TARGET docopt_s)
+  target_link_libraries(${PROJECT_NAME} docopt_s)
 else()
-  target_link_libraries(${PROJECT_NAME} docopt::docopt_s)
+  target_link_libraries(${PROJECT_NAME} docopt)
 endif()

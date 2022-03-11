@@ -1,8 +1,7 @@
-#include <stdio.h>
+#include <gf_complete.h>
 
-#include "gf_complete.h"
-
-int main(int argc, char *argv[]) {
+int main(void) {
     gf_t gf;
+    gf_init_easy(&gf, 16);
     return 0;
 }

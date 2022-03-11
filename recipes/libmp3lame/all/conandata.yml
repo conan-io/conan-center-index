@@ -2,3 +2,11 @@ sources:
   "3.100":
     url: "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz"
     sha256: "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
+patches:
+  "3.100":
+    - patch_file: "patches/6410.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/6416.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/android.patch"
+      base_path: "source_subfolder"

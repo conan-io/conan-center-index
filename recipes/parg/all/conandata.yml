@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/jibsen/parg/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "3c728affd1442c5778cf548d53339132ce033c92fd61f7522d1e59fe6b1b36a8"

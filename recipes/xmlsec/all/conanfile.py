@@ -1,7 +1,11 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+
+required_conan_version = ">=1.36.0"
+
 
 class XmlSecConan(ConanFile):
     name = "xmlsec"
@@ -9,34 +13,36 @@ class XmlSecConan(ConanFile):
     license = ("MIT", "MPL-1.1")
     homepage = "https://github.com/lsh123/xmlsec"
     url = "https://github.com/conan-io/conan-center-index"
-    generators = "pkg_config"
-    settings = "os", "compiler", "arch", "build_type"
     topics = ("xml", "signature", "encryption")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_xslt": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
-        "with_xslt": False
-        }
+        "with_xslt": False,
+    }
 
+    generators = "pkg_config"
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        self.requires("libxml2/2.9.10")
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
-        if self.options.with_xslt:
-            self.requires("libxslt/1.1.34")
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,32 +51,35 @@ class XmlSecConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Windows" and not self._is_msvc:
-                raise ConanInvalidConfiguration("Shared mingw builds are not supported (due to libtool blocking static dependencies)")
-        if not self.options.with_openssl:
-            raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        if not self._is_msvc and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
+    def requirements(self):
+        self.requires("libxml2/2.9.12")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1m")
+        if self.options.with_xslt:
+            self.requires("libxslt/1.1.34")
 
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+    def validate(self):
+        if not self.options.with_openssl:
+            raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
+
+    def build_requirements(self):
+        if not self._is_msvc:
+            self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.4")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "xmlsec-xmlsec-{}".format(self.version.replace(".", "_"))
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
-            with tools.vcvars(self.settings):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
 
@@ -85,7 +94,7 @@ class XmlSecConan(ConanFile):
                 "cscript",
                 "configure.js",
                 "prefix={}".format(self.package_folder),
-                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "cruntime=/{}".format(msvc_runtime_flag(self)),
                 "debug={}".format(yes_no(self.settings.build_type == "Debug")),
                 "static={}".format(yes_no(not self.options.shared)),
                 "include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)),
@@ -157,11 +166,8 @@ class XmlSecConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            # FIXME: conan is missing a feature to change the join character on lists of environment variables (fix for mingw on Windows)
-            # e.g. self.env_info.AUTOMAKE_CONAN_INCLUDES.joiner = ":"
-            with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": tools.get_env("AUTOMAKE_CONAN_INCLUDES", "").replace(";", ":")}):
-                with tools.chdir(self._source_subfolder):
-                    self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
+            with tools.chdir(self._source_subfolder):
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
             autotools = self._configure_autotools()
             autotools.make()
 
@@ -193,7 +199,9 @@ class XmlSecConan(ConanFile):
         self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
         self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
-        self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}".format(tools.Version(self.version).major)
+        self.cpp_info.components["libxmlsec"].set_property(
+            "pkg_config_name", "xmlsec{}".format(tools.Version(self.version).major)
+        )
         if not self.options.shared:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
         if self.options.with_xslt:
@@ -210,4 +218,6 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["openssl"].libs = [get_libname("openssl")]
             self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
             self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
-            self.cpp_info.components["openssl"].names["pkg_config"] = "xmlsec{}-openssl".format(tools.Version(self.version).major)
+            self.cpp_info.components["openssl"].set_property(
+                "pkg_config_name", "xmlsec{}-openssl".format(tools.Version(self.version).major)
+            )

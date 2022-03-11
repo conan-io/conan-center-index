@@ -3,6 +3,12 @@
 #include <QString>
 #include <QTimer>
 #include <QFile>
+
+#include <QNetworkAccessManager>
+#include <QSqlDatabase>
+#include <qtconcurrentfilter.h>
+#include <QDomText>
+
 #include "greeter.h"
 
 int main(int argc, char *argv[]){
@@ -24,6 +30,19 @@ int main(int argc, char *argv[]){
         qFatal("Could not open resource file");
     qDebug() << "Resource content:" << f.readAll();
     f.close();
+
+    QNetworkAccessManager networkTester;
+
+    QSqlDatabase sqlTester;
+
+    QVector<int> v;
+    v << 1 << 2 << 3 << 4;
+    QtConcurrent::blockingFilter(v, [](int i)
+    {
+        return i % 2;
+    });
+
+    QDomText xmlTester;
 
     return app.exec();
 }

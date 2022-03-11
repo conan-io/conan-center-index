@@ -3,7 +3,7 @@ import os
 import shutil
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 class FlatbuffersConan(ConanFile):
@@ -34,15 +34,16 @@ class FlatbuffersConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
     def configure(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
         # Detect if host or build context
         if self.options.options_from_context:
             settings_target = getattr(self, 'settings_target', None)
@@ -70,9 +71,7 @@ class FlatbuffersConan(ConanFile):
             self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -83,7 +82,7 @@ class FlatbuffersConan(ConanFile):
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = self.options.flatbuffers and not self.options.shared
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self.options.flatc
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
-        self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = not self.options.shared
+        self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -101,6 +100,7 @@ class FlatbuffersConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.flatbuffers:
             self.copy(pattern="BuildFlatBuffers.cmake", dst="bin/cmake", src=os.path.join(self._source_subfolder, "CMake"))
@@ -124,6 +124,7 @@ class FlatbuffersConan(ConanFile):
             self.cpp_info.filenames["cmake_find_package_multi"] = "Flatbuffers"
             self.cpp_info.names["cmake_find_package"] = "flatbuffers"
             self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
+            self.cpp_info.names["pkg_config"] = "flatbuffers"
             if not self._header_only:
                 cmake_target = "flatbuffers_shared" if self.options.shared else "flatbuffers"
                 self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target

@@ -1,0 +1,11 @@
+--- third_party/zlib/BUILD.gn
++++ third_party/zlib/BUILD.gn
+@@ -19,7 +19,7 @@
+ } else if (!crashpad_is_win && !crashpad_is_fuchsia) {
+   zlib_source = "system"
+ } else if (crashpad_is_standalone) {
+-  zlib_source = "embedded"
++  zlib_source = "system"
+ } else if (crashpad_is_external) {
+   zlib_source = "external_with_embedded_build"
+ }

@@ -12,7 +12,8 @@ index c733c6c..540c38e 100644
  aux_source_directory(common COMMON_SRC)
  set(APRILTAG_SRCS apriltag.c apriltag_pose.c apriltag_quad_thresh.c)
 @@ -10,9 +8,10 @@ set(APRILTAG_SRCS apriltag.c apriltag_pose.c apriltag_quad_thresh.c)
- set(CMAKE_BUILD_TYPE Release)
+-set(CMAKE_BUILD_TYPE Release)
++#set(CMAKE_BUILD_TYPE Release)
  
  # Library
 -file(GLOB TAG_FILES ${CMAKE_SOURCE_DIR}/tag*.c)

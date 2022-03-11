@@ -1,8 +1,24 @@
 sources:
+  "0.3+3":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+3.tar.gz"
+    sha256: "d6d8019ec647dc199e026e847f6cdf714afea29d1c202e3b2a9cde929bfd54b2"
+  "0.3+2":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+2.tar.gz"
+    sha256: "982fe978c113506aefe77c413befb3ab21fffb09d9bdf287ec8e8ba59bd786e7"
+  "0.3":
+    url: "https://github.com/CrowCpp/crow/archive/v0.3.tar.gz"
+    sha256: "95538db88fba73c0bc87bbc40b62dcf488012c133a895634ade015009ebb4f25"
   "0.2":
-    sha256: f52445e0b236ecf0fda50ac5a1b7a2da511401c885071fb97a74b6b9844a9e64
-    url: https://github.com/CrowCpp/crow/archive/0.2.tar.gz
+    url: "https://github.com/CrowCpp/crow/archive/0.2.tar.gz"
+    sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
 patches:
   "0.2":
-    - patch_file: "patches/001-disable-examples.patch"
+    - patch_file: "patches/0.2/0001-normalize-buildsystem.patch"
       base_path: "source_subfolder"
+      # patch_type: "conan"
+      # description: "Skip tests and examples from build"
+    - patch_file: "patches/0.2/0002-replace-uint.patch"
+      base_path: "source_subfolder"
+      # patch_type: "portability"
+      # source: "https://github.com/CrowCpp/Crow/commit/5fe3a45793604a50f5c9086909dfa1b50dfa3e88"
+      # description: "Replace uint (not default type) with unsigned"

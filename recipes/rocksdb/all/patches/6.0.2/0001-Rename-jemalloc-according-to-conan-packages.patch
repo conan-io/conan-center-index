@@ -1,0 +1,9 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -66,5 +66,5 @@ else()
+     set(WITH_JEMALLOC ON)
+   else()
+     if(WITH_JEMALLOC)
+-      find_package(JeMalloc REQUIRED)
++      find_package(jemalloc REQUIRED)
+       add_definitions(-DROCKSDB_JEMALLOC -DJEMALLOC_NO_DEMANGLE)

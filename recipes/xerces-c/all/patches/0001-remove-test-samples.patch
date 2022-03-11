@@ -1,0 +1,27 @@
+From 02f819bfda7f01d53d986db1c14ec704dd290b7b Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Fri, 3 Sep 2021 20:30:03 -0400
+Subject: [PATCH] disable extra junk
+
+---
+ CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4254f89bb..dfd4bb01b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -175,10 +175,10 @@ install(
+   COMPONENT "development")
+ 
+ # Process subdirectories
+-add_subdirectory(doc)
++#add_subdirectory(doc)
+ add_subdirectory(src)
+-add_subdirectory(tests)
+-add_subdirectory(samples)
++#add_subdirectory(tests)
++#add_subdirectory(samples)
+ 
+ # Display configuration summary
+ message(STATUS "")

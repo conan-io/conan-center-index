@@ -10,7 +10,6 @@ class LibCheckConan(ConanFile):
     homepage = "https://github.com/libcheck/check"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,7 +20,9 @@ class LibCheckConan(ConanFile):
         "fPIC": True,
         "with_subunit": True,
     }
-    generators = "cmake", "cmake_find_package", "pkg_config"
+
+    exports_sources = "CMakeLists.txt", "patches/*"
+    generators = "cmake", "cmake_find_package"
 
     _cmake = None
 
@@ -47,15 +48,9 @@ class LibCheckConan(ConanFile):
         if self.options.with_subunit:
             self.requires("subunit/1.4.0")
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("check-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

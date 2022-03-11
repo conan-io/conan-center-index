@@ -75,6 +75,9 @@ class XnnpackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if self.settings.arch == "armv8":
+            # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
         self._cmake.definitions["XNNPACK_LIBRARY_TYPE"] = "default"
         self._cmake.definitions["XNNPACK_ENABLE_ASSEMBLY"] = self.options.assembly
         self._cmake.definitions["XNNPACK_ENABLE_MEMOPT"] = self.options.memopt

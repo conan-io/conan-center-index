@@ -1,0 +1,4 @@
+sources:
+  "2.2.2":
+    url: "https://github.com/bloomen/transwarp/archive/refs/tags/2.2.2.tar.gz"
+    sha256: "0458aebbcef0d1cf1949cfc1fce6e5aa902226622783f6eb97f7716a711c8b4d"

@@ -8,3 +8,10 @@ sources:
   "1.8.5":
     sha256: 1e1a42159fccd10b1022445ea0f0690c5314e94b0fc3d5c9fa0f02b165148c18
     url: https://github.com/DavidAce/h5pp/archive/v1.8.5.tar.gz
+  "1.8.6":
+    sha256: 39d413c9383b00a87153b9480ab6a91ba356d3f30b3598de0c0c8f7f3bd802c7
+    url: https://github.com/DavidAce/h5pp/archive/v1.8.6.tar.gz
+  "1.9.0":
+    sha256: f633b6f76ab20e1767f55068154cf8bf553e39d526ae80947388640c57ea2056
+    url: https://github.com/DavidAce/h5pp/archive/v1.9.0.tar.gz
+

@@ -1,23 +1,30 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibkmlConan(ConanFile):
     name = "libkml"
     description = "Reference implementation of OGC KML 2.2"
     license = "BSD-3-Clause"
-    topics = ("conan", "libkml", "kml", "ogc", "geospatial")
+    topics = ("libkml", "kml", "ogc", "geospatial")
     homepage = "https://github.com/libkml/libkml"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -28,6 +35,11 @@ class LibkmlConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -37,18 +49,24 @@ class LibkmlConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("expat/2.2.10")
+        self.requires("boost/1.78.0")
+        self.requires("expat/2.4.2")
         self.requires("minizip/1.2.11")
-        self.requires("uriparser/0.9.4")
+        self.requires("uriparser/0.9.6")
         self.requires("zlib/1.2.11")
 
+    def validate(self):
+        if self.options.shared and \
+           ((self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+            (self.settings.compiler == "msvc" and self.settings.compiler.runtime == "static")):
+            raise ConanInvalidConfiguration("libkml shared with Visual Studio and MT runtime is not supported")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -101,14 +119,16 @@ class LibkmlConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "LibKML")
+        self.cpp_info.set_property("pkg_config_name", "libkml")
+
         self.cpp_info.names["cmake_find_package"] = "LibKML"
         self.cpp_info.names["cmake_find_package_multi"] = "LibKML"
-        self.cpp_info.names["pkg_config"] = "libkml"
 
         self._register_components({
             "kmlbase": {
                 "defines": ["LIBKML_DLL"] if self.settings.os == "Windows" and self.options.shared else [],
-                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "system_libs": ["m"] if self.settings.os in ["Linux", "FreeBSD"] else [],
                 "requires": ["boost::headers", "expat::expat", "minizip::minizip",
                              "uriparser::uriparser", "zlib::zlib"],
             },
@@ -119,7 +139,7 @@ class LibkmlConan(ConanFile):
                 "requires": ["boost::headers", "kmlbase"],
             },
             "kmlengine": {
-                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "system_libs": ["m"] if self.settings.os in ["Linux", "FreeBSD"] else [],
                 "requires": ["boost::headers", "kmldom", "kmlbase"],
             },
             "kmlconvenience": {
@@ -135,6 +155,7 @@ class LibkmlConan(ConanFile):
             defines = values.get("defines", [])
             system_libs = values.get("system_libs", [])
             requires = values.get("requires", [])
+            self.cpp_info.components[comp_cmake_lib_name].set_property("cmake_target_name", comp_cmake_lib_name)
             self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package"] = comp_cmake_lib_name
             self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package_multi"] = comp_cmake_lib_name
             self.cpp_info.components[comp_cmake_lib_name].builddirs.append(self._module_subfolder)

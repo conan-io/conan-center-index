@@ -1,0 +1,538 @@
+--- a/mDNSPosix/Identify.c
++++ b/mDNSPosix/Identify.c
+@@ -22,8 +22,10 @@
+ // We want to use the functionality provided by "mDNS.c",
+ // except we'll sneak a peek at the packets before forwarding them to the normal mDNSCoreReceive() routine
+ #define mDNSCoreReceive __MDNS__mDNSCoreReceive
++#define UDPSocket_struct __UDPSocket_struct
+ #include "mDNS.c"
+ #undef mDNSCoreReceive
++#undef UDPSocket_struct
+ 
+ //*************************************************************************************************************
+ // Headers
+--- a/mDNSPosix/NetMonitor.c
++++ b/mDNSPosix/NetMonitor.c
+@@ -22,8 +22,10 @@
+ // We want to use much of the functionality provided by "mDNS.c",
+ // except we'll steal the packets that would be sent to normal mDNSCoreReceive() routine
+ #define mDNSCoreReceive __NOT__mDNSCoreReceive__NOT__
++#define UDPSocket_struct __UDPSocket_struct
+ #include "../mDNSCore/mDNS.c"
+ #undef mDNSCoreReceive
++#undef UDPSocket_struct
+ 
+ //*************************************************************************************************************
+ // Headers
+--- a/mDNSPosix/mDNSPosix.c
++++ b/mDNSPosix/mDNSPosix.c
+@@ -75,6 +75,13 @@
+ };
+ typedef struct IfChangeRec IfChangeRec;
+ 
++// Platform-dependent low-level networking stuff
++
++mDNSlocal int SetupSocket(struct sockaddr *intfAddr, mDNSIPPort port, int interfaceIndex, int *sktPtr, mDNSIPPort* outport,
++                          mDNSBool joinMC);
++
++static struct UDPSocket_struct* PlatformUDPSockets = NULL;
++
+ // Note that static data is initialized to zero in (modern) C.
+ static fd_set gEventFDs;
+ static int gMaxFD;                              // largest fd in gEventFDs
+@@ -147,7 +154,6 @@
+     PosixNetworkInterface * thisIntf = (PosixNetworkInterface *)(InterfaceID);
+     int sendingsocket = -1;
+ 
+-    (void)src;  // Will need to use this parameter once we implement mDNSPlatformUDPSocket/mDNSPlatformUDPClose
+     (void) useBackgroundTrafficClass;
+ 
+     assert(m != NULL);
+@@ -169,7 +175,7 @@
+         sin->sin_family         = AF_INET;
+         sin->sin_port           = dstPort.NotAnInteger;
+         sin->sin_addr.s_addr    = dst->ip.v4.NotAnInteger;
+-        sendingsocket           = thisIntf ? thisIntf->multicastSocket4 : m->p->unicastSocket4;
++        sendingsocket           = (src) ? (src->sktv4) : (thisIntf ? thisIntf->multicastSocket4 : m->p->unicastSocket4);
+     }
+ 
+ #if HAVE_IPV6
+@@ -183,7 +189,7 @@
+         sin6->sin6_family         = AF_INET6;
+         sin6->sin6_port           = dstPort.NotAnInteger;
+         sin6->sin6_addr           = *(struct in6_addr*)&dst->ip.v6;
+-        sendingsocket             = thisIntf ? thisIntf->multicastSocket6 : m->p->unicastSocket6;
++        sendingsocket             = (src) ? (src->sktv6) : (thisIntf ? thisIntf->multicastSocket6 : m->p->unicastSocket6);
+     }
+ #endif
+ 
+@@ -213,7 +219,7 @@
+ }
+ 
+ // This routine is called when the main loop detects that data is available on a socket.
+-mDNSlocal void SocketDataReady(mDNS *const m, PosixNetworkInterface *intf, int skt)
++mDNSlocal void SocketDataReady(mDNS *const m, PosixNetworkInterface *intf, int skt, mDNSIPPort localPort)
+ {
+     mDNSAddr senderAddr, destAddr;
+     mDNSIPPort senderPort;
+@@ -309,7 +315,7 @@
+ 
+     if (packetLen >= 0)
+         mDNSCoreReceive(m, &packet, (mDNSu8 *)&packet + packetLen,
+-                        &senderAddr, senderPort, &destAddr, MulticastDNSPort, InterfaceID);
++                        &senderAddr, senderPort, &destAddr, mDNSIPPortIsZero(localPort) ? MulticastDNSPort : localPort, InterfaceID);
+ }
+ 
+ mDNSexport TCPSocket *mDNSPlatformTCPSocket(TCPSocketFlags flags, mDNSIPPort * port, mDNSBool useBackgroundTrafficClass)
+@@ -317,6 +323,7 @@
+     (void)flags;        // Unused
+     (void)port;         // Unused
+     (void)useBackgroundTrafficClass; // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return NULL;
+ }
+ 
+@@ -324,12 +331,14 @@
+ {
+     (void)flags;        // Unused
+     (void)sd;           // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return NULL;
+ }
+ 
+ mDNSexport int mDNSPlatformTCPGetFD(TCPSocket *sock)
+ {
+     (void)sock;         // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return -1;
+ }
+ 
+@@ -343,12 +352,14 @@
+     (void)InterfaceID;  // Unused
+     (void)callback;     // Unused
+     (void)context;      // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return(mStatus_UnsupportedErr);
+ }
+ 
+ mDNSexport void mDNSPlatformTCPCloseConnection(TCPSocket *sock)
+ {
+     (void)sock;         // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ mDNSexport long mDNSPlatformReadTCP(TCPSocket *sock, void *buf, unsigned long buflen, mDNSBool * closed)
+@@ -357,6 +368,7 @@
+     (void)buf;          // Unused
+     (void)buflen;       // Unused
+     (void)closed;       // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return 0;
+ }
+ 
+@@ -365,23 +377,88 @@
+     (void)sock;         // Unused
+     (void)msg;          // Unused
+     (void)len;          // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return 0;
+ }
+ 
+-mDNSexport UDPSocket *mDNSPlatformUDPSocket(mDNSIPPort port)
++mDNSexport UDPSocket *mDNSPlatformUDPSocket(mDNSIPPort requestedPort)
+ {
+-    (void)port;         // Unused
+-    return NULL;
++    mStatus err;
++    mDNSIPPort port = requestedPort;
++    mDNSBool randomizePort = mDNSIPPortIsZero(requestedPort);
++    struct sockaddr sa;
++    int i = 1000; // Try at most 1000 times to get a unique random port
++    UDPSocket *p = mallocL("UDPSocket", sizeof(UDPSocket));
++    if (!p) { LogMsg("mDNSPlatformUDPSocket: memory exhausted"); return(mDNSNULL); }
++    mDNSPlatformMemZero(p, sizeof(UDPSocket));
++    p->port  = zeroIPPort;
++    p->sktv4 = -1;
++    p->sktv6 = -1;
++
++    do {
++        // The kernel doesn't do cryptographically strong random port allocation, so we do it ourselves here
++        if (randomizePort) port = mDNSOpaque16fromIntVal(0xC000 + mDNSRandom(0x3FFF));
++        mDNSPlatformMemZero(&sa, sizeof(struct sockaddr));
++        sa.sa_family = AF_INET;
++        err = SetupSocket(&sa, port, 0, &p->sktv4, &p->port, mDNSSameIPPort(requestedPort, NATPMPAnnouncementPort));
++        /* TODO: make me work!
++        if (!err)
++            {
++            mDNSPlatformMemZero(&sa, sizeof(struct sockaddr));
++            sa.sa_family = AF_INET6;
++            err = SetupSocket(&sa, port, 0, &p->sktv6, &p->port, 0);
++            if (err) { close(p->sktv4); p->sktv4 = -1; }
++            }*/
++        i--;
++    } while (err == EADDRINUSE && randomizePort && i);
++
++    if (err) {
++        // In customer builds we don't want to log failures with port 5351, because this is a known issue
++        // of failing to bind to this port when Internet Sharing has already bound to it
++        // We also don't want to log about port 5350, due to a known bug when some other
++        // process is bound to it.
++        if (mDNSSameIPPort(requestedPort, NATPMPPort) || mDNSSameIPPort(requestedPort, NATPMPAnnouncementPort))
++            LogInfo("mDNSPlatformUDPSocket: SetupSocket %d failed error %d errno %d (%s)", mDNSVal16(requestedPort), err, errno, strerror(errno));
++        else LogMsg("mDNSPlatformUDPSocket: SetupSocket %d failed error %d errno %d (%s)", mDNSVal16(requestedPort), err, errno, strerror(errno));
++        freeL("UDPSocket", p);
++        return(mDNSNULL);
++    }
++
++    p->prev = NULL;
++    p->next = PlatformUDPSockets;
++    if (p->next)
++        p->next->prev = p;
++    PlatformUDPSockets = p;
++
++    return(p);
+ }
+ 
+-mDNSexport void           mDNSPlatformUDPClose(UDPSocket *sock)
++mDNSexport void mDNSPlatformUDPClose(UDPSocket *sock)
+ {
+-    (void)sock;         // Unused
++     if (sock->sktv4 > -1) {
++          close(sock->sktv4);
++          sock->sktv4 = -1;
++     }
++     if (sock->sktv6 > -1) {
++          close(sock->sktv6);
++          sock->sktv6 = -1;
++     }
++
++     if (sock->prev)
++          sock->prev->next = sock->next;
++     else
++          PlatformUDPSockets = sock->next;
++
++     if (sock->next)
++          sock->next->prev = sock->prev;
++
++     freeL("UDPSocket", sock);
+ }
+ 
+ mDNSexport void mDNSPlatformUpdateProxyList(const mDNSInterfaceID InterfaceID)
+ {
+     (void)InterfaceID;          // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ mDNSexport void mDNSPlatformSendRawPacket(const void *const msg, const mDNSu8 *const end, mDNSInterfaceID InterfaceID)
+@@ -389,6 +466,7 @@
+     (void)msg;          // Unused
+     (void)end;          // Unused
+     (void)InterfaceID;          // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ mDNSexport void mDNSPlatformSetLocalAddressCacheEntry(const mDNSAddr *const tpa, const mDNSEthAddr *const tha, mDNSInterfaceID InterfaceID)
+@@ -396,21 +474,33 @@
+     (void)tpa;          // Unused
+     (void)tha;          // Unused
+     (void)InterfaceID;          // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
++}
++
++mDNSexport void mDNSPlatformSetLocalARP(const mDNSv4Addr *const tpa, const mDNSEthAddr *const tha, mDNSInterfaceID InterfaceID)
++{
++    (void)tpa;          // Unused
++    (void)tha;          // Unused
++    (void)InterfaceID;          // Unused
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ mDNSexport mStatus mDNSPlatformTLSSetupCerts(void)
+ {
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+     return(mStatus_UnsupportedErr);
+ }
+ 
+ mDNSexport void mDNSPlatformTLSTearDownCerts(void)
+ {
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ mDNSexport void mDNSPlatformSetAllowSleep(mDNSBool allowSleep, const char *reason)
+ {
+     (void) allowSleep;
+     (void) reason;
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ #if COMPILER_LIKES_PRAGMA_MARK
+@@ -443,19 +533,104 @@
+     return mDNStrue;
+ }
+ 
++#ifdef TARGET_OS_LINUX
++#include <ctype.h>
++#endif
++
+ mDNSexport mStatus mDNSPlatformGetPrimaryInterface(mDNSAddr * v4, mDNSAddr * v6, mDNSAddr * router)
++#ifdef TARGET_OS_LINUX
+ {
++    unsigned long d, g;
++    char buf[256];
++    int line = 0;
++    FILE * f;
++    char * p;
++
++    // TODO: where/how to get ipv6 address?
++    if (v6)
++        *v6 = zeroAddr;
++
++    f = fopen("/proc/net/route", "r");
++
++    if (!f)
++        return mStatus_UnknownErr;
++
++    while(fgets(buf, sizeof(buf), f)) {
++        if(line > 0) {  /* skip the first line */
++            p = buf;
++
++            /* skip the interface name */
++            while(*p && !isspace(*p))
++                p++;
++
++            *p++ = '\0';
++
++            while(*p && isspace(*p))
++                p++;
++
++            if(sscanf(p, "%lx%lx", &d, &g)==2) {
++                if(d == 0 && g != 0) {
++                    if (router) {
++                        router->type = mDNSAddrType_IPv4;
++                        router->ip.v4.NotAnInteger = g;
++                    }
++                    fclose(f);
++
++                    int sock = socket(AF_INET, SOCK_DGRAM, 0);
++                    if (sock > -1) {
++                        struct sockaddr_in sin;
++                        socklen_t socklen = sizeof(struct sockaddr_in);
++
++                        mDNSPlatformMemZero(&sin, socklen);
++                        sin.sin_port = htons(3000);
++                        sin.sin_addr.s_addr = INADDR_ANY;
++                        sin.sin_family = AF_INET;
++
++
++                        if (connect(sock, (struct sockaddr*)&sin, socklen) >= 0 &&
++                            getsockname(sock, (struct sockaddr*)&sin, &socklen) >= 0) {
++
++                            if (v4) {
++                                v4->type = mDNSAddrType_IPv4;
++                                v4->ip.v4.NotAnInteger = sin.sin_addr.s_addr;
++                            }
++
++                            return mStatus_NoError;
++                        }
++
++                        close(sock);
++                    }
++
++                    return mStatus_UnknownErr;
++                }
++            }
++        }
++
++        line++;
++    }
++
++    /* default route not found ! */
++    if (f)
++        fclose(f);
++
++    return mStatus_UnknownErr;
++}
++#else
++{
++    (void) m;
+     (void) v4;
+     (void) v6;
+     (void) router;
+ 
+     return mStatus_UnsupportedErr;
+ }
++#endif
+ 
+ mDNSexport void mDNSPlatformDynDNSHostNameStatusChanged(const domainname *const dname, const mStatus status)
+ {
+     (void) dname;
+     (void) status;
++    LogMsg("%s:%s(): NOT IMPLEMENTED!", __FILE__, __FUNCTION__);
+ }
+ 
+ #if COMPILER_LIKES_PRAGMA_MARK
+@@ -502,8 +677,9 @@
+             mDNS_AddDNSServer(m, NULL, mDNSInterface_Any, 0, &DNSAddr, UnicastDNSPort, kScopeNone, 0, mDNSfalse, mDNSfalse, 0, mDNStrue, mDNStrue, mDNSfalse);
+             numOfServers++;
+         }
++        keyword[0] = nameserver[0] = 0;
+     }
+-	fclose(fp);
++    fclose(fp);
+     return (numOfServers > 0) ? 0 : -1;
+ }
+ 
+@@ -611,13 +787,14 @@
+ // Sets up a send/receive socket.
+ // If mDNSIPPort port is non-zero, then it's a multicast socket on the specified interface
+ // If mDNSIPPort port is zero, then it's a randomly assigned port number, used for sending unicast queries
+-mDNSlocal int SetupSocket(struct sockaddr *intfAddr, mDNSIPPort port, int interfaceIndex, int *sktPtr)
++mDNSlocal int SetupSocket(struct sockaddr *intfAddr, mDNSIPPort port, int interfaceIndex, int *sktPtr, mDNSIPPort* outport, mDNSBool joinMC)
+ {
+     int err = 0;
+     static const int kOn = 1;
+     static const int kIntTwoFiveFive = 255;
+     static const unsigned char kByteTwoFiveFive = 255;
+-    const mDNSBool JoinMulticastGroup = (port.NotAnInteger != 0);
++    const mDNSBool JoinMulticastGroup = joinMC;
++    const mDNSBool isNATPMPAnnouncePort = mDNSSameIPPort(port, NATPMPAnnouncementPort);
+ 
+     (void) interfaceIndex;  // This parameter unused on plaforms that don't have IPv6
+     assert(intfAddr != NULL);
+@@ -703,7 +880,7 @@
+         // Add multicast group membership on this interface
+         if (err == 0 && JoinMulticastGroup)
+         {
+-            imr.imr_multiaddr.s_addr = AllDNSLinkGroup_v4.ip.v4.NotAnInteger;
++            imr.imr_multiaddr.s_addr = isNATPMPAnnouncePort ? AllHosts_v4.NotAnInteger :  AllDNSLinkGroup_v4.ip.v4.NotAnInteger;
+             imr.imr_interface        = ((struct sockaddr_in*)intfAddr)->sin_addr;
+             err = setsockopt(*sktPtr, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imr, sizeof(imr));
+             if (err < 0) { err = errno; perror("setsockopt - IP_ADD_MEMBERSHIP"); }
+@@ -738,9 +915,10 @@
+         {
+             bindAddr.sin_family      = AF_INET;
+             bindAddr.sin_port        = port.NotAnInteger;
+-            bindAddr.sin_addr.s_addr = INADDR_ANY; // Want to receive multicasts AND unicasts on this socket
++            bindAddr.sin_addr.s_addr = isNATPMPAnnouncePort ? AllHosts_v4.NotAnInteger : INADDR_ANY;
+             err = bind(*sktPtr, (struct sockaddr *) &bindAddr, sizeof(bindAddr));
+             if (err < 0) { err = errno; perror("bind"); fflush(stderr); }
++            if (outport) outport->NotAnInteger = bindAddr.sin_port;
+         }
+     }     // endif (intfAddr->sa_family == AF_INET)
+ 
+@@ -911,10 +1089,10 @@
+     if (err == 0)
+     {
+         if (alias->multicastSocket4 == -1 && intfAddr->sa_family == AF_INET)
+-            err = SetupSocket(intfAddr, MulticastDNSPort, intf->index, &alias->multicastSocket4);
++            err = SetupSocket(intfAddr, MulticastDNSPort, intf->index, &alias->multicastSocket4, NULL, 1);
+ #if HAVE_IPV6
+         else if (alias->multicastSocket6 == -1 && intfAddr->sa_family == AF_INET6)
+-            err = SetupSocket(intfAddr, MulticastDNSPort, intf->index, &alias->multicastSocket6);
++            err = SetupSocket(intfAddr, MulticastDNSPort, intf->index, &alias->multicastSocket6, NULL, 1);
+ #endif
+     }
+ 
+@@ -1292,11 +1470,11 @@
+ 
+     sa.sa_family = AF_INET;
+     m->p->unicastSocket4 = -1;
+-    if (err == mStatus_NoError) err = SetupSocket(&sa, zeroIPPort, 0, &m->p->unicastSocket4);
++    if (err == mStatus_NoError) err = SetupSocket(&sa, zeroIPPort, 0, &m->p->unicastSocket4, NULL, 0);
+ #if HAVE_IPV6
+     sa.sa_family = AF_INET6;
+     m->p->unicastSocket6 = -1;
+-    if (err == mStatus_NoError) err = SetupSocket(&sa, zeroIPPort, 0, &m->p->unicastSocket6);
++    if (err == mStatus_NoError) err = SetupSocket(&sa, zeroIPPort, 0, &m->p->unicastSocket6, NULL, 0);
+ #endif
+ 
+     // Tell mDNS core about the network interfaces on this machine.
+@@ -1685,6 +1863,16 @@
+         info = (PosixNetworkInterface *)(info->coreIntf.next);
+     }
+ 
++    UDPSocket* socks = PlatformUDPSockets;
++    while (socks) {
++        if (socks->sktv4 > -1) mDNSPosixAddToFDSet(nfds, readfds, socks->sktv4);
++#if HAVE_IPV6
++        if (socks->sktv6 > -1) mDNSPosixAddToFDSet(nfds, readfds, socks->sktv6);
++#endif
++
++        socks = socks->next;
++    }
++
+     // 3. Calculate the time remaining to the next scheduled event (in struct timeval format)
+     ticks = nextevent - mDNS_TimeNow(m);
+     if (ticks < 1) ticks = 1;
+@@ -1707,13 +1895,13 @@
+     if (m->p->unicastSocket4 != -1 && FD_ISSET(m->p->unicastSocket4, readfds))
+     {
+         FD_CLR(m->p->unicastSocket4, readfds);
+-        SocketDataReady(m, NULL, m->p->unicastSocket4);
++        SocketDataReady(m, NULL, m->p->unicastSocket4, zeroIPPort);
+     }
+ #if HAVE_IPV6
+     if (m->p->unicastSocket6 != -1 && FD_ISSET(m->p->unicastSocket6, readfds))
+     {
+         FD_CLR(m->p->unicastSocket6, readfds);
+-        SocketDataReady(m, NULL, m->p->unicastSocket6);
++        SocketDataReady(m, NULL, m->p->unicastSocket6, zeroIPPort);
+     }
+ #endif
+ 
+@@ -1722,17 +1910,33 @@
+         if (info->multicastSocket4 != -1 && FD_ISSET(info->multicastSocket4, readfds))
+         {
+             FD_CLR(info->multicastSocket4, readfds);
+-            SocketDataReady(m, info, info->multicastSocket4);
++            SocketDataReady(m, info, info->multicastSocket4, zeroIPPort);
+         }
+ #if HAVE_IPV6
+         if (info->multicastSocket6 != -1 && FD_ISSET(info->multicastSocket6, readfds))
+         {
+             FD_CLR(info->multicastSocket6, readfds);
+-            SocketDataReady(m, info, info->multicastSocket6);
++            SocketDataReady(m, info, info->multicastSocket6, zeroIPPort);
+         }
+ #endif
+         info = (PosixNetworkInterface *)(info->coreIntf.next);
+     }
++
++    UDPSocket* socks = PlatformUDPSockets;
++    while (socks) {
++        if (socks->sktv4 > -1 && FD_ISSET(socks->sktv4, readfds)) {
++            FD_CLR(socks->sktv4, readfds);
++            SocketDataReady(m, NULL, socks->sktv4, socks->port);
++        }
++#if HAVE_IPV6
++        if (socks->sktv6 > -1 && FD_ISSET(socks->sktv6, readfds)) {
++            FD_CLR(socks->sktv6, readfds);
++            SocketDataReady(m, NULL, socks->sktv6, socks->port);
++        }
++#endif
++
++         socks = socks->next;
++    }
+ }
+ 
+ // update gMaxFD
+--- a/mDNSPosix/mDNSPosix.h
++++ b/mDNSPosix/mDNSPosix.h
+@@ -57,6 +57,17 @@
+ #endif
+ };
+ 
++// Platform-specific low-level networking code
++
++struct UDPSocket_struct {
++    mDNSIPPort port;
++    int sktv4;
++    int sktv6;
++
++    struct UDPSocket_struct* next;
++    struct UDPSocket_struct* prev;
++};
++
+ #define uDNS_SERVERS_FILE "/etc/resolv.conf"
+ extern int ParseDNSServers(mDNS *m, const char *filePath);
+ extern mStatus mDNSPlatformPosixRefreshInterfaceList(mDNS *const m);

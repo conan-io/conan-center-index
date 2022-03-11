@@ -1,65 +1,15 @@
 versions:
-  8.0.0:
-    folder: all
-  8.1.0:
-    folder: all
-  8.1.1:
-    folder: all
-  8.2.0:
-    folder: all
-  8.3.0:
-    folder: all
-  8.4.0:
-    folder: all
-  8.5.0:
-    folder: all
-  8.6.0:
-    folder: all
-  8.7.0:
-    folder: all
-  8.7.1:
-    folder: all
-  8.8.0:
-    folder: all
-  8.8.1:
-    folder: all
-  8.9.0:
-    folder: all
-  8.9.1:
-    folder: all
   8.9.2:
     folder: all
   9.0.0:
     folder: all
-  10.0.0:
-    folder: all
-  10.0.1:
-    folder: all
-  10.1.0:
-    folder: all
-  10.1.1:
-    folder: all
-  10.1.2:
-    folder: all
-  10.2.0:
-    folder: all
-  10.2.1:
-    folder: all
-  10.3.0:
-    folder: all
-  10.4.0:
-    folder: all
-  10.5.0:
-    folder: all
-  10.5.1:
-    folder: all
-  10.6.0:
-    folder: all
-  10.7.0:
-    folder: all
-  10.7.1:
-    folder: all
-  10.8.0:
-    folder: all
   10.9.1:
+    folder: all
+  10.10.0:
+    folder: all
+  10.11.0:
+    folder: all
+  10.12.0:
+    folder: all
+  10.12.1:
     folder: all

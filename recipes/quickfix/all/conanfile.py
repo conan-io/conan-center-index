@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class QuickfixConan(ConanFile):
     name = "quickfix"
@@ -33,6 +34,33 @@ class QuickfixConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def requirements(self):
+        if self.options.with_ssl:
+            self.requires("openssl/1.1.1k")
+
+        if self.options.with_postgres:
+            self.requires("libpq/13.2")
+
+        if self.options.with_mysql == "libmysqlclient":
+            self.requires("libmysqlclient/8.0.25")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("QuickFIX cannot be built as shared lib on Windows")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("QuickFIX doesn't support ARM compilation")  # See issue: https://github.com/quickfix/quickfix/issues/206
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -41,28 +69,6 @@ class QuickfixConan(ConanFile):
             self._cmake.definitions["HAVE_MYSQL"] = bool(self.options.with_mysql)
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    def requirements(self):
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1g")
-
-        if self.options.with_postgres:
-            self.requires("libpq/11.5")
-
-        if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.17")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("QuickFIX cannot be built as shared lib on Windows")
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:

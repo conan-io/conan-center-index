@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-06-18 00:05:40.000000000 -0300
++++ b/CMakeLists.txt	2021-07-14 18:02:10.941935678 -0300
+@@ -281,7 +281,7 @@
+       COMMENT "Copy mimalloc-redirect${MIMALLOC_REDIRECT_SUFFIX}.dll to output directory")
+   endif()
+ 
+-  install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_libdir} LIBRARY)  
++  install(TARGETS mimalloc EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)  
+   install(EXPORT mimalloc DESTINATION ${mi_install_cmakedir})
+ endif()
+ 
+@@ -305,7 +305,7 @@
+     set_target_properties(mimalloc-static PROPERTIES OUTPUT_NAME ${mi_basename})
+   endif()
+ 
+-  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${mi_install_libdir} LIBRARY)
++  install(TARGETS mimalloc-static EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+ endif()
+ 
+ # install include files
+@@ -315,7 +315,7 @@
+ install(FILES cmake/mimalloc-config.cmake DESTINATION ${mi_install_cmakedir})
+ install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${mi_install_cmakedir})
+ 
+-if(NOT WIN32 AND MI_BUILD_SHARED AND NOT MI_INSTALL_TOPLEVEL)
++if(FALSE)
+   # install a symlink in the /usr/local/lib to the versioned library
+   # note: use delayed prefix expansion as \${CMAKE_INSTALL_PREFIX}
+   set(mi_symlink "${CMAKE_SHARED_MODULE_PREFIX}${mi_basename}${CMAKE_SHARED_LIBRARY_SUFFIX}")

@@ -1,7 +1,8 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class EditlineConan(ConanFile):
@@ -29,15 +30,6 @@ class EditlineConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        if self.options.terminal_db == "termcap":
-            self.requires("termcap/1.3.1")
-        elif self.options.terminal_db == "ncurses":
-            self.requires("ncurses/6.2")
-        elif self.options.terminal_db == "tinfo":
-            # TODO - Add tinfo when available
-            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,13 +39,23 @@ class EditlineConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.terminal_db == "termcap":
+            self.requires("termcap/1.3.1")
+        elif self.options.terminal_db == "ncurses":
+            self.requires("ncurses/6.2")
+
+    def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported by libedit (missing termios.h)")
+        if self.options.terminal_db == "tinfo":
+            # TODO - Add tinfo when available
+            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        archive_name = glob.glob("{}-*-{}".format("libedit", self.version))[0]
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -62,7 +64,7 @@ class EditlineConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
 
-        configure_args = []
+        configure_args = ["--disable-examples"]
         if self.options.shared:
             configure_args.extend(["--disable-static", "--enable-shared"])
         else:

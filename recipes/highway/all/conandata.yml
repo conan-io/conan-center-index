@@ -2,6 +2,9 @@ sources:
   "0.11.1":
     url: "https://github.com/google/highway/archive/0.11.1.tar.gz"
     sha256: "4c4bb9501c02b27a0944afde8923aaab554384690d37e5b2a7f97553426ea641"
+  "0.12.2":
+    url: "https://github.com/google/highway/archive/0.12.2.tar.gz"
+    sha256: "e1d47ce510429fdcf31f41697ca74fb0dcd59d933196e531a86d51751a56f4cc"
 patches:
   "0.11.1":
     - patch_file: "patches/0001-remove-contrib.patch"

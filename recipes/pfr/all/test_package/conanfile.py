@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
 
 
@@ -8,6 +9,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["PfrMajorVersion"] = Version(
+            self.deps_cpp_info["pfr"].version).major
         cmake.configure()
         cmake.build()
 

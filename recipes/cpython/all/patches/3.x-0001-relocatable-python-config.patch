@@ -1,0 +1,11 @@
+--- Misc/python-config.sh.in
++++ Misc/python-config.sh.in
+@@ -30,7 +30,7 @@
+ # locations. Keep prefix & exec_prefix using their original values in case
+ # they are referenced in other configure variables, to prevent double
+ # substitution, issue #22140.
+-prefix="@prefix@"
++prefix="$PYTHON_ROOT"
+ exec_prefix="@exec_prefix@"
+ exec_prefix_real=${prefix_real}
+ includedir=$(echo "@includedir@" | sed "s#$prefix#$prefix_real#")

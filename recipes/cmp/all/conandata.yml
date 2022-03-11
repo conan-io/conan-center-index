@@ -1,0 +1,4 @@
+sources:
+  "19":
+    url: "https://github.com/camgunz/cmp/archive/refs/tags/v19.tar.gz"
+    sha256: "afa23e1961027c0146bda73f892726f3cdf0a85579a9813077890a51aec99916"

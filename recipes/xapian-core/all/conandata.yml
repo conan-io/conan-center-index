@@ -9,6 +9,8 @@ patches:
   "1.4.16":
     - base_path: ""
       patch_file: "patches/0001-add-msvc-cl-sh.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-missing-limits-include.patch"
   "1.4.18":
     - base_path: ""
       patch_file: "patches/0001-add-msvc-cl-sh.patch"

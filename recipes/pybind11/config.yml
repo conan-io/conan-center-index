@@ -9,4 +9,9 @@ versions:
     folder: all
   "2.6.2":
     folder: all
-    
+  "2.7.0":
+    folder: all
+  "2.7.1":
+    folder: all
+  "2.8.1":
+    folder: all

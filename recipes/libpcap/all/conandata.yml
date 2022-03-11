@@ -5,3 +5,6 @@ sources:
   "1.10.0":
     sha256: 7d8c18f740c0b630f55699ea22191ffbbba483f48ea60506848f9241d3973763
     url: https://github.com/the-tcpdump-group/libpcap/archive/libpcap-1.10.0.tar.gz
+  "1.10.1":
+    url: "https://github.com/the-tcpdump-group/libpcap/archive/libpcap-1.10.1.tar.gz"
+    sha256: "7b650c9e0ce246aa41ba5463fe8e903efc444c914a3ccb986547350bed077ed6"

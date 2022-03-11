@@ -1,0 +1,4 @@
+sources:
+  "1.32.90":
+    url: "https://alpha.gnu.org/gnu/tar/tar-1.32.90.tar.gz"
+    sha256: "641fe07b7403c8eb801e7bfb91d1b7e5800ab15df524e22e0b2e89501280b6d7"

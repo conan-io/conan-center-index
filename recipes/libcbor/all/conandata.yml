@@ -1,8 +1,17 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/PJK/libcbor/archive/v0.9.0.tar.gz"
+    sha256: "da81e4f9333e0086d4e2745183c7052f04ecc4dbcffcf910029df24f103c15d1"
   "0.7.0":
-    sha256: fb731afe0a9980581d85e4b8d4ef128b175f782d92e0cd898935f3d26dd3dde7
     url: https://github.com/PJK/libcbor/archive/v0.7.0.tar.gz
+    sha256: "fb731afe0a9980581d85e4b8d4ef128b175f782d92e0cd898935f3d26dd3dde7"
 patches:
+  "0.9.0":
+    - patch_file: "patches/0.7.0/002_fix_cmake_module_path.patch"
+      base_path: "source_subfolder"
   "0.7.0":
     - patch_file: "patches/0.7.0/001_fix_shared_build.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0.7.0/002_fix_cmake_module_path.patch"
+      base_path: "source_subfolder"
+

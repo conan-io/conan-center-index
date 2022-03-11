@@ -1,6 +1,10 @@
 sources:
   "3.3.9":
-    url: "http://www.fftw.org/fftw-3.3.9.tar.gz"
+    url:
+      [
+        "https://www.fftw.org/fftw-3.3.9.tar.gz",
+        "https://fftw.org/fftw-3.3.9.tar.gz",
+      ]
     sha256: "bf2c7ce40b04ae811af714deb512510cc2c17b9ab9d6ddcf49fe4487eea7af3d"
   "3.3.8":
     url: "http://www.fftw.org/fftw-3.3.8.tar.gz"

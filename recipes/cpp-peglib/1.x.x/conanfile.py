@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
+required_conan_version = ">=1.33.0"
 
 class CpppeglibConan(ConanFile):
     name = "cpp-peglib"
@@ -11,7 +11,6 @@ class CpppeglibConan(ConanFile):
     homepage = "https://github.com/yhirose/cpp-peglib"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler"
-    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -26,7 +25,7 @@ class CpppeglibConan(ConanFile):
             "apple-clang": "10"
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
@@ -46,12 +45,15 @@ class CpppeglibConan(ConanFile):
            tools.stdcpp_library(self) == "stdc++":
             raise ConanInvalidConfiguration("{} {} does not support clang 7 with libstdc++.".format(self.name, self.version))
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -62,7 +64,7 @@ class CpppeglibConan(ConanFile):
         self.copy("peglib.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
             self.cpp_info.cxxflags.append("-pthread")
             self.cpp_info.exelinkflags.append("-pthread")

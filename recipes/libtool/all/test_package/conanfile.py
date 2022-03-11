@@ -8,10 +8,15 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    test_type = "build_requires", "requires"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):
@@ -58,7 +63,7 @@ class TestPackageConan(ConanFile):
         assert os.path.isfile(os.path.join(self._package_folder, "include", "lib.h"))
         assert os.path.isdir(os.path.join(self._package_folder, "lib"))
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join(self._package_folder, "bin", "test_package"), run_environment=True)
 
     def _build_ltdl(self):
@@ -75,7 +80,7 @@ class TestPackageConan(ConanFile):
             "Windows": "dll",
         }[str(self.settings.os)]
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             libdir = "bin" if self.settings.os == "Windows" else "lib"
             lib_path = os.path.join(libdir, "liba.{}".format(lib_suffix))
@@ -91,7 +96,6 @@ class TestPackageConan(ConanFile):
         install_prefix = os.path.join(autotools_folder, "prefix")
 
         # Build static library using CMake
-        cmake_build_folder = os.path.join(autotools_folder, "cmake_build")
         cmake = CMake(self)
         cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
         cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
@@ -129,11 +133,13 @@ class TestPackageConan(ConanFile):
                 assert len(list(glob.glob(os.path.join("lib", "*.so")))) > 0
 
     def build(self):
-        self._build_autotools()
         self._build_ltdl()
-        self._build_static_lib_in_shared()
+        if not tools.cross_building(self):
+            self._build_autotools()
+            self._build_static_lib_in_shared()
 
     def test(self):
-        self._test_autotools()
         self._test_ltdl()
-        self._test_static_lib_in_shared()
+        if not tools.cross_building(self):
+            self._test_autotools()
+            self._test_static_lib_in_shared()

@@ -1,7 +1,7 @@
 import os
-
 from conans import CMake, ConanFile, tools
 
+required_conan_version = ">=1.33.0"
 
 class DuktapeConan(ConanFile):
     name = "duktape"
@@ -30,13 +30,13 @@ class DuktapeConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder) 
 
     def _configure_cmake(self):
         if self._cmake:

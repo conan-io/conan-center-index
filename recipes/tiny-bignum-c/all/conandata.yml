@@ -1,0 +1,4 @@
+sources:
+  "cci.20200203":
+    url: "https://github.com/kokke/tiny-bignum-c/archive/cb8b53925ae79e5fb8f6a2f21b371fb2c3c8e7ec.tar.gz"
+    sha256: "932ff413b78cb25d49c86220dce7017198cfbb4fc85f658709d39e3706f3c478"

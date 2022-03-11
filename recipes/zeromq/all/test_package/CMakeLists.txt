@@ -4,7 +4,7 @@ project(test_package)
 option(WITH_LIBSODIUM "zeromq is built with libsodium")
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(ZeroMQ REQUIRED CONFIG)
 

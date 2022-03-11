@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class libmaxminddbConan(ConanFile):
@@ -36,8 +38,8 @@ class libmaxminddbConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libmaxminddb-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -60,11 +62,14 @@ class libmaxminddbConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "maxminddb"
+        self.cpp_info.names["cmake_find_package_multi"] = "maxminddb"
+        self.cpp_info.names["pkg_config"] = "libmaxminddb"
         self.cpp_info.libs = ["maxminddb"]
-
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.settings.os != "Windows":
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

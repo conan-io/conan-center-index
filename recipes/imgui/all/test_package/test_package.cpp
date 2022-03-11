@@ -6,6 +6,9 @@ int main(int, char**)
     ImGuiContext* context =ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
+    ImGuiTextBuffer textBuffer;
+    textBuffer.append("Hello, ImGui");
+
     // Build atlas
     unsigned char* tex_pixels = NULL;
     int tex_w, tex_h;
@@ -20,6 +23,7 @@ int main(int, char**)
 
         static float f = 0.0f;
         ImGui::Text("Hello, world!");
+        ImGui::Text("%s", textBuffer.begin());
         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::ShowDemoWindow(NULL);

@@ -1,0 +1,4 @@
+sources:
+  "1.1.4":
+    url: "https://github.com/yayahjb/cqrlib/archive/refs/tags/CQRlib-1.1.4.tar.gz"
+    sha256: "98d70b5a347638754ef3a3874d4ec1ecdd9d1d12c123c44b367ff18419f92c6d"

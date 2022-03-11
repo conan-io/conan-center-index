@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class PCREConan(ConanFile):
     name = "pcre"
@@ -25,7 +27,7 @@ class PCREConan(ConanFile):
         "with_jit": [True, False],
         "with_utf": [True, False],
         "with_unicode_properties": [True, False],
-        "with_stack_for_recursion": [True, False]
+        "with_stack_for_recursion": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,9 +40,9 @@ class PCREConan(ConanFile):
         "with_bzip2": True,
         "with_zlib": True,
         "with_jit": False,
-        "with_utf": False,
-        "with_unicode_properties": False,
-        "with_stack_for_recursion": True
+        "with_utf": True,
+        "with_unicode_properties": True,
+        "with_stack_for_recursion": True,
     }
 
     exports_sources = "CMakeLists.txt"
@@ -68,12 +70,6 @@ class PCREConan(ConanFile):
         if not self.options.build_pcregrep:
             del self.options.with_bzip2
             del self.options.with_zlib
-        if not self.options.build_pcre_8 and not self.options.build_pcre_16 and not self.options.build_pcre_32:
-            raise ConanInvalidConfiguration("At least one of build_pcre_8, build_pcre_16 or build_pcre_32 must be enabled")
-        if self.options.build_pcrecpp and not self.options.build_pcre_8:
-            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the C++ library support")
-        if self.options.build_pcregrep and not self.options.build_pcre_8:
-            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
         if self.options.with_unicode_properties:
             self.options.with_utf = True
 
@@ -83,10 +79,17 @@ class PCREConan(ConanFile):
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
+    def validate(self):
+        if not self.options.build_pcre_8 and not self.options.build_pcre_16 and not self.options.build_pcre_32:
+            raise ConanInvalidConfiguration("At least one of build_pcre_8, build_pcre_16 or build_pcre_32 must be enabled")
+        if self.options.build_pcrecpp and not self.options.build_pcre_8:
+            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the C++ library support")
+        if self.options.build_pcregrep and not self.options.build_pcre_8:
+            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
@@ -102,6 +105,9 @@ class PCREConan(ConanFile):
         # can break conan generators
         tools.replace_in_file(
             cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(
+            cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -135,6 +141,7 @@ class PCREConan(ConanFile):
         self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PCRE"

@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NettleTLS(ConanFile):
     name = "nettle"
@@ -43,27 +45,33 @@ class NettleTLS(ConanFile):
         if self.settings.arch != "x86_64" and not str(self.settings.arch).startswith("arm"):
             del self.options.fat
 
-    def requirements(self):
-        if self.options.public_key:
-            self.requires("gmp/6.1.2")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.public_key:
+            self.requires("gmp/6.2.1")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("nettle-{}".format(self.version), self._source_subfolder)
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
-            self.build_requires("msys2/20190524")
+        self.build_requires("libtool/2.4.6")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -80,6 +88,11 @@ class NettleTLS(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        # srcdir in unix path causes some troubles in asm files on Windows
+        if self.settings.os == "Windows":
+            tools.replace_in_file(os.path.join(self.build_folder, "config.m4"),
+                                  tools.unix_path(os.path.join(self.build_folder, self._source_subfolder)),
+                                  os.path.join(self.build_folder, self._source_subfolder).replace("\\", "/"))
         return self._autotools
 
     def _patch_sources(self):
@@ -87,9 +100,15 @@ class NettleTLS(ConanFile):
         tools.replace_in_file(makefile_in,
                               "SUBDIRS = tools testsuite examples",
                               "SUBDIRS = ")
+        # Fix broken tests for compilers like apple-clang with -Werror,-Wimplicit-function-declaration
+        tools.replace_in_file(os.path.join(self._source_subfolder, "aclocal.m4"),
+                              "cat >conftest.c <<EOF",
+                              "cat >conftest.c <<EOF\n#include <stdlib.h>")
 
     def build(self):
         self._patch_sources()
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -101,10 +120,11 @@ class NettleTLS(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.components["hogweed"].names["pkgconfig"] = "hogweed"
         self.cpp_info.components["hogweed"].libs = ["hogweed"]
         if self.options.public_key:
             self.cpp_info.components["hogweed"].requires.append("gmp::libgmp")
 
         self.cpp_info.components["libnettle"].libs = ["nettle"]
         self.cpp_info.components["libnettle"].requires = ["hogweed"]
-        self.cpp_info.components["libnettle"].names["pkgconfig"] = ["nettle"]
+        self.cpp_info.components["libnettle"].names["pkgconfig"] = "nettle"

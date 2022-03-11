@@ -1,4 +1,7 @@
 sources:
+  "1.2.4":
+    url: "https://github.com/xguerin/tclap/archive/v1.2.4.tar.gz"
+    sha256: "7363f8f571e6e733b269c4b4e9c18f392d3cd7240d39a379d95de5a4c4bdc47f"
   "1.2.3":
     sha256: ccccd3471776f3198bb360aa6c09a1cd527d18b44360ff4d2b8356cdf984e980
     url: https://github.com/xguerin/tclap/archive/v1.2.3.tar.gz

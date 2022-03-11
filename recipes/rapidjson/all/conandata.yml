@@ -5,3 +5,6 @@ sources:
   "cci.20200410":
     url: "https://github.com/Tencent/rapidjson/archive/8f4c021fa2f1e001d2376095928fc0532adf2ae6.zip"
     sha256: e6fc99c7df7f29995838a764dd68df87b71db360f7727ace467b21b82c85efda
+  "cci.20211112":
+    url: "https://github.com/Tencent/rapidjson/archive/0d4517f15a8d7167ba9ae67f3f22a559ca841e3b.tar.gz"
+    sha256: 3697fdcea30dc7c2b2bb68d2521a6b8793f4d3269de751eed2c5fd477ff329ce

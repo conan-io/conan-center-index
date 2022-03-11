@@ -1,0 +1,26 @@
+diff --git a/include/crow/http_connection.h b/include/crow/http_connection.h
+index 2216687..04a992d 100644
+--- a/include/crow/http_connection.h
++++ b/include/crow/http_connection.h
+@@ -627,7 +627,7 @@ namespace crow
+ 
+         boost::array<char, 4096> buffer_;
+ 
+-        const uint res_stream_threshold_ = 1048576;
++        const unsigned res_stream_threshold_ = 1048576;
+ 
+         HTTPParser<Connection> parser_;
+         request req_;
+diff --git a/include/crow/multipart.h b/include/crow/multipart.h
+index 7deb8d4..7b63c20 100644
+--- a/include/crow/multipart.h
++++ b/include/crow/multipart.h
+@@ -48,7 +48,7 @@ namespace crow
+                 std::stringstream str;
+                 std::string delimiter = dd + boundary;
+ 
+-                for (uint i=0 ; i<parts.size(); i++)
++                for (unsigned i=0 ; i<parts.size(); i++)
+                 {
+                     str << delimiter << crlf;
+                     str << dump(i);

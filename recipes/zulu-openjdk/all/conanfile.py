@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os, glob
 
 
@@ -22,17 +23,19 @@ class ZuluOpenJDK(ConanFile):
         return os.path.join("include", folder)
 
     def configure(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
+        if Version(self.version) < Version("11.0.12"):
+            if self.settings.arch != "x86_64":
+                raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
-                  destination=self._source_subfolder, strip_root=True)
-
     def build(self):
-        pass # nothing to do, but this shall trigger no warnings ;-)
+        if Version(self.version) < Version("11.0.12"):
+            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
+                    destination=self._source_subfolder, strip_root=True)
+        else:
+            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
+                    destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"), excludes=("msvcp140.dll", "vcruntime140.dll"))

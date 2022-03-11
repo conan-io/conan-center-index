@@ -1,0 +1,10 @@
+sources:
+  "3.0.9":
+    url: "https://github.com/malaterre/GDCM/archive/refs/tags/v3.0.9.tar.gz"
+    sha256: "fcfc50ea8809bd4a173550c7d7bb4f8722ae0781fbf17240ce84a04e90af0e9b"
+patches:
+  "3.0.9":
+    - patch_file: "patches/0001-charls-linking.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-openjpeg-integration.patch"
+      base_path: "source_subfolder"

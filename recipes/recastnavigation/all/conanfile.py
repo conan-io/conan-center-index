@@ -1,6 +1,7 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class RecastNavigationConan(ConanFile):
@@ -37,10 +38,12 @@ class RecastNavigationConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('recastnavigation-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -64,6 +67,8 @@ class RecastNavigationConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "recastnavigation"
+        self.cpp_info.names["cmake_find_package_multi"] = "recastnavigation"
         self.cpp_info.components["Recast"].names["cmake_find_package"] = "Recast"
         self.cpp_info.components["Recast"].names["cmake_find_package_multi"] = "Recast"
         self.cpp_info.components["Recast"].libs = ["Recast"]

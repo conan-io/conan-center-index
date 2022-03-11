@@ -1,0 +1,16 @@
+diff --git a/bootstrap b/bootstrap
+--- bootstrap
++++ bootstrap
+@@ -1,11 +1,7 @@
+ #! /bin/sh
+ 
+ aclocal -I .
+ autoheader
+-if test "`uname -s`" = Darwin; then
+-    glibtoolize --automake
+-else
+-    libtoolize --automake
+-fi
++libtoolize --automake
+ automake --add-missing
+ autoconf

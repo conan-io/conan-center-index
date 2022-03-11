@@ -1,0 +1,4 @@
+sources:
+  "1.2.1":
+    url: "https://github.com/calebzulawski/cotila/archive/refs/tags/1.2.1.tar.gz"
+    sha256: "898ebfdf562cd1a3622870e17a703b38559cf2c607b2d5f79e6b3a55563af619"

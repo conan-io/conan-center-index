@@ -1,7 +1,17 @@
 sources:
+  "3.1.2":
+    url: "https://aomedia.googlesource.com/aom/+archive/ae2be8030200925895fa6e98bd274ffdb595cbf6.tar.gz"
+  "3.1.1":
+    url: "https://aomedia.googlesource.com/aom/+archive/7fadc0e77130efb05f52979b0deaba9b6a1bba6d.tar.gz"
   "2.0.1":
     url: "https://aomedia.googlesource.com/aom/+archive/b52ee6d44adaef8a08f6984390de050d64df9faa.tar.gz"
 patches:
+  "3.1.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-3.1.1-msvc-install.patch"
+  "3.1.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-3.1.1-msvc-install.patch"
   "2.0.1":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-msvc-install.patch"
+      patch_file: "patches/0001-2.0.1-msvc-install.patch"

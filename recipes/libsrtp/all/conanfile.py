@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class ConanRecipe(ConanFile):
@@ -13,8 +15,6 @@ class ConanRecipe(ConanFile):
     homepage = "https://github.com/cisco/libsrtp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +28,8 @@ class ConanRecipe(ConanFile):
         "with_openssl": False,
     }
 
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -46,12 +48,11 @@ class ConanRecipe(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

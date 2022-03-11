@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -104,7 +104,6 @@
+ 		CXX_STANDARD_REQUIRED YES
+ 		CXX_EXTENSIONS NO
+ 		DEBUG_POSTFIX "-d"
+-		POSITION_INDEPENDENT_CODE ON
+ )
+ 
+ # Target definitions

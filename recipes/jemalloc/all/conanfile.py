@@ -4,6 +4,8 @@ import os
 import shutil
 import string
 
+required_conan_version = ">=1.33.0"
+
 
 class JemallocConan(ConanFile):
     name = "jemalloc"
@@ -26,6 +28,7 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": [True, False],
         "enable_initial_exec_tls": [True, False],
         "enable_libdl": [True, False],
+        "enable_prof": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,17 +43,28 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": False,
         "enable_initial_exec_tls": True,
         "enable_libdl": True,
+        "enable_prof": False,
     }
+    exports_sources = ["patches/**"]
 
     _autotools = None
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if not self.options.enable_cxx:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.options.enable_cxx and \
                 self.settings.compiler.get_safe("libcxx") == "libc++" and \
                 self.settings.compiler == "clang" and \
@@ -63,23 +77,24 @@ class JemallocConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version != "15":
             # https://github.com/jemalloc/jemalloc/issues/1703
             raise ConanInvalidConfiguration("Only Visual Studio 15 2017 is supported.  Please fix this if other versions are supported")
-        if self.options.shared:
-            del self.options.fPIC
-        if not self.options.enable_cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
         if self.settings.build_type not in ("Release", "Debug", None):
             raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
         if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
+            raise ConanInvalidConfiguration("Unsupported compiler version")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH", None):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _autotools_args(self):
@@ -93,9 +108,11 @@ class JemallocConan(ConanFile):
             "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
             "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
             "--enable-log" if self.options.enable_debug_logging else "--disable-log",
-            "--enable-initial-exec-tld" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
+            "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
             "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
         ]
+        if self.options.enable_prof:
+            conf_args.append("--enable-prof")
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
@@ -129,6 +146,9 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
@@ -184,16 +204,13 @@ class JemallocConan(ConanFile):
             autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
             autotools.make(target="install_include")
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                os.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
-                          os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
+                tools.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
+                             os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
 
-    def package_id(self):
-        if not self.settings.build_type:
-            self.info.settings.build_type = "Release"
-
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "jemalloc"
         self.cpp_info.libs = [self._library_name]
         self.cpp_info.includedirs = [os.path.join(self.package_folder, "include"),
                                      os.path.join(self.package_folder, "include", "jemalloc")]
@@ -201,5 +218,5 @@ class JemallocConan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "msvc_compat"))
         if not self.options.shared:
             self.cpp_info.defines = ["JEMALLOC_EXPORT="]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])

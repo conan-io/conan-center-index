@@ -1,11 +1,32 @@
 sources:
-  "3.2.1":
-    url: "https://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz"
-    sha256: "d06ebb8e1d9a22d19e38d63fdb83954253f39bedc5d46232a05645685722ca37"
+  "3.4.2":
+    url: "https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz"
+    sha256: "540fb721619a6aba3bdeef7d940d8e9e0e6d2c193595bc243241b77ff9e93620"
   "3.3":
     url: "https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz"
     sha256: "72fba7922703ddfa7a028d513ac15a85c8d54c8d67f55fa5a4802885dc652056"
+  "3.2.1":
+    url: "https://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz"
+    sha256: "d06ebb8e1d9a22d19e38d63fdb83954253f39bedc5d46232a05645685722ca37"
 patches:
+  "3.4.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-3.4.2-fix-libtool-path.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0005-3.4.2-do-not-install-libraries-to-arch-dependent-directories.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0006-3.4.2-library-no-version-suffix.patch"
+  "3.3":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-3.3-fix-libtool-path.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0005-3.3-do-not-install-libraries-to-arch-dependent-directories.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0006-3.3-library-no-version-suffix.patch"
   "3.2.1":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-3.2.1-add-support-windows-dll.patch"
@@ -19,12 +40,3 @@ patches:
       patch_file: "patches/0005-3.2.1-do-not-install-libraries-to-arch-dependent-directories.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0006-3.2.1-library-no-version-suffix.patch"
-  "3.3":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-3.3-fix-libtool-path.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0005-3.3-do-not-install-libraries-to-arch-dependent-directories.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0006-3.3-library-no-version-suffix.patch"

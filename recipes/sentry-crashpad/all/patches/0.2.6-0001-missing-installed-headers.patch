@@ -1,0 +1,66 @@
+--- external/crashpad/compat/CMakeLists.txt
++++ external/crashpad/compat/CMakeLists.txt
+@@ -108,12 +108,13 @@
+ endif()
+ 
+ if(LINUX OR ANDROID)
+-    target_include_directories(crashpad_compat ${TI_YPE} "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/linux>")
++    target_include_directories(crashpad_compat ${TI_TYPE} "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/linux>")
++    target_link_libraries(crashpad_compat ${TI_TYPE} ${CMAKE_DL_LIBS})
+ endif()
+ 
+ if(ANDROID)
+-    target_include_directories(crashpad_compat ${TI_YPE} "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/android>")
++    target_include_directories(crashpad_compat ${TI_TYPE} "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/android>")
+ endif()
+ 
+ set_property(TARGET crashpad_compat PROPERTY EXPORT_NAME compat)
+ add_library(crashpad::compat ALIAS crashpad_compat)
+--- external/crashpad/third_party/mini_chromium/CMakeLists.txt
++++ external/crashpad/third_party/mini_chromium/CMakeLists.txt
+@@ -172,3 +172,7 @@
+     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad"
+     FILES_MATCHING PATTERN "*.h"
+ )
++crashpad_install_dev(DIRECTORY build
++    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad/mini_chromium"
++    FILES_MATCHING PATTERN "*.h"
++)
+--- external/crashpad/util/CMakeLists.txt
++++ external/crashpad/util/CMakeLists.txt
+@@ -237,7 +237,7 @@
+         linux/thread_info.cc
+         linux/thread_info.h
+         linux/traits.h
+-        misc/capture_context_linux.S
++        misc/capture_context_linux.S misc/time_linux.cc
+         misc/paths_linux.cc
+         posix/process_info_linux.cc
+         process/process_memory_linux.cc
+@@ -353,7 +353,7 @@
+ target_include_directories(crashpad_util PRIVATE
+     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+ )
+ target_link_libraries(crashpad_util
+     PRIVATE
+         $<BUILD_INTERFACE:crashpad_interface>
+     PUBLIC
+@@ -371,6 +371,10 @@
+     )
+ endif()
+ 
++if(LINUX)
++   target_link_libraries(crashpad_util PRIVATE rt pthread)
++endif()
++
+ if(WIN32)
+     target_link_libraries(crashpad_util PRIVATE user32 version winhttp)
+     if(MSVC)
+@@ -395,3 +399,7 @@
+ add_library(crashpad::util ALIAS crashpad_util)
+ 
+ crashpad_install_target(crashpad_util)
++crashpad_install_dev(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
++    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad/util"
++    FILES_MATCHING PATTERN "*.h"
++)

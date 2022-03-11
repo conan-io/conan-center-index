@@ -5,3 +5,16 @@ sources:
   "5.7.2.3":
     url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.2.3.tar.gz"
     sha256: "3dd3936fdd5443056fb0698477ad2b299c11b90ff6f551fa2dfb031a17930ee2"
+  "5.7.2.4":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.2.4.tar.gz"
+    sha256: "1ab370e430a1621c7f3ec8a530c3933efed1c5718953fbea214c1694fecc7128"
+  "5.7.2.5":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.2.5.tar.gz"
+    sha256: "0bf87f9a4ec631b2dd53033cbb9a8b84a09a8e499f4edf6504121c6a7d1ef459"
+  "5.7.2.6":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.2.6.tar.gz"
+    sha256: "62f1cfca8181bd60af2fb31b295471d0494b7ba72ab23e5a749bd70c9aa9e7b2"
+  "5.7.3":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.3.tar.gz"
+    sha256: "15ddaa69861e2853fb8888faf70766e7c56c3cf66a6293f72848e0909875a4c3"
+

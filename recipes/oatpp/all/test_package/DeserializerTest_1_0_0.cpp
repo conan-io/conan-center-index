@@ -1,4 +1,4 @@
-#include "DeserializerTest_1_0_0.hpp"
+#include "DeserializerTest.hpp"
 
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 #include "oatpp/core/macro/codegen.hpp"
@@ -8,7 +8,7 @@ namespace oatpp { namespace test { namespace parser { namespace json { namespace
 namespace {
 
 #include OATPP_CODEGEN_BEGIN(DTO)
-  
+
 typedef oatpp::data::mapping::type::Object DTO;
 
 class EmptyDto : public DTO {
@@ -30,11 +30,11 @@ class SampleDto : public DTO {
 };
 
 #include OATPP_CODEGEN_END(DTO)
-  
+
 }
-  
+
 void DeserializerTest::onRun(){
-  
+
   auto mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 
   auto obj = mapper->readFromString<SampleDto>("{ \"strF\": \"value1\", \"int32F\": 30, \"float32F\": 32.4, \"object\": {}\"list\": [] }");
@@ -47,5 +47,5 @@ void DeserializerTest::onRun(){
   OATPP_ASSERT(obj->list->count() == 0);
 
 }
-  
+
 }}}}}

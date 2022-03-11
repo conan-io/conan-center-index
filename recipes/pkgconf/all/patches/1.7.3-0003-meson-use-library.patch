@@ -1,0 +1,11 @@
+--- meson.build
++++ meson.build
+@@ -63,7 +63,7 @@
+ 
+ subdir('libpkgconf')
+ 
+-libpkgconf = shared_library('pkgconf',
++libpkgconf = library('pkgconf',
+   'libpkgconf/argvsplit.c',
+   'libpkgconf/audit.c',
+   'libpkgconf/bsdstubs.c',

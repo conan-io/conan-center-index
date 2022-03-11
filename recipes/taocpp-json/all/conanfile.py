@@ -2,7 +2,9 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+
+required_conan_version = ">=1.33.0"
+
 
 class TaoCPPJSONConan(ConanFile):
     name = "taocpp-json"
@@ -28,23 +30,35 @@ class TaoCPPJSONConan(ConanFile):
             "Visual Studio": "15",
         }
 
+    @property
+    def _min_cppstd_required(self):
+        return "11" if tools.Version(self.version) < "1.0.0-beta.11" else "17"
+
+    @property
+    def _requires_pegtl(self):
+        return tools.Version(self.version) >= "1.0.0-beta.13"
+
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
-        min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
-        if min_compiler_version:
-            if tools.Version(self.settings.compiler.version) < min_compiler_version:
-                raise ConanInvalidConfiguration("taocpp-json requires C++17, which your compiler does not support.")
-        else:
-            self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            tools.check_min_cppstd(self, self._min_cppstd_required)
+        if tools.Version(self.version) >= "1.0.0-beta.11":
+            min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
+            if min_compiler_version:
+                if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    raise ConanInvalidConfiguration("taocpp-json requires C++17, which your compiler does not support.")
+            else:
+                self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
+    def requirements(self):
+        if self._requires_pegtl:
+            self.requires("taocpp-pegtl/3.2.1")
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "json-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
+                  strip_root=True)
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
@@ -55,5 +69,7 @@ class TaoCPPJSONConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-json"
         self.cpp_info.names["cmake_find_package"] = "taocpp"
         self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
-        self.cpp_info.components["_taocpp-json"].names["cmake_find_package"] = "json"
-        self.cpp_info.components["_taocpp-json"].names["cmake_find_package_multi"] = "json"
+        self.cpp_info.components["json"].names["cmake_find_package"] = "json"
+        self.cpp_info.components["json"].names["cmake_find_package_multi"] = "json"
+        if self._requires_pegtl:
+            self.cpp_info.components["json"].requires = ["taocpp-pegtl::taocpp-pegtl"]

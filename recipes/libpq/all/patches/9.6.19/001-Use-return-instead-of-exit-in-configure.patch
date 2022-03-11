@@ -1,0 +1,85 @@
+From d3c7c1fbb346fd5c040a7a379d971db7b5129581 Mon Sep 17 00:00:00 2001
+From: Peter Eisentraut <peter_e@gmx.net>
+Date: Tue, 30 Aug 2016 12:00:00 -0400
+Subject: [PATCH 02/27] Use return instead of exit() in configure
+
+Using exit() requires stdlib.h, which is not included.  Use return
+instead.  Also add return type for main().
+---
+ config/c-compiler.m4 |  4 +++-
+ config/c-library.m4  |  4 +++-
+ configure            | 12 +++++++++---
+ 3 files changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/config/c-compiler.m4 b/config/c-compiler.m4
+index f87beb0..8bc6d32 100644
+--- a/config/c-compiler.m4
++++ b/config/c-compiler.m4
+@@ -71,8 +71,10 @@ int does_int64_work()
+     return 0;
+   return 1;
+ }
++
++int
+ main() {
+-  exit(! does_int64_work());
++  return (! does_int64_work());
+ }])],
+ [Ac_cachevar=yes],
+ [Ac_cachevar=no],
+diff --git a/config/c-library.m4 b/config/c-library.m4
+index 82b1614..a893d68 100644
+--- a/config/c-library.m4
++++ b/config/c-library.m4
+@@ -204,8 +204,10 @@ int does_int64_snprintf_work()
+     return 0;			/* either multiply or snprintf is busted */
+   return 1;
+ }
++
++int
+ main() {
+-  exit(! does_int64_snprintf_work());
++  return (! does_int64_snprintf_work());
+ }]])],
+ [pgac_cv_snprintf_long_long_int_modifier=$pgac_modifier; break],
+ [],
+diff --git a/configure b/configure
+index d4442f3..394f658 100755
+--- a/configure
++++ b/configure
+@@ -13853,8 +13853,10 @@ int does_int64_work()
+     return 0;
+   return 1;
+ }
++
++int
+ main() {
+-  exit(! does_int64_work());
++  return (! does_int64_work());
+ }
+ _ACEOF
+ if ac_fn_c_try_run "$LINENO"; then :
+@@ -13935,8 +13937,10 @@ int does_int64_work()
+     return 0;
+   return 1;
+ }
++
++int
+ main() {
+-  exit(! does_int64_work());
++  return (! does_int64_work());
+ }
+ _ACEOF
+ if ac_fn_c_try_run "$LINENO"; then :
+@@ -14011,8 +14015,10 @@ int does_int64_snprintf_work()
+     return 0;			/* either multiply or snprintf is busted */
+   return 1;
+ }
++
++int
+ main() {
+-  exit(! does_int64_snprintf_work());
++  return (! does_int64_snprintf_work());
+ }
+ _ACEOF
+ if ac_fn_c_try_run "$LINENO"; then :

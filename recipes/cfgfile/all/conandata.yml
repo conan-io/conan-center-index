@@ -1,0 +1,10 @@
+sources:
+  "0.2.9.1":
+    url: "https://github.com/igormironchik/cfgfile/archive/refs/tags/0.2.9.1.tar.gz"
+    sha256: "b5c8aa2ab148404325e817dc059dd6af81e96d7d831f137c93fe9dd79bbe3c7b"
+  "0.2.9.0":
+    url: "https://github.com/igormironchik/cfgfile/archive/refs/tags/0.2.9.0.tar.gz"
+    sha256: "4f42899849e87779089aab1db519ad7977c65cc40315c15515d7e29b0a3088c8"
+  "0.2.8.2.1":
+    url: "https://github.com/igormironchik/cfgfile/releases/download/0.2.8.2.1/cfgfile-0.2.8.2.1-full.tar.gz"
+    sha256: "6b0fe28323904ceb4567c5f3d450ab6eec6cca5eebad7ad0b77b1967f9e2772d"

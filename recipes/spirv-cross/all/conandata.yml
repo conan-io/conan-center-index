@@ -1,4 +1,16 @@
 sources:
+  "cci.20211113":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/7c3cb0b12c9965497b08403c82ac1b82846fa7be.tar.gz"
+    sha256: "5bb6837e2b75db1a9e36e7d6eac40d905e3460ff3b5234f391adc6bdf6aadcdf"
+  "cci.20210930":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/97a438d214b24e4958ca137a18639670648cedd0.tar.gz"
+    sha256: "dd07ce3c261fe8c08dbfbb3dd274f35de50ea8610f57fe5de4fe2b782c4accbd"
+  "cci.20210823":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/0e2880ab990e79ce6cc8c79c219feda42d98b1e8.tar.gz"
+    sha256: "611cf4d30d88c48a4a04848a66ae4c5d3a63ccf965fd6017d9ea86ec5c7a088d"
+  "cci.20210621":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/9cdeefb5e322fc26b5fed70795fe79725648df1f.tar.gz"
+    sha256: "3742c24e7ccc09fce10e9d88c2f9a2e85f5142cc742be6df5cc3ba3f96defa92"
   "20210115":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2021-01-15.tar.gz"
     sha256: "d700863b548cbc7f27a678cee305f561669a126eb2cc11d36a7023dfc462b9c4"
@@ -14,3 +26,22 @@ sources:
   "20200403":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
     sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
+patches:
+  "cci.20210621":
+    - patch_file: "patches/0001-fix-bundle-install-cci.20210621.patch"
+      base_path: "source_subfolder"
+  "20210115":
+    - patch_file: "patches/0001-fix-bundle-install-20210115.patch"
+      base_path: "source_subfolder"
+  "20200917":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200629":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200519":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200403":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"

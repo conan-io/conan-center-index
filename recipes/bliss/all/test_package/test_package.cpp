@@ -1,6 +1,7 @@
-#include "graph.hh"
+#include <graph.hh>
 
-#include <cstdio>
+#include <fstream>
+#include <iostream>
 
 int main() {
     bliss::Graph graph(4);
@@ -13,9 +14,9 @@ int main() {
     graph.add_edge(1, 3);
     graph.add_edge(2, 3);
 
-    graph.write_dot(stdout);
-    fprintf(stdout, "===\n");
-    graph.write_dimacs(stdout);
+    graph.write_dot("dot_output.txt");
+    std::ifstream ifs("dot_output.txt", std::ios::binary);
+    std::cout << ifs.rdbuf() << std::endl;
 
     return 0;
 }

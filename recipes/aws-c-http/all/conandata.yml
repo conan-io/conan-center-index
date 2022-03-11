@@ -1,0 +1,10 @@
+sources:
+  "0.6.10":
+    url: "https://github.com/awslabs/aws-c-http/archive/v0.6.10.tar.gz"
+    sha256: "4413faf2b8f6a83c898bb535cf83542fa548d7ecc1acf681dc79b7959a07231a"
+  "0.6.7":
+    url: "https://github.com/awslabs/aws-c-http/archive/v0.6.7.tar.gz"
+    sha256: "2244d1e26ce5b5f40f96e570b1c4332a07c645ef744644d5b90b089d3695ec3b"
+  "0.6.5":
+    url: "https://github.com/awslabs/aws-c-http/archive/v0.6.5.tar.gz"
+    sha256: "9cb82f1cfe1342f4bbd58f51b74beaeb6a544fb6792c48f9b0d3967619b33221"

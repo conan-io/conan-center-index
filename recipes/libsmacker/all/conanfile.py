@@ -1,15 +1,15 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+import contextlib
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class LibsmackerConan(ConanFile):
     name = "libsmacker"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://libsmacker.sourceforge.net"
-    topics = ("conan", "libsmacker", "decoding ", "smk", "smacker", "video", "file")
+    topics = ("libsmacker", "decoding ", "smk", "smacker", "video", "file")
     license = "LGPL-2.1-or-later"
     description = "A C library for decoding .smk Smacker Video files"
     options = {
@@ -21,12 +21,17 @@ class LibsmackerConan(ConanFile):
         "fPIC": True,
     }
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
+
+    exports_sources = "patches/*"
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,18 +45,17 @@ class LibsmackerConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows:
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        v = tools.Version(self.version)
-        os.rename("libsmacker-{}.{}.{}".format(v.major, v.minor, v.patch), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -67,9 +71,9 @@ class LibsmackerConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self,win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-FS")
+        yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),

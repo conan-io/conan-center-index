@@ -1,0 +1,16 @@
+Do not include crypt.h from minizip as it is not packaged in minizip recipe
+Taken from https://github.com/libkml/libkml/commit/a03adc24bc8cf5ab76a0e65f2756172a72c28b7a
+
+--- a/src/kml/base/contrib/minizip/unzip.c
++++ b/src/kml/base/contrib/minizip/unzip.c
+@@ -42,7 +42,9 @@ woven in by Terry Thorsen 1/2003.
+ #include <zlib.h> //RR
+ #include "unzip.h"
+ #include "iomem_simple.h"
+-#undef NOUNCRYPT
++#ifndef NOUNCRYPT
++#define NOUNCRYPT
++#endif
+ 
+ #ifdef STDC
+ #  include <stddef.h>

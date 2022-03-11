@@ -1,4 +1,7 @@
 sources:
+  "5.4.3":
+    url: "https://www.lua.org/ftp/lua-5.4.3.tar.gz"
+    sha256: "f8612276169e3bfcbcfb8f226195bfc6e466fe13042f1076cbde92b7ec96bbfb"
   "5.4.1":
     url: "https://www.lua.org/ftp/lua-5.4.1.tar.gz"
     sha256: "4ba786c3705eb9db6567af29c91a01b81f1c0ac3124fdbf6cd94bdd9e53cca7d"

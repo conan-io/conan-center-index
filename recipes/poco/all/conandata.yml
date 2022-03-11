@@ -1,38 +1,54 @@
 sources:
-  1.8.1:
-    sha256: 43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af
-    url: https://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz
-  1.9.3:
-    sha256: 73b9dfd1f57106eefb9b451d223579281acfb50b031424e9d0c6486ebb824d01
-    url: https://github.com/pocoproject/poco/archive/poco-1.9.3-release.tar.gz
-  1.9.4:
-    sha256: 367014cdbcfe9df8f1d746239902149d2398af9b49ba2c1aaaa88616fd538f61
-    url: https://github.com/pocoproject/poco/archive/poco-1.9.4-release.tar.gz
-  1.10.0:
-    sha256: 8047800d5a965d3177e614b4a4a162381e2638220b24d1d15ff5d6cac1738be8
-    url: https://github.com/pocoproject/poco/archive/poco-1.10.0-release.tar.gz
-  1.10.1:
-    sha256: 44592a488d2830c0b4f3bfe4ae41f0c46abbfad49828d938714444e858a00818
-    url: https://github.com/pocoproject/poco/archive/poco-1.10.1-release.tar.gz
+  "1.11.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz"
+    sha256: "2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0"
+  "1.11.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.0-release.tar.gz"
+    sha256: "8a7bfd0883ee95e223058edce8364c7d61026ac1882e29643822ce9b753f3602"
+  "1.10.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.10.1-release.tar.gz"
+    sha256: "44592a488d2830c0b4f3bfe4ae41f0c46abbfad49828d938714444e858a00818"
+  "1.10.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.10.0-release.tar.gz"
+    sha256: "8047800d5a965d3177e614b4a4a162381e2638220b24d1d15ff5d6cac1738be8"
+  "1.9.4":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.9.4-release.tar.gz"
+    sha256: "367014cdbcfe9df8f1d746239902149d2398af9b49ba2c1aaaa88616fd538f61"
+  "1.9.3":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.9.3-release.tar.gz"
+    sha256: "73b9dfd1f57106eefb9b451d223579281acfb50b031424e9d0c6486ebb824d01"
+  "1.8.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz"
+    sha256: "43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af"
 patches:
-  1.8.1:
-    - patch_file: patches/1.8.1.patch
+  "1.11.1":
+    - patch_file: patches/1.11.1.patch
       base_path: source_subfolder
-  1.9.3:
-    - patch_file: patches/1.9.2.patch
+    - patch_file: patches/0002-mysql-include.patch
       base_path: source_subfolder
-    - patch_file: patches/1.9.2-2.patch
+  "1.11.0":
+    - patch_file: patches/1.11.0.patch
       base_path: source_subfolder
-  1.9.4:
-    - patch_file: patches/1.9.2.patch
+    - patch_file: patches/0002-mysql-include.patch
       base_path: source_subfolder
-    - patch_file: patches/1.9.2-2.patch
+  "1.10.1":
+    - patch_file: patches/1.10.1.patch
       base_path: source_subfolder
-  1.10.0:
+  "1.10.0":
     - patch_file: patches/1.10.0.patch
       base_path: source_subfolder
     - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
       base_path: source_subfolder
-  1.10.1:
-    - patch_file: patches/1.10.1.patch
+  "1.9.4":
+    - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
+  "1.9.3":
+    - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
+  "1.8.1":
+    - patch_file: patches/1.8.1.patch
       base_path: source_subfolder

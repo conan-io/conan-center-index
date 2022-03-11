@@ -61,7 +61,9 @@ class QuillConan(ConanFile):
             self.output.warn("Quill requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.3.3":
+        if tools.Version(self.version) >= "1.6.3":
+            self.requires("fmt/8.0.1")
+        elif tools.Version(self.version) >= "1.3.3":
             self.requires("fmt/7.1.2")
         else:
             self.requires("fmt/6.2.1")

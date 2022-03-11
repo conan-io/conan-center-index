@@ -1,0 +1,10 @@
+--- a/bin/CMakeLists.txt
++++ b/bin/CMakeLists.txt
+@@ -8,6 +8,6 @@ if(NOT WIN32)
+ 
+   install(
+     TARGETS mmdblookup
+-    RUNTIME DESTINATION bin
++    DESTINATION bin
+   )
+ endif()

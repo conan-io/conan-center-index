@@ -1,0 +1,35 @@
+From fb008445b15b452f461c34667f4991f5ce06e481 Mon Sep 17 00:00:00 2001
+From: bobrofon <bobrofon@gmail.com>
+Date: Fri, 12 Mar 2021 19:17:55 +0700
+Subject: [PATCH] xml2cpp: Add missing EXPAT include dirs (#136)
+
+This patch is required if EXPAT library is installed in non-standard location.
+Without 'target_include_directories' cmake will find EXPAT library:
+  ...
+  -- Found EXPAT: .../lib/libexpat.a (found version "2.2.10")
+  ...
+
+But 'xml.cpp' compilation will fail with error:
+  ...
+  tools/xml2cpp-codegen/xml.cpp:7:10: fatal error: expat.h: No such file or directory
+    7 | #include <expat.h>
+  ...
+---
+ tools/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 375c379..8d7a3d0 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -43,6 +43,7 @@ set(CMAKE_CXX_STANDARD 14)
+ 
+ add_executable(sdbus-c++-xml2cpp ${SDBUSCPP_XML2CPP_SRCS})
+ target_link_libraries (sdbus-c++-xml2cpp ${EXPAT_LIBRARIES})
++target_include_directories(sdbus-c++-xml2cpp PRIVATE ${EXPAT_INCLUDE_DIRS})
+ 
+ #----------------------------------
+ # INSTALLATION
+-- 
+2.31.1
+

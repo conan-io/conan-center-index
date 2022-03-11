@@ -2,12 +2,13 @@ import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.36.0"
 
 class ZeroMQConan(ConanFile):
     name = "zeromq"
     homepage = "https://github.com/zeromq/libzmq"
     description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
-    topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
+    topics = ("zmq", "libzmq", "message-queue", "asynchronous")
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-3.0"
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -17,14 +18,20 @@ class ZeroMQConan(ConanFile):
         "fPIC": [True, False],
         "encryption": [None, "libsodium", "tweetnacl"],
         "with_norm": [True, False],
-        "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"]
+        "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
+        "with_draft_api": [True, False],
+        "with_websocket": [True, False],
+        "with_radix_tree": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "encryption": "libsodium",
         "with_norm": False,
-        "poller": None
+        "poller": None,
+        "with_draft_api": False,
+        "with_websocket": False,
+        "with_radix_tree": False,
     }
     generators = "cmake", "cmake_find_package"
 
@@ -56,8 +63,8 @@ class ZeroMQConan(ConanFile):
             self.requires("norm/1.5.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libzmq-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -74,6 +81,9 @@ class ZeroMQConan(ConanFile):
         self._cmake.definitions["WITH_DOCS"] = False
         self._cmake.definitions["WITH_DOC"] = False
         self._cmake.definitions["WITH_NORM"] = self.options.with_norm
+        self._cmake.definitions["ENABLE_DRAFTS"] = self.options.with_draft_api
+        self._cmake.definitions["ENABLE_WS"] = self.options.with_websocket
+        self._cmake.definitions["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
         if self.options.poller:
             self._cmake.definitions["POLLER"] = self.options.poller
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -115,10 +125,13 @@ class ZeroMQConan(ConanFile):
         # TODO: CMake imported target shouldn't be namespaced
         self.cpp_info.names["cmake_find_package"] = "ZeroMQ"
         self.cpp_info.names["cmake_find_package_multi"] = "ZeroMQ"
+        self.cpp_info.set_property("cmake_target_name", "ZeroMQ")
         self.cpp_info.names["pkg_config"] = "libzmq"
+        self.cpp_info.set_property("pkg_config_name", "libzmq")
         libzmq_target = "libzmq" if self.options.shared else "libzmq-static"
         self.cpp_info.components["libzmq"].names["cmake_find_package"] = libzmq_target
         self.cpp_info.components["libzmq"].names["cmake_find_package_multi"] = libzmq_target
+        self.cpp_info.components["libzmq"].set_property("cmake_target_name", libzmq_target)
         self.cpp_info.components["libzmq"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.components["libzmq"].system_libs = ["iphlpapi", "ws2_32"]
@@ -130,3 +143,7 @@ class ZeroMQConan(ConanFile):
             self.cpp_info.components["libzmq"].requires.append("libsodium::libsodium")
         if self.options.with_norm:
             self.cpp_info.components["libzmq"].requires.append("norm::norm")
+        if self.options.with_draft_api:
+            self.cpp_info.components["libzmq"].defines.append("ZMQ_BUILD_DRAFT_API")
+        if self.options.with_websocket and self.settings.os != "Windows":
+            self.cpp_info.components["libzmq"].system_libs.append("bsd")

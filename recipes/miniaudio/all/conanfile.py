@@ -1,12 +1,12 @@
 from conans import ConanFile, tools
 import os
-import glob
 
+required_conan_version = ">=1.33.0"
 
 class MiniaudioConan(ConanFile):
     name = "miniaudio"
     description = "A single file audio playback and capture library."
-    topics = ("conan", "miniaudio", "header-only", "sound")
+    topics = ("miniaudio", "header-only", "sound")
     homepage = "https://github.com/mackron/miniaudio"
     url = "https://github.com/conan-io/conan-center-index"
     license = ["Unlicense", "MIT-0"]
@@ -19,9 +19,8 @@ class MiniaudioConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

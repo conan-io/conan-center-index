@@ -10,9 +10,9 @@ class TestPackageConan(ConanFile):
     generators = "qt", "cmake", "cmake_find_package_multi", "cmake_find_package", "pkg_config", "qmake"
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.0")
+        self.build_requires("cmake/3.21.3")
         if self._meson_supported():
-            self.build_requires("meson/0.57.1")
+            self.build_requires("meson/0.59.0")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"

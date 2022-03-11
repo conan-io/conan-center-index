@@ -1,0 +1,11 @@
+--- a/mDNSCore/DNSCommon.c
++++ b/mDNSCore/DNSCommon.c
+@@ -1039,7 +1039,7 @@
+         LogMsg("Bad service type in %#s.%##s%##s Application protocol name must be underscore plus 1-15 characters. "
+                "See <http://www.dns-sd.org/ServiceTypes.html>", name->c, type->c, domain->c);
+     }
+-    if (len < 2 || len >= 0x40 || (len > 16 && !SameDomainName(domain, &localdomain))) return(mDNSNULL);
++    if (len < 2 || len >= 0x40) return(mDNSNULL);
+     if (src[1] != '_') { errormsg = "Application protocol name must begin with underscore"; goto fail; }
+     for (i=2; i<=len; i++)
+     {

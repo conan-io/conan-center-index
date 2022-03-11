@@ -1,19 +1,22 @@
 from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
 import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class LzipConan(ConanFile):
     name = "lzip"
     description = "Lzip is a lossless data compressor with a user interface similar to the one of gzip or bzip2"
-    topics = ("conan", "lzip", "compressor", "lzma")
+    topics = ("lzip", "compressor", "lzma")
     license = "GPL-v2-or-later"
     homepage = "https://www.nongnu.org/lzip/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
     settings = "os", "arch", "compiler", "build_type"
+
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -21,13 +24,20 @@ class LzipConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio is not supported")
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def package_id(self):
+        del self.info.settings.compiler
 
     def _detect_compilers(self):
         tools.rmdir("detectdir")
@@ -46,16 +56,11 @@ class LzipConan(ConanFile):
             cxx = tools.load("cxx.txt").strip()
         return cc, cxx
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         env = {}
         cc, cxx = self._detect_compilers()

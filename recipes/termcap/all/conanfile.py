@@ -1,7 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 import re
-import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class TermcapConan(ConanFile):
@@ -30,11 +31,11 @@ class TermcapConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
-        archive_name = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _extract_sources(self):
         makefile_text = open(os.path.join(self._source_subfolder, "Makefile.in")).read()
@@ -59,13 +60,15 @@ class TermcapConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        for src in self._extract_sources()[0]:
-            txt = open(src).read()
-            with open(src, "w") as f:
-                f.write("#include \"termcap_intern.h\"\n\n")
-                f.write(txt)
+
+        if self.settings.os == "Windows":
+            for src in self._extract_sources()[0]:
+                txt = open(src).read()
+                with open(src, "w") as f:
+                    f.write("#include \"termcap_intern.h\"\n\n")
+                    f.write(txt)
 
     def build(self):
         self._patch_sources()

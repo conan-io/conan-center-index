@@ -1,6 +1,8 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NlohmannJsonConan(ConanFile):
     name = "nlohmann_json"
@@ -20,13 +22,11 @@ class NlohmannJsonConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "json-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
+        self.copy("*", src=os.path.join(self._source_subfolder, "include"), dst="include")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json"

@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -77,11 +77,9 @@ set(ecos_sources
+ )
+ 
+ # ECOS library
+-add_library(ecos SHARED ${ecos_headers} ${ecos_sources})
++add_library(ecos ${ecos_headers} ${ecos_sources})
+ 
+ # Set compiler options and definitions
+-target_compile_options(ecos PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_OPTIONS}>")
+-target_compile_options(ecos PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_OPTIONS}>")
+ target_compile_definitions(ecos PUBLIC CTRLC=1)
+ if(USE_LONG)
+     target_compile_definitions(ecos PUBLIC LDL_LONG DLONG)

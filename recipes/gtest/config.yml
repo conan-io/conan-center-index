@@ -1,7 +1,9 @@
 versions:
-  "1.8.1":
+  "1.11.0":
+    folder: all
+  "cci.20210126":
     folder: all
   "1.10.0":
     folder: all
-  "cci.20210126":
+  "1.8.1":
     folder: all

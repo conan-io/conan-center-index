@@ -1,0 +1,4 @@
+sources:
+  "9.1.23.2":
+    url: https://github.com/FFmpeg/nv-codec-headers/releases/download/n9.1.23.2/nv-codec-headers-9.1.23.2.tar.gz
+    sha256: 34c9d1aedf32dc4b9fb22e94dbb041de666b568ceb4bdb317e414b752a3f9a9a

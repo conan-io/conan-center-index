@@ -1,15 +1,15 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.43.0"
 
 class ZstdConan(ConanFile):
     name = "zstd"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/zstd"
     description = "Zstandard - Fast real-time compression algorithm"
-    topics = ("conan", "zstd", "compression", "algorithm", "decoder")
+    topics = ("zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -25,6 +25,11 @@ class ZstdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -36,9 +41,7 @@ class ZstdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -72,9 +75,13 @@ class ZstdConan(ConanFile):
 
     def package_info(self):
         zstd_cmake = "libzstd_shared" if self.options.shared else "libzstd_static"
-        self.cpp_info.components["zstdlib"].names["pkg_config"] = "libzstd"
+        self.cpp_info.set_property("cmake_file_name", "zstd")
+        self.cpp_info.set_property("cmake_target_name", "zstd::{}".format(zstd_cmake))
+        self.cpp_info.set_property("pkg_config_name", "libzstd")
+        self.cpp_info.components["zstdlib"].set_property("pkg_config_name", "libzstd")
         self.cpp_info.components["zstdlib"].names["cmake_find_package"] = zstd_cmake
         self.cpp_info.components["zstdlib"].names["cmake_find_package_multi"] = zstd_cmake
+        self.cpp_info.components["zstdlib"].set_property("cmake_target_name", "zstd::{}".format(zstd_cmake))
         self.cpp_info.components["zstdlib"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["zstdlib"].system_libs.append("pthread")

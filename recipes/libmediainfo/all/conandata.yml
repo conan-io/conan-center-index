@@ -1,12 +1,14 @@
 sources:
+  "21.09":
+    url: "https://mediaarea.net/download/source/libmediainfo/21.09/libmediainfo_21.09.tar.xz"
+    sha256: "69be9444f6a03a1bdf56713ee31d56e987c502a7ec18eb54ee70fcc171b7f126"
+  "21.03":
+    url: "https://mediaarea.net/download/source/libmediainfo/21.03/libmediainfo_21.03.tar.xz"
+    sha256: "56b7e9abf80cba48032165cd7a46fd8d43dd63e3af35765f66c3f134caaca4ca"
   "20.03":
     url: "https://mediaarea.net/download/source/libmediainfo/20.03/libmediainfo_20.03.tar.xz"
     sha256: "6848310eb7050efe7f90f18191dacfcc220c924390b8088fdf0d553274917f72"
 patches:
   "20.03":
     - patch_file: "patches/0001-cmakelists-CMAKE_MODULE_PATH-find_package.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-no-debug-postfix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-install-no-pdbs.patch"
       base_path: "source_subfolder"

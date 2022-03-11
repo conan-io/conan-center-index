@@ -1,7 +1,17 @@
 versions:
-  1.5.1:
+  "1.2.198.0":
     folder: all
-  1.5.3:
+  "cci.20211010":
     folder: all
-  1.5.4:
+  "cci.20210811":
+    folder: all
+  "cci.20210616":
+    folder: all
+  "cci.20210414":
+    folder: all
+  "1.5.4":
+    folder: all
+  "1.5.3":
+    folder: all
+  "1.5.1":
     folder: all

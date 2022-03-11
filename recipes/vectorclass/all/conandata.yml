@@ -1,0 +1,4 @@
+sources:
+  "2.01.03":
+    url: "https://github.com/vectorclass/version2/archive/refs/tags/v2.01.03.tar.gz"
+    sha256: "f538d6432ede3e9cd07d969eaadab8b3bf4909840c5260566070e9270cb70551"

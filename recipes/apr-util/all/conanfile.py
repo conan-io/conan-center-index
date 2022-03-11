@@ -1,17 +1,16 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class AprUtilConan(ConanFile):
     name = "apr-util"
     description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
     license = "Apache-2.0"
-    topics = ("conan", "apr-util", "apache", "platform", "library")
+    topics = ("apr-util", "apache", "platform", "library")
     homepage = "https://apr.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -72,8 +71,11 @@ class AprUtilConan(ConanFile):
 
     def requirements(self):
         self.requires("apr/1.7.0")
+        if self.settings.os != "Windows":
+            #cmake build doesn't allow injection of iconv yet
+            self.requires("libiconv/1.16")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
@@ -96,17 +98,17 @@ class AprUtilConan(ConanFile):
             # self.requires("ldap/x.y.z")
             raise ConanInvalidConfiguration("CCI has no ldap recipe (yet)")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.35.1")
+            self.requires("sqlite3/3.35.5")
         if self.options.with_expat:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.1")
         if self.options.with_postgresql:
             self.requires("libpq/13.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
         if self.options.shared != self.options["apr"].shared:
@@ -139,6 +141,7 @@ class AprUtilConan(ConanFile):
         conf_args = [
             "--with-apr={}".format(tools.unix_path(self.deps_cpp_info["apr"].rootpath)),
             "--with-crypto" if self._with_crypto else "--without-crypto",
+            "--with-iconv={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)),
             "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)) if self.options.with_openssl else "--without-openssl",
             "--with-expat={}".format(tools.unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
             "--with-mysql={}".format(tools.unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
@@ -176,8 +179,7 @@ class AprUtilConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-            for file in glob.glob(os.path.join(self.package_folder, "lib", "apr-util-1", "*.la")):
-                os.unlink(file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "apr-util-1"), "*.la")
             os.unlink(os.path.join(self.package_folder, "lib", "libaprutil-1.la"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -191,8 +193,6 @@ class AprUtilConan(ConanFile):
                 self.cpp_info.system_libs = ["dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
-            elif self.settings.os == "Macos":
-                self.cpp_info.system_libs = ["iconv"]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var : {}".format(binpath))

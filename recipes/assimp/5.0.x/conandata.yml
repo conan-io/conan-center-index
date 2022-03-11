@@ -1,7 +1,0 @@
-sources:
-  "5.0.0":
-    sha256: 0c81f2d6c2b18272c98727e21846a9a8a203b15e8957c2ff7a6e76a1c52af2d3
-    url: https://github.com/assimp/assimp/archive/v5.0.0.zip
-  "5.0.1":
-    sha256: d10542c95e3e05dece4d97bb273eba2dfeeedb37a78fb3417fd4d5e94d879192
-    url: https://github.com/assimp/assimp/archive/v5.0.1.zip

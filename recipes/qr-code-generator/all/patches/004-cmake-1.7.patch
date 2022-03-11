@@ -1,0 +1,6 @@
+--- /dev/null
++++ b/files.cmake
+@@ -0,0 +1,3 @@
++set(SRC source_subfolder/cpp/qrcodegen.cpp)
++set(HEADERS source_subfolder/cpp/qrcodegen.hpp)
++set(LIBRARY_NAME qrcodegencpp)

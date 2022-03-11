@@ -1,0 +1,4 @@
+sources:
+  "1.4.7":
+    sha256: e56fd4a71337448727dbb9e2abe18992224d496a7ab5567030d6717a00680364
+    url: https://github.com/erikzenker/hsm/archive/refs/tags/v1.4.7.tar.gz

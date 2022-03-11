@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +12,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings, skip_x64_x86=True):
-            return
-        bin_path = os.path.join("bin", "test_package")
-        self.run(bin_path, run_environment=True)
+        if not tools.cross_building(self, skip_x64_x86=True):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
