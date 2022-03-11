@@ -1,14 +1,16 @@
 import os
 from conans import ConanFile, tools, CMake
+from conan.tools.files import rename, apply_conandata_patches
 
 
 class CycloneDDSConan(ConanFile):
 
     name = "cyclonedds"
     license = "Eclipse Public License - v 2.0"
-    author = 'Eclipse Cyclone DDS Contributors'
     description = "Eclipse Cyclone DDS project"
-    url = 'https://github.com/eclipse-cyclonedds/cyclonedds'
+    homepage = 'https://github.com/eclipse-cyclonedds/cyclonedds'
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = "dds", "ros2"
 
     options = {
         "enable_ssl": [True, False],
@@ -16,7 +18,8 @@ class CycloneDDSConan(ConanFile):
         "enable_lifespan": [True, False],
         "enable_deadline_missed": [True, False],
         "enable_type_discovery": [True, False],
-        "shared": [False, True]
+        "shared": [False, True],
+        "fPIC": [False, True]
     }
     default_options = {
         "enable_ssl": False,
@@ -24,7 +27,8 @@ class CycloneDDSConan(ConanFile):
         "enable_lifespan": True,
         "enable_deadline_missed": True,
         "enable_type_discovery": True,
-        "shared": True
+        "fPIC": True,
+        "shared": False
     }
 
     settings = "os", "arch", "compiler", "build_type"
@@ -34,6 +38,7 @@ class CycloneDDSConan(ConanFile):
     generators = "cmake"
 
     _cmake = None
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -46,6 +51,8 @@ class CycloneDDSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def configure(self):
         if self.options.shared:
@@ -58,7 +65,7 @@ class CycloneDDSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self._source_subfolder)
+        rename(self, downloaded_folder_name, self._source_subfolder)
 
         return
 
@@ -69,14 +76,12 @@ class CycloneDDSConan(ConanFile):
         # cmake = CMake(self, set_cmake_flags=True, append_vcvars=True)
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_SSL"] = self.options.enable_ssl
-        self._cmake.definitions[
-            "ENABLE_SECURITY"] = self.options.enable_security
-        self._cmake.definitions[
-            "ENABLE_LIFESPAN"] = self.options.enable_lifespan
-        self._cmake.definitions[
-            "ENABLE_DEADLINE_MISSED"] = self.options.enable_deadline_missed
-        self._cmake.definitions[
-            "ENABLE_TYPE_DISCOVERY"] = self.options.enable_type_discovery
+        self._cmake.definitions["ENABLE_SECURITY"] = self.options.enable_security
+        self._cmake.definitions["ENABLE_LIFESPAN"] = self.options.enable_lifespan
+        self._cmake.definitions["ENABLE_DEADLINE_MISSED"] = self.options.enable_deadline_missed
+        self._cmake.definitions["ENABLE_TYPE_DISCOVERY"] = self.options.enable_type_discovery
+        # Don't include the CMakeCPack.cmake file since we are not building an installer
+        self._cmake.definitions['CMAKECPACK_INCLUDED'] = 'TRUE'
         self._cmake.definitions["BUILD_IDLC"] = True
 
         # # Workaround for an annoying behavior of the vcvarsall and the helper in Conan
@@ -93,8 +98,8 @@ class CycloneDDSConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
+
         assert self.install_folder == self.build_folder, "Build and install folders must be the same"
         cmake = self._configure_cmake()
         cmake.build()
@@ -102,14 +107,20 @@ class CycloneDDSConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="NOTICE.md", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.name = "CycloneDDS"
+        self.cpp_info.names['cmake_find_package'] = "CycloneDDS"
         self.cpp_info.libs = tools.collect_libs(self)
 
-        self.env_info.LD_LIBRARY_PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        ])
-        self.env_info.PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        ])
+        self.cpp_info.build_modules['cmake_find_package'] = [
+            os.path.join('lib', 'cmake', 'CycloneDDS', 'idlc', 'Generate.cmake')
+        ]
+
+        self.env_info.LD_LIBRARY_PATH.extend(
+            [os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs])
+        self.env_info.PATH.extend(
+            [os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs])
