@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import glob
@@ -125,31 +126,12 @@ class ICUBase(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
 
         if self.options.dat_package_file:
             dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
             if dat_package_file:
                 shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
-
-        if self._is_msvc:
-            run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
-
-            if self.settings.compiler == "Visual Studio":
-                flags = "-{}".format(self.settings.compiler.runtime)
-                if tools.Version(self.settings.compiler.version) >= "12":
-                    flags += " -FS"
-            else:
-                flags = "-{}{}".format(
-                    "MT" if self.settings.runtime == "static" else "MD",
-                    "d" if self.settings.runtime_type == "Debug" else "",
-                )
-                flags += " -FS"
-            tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
-            tools.replace_in_file(run_configure_icu_file, "-MD", flags)
-
-        self._workaround_icu_20545()
 
         env_build = self._configure_autotools()
         build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
@@ -172,6 +154,31 @@ class ICUBase(ConanFile):
                                                                  silent=self._silent)
                         self.run(command, win_bash=tools.os_info.is_windows)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        if self._is_msvc:
+            run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
+            flags = "-{}".format(msvc_runtime_flag(self))
+            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
+                flags += " -FS"
+            tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
+            tools.replace_in_file(run_configure_icu_file, "-MD", flags)
+
+        if tools.os_info.is_windows:
+            # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
+            srcdir = os.path.join(self.build_folder, self._source_subfolder, "source")
+            makeconv_cpp = os.path.join(srcdir, "tools", "makeconv", "makeconv.cpp")
+            tools.replace_in_file(makeconv_cpp,
+                                  "pathBuf.appendPathPart(arg, localError);",
+                                  "pathBuf.append(\"/\", localError); pathBuf.append(arg, localError);")
+
+        # relocatable shared libs on macOS
+        mh_darwin = os.path.join(self._source_subfolder, "source", "config", "mh-darwin")
+        tools.replace_in_file(mh_darwin, "-install_name $(libdir)/$(notdir", "-install_name @rpath/$(notdir")
+        tools.replace_in_file(mh_darwin, "-install_name $(notdir", "-install_name @rpath/$(notdir")
+
     def _configure_autotools(self):
         if self._env_build:
             return self._env_build
@@ -183,15 +190,6 @@ class ICUBase(ConanFile):
         if "msys2" in self.deps_user_info:
             self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
         return self._env_build
-
-    def _workaround_icu_20545(self):
-        if tools.os_info.is_windows:
-            # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
-            srcdir = os.path.join(self.build_folder, self._source_subfolder, "source")
-            makeconv_cpp = os.path.join(srcdir, "tools", "makeconv", "makeconv.cpp")
-            tools.replace_in_file(makeconv_cpp,
-                                  "pathBuf.appendPathPart(arg, localError);",
-                                  "pathBuf.append(\"/\", localError); pathBuf.append(arg, localError);")
 
     @property
     def _build_config_cmd(self):
@@ -273,7 +271,6 @@ class ICUBase(ConanFile):
                     command = "{make} {silent} install".format(make=self._make_tool,
                                                                silent=self._silent)
                     self.run(command, win_bash=tools.os_info.is_windows)
-        self._install_name_tool()
 
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
@@ -290,14 +287,6 @@ class ICUBase(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def _install_name_tool(self):
-        if tools.is_apple_os(self.settings.os):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for dylib in glob.glob("*icu*.{0}.dylib".format(self.version)):
-                    command = "install_name_tool -id {0} {1}".format(os.path.basename(dylib), dylib)
-                    self.output.info(command)
-                    self.run(command)
 
     @property
     def _data_path(self):
