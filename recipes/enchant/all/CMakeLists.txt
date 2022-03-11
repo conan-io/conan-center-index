@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.2)
 
-project(enchant VERSION "${CONAN_enchant_VERSION}" LANGUAGES C)
+project(enchant VERSION "${CONAN_enchant_VERSION}")
 
 set(root "${PROJECT_SOURCE_DIR}/source_subfolder")
 set(src "${root}/src")
@@ -52,13 +52,13 @@ endfunction()
 set(providers "")
 macro(add_provider target)
   add_library("${target}" MODULE ${ARGN})
+  set_property(TARGET "${target}" PROPERTY DEFINE_SYMBOL enchant_module_EXPORTS)
+  target_set_visibility("${target}")
+  target_link_libraries("${target}" PRIVATE enchant)
   if(NOT providers)
     generate_export_header("${target}" BASE_NAME enchant_module)
   endif()
   list(APPEND providers "${target}")
-  target_set_visibility("${target}")
-  set_property(TARGET "${target}" PROPERTY DEFINE_SYMBOL enchant_module_EXPORTS)
-  target_link_libraries("${target}" PRIVATE enchant)
 endmacro()
 
 if(MSVC)
@@ -90,7 +90,6 @@ set_target_properties(
 # ---- Providers ----
 
 # There is only this provider in CCI for now
-enable_language(CXX)
 add_provider(enchant_hunspell "${root}/providers/enchant_hunspell.cpp")
 target_compile_features(enchant_hunspell PRIVATE cxx_std_11)
 
