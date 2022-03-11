@@ -183,6 +183,8 @@ class XmlSecConan(ConanFile):
         else:
             with tools.chdir(self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
+                # relocatable shared lib on macOS
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
