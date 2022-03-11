@@ -13,7 +13,7 @@ if(TARGET LLVMInterpreter)  # static libraries
     target_link_libraries(${PROJECT_NAME} PRIVATE
         LLVMInterpreter
         LLVMIRReader
-        x86codegen
+        LLVMX86CodeGen
     )
 else()  # shared library
     target_link_libraries(${PROJECT_NAME} LLVM)
