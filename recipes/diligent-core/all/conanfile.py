@@ -14,9 +14,11 @@ class DiligentCoreConan(ConanFile):
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "fPIC": [True, False],
+        "shared": [True, False],
+        "fPIC":   [True, False],
     }
     default_options = {
+        "shared": True,
         "fPIC": True,
     }
     generators = "cmake_find_package", "cmake"
@@ -148,11 +150,14 @@ class DiligentCoreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-        self.copy(pattern="*.so", dst="lib", keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+            self.copy(pattern="*.so", dst="lib", keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        else:
+            self.copy(pattern="*.a", dst="lib", keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+
         self.copy(pattern="*.fxh", dst="res", keep_path=False)
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
