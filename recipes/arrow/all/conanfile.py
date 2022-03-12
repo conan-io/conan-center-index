@@ -140,9 +140,6 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
         if self.options.with_llvm == False and self._with_llvm(True):
             raise ConanInvalidConfiguration("with_openssl options is required (or choose auto)")
-
-        if self.options.with_backtrace:
-            raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
         if self.options.with_hiveserver2:
@@ -279,6 +276,8 @@ class ArrowConan(ConanFile):
             self.requires("re2/20211101")
         if self._with_utf8proc():
             self.requires("utf8proc/2.7.0")
+        if self.options.with_backtrace:
+            self.requires("libbacktrace/cci.20210118")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -386,7 +385,6 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["utf8proc_SOURCE"] = "SYSTEM"
         if self._with_utf8proc():
             self._cmake.definitions["ARROW_UTF8PROC_USE_SHARED"] = self.options["utf8proc"].shared
-
         self._cmake.definitions["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
@@ -508,7 +506,7 @@ class ArrowConan(ConanFile):
         if self._with_thrift():
             self.cpp_info.components["libarrow"].requires.append("thrift::thrift")
         if self.options.with_backtrace:
-            self.cpp_info.components["libarrow"].requires.append("backtrace::backtrace")
+            self.cpp_info.components["libarrow"].requires.append("libbacktrace::libbacktrace")
         if self.options.with_cuda:
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
         if self.options.with_hiveserver2:
