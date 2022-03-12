@@ -57,7 +57,7 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.2.198.0")
+            self.requires("vulkan-loader/1.3.204.1")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
