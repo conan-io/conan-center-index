@@ -52,7 +52,8 @@ class CpuFeaturesConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        if tools.Version(self.version) < "0.7.0":
+            self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
         if tools.Version(self.version) >= "0.7.0":
             self._cmake.definitions["BUILD_TESTING"] = False
         # TODO: should be handled by CMake helper
