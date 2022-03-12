@@ -13,7 +13,7 @@ class NovelRTConan(ConanFile):
     description = "A cross-platform 2D game engine accompanied by a strong toolset for visual novels."
     topics = {"conan", "game", "engine" "gamedev", "visualnovel", "vn"}
     settings = "os", "compiler", "build_type", "arch"
-    tool_requires = ("cmake/3.19.8")
+    tool_requires = ("cmake/3.22.0")
     requires = [
         ("freetype/2.10.1"),
         ("glfw/3.3.2"),
@@ -37,6 +37,8 @@ class NovelRTConan(ConanFile):
         "BZip2:shared": True,
         "flac:shared": True,
         "fmt:shared": True,
+        "onetbb:tbbproxy": False,
+        "onetbb:tbbmalloc": False,
         "Opus:shared": True,
         "Ogg:shared": True,
         "Vorbis:shared": True,
@@ -62,6 +64,14 @@ class NovelRTConan(ConanFile):
     def _build_subfolder(self):
         return "artifacts"
 
+    @property
+    def _is_static_lib_win(self):
+        return str(self.settings.compiler.runtime) in ["MTd", "MT"]
+
+    @property
+    def _is_debug_runtime_win(self):
+        return str(self.settings.compiler.runtime) in ["MDd", "MTd"]
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
@@ -73,7 +83,7 @@ class NovelRTConan(ConanFile):
             else:
                 cmakePath += "/bin/cmake"
             self.output.info(f"Overriding CMake to use version from Conan at: {cmakePath}")
-        cmake = CMake(self, cmake_program=cmakePath)
+        cmake = CMake(self, cmake_program=cmakePath, parallel=True)
         cmake.definitions["NOVELRT_BUILD_DOCUMENTATION"] = "Off"
         cmake.definitions["NOVELRT_BUILD_TESTS"] = "Off"
         cmake.definitions["NOVELRT_BUILD_SAMPLES"] = "Off"
@@ -88,8 +98,7 @@ class NovelRTConan(ConanFile):
 
     def build(self):
         self.cmake = self.configure_cmake()
-        buildArgs = ['-j']
-        self.cmake.build(args=buildArgs)
+        self.cmake.build()
 
     def package(self):
         self.copy("*LICENCE.md", dst="licenses", keep_path=False)
@@ -132,7 +141,12 @@ class NovelRTConan(ConanFile):
         if minimum_version and compiler_version < minimum_version:
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation with {self.settings.compiler} {self.settings.compiler.version} as C++ 17 is required.")
         if self.settings.compiler == "clang":
-            if self.settings.compiler.libcxx != "libstdc++11":
+            if compiler_version == 10 and self.settings.compiler.libcxx != "libstdc++11":
                 raise errors.ConanInvalidConfiguration(f"Please use libstdc++11 when compiling NovelRT with Clang.")
+        if self.settings.compiler == "Visual Studio":
+            if self._is_debug_runtime_win:
+                raise errors.ConanInvalidConfiguration(f"NovelRT does not support debug runtime builds at this time with Visual Studio.")
+            if self._is_static_lib_win:
+                raise errors.ConanInvalidConfiguration(f"NovelRT does not support static builds at this time with Visual Studio.")
         if self.settings.arch != "x86_64":
             raise errors.ConanInvalidConfiguration(f"NovelRT does not support compilation under {self.settings.arch} architecture at this time.")
