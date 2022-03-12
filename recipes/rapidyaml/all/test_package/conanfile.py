@@ -8,9 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if tools.Version(self.deps_cpp_info["rapidyaml"].version) >= "0.4.0":
-            cmake.definitions["RYML_USE_PARSE_IN_ARENA"] = True
-
         cmake.configure()
         cmake.build()
 
