@@ -29,6 +29,10 @@ class VkBootstrapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -70,7 +74,7 @@ class VkBootstrapConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("vk-bootstrap requires C++14, which your compiler does not support.")
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("vk-boostrap shared not supported with Visual Studio")
 
     def source(self):
