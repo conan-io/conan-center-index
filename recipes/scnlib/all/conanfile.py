@@ -18,15 +18,11 @@ class ScnlibConan(ConanFile):
         "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_exceptions": [True, False],
-        "with_rtti": [True, False],
     }
     default_options = {
         "header_only": False,
         "shared": False,
         "fPIC": True,
-        "with_exceptions": True,
-        "with_rtti": True,
     }
 
     generators = "cmake"
@@ -87,8 +83,6 @@ class ScnlibConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SCN_INSTALL"] = True
-        self._cmake.definitions["SCN_USE_EXCEPTIONS"] = self.options.with_exceptions
-        self._cmake.definitions["SCN_USE_RTTI"] = self.options.with_rtti
         if tools.Version(self.version) >= "1.0":
             self._cmake.definitions["SCN_USE_BUNDLED_FAST_FLOAT"] = False
         self._cmake.definitions["SCN_INSTALL"] = True
