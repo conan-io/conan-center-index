@@ -1,4 +1,3 @@
-from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
@@ -82,6 +81,9 @@ class LibX264Conan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        extra_asflags = []
+        extra_cflags = []
+        extra_ldflags = []
         args = [
             "--bit-depth=%s" % str(self.options.bit_depth),
             "--disable-cli",
@@ -97,8 +99,8 @@ class LibX264Conan(ConanFile):
             args.append("--enable-debug")
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # bitstream-a.S:29:18: error: unknown token in expression
-            args.append("--extra-asflags=-arch arm64")
-            args.append("--extra-ldflags=-arch arm64")
+            extra_asflags.append("-arch arm64")
+            extra_ldflags.append("-arch arm64")
             args.append("--host=aarch64-apple-darwin")
 
         if self._with_nasm:
@@ -119,15 +121,21 @@ class LibX264Conan(ConanFile):
                 args.append("--cross-prefix={}".format("{}/bin/{}-linux-{}-".format(ndk_root, arch, abi)))
         if self._is_msvc:
             self._override_env["CC"] = "cl -nologo"
-            self._autotools.flags.append("-{}".format(msvc_runtime_flag(self)))
+            extra_cflags.extend(self._autotools.flags)
             if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
-                self._autotools.flags.append("-FS")
+                extra_cflags.append("-FS")
         build_canonical_name = None
         host_canonical_name = None
         if self._is_msvc:
             # autotools does not know about the msvc canonical name(s)
             build_canonical_name = False
             host_canonical_name = False
+        if extra_asflags:
+            args.append("--extra-asflags={}".format(" ".join(extra_asflags)))
+        if extra_cflags:
+            args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
+        if extra_ldflags:
+            args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
         self._autotools.configure(args=args, vars=self._override_env, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
