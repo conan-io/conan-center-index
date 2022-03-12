@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
@@ -156,7 +157,7 @@ class LibX264Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self._is_msvc:
             ext = ".dll.lib" if self.options.shared else ".lib"
-            tools.rename(os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
+            rename(self, os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
                          os.path.join(self.package_folder, "lib", "x264.lib"))
 
     def package_info(self):
