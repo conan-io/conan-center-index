@@ -52,6 +52,7 @@ class CharlsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
