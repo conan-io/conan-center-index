@@ -1,7 +1,7 @@
 /* Relocation requires the INSTALLDIR define to end with a path segment that is
  * equal to the final installation for the library file. Note that on Windows
  * the convention is <prefix>/bin while on other platforms it's <prefix>/lib */
-#if _WIN32
+#ifdef _WIN32
 #define INSTALLDIR "/usr/local/bin"
 #else
 #define INSTALLDIR "/usr/local/lib"
