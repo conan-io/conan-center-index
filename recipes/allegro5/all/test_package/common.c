@@ -123,5 +123,3 @@ void log_printf(char const *format, ...)
 }
 
 #endif
-
-/* vim: set sts=3 sw=3 et: */

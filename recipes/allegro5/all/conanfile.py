@@ -8,8 +8,8 @@ class Allegro5Conan(ConanFile):
     name = "allegro5"
     version = "5.2.7"
     license = "Custom licenses"
-    author = "Allegro5 development team and many contributors"
-    url = "https://github.com/liballeg/allegro5"
+    homepage = "https://github.com/liballeg/allegro5"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform graphics framework for basic game development and desktop applications"
     topics = ("gamedev", "gui", "framework", "graphics")
     settings = "os", "compiler", "build_type", "arch"
