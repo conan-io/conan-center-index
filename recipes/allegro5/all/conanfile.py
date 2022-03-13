@@ -7,11 +7,11 @@ import os
 class Allegro5Conan(ConanFile):
     name = "allegro5"
     version = "5.2.7"
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of Allegro5 here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    license = "Custom licenses"
+    author = "Allegro5 development team and many contributors"
+    url = "https://github.com/liballeg/allegro5"
+    description = "Cross-platform graphics framework for basic game development and desktop applications"
+    topics = ("gamedev", "gui", "framework", "graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -58,7 +58,6 @@ class Allegro5Conan(ConanFile):
 
     def source(self):
         self.run("git clone https://github.com/liballeg/allegro5.git --depth=1 --single-branch --branch=5.2.7")
-        #self.run("git clone https://github.com/liballeg/allegro5.git --depth=1 --single-branch --branch=master")
 
     def generate(self):
 
@@ -97,7 +96,7 @@ class Allegro5Conan(ConanFile):
 
         prefix = "lib"
         suffix = ".a"
-        if self.settings.compiler == "Visual Studio" or self.settings.compiler == "clang":
+        if self.settings.compiler == "Visual Studio":
             flags += " -DWANT_STATIC_RUNTIME=" + str(self.settings.compiler.runtime == "MT").lower()
             flags += " -DPREFER_STATIC_DEPS=true"
             prefix = ""
