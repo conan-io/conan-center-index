@@ -69,18 +69,16 @@ class PdalConan(ConanFile):
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
-        self.requires("boost/1.77.0")
+        self.requires("boost/1.78.0")
         self.requires("eigen/3.4.0")
-        self.requires("gdal/3.3.3")
-        self.requires("libcurl/7.79.1.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
+        self.requires("gdal/3.4.1")
+        self.requires("libcurl/7.80.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
         self.requires("libgeotiff/1.7.0")
-        self.requires("nanoflann/1.3.2")
+        self.requires("nanoflann/1.4.2")
         if self.options.with_xml:
             self.requires("libxml2/2.9.12")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
-        if self.options.with_lazperf:
-            raise ConanInvalidConfiguration("lazperf recipe not yet available in CCI")
+            self.requires("zstd/1.5.2")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
         if self.options.with_zlib:
@@ -106,6 +104,8 @@ class PdalConan(ConanFile):
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("pdal doesn't support cross-build yet")
+        if self.options.with_lazperf:
+            raise ConanInvalidConfiguration("lazperf recipe not yet available in CCI")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
