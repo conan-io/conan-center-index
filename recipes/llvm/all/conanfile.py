@@ -74,7 +74,6 @@ class Llvm(ConanFile):
         cmake = CMake(self, parallel=False);
         cmake.configure(
             defs = {
-                'LLVM_ENABLE_LLD': True,
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_BINDINGS': False,
             },
@@ -120,6 +119,9 @@ class Llvm(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration("An up to date version of Microsoft Visual Studio 2019 or newer is required.")
+
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("Debug builds are too heavy for CCI")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
