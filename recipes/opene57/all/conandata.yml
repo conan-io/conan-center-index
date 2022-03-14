@@ -1,0 +1,4 @@
+sources:
+  "1.6.2":
+    sha256: 2d487e663cf43105b19653d34250fd45f947af839e327336b6878464a99d5423
+    url: https://github.com/openE57/openE57/archive/refs/tags/1.6.2.tar.gz
