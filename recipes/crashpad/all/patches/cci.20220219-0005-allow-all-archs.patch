@@ -1,6 +1,6 @@
 --- third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
 +++ third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
-@@ -193,7 +193,7 @@
+@@ -198,7 +198,7 @@ config("default") {
            "arm64",
          ]
        } else {
@@ -9,7 +9,7 @@
        }
      }
  
-@@ -268,7 +268,7 @@
+@@ -278,7 +278,7 @@ config("default") {
          "-m64",
        ]
      } else {
@@ -18,7 +18,7 @@
      }
  
      # This is currently required by the clang toolchain build that DEPS uses
-@@ -302,7 +302,7 @@
+@@ -312,7 +312,7 @@ config("default") {
      } else if (target_cpu == "x64") {
        common_flags += [ "--target=x86_64-fuchsia" ]
      } else {
@@ -29,7 +29,7 @@
      # fdio is listed in ldflags instead of libs because it’s important for it to
 --- util/BUILD.gn
 +++ util/BUILD.gn
-@@ -145,7 +145,7 @@ if (crashpad_is_mac || crashpad_is_ios) {
+@@ -143,7 +143,7 @@ if (crashpad_is_mac || crashpad_is_ios) {
          "arm64",
        ]
      } else {
