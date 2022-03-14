@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -25,7 +26,6 @@ class QcustomplotConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -59,14 +59,13 @@ class QcustomplotConan(ConanFile):
                               "#if defined(QT_STATIC_BUILD)",
                               "#if 0" if self.options.shared else "#if 1")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
+        cmake = CMake(self)
+        cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
         # TODO: add an option to enable QCUSTOMPLOT_USE_OPENGL
-        self._cmake.configure()
-        return self._cmake
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
