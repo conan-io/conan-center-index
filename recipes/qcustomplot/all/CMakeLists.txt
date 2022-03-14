@@ -9,13 +9,16 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         AUTOMOC ON
         DEBUG_POSTFIX "d"
-        CXX_VISIBILITY_PRESET hidden
-        VISIBILITY_INLINES_HIDDEN ON
 )
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME}
         PRIVATE QCUSTOMPLOT_COMPILE_LIBRARY
         INTERFACE QCUSTOMPLOT_USE_LIBRARY
+    )
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+            CXX_VISIBILITY_PRESET hidden
+            VISIBILITY_INLINES_HIDDEN ON
     )
 endif()
 
