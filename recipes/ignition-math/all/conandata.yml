@@ -2,25 +2,25 @@ sources:
   "6.7.0":
     url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.7.0.tar.gz"
     sha256: "8456af51cbb128d7468d65b55124af7a235f052214ac2a239c3f23197416f2d2"
-  "6.8.0":
-    url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.8.0.tar.gz"
-    sha256: "07c4fa9eeaa51fe2b4ee2855ea69bb16571d7e6c315b8b0726fc4383b64303a1"
-  "6.9.0":
-    url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.9.0.tar.gz"
-    sha256: "80b7788c02df5a28333780d1049d5a84059fd969365cefd5476021c355916b3b"
-  #"6.10.0":
-  #  url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.10.0.tar.gz"
-  #  sha256: "9e00284cd6d51afe190165b2b44258e19bd4a28781cbacf21fd6b0bae43c16aa"
+  #"6.8.0":
+  #  url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.8.0.tar.gz"
+  #  sha256: "07c4fa9eeaa51fe2b4ee2855ea69bb16571d7e6c315b8b0726fc4383b64303a1"
+  #"6.9.0":
+  #  url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.9.0.tar.gz"
+  #  sha256: "80b7788c02df5a28333780d1049d5a84059fd969365cefd5476021c355916b3b"
+  "6.10.0":
+    url: "https://github.com/ignitionrobotics/ign-math/archive/refs/tags/ignition-math6_6.10.0.tar.gz"
+    sha256: "9e00284cd6d51afe190165b2b44258e19bd4a28781cbacf21fd6b0bae43c16aa"
 patches:
   "6.7.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-ign-math-6.7.0-cmake-fixes.patch"
-  "6.8.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-ign-math-6.8.0-cmake-fixes.patch"
-  "6.9.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-ign-math-6.9.0-cmake-fixes.patch"
-  #"6.10.0":
+  #"6.8.0":
   #  - base_path: "source_subfolder"
-  #    patch_file: "patches/0004-ign-math-6.10.0-cmake-fixes.patch"
+  #    patch_file: "patches/0002-ign-math-6.8.0-cmake-fixes.patch"
+  #"6.9.0":
+  #  - base_path: "source_subfolder"
+  #    patch_file: "patches/0003-ign-math-6.9.0-cmake-fixes.patch"
+  "6.10.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-ign-math-6.10.0-cmake-fixes.patch"
