@@ -55,9 +55,6 @@ class QcustomplotConan(ConanFile):
             tools.check_min_cppstd(self, min_cppstd)
         if not (self.options["qt"].gui and self.options["qt"].widgets):
             raise ConanInvalidConfiguration("qcustomplot requires qt gui and widgets")
-        # FIXME: test package fails, but it should work (issue likely comes from qt recipe)
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("qcustomplot recipe doesn't support Linux yet. Contributions are welcome.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
