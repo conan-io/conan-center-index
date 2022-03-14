@@ -25,6 +25,7 @@ class EasyProfilerConan(ConanFile):
     }
 
     generators = "cmake"
+    short_paths = True
     _cmake = None
 
     @property
