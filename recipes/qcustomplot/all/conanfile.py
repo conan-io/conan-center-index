@@ -40,7 +40,7 @@ class QcustomplotConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/6.1.1")
+        self.requires("qt/6.2.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
