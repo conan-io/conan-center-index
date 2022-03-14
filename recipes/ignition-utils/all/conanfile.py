@@ -129,6 +129,7 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-utils"].names["cmake_find_package_multi"] = "ignition-utils{}".format(version_major)
         self.cpp_info.components["libignition-utils"].names["pkg_config"] = "ignition-utils{}".format(version_major)
         self.cpp_info.components["libignition-utils"].requires = ["cli11::cli11"]
+        self.cpp_info.components["libignition-msgs"].requires.append("doxygen::doxygen")
         self.env_info.LD_LIBRARY_PATH.extend([
             os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
         ])
