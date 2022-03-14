@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(qcustomplot CXX)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 add_library(${PROJECT_NAME} source_subfolder/qcustomplot.cpp)
 set_target_properties(${PROJECT_NAME}
