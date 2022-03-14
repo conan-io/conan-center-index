@@ -27,7 +27,7 @@
 
 --- cmake/IgnUtils.cmake
 +++ cmake/IgnUtils.cmake
-@@ -1372,7 +1372,7 @@ macro(_ign_add_library_or_component)
+@@ -1396,7 +1396,7 @@ macro(_ign_add_library_or_component)
      # Generate export macro headers
      # Note: INTERFACE libraries do not need the export header
      set(binary_include_dir
