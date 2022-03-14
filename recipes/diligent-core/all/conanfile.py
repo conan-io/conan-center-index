@@ -85,6 +85,9 @@ class DiligentCoreConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.22.0")
+
     def requirements(self):
         self.requires("opengl/system")
 
