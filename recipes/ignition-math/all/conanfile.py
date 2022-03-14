@@ -71,7 +71,7 @@ class IgnitionMathConan(ConanFile):
         if tools.Version(self.version).minor <= "8":
             self.build_requires("ignition-cmake/2.5.0")
         else:
-            self.build_requires("ignition-cmake/2.10.0")
+            self.build_requires("ignition-cmake/2.10.0@ar/thirdparty")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
