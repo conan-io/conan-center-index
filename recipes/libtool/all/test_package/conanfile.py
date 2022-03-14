@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     test_type = "explicit"
+    short_paths = True
 
     @property
     def _settings_build(self):
