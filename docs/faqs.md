@@ -322,8 +322,9 @@ To isolate from this changes there are different strategies you can follow:
 
 The minimum solution involves small changes to your Conan client configuration by
 
- * **Pin the version of every reference you consume in your project** using recipe [revisions](https://docs.conan.io/en/latest/versioning/revisions.html)
-   and [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html).
+* **Pin the version of every reference you consume in your project** using either:
+  * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
+  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html).
    
 For larger projects and teams it is recommended to add some infrastructure to ensure stability by
 
