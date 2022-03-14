@@ -1,4 +1,7 @@
 sources:
+  "2.7.1":
+    url: "https://github.com/danmar/cppcheck/archive/2.7.1.tar.gz"
+    sha256: "f4d4ec42eb214b113c6a7ca7aaf6bafa92c33029560223049b46ac12f17f54b8"
   "2.6":
     url: "https://github.com/danmar/cppcheck/archive/2.6.tar.gz"
     sha256: "99f0c5cf58a0072876c4deb114f3f5f798c933b8e459cddb00a061c8bb4dd765"
@@ -18,6 +21,11 @@ sources:
     url: "https://github.com/danmar/cppcheck/archive/2.2.tar.gz"
     sha256: "ad96290a1842c5934bf9c4268cb270953f3078d4ce33a9a53922d6cb6daf61aa"
 patches:
+  "2.7.1":
+    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-htmlreport-python3.patch"
+      base_path: "source_subfolder"
   "2.6":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
       base_path: "source_subfolder"
