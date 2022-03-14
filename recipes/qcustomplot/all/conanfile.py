@@ -24,12 +24,16 @@ class QcustomplotConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,6 +61,8 @@ class QcustomplotConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # allow static qcustomplot with shared qt, and vice versa
         tools.replace_in_file(os.path.join(self._source_subfolder, "qcustomplot.h"),
                               "#if defined(QT_STATIC_BUILD)",
