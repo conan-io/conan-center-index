@@ -96,6 +96,12 @@ class FollyConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
+        if self.version < "2022.01.31.00" and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
+
+        if self.settings.os == "Macos" and self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Conan currently requires a 64bit target architecture for Folly on Macos")
+
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
 
@@ -115,9 +121,26 @@ class FollyConan(ConanFile):
         if miss_boost_required_comp:
             raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if tools.cross_building(self):
+                self._cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = "0"
+                self._cmake.definitions["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
+                self._cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
+                self._cmake.definitions["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
             self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             self._cmake.definitions["CXX_STD"] = self.settings.compiler.get_safe("cppstd") or "c++{}".format(self._minimum_cpp_standard)
             if self.settings.compiler == "Visual Studio":
@@ -206,5 +229,5 @@ class FollyConan(ConanFile):
             Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
-        if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "12.0":
+        if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
