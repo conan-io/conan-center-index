@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(iceoryx REQUIRED CONFIG)
 
+
 add_executable(single_process single_process/single_process.cpp)
 target_link_libraries(single_process iceoryx_posh::iceoryx_posh_roudi iceoryx_posh::iceoryx_posh)
 
@@ -31,3 +32,12 @@ target_link_libraries(iox-c-publisher iceoryx_binding_c::iceoryx_binding_c)
 add_executable(iox-c-subscriber icedelivery_in_c/ice_c_subscriber.c)
 set_source_files_properties(icedelivery_in_c/ice_c_subscriber.c PROPERTIES LANGUAGE C)
 target_link_libraries(iox-c-subscriber iceoryx_binding_c::iceoryx_binding_c)
+
+if(${USE_HOOFS})
+    target_compile_definitions(single_process PRIVATE USE_HOOFS=1)
+    target_compile_definitions(iox-cpp-publisher PRIVATE USE_HOOFS=1)
+    target_compile_definitions(iox-cpp-publisher-untyped PRIVATE USE_HOOFS=1)
+    target_compile_definitions(iox-cpp-subscriber PRIVATE USE_HOOFS=1)
+    target_compile_definitions(iox-cpp-subscriber-untyped PRIVATE USE_HOOFS=1)
+endif(${USE_HOOFS})
+
