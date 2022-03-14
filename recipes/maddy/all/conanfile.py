@@ -20,6 +20,10 @@ class MaddyConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+
     def source(self):
         tools.get(
             **self.conan_data["sources"][self.version],
