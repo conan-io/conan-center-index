@@ -1,6 +1,6 @@
 #include "sndfile.hh"
 
-#if __cplusplus < 201100
+#if __cplusplus < 201100 && defined(_MSC_VER)
 #undef nullptr
 #endif
 
