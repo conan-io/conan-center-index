@@ -14,7 +14,7 @@ class MsgpackCXXConan(ConanFile):
     topics = ("msgpack", "message-pack", "serialization")
     license = "BSL-1.0"
     no_copy_source = True
-    
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "use_boost": [True, False]
@@ -34,7 +34,7 @@ class MsgpackCXXConan(ConanFile):
 
     def configure_options(self):
         # No boost was added in 4.1.0
-        if tools.Version(self.version):
+        if tools.Version(self.version) <= "4.1.0":
             del self.options.use_boost
 
     def requirements(self):
@@ -89,7 +89,7 @@ class MsgpackCXXConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        
+
         if self.options.use_boost:
             self.cpp_info.defines = ["MSGPACK_USE_BOOST"]
         else:
