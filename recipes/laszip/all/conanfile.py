@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 import functools
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -23,7 +22,6 @@ class LaszipConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
     @property
@@ -33,6 +31,11 @@ class LaszipConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,9 +50,8 @@ class LaszipConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        # Do not build laszip_api, only laszip
-        tools.replace_in_file(os.path.join(self._source_subfolder, "dll", "CMakeLists.txt"),
-                              "LASZIP_ADD_LIBRARY(${LASZIP_API_LIB_NAME} ${LASZIP_API_SOURCES})", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
