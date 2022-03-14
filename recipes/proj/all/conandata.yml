@@ -1,4 +1,7 @@
 sources:
+  "9.0.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.0.0/proj-9.0.0.tar.gz"
+    sha256: "0620aa01b812de00b54d6c23e7c5cc843ae2cd129b24fabe411800302172b989"
   "8.2.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/8.2.1/proj-8.2.1.tar.gz"
     sha256: "76ed3d0c3a348a6693dfae535e5658bbfd47f71cb7ff7eb96d9f12f7e068b1cf"
@@ -24,27 +27,32 @@ sources:
     url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
+  "9.0.0":
+    - patch_file: "patches/0001-use-cmake-targets-9.0.0.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-configure-proj-pc.patch"
+      base_path: "source_subfolder"
   "8.2.1":
-    - patch_file: "patches/use-cmake-targets-8.2.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
       base_path: "source_subfolder"
   "8.2.0":
-    - patch_file: "patches/use-cmake-targets-8.2.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
       base_path: "source_subfolder"
   "8.1.1":
-    - patch_file: "patches/use-cmake-targets-8.1.1.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.1.1.patch"
       base_path: "source_subfolder"
   "8.1.0":
-    - patch_file: "patches/use-cmake-targets-8.1.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.1.0.patch"
       base_path: "source_subfolder"
   "8.0.1":
-    - patch_file: "patches/use-cmake-targets-8.0.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
       base_path: "source_subfolder"
   "8.0.0":
-    - patch_file: "patches/use-cmake-targets-8.0.0.patch"
+    - patch_file: "patches/0001-use-cmake-targets-8.0.0.patch"
       base_path: "source_subfolder"
   "7.2.1":
-    - patch_file: "patches/use-cmake-targets-7.2.1.patch"
+    - patch_file: "patches/0001-use-cmake-targets-7.2.1.patch"
       base_path: "source_subfolder"
   "6.3.1":
-    - patch_file: "patches/use-cmake-targets-6.x.x.patch"
+    - patch_file: "patches/0001-use-cmake-targets-6.x.x.patch"
       base_path: "source_subfolder"

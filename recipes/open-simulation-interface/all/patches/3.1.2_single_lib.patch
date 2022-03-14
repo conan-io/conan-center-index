@@ -1,0 +1,82 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 09659d8..afa3aca 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,7 @@ endif()
+ set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+     "Installation directory for CMake files")
+
+-set(INSTALL_LIB_DIR ${INSTALL_LIB_DIR}/osi${VERSION_MAJOR})
++
+ set(INSTALL_INCLUDE_DIR ${INSTALL_INCLUDE_DIR}/osi${VERSION_MAJOR})
+
+ configure_file(osi_version.proto.in ${CMAKE_CURRENT_SOURCE_DIR}/osi_version.proto)
+@@ -79,52 +79,19 @@ set(OSI_PROTO_FILES
+
+ protobuf_generate_cpp(PROTO_SRCS PROTO_HEADERS ${OSI_PROTO_FILES})
+
+-add_library(${PROJECT_NAME}_static STATIC ${PROTO_SRCS} ${PROTO_HEADERS})
+-target_include_directories(${PROJECT_NAME}_static
+-    PUBLIC
+-        ${PROTOBUF_INCLUDE_DIR}
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+-        $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
+-)
+-target_link_libraries(${PROJECT_NAME}_static PUBLIC ${PROTOBUF_LIBRARY})
+-install(TARGETS ${PROJECT_NAME}_static
+-        EXPORT ${PROJECT_NAME}_targets
+-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+-
+-
+-add_library(${PROJECT_NAME}_obj OBJECT ${PROTO_SRCS} ${PROTO_HEADERS})
+-target_include_directories(${PROJECT_NAME}_obj
+-    PUBLIC
+-        ${PROTOBUF_INCLUDE_DIR}
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+-        $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
+-)
+-set_property(TARGET ${PROJECT_NAME}_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+
+-add_library(${PROJECT_NAME}_pic STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_obj>)
++add_library(${PROJECT_NAME} ${PROTO_SRCS} ${PROTO_HEADERS})
++target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+
+-target_include_directories(${PROJECT_NAME}_pic
++target_include_directories(${PROJECT_NAME}
+     PUBLIC
+-        ${PROTOBUF_INCLUDE_DIR}
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
+ )
+-target_link_libraries(${PROJECT_NAME}_pic PUBLIC ${PROTOBUF_LIBRARY})
+-
+-set_property(TARGET ${PROJECT_NAME}_pic PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+-install(TARGETS ${PROJECT_NAME}_pic
+-        EXPORT ${PROJECT_NAME}_targets
+-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
++target_link_libraries(${PROJECT_NAME} PUBLIC protobuf::libprotobuf)
+
+-add_library(${PROJECT_NAME} SHARED $<TARGET_OBJECTS:${PROJECT_NAME}_obj>)
+-target_include_directories(${PROJECT_NAME}
+-    PUBLIC
+-        ${PROTOBUF_INCLUDE_DIR}
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+-        $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
+-)
+
+ set_property(
+     TARGET ${PROJECT_NAME}
+@@ -135,6 +102,11 @@ set_property(
+     PROPERTY VERSION ${${PROJECT_NAME}_LIBVERSION}
+ )
+
++    set_property(
++    TARGET ${PROJECT_NAME}
++    PROPERTY VERSION ${${PROJECT_NAME}_LIBVERSION}
++)
++
+ target_link_libraries(${PROJECT_NAME} PUBLIC ${PROTOBUF_LIBRARY})
+ install(TARGETS ${PROJECT_NAME}
+         EXPORT ${PROJECT_NAME}_targets

@@ -94,7 +94,7 @@ class QhullConan(ConanFile):
 
         # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libqhull"].libs = [self._qhull_lib_name]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libqhull"].system_libs.append("m")
         if self._is_msvc and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])

@@ -13,4 +13,4 @@ sources:
     sha256: "d3234d7f94cea4389e3ca70619b82e8fb4c2f33bb3a070799f1e18eef500a083"
   "4.0.0":
     url: "https://github.com/microsoft/GSL/archive/v4.0.0.tar.gz"
-    sha256: "95a51cd6432b491a71cac92ed279fd07668d1594d8909ea5654fb98156d57a10"
+    sha256: "f0e32cb10654fea91ad56bde89170d78cfbf4363ee0b01d8f097de2ba49f6ce9"

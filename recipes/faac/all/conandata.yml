@@ -7,8 +7,5 @@ sources:
     sha256: "fec821797a541e8359f086fef454b947a7f7246fe8ec6207668968b86606a7dd"
 patches:
   "1.30":
-    - patch_file: "patches/001-use-libtoolize.patch"
-      base_path: "source_subfolder"
-  "1.28":
-    - patch_file: "patches/001-use-libtoolize.patch"
+    - patch_file: "patches/001-fix-out-of-root-build.patch"
       base_path: "source_subfolder"

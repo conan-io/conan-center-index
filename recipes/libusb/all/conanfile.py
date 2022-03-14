@@ -156,7 +156,7 @@ class LibUSBConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]

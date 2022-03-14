@@ -99,6 +99,7 @@ class LibX264Conan(ConanFile):
             # bitstream-a.S:29:18: error: unknown token in expression
             args.append("--extra-asflags=-arch arm64")
             args.append("--extra-ldflags=-arch arm64")
+            args.append("--host=aarch64-apple-darwin")
 
         if self._with_nasm:
             # FIXME: get using user_build_info
