@@ -22,8 +22,16 @@
 #include "iceoryx_posh/popo/subscriber.hpp"
 #include "iceoryx_posh/roudi/iceoryx_roudi_components.hpp"
 #include "iceoryx_posh/runtime/posh_runtime_single_process.hpp"
-#include "iceoryx_utils/log/logmanager.hpp"
+
+#ifndef USE_HOOFS
 #include "iceoryx_utils/posix_wrapper/signal_handler.hpp"
+#include "iceoryx_utils/log/logmanager.hpp"
+#endif
+
+#ifdef USE_HOOFS
+#include "iceoryx_hoofs/posix_wrapper/signal_handler.hpp"
+#include "iceoryx_hoofs/log/logmanager.hpp"
+#endif
 
 #include <atomic>
 #include <chrono>

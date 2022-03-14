@@ -19,7 +19,14 @@
 
 #include "iceoryx_posh/popo/untyped_publisher.hpp"
 #include "iceoryx_posh/runtime/posh_runtime.hpp"
+
+#ifndef USE_HOOFS
 #include "iceoryx_utils/posix_wrapper/signal_handler.hpp"
+#endif
+
+#ifdef USE_HOOFS
+#include "iceoryx_hoofs/posix_wrapper/signal_handler.hpp"
+#endif
 
 #include <iostream>
 
