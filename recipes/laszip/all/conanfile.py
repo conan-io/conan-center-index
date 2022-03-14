@@ -68,7 +68,8 @@ class LaszipConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["laszip"]
+        suffix = tools.Version(self.version).major if self.settings.os == "Windows" else ""
+        self.cpp_info.libs = [f"laszip{suffix}"]
         if self.options.shared:
             self.cpp_info.defines.append("LASZIP_DYN_LINK")
         else:
