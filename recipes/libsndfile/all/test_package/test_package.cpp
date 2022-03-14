@@ -1,5 +1,9 @@
 #include "sndfile.hh"
 
+#if __cplusplus < 201100
+#undef nullptr
+#endif
+
 #include <iostream>
 
 int main(int argc, char *argv[]) {
