@@ -41,10 +41,6 @@ class Allegro5Conan(ConanFile):
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
             self.requires("gtk/system")
-
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            package_tool.install(update=True, packages="libgl1-mesa-dev")
-            package_tool.install(update=True, packages="libgtk-3-dev")
             
         self.options["freetype"].with_png = False
         self.options["freetype"].with_zlib = False
