@@ -69,6 +69,7 @@ class IgnitionUitlsConan(ConanFile):
     
     def requirements(self):
         self.requires("cli11/2.1.2")
+        self.requires("doxygen/1.9.2")
 
     def build_requirements(self):
         self.build_requires("ignition-cmake/2.10.0")
