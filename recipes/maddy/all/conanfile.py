@@ -13,7 +13,7 @@ class MaddyConan(ConanFile):
     )
     topics = ("maddy", "markdown", "header-only")
     license = "MIT"
-
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
