@@ -1,5 +1,5 @@
 import os
-
+import conan.tools.files
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -71,12 +71,12 @@ class IgnitionMathConan(ConanFile):
         if tools.Version(self.version).minor <= "8":
             self.build_requires("ignition-cmake/2.5.0")
         else:
-            self.build_requires("ignition-cmake/2.10.0@ar/thirdparty")
+            self.build_requires("ignition-cmake/2.10.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         version_major = self.version.split(".")[0]
-        os.rename(
+        conan.tools.files.rename(self, 
             "ign-math-ignition-math{}_{}".format(version_major, self.version),
             self._source_subfolder,
         )
