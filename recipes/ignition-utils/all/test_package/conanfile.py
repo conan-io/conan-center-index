@@ -6,7 +6,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):
-        self.build_requires("ignition-cmake/2.5.0")
+        self.build_requires("ignition-cmake/2.10.0")
 
     def build(self):
         cmake = CMake(self)

@@ -71,7 +71,7 @@ class IgnitionUitlsConan(ConanFile):
         self.requires("cli11/2.1.2")
 
     def build_requirements(self):
-        self.build_requires("ignition-cmake/2.5.0")
+        self.build_requires("ignition-cmake/2.10.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
