@@ -151,7 +151,7 @@ class PdalConan(ConanFile):
         # remove vendored boost
         tools.rmdir(os.path.join(self._source_subfolder, "vendor", "pdalboost"))
         tools.replace_in_file(top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
-        tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "${CONAN_LIBS}")
+        tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "Boost::filesystem")
         tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
                               "pdalboost::", "boost::")
         # No rpath manipulation
