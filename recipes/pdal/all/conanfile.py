@@ -240,32 +240,33 @@ class PdalConan(ConanFile):
         # pdal_base
         self.cpp_info.components["pdal_base"].set_property("cmake_target_name", self._pdal_base_name)
         self.cpp_info.components["pdal_base"].libs = [self._pdal_base_name]
-        self.cpp_info.components["pdal_base"].requires = ["pdal_util"]
+        if not self.options.shared:
+            self.cpp_info.components["pdal_base"].libs.extend(["pdal_arbiter", "pdal_kazhdan"])
+            if self.settings.os == "Windows":
+                # dependency of pdal_arbiter
+                self.cpp_info.components["pdal_base"].system_libs.append("shlwapi")
+        self.cpp_info.components["pdal_base"].requires = [
+            "pdal_util", "eigen::eigen", "gdal::gdal", "libcurl::libcurl",
+            "libgeotiff::libgeotiff", "nanoflann::nanoflann"
+        ]
+        if self.options.with_xml:
+            self.cpp_info.components["pdal_base"].requires.append("libxml2::libxml2")
+        if self.options.with_zstd:
+            self.cpp_info.components["pdal_base"].requires.append("zstd::zstd")
+        if self.options.with_laszip:
+            self.cpp_info.components["pdal_base"].requires.append("laszip::laszip")
+        if self.options.with_zlib:
+            self.cpp_info.components["pdal_base"].requires.append("zlib::zlib")
+        if self.options.with_lzma:
+            self.cpp_info.components["pdal_base"].requires.append("xz_utils::xz_utils")
 
         # pdal_util
         self.cpp_info.components["pdal_util"].set_property("cmake_target_name", "pdal_util")
         self.cpp_info.components["pdal_util"].libs = ["pdal_util"]
         if not self.options.shared:
-            self.cpp_info.components["pdal_util"].libs.extend(["pdal_arbiter", "pdal_kazhdan"])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["pdal_util"].system_libs.extend(["dl", "m"])
-            elif self.settings.os == "Windows":
-                # dependency of pdal_arbiter
-                self.cpp_info.components["pdal_util"].system_libs.append("shlwapi")
-        self.cpp_info.components["pdal_util"].requires = [
-            "boost::filesystem", "eigen::eigen", "gdal::gdal",
-            "libcurl::libcurl", "libgeotiff::libgeotiff", "nanoflann::nanoflann"
-        ]
-        if self.options.with_xml:
-            self.cpp_info.components["pdal_util"].requires.append("libxml2::libxml2")
-        if self.options.with_zstd:
-            self.cpp_info.components["pdal_util"].requires.append("zstd::zstd")
-        if self.options.with_laszip:
-            self.cpp_info.components["pdal_util"].requires.append("laszip::laszip")
-        if self.options.with_zlib:
-            self.cpp_info.components["pdal_util"].requires.append("zlib::zlib")
-        if self.options.with_lzma:
-            self.cpp_info.components["pdal_util"].requires.append("xz_utils::xz_utils")
+        self.cpp_info.components["pdal_util"].requires = ["boost::filesystem"]
         if self.options.get_safe("with_unwind"):
             self.cpp_info.components["pdal_util"].requires.append("libunwind::libunwind")
 
