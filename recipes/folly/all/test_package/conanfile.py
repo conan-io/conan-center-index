@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["FOLLY_VERSION"] = self.deps_cpp_info["folly"].version
         cmake.configure()
         cmake.build()
 

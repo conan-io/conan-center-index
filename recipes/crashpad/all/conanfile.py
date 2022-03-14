@@ -101,7 +101,7 @@ class CrashpadConan(ConanFile):
     def _gn_arch(self):
         return {
             "x86_64": "x64",
-            "armv8": "aarch64",
+            "armv8": "arm64",
             "x86": "x86",
         }.get(str(self.settings.arch), str(self.settings.arch))
 
@@ -137,6 +137,15 @@ class CrashpadConan(ConanFile):
             return ""
         else:
             return str(self.options.http_transport)
+
+    def _version_greater_equal_to_cci_20220219(self):
+        return self.version >= "cci.20220219"
+
+    def _has_separate_util_net_lib(self):
+        return self._version_greater_equal_to_cci_20220219()
+
+    def _needs_to_link_tool_support(self):
+        return self._version_greater_equal_to_cci_20220219()
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -267,7 +276,7 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["context"].requires = ["util"]
 
         self.cpp_info.components["snapshot"].libs = ["snapshot"]
-        self.cpp_info.components["snapshot"].requires = ["client_common", "mini_chromium_base", "util"]
+        self.cpp_info.components["snapshot"].requires = ["context", "client_common", "mini_chromium_base", "util"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["snapshot"].frameworks.extend(["OpenCL"])
 
@@ -277,11 +286,21 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].libs = ["minidump"]
         self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
 
+        extra_handler_common_req = []
+        if self._has_separate_util_net_lib():
+            self.cpp_info.components["net"].libs = ["net"]
+            extra_handler_common_req = ["net"]
+
+        extra_handler_req = []
+        if self._needs_to_link_tool_support():
+            self.cpp_info.components["tool_support"].libs = ["tool_support"]
+            extra_handler_req = ["tool_support"]
+
         self.cpp_info.components["handler_common"].libs = ["handler_common"]
-        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util"]
+        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util"] + extra_handler_common_req
 
         self.cpp_info.components["handler"].libs = ["handler"]
-        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"]
+        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"] + extra_handler_req
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
