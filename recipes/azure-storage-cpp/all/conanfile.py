@@ -71,7 +71,7 @@ class AzureStorageCppConan(ConanFile):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
 
         if self.settings.os == "Macos":
-            self._cmake.definitions["GETTEXT_LIB_DIR"] = self.deps_cpp_info["libgettext"].lib_paths[0]
+            self._cmake.definitions["GETTEXT_LIB_DIR"] = self.deps_cpp_info["gettext"].lib_paths[0]
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
