@@ -17,7 +17,7 @@ class MsgpackCXXConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "use_boost": [True, False]
+        "use_boost": [True, False],
     }
     default_options = {
         "use_boost": True
