@@ -90,7 +90,5 @@ class MsgpackCXXConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        if self.options.use_boost:
-            self.cpp_info.defines = ["MSGPACK_USE_BOOST"]
-        else:
-            self.cpp_info.defines = ["MSGPACK_NO_BOOST"]
+        if tools.Version(self.version) >= "4.1.0" and not self.options.use_boost:
+            self.cpp_info.defines.append("MSGPACK_NO_BOOST")
