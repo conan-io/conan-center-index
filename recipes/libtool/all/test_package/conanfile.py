@@ -96,8 +96,8 @@ class TestPackageConan(ConanFile):
         """ Build shared library using libtool (while linking to a static library) """
 
         # Copy static-in-shared directory to build folder
-        autotools_folder = os.path.join(self.build_folder, "static-in-shared")
-        shutil.copytree(os.path.join(self.source_folder, "static-in-shared"), autotools_folder)
+        autotools_folder = os.path.join(self.build_folder, "sis")
+        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_folder)
 
         install_prefix = os.path.join(autotools_folder, "prefix")
 
@@ -128,7 +128,7 @@ class TestPackageConan(ConanFile):
 
     def _test_static_lib_in_shared(self):
         """ Test existence of shared library """
-        install_prefix = os.path.join(self.build_folder, "static-in-shared", "prefix")
+        install_prefix = os.path.join(self.build_folder, "sis", "prefix")
 
         with tools.chdir(install_prefix):
             if self.settings.os == "Windows":
