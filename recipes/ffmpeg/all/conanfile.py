@@ -630,6 +630,8 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["avfilter"].frameworks.append("AppKit")
             if self.options.get_safe("with_coreimage"):
                 self.cpp_info.components["avfilter"].frameworks.append("CoreImage")
+            if tools.Version(self.version) >= "5.0" and tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):
             self.cpp_info.components["avutil"].requires.extend(["vaapi::vaapi", "xorg::x11"])
