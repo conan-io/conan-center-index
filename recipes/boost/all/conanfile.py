@@ -1,6 +1,5 @@
-from conans import ConanFile
-from conans import tools
-from conans.tools import Version, cppstd_flag
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 
 import glob
@@ -221,7 +220,7 @@ class BoostConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_clang_cl(self):
@@ -384,9 +383,8 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe("without_{}".format(lib)):
                     raise ConanInvalidConfiguration("Boost '{}' library requires multi threading".format(lib))
 
-        if self.settings.compiler == "Visual Studio" and self._shared:
-            if "MT" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+        if self._is_msvc and self._shared and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
         if not self.options.without_locale and self.options.i18n_backend_iconv == "off" and \
            not self.options.i18n_backend_icu and not self._is_windows_platform:
@@ -982,8 +980,8 @@ class BoostConan(ConanFile):
             add_defines("zstd")
 
         if self._is_msvc:
-            flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
-            flags.append("runtime-debugging=%s" % ("on" if "d" in str(self.settings.compiler.runtime) else "off"))
+            flags.append("runtime-link=%s" % ("static" if "MT" in msvc_runtime_flag(self) else "shared"))
+            flags.append("runtime-debugging=%s" % ("on" if "d" in msvc_runtime_flag(self) else "off"))
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
@@ -1002,7 +1000,7 @@ class BoostConan(ConanFile):
         flags.append("toolset=%s" % self._toolset)
 
         if self.settings.get_safe("compiler.cppstd"):
-            flags.append("cxxflags=%s" % cppstd_flag(self.settings))
+            flags.append("cxxflags=%s" % tools.cppstd_flag(self.settings))
 
         # LDFLAGS
         link_flags = []
@@ -1015,7 +1013,7 @@ class BoostConan(ConanFile):
         if self.settings.build_type == "RelWithDebInfo":
             if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
                 cxx_flags.append("-g")
-            elif self.settings.compiler == "Visual Studio":
+            elif self._is_msvc:
                 cxx_flags.append("/Z7")
 
 
@@ -1072,7 +1070,7 @@ class BoostConan(ConanFile):
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
             if not self.options["icu"].shared:
                 # Using ICU_OPTS to pass ICU system libraries is not possible due to Boost.Regex disallowing it.
-                if self.settings.compiler == "Visual Studio":
+                if self._is_msvc:
                     icu_ldflags = " ".join("{}.lib".format(l) for l in self.deps_cpp_info["icu"].system_libs)
                 else:
                     icu_ldflags = " ".join("-l{}".format(l) for l in self.deps_cpp_info["icu"].system_libs)
@@ -1259,7 +1257,7 @@ class BoostConan(ConanFile):
     @property
     def _toolset(self):
         if self._is_msvc:
-            return "clang-win" if self.settings.compiler.toolset == "ClangCL" else "msvc"
+            return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
         elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
@@ -1296,15 +1294,17 @@ class BoostConan(ConanFile):
             "apple-clang": "",
             "msvc": "vc",
             "Visual Studio": "vc",
+            "msvc": "vc",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
             compiler = "mgw"
         os_ = ""
         if self.settings.os == "Macos":
             os_ = "darwin"
-        toolset_version = str(tools.Version(self.settings.compiler.version).major)
-        if str(self.settings.compiler) in ("msvc", "Visual Studio"):
+        if self._is_msvc:
             toolset_version = self._toolset_version.replace(".", "")
+        else:
+            toolset_version = str(tools.Version(self.settings.compiler.version).major)
 
         toolset_parts = [compiler, os_]
         toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
@@ -1478,8 +1478,8 @@ class BoostConan(ConanFile):
             }
             if self._is_msvc:  # FIXME: mingw?
                 # FIXME: add 'y' when using cpython cci package and when python is built in debug mode
-                static_runtime_key = "s" if "MT" in str(self.settings.compiler.runtime) else ""
-                debug_runtime_key = "g" if "d" in str(self.settings.compiler.runtime) else ""
+                static_runtime_key = "s" if "MT" in msvc_runtime_flag(self) else ""
+                debug_runtime_key = "g" if "d" in msvc_runtime_flag(self) else ""
                 debug_key = "d" if self.settings.build_type == "Debug" else ""
                 abi = static_runtime_key + debug_runtime_key + debug_key
                 if abi:
@@ -1509,7 +1509,7 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
-                if self.settings.compiler == "Visual Studio" and (not self._shared or n in self._dependencies["static_only"]):
+                if self._is_msvc and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
                 return libprefix + n
 
