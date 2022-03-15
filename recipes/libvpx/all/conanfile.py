@@ -1,10 +1,11 @@
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import re
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibVPXConan(ConanFile):
@@ -129,12 +130,7 @@ class LibVPXConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 vc_version = self.settings.compiler.version
             else:
-                vc_version = {
-                    "190": "14",
-                    "191": "15",
-                    "192": "16",
-                    "193": "17",
-                }[str(self.settings.compiler.version)]
+                vc_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
             compiler = "vs{}".format(vc_version)
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
