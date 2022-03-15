@@ -133,6 +133,9 @@ class RubyConan(ConanFile):
             tools.replace_in_file(os.path.join(build_script_folder, "configure.bat"), "-alf", "-adplf")
             tools.replace_in_file(os.path.join(build_script_folder, "setup.mak"), "@type", "type")
 
+            if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
+                os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
+
         with tools.vcvars(self):
             at.configure(build_script_folder=build_script_folder)
             at.make()
