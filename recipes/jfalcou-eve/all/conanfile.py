@@ -29,7 +29,7 @@ class JfalcouEveConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "10.2",
+            "gcc": "11",
             "Visual Studio": "16.9",
             "clang": "13",
             "apple-clang": "13",
