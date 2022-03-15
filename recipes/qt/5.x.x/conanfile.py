@@ -331,11 +331,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.198.0")
+            self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.6")
+                self.requires("moltenvk/1.1.8")
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.71.3")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -347,7 +347,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/70.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/3.2.0")
+            self.requires("harfbuzz/4.0.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -356,12 +356,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.38.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.4")
+            self.requires("libpq/13.6")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
@@ -371,13 +371,13 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            self.requires("xkbcommon/1.3.1")
+            self.requires("xkbcommon/1.4.0")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.4.4")
+            self.requires("expat/2.4.6")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
