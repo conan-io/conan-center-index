@@ -3,6 +3,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
+required_conan_version = ">=1.33.0"
+
 class DbgMacroConan(ConanFile):
     name = "c-dbg-macro"
     url = "https://github.com/conan-io/conan-center-index"
