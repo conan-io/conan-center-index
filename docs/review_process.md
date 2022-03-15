@@ -20,7 +20,7 @@ conan-center-index tries to make the process as smooth and simple as possible fo
     * [Addressing review comments](#addressing-review-comments)
   * [Automatic Merges](#automatic-merges)
     * [Merge](#merge)
-    * [Upload](#upload)
+    * [Package available to consume](#package-available-to-consume)
     * [Updating web front end](#updating-web-front-end)
   * [Stale PRs](#stale-prs)<!-- endToc -->
 

@@ -5,8 +5,13 @@ of pull-requests and issues. Here you can find more information about the ones t
 special meaning:
 
 <!-- toc -->
-## Content
-<!-- endToc -->
+## Contents
+
+  * [Bump version](#bump-version)
+  * [Infrastructure](#infrastructure)
+  * [Stale](#stale)
+  * [Unexpected Error](#unexpected-error)
+  * [User-approval pending](#user-approval-pending)<!-- endToc -->
 
 
 ## Bump dependencies
