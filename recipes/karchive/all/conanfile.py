@@ -23,7 +23,7 @@ class KArchiveConan(ConanFile):
         "with_lzma": True
     }
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
 
