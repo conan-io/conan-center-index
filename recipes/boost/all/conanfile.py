@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
@@ -1340,7 +1341,7 @@ class BoostConan(ConanFile):
         if dll_pdbs:
             tools.mkdir(os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
-                tools.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
+                rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
