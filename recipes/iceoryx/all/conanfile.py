@@ -3,8 +3,6 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-from importlib_metadata import version
-
 required_conan_version = ">=1.43.0"
 
 
@@ -199,7 +197,7 @@ class IceoryxConan(ConanFile):
             "2.0.0": {
                 "iceoryx_platform": {
                     "target": "iceoryx_hoofs::iceoryx_platform",
-                    "system_libs": pthread(),
+                    "system_libs": pthread() + rt(),
                     "requires": [],
                     "includeDir": False
                 },
@@ -211,7 +209,7 @@ class IceoryxConan(ConanFile):
                 },
                 "iceoryx_posh": {
                     "target": "iceoryx_posh::iceoryx_posh",
-                    "system_libs": pthread(),
+                    "system_libs": pthread() + rt(),
                     "requires": ["iceoryx_hoofs"],
                     "includeDir": True
                 },
