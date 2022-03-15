@@ -82,11 +82,7 @@ namespace test
 		// serialize to file
 		{
 			ofstream f("test", ofstream::binary);
-			//auto& f = *static_cast<gs::oFile*>(fopen("test", "wb"));
-			
 			gs::serializer(f, a);
-
-			//fclose(&f);
 		}
 
 		a.x = 0;
@@ -98,11 +94,7 @@ namespace test
 		// read back from file
 		{
 			ifstream f("test", ios::binary);
-			//auto& f = *static_cast<gs::iFile*>(fopen("test", "rb"));
-
 			gs::serializer(f, a);
-
-			//fclose(&f);
 		}
 
 		puts("reading:");
