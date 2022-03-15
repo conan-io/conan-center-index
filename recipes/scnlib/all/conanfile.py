@@ -25,7 +25,7 @@ class ScnlibConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = ["cmake", "cmake_find_package"]
     _cmake = None
 
     @property
@@ -46,6 +46,9 @@ class ScnlibConan(ConanFile):
             del self.options.fPIC
         if self.options.header_only:
             del self.options.shared
+
+    def requirements(self):
+        self.requires("fast_float/3.4.0")
 
     @property
     def _compilers_minimum_version(self):
@@ -79,6 +82,7 @@ class ScnlibConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SCN_INSTALL"] = True
+        self._cmake.definitions["SCN_USE_BUNDLED_FAST_FLOAT"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -117,3 +121,4 @@ class ScnlibConan(ConanFile):
         self.cpp_info.components["_scnlib"].names["cmake_find_package"] = target
         self.cpp_info.components["_scnlib"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_scnlib"].set_property("cmake_target_name", "scn::{}".format(target))
+        self.cpp_info.components["_scnlib"].requires = ["fast_float::fast_float"]

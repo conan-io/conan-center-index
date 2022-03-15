@@ -2,7 +2,13 @@ sources:
   "0.4":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v0.4.tar.gz"
     sha256: "f23e66b00c9d38671b39b83c082a5b2db1cf05b3e3eff7b4a769487d9ed9d366"
+  "1.1":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.tar.gz"
+    sha256: "5cdd58f3e178619a8f8b8ac505e8da37f35b3172b14a5133635554ad71eb841f"
 patches:
   "0.4":
-    - patch_file: "patches/0001-install-dll-windows.patch"
+    - patch_file: "patches/0.4-install-dll-windows.patch"
+      base_path: "source_subfolder"
+  "1.1":
+    - patch_file: "patches/1.1-install-dll-windows.patch"
       base_path: "source_subfolder"
