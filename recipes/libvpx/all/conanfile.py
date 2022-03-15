@@ -2,6 +2,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import re
 
@@ -30,8 +31,6 @@ class LibVPXConan(ConanFile):
 
     options.update({name: [True, False] for name in _arch_options})
     default_options.update({name: 'avx' not in name for name in _arch_options})
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -94,20 +93,17 @@ class LibVPXConan(ConanFile):
                     "tag_content WholeProgramOptimization false",
                 )
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        win_bash = tools.os_info.is_windows
-        prefix = os.path.abspath(self.package_folder)
-        if win_bash:
-            prefix = tools.unix_path(prefix)
-        args = ['--prefix=%s' % prefix,
-                '--disable-examples',
-                '--disable-unit-tests',
-                '--disable-tools',
-                '--disable-docs',
-                '--enable-vp9-highbitdepth',
-                '--as=yasm']
+        args = [
+            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--disable-examples",
+            "--disable-unit-tests",
+            "--disable-tools",
+            "--disable-docs",
+            "--enable-vp9-highbitdepth",
+            "--as=yasm",
+        ]
         if self.options.shared:
             args.extend(['--disable-static', '--enable-shared'])
         else:
@@ -158,27 +154,26 @@ class LibVPXConan(ConanFile):
             for name in self._arch_options:
                 if not self.options.get_safe(name):
                     args.append('--disable-%s' % name)
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
-            if self._is_msvc:
-                # gen_msvs_vcxproj.sh doesn't like custom flags
-                self._autotools.cxxflags = []
-                self._autotools.flags = []
-            if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
-                # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
-                self._autotools.link_flags.append("-stdlib=libc++")
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
-        return self._autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self._is_msvc:
+            # gen_msvs_vcxproj.sh doesn't like custom flags
+            autotools.cxxflags = []
+            autotools.flags = []
+        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
+            # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
+            autotools.link_flags.append("-stdlib=libc++")
+        autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
+        return autotools
 
     def build(self):
         self._patch_sources()
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
