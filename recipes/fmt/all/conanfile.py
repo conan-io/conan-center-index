@@ -1,8 +1,12 @@
 import os
+import shutil
 
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, apply_conandata_patches
+from conan.tools.microsoft.visual import is_msvc, msvc_runtime_flag
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -14,6 +18,7 @@ class FmtConan(ConanFile):
     topics = ("fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    exports_sources = "patches/*"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,29 +36,23 @@ class FmtConan(ConanFile):
         "with_os_api": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     @property
     def _has_with_os_api_option(self):
-        return tools.Version(self.version) >= "7.0.0"
+        return Version(str(self.version)) >= "7.0.0"
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+    def generate(self):
+        if not self.options.header_only:
+            tc = CMakeToolchain(self)
+            tc.variables["FMT_DOC"] = False
+            tc.variables["FMT_TEST"] = False
+            tc.variables["FMT_INSTALL"] = True
+            tc.variables["FMT_LIB_DIR"] = "lib"
+            if self._has_with_os_api_option:
+                tc.variables["FMT_OS"] = self.options.with_os_api
+            tc.generate()  
+
+    def layout(self):
+        cmake_layout(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,15 +63,18 @@ class FmtConan(ConanFile):
             self.options.with_os_api = False
 
     def configure(self):
-        if self.options.header_only:
-            del self.options.fPIC
-            del self.options.shared
-            del self.options.with_os_api
-        elif self.options.shared:
-            del self.options.fPIC
+        try:
+            if self.options.header_only:
+                del self.options.fPIC
+                del self.options.shared
+                del self.options.with_os_api
+            elif self.options.shared:
+                del self.options.fPIC
+        except Exception:
+            pass
 
     def validate(self):
-        if self.options.get_safe("shared") and self._is_msvc and "MT" in msvc_runtime_flag(self):
+        if self.options.get_safe("shared") and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(
                 "Visual Studio build for shared library with MT runtime is not supported"
             )
@@ -84,39 +86,32 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FMT_DOC"] = False
-        self._cmake.definitions["FMT_TEST"] = False
-        self._cmake.definitions["FMT_INSTALL"] = True
-        self._cmake.definitions["FMT_LIB_DIR"] = "lib"
-        if self._has_with_os_api_option:
-            self._cmake.definitions["FMT_OS"] = self.options.with_os_api
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if not self.options.header_only:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
+            cmake.configure()
             cmake.build()
 
+    @staticmethod
+    def _rm_folder(folder):
+        try:
+            shutil.rmtree(folder)
+        except Exception:
+            pass
+
     def package(self):
-        self.copy("LICENSE.rst", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE.rst", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
-            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+            copy(self, "*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         else:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            self._rm_folder(os.path.join(self.package_folder, "lib", "cmake"))
+            self._rm_folder(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            self._rm_folder(os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fmt"
