@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import os
 
 required_conan_version = ">=1.43.0"
@@ -12,7 +13,6 @@ class S2n(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aws/s2n-tls"
     license = "Apache-2.0",
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,13 +23,17 @@ class S2n(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.shared:
@@ -58,6 +62,7 @@ class S2n(ConanFile):
         return self._cmake
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
