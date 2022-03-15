@@ -276,8 +276,6 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def validate(self):
-        if self.settings.os != "Macos":
-            raise ConanInvalidConfiguration("debug!")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
         if self.options.widgets and not self.options.gui:
@@ -389,15 +387,6 @@ class QtConan(ConanFile):
             self.requires("wayland/1.20.0")
 
     def source(self):
-        import tarfile
-        os.environ["CONAN_VERBOSE_TRACEBACK"] = "1"
-        if self.version == "5.15.3":
-            url = self.conan_data["sources"][self.version]["url"]
-            filename = "qt-everywhere-opensource-src-5.15.3.tar.xz"
-            tools.download(url, filename)
-            xz = tarfile.TarFile.xzopen(filename, 'r')
-            os.unlink(filename)
-            self.output.info("archive members {}".format(xz.getmembers()))
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination="qt5")
 
