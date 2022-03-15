@@ -12,6 +12,7 @@ class EmbeddedTemplateLibraryConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A C++ template library for embedded applications"
     topics = ("c++", "embedded", "template", "container", "utility", "framework", "messaging")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
