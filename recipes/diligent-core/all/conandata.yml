@@ -2,7 +2,7 @@ sources:
   "2.5.1":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.1.tar.gz"
     sha256: "56a577d5273539f88cc27fb74ab61e42f407da77ef4d0876f83a9f8e763c0f64"
-  "250014":
+  "api.250014":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API250014.tar.gz"
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
@@ -17,7 +17,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0006-install-linux-platform-header.diff"
       base_path: "source_subfolder"
-  "250014":
+  "api.250014":
     - patch_file: "patches/0007-API250014-remove_warning_as_error.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0008-API250014-use_conan_dependencies_in_shader_tools.patch"
