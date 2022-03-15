@@ -158,7 +158,8 @@ class DiligentCoreConan(ConanFile):
             self.copy(pattern="*.so", dst="lib", keep_path=False)
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.lib")
+            if self.settings.os is not "Windows":
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.lib")
         else:
             self.copy(pattern="*.a", dst="lib", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
