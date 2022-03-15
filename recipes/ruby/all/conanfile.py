@@ -4,7 +4,10 @@ import re
 
 from conan import ConanFile
 from conan.tools.apple.apple import is_apple_os, to_apple_arch
-from conan.tools.cross_building import cross_building
+try:
+    from conan.tools.cross_building import cross_building
+except ImportError:
+    from conans.client.tools.oss import cross_building
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conans import tools
