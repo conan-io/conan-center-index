@@ -31,7 +31,7 @@ class JfalcouEveConan(ConanFile):
         return {
             "gcc": "10.2",
             "Visual Studio": "16.9",
-            "clang": "12",
+            "clang": "13",
             "apple-clang": "13",
         }
 
