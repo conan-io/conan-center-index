@@ -1,6 +1,8 @@
+from conan.tools.files import rename
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -22,8 +24,6 @@ class LibbacktraceConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -80,21 +80,20 @@ class LibbacktraceConan(ConanFile):
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         if (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12") or \
            str(self.settings.compiler) == "msvc":
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -110,7 +109,7 @@ class LibbacktraceConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         lib_folder = os.path.join(self.package_folder, "lib")
         if self._is_msvc:
-            tools.rename(os.path.join(lib_folder, "libbacktrace.lib"),
+            rename(self, os.path.join(lib_folder, "libbacktrace.lib"),
                          os.path.join(lib_folder, "backtrace.lib"))
         tools.remove_files_by_mask(lib_folder, "*.la")
 
