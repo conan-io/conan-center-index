@@ -66,12 +66,14 @@ class IgnitionMathConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.3.9")
+        self.requires("doxygen/1.8.17")
+        self.requires("swig/4.0.2")
 
     def build_requirements(self):
         if int(tools.Version(self.version).minor) <= 8:
             self.build_requires("ignition-cmake/2.5.0")
         else:
-            self.build_requires("ignition-cmake/2.10.0")
+            self.build_requires("ignition-cmake/2.10.0@ar/thirdparty")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -131,6 +133,16 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components["libignition-math-all"].requires = ["libignition-math-eigen3"]
         self.cpp_info.components["libignition-math-all"].names["cmake_find_package"] = "ignition-math{}-all".format(version_major)
         self.cpp_info.components["libignition-math-all"].names["cmake_find_package_multi"] = "ignition-math{}-all".format(version_major)
+        self.cpp_info.components["libignition-math-all"].requires.append("eigen::eigen")
+        self.cpp_info.components["libignition-math-all"].requires.append("doxygen::doxygen")
+        self.cpp_info.components["libignition-math-all"].requires.append("swig::swig")
+
+        self.env_info.LD_LIBRARY_PATH.extend([
+            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
+        ])
+        self.env_info.PATH.extend([
+            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
+        ])
     
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
