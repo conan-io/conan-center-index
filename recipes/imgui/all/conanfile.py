@@ -55,9 +55,10 @@ class IMGUIConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        use_backends = 'docking' in self.version or tools.Version(self.version) >= "1.80"
         backends_folder = os.path.join(
             self._source_subfolder,
-            "backends" if tools.Version(self.version) >= "1.80" else "examples"
+            "backends" if use_backends else "examples"
         )
         self.copy(pattern="imgui_impl_*",
                   dst=os.path.join("res", "bindings"),
