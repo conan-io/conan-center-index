@@ -443,10 +443,6 @@ class BoostConan(ConanFile):
                         if tools.Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Math requires (boost:)cppstd>=11 (current one is lower)")
 
-    def build_requirements(self):
-        if not self.options.header_only:
-            self.build_requires("b2/4.7.1")
-
     def _with_dependency(self, dependency):
         """
         Return true when dependency is required according to the dependencies-x.y.z.yml file
@@ -493,12 +489,12 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118")
 
         if self._with_icu:
-            self.requires("icu/68.2")
+            self.requires("icu/70.1")
         if self._with_iconv:
             self.requires("libiconv/1.16")
 
@@ -516,6 +512,10 @@ class BoostConan(ConanFile):
                 del self.info.options.python_version
             else:
                 self.info.options.python_version = self._python_version
+
+    def build_requirements(self):
+        if not self.options.header_only:
+            self.build_requires("b2/4.8.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
