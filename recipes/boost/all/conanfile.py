@@ -354,9 +354,6 @@ class BoostConan(ConanFile):
         if self.options.without_locale:
             del self.options.i18n_backend_iconv
             del self.options.i18n_backend_icu
-        else:
-            if self.options.i18n_backend_iconv == "off" and not self.options.i18n_backend_icu and not self._is_windows_platform:
-                raise ConanInvalidConfiguration("Boost.Locale library needs either iconv or ICU library to be built on non windows platforms")
 
         if not self.options.without_python:
             if not self.options.python_version:
@@ -365,10 +362,7 @@ class BoostConan(ConanFile):
         else:
             del self.options.python_buildid
 
-        if self._stacktrace_addr2line_available:
-            if os.path.abspath(str(self.options.addr2line_location)) != str(self.options.addr2line_location):
-                raise ConanInvalidConfiguration("addr2line_location must be an absolute path to addr2line")
-        else:
+        if not self._stacktrace_addr2line_available:
             del self.options.addr2line_location
 
         if self.options.get_safe("without_stacktrace", True):
@@ -393,6 +387,16 @@ class BoostConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self._shared:
             if "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+        if not self.options.without_locale and self.options.i18n_backend_iconv == "off" and \
+           not self.options.i18n_backend_icu and not self._is_windows_platform:
+            raise ConanInvalidConfiguration(
+                "Boost.Locale library needs either iconv or ICU library to be built on non windows platforms"
+            )
+
+        if self._stacktrace_addr2line_available:
+            if os.path.abspath(str(self.options.addr2line_location)) != str(self.options.addr2line_location):
+                raise ConanInvalidConfiguration("addr2line_location must be an absolute path to addr2line")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
