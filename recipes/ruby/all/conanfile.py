@@ -138,6 +138,7 @@ class RubyConan(ConanFile):
 
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
+            self.conf["tools.gnu:make_program"] = "nmake"
 
         with tools.vcvars(self):
             at.configure(build_script_folder=build_script_folder)
