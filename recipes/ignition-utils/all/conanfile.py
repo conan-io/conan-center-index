@@ -98,7 +98,7 @@ class IgnitionUitlsConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cli_header_src = os.path.join(self._source_subfolder, "cli", "include")
-        if int(tools.Version(self.version).minor) is 0:
+        if int(tools.Version(self.version).minor) == 0:
             cli_header_src = os.path.join(cli_header_src, "ignition", "utils", "cli")
         else:
             cli_header_src = os.path.join(cli_header_src, "external-cli", "ignition", "utils", "cli")
