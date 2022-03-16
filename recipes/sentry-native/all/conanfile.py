@@ -130,7 +130,8 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.0")
+        if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
+            self.build_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 
