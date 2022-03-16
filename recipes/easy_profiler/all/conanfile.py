@@ -1,5 +1,7 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
@@ -26,7 +28,6 @@ class EasyProfilerConan(ConanFile):
 
     generators = "cmake"
     short_paths = True
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -35,6 +36,10 @@ class EasyProfilerConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -50,11 +55,9 @@ class EasyProfilerConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and \
-           self.options.shared and tools.Version(self.settings.compiler.version) >= "15":
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(
-                "{} {} with MTd runtime not supported".format(self.settings.compiler,
-                                                              self.settings.compiler.version)
+                "easy_profiler doesn't support Visual Studio with MTd runtime"
             )
 
     def source(self):
@@ -62,20 +65,25 @@ class EasyProfilerConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't pollute RPATH
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "SET(CMAKE_INSTALL_RPATH \"$ORIGIN\")", "")
+
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         # Don't build the GUI because it is dependent on Qt
-        self._cmake.definitions["EASY_PROFILER_NO_GUI"] = True
-        self._cmake.definitions["EASY_PROFILER_NO_SAMPLES"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.definitions["EASY_PROFILER_NO_GUI"] = True
+        cmake.definitions["EASY_PROFILER_NO_SAMPLES"] = True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
