@@ -36,7 +36,7 @@ class ZlibConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+        return str(self.settings.compiler) in ["Visual Studio"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
