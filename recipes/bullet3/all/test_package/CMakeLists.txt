@@ -5,6 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(Bullet REQUIRED CONFIG)
+include(${BULLET_ROOT_DIR}/${BULLET_USE_FILE})
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} Bullet::Bullet)
+target_link_libraries(${PROJECT_NAME} ${BULLET_LIBRARIES})
