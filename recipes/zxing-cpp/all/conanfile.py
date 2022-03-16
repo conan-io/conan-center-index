@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -28,7 +29,6 @@ class ZXingCppConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -78,14 +78,13 @@ class ZXingCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
-        self._cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
+        cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -97,7 +96,6 @@ class ZXingCppConan(ConanFile):
         self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
