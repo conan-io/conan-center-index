@@ -52,6 +52,11 @@ class JsonnetConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
+        if self.options.shared and \
+           ((str(self.settings.compiler) == "Visual Studio" and self.settings.compiler.runtime == "MTd") or \
+            (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "MT" and self.settings.compiler.runtime_type == "Debug")):
+            raise ConanInvalidConfiguration("shared jsonnet is not supported with MTd runtime")
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
