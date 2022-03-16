@@ -143,8 +143,8 @@ class NovelRTConan(ConanFile):
         if self.settings.compiler == "clang":
             if compiler_version == 10 and self.settings.compiler.libcxx != "libstdc++11":
                 raise errors.ConanInvalidConfiguration(f"Please use libstdc++11 when compiling NovelRT with Clang 10.")
-             if self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
-                raise errors.ConanInvalidConfiguration("Clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support.")
+            if self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
+                 raise errors.ConanInvalidConfiguration("Clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support.")
         if self.settings.compiler == "Visual Studio":
             if self._is_debug_runtime_win:
                 raise errors.ConanInvalidConfiguration(f"NovelRT does not support debug runtime builds at this time with Visual Studio.")
