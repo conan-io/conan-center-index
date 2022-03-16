@@ -1,17 +1,23 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class Bullet3Conan(ConanFile):
     name = "bullet3"
-    description = "Bullet Physics SDK: real-time collision detection and multi-physics simulation for VR, games, visual effects, robotics, machine learning etc."
+    description = (
+        "Bullet Physics SDK: real-time collision detection and multi-physics "
+        "simulation for VR, games, visual effects, robotics, machine learning etc."
+    )
     homepage = "https://github.com/bulletphysics/bullet3"
-    topics = "conan", "bullet", "physics", "simulation", "robotics", "kinematics", "engine",
+    topics = ("bullet", "physics", "simulation", "robotics", "kinematics", "engine")
     license = "ZLIB"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,7 +28,7 @@ class Bullet3Conan(ConanFile):
         "bt2_thread_locks": [True, False],
         "soft_body_multi_body_dynamics_world": [True, False],
         "network_support": [True, False],
-        "extras": [True, False]
+        "extras": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,11 +39,19 @@ class Bullet3Conan(ConanFile):
         "bt2_thread_locks": False,
         "soft_body_multi_body_dynamics_world": False,
         "network_support": False,
-        "extras": False
+        "extras": False,
     }
 
-    _source_subfolder = "source_subfolder"
-    _cmake = None
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,34 +60,35 @@ class Bullet3Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+
+    def validate(self):
+        if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Shared libraries on Visual Studio not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("bullet3-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_BULLET3"] = self.options.bullet3
-        self._cmake.definitions["INSTALL_LIBS"] = True
-        self._cmake.definitions["USE_GRAPHICAL_BENCHMARK"] = self.options.graphical_benchmark
-        self._cmake.definitions["USE_DOUBLE_PRECISION"] = self.options.double_precision
-        self._cmake.definitions["BULLET2_USE_THREAD_LOCKS"] = self.options.bt2_thread_locks
-        self._cmake.definitions["USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD"] = self.options.soft_body_multi_body_dynamics_world
-        self._cmake.definitions["BUILD_ENET"] = self.options.network_support
-        self._cmake.definitions["BUILD_CLSOCKET"] = self.options.network_support
-        self._cmake.definitions["BUILD_CPU_DEMOS"] = False
-        self._cmake.definitions["BUILD_OPENGL3_DEMOS"] = False
-        self._cmake.definitions["BUILD_BULLET2_DEMOS"] = False
-        self._cmake.definitions["BUILD_EXTRAS"] = self.options.extras
-        self._cmake.definitions["BUILD_UNIT_TESTS"] = False
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_BULLET3"] = self.options.bullet3
+        cmake.definitions["INSTALL_LIBS"] = True
+        cmake.definitions["USE_GRAPHICAL_BENCHMARK"] = self.options.graphical_benchmark
+        cmake.definitions["USE_DOUBLE_PRECISION"] = self.options.double_precision
+        cmake.definitions["BULLET2_USE_THREAD_LOCKS"] = self.options.bt2_thread_locks
+        cmake.definitions["USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD"] = self.options.soft_body_multi_body_dynamics_world
+        cmake.definitions["BUILD_ENET"] = self.options.network_support
+        cmake.definitions["BUILD_CLSOCKET"] = self.options.network_support
+        cmake.definitions["BUILD_CPU_DEMOS"] = False
+        cmake.definitions["BUILD_OPENGL3_DEMOS"] = False
+        cmake.definitions["BUILD_BULLET2_DEMOS"] = False
+        cmake.definitions["BUILD_EXTRAS"] = self.options.extras
+        cmake.definitions["BUILD_UNIT_TESTS"] = False
+        if self._is_msvc:
+            cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
