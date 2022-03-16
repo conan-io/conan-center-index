@@ -132,13 +132,11 @@ class RubyConan(ConanFile):
 
         build_script_folder = self._source_subfolder
         if self._is_msvc:
+            self.conf["tools.gnu:make_program"] = "nmake"
             build_script_folder = os.path.join(build_script_folder, "win32")
-            tools.replace_in_file(os.path.join(build_script_folder, "configure.bat"), "-alf", "-adplf")
-            tools.replace_in_file(os.path.join(build_script_folder, "setup.mak"), "@type", "type")
 
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
-            self.conf["tools.gnu:make_program"] = "nmake"
 
         with tools.vcvars(self):
             at.configure(build_script_folder=build_script_folder)
