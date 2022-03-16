@@ -71,7 +71,7 @@ class LibreSSLConan(ConanFile):
         self._cmake.definitions["ENABLE_ASM"] = True
         self._cmake.definitions["ENABLE_EXTRATESTS"] = False
         self._cmake.definitions["ENABLE_NC"] = False
-        self._cmake.definitions["OPENSSLDIR"] = "C:/Windows/libressl/ssl" if self.settings.os == "Windows" else "/etc/ssl"
+        self._cmake.definitions["OPENSSLDIR"] = os.path.join(self.package_folder, "res")
         self._cmake.configure()
         return self._cmake
 
