@@ -4,13 +4,17 @@ import re
 
 from conan import ConanFile
 from conan.tools.apple.apple import is_apple_os, to_apple_arch
+
 try:
     from conan.tools.cross_building import cross_building
 except ImportError:
     from conans.client.tools.oss import cross_building
+
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -52,21 +56,6 @@ class RubyConan(ConanFile):
         return ["user32", "advapi32", "shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
 
     @property
-    def _msvc_runtime_flag(self):        
-        compiler = self.settings.compiler
-        runtime = self.settings.get_safe("compiler.runtime")
-        if compiler == "msvc" or compiler == "intel-cc":
-            build_type = self.settings.get_safe("build_type")
-            if build_type != "Debug":
-                return {"static": "MT",
-                        "dynamic": "MD"}.get(runtime, "")
-            else:
-                return {"static": "MTd",
-                        "dynamic": "MDd"}.get(runtime, "")
-        else:
-            return runtime
-
-    @property
     def _msvc_optflag(self):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14":
             return "-O2b2xg-"
@@ -82,6 +71,11 @@ class RubyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if self._is_msvc and msvc_runtime_flag(self).startswith('MT'):
+            # see https://github.com/conan-io/conan-center-index/pull/8644#issuecomment-1068974098
+            raise ConanInvalidConfiguration("VS static runtime is not supported")
 
     def configure(self):
         if self.options.shared:
@@ -117,7 +111,7 @@ class RubyConan(ConanFile):
                 tc.configure_args.append(f"--with-arch={apple_arch}")
         if self._is_msvc:
             # this is marked as TODO in https://github.com/conan-io/conan/blob/01f4aecbfe1a49f71f00af8f1b96b9f0174c3aad/conan/tools/gnu/autotoolstoolchain.py#L23
-            tc.build_type_flags.append(f"-{self._msvc_runtime_flag}")
+            tc.build_type_flags.append(f"-{msvc_runtime_flag(self)}")
             # https://github.com/conan-io/conan/issues/10338
             # remove after conan 1.45
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
