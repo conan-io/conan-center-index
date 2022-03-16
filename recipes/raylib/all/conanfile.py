@@ -19,15 +19,15 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_examples": [True, False],
-        "use_external_glfw": ["OFF","ON","IF_POSSIBLE"],
-        "opengl_version":["OFF","3.3","2.1","1.1","ES 2.0"]
+        "use_external_glfw": [True, False],
+        "opengl_version":[None, "3.3","2.1","1.1","ES 2.0"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_examples": False,
-        "use_external_glfw": "ON",
-        "opengl_version" :"OFF"
+        "use_external_glfw": True,
+        "opengl_version" : None
     }
 
     exports_sources = ["CMakeLists.txt","patches/**"]
@@ -58,7 +58,7 @@ class RaylibConan(ConanFile):
 
     def requirements(self):
         
-        if self.options.use_external_glfw in ["ON","IF_POSSIBLE"] and self.settings.os != "Android":
+        if self.options.use_external_glfw and self.settings.os != "Android":
             self.requires("glfw/3.3.6")
         
         if self.settings.os != "Android":
@@ -84,8 +84,8 @@ class RaylibConan(ConanFile):
             self._cmake.definitions["USE_EXTERNAL_GLFW"] = "OFF"
             self._cmake.definitions["OPENGL_VERSION"] = "ES 2.0"
         else:
-            self._cmake.definitions["USE_EXTERNAL_GLFW"] = self.options.use_external_glfw
-            self._cmake.definitions["OPENGL_VERSION"] = self.options.opengl_version            
+            self._cmake.definitions["USE_EXTERNAL_GLFW"] = "OFF" if self.options.use_external_glfw else "ON"
+            self._cmake.definitions["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version  else self.options.opengl_version
         
         self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
