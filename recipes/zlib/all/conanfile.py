@@ -36,7 +36,7 @@ class ZlibConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio"]
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -105,10 +105,10 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
-                if self._is_msvc:
+                if self._is_msvc or str(self.settings.compiler) in ("clang"):
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler in ("clang", "gcc", ):
+                elif self.settings.compiler in ("gcc", ):
                     if not self.settings.os.subsystem:
                         current_lib = os.path.join(lib_path, "libzlibstatic.a")
                         tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
