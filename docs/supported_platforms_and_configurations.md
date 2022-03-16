@@ -65,7 +65,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 ## MacOS
 
-- Compilers: Apple-clang versions 11.0.3, 12.0.5, 13.0.0
+- Compilers: Apple-clang versions 11.0.3, 12.0.5, 12.0.5, 13.0.0, 13.0.0
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64, armv8
 - Build types: Release, Debug
