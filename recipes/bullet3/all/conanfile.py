@@ -104,31 +104,32 @@ class Bullet3Conan(ConanFile):
     def package_info(self):
         libs = []
         if self.options.bullet3:
-            libs += [
-                "Bullet2FileLoader",
-                "Bullet3Collision",
-                "Bullet3Dynamics",
+            libs.extend([
+                "Bullet3OpenCL_clew", # depends on LinearMath Bullet3Dynamics (and libdl on Linux)
+                "Bullet3Dynamics", # depends on Bullet3Collision
+                "Bullet3Collision", # depends on Bullet3Geometry
                 "Bullet3Geometry",
-                "Bullet3OpenCL_clew",
-            ]
-        libs += [
-            "BulletDynamics",
-            "BulletCollision",
-            "LinearMath",
-            "BulletSoftBody",
-            "Bullet3Common",
-            "BulletInverseDynamics",
-        ]
+                "Bullet2FileLoader", # depends on Bullet3Common
+            ])
         if self.options.extras:
-            libs += [   "BulletInverseDynamicsUtils",
-                        "BulletRobotics",
-                        "BulletFileLoader",
-                        "BulletXmlWorldImporter",
-                        "BulletWorldImporter",
-                        "ConvexDecomposition",
-                        "HACD",
-                        "GIMPACTUtils"
-                    ]
+            libs.extend([
+                "BulletRobotics", # depends on BulletInverseDynamicsUtils BulletWorldImporter BulletFileLoader BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamics LinearMath Bullet3Common
+                "BulletInverseDynamicsUtils", # depends on BulletInverseDynamics BulletDynamics BulletCollision Bullet3Common LinearMath
+                "BulletXmlWorldImporter", # depends on BulletWorldImporter BulletDynamics BulletCollision BulletFileLoader LinearMath
+                "BulletWorldImporter", # depends on BulletDynamics BulletCollision BulletFileLoader LinearMath
+                "BulletFileLoader", # depends on LinearMath
+                "GIMPACTUtils", # depends on ConvexDecomposition BulletCollision
+                "ConvexDecomposition", # depends on BulletCollision LinearMath
+                "HACD",
+            ])
+        libs.extend([
+            "BulletSoftBody", # depends on BulletDynamics
+            "BulletDynamics", # depends on BulletCollision & LinearMath
+            "BulletCollision", # depends on LinearMath
+            "BulletInverseDynamics", # depends on Bullet3Common & LinearMath
+            "LinearMath",
+            "Bullet3Common",
+        ])
         if self.settings.os == "Windows" and self.settings.build_type in ("Debug", "MinSizeRel", "RelWithDebInfo"):
             lib_suffix = "RelWithDebugInfo" if self.settings.build_type == "RelWithDebInfo" else self.settings.build_type
             libs = [lib + "_{}".format(lib_suffix) for lib in libs]
