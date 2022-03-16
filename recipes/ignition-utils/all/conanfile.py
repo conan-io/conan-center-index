@@ -36,10 +36,6 @@ class IgnitionUitlsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
     
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,7 +45,9 @@ class IgnitionUitlsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):    
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
@@ -127,9 +125,3 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-utils"].names["pkg_config"] = "ignition-utils{}".format(version_major)
         self.cpp_info.components["libignition-utils"].requires = ["cli11::cli11"]
         self.cpp_info.components["libignition-msgs"].requires.append("doxygen::doxygen")
-        self.env_info.LD_LIBRARY_PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        ])
-        self.env_info.PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        ])
