@@ -1,4 +1,4 @@
-// Copyright (c) 2019 by Robert Bosch GmbH. All rights reserved.
+// Copyright (c) 2020 by Robert Bosch GmbH. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,23 +13,17 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0
-#ifndef IOX_EXAMPLES_ICEDELIVERY_TOPIC_DATA_HPP
-#define IOX_EXAMPLES_ICEDELIVERY_TOPIC_DATA_HPP
+
+#ifndef IOX_EXAMPLES_ICEDELIVERY_IN_C_TOPIC_DATA_HPP
+#define IOX_EXAMPLES_ICEDELIVERY_IN_C_TOPIC_DATA_HPP
+
+#include <stdint.h>
 
 struct RadarObject
 {
-    RadarObject() noexcept
-    {
-    }
-    RadarObject(double x, double y, double z) noexcept
-        : x(x)
-        , y(y)
-        , z(z)
-    {
-    }
-    double x = 0.0;
-    double y = 0.0;
-    double z = 0.0;
+    double x;
+    double y;
+    double z;
 };
 
 #endif // IOX_EXAMPLES_ICEDELIVERY_TOPIC_DATA_HPP
