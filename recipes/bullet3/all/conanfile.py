@@ -79,7 +79,7 @@ class Bullet3Conan(ConanFile):
         cmake.definitions["INSTALL_LIBS"] = True
         cmake.definitions["USE_GRAPHICAL_BENCHMARK"] = self.options.graphical_benchmark
         cmake.definitions["USE_DOUBLE_PRECISION"] = self.options.double_precision
-        cmake.definitions["BULLET2_USE_THREAD_LOCKS"] = self.options.bt2_thread_locks
+        cmake.definitions["BULLET2_MULTITHREADING"] = self.options.bt2_thread_locks
         cmake.definitions["USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD"] = self.options.soft_body_multi_body_dynamics_world
         cmake.definitions["BUILD_ENET"] = self.options.network_support
         cmake.definitions["BUILD_CLSOCKET"] = self.options.network_support
@@ -190,6 +190,8 @@ class Bullet3Conan(ConanFile):
         if self.options.extras:
             self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))
         self.cpp_info.defines = self._bullet_definitions
+        if self.options.bt2_thread_locks and self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Bullet"
