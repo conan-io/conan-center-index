@@ -63,7 +63,7 @@ class CharlsConan(ConanFile):
                                                                                          self.settings.compiler.version))
 
         # name lookup issue for gcc == 5 in charls/2.2.0
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "5" and tools.Version(self.version) == "2.2.0":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "5" and tools.Version(self.version) >= "2.2.0":
             raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
@@ -74,11 +74,6 @@ class CharlsConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if tools.Version(self.version) == "2.3.4" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "charls", "public_types.h"),
-                                  "std::is_error_code_enum<charls::jpegls_errc> final",
-                                  "std::is_error_code_enum<charls::jpegls_errc>")
-
         cmake = self._configure_cmake()
         cmake.build()
 
