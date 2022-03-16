@@ -103,6 +103,8 @@ class LibreSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
+            if tools.Version(self.version) >= "3.3.0":
+                self.cpp_info.components["crypto"].system_libs.append("bcrypt")
 
         # SSL
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "LibreSSL::SSL")
