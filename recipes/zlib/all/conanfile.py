@@ -101,7 +101,7 @@ class ZlibConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
-                if self._is_msvc and suffix:
+                if (self._is_msvc or str(self.settings.compiler) in ("clang")) and suffix:
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
