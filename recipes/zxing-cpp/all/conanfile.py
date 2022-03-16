@@ -68,6 +68,11 @@ class ZXingCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "This compiler is too old. This library needs a compiler with c++14 support"
             )
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= "11":
+            raise ConanInvalidConfiguration(
+                "zxing-cpp doesn't support gcc >= 11. Contributions are "
+                "welcome if you want to fix the build."
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
