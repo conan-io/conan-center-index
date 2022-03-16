@@ -6,8 +6,8 @@ conan_basic_setup(TARGETS)
 
 find_package(jsonnet CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME}_c test_package.c)
-target_link_libraries(${PROJECT_NAME}_c jsonnet::libjsonnet)
+# add_executable(${PROJECT_NAME}_c test_package.c)
+# target_link_libraries(${PROJECT_NAME}_c jsonnet::libjsonnet)
 
 add_executable(${PROJECT_NAME}_cxx test_package.cpp)
 target_link_libraries(${PROJECT_NAME}_cxx jsonnet::libjsonnetpp)
