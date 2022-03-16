@@ -35,7 +35,7 @@ class Bullet3Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "bullet3": False,
+        "bullet3": True,
         "graphical_benchmark": False,
         "double_precision": False,
         "bt2_thread_locks": False,
