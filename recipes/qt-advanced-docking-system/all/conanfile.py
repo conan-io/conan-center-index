@@ -89,4 +89,5 @@ class QtADS(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = ["qtadvanceddocking"]
         else:
+            self.cpp_info.defines.append("ADS_STATIC")
             self.cpp_info.libs = ["qtadvanceddocking_static"]
