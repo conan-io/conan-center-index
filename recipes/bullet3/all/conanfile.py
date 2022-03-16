@@ -44,6 +44,7 @@ class Bullet3Conan(ConanFile):
         "extras": False,
     }
 
+    short_paths = True
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
