@@ -39,7 +39,7 @@ static void sigHandler(int f_sig IOX_MAYBE_UNUSED)
     killswitch = true;
 }
 
-void getRadarObject(RadarObject* const object, const double& val) noexcept
+void getRadarObject(RadarObject* const object, const double& val)
 {
     *object = RadarObject(val, val, val);
 }

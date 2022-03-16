@@ -18,10 +18,10 @@
 
 struct RadarObject
 {
-    RadarObject() noexcept
+    RadarObject()
     {
     }
-    RadarObject(double x, double y, double z) noexcept
+    RadarObject(double x, double y, double z)
         : x(x)
         , y(y)
         , z(z)
