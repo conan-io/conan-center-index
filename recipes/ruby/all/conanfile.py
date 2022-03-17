@@ -8,7 +8,7 @@ from conan.tools.apple.apple import is_apple_os, to_apple_arch
 try:
     from conan.tools.cross_building import cross_building
 except ImportError:
-    from conans.client.tools.oss import cross_building
+    from conan.tools.build.cross_building import cross_building
 
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
