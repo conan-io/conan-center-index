@@ -38,6 +38,7 @@ class RubyConan(ConanFile):
         "fPIC": True,
         "with_openssl": True
     }
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -150,7 +151,7 @@ class RubyConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
