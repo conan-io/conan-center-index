@@ -2,30 +2,31 @@ from conans import ConanFile, CMake, tools
 from pathlib import Path
 import os
 
-# conan create . -e CONAN_SYSREQUIRES_MODE=enabled
+required_conan_version = ">=1.33.0"
 
 class Allegro5Conan(ConanFile):
     name = "allegro5"
     version = "5.2.7"
-    license = "Custom licenses"
+    license = ("ZLib", "BSD", "SDL", "Dejavu-fonts", "Creative Commons BY Attribution", "CBString")
     homepage = "https://github.com/liballeg/allegro5"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform graphics framework for basic game development and desktop applications"
     topics = ("gamedev", "gui", "framework", "graphics")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "compiler", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    
     generators = "cmake"
-                
-    def requirements(self):       # Conditional dependencies
+    _cmake = None
 
+    def requirements(self):       # Conditional dependencies
         self.requires("libpng/1.6.37")
         self.requires("zlib/1.2.11")
         self.requires("libjpeg/9d")
         self.requires("freetype/2.11.1")
         self.requires("libwebp/1.2.2")
         self.requires("flac/1.3.3")
-        self.requires("ogg/1.3.5")
+        self.requires("ogg/1.3.4")
         self.requires("vorbis/1.3.7")
         self.requires("minimp3/20200304")
         self.requires("openal/1.21.1")
@@ -36,7 +37,6 @@ class Allegro5Conan(ConanFile):
         self.requires("opengl/system")
 
         if self.settings.os != "Windows":
-
             self.requires("xorg/system")
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
@@ -48,15 +48,26 @@ class Allegro5Conan(ConanFile):
         self.options["freetype"].with_brotli = False
         self.options["opusfile"].http = False
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+        
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
-        self.run("git clone https://github.com/liballeg/allegro5.git --depth=1 --single-branch --branch=5.2.7")
-
-    def generate(self):
-
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        
+    def _patch_sources(self):
         zlib = self.dependencies["zlib"]
         libpng = self.dependencies["libpng"]
         libjpeg = self.dependencies["libjpeg"]
@@ -75,34 +86,15 @@ class Allegro5Conan(ConanFile):
         if self.settings.os != "Windows":
             alsa = self.dependencies["libalsa"]
             pulseaudio = self.dependencies["pulseaudio"]
-
-        # Configure dependency flags for cmake
-        flags = "-Wno-dev"
-        flags += " -DSHARED=" + str(self.options.shared).lower()
-        flags += " -DWANT_DOCS=false"
-        flags += " -DWANT_DOCS_HTML=false"
-        flags += " -DWANT_EXAMPLES=false"
-        flags += " -DWANT_FONT=true"
-        flags += " -DWANT_MONOLITH=true"
-        flags += " -DWANT_TESTS=false"
-        flags += " -DWANT_DEMO=false"
-        flags += " -DWANT_RELEASE_LOGGING=false"
-        flags += " -DWANT_VORBIS=true"
-        flags += " -DWANT_MP3=true"
-
+        
         prefix = "lib"
         suffix = ".a"
         if self.settings.compiler == "Visual Studio":
-            flags += " -DWANT_STATIC_RUNTIME=" + str(self.settings.compiler.runtime == "MT").lower()
-            flags += " -DPREFER_STATIC_DEPS=true"
             prefix = ""
             suffix = ".lib"
-        else:
-            flags += " -DWANT_STATIC_RUNTIME=false"
-            flags += " -DPREFER_STATIC_DEPS=false"
 
         # libpng dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/image/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/image/CMakeLists.txt")), 
             "find_package(PNG)",
             '''set(PNG_FOUND 1)
                set(PNG_INCLUDE_DIR {})
@@ -111,7 +103,7 @@ class Allegro5Conan(ConanFile):
                    libpng.package_folder.replace("\\","/") + "/include", libpng.package_folder.replace("\\","/") + "/lib/" + prefix + libpng.cpp_info.libs[0] + suffix))
 
         # libjpeg dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/image/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/image/CMakeLists.txt")), 
             "find_package(JPEG)",
             '''set(JPEG_FOUND 1)
                set(JPEG_INCLUDE_DIR {})
@@ -120,7 +112,7 @@ class Allegro5Conan(ConanFile):
                    libjpeg.package_folder.replace("\\","/") + "/include", libjpeg.package_folder.replace("\\","/") + "/lib/" + prefix + libjpeg.cpp_info.libs[0] + suffix))
 
         # libwebp dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/image/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/image/CMakeLists.txt")), 
             "find_package(WebP)",
             '''set(WEBP_FOUND 1)
                set(WEBP_INCLUDE_DIRS {})
@@ -130,7 +122,7 @@ class Allegro5Conan(ConanFile):
                    libwebp.package_folder.replace("\\","/") + "/lib/" + prefix + libwebp.cpp_info.components["webp"].libs[0] + suffix))
 
         # FreeType dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/CMakeLists.txt")), 
             "find_package(Freetype)",
             '''set(FREETYPE_FOUND 1)
                set(FREETYPE_INCLUDE_DIRS {} {})
@@ -141,7 +133,7 @@ class Allegro5Conan(ConanFile):
                    freetype.package_folder.replace("\\","/") + "/lib/" + prefix + freetype.cpp_info.libs[0] + suffix))
 
         # zlib dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/CMakeLists.txt")), 
             "find_package(ZLIB)",
             '''set(ZLIB_FOUND 1)
                set(ZLIB_INCLUDE_DIR {})
@@ -151,7 +143,7 @@ class Allegro5Conan(ConanFile):
                    zlib.package_folder.replace("\\","/") + "/lib/" + prefix + zlib.cpp_info.libs[0] + suffix))
 
         # flac dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/acodec/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/acodec/CMakeLists.txt")), 
             "find_package(FLAC)",
             '''set(FLAC_FOUND 1)
                set(FLAC_STATIC 1)
@@ -163,7 +155,7 @@ class Allegro5Conan(ConanFile):
                    ogg.package_folder.replace("\\","/") + "/lib/" + prefix + ogg.cpp_info.components["ogglib"].libs[0] + suffix))
 
         # vorbis dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/acodec/CMakeLists.txt")),
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/acodec/CMakeLists.txt")),
             "find_package(Vorbis)",
             '''set(VORBIS_FOUND 1)
                set(OGG_INCLUDE_DIR {})
@@ -178,7 +170,7 @@ class Allegro5Conan(ConanFile):
                    ogg.package_folder.replace("\\","/") + "/lib/" + prefix + ogg.cpp_info.components["ogglib"].libs[0] + suffix))
 
         # minimp3 dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/acodec/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/acodec/CMakeLists.txt")), 
             "find_package(MiniMP3)",
             '''set(MINIMP3_FOUND 1)
                set(MINIMP3_INCLUDE_DIRS {})
@@ -186,7 +178,7 @@ class Allegro5Conan(ConanFile):
                message("-- Using MiniMP3 from conan package")'''.format(mp3.package_folder.replace("\\","/") + "/include"))
 
         # OpenAL dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/audio/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/audio/CMakeLists.txt")), 
             "find_package(OpenAL)",
             '''set(OPENAL_FOUND 1)
                set(OPENAL_INCLUDE_DIR {} {})
@@ -197,7 +189,7 @@ class Allegro5Conan(ConanFile):
                    openal.package_folder.replace("\\","/") + "/lib/" + prefix + openal.cpp_info.libs[0] + suffix))
 
         # PhysFS dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/CMakeLists.txt")), 
             "find_package(PhysFS)",
             '''set(PHYSFS_FOUND 1)
                set(PHYSFS_INCLUDE_DIR {})
@@ -207,7 +199,7 @@ class Allegro5Conan(ConanFile):
                    physfs.package_folder.replace("\\","/") + "/lib/" + prefix + physfs.cpp_info.libs[0] + suffix))
 
         # libopus/opusfile dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/acodec/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/acodec/CMakeLists.txt")), 
             "find_package(Opus)",
             '''set(OPUS_FOUND 1)
                set(OPUS_INCLUDE_DIR {} {} {})
@@ -226,7 +218,7 @@ class Allegro5Conan(ConanFile):
             theoralibs += " " + theora.package_folder.replace("\\","/") + "/lib/" + "libtheoraenc" + _static + suffix
             theoralibs += " " + theora.package_folder.replace("\\","/") + "/lib/" + "libtheoradec" + _static + suffix
 
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/video/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/video/CMakeLists.txt")), 
             "find_package(Theora)",
             '''set(THEORA_FOUND 1)
                set(THEORA_INCLUDE_DIR {})
@@ -235,7 +227,7 @@ class Allegro5Conan(ConanFile):
                    theora.package_folder.replace("\\","/") + "/include", theoralibs))
 
         # vorbis dependency
-        tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/video/CMakeLists.txt")), 
+        tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/video/CMakeLists.txt")), 
             "find_package(Vorbis)",
             '''set(VORBIS_FOUND 1)
                set(OGG_INCLUDE_DIR {})
@@ -252,7 +244,7 @@ class Allegro5Conan(ConanFile):
         if not self.settings.compiler == "Visual Studio":
 
             # libalsa dependency
-            tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/audio/CMakeLists.txt")), 
+            tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/audio/CMakeLists.txt")), 
                 "pkg_check_modules(ALSA alsa)",
                 '''set(ALSA_FOUND 1)
                    set(ALSA_INCLUDE_DIRS {})
@@ -262,7 +254,7 @@ class Allegro5Conan(ConanFile):
                        alsa.package_folder.replace("\\","/") + "/lib/" + prefix + alsa.cpp_info.libs[0] + suffix))
 
             # PulseAudio dependency
-            tools.replace_in_file(str(os.path.join(self.build_folder, "allegro5/addons/audio/CMakeLists.txt")), 
+            tools.replace_in_file(str(os.path.join(self._source_subfolder, "addons/audio/CMakeLists.txt")), 
                 "pkg_check_modules(PULSEAUDIO libpulse-simple)",
                 '''set(PULSEAUDIO_FOUND 1)
                    set(PULSEAUDIO_INCLUDE_DIRS {})
@@ -273,41 +265,60 @@ class Allegro5Conan(ConanFile):
                        pulseaudio.cpp_info.components["pulse"].libs[0],
                        pulseaudio.package_folder.replace("\\","/") + "/lib/"))
 
-        # Disable specific compiler warnings
-        if self.settings.compiler == "Visual Studio":   
-            flags += " -DCMAKE_CXX_FLAGS=\"/wd4267\""   # possible loss of data warning
-        else:
-            flags += " -Wno-unused-variable -Wp,-w"
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
 
-        # Call cmake generate
-        path = Path(self.build_folder + "/allegro5/build")
-        path.mkdir(parents=True, exist_ok=True)
-        os.chdir(path)
-        self.run("cmake .. " + flags)
-
-    def build(self):
-        if self.settings.os == "Windows":
-            self.run("cd allegro5/build & cmake --build . --config RelWithDebInfo") # Build the project
-        else:
-            path = Path(self.build_folder + "/allegro5/build")
-            path.mkdir(parents=True, exist_ok=True)
-            os.chdir(path)
-            self.run("make") # Build the project
-
-    def package(self):
-        self.copy("*.h", dst="include", src="allegro5/include")
-        self.copy("*.inl", dst="include", src="allegro5/include")
-        self.copy("*.h", dst="include", src="allegro5/build/include")
-
-        for addon in os.listdir('allegro5/addons'):
-            self.copy("*.h", dst="include", src="allegro5/addons/" + addon)
+        self._cmake = CMake(self, build_type="RelWithDebInfo")
+        self._cmake.definitions["SHARED"] = self.options.shared
+        self._cmake.definitions["WANT_DOCS"] = False
+        self._cmake.definitions["WANT_DOCS_HTML"] = False
+        self._cmake.definitions["WANT_EXAMPLES"] = False
+        self._cmake.definitions["WANT_FONT"] = True
+        self._cmake.definitions["WANT_MONOLITH"] = True
+        self._cmake.definitions["WANT_TESTS"] = False
+        self._cmake.definitions["WANT_DEMO"] = False
+        self._cmake.definitions["WANT_RELEASE_LOGGING"] = False
+        self._cmake.definitions["WANT_VORBIS"] = True
+        self._cmake.definitions["WANT_MP3"] = True
 
         if self.settings.compiler == "Visual Studio":
-            self.copy("*.lib", dst="lib", src="allegro5/build/lib/RelWithDebInfo")
+            self._cmake.definitions["WANT_STATIC_RUNTIME"] = str(self.settings.compiler.runtime == "MT").lower()
+            self._cmake.definitions["PREFER_STATIC_DEPS"] = True
         else:
-            self.copy("*.a", dst="lib", src="allegro5/build/lib")
+            self._cmake.definitions["WANT_STATIC_RUNTIME"] = False
+            self._cmake.definitions["PREFER_STATIC_DEPS"] = False
+            
+        # Disable specific compiler warnings
+        if self.settings.compiler == "Visual Studio":   
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "/wd4267 /wd4018"          # possible loss of data warning, signed/unsigned
+        else:
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wno-unused-variable -Wp,-w"  # unused variables, preprocessor warnings
+        
+        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        self._patch_sources()
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
+        self.copy("*.h", dst="include", src=os.path.join(self._build_subfolder, "include"), keep_path=True)
+        self.copy("*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
+        self.copy("*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
+
+        # Add all addon's headers
+        for addon in os.listdir(os.path.join(self._source_subfolder, "addons")):
+            self.copy("*.h", dst="include/allegro5", src=os.path.join(self._source_subfolder, "addons", addon, "allegro5"), keep_path=True)
 
     def package_info(self):
         self.cpp_info.libs = ["allegro_monolith-static"]
+
+        if not self.options.shared:
+            self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
+
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = [ "opengl32", "shlwapi" ]
