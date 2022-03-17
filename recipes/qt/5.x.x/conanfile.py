@@ -716,13 +716,12 @@ class QtConan(ConanFile):
                 with tools.environment_append(build_env):
 
                     if tools.os_info.is_macos:
-                        open(".qmake.stash" , "w").close()
-                        open(".qmake.super" , "w").close()
+                        tools.save(".qmake.stash" , "")
+                        tools.save(".qmake.super" , "")
 
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                     if tools.os_info.is_macos:
-                        with open("bash_env", "w") as f:
-                            f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                        tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
                         "BASH_ENV": os.path.abspath("bash_env")
                     }) if tools.os_info.is_macos else tools.no_op():
@@ -738,8 +737,7 @@ class QtConan(ConanFile):
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
-        with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write("""[Paths]
+        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
 Prefix = ..
 ArchData = bin/archdatadir
 HostData = bin/archdatadir
