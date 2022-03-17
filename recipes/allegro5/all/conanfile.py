@@ -6,7 +6,6 @@ required_conan_version = ">=1.33.0"
 
 class Allegro5Conan(ConanFile):
     name = "allegro5"
-    version = "5.2.7"
     license = ("ZLib", "BSD", "SDL", "Dejavu-fonts", "Creative Commons BY Attribution", "CBString")
     homepage = "https://github.com/liballeg/allegro5"
     url = "https://github.com/conan-io/conan-center-index"
