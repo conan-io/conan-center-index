@@ -29,3 +29,5 @@ versions:
     folder: portable
   "4.8.0":
     folder: portable
+  "4.8.1":
+    folder: portable
