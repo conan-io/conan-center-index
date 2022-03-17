@@ -15,7 +15,7 @@ class IgnitionPluginConan(ConanFile):
     topics = ("ignition", "robotics", "plugin")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
