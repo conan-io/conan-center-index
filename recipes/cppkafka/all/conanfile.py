@@ -58,6 +58,10 @@ class CppKafkaConan(ConanFile):
             raise ConanInvalidConfiguration("cppkafka could not be built by gcc <6")
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("cppkafka could not be built by MSVC <14")
+        if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
+            raise ConanInvalidConfiguration(
+                "{}/{} doesn't support clang with libc++".format(self.name, self.version),
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
