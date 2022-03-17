@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(rttopo C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 set(RTTOPO_HDR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/headers)
 set(RTTOPO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)

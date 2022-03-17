@@ -57,13 +57,6 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if self.options.get_safe("enable_udev"):
-            if self.settings.os == "Android":
-                raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
-            if tools.cross_building(self):
-                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -156,7 +149,7 @@ class LibUSBConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]

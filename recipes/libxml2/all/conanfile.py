@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
+import functools
 import itertools
 import os
 import textwrap
@@ -57,7 +58,6 @@ class Libxml2Conan(ConanFile):
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -235,26 +235,21 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("mingw32-make -f Makefile.mingw install-dist")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
-        configure_args = ['--prefix=%s' % full_install_subfolder]
-        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
-        if self.options.shared:
-            configure_args.extend(['--enable-shared', '--disable-static'])
-        else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        for option_name in self._option_names:
+            option_value = getattr(self.options, option_name)
+            args.append("--with-{}={}".format(option_name, yes_no(option_value)))
 
-        for name in self._option_names:
-            value = getattr(self.options, name)
-            value = ("--with-%s" % name) if value else ("--without-%s" % name)
-            configure_args.append(value)
-
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def _patch_sources(self):
         # Break dependency of install on build
@@ -262,9 +257,10 @@ class Libxml2Conan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
+        # relocatable shared lib on macOS
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                              "-install_name \\$rpath/",
+                              "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
@@ -306,7 +302,8 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
 
-            os.remove(os.path.join(self.package_folder, "lib", "libxml2.la"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
             for prefix in ["run", "test"]:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
             tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -350,15 +347,16 @@ class Libxml2Conan(ConanFile):
         return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
-        # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
-        self.cpp_info.set_property("cmake_file_name", "LibXml2")
+        # FIXME: Provide LibXml2::xmllint & LibXml2::xmlcatalog imported target for executables
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "LibXml2")
+        self.cpp_info.set_property("cmake_file_name", "libxml2")
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
-        if self._is_msvc:
-            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
-        else:
-            self.cpp_info.libs = ["xml2"]
+        prefix = "lib" if self._is_msvc else ""
+        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+        self.cpp_info.libs = ["{}xml2{}".format(prefix, suffix)]
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
@@ -375,6 +373,8 @@ class Libxml2Conan(ConanFile):
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "LibXml2"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "libxml2"
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

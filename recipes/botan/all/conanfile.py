@@ -238,6 +238,8 @@ class BotanConan(ConanFile):
                 botan_abi_flags.append('-arch armv7')
             elif self.settings.arch in ['armv8']:
                 botan_abi_flags.append('-arch arm64')
+            elif self.settings.arch in ['x86_64']:
+                botan_abi_flags.append('-arch x86_64')
 
         if self.options.get_safe('fPIC', True):
             botan_extra_cxx_flags.append('-fPIC')
