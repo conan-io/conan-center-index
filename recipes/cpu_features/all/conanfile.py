@@ -44,11 +44,6 @@ class CpuFeaturesConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if tools.Version(self.version) == "0.7.0" and \
-           tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
-            raise ConanInvalidConfiguration("cpu_features 0.7.0 does not support os=Macos arch=armv8")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
