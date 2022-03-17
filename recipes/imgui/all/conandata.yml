@@ -44,6 +44,10 @@ sources:
   "1.87":
     url: "https://github.com/ocornut/imgui/archive/v1.87.tar.gz"
     sha256: "b54ceb35bda38766e36b87c25edf7a1cd8fd2cb8c485b245aedca6fb85645a20"
-  "cci.20220207+docking":
+
+  # These versions belong to the docking branch in ImGUI repository. This branch is declared stable and production ready, and
+  # it is synced with `master` regularly. These versions are taken from that branch using the commit where `master` was synced
+  # after a regular release
+  "cci.20220207+1.87.docking":
     url: "https://github.com/ocornut/imgui/archive/1ee252772ae9c0a971d06257bb5c89f628fa696a.tar.gz"
     sha256: "c50e263660e1deb6e85b10a0382bf8a6fc861645e44b7012bd32da5460829ae0"
