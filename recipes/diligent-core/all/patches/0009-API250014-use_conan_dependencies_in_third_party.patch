@@ -70,8 +70,7 @@ index d7eea08a4..a893fe6a5 100644
 -            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
 -        endforeach()
 -    endif()
-+    list(APPEND THIRD_PARTY_LIBS CONAN_PKG::spirv-tools CONAN_PKG::spirv-cross CONAN_PKG::glslang)
- 
++    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries
 -    set_target_properties(${THIRD_PARTY_LIBS} PROPERTIES

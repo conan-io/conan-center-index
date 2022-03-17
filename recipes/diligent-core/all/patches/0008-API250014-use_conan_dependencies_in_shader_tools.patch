@@ -36,8 +36,8 @@ index dc47ac4b2..993fe97ab 100644
          PRIVATE
 -            SPIRV
 -            glslang
-+            CONAN_PKG::spirv-tools
-+            CONAN_PKG::glslang
++            spirv-tools::SPIRV-Tools-opt
++            glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL
          )
  
          target_include_directories(Diligent-ShaderTools
