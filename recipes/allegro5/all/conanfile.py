@@ -11,7 +11,7 @@ class Allegro5Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform graphics framework for basic game development and desktop applications"
     topics = ("gamedev", "gui", "framework", "graphics")
-    settings = "os", "compiler", "arch"
+    settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     
@@ -62,6 +62,9 @@ class Allegro5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            
+    def set_version(self):
+        self.version = "5.2.7"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -268,8 +271,9 @@ class Allegro5Conan(ConanFile):
         if self._cmake:
             return self._cmake
 
-        self._cmake = CMake(self, build_type="RelWithDebInfo")
+        self._cmake = CMake(self)
         self._cmake.definitions["SHARED"] = self.options.shared
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.definitions["WANT_DOCS"] = False
         self._cmake.definitions["WANT_DOCS_HTML"] = False
         self._cmake.definitions["WANT_EXAMPLES"] = False
