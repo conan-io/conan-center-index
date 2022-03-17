@@ -1,4 +1,7 @@
 sources:
+  "3.13.3":
+    url: "https://github.com/embree/embree/archive/v3.13.3.tar.gz"
+    sha256: "74ec785afb8f14d28ea5e0773544572c8df2e899caccdfc88509f1bfff58716f"
   "3.13.1":
     url: "https://github.com/embree/embree/archive/refs/tags/v3.13.1.tar.gz"
     sha256: "00dbd852f19ae2b95f5106dd055ca4b304486436ced0ccf842aec4e38a4df425"
