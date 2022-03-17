@@ -105,10 +105,10 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
-                if self._is_msvc or str(self.settings.compiler) in ("clang"):
+                if self._is_msvc or self.settings.compiler == "clang":
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler in ("gcc", ):
+                elif self.settings.compiler == "gcc":
                     if not self.settings.os.subsystem:
                         current_lib = os.path.join(lib_path, "libzlibstatic.a")
                         tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
