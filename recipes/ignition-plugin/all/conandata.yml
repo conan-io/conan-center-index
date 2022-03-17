@@ -1,0 +1,22 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/ignitionrobotics/ign-plugin/archive/refs/tags/ignition-plugin_1.1.0.tar.gz"
+    sha256: "ce089cd6924c460d16591f4d3983b282f2f05ed8b5588f7ede9a91dbd43bd5d7"
+  "1.2.0":
+    url: "https://github.com/ignitionrobotics/ign-plugin/archive/refs/tags/ignition-plugin_1.2.0.tar.gz"
+    sha256: "476b8a50233c05fec5ab3eb85703a19ff3afcd18c5d55e8de0046dca4940fd42"
+  "1.2.1":
+    url: "https://github.com/ignitionrobotics/ign-plugin/archive/refs/tags/ignition-plugin_1.2.1.tar.gz"
+    sha256: "d7a391cb4c6bd5023f2fa4cb1f4b1e628286bc7e933e72604b27ee301f70ccf6"
+
+patches:
+  "1.1.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-ign-plugin-1.1.0-cmake-fixes.patch"
+  "1.2.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-ign-plugin-1.2.0-cmake-fixes.patch"
+  "1.2.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-ign-plugin-1.2.1-cmake-fixes.patch"
+ 
