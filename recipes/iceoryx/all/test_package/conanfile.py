@@ -4,7 +4,6 @@ from conans import ConanFile, CMake
 class IceoryxTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = ["cmake", "cmake_find_package_multi"]
-    requires = ["cmake/3.16.2"]
 
     def build(self):
         cmake = CMake(self)
