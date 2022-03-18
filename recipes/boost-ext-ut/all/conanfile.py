@@ -55,6 +55,10 @@ class UTConan(ConanFile):
                         self.settings.compiler,
                         self.settings.compiler.version))
 
+        if self.settings.compiler in ["msvc", "Visual Studio"]:
+            if "disable_module" in self.options.values:
+                self.options.disable_module = True
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
         if tools.Version(self.version) <= "1.1.8":
@@ -70,8 +74,9 @@ class UTConan(ConanFile):
         self._cmake.definitions["BOOST_UT_BUILD_EXAMPLES"] = False
         self._cmake.definitions["BOOST_UT_BUILD_TESTS"] = False
         self._cmake.definitions["PROJECT_DISABLE_VERSION_SUFFIX"] = True
-        if self.options.get_safe("disable_module"):
-            self._cmake.definitions["BOOST_UT_DISABLE_MODULE"] = self.options.disable_module
+        disable_module = self.options.get_safe("disable_module")
+        if disable_module:
+            self._cmake.definitions["BOOST_UT_DISABLE_MODULE"] = disable_module
         self._cmake.configure()
         return self._cmake
     
@@ -100,7 +105,7 @@ class UTConan(ConanFile):
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
 
         if self.options.get_safe("disable_module"):
-            self.cpp_info.components["ut"].defines = ["BOOST_UT_DISABLE_MODULE"]
+            self.cpp_info.components["ut"].defines = ["BOOST_UT_DISABLE_MODULE=1"]
 
         if tools.Version(self.version) > "1.1.8":
             include_path_version = self.version
