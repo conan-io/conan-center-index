@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.8"
 
-      - run: "pip3 install conan yamllint packaging pylint==2.10.2 astroid"
+      - run: "pip3 install conan==1.44.1 yamllint packaging pylint==2.10.2 astroid"
 
       - name: install hook
         run: |
