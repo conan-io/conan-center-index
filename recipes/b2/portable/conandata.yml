@@ -35,3 +35,6 @@ sources:
   "4.8.1":
     url: "https://github.com/bfgroup/b2/archive/4.8.1.tar.gz"
     sha256: "8ecff1025df9473d91a0d116af3e32be6fba6e57d4ea962e033ff1678609d668"
+  "4.8.2":
+    url: "https://github.com/bfgroup/b2/archive/4.8.2.tar.gz"
+    sha256: "220edfbd5022394c5dc264dfdd8bf6d3ec53b784db87461026bb23ea9d9ec4bd"
