@@ -1,9 +1,10 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibmetalinkConan(ConanFile):
@@ -30,11 +31,22 @@ class LibmetalinkConan(ConanFile):
     }
 
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,17 +60,13 @@ class LibmetalinkConan(ConanFile):
 
     def requirements(self):
         if self.options.xml_backend == "expat":
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.6")
         if self.options.xml_backend == "libxml2":
             self.requires("libxml2/2.9.12")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             raise ConanInvalidConfiguration("libmetalink does not support Visual Studio yet")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
@@ -70,15 +78,23 @@ class LibmetalinkConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def _patch_sources(self):
+        # Support more configurations
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+        # Relocatable shared lib for Apple platforms
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "configure"),
+            "-install_name \\$rpath/",
+            "-install_name @rpath/",
+        )
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -87,14 +103,11 @@ class LibmetalinkConan(ConanFile):
             "--with-libxml2={}".format(yes_no(self.options.xml_backend == "libxml2")),
             "ac_cv_func_malloc_0_nonnull=yes",
         ]
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
 
     def build(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+        self._patch_sources()
         with tools.run_environment(self):
             autotools = self._configure_autotools()
             autotools.make()
@@ -109,5 +122,5 @@ class LibmetalinkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libmetalink"
+        self.cpp_info.set_property("pkg_config_name", "libmetalink")
         self.cpp_info.libs = ["metalink"]
