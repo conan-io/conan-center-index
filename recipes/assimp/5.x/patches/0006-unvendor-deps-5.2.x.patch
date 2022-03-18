@@ -48,15 +48,6 @@
  #include <iterator>
 --- a/code/AssetLib/M3D/M3DWrapper.h
 +++ b/code/AssetLib/M3D/M3DWrapper.h
-@@ -48,7 +48,7 @@
- #define AI_M3DWRAPPER_H_INC
- 
- #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
--#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)  
-+#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)
- 
- #include <memory>
- #include <vector>
 @@ -59,7 +59,7 @@
  
  // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
