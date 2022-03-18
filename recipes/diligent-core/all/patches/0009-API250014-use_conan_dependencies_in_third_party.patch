@@ -1,5 +1,5 @@
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index d7eea08a4..a893fe6a5 100644
+index d7eea08a..e9effb30 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -23,9 +23,6 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
@@ -43,13 +43,13 @@ index d7eea08a4..a893fe6a5 100644
      endif()
  
      set(SPIRV_CROSS_CLI OFF CACHE BOOL "Build the CLI binary. Requires SPIRV_CROSS_STATIC.")
-@@ -80,37 +64,11 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+@@ -80,37 +64,9 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
      set(SPIRV_CROSS_FORCE_PIC ON CACHE BOOL "Force position-independent code.")
      set(SPIRV_CROSS_SKIP_INSTALL ON CACHE BOOL "Skip SPIRV-Cross installation.")
      set(SPIRV_CROSS_NAMESPACE_OVERRIDE diligent_spirv_cross CACHE STRING "Override the namespace used in the C++ API.")
 -    add_subdirectory(SPIRV-Cross)
 -    set_directory_root_folder("SPIRV-Cross" "DiligentCore/ThirdParty/SPIRV-Cross")
- 
+-
 -    list(APPEND THIRD_PARTY_LIBS spirv-cross-core)
 -    if(METAL_SUPPORTED)
 -        list(APPEND THIRD_PARTY_LIBS spirv-cross-msl spirv-cross-glsl)
@@ -70,6 +70,7 @@ index d7eea08a4..a893fe6a5 100644
 -            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
 -        endforeach()
 -    endif()
+-
 +    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries
@@ -81,7 +82,7 @@ index d7eea08a4..a893fe6a5 100644
  endif()
  
  if(${DILIGENT_BUILD_GOOGLE_TEST})
-@@ -132,10 +90,3 @@ set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
+@@ -132,10 +88,3 @@ set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
  add_subdirectory(xxHash/cmake_unofficial)
  set_directory_root_folder("xxHash/cmake_unofficial" "DiligentCore/ThirdParty/xxHash")
  
