@@ -153,13 +153,13 @@ class Assimp(ConanFile):
             self.requires("irrxml/1.2")
         else:
             self.requires("pugixml/1.11")
+            self.requires("openddl-parser/cci.20211217")
 
         self.requires("zlib/1.2.11")
         self.requires("stb/cci.20210910")
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
         self.requires("clipper/4.8.8")
-        self.requires("openddl-parser/cci.20211217")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.1.31")
         if self._depends_on_poly2tri:
@@ -195,11 +195,11 @@ class Assimp(ConanFile):
             tools.replace_in_file(os.path.join(
                 self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
-        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "unzip", "stb", "zlib", "clipper", "openddlparser"]
+        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "unzip", "stb", "zlib", "clipper"]
         if tools.Version(self.version) < "5.1.0":
             vendors.append("irrXML")
         else:
-            vendors.extend(["pugixml", "draco"])
+            vendors.extend(["pugixml", "draco", "openddlparser"])
         for vendor in vendors:
             tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
