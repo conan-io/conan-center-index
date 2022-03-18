@@ -1,5 +1,5 @@
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index d7eea08a..e9effb30 100644
+index d7eea08a..e457b9b6 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -23,9 +23,6 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
@@ -71,7 +71,7 @@ index d7eea08a..e9effb30 100644
 -        endforeach()
 -    endif()
 -
-+    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
++    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL xxhash::xxhash)
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries
 -    set_target_properties(${THIRD_PARTY_LIBS} PROPERTIES
@@ -82,9 +82,14 @@ index d7eea08a..e9effb30 100644
  endif()
  
  if(${DILIGENT_BUILD_GOOGLE_TEST})
-@@ -132,10 +88,3 @@ set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
- add_subdirectory(xxHash/cmake_unofficial)
- set_directory_root_folder("xxHash/cmake_unofficial" "DiligentCore/ThirdParty/xxHash")
+@@ -127,15 +83,4 @@ if(${DILIGENT_BUILD_GOOGLE_TEST})
+ endif()
+ 
+ option(BUILD_SHARED_LIBS "Build shared library" OFF)
+-set(XXHASH_BUILD_XXHSUM OFF)
+-set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
+-add_subdirectory(xxHash/cmake_unofficial)
+-set_directory_root_folder("xxHash/cmake_unofficial" "DiligentCore/ThirdParty/xxHash")
  
 -install(FILES xxHash/LICENSE   DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME XXH3-License.txt)
 -install(FILES googletest/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME googletest-License.txt)
