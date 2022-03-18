@@ -177,7 +177,7 @@ class EmbreeConan(ConanFile):
         if content[0] == '\ufeff':
             content = content[1:]
         content = "#pragma code_page(65001)\n" + content
-        save(self, rc, content, encoding="utf8")
+        save(self, rc, content)
         os.remove(os.path.join(self._source_subfolder, "common", "cmake", "FindTBB.cmake"))
         cmake = self._configure_cmake()
         cmake.build()
