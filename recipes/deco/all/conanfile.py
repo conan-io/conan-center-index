@@ -4,7 +4,7 @@ import os
 
 class DecoConan(ConanFile):
     name = "deco"
-    license = "Apache 2.0 with LLVM exceptions"
+    license = "Apache-2.0 WITH LLVM-exception"
     description = "Delimiter Collision Free Format"
     topics = ("serialization")
     homepage = "https://github.com/Enhex/Deco"
