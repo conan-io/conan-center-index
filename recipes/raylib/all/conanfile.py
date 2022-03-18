@@ -18,14 +18,12 @@ class RaylibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_examples": [True, False],
         "use_external_glfw": [True, False],
         "opengl_version":[None, "3.3","2.1","1.1","ES 2.0"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_examples": False,
         "use_external_glfw": True,
         "opengl_version" : None
     }
@@ -77,7 +75,7 @@ class RaylibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = self.options.build_examples
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
 
         if self.settings.os == "Android":
             self._cmake.definitions["PLATFORM"] = "Android"
