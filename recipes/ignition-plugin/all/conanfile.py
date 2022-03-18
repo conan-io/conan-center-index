@@ -1,7 +1,7 @@
 import os
+import conan.tools.files
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import conan.tools.files
 
 required_conan_version = ">=1.29.1"
 
@@ -75,20 +75,20 @@ class IgnitionPluginConan(ConanFile):
                     self.name, self.settings.compiler
                 )
             )
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires c++17 support. The current compiler {} {} does not support it.".format(
-                        self.name,
-                        self.settings.compiler,
-                        self.settings.compiler.version,
-                    )
+        elif tools.Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                "{} requires c++17 support. The current compiler {} {} does not support it.".format(
+                    self.name,
+                    self.settings.compiler,
+                    self.settings.compiler.version,
                 )
+            )
     
     def requirements(self):
-        self.requires("doxygen/1.9.2")
+        pass
 
     def build_requirements(self):
+        self.build_requires("doxygen/1.9.2")
         if self.version <= "1.2.0":
             self.build_requires("ignition-cmake/2.5.0")
         else:
@@ -96,7 +96,6 @@ class IgnitionPluginConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
         conan.tools.files.rename(
              self, "ign-plugin-ignition-plugin_{}".format(self.version),
              self._source_subfolder
@@ -120,6 +119,10 @@ class IgnitionPluginConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
@@ -127,10 +130,10 @@ class IgnitionPluginConan(ConanFile):
 
     def package_info(self):
         version_major = tools.Version(self.version).major
-        self.cpp_info.components["libignition-plugin"].libs = ["ignition-plugin{}".format(version_major)]
+        self.cpp_info.names["cmake_find_package"] = "ignition-plugin{}".format(version_major)
+        self.cpp_info.names["cmake_find_package_multi"] = "ignition-plugin{}".format(version_major)
         self.cpp_info.components["libignition-plugin"].libs = ["ignition-plugin{}".format(version_major)]
         self.cpp_info.components["libignition-plugin"].includedirs.append("include/ignition/plugin{}".format(version_major))
         self.cpp_info.components["libignition-plugin"].names["cmake_find_package"] = "ignition-plugin{}".format(version_major)
         self.cpp_info.components["libignition-plugin"].names["cmake_find_package_multi"] = "ignition-plugin{}".format(version_major)
         self.cpp_info.components["libignition-plugin"].names["pkg_config"] = "ignition-plugin{}".format(version_major)
-        self.cpp_info.components["libignition-utils"].requires = ["doxygen::doxygen"]

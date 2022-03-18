@@ -4,9 +4,9 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(ignition-cmake2)
 find_package(ignition-plugin1)
 find_package(ignition-plugin1-loader)
+find_package(DL)
 
 set(IGN_PLUGIN_MAJOR_VER "" CACHE STRING "Version of igition-utils")
 
@@ -21,7 +21,6 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} 
                     ignition-plugin${IGN_PLUGIN_MAJOR_VER}::ignition-plugin${IGN_PLUGIN_MAJOR_VER}
                     ignition-plugin${IGN_PLUGIN_MAJOR_VER}::ignition-plugin${IGN_PLUGIN_MAJOR_VER}-loader
-                    #ignition-utils1::ignition-utils1
                     )
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
