@@ -75,14 +75,15 @@ class IgnitionPluginConan(ConanFile):
                     self.name, self.settings.compiler
                 )
             )
-        elif tools.Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                "{} requires c++17 support. The current compiler {} {} does not support it.".format(
-                    self.name,
-                    self.settings.compiler,
-                    self.settings.compiler.version,
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    "{} requires c++17 support. The current compiler {} {} does not support it.".format(
+                        self.name,
+                        self.settings.compiler,
+                        self.settings.compiler.version,
+                    )
                 )
-            )
     
     def requirements(self):
         pass
@@ -96,10 +97,10 @@ class IgnitionPluginConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        conan.tools.files.rename(
-             self, "ign-plugin-ignition-plugin_{}".format(self.version),
-             self._source_subfolder
-            )
+        #conan.tools.files.rename(
+        #     self, "ign-plugin-ignition-plugin_{}".format(self.version),
+        #     self._source_subfolder
+        #    )
 
     def _configure_cmake(self):
         if self._cmake is not None:
