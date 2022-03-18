@@ -10,7 +10,7 @@ class DecoConan(ConanFile):
     homepage = "https://github.com/Enhex/Deco"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
-    settings = ("compiler")
+    settings = ("compiler", "build_type", "os", "arch")
     requires = (
         "enhex-generic_serialization/1.0.0",
         "enhex-strong_type/1.0.0",
