@@ -55,10 +55,7 @@ class QtADS(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ADS_VERSION"] = self.version
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        if self.options.shared:
-            self._cmake.definitions["BUILD_STATIC"] = "OFF"
-        else:
-            self._cmake.definitions["BUILD_STATIC"] = "ON"
+        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
 
         self._cmake.configure()
         return self._cmake
