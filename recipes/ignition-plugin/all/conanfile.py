@@ -97,10 +97,10 @@ class IgnitionPluginConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        #conan.tools.files.rename(
-        #     self, "ign-plugin-ignition-plugin_{}".format(self.version),
-        #     self._source_subfolder
-        #    )
+        conan.tools.files.rename(
+             self, "ign-plugin-ignition-plugin_{}".format(self.version),
+             self._source_subfolder
+            )
 
     def _configure_cmake(self):
         if self._cmake is not None:
