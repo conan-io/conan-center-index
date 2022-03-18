@@ -11,11 +11,11 @@ index 81451d4..99f2512 100644
    if(APPLE)
      target_compile_definitions(cpu_features PRIVATE HAVE_SYSCTLBYNAME)
    endif()
-diff --git b/impl_aarch64__base_implementation.inl b/impl_aarch64__base_implementation.inl
+diff --git b/include/impl_aarch64__base_implementation.inl b/include/impl_aarch64__base_implementation.inl
 new file mode 100644
 index 0000000..5c3721d
 --- /dev/null
-+++ b/impl_aarch64__base_implementation.inl
++++ b/include/impl_aarch64__base_implementation.inl
 @@ -0,0 +1,85 @@
 +// Copyright 2021 Google LLC
 +//
