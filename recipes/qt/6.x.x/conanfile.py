@@ -898,6 +898,8 @@ class QtConan(ConanFile):
             core_reqs.append("icu::icu")
         if self.options.with_zstd:
             core_reqs.append("zstd::zstd")
+        if self.options.with_glib:
+            core_reqs.append("glib::glib")
 
         _create_module("Core", core_reqs)
         if self._is_msvc:
@@ -936,6 +938,8 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
+            if self.options.with_glib:
+                gui_reqs.append("glib::glib")
             _create_module("Gui", gui_reqs)
 
             build_modules.append(self._cmake_qt6_private_file("Gui"))
