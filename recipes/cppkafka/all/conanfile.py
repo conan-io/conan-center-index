@@ -75,10 +75,18 @@ class CppKafkaConan(ConanFile):
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = not self.deps_cpp_info["librdkafka"].shared
 
+        cxx_flags = list()
         if self.settings.get_safe("compiler.libcxx") == "libstdc++":
-            cmake.definitions["CMAKE_CXX_FLAGS"] = "-D_GLIBCXX_USE_CXX11_ABI=0"
+            cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=0")
         elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
-            cmake.definitions["CMAKE_CXX_FLAGS"] = "-D_GLIBCXX_USE_CXX11_ABI=1"
+            cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=1")
+
+        # disable max/min in Windows.h
+        if self.settings.os == "Windows":
+            cxx_flags.append("-DNOMINMAX")
+
+        if len(cxx_flags) > 0:
+            cmake.definitions["CMAKE_CXX_FLAGS"] = ' '.join(cxx_flags)
 
         cmake.configure(defs=opts, source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
