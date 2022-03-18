@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -23,7 +24,6 @@ class LZ4Conan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -74,19 +74,18 @@ class LZ4Conan(ConanFile):
             "",
         )
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder.replace("\\", "/")
-        self._cmake.definitions["LZ4_BUILD_CLI"] = False
-        self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
-        self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
-        self._cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
+        cmake = CMake(self)
+        cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder.replace("\\", "/")
+        cmake.definitions["LZ4_BUILD_CLI"] = False
+        cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
+        cmake.definitions["LZ4_BUNDLED_MODE"] = False
+        cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         # Generate a relocatable shared lib on Macos
-        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        self._cmake.configure()
-        return self._cmake
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -97,7 +96,6 @@ class LZ4Conan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
