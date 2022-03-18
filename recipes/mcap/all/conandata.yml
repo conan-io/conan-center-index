@@ -1,0 +1,4 @@
+sources:
+  0.1.1:
+    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.1.tar.gz
+    sha256: 162144ec9c6bcb6299f66fcc27dc796307b6445f403c71587310ec6cea30ade2
