@@ -16,3 +16,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/1.1.9-0003-fix-clobber-list-older-llvm.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/1.1.9-0004-add-option-to-enable-rtti.patch"
+      base_path: "source_subfolder"
