@@ -48,7 +48,7 @@ protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
 sdl/2.0.16
 signalr-qt/0.1.dssl3
-sip/4.14.3@trassir/stable
+sip/4.14.3@trassir/sdk142
 snappy/1.1.8.dssl1
 sqlite3/3.31.0.dssl1
 tevian/2.13.6@trassir/stable
