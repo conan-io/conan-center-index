@@ -22,7 +22,7 @@ class LZ4Conan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -48,6 +48,9 @@ class LZ4Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("xxhash/0.8.1")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -58,13 +61,24 @@ class LZ4Conan(ConanFile):
             subfolder = os.path.join("contrib", "cmake_unofficial")
         else:
             subfolder = os.path.join("build", "cmake")
-        return os.path.join(self._source_subfolder, subfolder).replace("\\", "/")
+        return os.path.join(self._source_subfolder, subfolder)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # remove bundled xxhash
+        tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "xxhash.*")
+        tools.replace_in_file(
+            os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"),
+            "\"${LZ4_LIB_SOURCE_DIR}/xxhash.c\"",
+            "",
+        )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder
+        self._cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder.replace("\\", "/")
         self._cmake.definitions["LZ4_BUILD_CLI"] = False
         self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
         self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
@@ -75,8 +89,7 @@ class LZ4Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
