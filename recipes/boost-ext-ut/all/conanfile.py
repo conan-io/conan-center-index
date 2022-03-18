@@ -40,6 +40,9 @@ class UTConan(ConanFile):
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        if tools.Version(self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
+            raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
+                                            "Please use at least version 1.1.9 with MSVC.")
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
