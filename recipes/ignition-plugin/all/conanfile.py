@@ -86,14 +86,17 @@ class IgnitionPluginConan(ConanFile):
                 )
     
     def requirements(self):
-        pass
+        if self.version < "1.2.0":
+            self.requires("ignition-cmake/2.5.0")
+        else:
+            self.requires("ignition-cmake/2.10.0@ar/thirdparty")
 
     def build_requirements(self):
         self.build_requires("doxygen/1.9.2")
-        if self.version <= "1.2.0":
-            self.build_requires("ignition-cmake/2.5.0")
-        else:
-            self.build_requires("ignition-cmake/2.10.0")
+        #if self.version <= "1.2.0":
+        #    self.build_requires("ignition-cmake/2.5.0")
+        #else:
+        #    self.build_requires("ignition-cmake/2.10.0@ar/thirdparty")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -122,6 +125,7 @@ class IgnitionPluginConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
         tools.rmdir(os.path.join(self.recipe_folder, "..", "source"))
         tools.rmdir(os.path.join(self.recipe_folder, "..", "build"))
@@ -147,10 +151,12 @@ class IgnitionPluginConan(ConanFile):
         self.cpp_info.components["loader"].names["pkg_config"] = "ignition-plugin{}-loader".format(version_major)
         self.cpp_info.components["loader"].libs = ["ignition-plugin{}-loader".format(version_major)]
         self.cpp_info.components["loader"].includedirs = ["include/ignition/plugin{}".format(version_major)]
+        self.cpp_info.components["loader"].requires = ["ignition-cmake::ignition-cmake", "core"]
 
         if self.options.shared:
             self.cpp_info.components["register"].names["cmake_find_package"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].names["cmake_find_package_multi"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].names["pkg_config"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].includedirs = ["include/ignition/plugin{}".format(version_major)]
+            self.cpp_info.components["register"].requires = ["ignition-cmake::ignition-cmake", "core"]
 
