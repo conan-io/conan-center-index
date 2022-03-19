@@ -89,7 +89,7 @@ class IgnitionPluginConan(ConanFile):
         if self.version < "1.2.0":
             self.requires("ignition-cmake/2.5.0")
         else:
-            self.requires("ignition-cmake/2.10.0@ar/thirdparty")
+            self.requires("ignition-cmake/2.10.0")
 
     def build_requirements(self):
         self.build_requires("doxygen/1.9.2")
