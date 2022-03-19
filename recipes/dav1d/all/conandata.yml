@@ -1,7 +1,10 @@
 sources:
-  "0.8.1":
-    url: "https://code.videolan.org/videolan/dav1d/-/archive/0.8.1/dav1d-0.8.1.tar.gz"
-    sha256: "39f52cccc31180c7180ebe8f223de6d12351c0407de0dfac087e8a9cc3feb8da"
+  "1.0.0":
+    url: "https://code.videolan.org/videolan/dav1d/-/archive/1.0.0/dav1d-1.0.0.tar.gz"
+    sha256: "047b8229511a82b5718a1d34c86c067b078efd02f602986d2ed09b23182ec136"
   "0.9.1":
     url: "https://code.videolan.org/videolan/dav1d/-/archive/0.9.1/dav1d-0.9.1.tar.gz"
     sha256: "097db6f370b88bf09fec62919c0d3af64e07d58210c665ec461d63f4ec79f6a2"
+  "0.8.1":
+    url: "https://code.videolan.org/videolan/dav1d/-/archive/0.8.1/dav1d-0.8.1.tar.gz"
+    sha256: "39f52cccc31180c7180ebe8f223de6d12351c0407de0dfac087e8a9cc3feb8da"
