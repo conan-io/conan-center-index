@@ -96,6 +96,7 @@ class Assimp(ConanFile):
     default_options.update(dict.fromkeys(_format_option_map, True))
 
     generators = "cmake", "cmake_find_package"
+    short_paths = True
 
     @property
     def _source_subfolder(self):
