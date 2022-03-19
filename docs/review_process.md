@@ -20,7 +20,7 @@ conan-center-index tries to make the process as smooth and simple as possible fo
     * [Addressing review comments](#addressing-review-comments)
   * [Automatic Merges](#automatic-merges)
     * [Merge](#merge)
-    * [Upload](#upload)
+    * [Package available to consume](#package-available-to-consume)
     * [Updating web front end](#updating-web-front-end)
   * [Stale PRs](#stale-prs)<!-- endToc -->
 
@@ -38,7 +38,7 @@ In general, reviews are driven by the automated [bot](https://github.com/conan-c
 ## Green build
 
 The first important prerequisite is ensuring your PR is green (build is successful).
-It requires a bit of patience, because there are many PRs are running, and we're building a lot of configurations for a numerous versions of libraries.
+It requires a bit of patience, because there are many PRs running and we're building a lot of configurations for a numerous versions of libraries.
 Keep attention to the error messages from the bot, and address all the build failures.
 The bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
 
@@ -61,13 +61,13 @@ Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-
 
 ## Avoiding conflicts
 
-Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts. Pull Requests that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts. Pull Requests that have merge conflicts can't be merged, and all the conflicts have to be resolved first.
 
-Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch. This is importatnt for ConanCenter to ensure it is building the correct recipe revision, see [this comment](https://github.com/conan-io/conan-center-index/pull/8797#discussion_r781993233) for details. One trick is to look out for comments from the [Community's Conflict PR Bot](https://github.com/prince-chrismc/conan-center-index/blob/patch-41/docs/community_resources.md#bots) which can alter you to possible problems.
+Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch. This is importatnt for ConanCenter to ensure it is building the correct recipe revision, see [this comment](https://github.com/conan-io/conan-center-index/pull/8797#discussion_r781993233) for details. One trick is to look out for comments from the [Community's Conflict PR Bot](https://github.com/prince-chrismc/conan-center-index/blob/patch-41/docs/community_resources.md#bots) which can anticipate possible problems.
 
 ## Draft
 
-Draft pull requests are also never merged. The same applies for PRs with the `WIP` keyword (stands for `Work in Progress`) in the title - GitHub considers them drafts as well.
+Draft pull requests are also never merged, and they won't likely be reviewed.
 Once you're done with your changes, remember to convert from "Draft" to "Normal" pull request.
 
 ## Getting your pull request reviewed
@@ -88,7 +88,7 @@ The list includes only official Conan developers:
 
 ### Community reviewers
 
-The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submitted pull requests and provide their own useful reviews:
+The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews:
 
 - [@madebr](https://github.com/madebr)
 - [@SpaceIm](https://github.com/SpaceIm)
@@ -107,13 +107,17 @@ That also means you can be included in this list as well - submit PRs and provid
 
 ### Rule of 3 reviews
 
-At least 3 reviews are required for an approval, and at least one of them has to be from the official reviewers.
+At least 3 approving reviews are required, and at least one of them has to be from the official reviewers.
 So, it might be 1 official + 2 community, or 3 official, but it couldn't be just 3 community reviews.
 Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
 
+> **Note.-** Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
+> or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+) are merged by
+> the bot without requiring any approval. 
+
 ### Reviews from others
 
-All reviews are still valuable and very helpful. Even if you're not listed as an official or community reviewer counted by the bot, your reviews are still welcome, so please do not hesitate to provide them.
+All reviews are still valuable and very helpful. Even if you're not listed as an official or community reviewer, **your reviews are very welcome**, so please do not hesitate to provide them.
 
 ### Addressing review comments
 
@@ -122,34 +126,37 @@ It doesn't always mean accepting all the suggestions, but at least providing a r
 
 ## Automatic Merges
 
-The bot runs Automatic Merges every 30 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of 48 PRs merged per day (in practice, it's even less for reasons listed below).
+The bot checks for pull requests that can be merged several times every hour. Only one pull request will be merge in each execution,
+so there is a theoretical limit of ~70 PRs merged per day (in practice, it's less for reasons listed below).
 PR is selected for the merge only if:
 
 - Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).
 - Author has signed CLA.
-- PR is not a Draft or WIP.
+- PR is not a Draft.
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.
 - PR has 3 approved reviews (as described above).
 - PR does not have any [official reviewers](#official-reviewers) requesting changes
 - Master build is not running already (see below)
 
-If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
+If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of `master` is launched.
 
-The conan-center-bot will perform a [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This means should do not need to rebase your pull request; doing so will dismiss any reviews and the reviewer will need to restart.
+The conan-center-bot will perform a [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). You don't need to rebase 
+your pull request, we ask you not to do it because it will dismiss any reviews and the reviewer will need to restart.
 
 ### Merge
 
-After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in master by the time PR merged),
-it will introduce a new recipe revision. Therefore, the build should be run one more time, so the master build is launched.
+After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in `master` by the time PR merged),
+it will introduce a new recipe revision. Therefore, the build should be run one more time, so the `master` build is launched.
 In reality this could happen frequently enough if there are multiple PRs aiming to update the same recipe (even if they touch different files in the same recipe).
 Such builds can take hours for big packages (like boost), blocking other merges for a while.
-So we really appreciate it if changes in master to the same recipe are already merged into the proposed PR.
+So we really appreciate it if changes in `master` to the same recipe are already merged into the proposed PR.
 
-### Upload
+### Package available to consume
 
-Even if there is no new revision introduced, CI still needs to publish artifacts from the internal repository to ConanCenter, and it may also take hours for big enough packages.
-This also blocks further merges until upload is finished. It also explains why new packages are not immediately available for consumption after the merge, and there is a grace period to wait for their availability.
+New packages are promoted from the internal repository to ConanCenter. This process is an internal Artifactory promotion that is quite
+fast, nevertheless there are some caches and CDNs that need to be invalidated and propagated before the package is finally available for consumption.
+The process can take several minutes, so please, consider a _grace period_ and understand that the package won't be available inmediately.
 
 ### Updating web front end
 

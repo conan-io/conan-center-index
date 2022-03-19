@@ -1,5 +1,7 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -47,7 +49,6 @@ class PCREConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -56,6 +57,10 @@ class PCREConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -109,28 +114,30 @@ class PCREConan(ConanFile):
         tools.replace_in_file(
             cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PCRE_BUILD_TESTS"] = False
-        self._cmake.definitions["PCRE_BUILD_PCRE8"] = self.options.build_pcre_8
-        self._cmake.definitions["PCRE_BUILD_PCRE16"] = self.options.build_pcre_16
-        self._cmake.definitions["PCRE_BUILD_PCRE32"] = self.options.build_pcre_32
-        self._cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
-        self._cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
-        self._cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
-        self._cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
-        self._cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
-        self._cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
-        self._cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
-        self._cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
-        self._cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
-        self._cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["PCRE_BUILD_TESTS"] = False
+        cmake.definitions["PCRE_BUILD_PCRE8"] = self.options.build_pcre_8
+        cmake.definitions["PCRE_BUILD_PCRE16"] = self.options.build_pcre_16
+        cmake.definitions["PCRE_BUILD_PCRE32"] = self.options.build_pcre_32
+        cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
+        cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
+        cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
+        cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
+        cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
+        cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
+        cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
+        cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
+        cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
+        if self._is_msvc:
+            cmake.definitions["PCRE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        if tools.is_apple_os(self.settings.os):
+            # Generate a relocatable shared lib on Macos
+            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()

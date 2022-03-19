@@ -334,24 +334,24 @@ class QtConan(ConanFile):
             self.requires("glib/2.70.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
-        if self.options.with_doubleconversion and not self.options.multiconfiguration:
+        if self.options.with_doubleconversion:
             self.requires("double-conversion/3.2.0")
-        if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
+        if self.options.get_safe("with_freetype", False):
             self.requires("freetype/2.11.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/70.1")
-        if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
+        if self.options.get_safe("with_harfbuzz", False):
             self.requires("harfbuzz/3.2.0")
-        if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
+        if self.options.get_safe("with_libjpeg", False):
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
             else:
                 self.requires("libjpeg/9d")
-        if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
+        if self.options.get_safe("with_libpng", False):
             self.requires("libpng/1.6.37")
-        if self.options.with_sqlite3 and not self.options.multiconfiguration:
+        if self.options.with_sqlite3:
             self.requires("sqlite3/3.37.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
@@ -727,8 +727,8 @@ class QtConan(ConanFile):
                         self.run(self._make_program(), run_environment=True)
 
     @property
-    def _cmake_executables_file(self):
-        return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
+    def _cmake_core_extras_file(self):
+        return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_core_extras.cmake")
 
     def _cmake_qt5_private_file(self, module):
         return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
@@ -802,7 +802,26 @@ Examples = bin/datadir/examples""")
                     endif()
                     """.format(target=target, ext=extension, namespace=namespace, uppercase_target=target.upper()))
 
-        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        if self.settings.os == "Windows":
+            filecontents += textwrap.dedent("""\
+                set(Qt5Core_QTMAIN_LIBRARIES Qt5::WinMain)
+                if (NOT Qt5_NO_LINK_QTMAIN)
+                    set(_isExe $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
+                    set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
+                    set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:Qt5_NO_LINK_QTMAIN>>>)
+                    set(_isPolicyNEW $<TARGET_POLICY:CMP0020>)
+                    set_property(TARGET Qt5::Core APPEND PROPERTY
+                        INTERFACE_LINK_LIBRARIES
+                            $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt5::WinMain>
+                    )
+                    unset(_isExe)
+                    unset(_isWin32)
+                    unset(_isNotExcluded)
+                    unset(_isPolicyNEW)
+                endif()
+                """)
+
+        tools.save(os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
             if "Core" not in dependencies:
@@ -857,11 +876,12 @@ Examples = bin/datadir/examples""")
         build_modules = []
 
         libsuffix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                libsuffix = "d"
-            elif tools.is_apple_os(self.settings.os):
-                libsuffix = "_debug"
+        if not self.options.multiconfiguration:
+            if self.settings.build_type == "Debug":
+                if self.settings.os == "Windows":
+                    libsuffix = "d"
+                elif tools.is_apple_os(self.settings.os):
+                    libsuffix = "_debug"
 
         def _get_corrected_reqs(requires):
             reqs = []
@@ -913,8 +933,15 @@ Examples = bin/datadir/examples""")
             core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
-        if self._is_msvc:
-            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
+        if self.settings.os == "Windows":
+            module = "WinMain"
+            componentname = "qt%s" % module
+            self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt5::{}".format(module))
+            self.cpp_info.components[componentname].names["cmake_find_package"] = module
+            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
+            self.cpp_info.components[componentname].libs = ["qtmain%s" % libsuffix]
+            self.cpp_info.components[componentname].includedirs = []
+            self.cpp_info.components[componentname].defines = []
 
         if self.options.gui:
             gui_reqs = []
@@ -1246,9 +1273,9 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
-        build_modules.append(self._cmake_executables_file)
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
-        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        build_modules.append(self._cmake_core_extras_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_core_extras_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_core_extras_file)
         build_modules.append(self._cmake_qt5_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))

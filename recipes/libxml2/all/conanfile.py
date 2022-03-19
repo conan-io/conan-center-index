@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
+from conan.tools.files import rename
 import functools
 import itertools
 import os
@@ -12,8 +13,8 @@ class Libxml2Conan(ConanFile):
     name = "libxml2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxml2 is a software library for parsing XML documents"
-    topics = ("XML", "parser", "validation")
-    homepage = "https://xmlsoft.org"
+    topics = ("xml", "parser", "validation")
+    homepage = "https://gitlab.gnome.org/GNOME/libxml2/-/wikis/"
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -106,7 +107,7 @@ class Libxml2Conan(ConanFile):
         # can't use strip_root here because if fails since 2.9.10 with:
         # KeyError: "linkname 'libxml2-2.9.1x/test/relaxng/ambig_name-class.xml' not found"
         tools.get(**self.conan_data["sources"][self.version])
-        tools.rename("libxml2-{}".format(self.version), self._source_subfolder)
+        rename(self, "libxml2-{}".format(self.version), self._source_subfolder)
 
     @contextmanager
     def _msvc_build_environment(self):
