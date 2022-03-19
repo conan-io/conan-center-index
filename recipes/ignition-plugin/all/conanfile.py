@@ -125,7 +125,7 @@ class IgnitionPluginConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
         tools.rmdir(os.path.join(self.recipe_folder, "..", "source"))
         tools.rmdir(os.path.join(self.recipe_folder, "..", "build"))

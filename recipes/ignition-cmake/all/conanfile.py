@@ -45,13 +45,15 @@ class IgnitionCmakeConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         version_major = tools.Version(self.version).major
         self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(version_major)
-        self.cpp_info.builddirs = [
-            os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major)),
-            os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)),
-        ]
+        #self.cpp_info.builddirs = [
+        #    os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major)),
+        #    os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)),
+        #]
+        self.cpp_info.components["libignition-cmake"].includedirs.append("include/ignition/cmake{}".format(version_major))
+        self.cpp_info.components["libignition-cmake"].libs = ["ignition-cmake{}".format(version_major)]
