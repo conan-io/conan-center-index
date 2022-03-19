@@ -44,6 +44,7 @@ class FlacConan(ConanFile):
 
     def requirements(self):
         self.requires("ogg/1.3.5")
+        self.requires("libiconv/1.16")
 
     def build_requirements(self):
         if self.settings.arch in ["x86", "x86_64"]:
