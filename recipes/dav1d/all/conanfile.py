@@ -1,15 +1,17 @@
 import os
-from conans import ConanFile, Meson, tools
+from conan import ConanFile
+from conan.tools.files import rename, get, replace_in_file
+from conans import Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class Dav1dConan(ConanFile):
     name = "dav1d"
     description = "dav1d is a new AV1 cross-platform decoder, open-source, and focused on speed, size and correctness."
     homepage = "https://www.videolan.org/projects/dav1d.html"
-    topics = ("conan", "av1", "codec", "video", "decoding")
+    topics = ("av1", "codec", "video", "decoding")
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     options = {
@@ -69,12 +71,12 @@ class Dav1dConan(ConanFile):
             self.build_requires("nasm/2.15.05")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "subdir('doc')", "")
+        replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
+                        "subdir('doc')", "")
 
     def _configure_meson(self):
         if self._meson:
@@ -108,8 +110,9 @@ class Dav1dConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             # https://github.com/mesonbuild/meson/issues/7378
-            os.rename(os.path.join(self.package_folder, "lib", "libdav1d.a"),
-                      os.path.join(self.package_folder, "lib", "dav1d.lib"))
+            rename(self,
+                   os.path.join(self.package_folder, "lib", "libdav1d.a"),
+                   os.path.join(self.package_folder, "lib", "dav1d.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["dav1d"]
