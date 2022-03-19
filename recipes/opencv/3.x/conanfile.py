@@ -404,7 +404,7 @@ class OpenCVConan(ConanFile):
 
         def get_lib_name(module):
             if module in ("correspondence", "multiview", "numeric"):
-                return "%s%s" % (module, debug)
+                return module
             else:
                 return "opencv_%s%s%s" % (module, version, debug)
 

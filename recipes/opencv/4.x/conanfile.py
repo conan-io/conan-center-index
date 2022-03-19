@@ -711,8 +711,10 @@ class OpenCVConan(ConanFile):
         debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
 
         def get_lib_name(module):
-            if module in ("ippiw", "correspondence", "multiview", "numeric"):
+            if module == "ippiw":
                 return "%s%s" % (module, debug)
+            elif module in ("correspondence", "multiview", "numeric"):
+                return module
             else:
                 return "opencv_%s%s%s" % (module, version, debug)
 
