@@ -126,6 +126,9 @@ class Allegro5Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
         self._cmake = CMake(self)
         self._cmake.definitions["SHARED"] = self.options.shared
         self._cmake.definitions["WANT_STATIC_RUNTIME"] = self.settings.compiler.runtime == "MT" if self._is_msvc else False
@@ -159,15 +162,9 @@ class Allegro5Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
-        self.copy("*.h", dst="include", src=os.path.join(self._build_subfolder, "include"), keep_path=True)
-        self.copy("*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
-        self.copy("*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
-
-        # Add all addon's headers
-        for addon in os.listdir(os.path.join(self._source_subfolder, "addons")):
-            self.copy("*.h", dst="include/allegro5", src=os.path.join(self._source_subfolder, "addons", addon, "allegro5"), keep_path=True)
 
     def package_info(self):
         self.cpp_info.libs = ["allegro_monolith-static"]
