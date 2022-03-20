@@ -119,8 +119,6 @@ class Allegro5Conan(ConanFile):
             '''find_package(Brotli REQUIRED)
                list(APPEND FREETYPE_STATIC_LIBRARIES "${Brotli_LIBRARIES}")
                run_c_compile_test("${FREETYPE_TEST_SOURCE}" TTF_COMPILES_WITH_EXTRA_DEPS)''')
-        
-            
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
