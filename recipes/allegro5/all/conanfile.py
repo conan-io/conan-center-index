@@ -65,17 +65,17 @@ class Allegro5Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
             
-    def set_version(self):
-        self.version = "5.2.7"
+    #def set_version(self):
+    #    self.version = "5.2.7"
 
     def _patch_addon(self, addon, find, replace):
         path = None
         if (addon == None):
-            path = os.path.join("../source", self._source_subfolder, "CMakeLists.txt")
+            path = os.path.join(self._source_subfolder, "CMakeLists.txt")
         elif (addon == "addons"):
-            path = os.path.join("../source", self._source_subfolder, "addons", "CMakeLists.txt")
+            path = os.path.join(self._source_subfolder, "addons", "CMakeLists.txt")
         else:
-            path = os.path.join("../source", self._source_subfolder, "addons", addon, "CMakeLists.txt")
+            path = os.path.join(self._source_subfolder, "addons", addon, "CMakeLists.txt")
         tools.replace_in_file(path, find, replace, strict=False)
         
     def _patch_sources(self):
@@ -109,6 +109,8 @@ class Allegro5Conan(ConanFile):
         self._patch_addon("addons", "if(PHYSFS_FOUND)", "if(PhysFS_FOUND)")
         self._patch_addon("addons", "${PHYSFS_INCLUDE_DIR}", "${physfs_INCLUDE_DIR}")
         self._patch_addon("addons", "${PHYSFS_LIBRARY}", "${physfs_LIBRARY}")
+        self._patch_addon("physfs", "${PHYSFS_INCLUDE_DIR}", "${physfs_INCLUDE_DIR}")
+        self._patch_addon("physfs", "${PHYSFS_INCLUDE_FILES}", "${physfs_INCLUDE_FILES}")
         self._patch_addon("addons", "find_package_handle_standard_args(PHYSFS DEFAULT_MSG\n        PHYSFS_LIBRARY PHYSFS_INCLUDE_DIR)", "")
 
         self._patch_addon(None, "find_package(X11)", "find_package(X11 REQUIRED)\nset(X11_LIBRARIES ${X11_LIBRARIES} xcb dl)")
@@ -144,7 +146,7 @@ class Allegro5Conan(ConanFile):
         self._cmake.definitions["FREETYPE_ZLIB"] = True
         self._cmake.definitions["FREETYPE_BZIP2"] = True
         self._cmake.definitions["FREETYPE_PNG"] = True
-        self._cmake.definitions["FREETYPE_HARFBUZZ"] = True
+        self._cmake.definitions["FREETYPE_HARFBUZZ"] = False
             
         self._cmake.definitions["CMAKE_CXX_FLAGS"] = "/wd4267 /wd4018" if self._is_msvc else "-Wno-unused-variable -w"
         
