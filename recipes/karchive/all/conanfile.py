@@ -46,8 +46,7 @@ class KArchiveConan(ConanFile):
             self.requires("xz_utils/5.2.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        rename(self, "karchive-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
