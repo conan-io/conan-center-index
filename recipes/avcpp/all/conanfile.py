@@ -12,8 +12,14 @@ class AvcppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/h4tr3d/avcpp/"
     settings = "os", "arch", "compiler", "build_type"
-    options = { "fPIC": [True, False], "shared": [True, False], }
-    default_options = { "fPIC": True, "shared": False, }
+    options = {
+        "fPIC": [True, False], 
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True, 
+        "shared": False,
+    }
     generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
