@@ -7,8 +7,6 @@ class IceoryxTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if not self.deps_cpp_info["iceoryx"].version.startswith("1.0"):
-            cmake.definitions["USE_HOOFS"] = True 
         cmake.configure()
         cmake.build()
 
