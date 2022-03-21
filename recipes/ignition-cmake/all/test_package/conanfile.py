@@ -7,6 +7,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    requires = (
+        "ignition-cmake/[^2.5.0]@gg/cc-testing"
+        )
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
