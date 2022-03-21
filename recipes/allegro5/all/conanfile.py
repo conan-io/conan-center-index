@@ -65,8 +65,8 @@ class Allegro5Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
             
-    #def set_version(self):
-    #    self.version = "5.2.7"
+    def set_version(self):
+        self.version = "5.2.7"
 
     def _patch_addon(self, addon, find, replace):
         path = None
@@ -76,7 +76,7 @@ class Allegro5Conan(ConanFile):
             path = os.path.join(self._source_subfolder, "addons", "CMakeLists.txt")
         else:
             path = os.path.join(self._source_subfolder, "addons", addon, "CMakeLists.txt")
-        tools.replace_in_file(path, find, replace, strict=False)
+        tools.replace_in_file(path, find, replace)
         
     def _patch_sources(self):
         self._patch_addon("image", "${FREEIMAGE_INCLUDE_PATH}", "${FreeImage_INCLUDE_DIR}")
@@ -119,6 +119,7 @@ class Allegro5Conan(ConanFile):
             '''find_package(Brotli REQUIRED)
                list(APPEND FREETYPE_STATIC_LIBRARIES "${Brotli_LIBRARIES}")
                run_c_compile_test("${FREETYPE_TEST_SOURCE}" TTF_COMPILES_WITH_EXTRA_DEPS)''')
+        self._patch_addon(None, "set(INSTALL_PKG_CONFIG_FILES true)", "set(INSTALL_PKG_CONFIG_FILES false)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
