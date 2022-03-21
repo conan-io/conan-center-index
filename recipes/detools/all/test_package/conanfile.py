@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 
 class DetoolsTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):

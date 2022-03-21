@@ -12,9 +12,15 @@ class DetoolsConan(ConanFile):
     license = "MIT"
     topics = ("delta-compression", "delta-update", "delta-encoding",
               "ota", "bsdiff", "hdiffpatch")
-    settings = ("os", "compiler", "build_type", "arch")
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     requires = ['heatshrink/0.4.1', 'lz4/1.9.3', 'xz_utils/5.2.5']
@@ -28,12 +34,14 @@ class DetoolsConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This library is only compatible with Linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This library is only compatible with Linux and FreeBSD")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
