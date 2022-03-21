@@ -12,8 +12,14 @@ class Md4cConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mity/md4c"
     settings = "os", "arch", "compiler", "build_type"
-    options = { "shared": [True, False], "fPIC": [True, False], }
-    default_options = { "shared": False, "fPIC": True, }
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     generators = "cmake"
 
     _cmake = None
