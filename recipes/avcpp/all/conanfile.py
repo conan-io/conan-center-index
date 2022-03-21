@@ -23,7 +23,6 @@ class AvcppConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package_multi"
 
-    _cmake = None
 
     @property
     def _compiler_required_cpp17(self):
