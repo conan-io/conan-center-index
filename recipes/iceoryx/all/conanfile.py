@@ -90,7 +90,7 @@ class IceoryxConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # Honor fPIC option
-        iceoryx_utils = "iceoryx_utils" if self.version.startswith("1.") else "iceoryx_hoofs"
+        iceoryx_utils = "iceoryx_hoofs" if  tools.Version(self.version) >= "2.0.0" else "iceoryx_utils"
         for cmake_file in [
                 os.path.join("iceoryx_binding_c", "CMakeLists.txt"),
                 os.path.join("iceoryx_posh", "CMakeLists.txt"),
@@ -103,11 +103,11 @@ class IceoryxConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["TOML_CONFIG"] = self.options.toml_config
-        if not self.version.startswith("1."):
+        if  tools.Version(self.version) >= "2.0.0":
             self._cmake.definitions["DOWNLOAD_TOML_LIB"] = False
         self._cmake.configure()
-        return self._cmake
-
+        return self._cmake  
+    
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -126,16 +126,16 @@ class IceoryxConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "etc"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        if self.version.startswith("1."):
-            self._create_cmake_module_alias_targets(
-                os.path.join(self.package_folder, self._module_file_rel_path),
-                {v["target"]: "iceoryx::{}".format(k)
-                 for k, v in self._iceoryx_components["1.0.X"].items()})
-        else:
+        if (tools.Version(self.version) >= "2.0.0"):
             self._create_cmake_module_alias_targets(
                 os.path.join(self.package_folder, self._module_file_rel_path),
                 {v["target"]: "iceoryx::{}".format(k)
                  for k, v in self._iceoryx_components["2.0.0"].items()})
+        else:
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {v["target"]: "iceoryx::{}".format(k)
+                 for k, v in self._iceoryx_components["1.0.X"].items()})
 
     @property
     def _iceoryx_components(self):
@@ -284,10 +284,10 @@ class IceoryxConan(ConanFile):
                     self._module_file_rel_path
                 ]
 
-        if self.version.startswith("1."):
-            _register_components(self._iceoryx_components["1.0.X"])
+        if tools.Version(self.version) >= "2.0.0":
+             _register_components(self._iceoryx_components["2.0.0"], add_include=True)
         else:
-            _register_components(self._iceoryx_components["2.0.0"], add_include=True)
+            _register_components(self._iceoryx_components["1.0.X"])  
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
