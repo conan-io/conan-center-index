@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from pathlib import Path
 import os
 
 required_conan_version = ">=1.33.0"
@@ -40,6 +39,7 @@ class Allegro5Conan(ConanFile):
 
         if self.settings.os != "Windows":
             self.requires("xorg/system")
+            self.requires("glu/system")
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
             self.requires("gtk/system")
