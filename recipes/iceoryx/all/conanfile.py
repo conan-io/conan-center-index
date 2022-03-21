@@ -124,6 +124,17 @@ class IceoryxConan(ConanFile):
             tools.rename(os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
                          os.path.join(self.package_folder, "res", "roudi_config.toml"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
+        # bring to default package structure
+        if (tools.Version(self.version) >= "2.0.0"):
+            include_paths = [
+                "iceoryx_binding_c",
+                "iceoryx_hoofs",
+                "iceoryx_posh",
+                "iceoryx_versions.hpp"
+            ]
+            for include_path in include_paths:
+                tools.rename(os.path.join(self.package_folder, "include","iceoryx","v{}".format(self.version),include_path),
+                         os.path.join(self.package_folder, "include",include_path))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         if (tools.Version(self.version) >= "2.0.0"):
@@ -265,7 +276,7 @@ class IceoryxConan(ConanFile):
         #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "iceoryx")
 
-        def _register_components(components, add_include=False):
+        def _register_components(components):
             for lib_name, values in components.items():
                 cmake_target = values.get("target", [])
                 system_libs = values.get("system_libs", [])
@@ -274,18 +285,14 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].libs = [lib_name]
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
-                if add_include:
-                    include_dir = os.path.join("include", self.name, "v{}".format(self.version))
-                    self.cpp_info.components[lib_name].includedirs = [include_dir]
-
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [
                     self._module_file_rel_path
                 ]
-
+        
         if tools.Version(self.version) >= "2.0.0":
-             _register_components(self._iceoryx_components["2.0.0"], add_include=True)
+            _register_components(self._iceoryx_components["2.0.0"])
         else:
             _register_components(self._iceoryx_components["1.0.X"])  
 
