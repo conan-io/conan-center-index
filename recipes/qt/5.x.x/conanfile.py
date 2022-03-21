@@ -39,7 +39,8 @@ class QtConan(ConanFile):
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
-    "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d"]
+    "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d",
+    "qtknx", "qtmqtt", "qtcoap", "qtopcua"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -261,7 +262,8 @@ class QtConan(ConanFile):
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s is not present in recipe options : (%s)" % (m, ",".join(self._submodules))
 
         for m in self._submodules:
-            assert m in submodules_tree, "module %s is not present in qtmodules%s.conf : (%s)" % (m, self.version, ",".join(submodules_tree))
+            if m not in submodules_tree:
+                delattr(self.options, m)
 
         def _enablemodule(mod):
             if mod != "qtbase":
@@ -327,11 +329,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.198.0")
+            self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.6")
+                self.requires("moltenvk/1.1.8")
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.71.3")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion:
@@ -343,7 +345,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/70.1")
         if self.options.get_safe("with_harfbuzz", False):
-            self.requires("harfbuzz/3.2.0")
+            self.requires("harfbuzz/4.0.1")
         if self.options.get_safe("with_libjpeg", False):
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -352,12 +354,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False):
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.38.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.4")
+            self.requires("libpq/13.6")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
@@ -367,13 +369,13 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            self.requires("xkbcommon/1.3.1")
+            self.requires("xkbcommon/1.4.0")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.4.4")
+            self.requires("expat/2.4.6")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -537,7 +539,7 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
 
         for module in self._submodules:
-            if not self.options.get_safe(module):
+            if module in self.options and not self.options.get_safe(module):
                 args.append("-skip " + module)
 
         args.append("--zlib=system")
@@ -714,13 +716,12 @@ class QtConan(ConanFile):
                 with tools.environment_append(build_env):
 
                     if tools.os_info.is_macos:
-                        open(".qmake.stash" , "w").close()
-                        open(".qmake.super" , "w").close()
+                        tools.save(".qmake.stash" , "")
+                        tools.save(".qmake.super" , "")
 
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                     if tools.os_info.is_macos:
-                        with open("bash_env", "w") as f:
-                            f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                        tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
                         "BASH_ENV": os.path.abspath("bash_env")
                     }) if tools.os_info.is_macos else tools.no_op():
@@ -736,8 +737,7 @@ class QtConan(ConanFile):
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
-        with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write("""[Paths]
+        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
 Prefix = ..
 ArchData = bin/archdatadir
 HostData = bin/archdatadir
