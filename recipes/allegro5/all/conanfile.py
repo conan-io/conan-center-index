@@ -121,7 +121,7 @@ class Allegro5Conan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["SHARED"] = False
-        self._cmake.definitions["WANT_STATIC_RUNTIME"] = self.settings.compiler.runtime == "MT" if self._is_msvc else False
+        self._cmake.definitions["WANT_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime if self._is_msvc else False
         self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.definitions["PREFER_STATIC_DEPS"] = True
         self._cmake.definitions["WANT_DOCS"] = False
