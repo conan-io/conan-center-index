@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     requires = (
-        "ignition-cmake/[^2.5.0]@gg/cc-testing"
+        "ignition-cmake/[^2.5.0]"
         )
 
     def build(self):
