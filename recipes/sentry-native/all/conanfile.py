@@ -36,7 +36,7 @@ class SentryNativeConan(ConanFile):
         "qt": False,
         "with_crashpad": "sentry",
         "with_breakpad": "sentry",
-        "performance": True,
+        "performance": False,
     }
 
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
