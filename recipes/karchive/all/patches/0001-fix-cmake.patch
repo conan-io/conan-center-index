@@ -1,0 +1,77 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 541f9ea..4d0c1f0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,8 +17,8 @@ include(KDECMakeSettings)
+ 
+ include(ECMGenerateExportHeader)
+ 
+-set(REQUIRED_QT_VERSION 5.12.0)
+-find_package(Qt5Core ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE)
++# set(REQUIRED_QT_VERSION 5.12.0)
++# find_package(Qt5Core ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE)
+ 
+ find_package(ZLIB)
+ set_package_properties(ZLIB PROPERTIES
+diff --git a/autotests/CMakeLists.txt b/autotests/CMakeLists.txt
+index 1b0a933..0d009b8 100644
+--- a/autotests/CMakeLists.txt
++++ b/autotests/CMakeLists.txt
+@@ -2,19 +2,19 @@ remove_definitions(-DQT_NO_CAST_FROM_ASCII)
+ 
+ include(ECMAddTests)
+ 
+-find_package(Qt5Test ${REQUIRED_QT_VERSION} CONFIG QUIET)
+-find_package(Qt5Network)
++#find_package(Qt5Test ${REQUIRED_QT_VERSION} CONFIG QUIET)
++#find_package(Qt5Network)
+ 
+-if(NOT Qt5Test_FOUND)
+-    message(STATUS "Qt5Test not found, autotests will not be built.")
+-    return()
+-endif()
++# if(NOT Qt5Test_FOUND)
++#     message(STATUS "Qt5Test not found, autotests will not be built.")
++#     return()
++# endif()
+ 
+ ecm_add_tests(
+     karchivetest.cpp
+     kfiltertest.cpp
+     deprecatedtest.cpp
+-    LINK_LIBRARIES KF5::Archive Qt5::Test
++    LINK_LIBRARIES KF5::Archive CONAN_PKG::qt
+ )
+ 
+ target_link_libraries(kfiltertest ${ZLIB_LIBRARIES})
+@@ -25,7 +25,7 @@ ecm_add_test(
+     klimitediodevicetest.cpp
+     ../src/klimitediodevice.cpp
+     TEST_NAME klimitediodevicetest
+-    LINK_LIBRARIES Qt5::Test
++    LINK_LIBRARIES CONAN_PKG::qt
+ )
+ target_include_directories(klimitediodevicetest
+     PRIVATE $<TARGET_PROPERTY:KF5Archive,INTERFACE_INCLUDE_DIRECTORIES>)
+@@ -34,7 +34,7 @@ target_include_directories(klimitediodevicetest
+ if (Qt5Network_FOUND)
+     ecm_add_test(
+         kcompressiondevicetest.cpp
+-        LINK_LIBRARIES KF5::Archive Qt5::Test Qt5::Network
++        LINK_LIBRARIES KF5::Archive CONAN_PKG::qt
+     )
+ 
+     set(testDir $<TARGET_FILE_DIR:kcompressiondevicetest>)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index de0d6f4..ad33c0e 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -62,7 +62,7 @@ target_include_directories(KF5Archive
+ 
+ target_link_libraries(KF5Archive
+     PUBLIC
+-        Qt5::Core
++        CONAN_PKG::qt
+     PRIVATE
+         ${karchive_OPTIONAL_LIBS}
+         ${ZLIB_LIBRARY}

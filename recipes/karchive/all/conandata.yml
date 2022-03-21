@@ -2,3 +2,7 @@ sources:
   "5.75.0":
     url: "https://download.kde.org/stable/frameworks/5.75/karchive-5.75.0.zip"
     sha256: "480cb9d66434241c47110b199d76ce6e23306ee98d5eb8567be98cac24fe232d"
+patches:
+  "5.75.0":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"

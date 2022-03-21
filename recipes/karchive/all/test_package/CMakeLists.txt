@@ -3,8 +3,8 @@ project(PackageTest CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(qt REQUIRED CONFIG)
-find_package(karchive CONFIG REQUIRED)
+include(conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 add_executable(example example.cpp)
-target_link_libraries(example karchive::karchive qt::qt)
+target_link_libraries(example CONAN_PKG::karchive CONAN_PKG::qt)
