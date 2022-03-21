@@ -21,6 +21,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.4.x/fix-include-xerces.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.4.x/fix-include-podofo.patch"
+      base_path: "source_subfolder"
   "3.3.3":
     - patch_file: "patches/3.3.x/fix-autotools-3.3.3.patch"
       base_path: "source_subfolder"
@@ -30,6 +32,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.3.x/fix-include-xerces.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.3.x/fix-include-podofo.patch"
+      base_path: "source_subfolder"
   "3.2.3":
     - patch_file: "patches/3.2.x/fix-autotools.patch"
       base_path: "source_subfolder"
@@ -38,6 +42,8 @@ patches:
     - patch_file: "patches/3.2.x/fix-include-jsonc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.2.x/fix-include-xerces.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.2.x/fix-include-podofo.patch"
       base_path: "source_subfolder"
   "3.1.4":
     - patch_file: "patches/3.1.x/fix-autotools-3.1.4.patch"
@@ -51,4 +57,6 @@ patches:
     - patch_file: "patches/3.1.x/fix-include-jsonc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.1.x/fix-include-xerces-3.1.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.1.x/fix-include-podofo.patch"
       base_path: "source_subfolder"
