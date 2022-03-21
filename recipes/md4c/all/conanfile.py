@@ -15,10 +15,12 @@ class Md4cConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "encoding": ["utf-8", "utf-16", "ascii"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "encoding": "utf-8",
     }
     generators = "cmake"
 
@@ -41,6 +43,10 @@ class Md4cConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.encoding == "utf-16":
+            raise tools.ConanInvalidConfiguration("utf-16 options is not supported on non-Windows platforms")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -49,6 +55,12 @@ class Md4cConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+
+        if self.options.encoding == "utf-16":
+            cmake.definitions["CONAN_C_FLAGS"] = "-DMD4C_USE_UTF16"
+        elif self.options.encoding == "ascii":
+            cmake.definitions["CONAN_C_FLAGS"] = "-DMD4C_USE_ASCII"
+
         cmake.configure()
         return cmake
 
@@ -67,3 +79,6 @@ class Md4cConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["md4c", "md4c-html",]
+
+        if self.options.encoding == "utf-16":
+            self.cpp_info.defines.append("MD4C_USE_UTF16")
