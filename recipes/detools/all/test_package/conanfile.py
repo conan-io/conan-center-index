@@ -1,4 +1,3 @@
-import filecmp
 import os
 
 from conans import ConanFile, CMake, tools
@@ -27,11 +26,7 @@ class DetoolsTestConan(ConanFile):
         bin_path = os.path.join("bin", "test_package")
         old_path = os.path.join(self.source_folder, "old")
         patch_path = os.path.join(self.source_folder, "patch")
-        new_path = os.path.join(self.source_folder, "new")
         patched_path = os.path.join(self.build_folder, "patched")
 
         self.run(f"{bin_path} {old_path} {patch_path} {patched_path}",
                  run_environment=True)
-
-        if not filecmp.cmp(patched_path, new_path):
-            raise Exception("Patched file does not match new")
