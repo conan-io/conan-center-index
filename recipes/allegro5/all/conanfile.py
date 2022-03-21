@@ -136,9 +136,9 @@ class Allegro5Conan(ConanFile):
         self._cmake.definitions["WANT_MP3"] = True
         self._cmake.definitions["WANT_OGG_VIDEO"] = True
 
-        self._cmake.definitions["FREETYPE_ZLIB"] = True
-        self._cmake.definitions["FREETYPE_BZIP2"] = True
-        self._cmake.definitions["FREETYPE_PNG"] = True
+        self._cmake.definitions["FREETYPE_ZLIB"] = self.options["freetype"].with_zlib
+        self._cmake.definitions["FREETYPE_BZIP2"] = self.options["freetype"].with_bzip2
+        self._cmake.definitions["FREETYPE_PNG"] = self.options["freetype"].with_png
         self._cmake.definitions["FREETYPE_HARFBUZZ"] = False
             
         self._cmake.definitions["CMAKE_CXX_FLAGS"] = "/wd4267 /wd4018" if self._is_msvc else "-Wno-unused-variable -w"
