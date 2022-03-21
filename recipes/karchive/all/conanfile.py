@@ -69,7 +69,7 @@ class KArchiveConan(ConanFile):
         cmake.install()
         self.copy("*", src=os.path.join(self._source_subfolder, "LICENSES"), dst="licenses")
 
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "karchive")
