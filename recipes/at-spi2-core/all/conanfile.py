@@ -40,7 +40,7 @@ class AtSpi2CoreConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.version >= tools.Version("2.44.0") and not self.options.with_x11:
+        if tools.Version(self.version) >= tools.Version("2.44.0") and not self.options.with_x11:
             self.output.warn("Forcing option at-spi2-core:with_x11 to True because of upstream issue"
                              " https://gitlab.gnome.org/GNOME/at-spi2-core/-/issues/51")
             self.options.with_x11 = True
