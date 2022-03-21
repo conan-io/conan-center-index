@@ -157,7 +157,7 @@ class Allegro5Conan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["allegro_monolith-static"]
+        self.cpp_info.libs = ["allegro_monolith-debug-static" if self.settings.build_type == "Debug" else "allegro_monolith-static"]
         self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
 
         if self.settings.os == "Windows":
