@@ -39,6 +39,11 @@ class AtSpi2CoreConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.version >= tools.Version("2.44.0") and not self.options.with_x11:
+            self.output.warn("Forcing option at-spi2-core:with_x11 to True because of upstream issue"
+                             " https://gitlab.gnome.org/GNOME/at-spi2-core/-/issues/51")
+            self.options.with_x11 = True
     
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
