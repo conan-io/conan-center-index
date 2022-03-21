@@ -22,8 +22,6 @@ class Md4cConan(ConanFile):
     }
     generators = "cmake"
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
