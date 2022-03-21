@@ -8,7 +8,7 @@ class AvcppConan(ConanFile):
     name = "avcpp"
     description = "C++ wrapper for FFmpeg"
     topics = ("ffmpeg", "cpp")
-    license = "LGPL-2.1 or BSD"
+    license = "LGPL-2.1", "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/h4tr3d/avcpp/"
     settings = "os", "arch", "compiler", "build_type"
