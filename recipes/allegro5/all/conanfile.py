@@ -64,9 +64,6 @@ class Allegro5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            
-    def set_version(self):
-        self.version = "5.2.7"
 
     def _patch_addon(self, addon, find, replace):
         path = None
@@ -166,7 +163,7 @@ class Allegro5Conan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["allegro_monolith-static" if self.options.shared else "allegro_monolith"]
+        self.cpp_info.libs = ["allegro_monolith" if self.options.shared else "allegro_monolith-static"]
 
         if not self.options.shared:
             self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
