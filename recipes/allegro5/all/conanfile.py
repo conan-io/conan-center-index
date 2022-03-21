@@ -166,7 +166,7 @@ class Allegro5Conan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["allegro_monolith-static"]
+        self.cpp_info.libs = ["allegro_monolith-static" if self.options.shared else "allegro_monolith"]
 
         if not self.options.shared:
             self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
