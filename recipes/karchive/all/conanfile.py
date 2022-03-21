@@ -3,6 +3,8 @@ from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class KArchiveConan(ConanFile):
     name = "karchive"
