@@ -57,6 +57,7 @@ class KArchiveConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions['BUILD_TESTING'] = False
         self._cmake.definitions['ECM_MKSPECS_INSTALL_DIR'] = os.path.join(self.package_folder, "res")
         self._cmake.definitions['KDE_INSTALL_LOGGINGCATEGORIESDIR'] = os.path.join(self.package_folder, "res")
         self._cmake.configure()
