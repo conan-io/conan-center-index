@@ -12,11 +12,9 @@ class Allegro5Conan(ConanFile):
     topics = ("allegro5", "gamedev", "gui", "framework", "graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False], 
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, 
         "fPIC": True
     }
     
@@ -59,10 +57,6 @@ class Allegro5Conan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
     def _patch_addon(self, addon, find, replace):
@@ -126,7 +120,7 @@ class Allegro5Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["SHARED"] = self.options.shared
+        self._cmake.definitions["SHARED"] = False
         self._cmake.definitions["WANT_STATIC_RUNTIME"] = self.settings.compiler.runtime == "MT" if self._is_msvc else False
         self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.definitions["PREFER_STATIC_DEPS"] = True
@@ -163,10 +157,8 @@ class Allegro5Conan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["allegro_monolith" if self.options.shared else "allegro_monolith-static"]
-
-        if not self.options.shared:
-            self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
+        self.cpp_info.libs = ["allegro_monolith-static"]
+        self.cpp_info.defines = ["ALLEGRO_STATICLINK"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = [ "opengl32", "shlwapi" ]
