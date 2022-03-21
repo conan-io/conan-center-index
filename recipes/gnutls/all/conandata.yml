@@ -1,0 +1,4 @@
+sources:
+  "3.7.4":
+    url: "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.4.tar.xz"
+    sha256: "e6adbebcfbc95867de01060d93c789938cf89cc1d1f6ef9ef661890f6217451f"
