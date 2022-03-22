@@ -1,11 +1,11 @@
 #define CLOVE_IMPLEMENTATION
-#define CLOVE_SUITE_NAME Suite01
 #include <clove-unit.h>
 
-CLOVE_RUNNER()
-
-CLOVE_TEST(Test1) {
-    CLOVE_PASS();
+char * __clove_exec_path;
+char * __clove_exec_base_path;
+int main() {
+    __clove_report_console_setup_ansi();
+    return 0;
 }
 
 
