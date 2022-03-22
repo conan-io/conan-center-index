@@ -11,3 +11,10 @@ sources:
   "1.0.11":
     url: "https://github.com/awslabs/s2n/archive/v1.0.11.tar.gz"
     sha256: "dbe886cf8cd6658cce571cdaba81e9a93d8c914fd1eba0d3233fec64ed53224b"
+patches:
+  "1.1.0":
+    - patch_file: "patches/1.1.0/001-try-compile.patch"
+      base_path: "source_subfolder"
+  "1.0.11":
+    - patch_file: "patches/1.0.11/001-try-compile.patch"
+      base_path: "source_subfolder"

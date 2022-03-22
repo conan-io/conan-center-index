@@ -38,6 +38,10 @@ class ProjConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -59,7 +63,7 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5")
-        self.requires("sqlite3/3.37.2")
+        self.requires("sqlite3/3.38.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_curl"):
@@ -67,7 +71,7 @@ class ProjConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.37.2")
+            self.build_requires("sqlite3/3.38.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -88,7 +92,7 @@ class ProjConan(ConanFile):
         tools.replace_in_file(cmakelists, "/W4", "")
 
         # Let CMake install shared lib with a clean rpath !
-        if tools.Version(self.version) >= "7.1.0":
+        if tools.Version(self.version) >= "7.1.0" and tools.Version(self.version) < "9.0.0":
             tools.replace_in_file(cmakelists,
                                   "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                                   "")
@@ -199,7 +203,7 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if tools.Version(self.version) < "8.2.0":
-            if self.options.shared and self.settings.compiler in ["Visual Studio", "msvc"]:
+            if self.options.shared and self._is_msvc:
                 self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
         else:
             if not self.options.shared:

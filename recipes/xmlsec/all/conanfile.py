@@ -2,6 +2,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -20,17 +21,22 @@ class XmlSecConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_nss": [True, False],
+        "with_gcrypt": [True, False],
+        "with_gnutls": [True, False],
         "with_xslt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_nss": False,
+        "with_gcrypt": False,
+        "with_gnutls": False,
         "with_openssl": True,
         "with_xslt": False,
     }
 
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -62,7 +68,13 @@ class XmlSecConan(ConanFile):
             self.requires("libxslt/1.1.34")
 
     def validate(self):
-        if not self.options.with_openssl:
+        if self.options.with_nss:
+            raise ConanInvalidConfiguration("xmlsec with nss not supported yet in this recice")
+        if self.options.with_gcrypt:
+            raise ConanInvalidConfiguration("xmlsec with gcrypt not supported yet in this recice")
+        if self.options.with_gnutls:
+            raise ConanInvalidConfiguration("xmlsec with gnutls not supported yet in this recice")
+        if not (self.options.with_openssl or self.options.with_nss or self.options.with_gcrypt or self.options.with_gnutls):
             raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
 
     def build_requirements(self):
@@ -139,18 +151,21 @@ class XmlSecConan(ConanFile):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if not self.options.shared:
-            self._autotools.defines.append("XMLSEC_STATIC")
+            autotools.defines.append("XMLSEC_STATIC")
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-crypto-dl={}".format(yes_no(False)),
             "--enable-apps-crypto-dl={}".format(yes_no(False)),
             "--with-libxslt={}".format(yes_no(self.options.with_xslt)),
             "--with-openssl={}".format(yes_no(self.options.with_openssl)),
+            "--with-nss={}".format(yes_no(self.options.with_nss)),
+            "--with-nspr={}".format(yes_no(self.options.with_nss)),
+            "--with-gcrypt={}".format(yes_no(self.options.with_gcrypt)),
+            "--with-gnutls={}".format(yes_no(self.options.with_gnutls)),
             "--enable-mscrypto={}".format(yes_no(False)),   # Built on mingw
             "--enable-mscng={}".format(yes_no(False)),      # Build on mingw
             "--enable-docs=no",
@@ -158,9 +173,9 @@ class XmlSecConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.libs = []
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.libs = []
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         if self._is_msvc:
@@ -168,6 +183,8 @@ class XmlSecConan(ConanFile):
         else:
             with tools.chdir(self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
+                # relocatable shared lib on macOS
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
@@ -209,7 +226,7 @@ class XmlSecConan(ConanFile):
         else:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_NO_XSLT=1")
         self.cpp_info.components["libxmlsec"].defines.extend(["XMLSEC_NO_SIZE_T", "XMLSEC_NO_GOST=1", "XMLSEC_NO_CRYPTO_DYNAMIC_LOADING=1"])
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libxmlsec"].system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
             self.cpp_info.components["libxmlsec"].system_libs = ["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"]

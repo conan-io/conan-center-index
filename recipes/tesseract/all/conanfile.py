@@ -82,7 +82,7 @@ class TesseractConan(ConanFile):
             # 5.0.0 requires C++-17 compiler
             minimal_version = {
                 "Visual Studio": "16",
-                "gcc": "9",
+                "gcc": "7",
                 "clang": "7",
                 "apple-clang": "11"
             }

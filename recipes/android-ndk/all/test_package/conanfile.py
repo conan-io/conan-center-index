@@ -4,8 +4,11 @@ from conans import ConanFile, tools, CMake
 
 class TestPackgeConan(ConanFile):
     settings = "os", "arch"
-    test_type = "build_requires"
+    test_type = "explicit"
     generators = "cmake"
+
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def build(self):
         # It only makes sense to build a library, if the target os is Android

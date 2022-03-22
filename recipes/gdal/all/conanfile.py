@@ -249,13 +249,13 @@ class GdalConan(ConanFile):
         self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.3.0")
-        self.requires("proj/8.2.1")
+        self.requires("proj/9.0.0")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.0")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.9")
+            self.requires("libdeflate/1.10")
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
@@ -315,7 +315,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.4")
+            self.requires("expat/2.4.6")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
@@ -329,7 +329,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.38.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -345,8 +345,8 @@ class GdalConan(ConanFile):
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
         if self.options.with_opencl:
-            self.requires("opencl-headers/2021.04.29")
-            self.requires("opencl-icd-loader/2021.04.29")
+            self.requires("opencl-headers/2022.01.04")
+            self.requires("opencl-icd-loader/2022.01.04")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_poppler:

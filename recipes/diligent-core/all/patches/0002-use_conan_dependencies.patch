@@ -7,7 +7,7 @@ index 387b3b019..e760513de 100644
      message("HLSL support is disabled. Vulkan backend will not be able to consume SPIRV bytecode generated from HLSL.")
  else()
 -    list(APPEND PRIVATE_DEPENDENCIES SPIRV-Tools-opt)
-+    list(APPEND PRIVATE_DEPENDENCIES CONAN_PKG::spirv-tools)
++    list(APPEND PRIVATE_DEPENDENCIES spirv-tools::SPIRV-Tools-opt)
  endif()
  
  # Use DirectX shader compiler for SPIRV.
@@ -27,7 +27,7 @@ index 00e634263..a7519f23e 100644
          target_link_libraries(Diligent-ShaderTools
          PRIVATE
 -            SPIRV-Tools-opt
-+            CONAN_PKG::spirv-tools
++            spirv-tools::SPIRV-Tools-opt
          )
      endif()
  
@@ -36,8 +36,8 @@ index 00e634263..a7519f23e 100644
          PRIVATE
 -            SPIRV
 -            glslang
-+            CONAN_PKG::spirv-tools
-+            CONAN_PKG::glslang
++            spirv-tools::SPIRV-Tools-opt
++            glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL
          )
  
          target_include_directories(Diligent-ShaderTools
@@ -119,7 +119,7 @@ index e329495f4..f2adeccdd 100644
 -            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
 -        endforeach()
 -    endif()
-+    list(APPEND THIRD_PARTY_LIBS CONAN_PKG::spirv-tools CONAN_PKG::spirv-cross CONAN_PKG::glslang)
++    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
  
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries
