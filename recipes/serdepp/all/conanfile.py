@@ -47,7 +47,7 @@ class SerdeppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
-            "Visual Studio": "15",
+            "Visual Studio": "17",
             "clang": "5",
             "apple-clang": "10",
         }
