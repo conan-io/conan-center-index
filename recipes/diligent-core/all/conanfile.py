@@ -83,6 +83,9 @@ class DiligentCoreConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.22.0")
+
     def requirements(self):
         self.requires("opengl/system")
 
@@ -92,11 +95,11 @@ class DiligentCoreConan(ConanFile):
         self.requires("libpng/1.6.37")
 
         self.requires("spirv-cross/cci.20210930")
-        self.requires("spirv-headers/1.2.198.0")
-        self.requires("spirv-tools/2021.4")
-        self.requires("vulkan-headers/1.2.198")
-        self.requires("volk/1.2.198")
-        self.requires("glslang/11.7.0")
+        self.requires("spirv-tools/1.3.204.0")
+        self.requires("vulkan-headers/1.3.204")
+        self.requires("volk/1.3.204")
+        self.requires("glslang/1.3.204.0")
+        self.requires("xxhash/0.8.0")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
@@ -146,7 +149,7 @@ class DiligentCoreConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
-                     dst=os.path.join(self.package_folder, "include", "DiligentCore"))
+        dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         tools.rmdir(os.path.join(self.package_folder, "lib"))
