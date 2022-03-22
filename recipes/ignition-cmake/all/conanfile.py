@@ -51,9 +51,6 @@ class IgnitionCmakeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "..", "..", "source"))
-        tools.rmdir(os.path.join(self.package_folder, "..", "..", "build"))
-        tools.rmdir(os.path.join(self.package_folder, "..", "..", "export_source"))
 
     def package_info(self):
         version_major = tools.Version(self.version).major
