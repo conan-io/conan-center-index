@@ -30,7 +30,7 @@ class ApprovalTestsCppConan(ConanFile):
         "with_cpputest": False,
     }
     no_copy_source = True
-    settings = "compiler"
+    settings = "compiler", "os", "build_type", "arch"
 
     @property
     def _header_file(self):
