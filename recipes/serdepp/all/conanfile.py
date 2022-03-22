@@ -15,7 +15,7 @@ class SerdeppConan(ConanFile):
     topics = ("yaml", "toml", "serialization", "json", "reflection")
     homepage = "https://github.com/injae/serdepp"
     url = "https://github.com/conan-io/conan-center-index"
-
+    settings = "arch", "build_type", "compiler", "os"
     options = {
         # keeping the option in case upstream support dynamic linking
         "with_nlohmann_json": [True, False],
