@@ -31,6 +31,7 @@ class TestPackageConan(ConanFile):
             return
 
         bin_path = os.path.join("bin", "test_package")
+        self.run(bin_path, run_environment=True)
         if self.options["approvaltests.cpp"].with_boosttest and self._boost_test_supported():
             print("Running Boost")
             self.run(bin_path + "_boosttest", run_environment=True)
