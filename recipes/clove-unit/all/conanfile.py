@@ -17,7 +17,7 @@ class CloveUnitConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
