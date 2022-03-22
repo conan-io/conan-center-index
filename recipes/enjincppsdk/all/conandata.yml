@@ -1,7 +1,4 @@
 sources:
-#  "1.0.0-alpha.3":
-#    url: "https://github.com/enjin/enjin-cpp-sdk/archive/1.0.0.1002.tar.gz"
-#    sha256: "c3c3e0e9c44dea6f226b709d0207f6dbeacc783673be1a70737d692204d5b018"
-  "1.0.0-alpha.3a":
-    url: "https://github.com/enjin/enjin-cpp-sdk/archive/bugfix/SDK-178/include-headers.tar.gz"
-    sha256: "7bc55a9f3ad22d9925dad950ea32bf6882d17108981fe38d4ea054e83da8f38d"
+  "1.0.0-alpha.3":
+    url: "https://github.com/enjin/enjin-cpp-sdk/archive/1.0.0.1002.tar.gz"
+    sha256: "c3c3e0e9c44dea6f226b709d0207f6dbeacc783673be1a70737d692204d5b018"
