@@ -13,6 +13,8 @@ class GnuTLSConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
+    generators = "pkg_config"
+    _configure_vars = None
 
     @property
     def _source_subfolder(self):
@@ -26,7 +28,7 @@ class GnuTLSConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.compiler in ("Visual Studio", "msvc"):
-            raise ConanInvalidConfiguration("The GnuTLS package cannot be deployed on Visual Studio.")
+            raise ConanInvalidConfiguration("The GnuTLS package cannot be deployed by Visual Studio.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -38,18 +40,20 @@ class GnuTLSConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         configure_args = ["--disable-tests",
+                          "--disable-doc",
+                          "--disable-manpages",
                           "--disable-full-test-suite",
                           "--disable-maintainer-mode",
+                          "--disable-option-checking",
                           "--without-p11-kit",
                           "--without-idn",
                           "--with-included-libtasn1",
-                          "--enable-local-libopts",
                           "--with-included-unistring",
                           "--with-libiconv-prefix={}".format(self.deps_cpp_info["libiconv"].rootpath)]
-        configure_vars = autotools.vars
-        configure_vars.update({
+        self._configure_vars = autotools.vars
+        self._configure_vars.update({
             "NETTLE_CFLAGS": "-I{}".format(self.deps_cpp_info["nettle"].include_paths[0]),
             "NETTLE_LIBS": "-L{} -lnettle".format(self.deps_cpp_info["nettle"].lib_paths[0]),
             "HOGWEED_CFLAGS": "-I{}".format(self.deps_cpp_info["nettle"].include_paths[0]),
@@ -62,18 +66,25 @@ class GnuTLSConan(ConanFile):
             configure_args.extend(["--enable-shared", "--disable-static"])
         else:
             configure_args.extend(["--disable-shared", "--enable-static"])
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder, vars=configure_vars)
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder, vars=self._configure_vars)
         return autotools
 
     def build(self):
         autotools = self._configure_autotools()
-        autotools.make()
+        autotools.make(vars=self._configure_vars)
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        # tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.set_property("cmake_file_name", "GnuTLS")
+        self.cpp_info.set_property("cmake_target_name", "GnuTLS")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "GnuTLS"
+        self.cpp_info.names["cmake_find_package_multi"] = "GnuTLS"
