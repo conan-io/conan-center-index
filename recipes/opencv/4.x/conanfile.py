@@ -298,6 +298,21 @@ class OpenCVConan(ConanFile):
             gapi_cmake = os.path.join(self._source_subfolder, "modules", "gapi", "CMakeLists.txt")
             tools.replace_in_file(gapi_cmake, " ade)", " ade::ade)")
 
+        if self.options.contrib and self.options.contrib_sfm and tools.Version(self.version) <= "4.5.2":
+            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
+            ver = tools.Version(self.version)
+            if ver <= "4.5.0":
+                search = '  find_package(Glog QUIET)\nendif()'
+            else:
+                search = '  set(GLOG_INCLUDE_DIRS "${GLOG_INCLUDE_DIR}")\nendif()'
+            tools.replace_in_file(sfm_cmake, search, """{}
+            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
+              set(GFLAGS_LIBRARIES gflags::gflags)
+            endif()
+            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
+              set(GLOG_LIBRARIES glog::glog)
+            endif()""".format(search))
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
