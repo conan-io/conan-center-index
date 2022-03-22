@@ -29,6 +29,10 @@ class IgnitionCmakeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_INSTALL_DATAROOTDIR"] = "lib"
+        self._cmake.definitions["BUILD_TESTING"] = True
+        self._cmake.definitions["-BUILDSYSTEM_TESTING"] = False
+        self._cmake.definitions["SKIP_component_name"] = False
+
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
