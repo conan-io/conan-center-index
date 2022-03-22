@@ -60,6 +60,8 @@ class FunchookConan(ConanFile):
         if self.options.disassembler == "zydis":
             raise ConanInvalidConfiguration("disassembler 'zydis' currently not supported by this Conan recipe")
         if 'arm' in str(self.settings.arch):
+            if self.settings.os == "Macos":
+                raise ConanInvalidConfiguration("Funchook does not support ARM on MacOS")
             if self.options.disassembler != "capstone":
                 raise ConanInvalidConfiguration("disassembler must be 'capstone' for arm arch")
 
