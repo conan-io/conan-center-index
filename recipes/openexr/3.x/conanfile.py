@@ -13,7 +13,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
 
     @property
     def _source_subfolder(self):
@@ -54,6 +54,9 @@ class OpenEXRConan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
