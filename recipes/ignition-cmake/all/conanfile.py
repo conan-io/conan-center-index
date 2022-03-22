@@ -11,7 +11,8 @@ class IgnitionCmakeConan(ConanFile):
     homepage = "https://github.com/ignitionrobotics/ign-cmake"
     description = "A set of CMake modules that are used by the C++-based Ignition projects."
     topics = ("ignition", "robotics", "cmake")
-    generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None

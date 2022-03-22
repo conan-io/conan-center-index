@@ -5,11 +5,11 @@ from conans import CMake, ConanFile, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
-    requires = (
-        "ignition-cmake/[^2.5.0]"
-        )
+    def requirements(self):
+        ignCmake = self.requires["ignition-cmake"]
+        self.requires(str(ignCmake))
 
     def build(self):
         cmake = CMake(self)
