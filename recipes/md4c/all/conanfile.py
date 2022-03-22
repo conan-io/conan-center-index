@@ -54,7 +54,6 @@ class Md4cConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
 
         if self.options.encoding == "utf-16":
             cmake.definitions["CONAN_C_FLAGS"] = "-DMD4C_USE_UTF16"
