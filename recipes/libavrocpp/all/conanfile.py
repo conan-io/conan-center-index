@@ -22,6 +22,7 @@ class LibavrocppConan(ConanFile):
         "shared": False, 
         "fPIC": True
     }
+    short_paths = True
 
     @property
     def _source_subfolder(self):
