@@ -51,13 +51,28 @@ class CppKafkaConan(ConanFile):
         self.requires("boost/1.78.0")
         self.requires("librdkafka/1.8.2")
 
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "4",
+            "apple-clang": "5.1",
+        }
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 6:
-            raise ConanInvalidConfiguration("cppkafka could not be built by gcc <6")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
-            raise ConanInvalidConfiguration("cppkafka could not be built by MSVC <14")
+            tools.check_min_cppstd(self, 14)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn(
+                "pretty-name requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                "pretty-name requires C++14, which your compiler does not support.")
+
         if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
             raise ConanInvalidConfiguration(
                 "{}/{} doesn't support clang with libc++".format(self.name, self.version),
