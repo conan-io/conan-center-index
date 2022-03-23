@@ -43,16 +43,6 @@ int main(int argc, char** argv )
         {
             FreeImage_Unload(dib);
         }
-        else
-        {
-            std::cerr << "Unable to load " << image_file << std::endl;
-            return 10;
-        }
-    }
-    else
-    {
-        std::cerr << "Missing plugin for " << image_file << std::endl;
-        return 10;
     }
 
 #if NEED_INIT
