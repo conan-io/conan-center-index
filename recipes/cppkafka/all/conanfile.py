@@ -80,6 +80,8 @@ class CppKafkaConan(ConanFile):
             cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=0")
         elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
             cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=1")
+        if not self.options.shared:
+            cxx_flags.append("-DCPPKAFKA_STATIC")
 
         # disable max/min in Windows.h
         if self.settings.os == "Windows":
