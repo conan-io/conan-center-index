@@ -47,6 +47,9 @@ sources:
   "4.0.1":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/4.0.1/harfbuzz-4.0.1.tar.xz"
     sha256: "98f68777272db6cd7a3d5152bac75083cd52a26176d87bc04c8b3929d33bce49"
+  "4.1.0":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/4.1.0.tar.gz"
+    sha256: "0dad9332aa017d216981382cc07a9cf115740990c83b81ce3ea71ad88026d7f1"
 patches:
   "2.6.8":
     - patch_file: "patches/icu.patch"
@@ -94,5 +97,8 @@ patches:
     - patch_file: "patches/icu-3.0.x.patch"
       base_path: "source_subfolder"
   "4.0.1":
+    - patch_file: "patches/icu-4.0.x.patch"
+      base_path: "source_subfolder"
+  "4.1.0":
     - patch_file: "patches/icu-4.0.x.patch"
       base_path: "source_subfolder"
