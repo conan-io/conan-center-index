@@ -11,12 +11,25 @@ index 81451d4..99f2512 100644
    if(APPLE)
      target_compile_definitions(cpu_features PRIVATE HAVE_SYSCTLBYNAME)
    endif()
+diff --git a/include/cpu_features_macros.h b/include/cpu_features_macros.h
+index 6a2f76a..5faae4d 100644
+--- a/include/cpu_features_macros.h
++++ b/include/cpu_features_macros.h
+@@ -39,7 +39,7 @@
+ #define CPU_FEATURES_ARCH_ARM
+ #endif
+ 
+-#if defined(__aarch64__)
++#if defined(__aarch64__) || defined(__arm64__)
+ #define CPU_FEATURES_ARCH_AARCH64
+ #endif
+ 
 diff --git b/include/impl_aarch64__base_implementation.inl b/include/impl_aarch64__base_implementation.inl
 new file mode 100644
-index 0000000..5c3721d
+index 0000000..a8918e6
 --- /dev/null
 +++ b/include/impl_aarch64__base_implementation.inl
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,84 @@
 +// Copyright 2021 Google LLC
 +//
 +// Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,20 +114,6 @@ index 0000000..5c3721d
 +  LINE(AARCH64_MTE, mte, "mte", 0, AARCH64_HWCAP2_MTE)
 +#define INTROSPECTION_PREFIX Aarch64
 +#define INTROSPECTION_ENUM_PREFIX AARCH64
-+#include "define_introspection_and_hwcaps.inl"
-diff --git a/include/cpu_features_macros.h b/include/cpu_features_macros.h
-index 6a2f76a..5faae4d 100644
---- a/include/cpu_features_macros.h
-+++ b/include/cpu_features_macros.h
-@@ -39,7 +39,7 @@
- #define CPU_FEATURES_ARCH_ARM
- #endif
- 
--#if defined(__aarch64__)
-+#if defined(__aarch64__) || defined(__arm64__)
- #define CPU_FEATURES_ARCH_AARCH64
- #endif
- 
 diff --git a/src/impl_aarch64_linux_or_android.c b/src/impl_aarch64_linux_or_android.c
 index 745beb9..c0a764c 100644
 --- a/src/impl_aarch64_linux_or_android.c
@@ -201,10 +200,10 @@ index 745beb9..c0a764c 100644
                                Aarch64Info* const info) {
 diff --git b/src/impl_aarch64_macos_or_iphone.c b/src/impl_aarch64_macos_or_iphone.c
 new file mode 100644
-index 0000000..3ca4f3c
+index 0000000..4dd1db7
 --- /dev/null
 +++ b/src/impl_aarch64_macos_or_iphone.c
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,82 @@
 +// Copyright 2021 Google LLC
 +//
 +// Licensed under the Apache License, Version 2.0 (the "License");
@@ -225,6 +224,7 @@ index 0000000..3ca4f3c
 +#if defined(CPU_FEATURES_OS_MACOS) || defined(CPU_FEATURES_OS_IPHONE)
 +
 +#include "impl_aarch64__base_implementation.inl"
++#include "define_introspection_and_hwcaps.inl"
 +
 +#if !defined(HAVE_SYSCTLBYNAME)
 +#error "Darwin needs support for sysctlbyname"
