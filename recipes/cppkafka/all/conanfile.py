@@ -56,7 +56,7 @@ class CppKafkaConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "gcc": "5",
+            "gcc": "6",
             "clang": "4",
             "apple-clang": "5.1",
         }
