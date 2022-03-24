@@ -33,11 +33,11 @@ class UTConan(ConanFile):
             "Visual Studio": "16",
         }
 
-    def config_options(self):
-        if tools.Version(self.version) <= "1.1.8":
-            del self.options.disable_module
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         if tools.Version(self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
@@ -58,16 +58,19 @@ class UTConan(ConanFile):
                         self.settings.compiler,
                         self.settings.compiler.version))
 
+    def config_options(self):
+        if tools.Version(self.version) <= "1.1.8":
+            del self.options.disable_module
+
+    def configure(self):
         if self.settings.compiler in ["msvc", "Visual Studio"]:
             if "disable_module" in self.options.values:
                 self.options.disable_module = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
-        if tools.Version(self.version) <= "1.1.8":
-            tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
-                       sha256="c9bff75738922193e67fa726fa225535870d2aa1059f914"
-                       "52c411736284ad566")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -88,7 +91,7 @@ class UTConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE" if tools.Version(self.version) <= "1.1.8" else "LICENSE.md", dst="licenses")
+        self.copy("LICENSE*", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
@@ -107,12 +110,8 @@ class UTConan(ConanFile):
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
 
+        if tools.Version(self.version) > "1.1.8":
+            self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + self.version, "include")]
+
         if self.options.get_safe("disable_module"):
             self.cpp_info.components["ut"].defines = ["BOOST_UT_DISABLE_MODULE=1"]
-
-        if tools.Version(self.version) > "1.1.8":
-            include_path_version = self.version
-            # There was a typo in the project version number in version 1.1.9.
-            if tools.Version(self.version) == "1.1.9":
-                include_path_version = "1.1.8"
-            self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + include_path_version, "include")]
