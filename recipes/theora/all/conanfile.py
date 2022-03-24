@@ -79,33 +79,30 @@ class TheoraConan(ConanFile):
 
         project = "libtheora"
         config = "dynamic" if self.options.shared else "static"
-        vcproj_dir = os.path.join(self._source_subfolder, "win32", "VS2008", project)
-        vcproj = "{}_{}.vcproj".format(project, config)
+        sln_dir = os.path.join(self._source_subfolder, "win32", "VS2008")
+        vcproj_path = os.path.join(sln_dir, project, "{}_{}.vcproj".format(project, config))
 
         # fix hard-coded ogg names
-        vcproj_path = os.path.join(vcproj_dir, vcproj)
         if self.options.shared:
             tools.replace_in_file(vcproj_path,
                                   "libogg.lib",
                                   format_libs(self.deps_cpp_info["ogg"].libs))
+
+        # Honor vc runtime from profile
         if "MT" in msvc_runtime_flag(self):
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
+        sln = "{}_{}.sln".format(project, config)
+        targets = ["libtheora" if self.options.shared else "libtheora_static"]
         properties = {
             # Enable LTO when CFLAGS contains -GL
             "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
         }
 
-        with tools.chdir(vcproj_dir):
+        with tools.chdir(sln_dir):
             msbuild = MSBuild(self)
-            try:
-                # upgrade .vcproj
-                msbuild.build(vcproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
-            except:
-                # build .vcxproj
-                vcxproj = "{}_{}.vcxproj".format(project, config)
-                msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
+            msbuild.build(sln, targets=targets, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
