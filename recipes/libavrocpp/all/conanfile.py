@@ -82,7 +82,7 @@ class LibavrocppConan(ConanFile):
         self.copy("NOTICE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if os.settings.os == "Windows":
+        if self.settings.os == "Windows":
             tools.remove_from_path(os.path.join(self.package_folder, "bin", "concrt140.dll"))
             tools.remove_from_path(os.path.join(self.package_folder, "bin", "msvcp140.dll"))
             tools.remove_from_path(os.path.join(self.package_folder, "bin", "vcruntime140.dll"))
