@@ -31,7 +31,7 @@ class LibavrocppConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-▽g
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
