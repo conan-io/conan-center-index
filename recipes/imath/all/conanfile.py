@@ -88,6 +88,8 @@ class ImathConan(ConanFile):
         imath_lib.set_property("pkg_config_name", "Imath")
         imath_lib.libs = tools.collect_libs(self)
         imath_lib.requires = ["imath_config"]
+        if self.settings.os == "Windows" and self.options.shared:
+            imath_lib.defines.append("IMATH_DLL")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "Imath"
