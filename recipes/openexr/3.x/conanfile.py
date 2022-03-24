@@ -91,10 +91,11 @@ class OpenEXRConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
-        self.cpp_info.set_property("pkg_config_name", "openexr")
+        self.cpp_info.set_property("pkg_config_name", "OpenEXR")
 
         self.cpp_info.names["cmake_find_package"] = "OpenEXR"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
+        self.cpp_info.names["pkg_config"] = "OpenEXR"
 
         openexr_version = tools.Version(self.version)
         lib_suffix = "-{}_{}".format(openexr_version.major, openexr_version.minor)
