@@ -73,10 +73,9 @@ class CppKafkaConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "pretty-name requires C++14, which your compiler does not support.")
 
-        if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
+        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(
-                "{}/{} doesn't support clang with libc++".format(self.name, self.version),
-            )
+                "{}/{} doesn't support {} with libc++".format(self.name, self.version, self.settings.compiler))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
