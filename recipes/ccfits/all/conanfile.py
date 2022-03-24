@@ -1,13 +1,13 @@
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class CcfitsConan(ConanFile):
     name = "ccfits"
     description = "CCfits is an object oriented interface to the cfitsio library."
     license = "ISC"
-    topics = ("conan", "ccfits", "fits", "image", "nasa", "astronomy", "astrophysics", "space")
+    topics = ("ccfits", "fits", "image", "nasa", "astronomy", "astrophysics", "space")
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/ccfits"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -21,13 +21,17 @@ class CcfitsConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,7 +42,7 @@ class CcfitsConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cfitsio/3.490")
+        self.requires("cfitsio/4.0.0")
 
     def validate(self):
         if tools.Version(self.version) >= "2.6":
@@ -68,5 +72,8 @@ class CcfitsConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "CCfits"
+        self.cpp_info.set_property("pkg_config_name", "CCfits")
         self.cpp_info.libs = ["CCfits"]
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "CCfits"

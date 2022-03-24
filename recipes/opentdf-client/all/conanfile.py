@@ -30,13 +30,13 @@ class OpenTDFConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 14
+        return 17
 
     @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "17",
-            "gcc": "9",
+            "gcc": "7.5.0",
             "clang": "12",
             "apple-clang": "12.0.0",
         }
@@ -56,7 +56,6 @@ class OpenTDFConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1l@")
         self.requires("boost/1.76.0@")
-        self.requires("libiconv/1.16@")
         self.requires("zlib/1.2.11@")
         self.requires("ms-gsl/2.1.0@")
         self.requires("libxml2/2.9.10@")
@@ -95,5 +94,5 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
-        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "libiconv::libiconv", "zlib::zlib", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "zlib::zlib", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
 

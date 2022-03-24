@@ -93,6 +93,7 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "multiconfiguration": [True, False],
+        "disabled_features": "ANY",
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -132,6 +133,7 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "multiconfiguration": False,
+        "disabled_features": "",
     }
     default_options.update({module: False for module in _submodules})
 
@@ -281,11 +283,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.198.0")
+            self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.6")
+                self.requires("moltenvk/1.1.8")
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.71.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -295,7 +297,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/70.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/3.2.0")
+            self.requires("harfbuzz/4.0.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -304,12 +306,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.38.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.4")
+            self.requires("libpq/13.6")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
@@ -319,7 +321,7 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            self.requires("xkbcommon/1.3.1")
+            self.requires("xkbcommon/1.4.0")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -329,7 +331,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.4")
+            self.requires("expat/2.4.6")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
@@ -609,6 +611,9 @@ class QtConan(ConanFile):
                 self._cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 self._cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
 
+        for feature in str(self.options.disabled_features).split(" "):
+            self._cmake.definitions["FEATURE_%s" % feature] = "OFF"
+
         if self.settings.os == "Macos":
             self._cmake.definitions["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
@@ -799,6 +804,9 @@ class QtConan(ConanFile):
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
 
+        if self.options.widgets:
+            _create_private_module("Widgets", ["CorePrivate", "GuiPrivate", "Widgets"])
+
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
 
@@ -890,6 +898,8 @@ class QtConan(ConanFile):
             core_reqs.append("icu::icu")
         if self.options.with_zstd:
             core_reqs.append("zstd::zstd")
+        if self.options.with_glib:
+            core_reqs.append("glib::glib")
 
         _create_module("Core", core_reqs)
         if self._is_msvc:
@@ -901,6 +911,7 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
+        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
@@ -927,7 +938,13 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
+            if self.options.with_glib:
+                gui_reqs.append("glib::glib")
             _create_module("Gui", gui_reqs)
+
+            build_modules.append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
@@ -969,6 +986,9 @@ class QtConan(ConanFile):
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
+            build_modules.append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Widgets"))
         if self.options.gui and self.options.widgets:
             _create_module("PrintSupport", ["Gui", "Widgets"])
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
@@ -1243,10 +1263,6 @@ class QtConan(ConanFile):
             build_modules.append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_entry_point_file)
-
-        build_modules.append(self._cmake_qt6_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)

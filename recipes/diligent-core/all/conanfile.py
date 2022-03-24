@@ -14,12 +14,14 @@ class DiligentCoreConan(ConanFile):
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "fPIC": [True, False],
+        "shared": [True, False],
+        "fPIC":   [True, False],
     }
     default_options = {
+        "shared": False	,
         "fPIC": True,
     }
-    generators = "cmake_find_package", "cmake"
+    generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
@@ -69,6 +71,10 @@ class DiligentCoreConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -91,8 +97,6 @@ class DiligentCoreConan(ConanFile):
         self.requires("vulkan-headers/1.2.198")
         self.requires("volk/1.2.198")
         self.requires("glslang/11.7.0")
-        if self.settings.compiler == "apple-clang":
-            self.options["glslang"].shared = True
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
@@ -124,6 +128,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = False
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
@@ -144,14 +149,30 @@ class DiligentCoreConan(ConanFile):
                      dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_info(self):
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
-        if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
+        if self.options.shared:
+            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+            self.copy(pattern="*.so", dst="lib", keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            if self.settings.os is not "Windows":
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.lib")
+        else:
+            self.copy(pattern="*.a", dst="lib", keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll")
 
+        self.copy(pattern="*.fxh", dst="res", keep_path=False)
+
+        self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+
+    def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))

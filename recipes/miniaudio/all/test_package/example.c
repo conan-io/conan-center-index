@@ -6,6 +6,11 @@ many devices to one context. If you use device enumeration, you should
 explicitly specify the same context you used for enumeration in the call to
 `ma_device_init()` when you initialize your devices.
 */
+
+// With the package in header-only mode, this will embed the implementation of
+// miniaudio in this file.
+// In lib mode, this will be ignored because we use the stripped version of
+// miniaudio.h that only contains definitions.
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 

@@ -32,6 +32,8 @@ class LibarchiveConan(ConanFile):
         "with_lzo": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
+        "with_mbedtls": [True, False],
+        "with_xattr": [True, False],
     }
     default_options = {
         "shared": False,
@@ -51,6 +53,8 @@ class LibarchiveConan(ConanFile):
         "with_lzo": False,
         "with_lzma": False,
         "with_zstd": False,
+        "with_mbedtls": False,
+        "with_xattr": False,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -72,6 +76,8 @@ class LibarchiveConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "3.4.2":
+            del self.options.with_mbedtls
 
     def configure(self):
         if self.options.shared:
@@ -87,14 +93,11 @@ class LibarchiveConan(ConanFile):
         if self.options.with_libxml2:
             self.requires("libxml2/2.9.12")
         if self.options.with_expat:
-            self.requires("expat/2.4.2")
+            self.requires("expat/2.4.6")
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
             self.requires("pcre/8.45")
-        if self.settings.os != "Windows" and self.options.with_cng:
-            # TODO: add cng when available in CCI
-            raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
@@ -108,9 +111,14 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
+        if self.options.get_safe("with_mbedtls"):
+            self.requires("mbedtls/3.1.0")
 
     def validate(self):
+        if self.settings.os != "Windows" and self.options.with_cng:
+            # TODO: add cng when available in CCI
+            raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
         if self.options.with_expat and self.options.with_libxml2:
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
@@ -150,6 +158,9 @@ class LibarchiveConan(ConanFile):
         self._cmake.definitions["ENABLE_TEST"] = False
         # too strict check
         self._cmake.definitions["ENABLE_WERROR"] = False
+        if tools.Version(self.version) >= "3.4.2":
+            self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        self._cmake.definitions["ENABLE_XATTR"] = self.options.with_xattr
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
