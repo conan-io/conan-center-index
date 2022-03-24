@@ -31,7 +31,7 @@ class LibavrocppConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
+▽g
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -82,10 +82,10 @@ class LibavrocppConan(ConanFile):
         self.copy("NOTICE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+
         if self.settings.os == "Windows":
-            tools.remove_from_path(os.path.join(self.package_folder, "bin", "concrt140.dll"))
-            tools.remove_from_path(os.path.join(self.package_folder, "bin", "msvcp140.dll"))
-            tools.remove_from_path(os.path.join(self.package_folder, "bin", "vcruntime140.dll"))
+            for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                tools.remove_files_by_mask(self.package_folder, dll_pattern_to_remove)
 
     def package_info(self):
         # FIXME: avro does not install under a CMake namespace https://github.com/apache/avro/blob/351f589913b9691322966fb77fe72269a0a2ec82/lang/c%2B%2B/CMakeLists.txt#L193
