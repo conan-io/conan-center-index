@@ -4,10 +4,10 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
-
-    requires = (
-        "ignition-cmake/2.10.0"
-        )
+    test_type = "explicit"
+    def requirements(self):
+         self.requires(self.tested_reference_str)
+         self.requires("ignition-cmake/2.10.0")
 
     def build(self):
         cmake = CMake(self)

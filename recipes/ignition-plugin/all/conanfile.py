@@ -125,7 +125,7 @@ class IgnitionPluginConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
         
 
@@ -149,12 +149,12 @@ class IgnitionPluginConan(ConanFile):
         self.cpp_info.components["loader"].names["pkg_config"] = "ignition-plugin{}-loader".format(version_major)
         self.cpp_info.components["loader"].libs = ["ignition-plugin{}-loader".format(version_major)]
         self.cpp_info.components["loader"].includedirs = ["include/ignition/plugin{}".format(version_major)]
-        self.cpp_info.components["loader"].requires = ["ignition-cmake::ignition-cmake", "libignition-plugin"]
+        self.cpp_info.components["loader"].requires.append ("ignition-cmake::ignition-cmake")
 
         if self.options.shared:
             self.cpp_info.components["register"].names["cmake_find_package"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].names["cmake_find_package_multi"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].names["pkg_config"] = "ignition-plugin{}-register".format(version_major)
             self.cpp_info.components["register"].includedirs = ["include/ignition/plugin{}".format(version_major)]
-            self.cpp_info.components["register"].requires = ["ignition-cmake::ignition-cmake", "libignition-plugin"]
+            self.cpp_info.components["register"].requires.append("ignition-cmake::ignition-cmake")
 
