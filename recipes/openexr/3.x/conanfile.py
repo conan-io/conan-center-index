@@ -82,8 +82,12 @@ class OpenEXRConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
+    @staticmethod
+    def _conan_comp(name):
+        return f"openexr_{name.lower()}"
+
     def _add_component(self, name):
-        component = self.cpp_info.components[name]
+        component = self.cpp_info.components[self._conan_comp(name)]
         component.set_property("cmake_target_name", f"OpenEXR::{name}")
         component.names["cmake_find_package"] = name
         component.names["cmake_find_package_multi"] = name
@@ -117,29 +121,34 @@ class OpenEXRConan(ConanFile):
         # OpenEXR::Iex
         Iex = self._add_component("Iex")
         Iex.libs = ["Iex{}".format(lib_suffix)]
-        Iex.requires = ["IexConfig"]
+        Iex.requires = [self._conan_comp("IexConfig")]
 
         # OpenEXR::IlmThread
         IlmThread = self._add_component("IlmThread")
         IlmThread.libs = ["IlmThread{}".format(lib_suffix)]
-        IlmThread.requires = ["IlmThreadConfig", "Iex"]
+        IlmThread.requires = [
+            self._conan_comp("IlmThreadConfig"), self._conan_comp("Iex"),
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             IlmThread.system_libs = ["pthread"]
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
         OpenEXRCore.libs = ["OpenEXRCore{}".format(lib_suffix)]
-        OpenEXRCore.requires = ["OpenEXRConfig", "zlib::zlib"]
+        OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
 
         # OpenEXR::OpenEXR
         OpenEXR = self._add_component("OpenEXR")
         OpenEXR.libs = ["OpenEXR{}".format(lib_suffix)]
-        OpenEXR.requires = ["OpenEXRCore", "IlmThread", "Iex", "imath::imath"]
+        OpenEXR.requires = [
+            self._conan_comp("OpenEXRCore"), self._conan_comp("IlmThread"),
+            self._conan_comp("Iex"), "imath::imath",
+        ]
 
         # OpenEXR::OpenEXRUtil
         OpenEXRUtil = self._add_component("OpenEXRUtil")
         OpenEXRUtil.libs = ["OpenEXRUtil{}".format(lib_suffix)]
-        OpenEXRUtil.requires = ["OpenEXR"]
+        OpenEXRUtil.requires = [self._conan_comp("OpenEXR")]
 
         # Add tools directory to PATH
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
