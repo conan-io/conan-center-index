@@ -102,14 +102,14 @@ class FreeImageConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
-        cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000
-        cmake.definitions["WITH_PNG"] = self.options.with_png
-        cmake.definitions["WITH_WEBP"] = self.options.with_webp
-        cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
-        cmake.definitions["WITH_RAW"] = self.options.with_raw
-        cmake.definitions["WITH_JXR"] = self.options.with_jxr
-        cmake.definitions["WITH_TIFF"] = self.options.with_tiff
+        cmake.definitions["FREEIMAGE_WITH_JPEG"] = self.options.with_jpeg != False
+        cmake.definitions["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
+        cmake.definitions["FREEIMAGE_WITH_PNG"] = self.options.with_png
+        cmake.definitions["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
+        cmake.definitions["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
+        cmake.definitions["FREEIMAGE_WITH_RAW"] = self.options.with_raw
+        cmake.definitions["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
+        cmake.definitions["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
