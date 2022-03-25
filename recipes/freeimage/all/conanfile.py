@@ -13,8 +13,7 @@ class FreeImageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later"
     topics = ("freeimage", "image", "decoding", "graphics")
-    short_paths = True
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,6 +42,8 @@ class FreeImageConan(ConanFile):
         "with_jxr": True,
     }
 
+    short_paths = True
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
