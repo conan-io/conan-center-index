@@ -76,7 +76,7 @@ if(NOT WITH_TIFF)
 endif()
 
 add_library(FreeImage ${FREEIMAGE_SOURCES} ${FREEIMAGETOOLKIT_SOURCES} ${METADATA_SOURCES})
-target_compile_features(FreeImage PUBLIC cxx_std_11)
+target_compile_features(FreeImage PRIVATE cxx_std_11)
 set_target_properties(FreeImage PROPERTIES
     OUTPUT_NAME "freeimage"
     C_VISIBILITY_PRESET hidden
