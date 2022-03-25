@@ -11,7 +11,8 @@ class IgnitionCmakeConan(ConanFile):
     homepage = "https://github.com/ignitionrobotics/ign-cmake"
     description = "A set of CMake modules that are used by the C++-based Ignition projects."
     topics = ("ignition", "robotics", "cmake")
-    generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
@@ -28,6 +29,8 @@ class IgnitionCmakeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_INSTALL_DATAROOTDIR"] = "lib"
+        self._cmake.definitions["SKIP_component_name"] = False
+
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
@@ -55,3 +58,6 @@ class IgnitionCmakeConan(ConanFile):
             os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major)),
             os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)),
         ]
+        self.cpp_info.libdirs.append(os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)))
+        self.cpp_info.includedirs.append("include/ignition/cmake{}".format(version_major))
+        
