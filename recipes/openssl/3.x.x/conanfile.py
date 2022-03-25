@@ -151,11 +151,11 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _target(self):
-        target = f"conan-{self.settings.build_type}-{self.settings.os}-{self.settings.arch}-{self.settings.compiler}-{self.settings.compiler.version}"
+        target = "conan-{}-{}-{}-{}-{}".format(self.settings.build_type, self.settings.os, self.settings.arch, self.settings.compiler, self.settings.compiler.version)
         if self._use_nmake:
-            target = f"VC-{target}"  # VC- prefix is important as it's checked by Configure
+            target = "VC-{}".format(target)  # VC- prefix is important as it's checked by Configure
         if self._is_mingw:
-            target = f"mingw-{target}"
+            target = "mingw-{}".format(target)
         return target
 
     @property
@@ -319,13 +319,13 @@ class OpenSSLConan(ConanFile):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
         compiler = "Visual Studio" if self.settings.compiler == "msvc" else self.settings.compiler
-        query = f"{self.settings.os}-{self.settings.arch}-{compiler}"
+        query = "{}-{}-{}".format(self.settings.os, self.settings.arch, compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
             raise ConanInvalidConfiguration(
-                f"Unsupported configuration ({self.settings.os}/{self.settings.arch}/{self.settings.compiler}).\n"
-                f"Please open an issue at {self.url}.\n"
-                f"Alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable into your conan profile."
+                "Unsupported configuration ({}/{}/{}).\n".format(self.settings.os, self.settings.arch, self.settings.compiler) +
+                "Please open an issue at {}.\n".format(self.url) +
+                "Alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable into your conan profile."
             )
         return ancestor
 
@@ -435,7 +435,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips"):
-                self.output.info(f"Activated option: {option_name}")
+                self.output.info("Activated option: {}".format(option_name))
                 args.append(option_name.replace("_", "-"))
         return args
 
