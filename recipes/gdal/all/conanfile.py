@@ -802,7 +802,7 @@ class GdalConan(ConanFile):
         args.append("--with-sqlite3={}".format(yes_no(self.options.get_safe("with_sqlite3"))))
         args.append("--without-rasterlite2") # TODO: to implement when rasterlite2 lib available
         if self._has_with_pcre2_option:
-            args.append("--with-pcre2={}".format(yes_no(self.options.with_pcre2)))
+            args.append("--with-pcre2={}".format(yes_no(self.options.get_safe("with_pcre2"))))
         args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
         args.append("--without-teigha") # commercial library
         args.append("--without-idb") # commercial library
