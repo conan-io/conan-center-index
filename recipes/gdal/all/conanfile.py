@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -154,8 +155,6 @@ class GdalConan(ConanFile):
     }
 
     generators = "pkg_config"
-    _autotools= None
-    _nmake_args = None
 
     @property
     def _source_subfolder(self):
@@ -535,10 +534,8 @@ class GdalConan(ConanFile):
     def _replace_in_nmake_opt(self, str1, str2):
         tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2)
 
-    def _get_nmake_args(self):
-        if self._nmake_args:
-            return self._nmake_args
-
+    @property
+    def _nmake_args(self):
         rootpath = lambda req: self.deps_cpp_info[req].rootpath
         include_paths = lambda req: " -I".join(self.deps_cpp_info[req].include_paths)
         version = lambda req: tools.Version(self.deps_cpp_info[req].version)
@@ -674,8 +671,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_heif"):
             args.append("HEIF_INC=\"-I{}\"".format(include_paths("libheif")))
 
-        self._nmake_args = args
-        return self._nmake_args
+        return args
 
     def _gather_libs(self, p):
         libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
@@ -685,13 +681,9 @@ class GdalConan(ConanFile):
                     libs.append(l)
         return libs
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        # FIXME: set self._autotools.libs to empty array and improve patch in configure.ac,
-        #        to avoid configure errors on macOS if all shared
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         yes_no = lambda v: "yes" if v else "no"
         internal_no = lambda v: "internal" if v else "no"
@@ -858,13 +850,13 @@ class GdalConan(ConanFile):
             args.append("--with-heif={}".format(yes_no(self.options.with_heif)))
 
         # Inject -stdlib=libc++ for clang with libc++
-        env_build_vars = self._autotools.vars
+        env_build_vars = autotools.vars
         if self.settings.compiler == "clang" and \
            self.settings.os == "Linux" and tools.stdcpp_library(self) == "c++":
             env_build_vars["LDFLAGS"] = "-stdlib=libc++ {}".format(env_build_vars["LDFLAGS"])
 
-        self._autotools.configure(args=args, vars=env_build_vars)
-        return self._autotools
+        autotools.configure(args=args, vars=env_build_vars)
+        return autotools
 
     @contextmanager
     def _msvc_build_environment(self):
@@ -886,7 +878,7 @@ class GdalConan(ConanFile):
         if self._is_msvc:
             self._edit_nmake_opt()
             with self._msvc_build_environment():
-                self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
+                self.run("nmake -f makefile.vc {}".format(" ".join(self._nmake_args)))
         else:
             with self._autotools_build_environment():
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
@@ -913,7 +905,7 @@ class GdalConan(ConanFile):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         if self._is_msvc:
             with self._msvc_build_environment():
-                self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
+                self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._nmake_args)))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         else:
             with self._autotools_build_environment():
