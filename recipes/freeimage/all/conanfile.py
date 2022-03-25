@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 import os
-import shutil
 
 required_conan_version = ">=1.43.0"
 
@@ -158,9 +157,6 @@ class FreeImageConan(ConanFile):
                 components.append("libtiff::libtiff")
             return components
 
-        self.cpp_info.names["pkg_config"] = "freeimage"
-        self.cpp_info.names["cmake_find_package"] = "FreeImage"
-        self.cpp_info.names["cmake_find_package_multi"] = "FreeImage"
         self.cpp_info.components["FreeImage"].libs = ["freeimage"]
         self.cpp_info.components["FreeImage"].requires = imageformats_deps()
         self.cpp_info.components["FreeImagePlus"].libs = ["freeimageplus"]
