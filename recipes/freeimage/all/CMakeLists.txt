@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(FreeImage C CXX)
 
 include(conanbuildinfo.cmake)
@@ -31,10 +31,6 @@ endif()
 if(WITH_TIFF)
     find_package(TIFF REQUIRED)
 endif()
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 # FreeImage
 
@@ -78,6 +74,7 @@ if(NOT WITH_TIFF)
 endif()
 
 add_library(FreeImage ${FREEIMAGE_SOURCES} ${FREEIMAGETOOLKIT_SOURCES} ${METADATA_SOURCES})
+target_compile_features(FreeImage PUBLIC cxx_std_11)
 set_target_properties(FreeImage PROPERTIES OUTPUT_NAME "freeimage")
 target_include_directories(FreeImage PRIVATE
     ${FREEIMAGE_FOLDER}/Source
@@ -140,6 +137,7 @@ if(MSVC)
     list(APPEND FREEIMAGE_SOURCES ${FREEIMAGE_FOLDER}/Wrapper/FreeImagePlus/FreeImagePlus.rc)
 endif(MSVC)
 add_library(FreeImagePlus ${FREEIMAGEPLUS_SOURCES} ${FREEIMAGEPLUS_HEADERS})
+target_compile_features(FreeImagePlus PUBLIC cxx_std_11)
 set_target_properties(FreeImagePlus PROPERTIES OUTPUT_NAME "freeimageplus")
 target_link_libraries(FreeImagePlus PUBLIC FreeImage)
 target_include_directories(FreeImagePlus PRIVATE

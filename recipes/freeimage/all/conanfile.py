@@ -63,7 +63,6 @@ class FreeImageConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
         self.output.warn("G3 plugin and JPEGTransform are disabled.")
@@ -91,6 +90,10 @@ class FreeImageConan(ConanFile):
             self.requires("jxrlib/cci.20170615")
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
