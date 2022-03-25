@@ -146,6 +146,13 @@ class Assimp(ConanFile):
         return self.options.with_ifc
 
     @property
+    def _depends_on_stb(self):
+        if tools.Version(self.version) < "5.1.0":
+            return False
+        return self.options.with_m3d or self.options.with_m3d_exporter or \
+            self.options.with_pbrt_exporter
+
+    @property
     def _depends_on_zlib(self):
         return self.options.with_assbin or self.options.with_assbin_exporter or \
             self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
@@ -159,7 +166,6 @@ class Assimp(ConanFile):
         else:
             self.requires("pugixml/1.11")
             self.requires("openddl-parser/cci.20211217")
-            self.requires("stb/cci.20210910")
 
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
@@ -175,6 +181,8 @@ class Assimp(ConanFile):
             self.requires("draco/1.4.3")
         if self._depends_on_draco:
             self.requires("clipper/4.8.8")
+        if self._depends_on_stb:
+            self.requires("stb/cci.20210910")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
