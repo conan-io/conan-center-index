@@ -2,6 +2,7 @@
 
 ### 25-March-2022 - 09:54 CET
 
+- [feature] Updated CMake version to 3.20 only in MacOS machines.
 - [feature] Collect requirements from test_package as well.
 - [feature] Make the conan-center-bot write a comment after merging a `Bump version` or `Bump dependencies` labeled pull request.
 - [feature] Allow SecheduledExportCheck job to report in any issue.
