@@ -66,7 +66,7 @@ class FreeImageConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         self.output.warn("G3 plugin and JPEGTransform are disabled.")
-        if self.options.with_jpeg is not None:
+        if bool(self.options.with_jpeg):
             if self.options.with_tiff:
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
