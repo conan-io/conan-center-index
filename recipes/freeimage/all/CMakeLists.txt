@@ -77,7 +77,12 @@ endif()
 
 add_library(FreeImage ${FREEIMAGE_SOURCES} ${FREEIMAGETOOLKIT_SOURCES} ${METADATA_SOURCES})
 target_compile_features(FreeImage PUBLIC cxx_std_11)
-set_target_properties(FreeImage PROPERTIES OUTPUT_NAME "freeimage")
+set_target_properties(FreeImage PROPERTIES
+    OUTPUT_NAME "freeimage"
+    C_VISIBILITY_PRESET hidden
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
 target_include_directories(FreeImage PRIVATE
     ${FREEIMAGE_FOLDER}/Source
     ${FREEIMAGE_FOLDER}/Source/FreeImage
@@ -118,9 +123,9 @@ if(WITH_TIFF)
     target_link_libraries(FreeImage PRIVATE TIFF::TIFF)
 endif()
 if(BUILD_SHARED_LIBS)
-	target_compile_definitions(FreeImage PUBLIC FREEIMAGE_EXPORTS)
+    target_compile_definitions(FreeImage PRIVATE FREEIMAGE_EXPORTS)
 else()
-	target_compile_definitions(FreeImage PUBLIC FREEIMAGE_LIB)
+    target_compile_definitions(FreeImage PUBLIC FREEIMAGE_LIB)
 endif()
 
 install(TARGETS FreeImage
@@ -138,9 +143,14 @@ file(GLOB FREEIMAGEPLUS_SOURCES ${FREEIMAGE_FOLDER}/Wrapper/FreeImagePlus/src/*.
 if(MSVC)
     list(APPEND FREEIMAGE_SOURCES ${FREEIMAGE_FOLDER}/Wrapper/FreeImagePlus/FreeImagePlus.rc)
 endif(MSVC)
-add_library(FreeImagePlus ${FREEIMAGEPLUS_SOURCES} ${FREEIMAGEPLUS_HEADERS})
+add_library(FreeImagePlus ${FREEIMAGEPLUS_SOURCES})
 target_compile_features(FreeImagePlus PUBLIC cxx_std_11)
-set_target_properties(FreeImagePlus PROPERTIES OUTPUT_NAME "freeimageplus")
+set_target_properties(FreeImagePlus PROPERTIES
+    OUTPUT_NAME "freeimageplus"
+    C_VISIBILITY_PRESET hidden
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
 target_link_libraries(FreeImagePlus PUBLIC FreeImage)
 target_include_directories(FreeImagePlus PRIVATE
     ${FREEIMAGE_FOLDER}/Wrapper/FreeImagePlus
