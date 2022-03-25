@@ -58,6 +58,9 @@ class QXlsxConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "QXlsx", "CMakeLists.txt"),
+                              "CMAKE_CXX_STANDARD 11",
+                              "CMAKE_CXX_STANDARD 17")
         cmake = self._configure_cmake()
         cmake.build()
 
