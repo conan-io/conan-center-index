@@ -179,7 +179,7 @@ class Assimp(ConanFile):
             self.requires("zlib/1.2.11")
         if self._depends_on_draco:
             self.requires("draco/1.4.3")
-        if self._depends_on_draco:
+        if self._depends_on_clipper:
             self.requires("clipper/4.8.8")
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
