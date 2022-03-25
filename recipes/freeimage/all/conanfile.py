@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -43,7 +44,6 @@ class FreeImageConan(ConanFile):
 
     short_paths = True
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -99,20 +99,19 @@ class FreeImageConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
-        self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000
-        self._cmake.definitions["WITH_PNG"] = self.options.with_png
-        self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
-        self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
-        self._cmake.definitions["WITH_RAW"] = self.options.with_raw
-        self._cmake.definitions["WITH_JXR"] = self.options.with_jxr
-        self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
-        self._cmake.configure(build_dir=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
+        cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000
+        cmake.definitions["WITH_PNG"] = self.options.with_png
+        cmake.definitions["WITH_WEBP"] = self.options.with_webp
+        cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
+        cmake.definitions["WITH_RAW"] = self.options.with_raw
+        cmake.definitions["WITH_JXR"] = self.options.with_jxr
+        cmake.definitions["WITH_TIFF"] = self.options.with_tiff
+        cmake.configure(build_dir=self._build_subfolder)
+        return cmake
 
     def build(self):
         tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibPNG"))
