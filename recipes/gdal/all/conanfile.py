@@ -250,7 +250,7 @@ class GdalConan(ConanFile):
         self.requires("libtiff/4.3.0")
         self.requires("proj/9.0.0")
         if tools.Version(self.version) >= "3.1.0":
-            self.requires("flatbuffers/2.0.0")
+            self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
