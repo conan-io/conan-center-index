@@ -523,7 +523,7 @@ class GdalConan(ConanFile):
         if not (self.options.get_safe("with_zlib", True) and self.options.get_safe("with_png", True) and bool(self.options.with_jpeg)):
             self._replace_in_nmake_opt("MRF_SETTING=yes", "")
         if self.options.with_charls:
-            self._replace_in_nmake_opt("#CHARLS_LIB=e:\\work\\GIS\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
+            self._replace_in_nmake_opt("#CHARLS_LIB=e:\\work\\GIS\\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
         # Inject required systems libs of dependencies
         self._replace_in_nmake_opt("ADD_LIBS	=", "ADD_LIBS={}".format(" ".join([lib + ".lib" for lib in self.deps_cpp_info.system_libs])))
         # Trick to enable OpenCL (option missing in upstream nmake files)
