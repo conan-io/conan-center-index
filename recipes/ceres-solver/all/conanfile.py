@@ -79,7 +79,7 @@ class ceressolverConan(ConanFile):
         if self.options.use_gflags:
             self.requires("gflags/2.2.2")
         if self.options.use_TBB:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def _check_cxx14_supported(self):
         min_compiler_version = {
@@ -179,7 +179,7 @@ class ceressolverConan(ConanFile):
         if self.options.use_gflags:
             self.cpp_info.components["ceres"].requires.append("gflags::gflags")
         if self.options.use_TBB:
-            self.cpp_info.components["ceres"].requires.append("tbb::tbb")
+            self.cpp_info.components["ceres"].requires.append("onetbb::onetbb")
         libcxx = tools.stdcpp_library(self)
         if libcxx:
             self.cpp_info.components["ceres"].system_libs.append(libcxx)
