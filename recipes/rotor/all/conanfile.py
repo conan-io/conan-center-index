@@ -28,7 +28,7 @@ class RotorConan(ConanFile):
     }
 
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -106,5 +106,4 @@ class RotorConan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "rotor"
-        self.cpp_info.names["cmake_find_package_multi"] = "rotor"
 
