@@ -115,27 +115,30 @@ class AndroidNDKConan(ConanFile):
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 filename = os.path.join(root, filename)
-                with open(filename, "rb") as f:
-                    sig = f.read(4)
-                    if type(sig) is str:
-                        sig = [ord(s) for s in sig]
-                    else:
-                        sig = [s for s in sig]
-                    if len(sig) > 2 and sig[0] == 0x23 and sig[1] == 0x21:
-                        self.output.info(f"chmod on script file: '{filename}'")
-                        self._chmod_plus_x(filename)
-                    elif sig == [0x7F, 0x45, 0x4C, 0x46]:
-                        self.output.info(f"chmod on ELF file: '{filename}'")
-                        self._chmod_plus_x(filename)
-                    elif sig == [0xCA, 0xFE, 0xBA, 0xBE] or \
-                         sig == [0xBE, 0xBA, 0xFE, 0xCA] or \
-                         sig == [0xFE, 0xED, 0xFA, 0xCF] or \
-                         sig == [0xCF, 0xFA, 0xED, 0xFE] or \
-                         sig == [0xFE, 0xEF, 0xFA, 0xCE] or \
-                         sig == [0xCE, 0xFA, 0xED, 0xFE]:
-                        self.output.info(f"chmod on Mach-O file: '{filename}'")
-                        self._chmod_plus_x(filename)
-
+                try:
+                    with open(filename, "rb") as f:
+                        sig = f.read(4)
+                        if type(sig) is str:
+                            sig = [ord(s) for s in sig]
+                        else:
+                            sig = [s for s in sig]
+                        if len(sig) > 2 and sig[0] == 0x23 and sig[1] == 0x21:
+                            self.output.info(f"chmod on script file: '{filename}'")
+                            self._chmod_plus_x(filename)
+                        elif sig == [0x7F, 0x45, 0x4C, 0x46]:
+                            self.output.info(f"chmod on ELF file: '{filename}'")
+                            self._chmod_plus_x(filename)
+                        elif sig == [0xCA, 0xFE, 0xBA, 0xBE] or \
+                            sig == [0xBE, 0xBA, 0xFE, 0xCA] or \
+                            sig == [0xFE, 0xED, 0xFA, 0xCF] or \
+                            sig == [0xCF, 0xFA, 0xED, 0xFE] or \
+                            sig == [0xFE, 0xEF, 0xFA, 0xCE] or \
+                            sig == [0xCE, 0xFA, 0xED, 0xFE]:
+                            self.output.info(f"chmod on Mach-O file: '{filename}'")
+                            self._chmod_plus_x(filename)
+                except:
+                    if not os.path.exists(os.readlink(filename)):
+                        os.remove(filename)
     @property
     def _host(self):
         return f"{self._platform}-{self.settings.arch}"
@@ -290,7 +293,7 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-        
+
         # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
@@ -324,7 +327,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     import zipfile
     with zipfile.ZipFile(filename, "r") as z:
         zip_info = z.infolist()
-        
+
         names = [n.replace("\\", "/") for n in z.namelist()]
         common_folder = os.path.commonprefix(names).split("/", 1)[0]
 
