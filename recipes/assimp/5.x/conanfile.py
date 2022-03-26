@@ -158,6 +158,12 @@ class Assimp(ConanFile):
             self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
             self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
 
+    @property
+    def _depends_on_openddlparser(self):
+        if tools.Version(self.version) < "5.1.0":
+            return False
+        return self.options.with_opengex
+
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
@@ -165,7 +171,6 @@ class Assimp(ConanFile):
             self.requires("irrxml/1.2")
         else:
             self.requires("pugixml/1.11")
-            self.requires("openddl-parser/cci.20211217")
 
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
@@ -183,6 +188,8 @@ class Assimp(ConanFile):
             self.requires("clipper/4.8.8")
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
+        if self._depends_on_openddlparser:
+            self.requires("openddl-parser/cci.20211217")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
