@@ -11,7 +11,6 @@ class TestPackageConan(ConanFile):
     def build(self):
         with tools.vcvars(self):
             cmake = CMake(self)
-            cmake.definitions["CMAKE_FIND_DEBUG_MODE"] = True
             cmake.configure()
             cmake.build()
 

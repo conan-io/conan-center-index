@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
+set(CMAKE_FIND_DEBUG_MODE ON)
+
 find_package(Ruby REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
