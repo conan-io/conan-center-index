@@ -341,7 +341,7 @@ class FFMpegConan(ConanFile):
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_libfdk_aac),
+            opt_enable_disable("nonfree", self.options.with_libfdk_aac or ( self.options.with_ssl and ( self.options.with_libx264 or self.options.with_libx265 or self.options.postproc ) ) ),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
         if tools.is_apple_os(self.settings.os):
