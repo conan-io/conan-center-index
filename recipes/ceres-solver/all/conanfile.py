@@ -1,6 +1,7 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -44,7 +45,6 @@ class ceressolverConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -111,36 +111,35 @@ class ceressolverConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination = self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
-        self._cmake.definitions["LIB_SUFFIX"] = ""
-        self._cmake.definitions["GFLAGS"] = self.options.use_gflags
-        self._cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
-        self._cmake.definitions["BUILD_TESTING"] = False            #Requires gflags
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False      #Requires python modules Sphinx and sphinx-rtd-theme
-        self._cmake.definitions["CUSTOM_BLAS"] = self.options.use_custom_blas
-        self._cmake.definitions["GLOG_PREFER_EXPORTED_GLOG_CMAKE_CONFIGURATION"] = False      #Set to false to Force CMake to use the conan-generated dependencies
-        self._cmake.definitions["EIGENSPARSE"] = self.options.use_eigen_sparse
-        self._cmake.definitions["SUITESPARSE"] = False  #Optional. Not supported right now because SuiteSparse is not part of conan-index
-        self._cmake.definitions["LAPACK"] = False       #Optional. Not supported right now because LAPACK is not part of conan-index
-        self._cmake.definitions["CXSPARSE"] = False     #Optional. Not supported right now because CXSSPARSE is not part of conan-index
-        self._cmake.definitions["MINIGLOG"] = not self.options.use_glog
+        cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
+        cmake.definitions["LIB_SUFFIX"] = ""
+        cmake.definitions["GFLAGS"] = self.options.use_gflags
+        cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
+        cmake.definitions["BUILD_TESTING"] = False            #Requires gflags
+        cmake.definitions["BUILD_DOCUMENTATION"] = False      #Requires python modules Sphinx and sphinx-rtd-theme
+        cmake.definitions["CUSTOM_BLAS"] = self.options.use_custom_blas
+        cmake.definitions["GLOG_PREFER_EXPORTED_GLOG_CMAKE_CONFIGURATION"] = False      #Set to false to Force CMake to use the conan-generated dependencies
+        cmake.definitions["EIGENSPARSE"] = self.options.use_eigen_sparse
+        cmake.definitions["SUITESPARSE"] = False  #Optional. Not supported right now because SuiteSparse is not part of conan-index
+        cmake.definitions["LAPACK"] = False       #Optional. Not supported right now because LAPACK is not part of conan-index
+        cmake.definitions["CXSPARSE"] = False     #Optional. Not supported right now because CXSSPARSE is not part of conan-index
+        cmake.definitions["MINIGLOG"] = not self.options.use_glog
         if not self.options.use_TBB:
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_TBB"] = True
+            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_TBB"] = True
         if tools.Version(self.version) < "2.0":
-            self._cmake.definitions["TBB"] = self.options.use_TBB
-            self._cmake.definitions["OPENMP"] = False
-            self._cmake.definitions["EIGEN_PREFER_EXPORTED_EIGEN_CMAKE_CONFIGURATION"] = False    #Set to false to Force CMake to use the conan-generated dependencies
-            self._cmake.definitions["GFLAGS_PREFER_EXPORTED_GFLAGS_CMAKE_CONFIGURATION"] = False  #Set to false to Force CMake to use the conan-generated dependencies
-            self._cmake.definitions["CXX11_THREADS"] = self.options.use_CXX11_threads
-            self._cmake.definitions["CXX11"] = self.options.use_CXX11
-        self._cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
+            cmake.definitions["TBB"] = self.options.use_TBB
+            cmake.definitions["OPENMP"] = False
+            cmake.definitions["EIGEN_PREFER_EXPORTED_EIGEN_CMAKE_CONFIGURATION"] = False    #Set to false to Force CMake to use the conan-generated dependencies
+            cmake.definitions["GFLAGS_PREFER_EXPORTED_GFLAGS_CMAKE_CONFIGURATION"] = False  #Set to false to Force CMake to use the conan-generated dependencies
+            cmake.definitions["CXX11_THREADS"] = self.options.use_CXX11_threads
+            cmake.definitions["CXX11"] = self.options.use_CXX11
+        cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         if self._is_msvc:
-            self._cmake.definitions["MSVC_USE_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
-        self._cmake.configure()
-        return self._cmake
+            cmake.definitions["MSVC_USE_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
