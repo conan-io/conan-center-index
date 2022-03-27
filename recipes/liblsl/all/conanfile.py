@@ -7,7 +7,6 @@ required_conan_version = ">=1.33.0"
 
 class LiblslConan(ConanFile):
     name = "liblsl"
-    version = "1.16.0"
     description = "Lab Streaming Layer is a C++ library for multi-modal " \
                   "time-synched data transmission over the local network"
     license = "MIT"
