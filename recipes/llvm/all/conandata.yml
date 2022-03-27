@@ -1,10 +1,4 @@
 sources:
   "14.0.0":
-    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/llvm-14.0.0.src.tar.xz
-    sha256: 4df7ed50b8b7017b90dc22202f6b59e9006a29a9568238c6af28df9c049c7b9b
-  # "13.0.1":
-  #   url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.1/llvm-13.0.1.src.tar.xz
-  #   sha256: ec6b80d82c384acad2dc192903a6cf2cdbaffb889b84bfb98da9d71e630fc834
-  # "13.0.0":
-  #   url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz
-  #   sha256: 408d11708643ea826f519ff79761fcdfc12d641a2510229eec459e72f8163020
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/llvm-project-14.0.0.src.tar.xz
+    sha256: 35ce9edbc8f774fe07c8f4acdf89ec8ac695c8016c165dd86b8d10e7cba07e23
