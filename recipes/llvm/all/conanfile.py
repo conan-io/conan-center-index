@@ -99,10 +99,10 @@ class Llvm(ConanFile):
             "LLVM_ENABLE_BINDINGS": False,
             # LLVM_BUILD_LLVM_DYLIB  # TODO(ruilvo): for then shared is enabled
         }
-        if self.options.get("limit_simultaneous_link_jobs", False):
+        if self.options.get_safe("limit_simultaneous_link_jobs"):
             cmake_defs["LLVM_PARALLEL_LINK_JOBS"] = 1
 
-        self._cmake = CMake(self, self.options.get("allow_parallel_builds", True))
+        self._cmake = CMake(self, self.options.get_safe("allow_parallel_builds"))
         self._cmake.configure(
             defs=cmake_defs,
             source_folder=os.path.join(self._source_subfolder, "llvm"),
@@ -145,8 +145,8 @@ class Llvm(ConanFile):
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required."
             )
 
-        if self.settings.build_type == "Debug" and not self.options.get(
-            "allow_debug_builds", False
+        if self.settings.build_type == "Debug" and not self.options.get_safe(
+            "allow_debug_builds"
         ):
             raise ConanInvalidConfiguration(
                 "Can't make a Debug build without `allow_debug_builds: True`."
@@ -154,21 +154,21 @@ class Llvm(ConanFile):
 
         for project in self._projects:
             for runtime in self._runtimes:
-                if self.options.get(
-                    "with_project_" + project, False
-                ) and self.options.get("with_runtime_" + runtime, False):
+                if self.options.get_safe(
+                    "with_project_" + project
+                ) and self.options.get_safe("with_runtime_" + runtime):
                     raise ConanInvalidConfiguration(
                         "Can't enable both project and runtime for a module."
                     )
 
         if self._is_msvc:
-            if self.options.get("with_runtime_libc", False):
+            if self.options.get_safe("with_runtime_libc"):
                 raise ConanInvalidConfiguration("Can't build libc as runtime on MSVC.")
-            if self.options.get("with_runtime_libcxxabi", False):
+            if self.options.get_safe("with_runtime_libcxxabi"):
                 raise ConanInvalidConfiguration("Can't build libcxxabi on Windows.")
-            if self.options.get("with_runtime_libunwind", False):
+            if self.options.get_safe("with_runtime_libunwind"):
                 raise ConanInvalidConfiguration("Can't build libunwind on Windows.")
-            if self.options.get("with_project_cross-project-tests", False):
+            if self.options.get_safe("with_project_cross-project-tests"):
                 raise ConanInvalidConfiguration(
                     "Can't build cross-project-tests on Windows."
                 )
