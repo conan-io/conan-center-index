@@ -25,7 +25,8 @@ class ScnlibConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    # required cmake_find_package_multi since scnlib>=1.1 uses `find_package(fast_float)`
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
