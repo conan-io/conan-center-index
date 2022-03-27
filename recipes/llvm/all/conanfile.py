@@ -117,7 +117,7 @@ class Llvm(ConanFile):
     # complete this with them.
 
     def config_options(self):
-        if self.settings.get("os", False) == "Windows":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
