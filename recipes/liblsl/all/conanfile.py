@@ -120,6 +120,11 @@ class LiblslConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.defines = ["LSLNOAUTOLINK"]
+        if not self.options.shared:
+            self.cpp_info.defines.append("LIBLSL_STATIC")
         self.cpp_info.libs = ["lsl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["iphlpapi", "winmm", "mswsock", "ws2_32"]
