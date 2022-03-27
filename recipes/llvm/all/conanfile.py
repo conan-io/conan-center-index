@@ -102,7 +102,9 @@ class Llvm(ConanFile):
         if self.options.get_safe("limit_simultaneous_link_jobs"):
             cmake_defs["LLVM_PARALLEL_LINK_JOBS"] = 1
 
-        self._cmake = CMake(self, self.options.get_safe("allow_parallel_builds"))
+        self._cmake = CMake(
+            self, parallel=self.options.get_safe("allow_parallel_builds")
+        )
         self._cmake.configure(
             defs=cmake_defs,
             source_folder=os.path.join(self._source_subfolder, "llvm"),
@@ -171,8 +173,11 @@ class Llvm(ConanFile):
                 )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True
+        )
         # tools.get(**self.conan_data["sources"][self.version])
         # extracted_dir = "llvm-project-" + self.version + ".src"
         # os.rename(extracted_dir, self._source_subfolder)
