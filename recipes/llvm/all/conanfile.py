@@ -105,7 +105,7 @@ class Llvm(ConanFile):
         self._cmake = CMake(self, self.options.get_safe("allow_parallel_builds"))
         self._cmake.configure(
             defs=cmake_defs,
-            source_folder=self._source_subfolder,
+            source_folder=os.path.join(self._source_subfolder, "llvm"),
         )
         return self._cmake
 
@@ -171,9 +171,11 @@ class Llvm(ConanFile):
                 )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "llvm" + "-" + self.version + ".src"
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+        # tools.get(**self.conan_data["sources"][self.version])
+        # extracted_dir = "llvm-project-" + self.version + ".src"
+        # os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
