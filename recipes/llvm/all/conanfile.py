@@ -105,7 +105,7 @@ class Llvm(ConanFile):
         self._cmake = CMake(self, self.options.get_safe("allow_parallel_builds"))
         self._cmake.configure(
             defs=cmake_defs,
-            source_folder=os.path.join(self._source_subfolder, "llvm"),
+            source_folder=self._source_subfolder,
         )
         return self._cmake
 
