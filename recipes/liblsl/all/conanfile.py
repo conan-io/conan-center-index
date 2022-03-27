@@ -7,6 +7,7 @@ required_conan_version = ">=1.33.0"
 
 class LiblslConan(ConanFile):
     name = "liblsl"
+    version = "1.16.0"
     description = "Lab Streaming Layer is a C++ library for multi-modal " \
                   "time-synched data transmission over the local network"
     license = "MIT"
@@ -38,7 +39,7 @@ class LiblslConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("boost/1.77.0")
+        self.requires("boost/1.78.0")
         self.requires("pugixml/1.11")
 
     def config_options(self):
