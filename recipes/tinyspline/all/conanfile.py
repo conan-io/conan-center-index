@@ -55,6 +55,11 @@ class TinysplineConan(ConanFile):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
+    def validate(self):
+        if tools.Version(self.version) >= "0.4.0" and self.options.cxx:
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
