@@ -83,6 +83,13 @@ sources:
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.2/6.2.3/single/qt-everywhere-src-6.2.3.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.2/6.2.3/single/qt-everywhere-src-6.2.3.tar.xz"
     sha256: "f784998a159334d1f47617fd51bd0619b9dbfe445184567d2cd7c820ccb12771"
+  "6.2.4":
+    url:
+      - "https://download.qt.io/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
+    sha256: "cfe41905b6bde3712c65b102ea3d46fc80a44c9d1487669f14e4a6ee82ebb8fd"
 patches:
   "6.0.4":
     - base_path: "qt6/qtbase/cmake"
@@ -139,6 +146,15 @@ patches:
     - patch_file: "patches/138a720.diff"
       base_path: "qt6/qtwebengine/src/3rdparty"
   "6.2.3":
+    - base_path: "qt6/qtdeclarative"
+      patch_file: "patches/32451d5.diff"
+    - base_path: "qt6/qtbase/cmake"
+      patch_file: "patches/qt6-pri-helpers-fix.diff"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qt6/qtwebengine"
+    - patch_file: "patches/138a720.diff"
+      base_path: "qt6/qtwebengine/src/3rdparty"
+  "6.2.4":
     - base_path: "qt6/qtdeclarative"
       patch_file: "patches/32451d5.diff"
     - base_path: "qt6/qtbase/cmake"
