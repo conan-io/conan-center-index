@@ -150,6 +150,8 @@ class TinysplineConan(ConanFile):
         self.cpp_info.components["libtinyspline"].libs = ["{}tinyspline{}".format(lib_prefix, lib_suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libtinyspline"].system_libs = ["m"]
+        if tools.Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
+            self.cpp_info.components["libtinyspline"].defines.append("TINYSPLINE_SHARED")
 
         if self.options.cxx:
             # FIXME: should live in tinysplinecxx-config.cmake (see https://github.com/conan-io/conan/issues/9000)
@@ -158,6 +160,8 @@ class TinysplineConan(ConanFile):
             self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}{}".format(lib_prefix, cpp_prefix, lib_suffix)]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libtinysplinecxx"].system_libs = ["m"]
+            if tools.Version(self.version) >= "0.3.0" and self.options.shared and self.settings.os == "Windows":
+                self.cpp_info.components["libtinysplinecxx"].defines.append("TINYSPLINE_SHARED")
 
             # Workaround to always provide a global target or pkg-config file with all components
             self.cpp_info.set_property("cmake_target_name", "tinyspline-do-not-use")
