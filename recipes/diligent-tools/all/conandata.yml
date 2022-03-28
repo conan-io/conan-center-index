@@ -1,0 +1,16 @@
+sources:
+  "cci.20211009":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/846ffbe83ac5ae0c96135f5a772d0077d0d086a8.tar.gz"
+    sha256: "12ec01e730aefd64ca0d335b5ac6af47279f5e58617f37bc062cd83422f81703"
+patches:
+  "cci.20211009":
+    - patch_file: "patches/0001-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-diligent-core-include-paths.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-fix-install.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-include-path.diff"
+      base_path: "source_subfolder"

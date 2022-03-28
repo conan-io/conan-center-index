@@ -28,7 +28,7 @@ This section gathers the most common questions from the community related to pac
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
-  * [How to _protect_ my project from breaking changes in recipes?](#how-to-_protect_-my-project-from-breaking-changes-in-recipes)
+  * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
@@ -308,7 +308,7 @@ For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`,
 intel-mkl/2021@mycompany/stable
 ```
 
-## How to _protect_ my project from breaking changes in recipes?
+## How to protect my project from breaking changes in recipes?
 
 This repository and the CI building recipes is continuosly pushing to new Conan versions,
 sometimes adopting new features as soon as they are released 
@@ -319,11 +319,18 @@ features that will be broken unless you also upgrade Conan client (and sometimes
 need to modify your project if the recipe changes the binaries, flags,... it provides).
 
 To isolate from this changes there are different strategies you can follow:
+
+The minimum solution involves small changes to your Conan client configuration by
+
+* **Pin the version of every reference you consume in your project** using either:
+  * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
+  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html).
+   
+For larger projects and teams it is recommended to add some infrastructure to ensure stability by
+
  * **Cache recipes in your own Artifactory**: your project should use only this remote and
    new recipe revisions are only pushed to your Artifactory after they have been validated
    in your project.
- * **Pin the version of every reference you consume in your project** using recipe revisions
-   and lockfiles. 
 
 Keep reading in the [consuming recipes section](consuming_recipes.md).
 

@@ -27,6 +27,10 @@ class LibdeflateConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_clangcl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
+    @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
@@ -55,6 +59,8 @@ class LibdeflateConan(ConanFile):
 
     def _build_msvc(self):
         makefile_msc_file = os.path.join(self._source_subfolder, "Makefile.msc")
+        if self._is_clangcl:
+            tools.replace_in_file(makefile_msc_file, "CC = cl", "CC = $(CC)")
         tools.replace_in_file(makefile_msc_file, "CFLAGS = /MD /O2 -I.", "CFLAGS = /nologo $(CFLAGS) -I.")
         tools.replace_in_file(makefile_msc_file, "LDFLAGS =", "")
         with tools.chdir(self._source_subfolder):
@@ -76,7 +82,7 @@ class LibdeflateConan(ConanFile):
             autotools.make()
 
     def build(self):
-        if self._is_msvc:
+        if self._is_msvc or self._is_clangcl:
             self._build_msvc()
         else:
             self._build_make()

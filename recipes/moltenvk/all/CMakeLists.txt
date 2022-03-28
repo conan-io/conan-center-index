@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(MoltenVK)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
         CMAKE_SYSTEM_NAME STREQUAL "iOS" OR
@@ -65,6 +65,15 @@ add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
 target_include_directories(MoltenVKCommon PUBLIC ${MVK_COMMON_DIR})
 target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
 target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKCommon PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverter
 if(MVK_VERSION VERSION_LESS "1.1.0")
@@ -105,6 +114,15 @@ target_link_libraries(MoltenVKShaderConverter
 target_compile_definitions(MoltenVKShaderConverter PRIVATE
     $<$<NOT:$<BOOL:${MVK_WITH_SPIRV_TOOLS}>>:MVK_EXCLUDE_SPIRV_TOOLS>
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKShaderConverter PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverterTool
 if(MVK_BUILD_SHADERCONVERTER_TOOL)
@@ -165,6 +183,15 @@ target_link_libraries(MoltenVK
         ${IOSURFACE_FRAMEWORK}
         ${COREGRAPHICS_FRAMEWORK}
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVK PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 # Custom Target to generate internal header file required by MoltenVK target.

@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a8a67e8..358703f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -140,10 +140,10 @@ if(USE_ARC4)
+ endif()
+ 
+ if(USE_LZMA)
+-	find_package(LZMA REQUIRED)
+-	list(APPEND LIBRARIES ${LZMA_LIBRARIES})
+-	include_directories(SYSTEM ${LZMA_INCLUDE_DIR})
+-	add_definitions(${LZMA_DEFINITIONS})
++	find_package(LibLZMA REQUIRED)
++	list(APPEND LIBRARIES ${LibLZMA_LIBRARIES})
++	include_directories(SYSTEM ${LibLZMA_INCLUDE_DIR})
++	add_definitions(${LibLZMA_DEFINITIONS})
+ 	set(INNOEXTRACT_HAVE_LZMA 1)
+ else()
+ 	message(WARNING "\nDisabling LZMA decompression support.\n"

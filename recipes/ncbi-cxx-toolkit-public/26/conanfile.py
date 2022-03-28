@@ -7,7 +7,7 @@ class NcbiCxxToolkit(ConanFile):
     license = "CC0-1.0"
     homepage = "https://ncbi.github.io/cxx-toolkit"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "NCBI C++ Toolkit"
+    description = "NCBI C++ Toolkit -- a cross-platform application framework and a collection of libraries for working with biological data."
     topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
@@ -86,12 +86,14 @@ class NcbiCxxToolkit(ConanFile):
             tools.check_min_cppstd(self, 17)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:   
             raise ConanInvalidConfiguration("This operating system is not supported")
-        if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -119,9 +121,8 @@ class NcbiCxxToolkit(ConanFile):
         cmake.configure(source_folder=self._source_subfolder)
 # Visual Studio sometimes runs "out of heap space"
         if self.settings.compiler == "Visual Studio":
-            self.run("cmake --build . %s -j 1" % cmake.build_config)
-        else:
-            cmake.build()
+            cmake.parallel = False
+        cmake.build()
 
 #----------------------------------------------------------------------------
     def package(self):

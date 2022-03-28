@@ -133,10 +133,17 @@ class CapnprotoConan(ConanFile):
             cmake.build()
         else:
             with tools.chdir(os.path.join(self._source_subfolder, "c++")):
-                self.run("{} --install --verbose -Wall".format(tools.get_env("AUTORECONF")))
-                # Fix rpath on macOS
-                if self.settings.os == "Macos":
-                    tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name @rpath/")
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
+                # relocatable shared libs on macOS
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+                # avoid SIP issues on macOS when dependencies are shared
+                if tools.is_apple_os(self.settings.os):
+                    libpaths = ":".join(self.deps_cpp_info.lib_paths)
+                    tools.replace_in_file(
+                        "configure",
+                        "#! /bin/sh\n",
+                        "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+                    )
                 autotools = self._configure_autotools()
                 autotools.make()
 

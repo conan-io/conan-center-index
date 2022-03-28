@@ -1,19 +1,22 @@
 sources:
-  "3.1.0":
-    url: https://github.com/ToruNiina/toml11/archive/v3.1.0.tar.gz
-    sha256: 3a118f32e5343998f37be9807c72fd11c3168fe12a5b1abfdc0f1e60de6380a4
-  "3.4.0":
-    url: https://github.com/ToruNiina/toml11/archive/v3.4.0.tar.gz
-    sha256: bc6d733efd9216af8c119d8ac64a805578c79cc82b813e4d1d880ca128bd154d
-  "3.5.0":
-    url: https://github.com/ToruNiina/toml11/archive/v3.5.0.tar.gz
-    sha256: fc613874c6e80dc740134a7353cf23c7f834b59cd601af84ab535ee16a53b1c3
-  "3.6.0":
-    url: https://github.com/ToruNiina/toml11/archive/v3.6.0.tar.gz
-    sha256: 39e8d651db346ae8c7e3b39d6338a37232b9af3bba36ade45b241bf105c2226c
-  "3.6.1":
-    url: https://github.com/ToruNiina/toml11/archive/refs/tags/v3.6.1.tar.gz
-    sha256: ca4c390ed8da0d77ae6eca30e70ab0bf5cc92adfc1bc2f71a2066bc5656d8d96
+  "3.7.1":
+    url: "https://github.com/ToruNiina/toml11/archive/refs/tags/v3.7.1.tar.gz"
+    sha256: "afeaa9aa0416d4b6b2cd3897ca55d9317084103077b32a852247d8efd4cf6068"
   "3.7.0":
     url: "https://github.com/ToruNiina/toml11/archive/v3.7.0.tar.gz"
     sha256: "a0b6bec77c0e418eea7d270a4437510884f2fe8f61e7ab121729624f04c4b58e"
+  "3.6.1":
+    url: "https://github.com/ToruNiina/toml11/archive/refs/tags/v3.6.1.tar.gz"
+    sha256: "ca4c390ed8da0d77ae6eca30e70ab0bf5cc92adfc1bc2f71a2066bc5656d8d96"
+  "3.6.0":
+    url: "https://github.com/ToruNiina/toml11/archive/v3.6.0.tar.gz"
+    sha256: "39e8d651db346ae8c7e3b39d6338a37232b9af3bba36ade45b241bf105c2226c"
+  "3.5.0":
+    url: "https://github.com/ToruNiina/toml11/archive/v3.5.0.tar.gz"
+    sha256: "fc613874c6e80dc740134a7353cf23c7f834b59cd601af84ab535ee16a53b1c3"
+  "3.4.0":
+    url: "https://github.com/ToruNiina/toml11/archive/v3.4.0.tar.gz"
+    sha256: "bc6d733efd9216af8c119d8ac64a805578c79cc82b813e4d1d880ca128bd154d"
+  "3.1.0":
+    url: "https://github.com/ToruNiina/toml11/archive/v3.1.0.tar.gz"
+    sha256: "3a118f32e5343998f37be9807c72fd11c3168fe12a5b1abfdc0f1e60de6380a4"
