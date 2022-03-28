@@ -79,11 +79,11 @@ class AafConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             if self.settings.build_type == "Release":
-                self.cpp_info.libs = ["AAF", "AAFIID", "AAFINTP", "AAFPGAPI", "AAFCOAPI"]
+                self.cpp_info.libs = ["AAF", "AAFIID", "AAFCOAPI"]
             else:
-                self.cpp_info.libs = ["AAFD", "AAFIIDD", "AAFINTPD", "AAFPGAPID", "AAFCOAPI"]
+                self.cpp_info.libs = ["AAFD", "AAFIIDD", "AAFCOAPI"]
         else:
-            self.cpp_info.libs = ["aaflib", "aafiid", "aafintp", "aafpgapi", "com-api"]
+            self.cpp_info.libs = ["aaflib", "aafiid", "com-api"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["dl"]
         if self.settings.os == 'Macos':
