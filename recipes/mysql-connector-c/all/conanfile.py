@@ -15,6 +15,8 @@ class MysqlConnectorCConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
     default_options = {'shared': False, 'with_ssl': True, 'with_zlib': True}
+    
+    deprecated = "libmysqlclient"
 
     _cmake = None
 
