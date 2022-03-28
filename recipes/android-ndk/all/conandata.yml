@@ -1,4 +1,18 @@
 sources:
+  "r24":
+    url:
+      "Windows":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r24-windows.zip"
+          sha256: "b2a9fab1481c3c21df0b78608747dde0747b50890134a62a81c983a5250066d6"
+      "Linux":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r24-linux.zip"
+          sha256: "caac638f060347c9aae994e718ba00bb18413498d8e0ad4e12e1482964032997"
+      "Macos":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r24-darwin.dmg"
+          sha256: "9b67b1aec07aaf707ca167332982d3d86eff901df0843cefa2a3b347fb463333"
   "r23b":
     url:
       "Windows":
