@@ -35,4 +35,3 @@ allow building package with rtti enabled
 +
  include(TestBigEndian)
  test_big_endian(SNAPPY_IS_BIG_ENDIAN)
- 
