@@ -89,10 +89,6 @@ class DiligentCoreConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("libtiff/4.3.0")
-        self.requires("zlib/1.2.11")
-        self.requires("libpng/1.6.37")
-
         self.requires("spirv-cross/cci.20210930")
         self.requires("spirv-tools/1.3.204.0")
         self.requires("vulkan-headers/1.3.204.1")
