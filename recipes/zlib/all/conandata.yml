@@ -2,7 +2,7 @@ sources:
   "1.2.12":
     url: [
       "https://zlib.net/zlib-1.2.12.tar.gz",
-      "https://downloads.sourceforge.net/project/libpng/zlib/1.2.12/zlib-1.2.12.tar.gz",
+      # libpng does not provide zlib 1.2.12 yet.
     ]
     sha256: ""
   "1.2.11":
