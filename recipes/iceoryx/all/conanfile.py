@@ -52,6 +52,10 @@ class IceoryxConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("acl/2.3.1")
 
+    def build_requirements(self):
+        if tools.Version(self.version) >= "2.0.0":
+            self.tool_requires("cmake/3.16.2")
+
     def validate(self):
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
@@ -63,7 +67,8 @@ class IceoryxConan(ConanFile):
             if version < "16":
                 raise ConanInvalidConfiguration("Iceoryx is just supported for Visual Studio 2019 and higher.")
             if self.options.shared:
-                raise ConanInvalidConfiguration('Using Iceoryx with Visual Studio currently just possible with "shared=False"')
+                raise ConanInvalidConfiguration(
+                    'Using Iceoryx with Visual Studio currently just possible with "shared=False"')
         elif compiler == "gcc":
             if version < "6":
                 raise ConanInvalidConfiguration("Using Iceoryx with gcc requires gcc 6 or higher.")
@@ -80,26 +85,27 @@ class IceoryxConan(ConanFile):
                 raise ConanInvalidConfiguration("shared Debug with clang 7.0 and libc++ not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # Honor fPIC option
+        iceoryx_utils = "iceoryx_hoofs" if tools.Version(self.version) >= "2.0.0" else "iceoryx_utils"
         for cmake_file in [
-            os.path.join("iceoryx_binding_c", "CMakeLists.txt"),
-            os.path.join("iceoryx_posh", "CMakeLists.txt"),
-            os.path.join("iceoryx_utils", "CMakeLists.txt"),
+                os.path.join("iceoryx_binding_c", "CMakeLists.txt"),
+                os.path.join("iceoryx_posh", "CMakeLists.txt"),
+                os.path.join(iceoryx_utils, "CMakeLists.txt")
         ]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file),
-                                  "POSITION_INDEPENDENT_CODE ON", "")
+            tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file), "POSITION_INDEPENDENT_CODE ON", "")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["TOML_CONFIG"] = self.options.toml_config
+        if tools.Version(self.version) >= "2.0.0":
+            self._cmake.definitions["DOWNLOAD_TOML_LIB"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -116,20 +122,32 @@ class IceoryxConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.toml_config:
             tools.mkdir(os.path.join(self.package_folder, "res"))
-            tools.rename(
-                os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
-                os.path.join(self.package_folder, "res", "roudi_config.toml")
-            )
+            tools.rename(os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),
+                         os.path.join(self.package_folder, "res", "roudi_config.toml"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
+        # bring to default package structure
+        if (tools.Version(self.version) >= "2.0.0"):
+            include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]
+            for include_path in include_paths:
+                tools.rename(
+                    os.path.join(self.package_folder, "include", "iceoryx", "v{}".format(self.version), include_path),
+                    os.path.join(self.package_folder, "include", include_path))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {v["target"]:"iceoryx::{}".format(k) for k, v in self._iceoryx_components.items()}
-        )
+        if (tools.Version(self.version) >= "2.0.0"):
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {v["target"]: "iceoryx::{}".format(k)
+                 for k, v in self._iceoryx_components["2.0.0"].items()})
+        else:
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {v["target"]: "iceoryx::{}".format(k)
+                 for k, v in self._iceoryx_components["1.0.X"].items()})
 
     @property
     def _iceoryx_components(self):
+
         def pthread():
             return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
@@ -150,41 +168,87 @@ class IceoryxConan(ConanFile):
             return [libcxx] if libcxx and not self.options.shared else []
 
         return {
-            "iceoryx_platform": {
-                "target": "iceoryx_utils::iceoryx_platform",
-                "system_libs": pthread(),
-                "requires": [],
+            "1.0.X": {
+                "iceoryx_platform": {
+                    "target": "iceoryx_utils::iceoryx_platform",
+                    "system_libs": pthread(),
+                    "requires": []
+                },
+                "iceoryx_utils": {
+                    "target": "iceoryx_utils::iceoryx_utils",
+                    "system_libs": pthread() + rt() + atomic(),
+                    "requires": ["iceoryx_platform"] + acl()
+                },
+                "iceoryx_posh": {
+                    "target": "iceoryx_posh::iceoryx_posh",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_utils"]
+                },
+                "iceoryx_posh_roudi": {
+                    "target": "iceoryx_posh::iceoryx_posh_roudi",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_utils", "iceoryx_posh"] + cpptoml()
+                },
+                "iceoryx_posh_gateway": {
+                    "target": "iceoryx_posh::iceoryx_posh_gateway",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_utils", "iceoryx_posh"]
+                },
+                "iceoryx_posh_config": {
+                    "target": "iceoryx_posh::iceoryx_posh_config",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_posh_roudi", "iceoryx_utils", "iceoryx_posh"]
+                },
+                "iceoryx_binding_c": {
+                    "target": "iceoryx_binding_c::iceoryx_binding_c",
+                    "system_libs": pthread() + libcxx(),
+                    "requires": ["iceoryx_utils", "iceoryx_posh"]
+                }
             },
-            "iceoryx_utils": {
-                "target": "iceoryx_utils::iceoryx_utils",
-                "system_libs": pthread() + rt() + atomic(),
-                "requires": ["iceoryx_platform"] + acl(),
-            },
-            "iceoryx_posh": {
-                "target": "iceoryx_posh::iceoryx_posh",
-                "system_libs": pthread(),
-                "requires": ["iceoryx_utils"],
-            },
-            "iceoryx_posh_roudi": {
-                "target": "iceoryx_posh::iceoryx_posh_roudi",
-                "system_libs": pthread(),
-                "requires": ["iceoryx_utils", "iceoryx_posh"] + cpptoml(),
-            },
-            "iceoryx_posh_gateway": {
-                "target": "iceoryx_posh::iceoryx_posh_gateway",
-                "system_libs": pthread(),
-                "requires": ["iceoryx_utils", "iceoryx_posh"],
-            },
-            "iceoryx_posh_config": {
-                "target": "iceoryx_posh::iceoryx_posh_config",
-                "system_libs": pthread(),
-                "requires": ["iceoryx_posh_roudi", "iceoryx_utils", "iceoryx_posh"],
-            },
-            "iceoryx_binding_c": {
-                "target": "iceoryx_binding_c::iceoryx_binding_c",
-                "system_libs": pthread() + libcxx(),
-                "requires": ["iceoryx_utils", "iceoryx_posh"],
-            },
+            "2.0.0": {
+                "iceoryx_platform": {
+                    "target": "iceoryx_hoofs::iceoryx_platform",
+                    "system_libs": pthread() + rt(),
+                    "requires": [],
+                    "includeDir": False
+                },
+                "iceoryx_hoofs": {
+                    "target": "iceoryx_hoofs::iceoryx_hoofs",
+                    "system_libs": pthread() + rt() + atomic(),
+                    "requires": ["iceoryx_platform"] + acl(),
+                    "includeDir": True
+                },
+                "iceoryx_posh": {
+                    "target": "iceoryx_posh::iceoryx_posh",
+                    "system_libs": pthread() + rt(),
+                    "requires": ["iceoryx_hoofs"],
+                    "includeDir": True
+                },
+                "iceoryx_posh_roudi": {
+                    "target": "iceoryx_posh::iceoryx_posh_roudi",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_hoofs", "iceoryx_posh"] + cpptoml(),
+                    "includeDir": False
+                },
+                "iceoryx_posh_gateway": {
+                    "target": "iceoryx_posh::iceoryx_posh_gateway",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_hoofs", "iceoryx_posh"],
+                    "includeDir": False
+                },
+                "iceoryx_posh_config": {
+                    "target": "iceoryx_posh::iceoryx_posh_config",
+                    "system_libs": pthread(),
+                    "requires": ["iceoryx_posh_roudi", "iceoryx_hoofs", "iceoryx_posh"],
+                    "includeDir": False
+                },
+                "iceoryx_binding_c": {
+                    "target": "iceoryx_binding_c::iceoryx_binding_c",
+                    "system_libs": pthread() + libcxx(),
+                    "requires": ["iceoryx_hoofs", "iceoryx_posh"],
+                    "includeDir": True
+                }
+            }
         }
 
     @staticmethod
@@ -218,12 +282,16 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].libs = [lib_name]
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
-
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [
+                    self._module_file_rel_path
+                ]
 
-        _register_components(self._iceoryx_components)
+        if tools.Version(self.version) >= "2.0.0":
+            _register_components(self._iceoryx_components["2.0.0"])
+        else:
+            _register_components(self._iceoryx_components["1.0.X"])
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
