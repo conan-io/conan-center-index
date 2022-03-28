@@ -423,8 +423,8 @@ class QtConan(ConanFile):
                                       )
 
         tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
-                              "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t)",
-                              "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t -Zc:twoPhase-)")
+                              "-Zc:wchar_t",
+                              "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join("qt6", "qtbase", "cmake", f)
             if os.path.isfile(file):
