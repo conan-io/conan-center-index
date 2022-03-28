@@ -64,20 +64,35 @@ class TinysplineConan(ConanFile):
         cmake.definitions["TINYSPLINE_BUILD_DOCS"] = False
         cmake.definitions["TINYSPLINE_BUILD_EXAMPLES"] = False
         cmake.definitions["TINYSPLINE_BUILD_TESTS"] = False
-        cmake.definitions["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
-        cmake.definitions["TINYSPLINE_DISABLE_CSHARP"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_D"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_GOLANG"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_JAVA"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_LUA"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_OCTAVE"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_PHP"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_PYTHON"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_R"] = True
-        cmake.definitions["TINYSPLINE_DISABLE_RUBY"] = True
         cmake.definitions["TINYSPLINE_FLOAT_PRECISION"] = self.options.floating_point_precision == "single"
         cmake.definitions["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
         cmake.definitions["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
+        if tools.Version(self.version) < "0.3.0":
+            cmake.definitions["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
+            cmake.definitions["TINYSPLINE_DISABLE_CSHARP"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_D"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_GOLANG"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_JAVA"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_LUA"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_OCTAVE"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_PHP"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_PYTHON"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_R"] = True
+            cmake.definitions["TINYSPLINE_DISABLE_RUBY"] = True
+        else:
+            cmake.definitions["TINYSPLINE_WARNINGS_AS_ERRORS"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_CXX"] = self.options.cxx
+            cmake.definitions["TINYSPLINE_ENABLE_CSHARP"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_DLANG"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_GO"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_JAVA"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_LUA"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_OCTAVE"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_PHP"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_PYTHON"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_R"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_RUBY"] = False
+            cmake.definitions["TINYSPLINE_ENABLE_ALL_INTERFACES"] = False
         cmake.configure()
         return cmake
 
@@ -105,18 +120,21 @@ class TinysplineConan(ConanFile):
             cpp_prefix = "cxx"
 
         self.cpp_info.set_property("cmake_file_name", "tinyspline")
-        self.cpp_info.set_property("cmake_target_name", "tinyspline-do-not-use")
-        self.cpp_info.set_property("pkg_config_name", "tinyspline-do-not-use")
 
         self.cpp_info.components["libtinyspline"].set_property("cmake_target_name", "tinyspline::tinyspline")
         self.cpp_info.components["libtinyspline"].set_property("pkg_config_name", "tinyspline")
         self.cpp_info.components["libtinyspline"].libs = ["{}tinyspline{}".format(lib_prefix, lib_suffix)]
-
-        # FIXME: should live in tinysplinecxx-config.cmake (see https://github.com/conan-io/conan/issues/9000)
-        self.cpp_info.components["libtinysplinecxx"].set_property("cmake_target_name", "tinysplinecxx::tinysplinecxx")
-        self.cpp_info.components["libtinysplinecxx"].set_property("pkg_config_name", "tinysplinecxx")
-        self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}{}".format(lib_prefix, cpp_prefix, lib_suffix)]
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libtinyspline"].system_libs = ["m"]
-            self.cpp_info.components["libtinysplinecxx"].system_libs = ["m"]
+
+        if self.options.cxx:
+            # FIXME: should live in tinysplinecxx-config.cmake (see https://github.com/conan-io/conan/issues/9000)
+            self.cpp_info.components["libtinysplinecxx"].set_property("cmake_target_name", "tinysplinecxx::tinysplinecxx")
+            self.cpp_info.components["libtinysplinecxx"].set_property("pkg_config_name", "tinysplinecxx")
+            self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}{}".format(lib_prefix, cpp_prefix, lib_suffix)]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libtinysplinecxx"].system_libs = ["m"]
+
+            # Workaround to always provide a global target or pkg-config file with all components
+            self.cpp_info.set_property("cmake_target_name", "tinyspline-do-not-use")
+            self.cpp_info.set_property("pkg_config_name", "tinyspline-do-not-use")
