@@ -795,7 +795,7 @@ class OpenSSLConan(ConanFile):
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
             flag = msvc_runtime_flag(self)
-            if self._is_clangcl:
+            if self._is_clangcl and not flag:
                 flag = self.settings.get_safe("compiler.runtime")
             tools.replace_in_file(filename, "/%s " % e, "/%s " % flag, strict=False)
             tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % flag, strict=False)
