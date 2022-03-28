@@ -7,7 +7,6 @@ special meaning:
 <!-- toc -->
 ## Contents
 
-  * [Bump dependencies](#bump-dependencies)
   * [Bump version](#bump-version)
   * [Infrastructure](#infrastructure)
   * [Stale](#stale)
