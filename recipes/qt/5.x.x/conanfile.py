@@ -377,6 +377,10 @@ class QtConan(ConanFile):
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.4.6")
             self.requires("opus/1.3.1")
+            self.requires("xorg-proto/2021.4")
+            self.requires("libxshmfence/1.3")
+            self.requires("nss/3.72")
+            self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -1094,7 +1098,8 @@ Examples = bin/datadir/examples""")
         if self.options.qtwebengine:
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                webenginereqs.extend(["expat::expat", "opus::libopus"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
+                                      "nss::nss", "libdrm::libdrm"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
