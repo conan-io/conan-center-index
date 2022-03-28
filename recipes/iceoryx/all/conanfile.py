@@ -53,7 +53,8 @@ class IceoryxConan(ConanFile):
             self.requires("acl/2.3.1")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.16.2")
+        if  tools.Version(self.version) >= "2.0.0":         
+            self.tool_requires("cmake/3.16.2")
 
     def validate(self):
         compiler = self.settings.compiler
