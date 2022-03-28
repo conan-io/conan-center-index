@@ -63,9 +63,10 @@ class ZlibConan(ConanFile):
 
         with tools.chdir(self._source_subfolder):
             # https://github.com/madler/zlib/issues/268
-            tools.replace_in_file('gzguts.h',
-                                  '#if defined(_WIN32) || defined(__CYGWIN__)',
-                                  '#if defined(_WIN32) || defined(__MINGW32__)')
+            if tools.Version(self.version) <= "1.2.11":
+                tools.replace_in_file('gzguts.h',
+                                      '#if defined(_WIN32) || defined(__CYGWIN__)',
+                                      '#if defined(_WIN32) || defined(__MINGW32__)')
 
             is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
             if not is_apple_clang12:
