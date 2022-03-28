@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import functools
 import os
+import textwrap
 
 required_conan_version = ">=1.43.0"
 
@@ -109,6 +110,29 @@ class TinysplineConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        if self.options.cxx:
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {"tinysplinecxx::tinysplinecxx": "tinyspline::libtinysplinecxx"}
+            )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+
     def package_info(self):
         if tools.Version(self.version) < "0.3.0":
             lib_prefix = "lib" if self._is_msvc and not self.options.shared else ""
@@ -138,3 +162,9 @@ class TinysplineConan(ConanFile):
             # Workaround to always provide a global target or pkg-config file with all components
             self.cpp_info.set_property("cmake_target_name", "tinyspline-do-not-use")
             self.cpp_info.set_property("pkg_config_name", "tinyspline-do-not-use")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["libtinyspline"].names["cmake_find_package"] = "tinyspline"
+        if self.options.cxx:
+            self.cpp_info.components["libtinysplinecxx"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libtinysplinecxx"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
