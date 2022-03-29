@@ -49,6 +49,10 @@ class ProtobufConan(ConanFile):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == 'clang' and self.settings.os == 'Windows'
+
+    @property
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
@@ -112,8 +116,13 @@ class ProtobufConan(ConanFile):
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
             cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
-        if self._is_msvc:
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        if self._is_msvc or self._is_clang_cl:
+            runtime = msvc_runtime_flag(self)
+            if not runtime:
+                runtime = self.settings.get_safe("compiler.runtime")
+            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+        if self._is_clang_cl:
+            cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -220,7 +229,7 @@ class ProtobufConan(ConanFile):
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
-        lib_prefix = "lib" if self._is_msvc else ""
+        lib_prefix = "lib" if (self._is_msvc or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
         # libprotobuf
