@@ -127,12 +127,7 @@ class MdnsResponderConan(ConanFile):
             tools.replace_in_file(rc, "afxres.h", "winres.h")
 
         msbuild = MSBuild(self)
-        try:
-            msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
-        except Exception as e:
-            log = tools.load(os.path.join(self._source_subfolder, "UpgradeLog.htm"))
-            self.output.info(log)
-            raise e
+        msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
