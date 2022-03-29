@@ -40,7 +40,7 @@ class LibiconvConan(ConanFile):
 
     @property
     def _is_clang_cl(self):
-        return str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ["Windows"]
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
