@@ -132,3 +132,6 @@ class CppKafkaConan(ConanFile):
             self.cpp_info.system_libs = ['pthread']
         if not self.deps_cpp_info["librdkafka"].shared:
             self.cpp_info.defines.append("CPPKAFKA_RDKAFKA_STATIC_LIB")
+        if self.options.shared == False:
+            self.cpp_info.defines.append("CPPKAFKA_STATIC")
+
