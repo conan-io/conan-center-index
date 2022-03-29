@@ -47,6 +47,8 @@ class ElfutilsConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if self.version < "0.186":
+            del self.options.libdebuginfod
 
     def configure(self):
         if self.options.shared:
@@ -55,9 +57,14 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler in ["Visual Studio"]:
-            raise ConanInvalidConfiguration("Compiler %s not supported. "
-                          "elfutils only supports gcc" % self.settings.compiler)
+        if self.version >= "0.186":
+            if self.settings.compiler in ["Visual Studio"]:
+                raise ConanInvalidConfiguration("Compiler %s not supported. "
+                            "elfutils only supports gcc" % self.settings.compiler)
+        else:
+            if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
+                raise ConanInvalidConfiguration("Compiler %s not supported. "
+                            "elfutils only supports gcc" % self.settings.compiler)
         if self.settings.compiler != "gcc":
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
@@ -70,7 +77,7 @@ class ElfutilsConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.options.debuginfod or self.options.libdebuginfod:
+        if self.options.debuginfod or (self.version >= "0.186" and self.options.libdebuginfod):
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
@@ -102,9 +109,11 @@ class ElfutilsConan(ConanFile):
                 "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
-                "--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod",
-                'BUILD_STATIC={}'.format("0" if self.options.shared else "1"),
             ]
+            if self.version >= "0.186":
+                args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
+            args.append('BUILD_STATIC={}'.format("0" if self.options.shared else "1"))
+
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
