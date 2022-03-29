@@ -42,10 +42,6 @@ class VulkanLoaderConan(ConanFile):
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
-    @property
-    def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
