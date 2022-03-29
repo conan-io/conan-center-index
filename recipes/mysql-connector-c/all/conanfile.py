@@ -7,7 +7,7 @@ class MysqlConnectorCConan(ConanFile):
     name = "mysql-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A MySQL client library for C development."
-    topics = ("conan", "mysql", "sql", "connector", "database")
+    topics = ("mysql", "sql", "connector", "database")
     homepage = "https://dev.mysql.com/downloads/connector/c/"
     license = "GPL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
@@ -31,10 +31,13 @@ class MysqlConnectorCConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
+
     def source(self):
-        archive_name = self.name + "-" + self.version + "-src"
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -63,8 +66,8 @@ class MysqlConnectorCConan(ConanFile):
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
 
-        os.rename(sources_cmake, sources_cmake_orig)
-        os.rename("CMakeLists.txt", sources_cmake)
+        tools.rename(sources_cmake, sources_cmake_orig)
+        tools.rename("CMakeLists.txt", sources_cmake)
 
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
