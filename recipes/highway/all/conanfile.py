@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class HighwayConan(ConanFile):
     name = "highway"
@@ -15,8 +16,6 @@ class HighwayConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-
-    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     _cmake = None
 
@@ -36,11 +35,16 @@ class HighwayConan(ConanFile):
             "clang": "7",
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._minimum_compilers_version.get(
@@ -56,8 +60,8 @@ class HighwayConan(ConanFile):
                         self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
