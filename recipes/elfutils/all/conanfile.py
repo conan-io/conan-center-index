@@ -58,7 +58,7 @@ class ElfutilsConan(ConanFile):
 
     def validate(self):
         if self.version >= "0.186":
-            if self.settings.compiler in ["Visual Studio"]:
+            if self.settings.compiler in ["Visual Studio", "apple-clang"]:
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
                             "elfutils only supports gcc" % self.settings.compiler)
         else:
