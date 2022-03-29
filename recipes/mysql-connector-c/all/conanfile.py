@@ -83,7 +83,7 @@ class MysqlConnectorCConan(ConanFile):
         tools.mkdir(os.path.join(self.package_folder, "licenses"))
         tools.rename(os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
         tools.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "README*"))
+        tools.remove_files_by_mask(self.package_folder, "README*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "docs"))
 
