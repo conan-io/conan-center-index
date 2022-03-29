@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
@@ -185,7 +186,7 @@ class Assimp(ConanFile):
         if self._depends_on_draco:
             self.requires("draco/1.5.2")
         if self._depends_on_clipper:
-            self.requires("clipper/6.4.2")
+            self.requires("clipper/4.8.8")  # Only 4.x supported
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
         if self._depends_on_openddlparser:
@@ -256,6 +257,10 @@ class Assimp(ConanFile):
         return cmake
 
     def build(self):
+        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
+        if self._depends_on_clipper and tools.Version(self.deps_cpp_info["clipper"].version) >= "5":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
