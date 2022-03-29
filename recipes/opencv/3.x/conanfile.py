@@ -279,6 +279,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

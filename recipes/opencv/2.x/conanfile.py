@@ -193,6 +193,8 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
         self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
 
+        self._cmake.definitions["ENABLE_CCACHE"] = False
+
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
         self._cmake.configure(build_folder=self._build_subfolder)
