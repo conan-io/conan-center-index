@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
 class MysqlConnectorCConan(ConanFile):
@@ -80,15 +80,11 @@ class MysqlConnectorCConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        os.mkdir(os.path.join(self.package_folder, "licenses"))
-        os.rename(os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
-        os.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
-        os.remove(os.path.join(self.package_folder, "README"))
-        os.remove(os.path.join(self.package_folder, "README-debug"))
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(f)
-        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-            os.remove(f)
+        tools.mkdir(os.path.join(self.package_folder, "licenses"))
+        tools.rename(os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
+        tools.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "README*"))
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "docs"))
 
     def package_info(self):
@@ -97,5 +93,5 @@ class MysqlConnectorCConan(ConanFile):
             stdcpp_library = tools.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append('m')
