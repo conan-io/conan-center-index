@@ -196,6 +196,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_js"] = False
         self._cmake.definitions["BUILD_opencv_apps"] = False
         self._cmake.definitions["BUILD_opencv_java"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False

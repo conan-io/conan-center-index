@@ -350,6 +350,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_WEBP"] = False
         self._cmake.definitions["BUILD_TBB"] = False
         self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
