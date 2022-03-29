@@ -150,3 +150,5 @@ class SpdlogConan(ConanFile):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_EXCEPTIONS")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libspdlog"].system_libs = ["pthread"]
+        if self.options.header_only and self.settings.os in ("iOS", "tvOS", "watchOS"):
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_TLS")
