@@ -11,7 +11,7 @@ if(NOT IGN_MSGS_MAJOR_VER)
 endif()
 
 find_package(ignition-cmake2 REQUIRED)
-find_package(ignition-msgs${IGN_MSGS_MAJOR_VER} REQUIRED CONFIG)
+find_package(ignition-msgs${IGN_MSGS_MAJOR_VER} REQUIRED)
 
 add_executable(${PROJECT_NAME} test_ign_msg_recipe.cpp)
 target_link_libraries(${PROJECT_NAME} ignition-msgs${IGN_MSGS_MAJOR_VER}::ignition-msgs${IGN_MSGS_MAJOR_VER})

@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 62b56b1..4c97a06 100644
+index 62b56b1..2b832aa 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -48,7 +48,7 @@ ign_find_package(ignition-tools
+ 
+ #--------------------------------------
+ # Find Tinyxml2
+-ign_find_package(TINYXML2 REQUIRED PRIVATE PRETTY tinyxml2)
++ign_find_package(tinyxml2 REQUIRED PRIVATE PRETTY tinyxml2)
+ 
+ #============================================================================
+ # Configure the build
 @@ -82,13 +82,13 @@ ign_create_packages()
  #============================================================================
  # Create documentation
@@ -20,4 +29,25 @@ index 62b56b1..4c97a06 100644
    TAGFILES
      "${IGNITION-MATH_DOXYGEN_TAGFILE} = ${IGNITION-MATH_API_URL}"
  )
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f68bf3d..88f3575 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -181,7 +181,7 @@ target_link_libraries(${PROJECT_LIBRARY_TARGET_NAME}
+     protobuf::libprotobuf
+     ${ignition-math${IGN_MATH_VER}_LIBRARIES}
+   PRIVATE
+-    TINYXML2::TINYXML2
++    tinyxml2::tinyxml2
+ )
  
+ target_include_directories(${PROJECT_LIBRARY_TARGET_NAME}
+@@ -206,7 +206,7 @@ ign_build_tests(TYPE UNIT
+   SOURCES
+     ${gtest_sources}
+   LIB_DEPS
+-      TINYXML2::TINYXML2
++      tinyxml2::tinyxml2
+ )
+ 
+ ##################################################

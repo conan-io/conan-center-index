@@ -6,7 +6,7 @@ import conan.tools.files
 required_conan_version = ">=1.29.1"
 
 
-class IgnitionUitlsConan(ConanFile):
+class IgnitionMsgsConan(ConanFile):
     name = "ignition-msgs"
     license = "Apache-2.0"
     homepage = "https://github.com/ignitionrobotics/ign-msgs"
@@ -16,7 +16,7 @@ class IgnitionUitlsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
@@ -78,16 +78,17 @@ class IgnitionUitlsConan(ConanFile):
         self.requires("doxygen/1.9.2")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.15.7")
-        if int(self.version.split(".")[0]) > 5:
-            self.build_requires("ignition-cmake/2.5.0")
-        else:
-            #TODO: use ignition-cmake/2.10.0 when available on CCI
-            self.build_requires("ignition-cmake/2.5.0")
+        #self.build_requires("cmake/3.15.7")
+        #version_major = tools.Version(self.version).major
+        #if version_major > 5:
+        #    self.build_requires("ignition-cmake/2.5.0")
+        #else:
+        #    #TODO: use ignition-cmake/2.10.0 when available on CCI
+        self.build_requires("ignition-cmake/2.10.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
+        version_major = tools.Version(self.version).major
         conan.tools.files.rename(
              self, "ign-msgs-ignition-msgs{}_{}".format(version_major, self.version),
              self._source_subfolder
@@ -98,8 +99,6 @@ class IgnitionUitlsConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
-        #self._cmake.definitions["IGN_UTILS_VENDOR_CLI11"] = True
-        #self._cmake.definitions["CMAKE_FIND_DEBUG_MODE"] = "1"
         self._cmake.configure()
         return self._cmake
 
@@ -110,14 +109,11 @@ class IgnitionUitlsConan(ConanFile):
         cmake.build()
 
     def package(self):
+        version_major = tools.Version(self.version).major
+        self.copy("msgs.hh", 
+                 dst=os.path.join(self.package_folder,"include","ignition", f"msgs{version_major}"),
+                 src=os.path.join(self._source_subfolder, "include", "ignition"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cli_header_src = os.path.join(self._source_subfolder, "cli", "include")
-        if int(tools.Version(self.version).minor) is 0:
-            cli_header_src = os.path.join(cli_header_src, "ignition", "msgs", "cli")
-        else:
-            cli_header_src = os.path.join(cli_header_src, "external-cli", "ignition", "msgs", "cli")
-        self.copy("*.hpp", src=cli_header_src,
-                     dst="include/ignition/utils1/ignition/msgs/cli")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -134,18 +130,12 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-msgs{}".format(version_major)
 
         # cmake_find_package filename: ignition-msgs-config.cmake
-        self.cpp_info.components["libignition-msgs"].libs = ["ignition-msgs{}".format(version_major)]
-        self.cpp_info.components["libignition-msgs"].includedirs.append("include/ignition/msgs{}".format(version_major))
-        self.cpp_info.components["libignition-msgs"].names["cmake_find_package"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.components["libignition-msgs"].names["cmake_find_package_multi"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.components["libignition-msgs"].names["pkg_config"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.components["libignition-msgs"].requires = ["ignition-math::ignition-math"]
-        self.cpp_info.components["libignition-msgs"].requires.append("protobuf::protobuf")
-        self.cpp_info.components["libignition-msgs"].requires.append("tinyxml2::tinyxml2")
-        self.cpp_info.components["libignition-msgs"].requires.append("doxygen::doxygen")
-        self.env_info.LD_LIBRARY_PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        ])
-        self.env_info.PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        ])
+        self.cpp_info.components["core"].libs = ["ignition-msgs{}".format(version_major)]
+        self.cpp_info.components["core"].includedirs.append("include/ignition/msgs{}".format(version_major))
+        self.cpp_info.components["core"].names["cmake_find_package"] = "ignition-msgs{}".format(version_major)
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "ignition-msgs{}".format(version_major)
+        self.cpp_info.components["core"].names["pkg_config"] = "ignition-msgs{}".format(version_major)
+        self.cpp_info.components["core"].requires = ["ignition-math::ignition-math"]
+        self.cpp_info.components["core"].requires.append("protobuf::protobuf")
+        self.cpp_info.components["core"].requires.append("tinyxml2::tinyxml2")
+        self.cpp_info.components["core"].requires.append("doxygen::doxygen")
