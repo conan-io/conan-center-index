@@ -82,7 +82,7 @@ class TesseractConan(ConanFile):
             # 5.0.0 requires C++-17 compiler
             minimal_version = {
                 "Visual Studio": "16",
-                "gcc": "9",
+                "gcc": "7",
                 "clang": "7",
                 "apple-clang": "11"
             }
@@ -108,6 +108,7 @@ class TesseractConan(ConanFile):
             return self._cmake
         cmake = self._cmake = CMake(self)
         cmake.definitions["BUILD_TRAINING_TOOLS"] = self.options.with_training
+        cmake.definitions["INSTALL_CONFIGS"] = self.options.with_training
 
         # pre-5.0.0 uses custom STATIC variable instead of BUILD_SHARED_LIBS
         if tools.Version(self.version) < "5.0.0":

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
@@ -16,11 +16,13 @@ class RapidYAMLConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_default_callbacks": [True, False],
+        "with_tab_tokens": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_default_callbacks": True,
+        "with_tab_tokens": False,
     }
     generators = "cmake", "cmake_find_package_multi"
 
@@ -44,13 +46,15 @@ class RapidYAMLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "0.4.0":
+            del self.options.with_tab_tokens
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("c4core/0.1.8")
+        self.requires("c4core/0.1.9")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -63,9 +67,6 @@ class RapidYAMLConan(ConanFile):
         else:
             self.output.warn("{0} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name))
 
-        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
-            raise ConanInvalidConfiguration("{} doesn't support clang with libc++".format(self.name))
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -75,6 +76,8 @@ class RapidYAMLConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
+        if tools.Version(self.version) >= "0.4.0":
+            self._cmake.definitions["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
         self._cmake.configure()
         return self._cmake
 

@@ -93,7 +93,9 @@ class CAresConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["cares"].system_libs.append("rt")
         elif self.settings.os == "Windows":
-            self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "Advapi32"])
+            self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
+            if tools.Version(self.version) >= "1.18.0":
+                self.cpp_info.components["cares"].system_libs.append("iphlpapi")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 

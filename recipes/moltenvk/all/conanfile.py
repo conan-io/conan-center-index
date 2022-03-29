@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException, ConanInvalidConfiguration
+import functools
 import os
+import yaml
 
 required_conan_version = ">=1.35.0"
 
@@ -32,11 +34,26 @@ class MoltenVKConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _dependencies_filename(self):
+        return f"dependencies-{self.version}.yml"
+
+    @property
+    @functools.lru_cache(1)
+    def _dependencies_versions(self):
+        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
+        if not os.path.isfile(dependencies_filepath):
+            raise ConanException(f"Cannot find {dependencies_filepath}")
+        cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return cached_dependencies
+
+    def export(self):
+        self.copy(self._dependencies_filename, src="dependencies", dst="dependencies")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -48,69 +65,17 @@ class MoltenVKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cereal/1.3.0")
-        self.requires("glslang/11.7.0")
-        self.requires("spirv-cross/{}".format(self._spirv_cross_version))
-        self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
+        self.requires("cereal/1.3.1")
+        self.requires(self._require("glslang"))
+        self.requires(self._require("spirv-cross"))
+        self.requires(self._require("vulkan-headers"))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2021.4")
-        if tools.Version(self.version) < "1.1.0":
-            raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
-            self.requires("vulkan-portability/0.2")
+            self.requires(self._require("spirv-tools"))
 
-    @property
-    def _spirv_cross_version(self):
-        return {
-            "1.1.6": "cci.20211113",
-            "1.1.5": "cci.20210823",
-            "1.1.4": "cci.20210621",
-            "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
-            "1.1.0": "20200917", # compiles only with spirv-cross 20200917
-            "1.0.44": "20200917", # compiles only with spirv-cross 20200917
-            "1.0.43": "20200519", # compiles only with spirv-cross 20200519
-            "1.0.42": "20200519", # compiles only with spirv-cross 20200519
-            "1.0.41": "20200519", # compiles only with spirv-cross 20200403 or 20200519
-            "1.0.40": "20200519", # compiles only with spirv-cross 20200403 or 20200519
-            "1.0.39": "20200519", # compiles only with spirv-cross 20200403 or 20200519
-        }[self.version]
-
-    @property
-    def _vulkan_headers_version(self):
-        return {
-            "1.1.6": "1.2.198.0",
-            "1.1.5": "1.2.189",
-            "1.1.4": "1.2.182",
-            "1.1.1": "1.2.162.0",
-            "1.1.0": "1.2.154.0",
-            "1.0.44": "1.2.148.0",
-            "1.0.43": "1.2.141.0",
-            "1.0.42": "1.2.141.0",
-            "1.0.41": "1.2.135.0",
-            "1.0.40": "1.2.131.1",
-            "1.0.39": "1.1.130.0",
-            "1.0.38": "1.1.126.0",
-            "1.0.37": "1.1.121.0",
-            "1.0.36": "1.1.114.0",
-            "1.0.35": "1.1.108.0",
-            "1.0.34": "1.1.106.0",
-            "1.0.33": "1.1.101.0",
-            "1.0.32": "1.1.97.0",
-            "1.0.31": "1.1.97.0",
-            "1.0.30": "1.1.92.0",
-            "1.0.29": "1.1.92.0",
-            "1.0.28": "1.1.92.0",
-            "1.0.27": "1.1.92.0",
-            "1.0.26": "1.1.85.0",
-            "1.0.25": "1.1.85.0",
-            "1.0.24": "1.1.85.0",
-            "1.0.23": "1.1.85.0",
-            "1.0.22": "1.1.82.0",
-            "1.0.21": "1.1.82.0",
-            "1.0.20": "1.1.82.0",
-            "1.0.19": "1.1.82.0",
-            "1.0.18": "1.1.82.0",
-            "1.0.17": "1.1.82.0",
-        }[self.version]
+    def _require(self, recipe_name):
+        if recipe_name not in self._dependencies_versions:
+            raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
+        return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
     def package_id(self):
         # MoltenVK >=1.O.42 requires at least XCode 12.0 (11.4 actually) at build
@@ -136,15 +101,14 @@ class MoltenVKConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["MVK_VERSION"] = self.version
-        self._cmake.definitions["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
-        self._cmake.definitions["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["MVK_VERSION"] = self.version
+        cmake.definitions["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
+        cmake.definitions["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

@@ -2,7 +2,21 @@ sources:
   "6.4.2":
     url: "https://github.com/skyrpex/clipper/archive/6.4.2.tar.gz"
     sha256: "8f55019c0cb73e22f4fd15af721b6b8d3bd20b0eb5621271834c796671e0b634"
+  "5.1.6":
+    url: "https://github.com/skyrpex/clipper/archive/5.1.6.tar.gz"
+    sha256: "34e1b8dacac09f3732772e9c0dd4034d584fde3a15e8c05dfed52d24e9ad4cb3"
+  "4.8.8":
+    url:
+      post: "https://sourceforge.net/p/polyclipping/code/HEAD/tree/tags/4.8.8/tarball"
+      archive: "https://sourceforge.net/code-snapshots/svn/p/po/polyclipping/code/polyclipping-code-r585-tags-4.8.8.zip"
+    sha256: "dc5d526446f0899e61f7e8fc3d9f33335622f8b5adcbe3464d1b51b674034b96"
 patches:
   "6.4.2":
-    - patch_file: "patches/0001-include-install-directory.patch"
+    - patch_file: "patches/0001-include-install-directory-6.x.patch"
+      base_path: "source_subfolder"
+  "5.1.6":
+    - patch_file: "patches/0001-include-install-directory-5.x.patch"
+      base_path: "source_subfolder"
+  "4.8.8":
+    - patch_file: "patches/0001-include-install-directory-5.x.patch"
       base_path: "source_subfolder"

@@ -45,7 +45,7 @@
  set(
      qhull_TARGETS_TEST   # Unused
          user_eg user_eg2 user_eg3 user_egp testqset testqset_r
-@@ -375,7 +375,8 @@ add_library(${qhull_SHAREDR} SHARED
+@@ -375,10 +375,12 @@ add_library(${qhull_SHAREDR} SHARED
          src/libqhull_r/qhull_r-exports.def)
  set_target_properties(${qhull_SHAREDR} PROPERTIES
      SOVERSION ${qhull_SOVERSION}
@@ -55,7 +55,19 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHAREDR} m)
-@@ -398,15 +399,11 @@ add_library(${qhull_SHARED} SHARED
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDR} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -388,6 +390,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -398,18 +401,15 @@ add_library(${qhull_SHARED} SHARED
          ${libqhull_SOURCES}
          src/libqhull/qhull-exports.def)
          
@@ -73,7 +85,19 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHARED} m)
-@@ -431,7 +428,8 @@ add_library(${qhull_SHAREDP} SHARED
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHARED} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -419,6 +419,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -431,10 +432,12 @@ add_library(${qhull_SHAREDP} SHARED
  set_target_properties(${qhull_SHAREDP} PROPERTIES
      COMPILE_DEFINITIONS "qh_QHpointer"
      SOVERSION ${qhull_SOVERSION}
@@ -83,7 +107,19 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHAREDP} m)
-@@ -452,11 +450,13 @@ endif(UNIX)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDP} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -444,6 +447,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -452,11 +456,13 @@ endif(UNIX)
  
  add_library(${qhull_STATIC} STATIC ${libqhull_SOURCES})
  set_target_properties(${qhull_STATIC} PROPERTIES
@@ -99,7 +135,7 @@
  
  if(UNIX)
      target_link_libraries(${qhull_STATIC} m)
-@@ -471,6 +471,7 @@ endif(UNIX)
+@@ -471,6 +477,7 @@ endif(UNIX)
  add_library(${qhull_CPP} STATIC ${libqhullcpp_SOURCES})
  set_target_properties(${qhull_CPP} PROPERTIES
      VERSION ${qhull_VERSION}
@@ -107,7 +143,7 @@
      POSITION_INDEPENDENT_CODE "TRUE")
  
  # ---------------------------------------
-@@ -561,10 +562,8 @@ target_link_libraries(user_eg2 ${qhull_STATICR})
+@@ -561,10 +568,8 @@ target_link_libraries(user_eg2 ${qhull_STATICR})
  
  set(user_eg3_SOURCES    src/user_eg3/user_eg3_r.cpp)
  
@@ -118,7 +154,7 @@
  
  # ---------------------------------------
  # qhullp is qhull/unix.c linked to deprecated qh_QHpointer libqhull_p
-@@ -615,8 +614,6 @@ add_test(NAME user_eg
+@@ -615,8 +620,6 @@ add_test(NAME user_eg
     COMMAND sh -c "./user_eg")
  add_test(NAME user_eg2
     COMMAND sh -c "./user_eg2")
@@ -127,7 +163,7 @@
  
  # ---------------------------------------
  # Define install
-@@ -624,6 +621,7 @@ add_test(NAME user_eg3
+@@ -624,6 +627,7 @@ add_test(NAME user_eg3
  
  install(TARGETS ${qhull_TARGETS_INSTALL} EXPORT QhullTargets
          RUNTIME DESTINATION ${BIN_INSTALL_DIR}
@@ -135,7 +171,7 @@
          LIBRARY DESTINATION ${LIB_INSTALL_DIR}
          ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
          INCLUDES DESTINATION include)
-@@ -681,10 +679,7 @@ foreach(pkgconfig IN ITEMS "${qhull_SHARED};Qhull shared library"
+@@ -681,10 +685,7 @@ foreach(pkgconfig IN ITEMS "${qhull_SHARED};Qhull shared library"
  endforeach()
  
  install(FILES ${libqhull_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)

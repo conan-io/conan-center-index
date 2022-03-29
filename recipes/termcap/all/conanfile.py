@@ -95,7 +95,7 @@ class TermcapConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
-            self.cpp_info.definitions = ["TERMCAP_SHARED"]
+            self.cpp_info.defines = ["TERMCAP_SHARED"]
 
         self.output.info("Setting TERMCAP environment variable: {}".format(self._termcap_path))
         self.env_info.TERMCAP = self._termcap_path

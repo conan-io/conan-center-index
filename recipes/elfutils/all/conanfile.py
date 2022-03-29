@@ -21,7 +21,6 @@ class ElfutilsConan(ConanFile):
         "with_bzlib": [True, False],
         "with_lzma": [True, False],
         "with_sqlite3": [True, False],
-        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,7 +29,6 @@ class ElfutilsConan(ConanFile):
         "with_bzlib": True,
         "with_lzma": True,
         "with_sqlite3": False,
-        "with_zlib": True,
     }
 
     generators = "pkg_config"
@@ -60,12 +58,11 @@ class ElfutilsConan(ConanFile):
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.37.0")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.debuginfod:
@@ -96,7 +93,7 @@ class ElfutilsConan(ConanFile):
                 "--enable-static={}".format("no" if self.options.shared else "yes"),
                 "--enable-deterministic-archives",
                 "--enable-silent-rules",
-                "--with-zlib" if self.options.with_zlib else "--without-zlib",
+                "--with-zlib",
                 "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
@@ -132,7 +129,11 @@ class ElfutilsConan(ConanFile):
         self.cpp_info.components["libelf"].requires = ["zlib::zlib"]
 
         self.cpp_info.components["libdw"].libs = ["dw"]
-        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils"]
+        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib"]
+        if self.options.with_bzlib:
+            self.cpp_info.components["libdw"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["libdw"].requires.append("xz_utils::xz_utils")
 
         self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
         self.cpp_info.components["libasm"].libs = ["asm"]

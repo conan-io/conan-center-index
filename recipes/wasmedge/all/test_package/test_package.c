@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <wasmedge/wasmedge.h>
 
 int main() {

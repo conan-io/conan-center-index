@@ -8,8 +8,11 @@ required_conan_version = ">=1.43.0"
 
 class XZUtils(ConanFile):
     name = "xz_utils"
-    description = "XZ Utils is free general-purpose data compression software with a high compression ratio. XZ Utils were written" \
-                  " for POSIX-like systems, but also work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
+    description = (
+        "XZ Utils is free general-purpose data compression software with a high "
+        "compression ratio. XZ Utils were written for POSIX-like systems, but also "
+        "work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
+    )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
     topics = ("lzma", "xz", "compression")
@@ -35,6 +38,11 @@ class XZUtils(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
         return "Debug" if self.settings.build_type == "Debug" else "Release"
@@ -48,10 +56,6 @@ class XZUtils(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and \
@@ -82,6 +86,14 @@ class XZUtils(ConanFile):
                                   windows_target_platform_version_old,
                                   windows_target_platform_version_new)
 
+        # Allow to install relocatable shared lib on macOS
+        if tools.is_apple_os(self.settings.os):
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "configure"),
+                "-install_name \\$rpath/",
+                "-install_name @rpath/",
+            )
+
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
@@ -91,9 +103,9 @@ class XZUtils(ConanFile):
             msbuild.build(
                 "xz_win.sln",
                 targets=[target],
-                build_type=self._effective_msbuild_type(),
+                build_type=self._effective_msbuild_type,
                 platforms={"x86": "Win32", "x86_64": "x64"},
-                upgrade_project=False)
+                upgrade_project=Version(self.settings.compiler.version) >= "17")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -128,7 +140,7 @@ class XZUtils(ConanFile):
             target = "liblzma_dll" if self.options.shared else "liblzma"
             msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
             bin_dir = os.path.join(self._source_subfolder, "windows", msvc_version,
-                                   str(self._effective_msbuild_type()), arch, target)
+                                   self._effective_msbuild_type, arch, target)
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
@@ -167,19 +179,13 @@ class XZUtils(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "LibLZMA")
         self.cpp_info.set_property("cmake_target_name", "LibLZMA::LibLZMA")
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "liblzma")
         if not self.options.shared:

@@ -15,13 +15,9 @@ class AafConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "structured_storage": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "structured_storage": False,
     }
 
@@ -32,14 +28,6 @@ class AafConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def requirements(self):
         self.requires("expat/2.4.1")

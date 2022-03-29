@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CLIPPER_MAJOR_VERSION"] = tools.Version(self.deps_cpp_info["clipper"].version).major
         cmake.configure()
         cmake.build()
 

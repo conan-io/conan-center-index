@@ -1,5 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
+import functools
 import os
 import textwrap
 
@@ -29,7 +30,6 @@ class GlfwConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -57,7 +57,7 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.2.198.0")
+            self.requires("vulkan-loader/1.3.204.1")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
@@ -82,18 +82,18 @@ class GlfwConan(ConanFile):
                                   ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
                                    'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
-            self._cmake.definitions["GLFW_BUILD_TESTS"] = False
-            self._cmake.definitions["GLFW_BUILD_DOCS"] = False
-            self._cmake.definitions["GLFW_INSTALL"] = True
-            self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
-            if self._is_msvc:
-                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
-            self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
+        cmake.definitions["GLFW_BUILD_TESTS"] = False
+        cmake.definitions["GLFW_BUILD_DOCS"] = False
+        cmake.definitions["GLFW_INSTALL"] = True
+        cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
+        if self._is_msvc:
+            cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()

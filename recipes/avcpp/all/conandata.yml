@@ -1,0 +1,9 @@
+sources:
+  "cci.20220301":
+    url: "https://github.com/h4tr3d/avcpp/archive/fd4bc4662eb39853de8fcac4a663bebd0eea30b8.tar.gz"
+    sha256: "e48eae2ec154bc69aed16159c8b18c9ffb4925ba672b022e94a3c9b96782a4bf"
+
+patches:
+  "cci.20220301":
+    - base_path: "source_subfolder"
+      patch_file: "patches/fix-ffmpeg-package.patch"

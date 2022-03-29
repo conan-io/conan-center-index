@@ -34,12 +34,16 @@ class AtSpi2CoreConan(ConanFile):
     
     _meson = None
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-    
+
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
         self.build_requires("pkgconf/1.7.4")
@@ -73,7 +77,9 @@ class AtSpi2CoreConan(ConanFile):
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
         return self._meson
 
-    def build(self):
+    def build(self):        
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if tools.Version(self.version) >= "2.42.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "bus", "meson.build"),
                                   "if x11_dep.found()",
