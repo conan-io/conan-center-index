@@ -104,7 +104,7 @@ class CppKafkaConan(ConanFile):
         if len(cxx_flags) > 0:
             cmake.definitions["CMAKE_CXX_FLAGS"] = ' '.join(cxx_flags)
 
-        cmake.configure(defs=opts, source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.configure(defs=opts, build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
