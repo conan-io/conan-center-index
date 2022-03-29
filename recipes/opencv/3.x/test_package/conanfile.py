@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["built_contrib"] = self.options["opencv"].contrib
         cmake.configure()
         cmake.build()
 
