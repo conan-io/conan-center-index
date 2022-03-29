@@ -1,6 +1,6 @@
 --- configure.ac
 +++ configure.ac
-@@ -393,8 +393,25 @@
+@@ -364,8 +364,25 @@
                 [install_elfh=$enableval], [install_elfh=no])
  AM_CONDITIONAL(INSTALL_ELFH, test "$install_elfh" = yes)
  

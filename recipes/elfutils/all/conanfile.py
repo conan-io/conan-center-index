@@ -18,6 +18,7 @@ class ElfutilsConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "debuginfod": [True, False],
+        "libdebuginfod": [True, False],
         "with_bzlib": [True, False],
         "with_lzma": [True, False],
         "with_sqlite3": [True, False],
@@ -27,6 +28,7 @@ class ElfutilsConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "debuginfod": False,
+        "libdebuginfod": False,
         "with_bzlib": True,
         "with_lzma": True,
         "with_sqlite3": False,
@@ -53,7 +55,7 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
+        if self.settings.compiler in ["Visual Studio"]:
             raise ConanInvalidConfiguration("Compiler %s not supported. "
                           "elfutils only supports gcc" % self.settings.compiler)
         if self.settings.compiler != "gcc":
@@ -68,7 +70,7 @@ class ElfutilsConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.options.debuginfod:
+        if self.options.debuginfod or self.options.libdebuginfod:
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
@@ -100,6 +102,7 @@ class ElfutilsConan(ConanFile):
                 "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
+                "--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod",
                 'BUILD_STATIC={}'.format("0" if self.options.shared else "1"),
             ]
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
