@@ -77,7 +77,9 @@ class ElfutilsConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.options.debuginfod or (self.version >= "0.186" and self.options.libdebuginfod):
+        if self.version >= "0.186" and self.options.libdebuginfod:
+            self.requires("libcurl/7.80.0")
+        if self.options.debuginfod:
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
@@ -130,6 +132,7 @@ class ElfutilsConan(ConanFile):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
@@ -149,6 +152,10 @@ class ElfutilsConan(ConanFile):
         self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
         self.cpp_info.components["libasm"].libs = ["asm"]
         self.cpp_info.components["libasm"].requires = ["libelf", "libdw"]
+
+        if self.version >= "0.186" and self.options.libdebuginfod:
+            self.cpp_info.components["libdebuginfod"].libs = ["debuginfod"]
+            self.cpp_info.components["libdebuginfod"].requires = ["libcurl::curl"]
 
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")
