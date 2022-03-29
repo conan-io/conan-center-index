@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import msvc_runtime_flag
 import os, glob
 
 
@@ -49,6 +50,8 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
         if not self.options["nspr"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
+        if msvc_runtime_flag(self) == "MTd":
+            raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
         if not self.options["sqlite3"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch == "armv8":
