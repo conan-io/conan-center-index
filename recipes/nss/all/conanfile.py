@@ -59,7 +59,10 @@ class NSSConan(ConanFile):
         args = []
         if self.settings.arch in ["x86_64"]:
             args.append("USE_64=1")
-            args.append("CPU_ARCH=x86_64")
+            if self.settings.os == "Macos":
+                args.append("CPU_ARCH=i386")
+            else:
+                args.append("CPU_ARCH=x86_64")
         if self.settings.arch in ["armv8"]:
             args.append("CPU_ARCH=arm")
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
