@@ -100,8 +100,8 @@ class VulkanLoaderConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
                               "if(FALSE)")
-        if self._is_clang_cl:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), '/WX', '')
+        # No warnings as errors
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/WX", "")
 
     def _configure_cmake(self):
         if self._cmake:
