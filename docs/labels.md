@@ -15,7 +15,7 @@ special meaning:
   * [User-approval pending](#user-approval-pending)<!-- endToc -->
 
 
-## Bump dependencies
+## Bump dependencies
 
 Label [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+)
 is assigned by the bot to pull-requests that are just upgrading the version of the requirements that were already in the
