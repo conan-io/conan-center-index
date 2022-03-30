@@ -39,7 +39,7 @@ class PocoConan(ConanFile):
         # "CppUnit": _PocoComponent("enable_cppunit", False, ["Foundation"], [], False)),
         "Crypto": _PocoComponent("enable_crypto", True, ["Foundation"], ["openssl::openssl"], True),
         "Data": _PocoComponent("enable_data", True, ["Foundation"], [], True),
-        "DataMySQL": _PocoComponent("enable_data_mysql", True, ["Data"], ["apr::apr", "apr-util::apr-util", "libmysqlclient::libmysqlclient"], True),
+        "DataMySQL": _PocoComponent("enable_data_mysql", True, ["Data"], ["libmysqlclient::libmysqlclient"], True),
         "DataODBC": _PocoComponent("enable_data_odbc", False, ["Data"], [], True), # requires odbc but conditional, see package_info()
         "DataPostgreSQL": _PocoComponent("enable_data_postgresql", True, ["Data"], ["libpq::libpq"], True),
         "DataSQLite": _PocoComponent("enable_data_sqlite", True, ["Data"], ["sqlite3::sqlite3"], True),
@@ -121,6 +121,9 @@ class PocoConan(ConanFile):
             self.requires("expat/2.4.8")
         if self.options.enable_data_sqlite:
             self.requires("sqlite3/3.38.1")
+        if self.options.enable_apacheconnector:
+            self.requires("apr/1.7.0")
+            self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
             self.requires("openssl/1.1.1n")
@@ -128,9 +131,6 @@ class PocoConan(ConanFile):
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql"):
             self.requires("libpq/14.2")
-        if self.options.get_safe("enable_data_mysql") or self.options.enable_apacheconnector:
-            self.requires("apr/1.7.0")
-            self.requires("apr-util/1.6.1")
         if self.options.get_safe("enable_data_mysql"):
             self.requires("libmysqlclient/8.0.25")
 
@@ -185,6 +185,7 @@ class PocoConan(ConanFile):
             cmake.definitions["MYSQL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             cmake.definitions["MYSQL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             cmake.definitions["MYSQL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].lib_paths)
+        if self.options.enable_apacheconnector:
             cmake.definitions["APR_ROOT_DIR"] = self.deps_cpp_info["apr"].rootpath
             cmake.definitions["APR_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["apr"].include_paths)
             cmake.definitions["APR_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr"].lib_paths)
