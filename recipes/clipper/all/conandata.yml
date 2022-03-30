@@ -7,9 +7,9 @@ sources:
     sha256: "34e1b8dacac09f3732772e9c0dd4034d584fde3a15e8c05dfed52d24e9ad4cb3"
   "4.8.8":
     url:
-      post: "https://sourceforge.net/p/polyclipping/code/HEAD/tree/tags/4.8.8/tarball"
+      post: "https://sourceforge.net/p/polyclipping/code/HEAD/tarball?path=/tags/4.8.8"
       archive: "https://sourceforge.net/code-snapshots/svn/p/po/polyclipping/code/polyclipping-code-r585-tags-4.8.8.zip"
-    sha256: "dc5d526446f0899e61f7e8fc3d9f33335622f8b5adcbe3464d1b51b674034b96"
+    sha256: "a987e9e65e82ff02b685aa3788b3479ad46d6cd08611457f376ec82ebe3029a0"
 patches:
   "6.4.2":
     - patch_file: "patches/0001-include-install-directory-6.x.patch"
