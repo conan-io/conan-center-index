@@ -37,6 +37,10 @@ class GLibConan(ConanFile):
     generators = "pkg_config"
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc"
 
@@ -167,7 +171,7 @@ class GLibConan(ConanFile):
         self._patch_sources()
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc else tools.no_op():
+        ) if self._is_msvc or self._is_clang_cl else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
@@ -183,7 +187,7 @@ class GLibConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc else tools.no_op():
+        ) if self._is_msvc or self._is_clang_cl else tools.no_op():
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
