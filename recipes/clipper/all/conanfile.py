@@ -11,7 +11,7 @@ class ClipperConan(ConanFile):
     description = "Clipper is an open source freeware polygon clipping library"
     topics = ("clipper", "clipping", "polygon")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/skyrpex/clipper"
+    homepage = "http://www.angusj.com/delphi/clipper.php"
     license = "BSL-1.0"
 
     settings = "os", "arch", "compiler", "build_type"
