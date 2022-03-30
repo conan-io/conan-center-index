@@ -1,4 +1,7 @@
 sources:
+  "3.8.2":
+    url: "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.gz"
+    sha256: "06c9e13bdf7eb24d4ceb6b59205a4f67c2c7e7213119644430fe82fbd14a0abb"
   "3.7.6":
     url: "https://ftp.gnu.org/gnu/bison/bison-3.7.6.tar.gz"
     sha256: "69dc0bb46ea8fc307d4ca1e0b61c8c355eb207d0b0c69f4f8462328e74d7b9ea"
@@ -9,6 +12,13 @@ sources:
     url: "https://ftp.gnu.org/gnu/bison/bison-3.5.3.tar.gz"
     sha256: "34e201d963156618a0ea5bc87220f660a1e08403dd3c7c7903d4f38db3f40039"
 patches:
+  "3.8.2":
+    - patch_file: "patches/0001-3.8.2-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-3.7.6-open-source-file-in-binary-mode-MS-ftell-bug-ks-68337.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-gnulib-limit-search-range-of-_setmaxstdio.patch"
+      base_path: "source_subfolder"
   "3.7.6":
     - patch_file: "patches/0001-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
       base_path: "source_subfolder"

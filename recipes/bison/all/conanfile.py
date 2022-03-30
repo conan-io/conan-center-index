@@ -146,8 +146,8 @@ class BisonConan(ConanFile):
             self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "liby.a"),
-                      os.path.join(self.package_folder, "lib", "y.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "liby.a"),
+                         os.path.join(self.package_folder, "lib", "y.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["y"]
