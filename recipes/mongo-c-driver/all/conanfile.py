@@ -24,6 +24,7 @@ class MongoCDriverConan(ConanFile):
         "with_zstd": [True, False],
         "with_icu": [True, False],
         "srv": [True, False],
+        "with_tracing": [True, False],
     }
 
     default_options = {
@@ -36,6 +37,7 @@ class MongoCDriverConan(ConanFile):
         "with_zstd": True,
         "with_icu": True,
         "srv": True,
+        "with_tracing": False,
     }
 
     short_paths = True
@@ -68,9 +70,9 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         elif self.options.with_ssl == "libressl":
-            self.requires("libressl/3.2.1")
+            self.requires("libressl/3.4.3")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
@@ -78,7 +80,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.with_icu:
             self.requires("icu/70.1")
 
@@ -144,7 +146,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_MAINTAINER_FLAGS"] = "OFF"
         self._cmake.definitions["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
         self._cmake.definitions["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
-        self._cmake.definitions["ENABLE_TRACING"] = "OFF"
+        self._cmake.definitions["ENABLE_TRACING"] = self.options.with_tracing
         self._cmake.definitions["ENABLE_COVERAGE"] = "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
