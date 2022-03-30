@@ -16,7 +16,7 @@ class IgnitionMsgsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
@@ -66,31 +66,30 @@ class IgnitionMsgsConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
-    
+
     def requirements(self):
-        if int(self.version.split(".")[0]) > 5:
+        self.requires("protobuf/3.17.1@")
+        self.requires("tinyxml2/8.0.0@")
+        if int(tools.Version(self.version).major) == 5:
+            ## waiting for ignition-tools to get merged to master in ar-conan-thirdparty
+            #self.build_requires("ignition-tools/1.0.0@ar/thirdparty")
             self.requires("ignition-math/6.7.0")
-        else:
-            #TODO: use ignition-math/6.9.0 when available on CCI
-            self.requires("ignition-math/6.7.0")
-        self.requires("protobuf/3.19.2")
-        self.requires("tinyxml2/9.0.0")
-        self.requires("doxygen/1.9.2")
+        elif int(tools.Version(self.version).major) == 8:
+            ## waiting for ignition-tools to get merged to master in ar-conan-thirdparty
+            #self.build_requires("ignition-cmake/1.4.0@ar/thirdparty")
+            self.requires("ignition-math/6.10.0")
 
     def build_requirements(self):
-        #self.build_requires("cmake/3.15.7")
-        #version_major = tools.Version(self.version).major
-        #if version_major > 5:
-        #    self.build_requires("ignition-cmake/2.5.0")
-        #else:
-        #    #TODO: use ignition-cmake/2.10.0 when available on CCI
+        # at least cmake version 3.15.0 is needed by tinyxml2
+        self.build_requires("doxygen/1.8.20@")
         self.build_requires("ignition-cmake/2.10.0")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         version_major = tools.Version(self.version).major
         conan.tools.files.rename(
-             self, "ign-msgs-ignition-msgs{}_{}".format(version_major, self.version),
+             self, f"ign-msgs-ignition-msgs{version_major}_{self.version}",
              self._source_subfolder
             )
 
@@ -126,16 +125,15 @@ class IgnitionMsgsConan(ConanFile):
 
     def package_info(self):
         version_major = tools.Version(self.version).major
-        self.cpp_info.names["cmake_find_package"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.names["cmake_find_package_multi"] = "ignition-msgs{}".format(version_major)
+        self.cpp_info.names["cmake_find_package"] = f"ignition-msgs{version_major}"
+        self.cpp_info.names["cmake_find_package_multi"] = "ignition-msgs{version_major}"
 
-        # cmake_find_package filename: ignition-msgs-config.cmake
-        self.cpp_info.components["core"].libs = ["ignition-msgs{}".format(version_major)]
-        self.cpp_info.components["core"].includedirs.append("include/ignition/msgs{}".format(version_major))
-        self.cpp_info.components["core"].names["cmake_find_package"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "ignition-msgs{}".format(version_major)
-        self.cpp_info.components["core"].names["pkg_config"] = "ignition-msgs{}".format(version_major)
+        self.cpp_info.components["core"].libs = [f"ignition-msgs{version_major}"]
+        self.cpp_info.components["core"].includedirs.append(f"include/ignition/msgs{version_major}")
+        self.cpp_info.components["core"].names["cmake_find_package"] = f"ignition-msgs{version_major}"
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = f"ignition-msgs{version_major}"
+        self.cpp_info.components["core"].names["pkg_config"] = f"ignition-msgs{version_major}"
         self.cpp_info.components["core"].requires = ["ignition-math::ignition-math"]
         self.cpp_info.components["core"].requires.append("protobuf::protobuf")
         self.cpp_info.components["core"].requires.append("tinyxml2::tinyxml2")
-        self.cpp_info.components["core"].requires.append("doxygen::doxygen")
+
