@@ -39,9 +39,6 @@ class FunchookConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def package_id(self):
-        self.info.shared_library_package_id()
-
     def requirements(self):
         if self.options.disassembler == "capstone":
             self.requires("capstone/4.0.2")
