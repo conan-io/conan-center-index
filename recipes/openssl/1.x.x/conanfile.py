@@ -793,12 +793,14 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(makefile, old_str, new_str, strict=self.in_local_cache)
 
     def _replace_runtime_in_file(self, filename):
+        runtime = msvc_runtime_flag(self)
+        if self._is_clangcl and not runtime:
+            # TODO: to remove if min conan version bumped to a version
+            #       implementing https://github.com/conan-io/conan/pull/10898
+            runtime = self.settings.get_safe("compiler.runtime")
         for e in ["MDd", "MTd", "MD", "MT"]:
-            flag = msvc_runtime_flag(self)
-            if self._is_clangcl and not flag:
-                flag = self.settings.get_safe("compiler.runtime")
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % flag, strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % flag, strict=False)
+            tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
+            tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
