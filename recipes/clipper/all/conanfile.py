@@ -74,9 +74,7 @@ class ClipperConan(ConanFile):
             tools.get(url=archive_url, sha256=sha256,
                       destination=self._source_subfolder, strip_root=True)
         else:
-            strip_root = tools.Version(self.version) >= "5.0.0"
-            tools.get(**conan_data_version, destination=self._source_subfolder,
-                      strip_root=strip_root)
+            tools.get(**conan_data_version, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
