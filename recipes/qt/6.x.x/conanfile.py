@@ -477,7 +477,7 @@ class QtConan(ConanFile):
                 "Visual Studio": "win32-msvc",
                 "msvc": "win32-msvc",
                 "gcc": "win32-g++",
-                "clang": "win32-clang-g++",
+                "clang": "win32-clang-msvc",
             }.get(str(self.settings.compiler))
 
         elif self.settings.os == "WindowsStore":
