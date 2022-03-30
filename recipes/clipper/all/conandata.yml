@@ -12,7 +12,7 @@ sources:
     url:
       post: "https://sourceforge.net/p/polyclipping/code/HEAD/tarball?path=/tags/4.8.8"
       archive: "https://sourceforge.net/code-snapshots/svn/p/po/polyclipping/code/polyclipping-code-r585-tags-4.8.8.zip"
-    sha256: "a987e9e65e82ff02b685aa3788b3479ad46d6cd08611457f376ec82ebe3029a0"
+    sha256: "f5a2da51fb94e3433b06a9e681bcae16ac522777aed5622f45bbdc6205a70379"
 patches:
   "6.4.2":
     - patch_file: "patches/0001-include-install-directory-6.x.patch"
