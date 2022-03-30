@@ -100,12 +100,7 @@ class FunchookConan(ConanFile):
             self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-
-        # in case of static linking, funchook needs to be at the start (before other .a files)
-        funchook_libs = [i for i in self.cpp_info.libs if i.startswith('funchook')]
-        self.cpp_info.libs = [i for i in self.cpp_info.libs if i not in funchook_libs]
-        self.cpp_info.libs = funchook_libs + self.cpp_info.libs
+        self.cpp_info.libs = ["funkhook"]
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "dl"])
