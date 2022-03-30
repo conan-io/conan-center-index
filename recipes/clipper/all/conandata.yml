@@ -5,6 +5,9 @@ sources:
   "5.1.6":
     url: "https://github.com/skyrpex/clipper/archive/5.1.6.tar.gz"
     sha256: "34e1b8dacac09f3732772e9c0dd4034d584fde3a15e8c05dfed52d24e9ad4cb3"
+  "4.10.0":
+    url: "https://sourceforge.net/projects/polyclipping/files/Older%20versions/clipper_ver4.10.0.zip"
+    sha256: "b71269a1e38ffd58b07e0dddf60c6794978cd3d9055c5d70c6c2cc1c7a841848"
   "4.8.8":
     url:
       post: "https://sourceforge.net/p/polyclipping/code/HEAD/tarball?path=/tags/4.8.8"
@@ -15,6 +18,9 @@ patches:
     - patch_file: "patches/0001-include-install-directory-6.x.patch"
       base_path: "source_subfolder"
   "5.1.6":
+    - patch_file: "patches/0001-include-install-directory-5.x.patch"
+      base_path: "source_subfolder"
+  "4.10.0":
     - patch_file: "patches/0001-include-install-directory-5.x.patch"
       base_path: "source_subfolder"
   "4.8.8":
