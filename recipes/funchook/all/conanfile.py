@@ -108,7 +108,6 @@ class FunchookConan(ConanFile):
         self.cpp_info.libs = funchook_libs + self.cpp_info.libs
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append('m')
-            self.cpp_info.system_libs.extend(["dl"])
+            self.cpp_info.system_libs.extend(["m", "dl"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi"])
