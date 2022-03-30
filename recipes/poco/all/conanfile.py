@@ -121,26 +121,22 @@ class PocoConan(ConanFile):
             self.requires("expat/2.4.8")
         if self.options.enable_data_sqlite:
             self.requires("sqlite3/3.38.1")
-        if self.options.enable_apacheconnector:
-            self.requires("apr/1.7.0")
-            self.requires("apr-util/1.6.1")
-            # FIXME: missing apache2 recipe
-            raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.enable_netssl or \
-                self.options.enable_crypto or \
-                self.options.get_safe("enable_jwt", False):
+        if self.options.enable_netssl or self.options.enable_crypto or \
+           self.options.get_safe("enable_jwt"):
             self.requires("openssl/1.1.1n")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
-        if self.options.get_safe("enable_data_postgresql", False):
+        if self.options.get_safe("enable_data_postgresql"):
             self.requires("libpq/14.2")
-        if self.options.get_safe("enable_data_mysql", False):
+        if self.options.get_safe("enable_data_mysql") or self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
+        if self.options.get_safe("enable_data_mysql"):
             self.requires("libmysqlclient/8.0.25")
 
     def validate(self):
         if self.options.enable_apacheconnector:
+            # FIXME: missing apache2 recipe + few issues
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
