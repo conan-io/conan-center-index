@@ -158,6 +158,14 @@ class OpenCVConan(ConanFile):
               set(GLOG_LIBRARIES glog::glog)
             endif()""".format(search))
 
+        if self.options.contrib and self._is_msvc:
+            videoio_cmake = os.path.join(self._source_subfolder, "modules", "videoio", "CMakeLists.txt")
+            tools.replace_in_file(videoio_cmake, "ocv_module_include_directories()", """ocv_module_include_directories()
+            get_directory_property(temp_include_dirs INCLUDE_DIRECTORIES)
+            string(REPLACE "%s" "" temp_new_include_dirs "${temp_include_dirs}")
+            set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${temp_new_include_dirs}")
+            """ % os.path.join(self.deps_cpp_info["libelf"].rootpath, "include", "libelf").replace("\\", "/"))
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
