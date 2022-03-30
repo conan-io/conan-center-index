@@ -8,10 +8,6 @@ class TestPackageConan(ConanFile):
 
     _cmake = None
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
