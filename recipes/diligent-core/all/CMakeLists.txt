@@ -4,4 +4,7 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+find_package(glslang REQUIRED CONFIG)
+find_package(xxHash REQUIRED CONFIG)
+
 add_subdirectory(source_subfolder)
