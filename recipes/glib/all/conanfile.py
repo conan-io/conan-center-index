@@ -64,7 +64,7 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
-        if not is_msvc(self):
+        if is_msvc(self):
             del self.options.with_elf
 
     def build_requirements(self):
