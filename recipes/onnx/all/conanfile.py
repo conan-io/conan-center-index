@@ -125,11 +125,11 @@ class OnnxConan(ConanFile):
 
     @property
     def _onnx_components(self):
-        return {
+        components = {
             "libonnx": {
                 "target": "onnx",
                 "libs": ["onnx"],
-                "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1", "__STDC_FORMAT_MACROS"],
+                "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"],
                 "requires": ["onnx_proto"]
             },
             "onnx_proto": {
@@ -155,6 +155,9 @@ class OnnxConan(ConanFile):
                 "target": "onnxifi_wrapper"
             }
         }
+        if tools.Version(self.version) >= "1.11.0":
+            components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
+        return components
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ONNX"
