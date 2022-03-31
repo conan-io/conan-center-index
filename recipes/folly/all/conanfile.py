@@ -67,7 +67,7 @@ class FollyConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.2.0")
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.5.0")
+        self.requires("glog/0.4.0")
         self.requires("libevent/2.1.12")
         self.requires("openssl/1.1.1n")
         self.requires("lz4/1.9.3")
