@@ -166,7 +166,7 @@ class GLibConan(ConanFile):
         self._patch_sources()
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if is_msvc() else tools.no_op():
+        ) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
@@ -182,7 +182,7 @@ class GLibConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if is_msvc() else tools.no_op():
+        ) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
