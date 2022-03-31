@@ -2,9 +2,10 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class FollyConan(ConanFile):
@@ -71,7 +72,8 @@ class FollyConan(ConanFile):
         self.requires("snappy/1.1.8")
         self.requires("zlib/1.2.11")
         self.requires("zstd/1.4.9")
-        self.requires("libdwarf/20191104")
+        if not is_msvc(self):
+            self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.18")
         self.requires("xz_utils/5.2.5")
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
@@ -204,10 +206,11 @@ class FollyConan(ConanFile):
             "snappy::snappy",
             "zlib::zlib",
             "zstd::zstd",
-            "libdwarf::libdwarf",
             "libsodium::libsodium",
             "xz_utils::xz_utils"
         ]
+        if not is_msvc(self):
+            self.cpp_info.components["libfolly"].requires.append("libdwarf::libdwarf")
         if self.settings.os == "Linux":
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
