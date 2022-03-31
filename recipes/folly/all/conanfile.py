@@ -63,17 +63,17 @@ class FollyConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.78.0")
         self.requires("bzip2/1.0.8")
-        self.requires("double-conversion/3.1.5")
+        self.requires("double-conversion/3.2.0")
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.4.0")
+        self.requires("glog/0.5.0")
         self.requires("libevent/2.1.12")
         self.requires("openssl/1.1.1n")
         self.requires("lz4/1.9.3")
-        self.requires("snappy/1.1.8")
-        self.requires("zlib/1.2.11")
-        self.requires("zstd/1.4.9")
+        self.requires("snappy/1.1.9")
+        self.requires("zlib/1.2.12")
+        self.requires("zstd/1.5.2")
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.18")
