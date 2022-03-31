@@ -74,7 +74,7 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_png:
