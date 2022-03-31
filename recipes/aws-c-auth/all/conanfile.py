@@ -41,7 +41,7 @@ class AwsCAuth(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.6.19")
-        self.requires("aws-c-cal/0.5.13"    )
+        self.requires("aws-c-cal/0.5.13")
         self.requires("aws-c-io/0.10.20")
         self.requires("aws-c-http/0.6.13")
         if tools.Version(self.version) >= "0.6.5":
