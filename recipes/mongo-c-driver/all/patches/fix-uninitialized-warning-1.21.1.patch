@@ -1,12 +1,14 @@
 diff --git a/src/libbson/src/bson/bson-iter.c b/src/libbson/src/bson/bson-iter.c
-index c9e839e..3c94326 100644
+index c9e839e..1611c82 100644
 --- a/src/libbson/src/bson/bson-iter.c
 +++ b/src/libbson/src/bson/bson-iter.c
-@@ -1895,7 +1895,7 @@ bson_iter_visit_all (bson_iter_t *iter,             /* INOUT */
+@@ -1894,8 +1894,8 @@ bson_iter_visit_all (bson_iter_t *iter,             /* INOUT */
+                      const bson_visitor_t *visitor, /* IN */
                       void *data)                    /* IN */
  {
-    uint32_t bson_type;
+-   uint32_t bson_type;
 -   const char *key;
++   uint32_t bson_type = BSON_TYPE_EOD;
 +   const char *key = NULL;
     bool unsupported;
  
