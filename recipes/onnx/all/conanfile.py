@@ -129,7 +129,7 @@ class OnnxConan(ConanFile):
             "libonnx": {
                 "target": "onnx",
                 "libs": ["onnx"],
-                "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"],
+                "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1", "__STDC_FORMAT_MACROS"],
                 "requires": ["onnx_proto"]
             },
             "onnx_proto": {
