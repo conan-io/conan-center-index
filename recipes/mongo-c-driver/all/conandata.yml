@@ -18,6 +18,8 @@ patches:
   "1.21.1":
     - patch_file: "patches/disable-shared-when-static-1.21.1.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-uninitialized-warning-1.21.1.patch"
+      base_path: "source_subfolder"
   "1.17.6":
     - patch_file: "patches/disable-shared-when-static-1.17.6.patch"
       base_path: "source_subfolder"
