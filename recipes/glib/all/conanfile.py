@@ -293,7 +293,7 @@ class GLibConan(ConanFile):
         )
 
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
-        if self.options.get_safe("with_elf", True):
+        if self.options.get_safe("with_elf"):
             self.cpp_info.components["gresource"].requires.append(
                 "libelf::libelf"
             )  # this is actually an executable
