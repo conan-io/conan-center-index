@@ -116,7 +116,7 @@ class PocoConan(ConanFile):
 
     def requirements(self):
         self.requires("pcre/8.45")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.enable_xml:
             self.requires("expat/2.4.8")
         if self.options.enable_data_sqlite:
