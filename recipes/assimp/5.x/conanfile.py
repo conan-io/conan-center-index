@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
@@ -170,22 +171,22 @@ class Assimp(ConanFile):
         if tools.Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
-            self.requires("pugixml/1.11")
+            self.requires("pugixml/1.12.1")
 
         self.requires("minizip/1.2.11")
-        self.requires("utfcpp/3.1.2")
+        self.requires("utfcpp/3.2.1")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.1.31")
+            self.requires("kuba-zip/0.2.2")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
-            self.requires("rapidjson/cci.20200410")
+            self.requires("rapidjson/cci.20211112")
         if self._depends_on_zlib:
             self.requires("zlib/1.2.11")
         if self._depends_on_draco:
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.2")
         if self._depends_on_clipper:
-            self.requires("clipper/4.8.8")
+            self.requires("clipper/4.8.8")  # Only 4.x supported
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
         if self._depends_on_openddlparser:
@@ -256,6 +257,10 @@ class Assimp(ConanFile):
         return cmake
 
     def build(self):
+        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
+        if self._depends_on_clipper and tools.Version(self.deps_cpp_info["clipper"].version) >= "5":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
