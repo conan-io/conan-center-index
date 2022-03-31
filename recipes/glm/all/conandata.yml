@@ -11,3 +11,6 @@ sources:
   "0.9.9.5":
     url: "https://github.com/g-truc/glm/archive/0.9.9.5.tar.gz"
     sha256: "5e33b6131cea6a904339734b015110d4342b7dc02d995164fdb86332d28a5aa4"
+  "0.9.5.4":
+    url: "https://github.com/g-truc/glm/archive/refs/tags/0.9.5.4.tar.gz"
+    sha256: "39c7ee0db54289f78350c7629ea2531664d71c6a494bbb86db48a86536de9ff2"
