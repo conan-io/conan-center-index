@@ -98,11 +98,14 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].libs = ["rotor"]
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
-        self.cpp_info.components["asio"].libs = ["rotor_asio"]
-        self.cpp_info.components["asio"].requires = ["core"]
 
-        self.cpp_info.components["thread"].libs = ["rotor_thread"]
-        self.cpp_info.components["thread"].requires = ["core"]
+        if (self.options.boost_asio):
+                self.cpp_info.components["asio"].libs = ["rotor_asio"]
+                self.cpp_info.components["asio"].requires = ["core"]
+
+        if (self.options.thread):
+            self.cpp_info.components["thread"].libs = ["rotor_thread"]
+            self.cpp_info.components["thread"].requires = ["core"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "rotor"
