@@ -7,7 +7,7 @@ index e4772d5ea..34451f2dd 100644
      message("HLSL support is disabled. Vulkan backend will not be able to consume SPIRV bytecode generated from HLSL.")
  else()
 -    list(APPEND PRIVATE_DEPENDENCIES SPIRV-Tools-opt)
-+    list(APPEND PRIVATE_DEPENDENCIES CONAN_PKG::spirv-tools)
++    list(APPEND PRIVATE_DEPENDENCIES spirv-tools::SPIRV-Tools-opt)
  endif()
  
  # Use DirectX shader compiler for SPIRV.
@@ -20,14 +20,14 @@ index dc47ac4b2..993fe97ab 100644
      target_link_libraries(Diligent-ShaderTools
      PRIVATE
 -        spirv-cross-core
-+        CONAN_PKG::spirv-cross
++        spirv-cross::spirv-cross-core
      )
  
      if (${USE_SPIRV_TOOLS})
          target_link_libraries(Diligent-ShaderTools
          PRIVATE
 -            SPIRV-Tools-opt
-+            CONAN_PKG::spirv-tools
++            spirv-tools::SPIRV-Tools-opt
          )
      endif()
  
