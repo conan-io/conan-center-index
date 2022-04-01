@@ -23,8 +23,8 @@ class RotorConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "boost_asio": True,
-        "thread": True,
+        "boost_asio": False,
+        "thread": False,
     }
 
     exports_sources = ["CMakeLists.txt"]
