@@ -6,7 +6,7 @@ import functools
 required_conan_version = ">=1.43.0"
 
 
-class Assimp(ConanFile):
+class AssimpConan(ConanFile):
     name = "assimp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
