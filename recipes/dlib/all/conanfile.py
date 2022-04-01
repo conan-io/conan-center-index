@@ -24,7 +24,7 @@ class DlibConan(ConanFile):
         "with_sse2": [True, False, "auto"],
         "with_sse4": [True, False, "auto"],
         "with_avx": [True, False, "auto"],
-        "with_openblas": [True, False]
+        "with_openblas": [True, False],
     }
     default_options = {
         "shared": False,
