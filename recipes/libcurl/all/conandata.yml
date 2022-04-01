@@ -55,12 +55,7 @@ sources:
     url: https://curl.haxx.se/download/curl-7.64.1.tar.gz
 patches:
   "7.79.0":
-    - patch_file: "patches/005-FindNGHTTP2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/004-no-checksrc.patch"
-      base_path: "source_subfolder"
-  "7.73.0":
-    - patch_file: "patches/005-FindNGHTTP2.patch"
       base_path: "source_subfolder"
   "7.72.0":
     - patch_file: "patches/002-add-missing-file-FindZstd.patch"

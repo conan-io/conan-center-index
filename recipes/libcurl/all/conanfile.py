@@ -296,14 +296,37 @@ class LibcurlConan(ConanFile):
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
             return
-
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
         if self._has_zstd_option:
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
                                   "if(UNIX)", "if(TRUE)")
         # TODO: check this patch, it's suspicious
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.replace_in_file(cmakelists,
                               "include(CurlSymbolHiding)", "")
+
+        # libnghttp2
+        tools.replace_in_file(
+            cmakelists,
+            "find_package(NGHTTP2 REQUIRED)",
+            "find_package(libnghttp2 REQUIRED CONFIG)",
+        )
+        tools.replace_in_file(
+            cmakelists,
+            "include_directories(${NGHTTP2_INCLUDE_DIRS})",
+            "",
+        )
+        tools.replace_in_file(
+            cmakelists,
+            "list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})",
+            "list(APPEND CURL_LIBS libnghttp2::nghttp2)",
+        )
+
+        tools.replace_in_file(
+            cmakelists,
+            "find_package(OpenSSL REQUIRED)",
+            "find_package(OpenSSL REQUIRED CONFIG)",
+        )
 
     def _get_configure_command_args(self):
         yes_no = lambda v: "yes" if v else "no"
@@ -520,6 +543,7 @@ class LibcurlConan(ConanFile):
                 self._cmake.definitions["CURL_DISABLE_NTLM"] = True
         self._cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
+        self._cmake.definitions["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.get_safe("build_type", default="Release")
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
