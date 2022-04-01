@@ -5,3 +5,6 @@ sources:
   "1.0.1":  
     url: https://github.com/serge-sans-paille/frozen/archive/1.0.1.tar.gz
     sha256: 29ab5de4eb6bebfb803cd4bd33e324777488fb035116dab1aea27f9118809d0d
+  "1.1.1":  
+    url: https://github.com/serge-sans-paille/frozen/archive/1.1.1.tar.gz
+    sha256: f7c7075750e8fceeac081e9ef01944f221b36d9725beac8681cbd2838d26be45 
