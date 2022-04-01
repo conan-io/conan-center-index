@@ -177,7 +177,7 @@ class Assimp(ConanFile):
         else:
             self.requires("pugixml/1.12.1")
 
-        self.requires("minizip/1.2.11")
+        self.requires("minizip/1.2.12")
         self.requires("utfcpp/3.2.1")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.2.2")
