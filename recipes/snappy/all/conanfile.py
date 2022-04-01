@@ -65,7 +65,6 @@ class SnappyConan(ConanFile):
             self._cmake.definitions["SNAPPY_INSTALL"] = True
         if tools.Version(self.version) >= "1.1.9":
             self._cmake.definitions["SNAPPY_BUILD_BENCHMARKS"] = False
-            self._cmake.definitions["SNAPPY_ENABLE_RTTI"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
