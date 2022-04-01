@@ -107,6 +107,10 @@ class Assimp(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -258,7 +262,7 @@ class Assimp(ConanFile):
 
     def build(self):
         # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
-        if self._depends_on_clipper and tools.Version(self.deps_cpp_info["clipper"].version) >= "5":
+        if self._depends_on_clipper and tools.Version(self.deps_cpp_info["clipper"].version).major != "4":
             raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
 
         self._patch_sources()
@@ -266,21 +270,20 @@ class Assimp(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "assimp"
-        self.cpp_info.names["cmake_find_package_multi"] = "assimp"
-        self.cpp_info.names["pkg_config"] = "assimp"
+        self.cpp_info.set_property("cmake_file_name", "assimp")
+        self.cpp_info.set_property("cmake_target_name", "assimp::assimp")
+        self.cpp_info.set_property("pkg_config_name", "assimp")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             self.cpp_info.defines.append("ASSIMP_DLL")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
         if not self.options.shared:
             stdcpp_library = tools.stdcpp_library(self)
