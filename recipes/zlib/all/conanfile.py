@@ -62,11 +62,6 @@ class ZlibConan(ConanFile):
             tools.patch(**patch)
 
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268
-            tools.replace_in_file('gzguts.h',
-                                  '#if defined(_WIN32) || defined(__CYGWIN__)',
-                                  '#if defined(_WIN32) || defined(__MINGW32__)')
-
             is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
             if not is_apple_clang12:
                 for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
