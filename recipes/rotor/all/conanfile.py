@@ -18,13 +18,13 @@ class RotorConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "boost_asio": [True, False],
-        "thread": [True, False],
+        "enable_asio": [True, False],
+        "enable_thread": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "boost_asio": False,
-        "thread": False,
+        "enable_asio": False,
+        "enable_thread": False,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -74,8 +74,8 @@ class RotorConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_BOOST_ASIO"] = self.options.boost_asio
-        self._cmake.definitions["BUILD_THREAD"] = self.options.thread
+        self._cmake.definitions["BUILD_BOOST_ASIO"] = self.options.enable_asio
+        self._cmake.definitions["BUILD_THREAD"] = self.options.enable_thread
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -99,11 +99,11 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
 
-        if (self.options.boost_asio):
+        if (self.options.enable_asio):
                 self.cpp_info.components["asio"].libs = ["rotor_asio"]
                 self.cpp_info.components["asio"].requires = ["core"]
 
-        if (self.options.thread):
+        if (self.options.enable_thread):
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
             self.cpp_info.components["thread"].requires = ["core"]
 
