@@ -37,7 +37,6 @@ class DlibConan(ConanFile):
         "with_avx": "auto",
         "with_openblas": True,
 
-        "openblas:shared": False
     }
 
     _cmake = None
