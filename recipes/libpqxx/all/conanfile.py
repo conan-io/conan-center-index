@@ -52,7 +52,7 @@ class LibpqxxConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libpq/12.2")
+        self.requires("libpq/14.2")
 
     def validate(self):
         compiler = str(self.settings.compiler)
