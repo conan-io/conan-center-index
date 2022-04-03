@@ -63,8 +63,8 @@ class IgnitionUitlsConan(ConanFile):
                     )
                 )
 
-    #def requirements(self):
-    #    self.requires("cli11/2.1.2")
+    def requirements(self):
+        self.requires("ruby/3.1.0")
 
     #def build_requirements(self):
     #    self.build_requires("ignition-cmake/2.5.0")
@@ -118,6 +118,7 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-tools"].names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["pkg_config"] = "ignition-tools{}".format(version_major)
+        self.cpp_info.components["libignition-tools"].requires = ["ruby::ruby"]
         #self.cpp_info.components["libignition-tools"].requires = ["cli11::cli11"]
         self.env_info.LD_LIBRARY_PATH.extend([
             os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
