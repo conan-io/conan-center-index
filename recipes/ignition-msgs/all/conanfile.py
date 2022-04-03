@@ -68,20 +68,17 @@ class IgnitionMsgsConan(ConanFile):
                 )
 
     def requirements(self):
-        self.requires("protobuf/3.17.1@")
-        self.requires("tinyxml2/8.0.0@")
-        if int(tools.Version(self.version).major) == 5:
-            ## waiting for ignition-tools to get merged to master in ar-conan-thirdparty
+        self.requires("protobuf/3.17.1")
+        self.requires("tinyxml2/8.0.0")
+        if int(tools.Version(self.version).major) == 5: 
             #self.build_requires("ignition-tools/1.0.0")
             self.requires("ignition-math/6.7.0")
         elif int(tools.Version(self.version).major) == 8:
-            ## waiting for ignition-tools to get merged to master in ar-conan-thirdparty
-            #self.build_requires("ignition-cmake/1.4.0")
-            self.requires("ignition-math/6.9.0")
+            #self.build_requires("ignition-tools/1.4.0")
+            self.requires("ignition-math/6.10.0")
 
     def build_requirements(self):
-        # at least cmake version 3.15.0 is needed by tinyxml2
-        self.build_requires("doxygen/1.8.17@")
+        self.build_requires("doxygen/1.8.17")
         self.build_requires("ignition-cmake/2.10.0")
 
 
