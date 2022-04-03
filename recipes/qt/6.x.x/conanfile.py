@@ -348,7 +348,7 @@ class QtConan(ConanFile):
         self.build_requires("cmake/3.22.0")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
-        if self._is_msvc:
+        if self.settings.os == "Windows":
             self.build_requires('strawberryperl/5.30.0.1')
 
         if self.options.get_safe("qtwebengine"):
@@ -575,9 +575,9 @@ class QtConan(ConanFile):
                 self._cmake.definitions["INPUT_openssl"] = "linked"
 
         if self.options.with_dbus:
-           self._cmake.definitions["INPUT_dbus"] = "linked"
+            self._cmake.definitions["INPUT_dbus"] = "linked"
         else:
-           self._cmake.definitions["FEATURE_dbus"] = "OFF"
+            self._cmake.definitions["FEATURE_dbus"] = "OFF"
 
 
         for opt, conf_arg in [("with_glib", "glib"),
@@ -691,13 +691,12 @@ class QtConan(ConanFile):
             with tools.environment_append(build_env):
 
                 if tools.os_info.is_macos:
-                    open(".qmake.stash" , "w").close()
-                    open(".qmake.super" , "w").close()
+                    tools.save(".qmake.stash" , "")
+                    tools.save(".qmake.super" , "")
 
                 cmake = self._configure_cmake()
                 if tools.os_info.is_macos:
-                    with open("bash_env", "w") as f:
-                        f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                    tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                 with tools.environment_append({
                     "BASH_ENV": os.path.abspath("bash_env")
                 }) if tools.os_info.is_macos else tools.no_op():
@@ -717,8 +716,7 @@ class QtConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write(qt.content_template("..", "res", self.settings.os))
+        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
@@ -1152,9 +1150,9 @@ class QtConan(ConanFile):
 
         if (self.options.get_safe("qtlocation") and tools.Version(self.version) < "6.2.2") or \
             (self.options.get_safe("qtpositioning") and tools.Version(self.version) >= "6.2.2"):
-                _create_module("Positioning")
-                _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
-                _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
+            _create_module("Positioning")
+            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
+            _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
 
         if self.options.get_safe("qtsensors"):
             _create_module("Sensors")

@@ -1,0 +1,13 @@
+diff --git a/gzguts.h b/gzguts.h
+index c78cb40..4e9ec4f 100644
+--- a/gzguts.h
++++ b/gzguts.h
+@@ -43,7 +43,7 @@
+ #  include <io.h>
+ #endif
+ 
+-#if defined(_WIN32) || defined(__CYGWIN__)
++#if defined(_WIN32)
+ #  define WIDECHAR
+ #endif
+ 
