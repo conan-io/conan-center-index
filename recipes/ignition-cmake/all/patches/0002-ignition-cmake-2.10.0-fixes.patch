@@ -1,5 +1,19 @@
---- cmake/IgnSetCompilerFlags.cmake
-+++ cmake/IgnSetCompilerFlags.cmake
+diff --git a/cmake/IgnCMake.cmake b/cmake/IgnCMake.cmake
+index 7af66ad..7ab9af3 100644
+--- a/cmake/IgnCMake.cmake
++++ b/cmake/IgnCMake.cmake
+@@ -36,3 +36,6 @@ include(IgnPkgConfig)
+ #============================================================================
+ include(CMakePackageConfigHelpers)
+ include(CMakeParseArguments)
++
++set(IGNITION_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
++set(IGNITION_CMAKE_DOXYGEN_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../ignition/ignition-cmake2/doxygen")
+\ No newline at end of file
+diff --git a/cmake/IgnSetCompilerFlags.cmake b/cmake/IgnSetCompilerFlags.cmake
+index edc2b88..9e736f0 100644
+--- a/cmake/IgnSetCompilerFlags.cmake
++++ b/cmake/IgnSetCompilerFlags.cmake
 @@ -77,9 +77,9 @@ macro(ign_setup_unix)
      exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR)
      set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL
@@ -24,9 +38,10 @@
      add_definitions(-DMAC_OS_X_VERSION=1050)
    elseif(${CMAKE_SYSTEM_VERSION} GREATER 10 AND ${CMAKE_SYSTEM_VERSION} LESS 11)
      add_definitions(-DMAC_OS_X_VERSION=1060)
-
---- cmake/IgnUtils.cmake
-+++ cmake/IgnUtils.cmake
+diff --git a/cmake/IgnUtils.cmake b/cmake/IgnUtils.cmake
+index 9d00989..7c7fda3 100644
+--- a/cmake/IgnUtils.cmake
++++ b/cmake/IgnUtils.cmake
 @@ -1396,7 +1396,7 @@ macro(_ign_add_library_or_component)
      # Generate export macro headers
      # Note: INTERFACE libraries do not need the export header
