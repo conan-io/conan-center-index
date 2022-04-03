@@ -5,7 +5,7 @@ from conans import CMake, ConanFile, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package"
 
     test_type = "explicit"
     def requirements(self):
