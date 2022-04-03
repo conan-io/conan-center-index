@@ -1,5 +1,3 @@
-diff --git a/cmake/IgnCMake.cmake b/cmake/IgnCMake.cmake
-index 7af66ad..7ab9af3 100644
 --- a/cmake/IgnCMake.cmake
 +++ b/cmake/IgnCMake.cmake
 @@ -36,3 +36,6 @@ include(IgnPkgConfig)
@@ -10,8 +8,7 @@ index 7af66ad..7ab9af3 100644
 +set(IGNITION_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 +set(IGNITION_CMAKE_DOXYGEN_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../ignition/ignition-cmake2/doxygen")
 \ No newline at end of file
-diff --git a/cmake/IgnSetCompilerFlags.cmake b/cmake/IgnSetCompilerFlags.cmake
-index e4257ee..00912d7 100644
+
 --- a/cmake/IgnSetCompilerFlags.cmake
 +++ b/cmake/IgnSetCompilerFlags.cmake
 @@ -77,9 +77,9 @@ macro(ign_setup_unix)
@@ -38,8 +35,7 @@ index e4257ee..00912d7 100644
      add_definitions(-DMAC_OS_X_VERSION=1050)
    elseif(${CMAKE_SYSTEM_VERSION} GREATER 10 AND ${CMAKE_SYSTEM_VERSION} LESS 11)
      add_definitions(-DMAC_OS_X_VERSION=1060)
-diff --git a/cmake/IgnUtils.cmake b/cmake/IgnUtils.cmake
-index bc6dbdc..7097e24 100644
+
 --- a/cmake/IgnUtils.cmake
 +++ b/cmake/IgnUtils.cmake
 @@ -1372,7 +1372,7 @@ macro(_ign_add_library_or_component)
