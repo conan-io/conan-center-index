@@ -26,6 +26,11 @@ class PkgConfConan(ConanFile):
     _meson = None
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -87,13 +92,15 @@ class PkgConfConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
-        meson.build()
+        with tools.vcvars(self) if self._is_clang_cl else tools.no_op():
+            meson = self._configure_meson()
+            meson.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        meson = self._configure_meson()
-        meson.install()
+        with tools.vcvars(self) if self._is_clang_cl else tools.no_op():
+            meson = self._configure_meson()
+            meson.install()
 
         if self._is_msvc:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")

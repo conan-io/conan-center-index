@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
-import shutil
 
 required_conan_version = ">=1.43.0"
 
@@ -13,7 +13,7 @@ class FreeImageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later"
     topics = ("freeimage", "image", "decoding", "graphics")
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,7 +42,8 @@ class FreeImageConan(ConanFile):
         "with_jxr": True,
     }
 
-    _cmake = None
+    short_paths = True
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
@@ -62,11 +63,10 @@ class FreeImageConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
         self.output.warn("G3 plugin and JPEGTransform are disabled.")
-        if self.options.with_jpeg is not None:
+        if bool(self.options.with_jpeg):
             if self.options.with_tiff:
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
@@ -91,24 +91,27 @@ class FreeImageConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
-        self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000
-        self._cmake.definitions["WITH_PNG"] = self.options.with_png
-        self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
-        self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
-        self._cmake.definitions["WITH_RAW"] = self.options.with_raw
-        self._cmake.definitions["WITH_JXR"] = self.options.with_jxr
-        self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
-        self._cmake.configure(build_dir=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["FREEIMAGE_WITH_JPEG"] = self.options.with_jpeg != False
+        cmake.definitions["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
+        cmake.definitions["FREEIMAGE_WITH_PNG"] = self.options.with_png
+        cmake.definitions["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
+        cmake.definitions["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
+        cmake.definitions["FREEIMAGE_WITH_RAW"] = self.options.with_raw
+        cmake.definitions["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
+        cmake.definitions["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
+        cmake.configure(build_dir=self._build_subfolder)
+        return cmake
 
     def build(self):
         tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibPNG"))
@@ -153,9 +156,6 @@ class FreeImageConan(ConanFile):
                 components.append("libtiff::libtiff")
             return components
 
-        self.cpp_info.names["pkg_config"] = "freeimage"
-        self.cpp_info.names["cmake_find_package"] = "FreeImage"
-        self.cpp_info.names["cmake_find_package_multi"] = "FreeImage"
         self.cpp_info.components["FreeImage"].libs = ["freeimage"]
         self.cpp_info.components["FreeImage"].requires = imageformats_deps()
         self.cpp_info.components["FreeImagePlus"].libs = ["freeimageplus"]

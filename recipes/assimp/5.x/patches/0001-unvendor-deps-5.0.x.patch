@@ -1,6 +1,6 @@
 --- a/code/3MF/D3MFExporter.cpp
 +++ b/code/3MF/D3MFExporter.cpp
-@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -58,7 +58,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <zip/zip.h>
  #else
@@ -11,7 +11,7 @@
  namespace Assimp {
 --- a/code/Blender/BlenderTessellator.h
 +++ b/code/Blender/BlenderTessellator.h
-@@ -147,7 +147,7 @@ namespace Assimp
+@@ -147,7 +147,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <poly2tri/poly2tri.h>
  #else
@@ -20,9 +20,19 @@
  #endif
  
  namespace Assimp
+diff -Naur a/code/CMakeLists.txt b/code/CMakeLists.txt
 --- a/code/CMakeLists.txt
 +++ b/code/CMakeLists.txt
-@@ -893,7 +893,7 @@ ENDIF(HUNTER_ENABLED)
+@@ -881,7 +881,7 @@
+ IF(HUNTER_ENABLED)
+   hunter_add_package(polyclipping)
+   find_package(polyclipping CONFIG REQUIRED)
+-ELSE(HUNTER_ENABLED)
++ELSEIF(0)
+   SET( Clipper_SRCS
+     ../contrib/clipper/clipper.hpp
+     ../contrib/clipper/clipper.cpp
+@@ -893,7 +893,7 @@
  IF(HUNTER_ENABLED)
    hunter_add_package(poly2tri)
    find_package(poly2tri CONFIG REQUIRED)
@@ -31,7 +41,7 @@
    SET( Poly2Tri_SRCS
      ../contrib/poly2tri/poly2tri/common/shapes.cc
      ../contrib/poly2tri/poly2tri/common/shapes.h
-@@ -914,7 +914,7 @@ ENDIF(HUNTER_ENABLED)
+@@ -914,7 +914,7 @@
  IF(HUNTER_ENABLED)
    hunter_add_package(minizip)
    find_package(minizip CONFIG REQUIRED)
@@ -40,7 +50,7 @@
    SET( unzip_SRCS
      ../contrib/unzip/crypt.h
      ../contrib/unzip/ioapi.c
-@@ -929,7 +929,7 @@ ENDIF(HUNTER_ENABLED)
+@@ -929,7 +929,7 @@
  IF(HUNTER_ENABLED)
    hunter_add_package(zip)
    find_package(zip CONFIG REQUIRED)
@@ -49,7 +59,7 @@
    SET( ziplib_SRCS
      ../contrib/zip/src/miniz.h
      ../contrib/zip/src/zip.c
-@@ -1025,7 +1025,6 @@ IF(HUNTER_ENABLED)
+@@ -1025,7 +1025,6 @@
    hunter_add_package(RapidJSON)
    find_package(RapidJSON CONFIG REQUIRED)
  ELSE(HUNTER_ENABLED)
@@ -57,7 +67,7 @@
    INCLUDE_DIRECTORIES( "../contrib" )
  ENDIF(HUNTER_ENABLED)
  
-@@ -1045,7 +1044,7 @@ if ( MSVC )
+@@ -1045,7 +1044,7 @@
  endif ( MSVC )
  
  IF(NOT HUNTER_ENABLED)
@@ -66,7 +76,7 @@
      SET (unzip_compile_SRCS "")
    else (UNZIP_FOUND)
      SET (unzip_compile_SRCS ${unzip_SRCS})
-@@ -1125,7 +1124,7 @@ IF(HUNTER_ENABLED)
+@@ -1125,7 +1124,7 @@
        zip::zip
    )
  ELSE(HUNTER_ENABLED)
@@ -77,7 +87,7 @@
  if(ASSIMP_ANDROID_JNIIOSYSTEM)
 --- a/code/Common/BaseImporter.cpp
 +++ b/code/Common/BaseImporter.cpp
-@@ -344,7 +344,7 @@ std::string BaseImporter::GetExtension( const std::string& file ) {
+@@ -344,7 +344,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8/utf8.h>
  #else
@@ -88,7 +98,7 @@
  // ------------------------------------------------------------------------------------------------
 --- a/code/Common/ZipArchiveIOSystem.cpp
 +++ b/code/Common/ZipArchiveIOSystem.cpp
-@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -55,7 +55,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <minizip/unzip.h>
  #else
@@ -99,18 +109,20 @@
  namespace Assimp {
 --- a/code/Importer/IFC/IFCGeometry.cpp
 +++ b/code/Importer/IFC/IFCGeometry.cpp
-@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
  #else
 -#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
 +#  include <poly2tri/poly2tri.h>
- #  include "../contrib/clipper/clipper.hpp"
++#  include <polyclipping/clipper.hpp>
  #endif
  
+ #include <memory>
 --- a/code/Importer/IFC/IFCLoader.cpp
 +++ b/code/Importer/IFC/IFCLoader.cpp
-@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -55,7 +55,7 @@
  #  ifdef ASSIMP_USE_HUNTER
  #    include <minizip/unzip.h>
  #  else
@@ -121,18 +133,20 @@
  
 --- a/code/Importer/IFC/IFCOpenings.cpp
 +++ b/code/Importer/IFC/IFCOpenings.cpp
-@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
  #else
 -#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
 +#  include <poly2tri/poly2tri.h>
- #  include "../contrib/clipper/clipper.hpp"
++#  include <polyclipping/clipper.hpp>
  #endif
  
+ #include <iterator>
 --- a/code/Importer/STEPParser/STEPFileEncoding.cpp
 +++ b/code/Importer/STEPParser/STEPFileEncoding.cpp
-@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -48,7 +48,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8/utf8.h>
  #else
@@ -143,7 +157,7 @@
  #include <memory>
 --- a/code/MMD/MMDPmxParser.cpp
 +++ b/code/MMD/MMDPmxParser.cpp
-@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -45,7 +45,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8/utf8.h>
  #else
@@ -154,7 +168,7 @@
  
 --- a/code/SIB/SIBImporter.cpp
 +++ b/code/SIB/SIBImporter.cpp
-@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -63,7 +63,7 @@
  #  include <utf8/utf8.h>
  #else
  //#  include "../contrib/ConvertUTF/ConvertUTF.h"
@@ -165,7 +179,7 @@
  #include <assimp/DefaultLogger.hpp>
 --- a/code/X3D/FIReader.cpp
 +++ b/code/X3D/FIReader.cpp
-@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -63,7 +63,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8/utf8.h>
  #else

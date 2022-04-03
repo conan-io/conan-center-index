@@ -1,0 +1,14 @@
+diff --git a/win32/Makefile.sub b/win32/Makefile.sub
+--- win32/Makefile.sub
++++ win32/Makefile.sub
+@@ -252,8 +252,10 @@
+ ARCH_FLAG = $(PROCESSOR_FLAG)
+ !endif
+ !if !defined(CFLAGS)
+ CFLAGS = $(CFLAGS_NO_ARCH) $(ARCH_FLAG)
++!else
++CFLAGS = $(CFLAGS) $(WARNFLAGS)
+ !endif
+ !if !defined(CXXFLAGS)
+ CXXFLAGS = $(CFLAGS)
+ !endif

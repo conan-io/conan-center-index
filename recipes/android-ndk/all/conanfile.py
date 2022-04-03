@@ -37,7 +37,7 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b']:
+        if self.version in ['r23', 'r23b', 'r24']:
             data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
@@ -50,6 +50,7 @@ class AndroidNDKConan(ConanFile):
         self.copy("*NOTICE.toolchain", src=self._source_subfolder, dst="licenses")
         self.copy("cmake-wrapper.cmd")
         self.copy("cmake-wrapper")
+        self._fix_broken_links()
         self._fix_permissions()
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
@@ -135,6 +136,20 @@ class AndroidNDKConan(ConanFile):
                          sig == [0xCE, 0xFA, 0xED, 0xFE]:
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
+
+    def _fix_broken_links(self):
+        # https://github.com/android/ndk/issues/1671
+        # https://github.com/android/ndk/issues/1569
+        if self.version == "r23b" and self.settings.os in ["Linux", "Macos"]:
+            platform = "darwin" if self.settings.os == "Macos" else "linux"
+            links = {f"toolchains/llvm/prebuilt/{platform}-x86_64/aarch64-linux-android/bin/as": "../../bin/aarch64-linux-android-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/arm-linux-androideabi/bin/as": "../../bin/arm-linux-androideabi-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/x86_64-linux-android/bin/as": "../../bin/x86_64-linux-android-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/i686-linux-android/bin/as": "../../bin/i686-linux-android-as"}
+            for path, target in links.items():
+                path = os.path.join(self.package_folder, path)
+                os.unlink(path)
+                os.symlink(target, path)
 
     @property
     def _host(self):

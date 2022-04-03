@@ -1,4 +1,8 @@
 #include <imgui.h>
+#ifdef DOCKING
+    #include <imgui_internal.h>
+#endif
+
 #include <stdio.h>
 
 int main(int, char**)
@@ -20,6 +24,13 @@ int main(int, char**)
         io.DisplaySize = ImVec2(1920, 1080);
         io.DeltaTime = 1.0f / 60.0f;
         ImGui::NewFrame();
+
+#ifdef DOCKING
+        auto dockspaceID = ImGui::GetID("MyDockSpace");
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspace_flags);
+        printf("  with docking\n");
+#endif
 
         static float f = 0.0f;
         ImGui::Text("Hello, world!");

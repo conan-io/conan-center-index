@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, tools
 from conans.tools import Version, ConanInvalidConfiguration
+from conan.tools.files import rename
+
+
+required_conan_version = ">=1.43.0"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -12,7 +14,7 @@ class ApprovalTestsCppConan(ConanFile):
     description = "Approval Tests allow you to verify a chunk of output " \
                   "(such as a file) in one operation as opposed to writing " \
                   "test assertions for each element."
-    topics = ("conan", "testing", "unit-testing", "header-only")
+    topics = ("testing", "unit-testing", "header-only")
     options = {
         "with_boosttest": [True, False],
         "with_catch2": [True, False],
@@ -28,18 +30,20 @@ class ApprovalTestsCppConan(ConanFile):
         "with_cpputest": False,
     }
     no_copy_source = True
-    settings = "compiler"
+    settings = "compiler", "os", "build_type", "arch"
+
+    @property
+    def _header_file(self):
+        return "ApprovalTests.hpp"
 
     def configure(self):
         if not self._boost_test_supported():
             del self.options.with_boosttest
         if not self._cpputest_supported():
             del self.options.with_cpputest
-        self._validate_compiler_settings()
 
-    @property
-    def _header_file(self):
-        return "ApprovalTests.hpp"
+    def validate(self):
+        self._validate_compiler_settings()
 
     def requirements(self):
         if self.options.get_safe("with_boosttest"):
@@ -53,14 +57,16 @@ class ApprovalTestsCppConan(ConanFile):
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
             tools.download(url, filename)
             tools.check_sha256(filename, source["sha256"])
-        os.rename("ApprovalTests.v.{}.hpp".format(self.version),
-                  self._header_file)
+        rename(self, "ApprovalTests.v.{}.hpp".format(self.version), self._header_file)
 
     def package(self):
         self.copy(self._header_file, dst="include")
@@ -69,9 +75,6 @@ class ApprovalTestsCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
         self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
-
-    def package_id(self):
-        self.info.header_only()
 
     def _boost_test_supported(self):
         return Version(self.version) >= "8.6.0"

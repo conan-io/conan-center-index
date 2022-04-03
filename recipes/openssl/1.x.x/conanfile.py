@@ -536,6 +536,9 @@ class OpenSSLConan(ConanFile):
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
+        if self._is_clangcl:
+            # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
+            args.append("-D__STDC_NO_ATOMICS__")
         if self._full_version < "1.1.0":
             if self.options.get_safe("no_zlib"):
                 args.append("no-zlib")
@@ -790,9 +793,14 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(makefile, old_str, new_str, strict=self.in_local_cache)
 
     def _replace_runtime_in_file(self, filename):
+        runtime = msvc_runtime_flag(self)
+        if self._is_clangcl and not runtime:
+            # TODO: to remove if min conan version bumped to a version
+            #       implementing https://github.com/conan-io/conan/pull/10898
+            runtime = self.settings.get_safe("compiler.runtime")
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % msvc_runtime_flag(self), strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % msvc_runtime_flag(self), strict=False)
+            tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
+            tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
