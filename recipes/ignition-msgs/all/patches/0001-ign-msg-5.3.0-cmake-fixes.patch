@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 62b56b1..2b832aa 100644
+index 62b56b1..9a5054a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -10,7 +10,7 @@ project(ignition-msgs5 VERSION 5.3.0)
+ #============================================================================
+ # If you get an error at this line, you need to install ignition-cmake
+ find_package(ignition-cmake2 REQUIRED)
+-
++include(IgnCMake)
+ #============================================================================
+ # Configure the project
+ #============================================================================
 @@ -48,7 +48,7 @@ ign_find_package(ignition-tools
  
  #--------------------------------------

@@ -2,21 +2,21 @@ sources:
   "5.3.0":
     url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs5_5.3.0.tar.gz"
     sha256: "1e11986cdf9549f1b4e2a6da1b978525ff2f60539a451b24db5b81ca2c0893df"
-  #"8.0.0":
-  #  url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.0.0.tar.gz"
-  #  sha256: "a6c67a67958d37c192930f779dd1940ba52ee96e83df981cd9879b57edd73ff4"
-  #"8.2.0":
-  #  url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.2.0.tar.gz"
-  #  sha256: "83671fac95273a3a4b2cc444cef88f00935fd55fb64085436d79d6e95221a9e7"
+  "8.0.0":
+    url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.0.0.tar.gz"
+    sha256: "a6c67a67958d37c192930f779dd1940ba52ee96e83df981cd9879b57edd73ff4"
+  "8.2.0":
+    url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.2.0.tar.gz"
+    sha256: "83671fac95273a3a4b2cc444cef88f00935fd55fb64085436d79d6e95221a9e7"
 
 patches:
   "5.3.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-ign-msg-5.3.0-cmake-fixes.patch"
-  #"8.0.0":
-  #  - base_path: "source_subfolder"
-  #    patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
-  #"8.2.0":
-  #  - base_path: "source_subfolder"
-  #    patch_file: "patches/0003-ign-utils-8.2.0-cmake-fixes.patch"
+  "8.0.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
+  "8.2.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-ign-msg-8.2.0-cmake-fixes.patch"
  

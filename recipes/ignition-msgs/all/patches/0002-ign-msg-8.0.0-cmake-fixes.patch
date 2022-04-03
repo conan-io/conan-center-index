@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3509ffb..954f2d0 100644
+index 3509ffb..1807a6d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -10,7 +10,7 @@ project(ignition-msgs8 VERSION 8.0.0)
+ #============================================================================
+ # If you get an error at this line, you need to install ignition-cmake
+ find_package(ignition-cmake2 2.8.0 REQUIRED)
+-
++include(IgnCMake)
+ #============================================================================
+ # Configure the project
+ #============================================================================
 @@ -74,7 +74,7 @@ find_program(HAVE_IGN_TOOLS ign)
  
  #--------------------------------------
