@@ -104,6 +104,9 @@ class OpenCVConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
+
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+
         # allow to find conan-supplied OpenEXR
         if self.options.with_openexr:
             find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
@@ -135,19 +138,18 @@ class OpenCVConan(ConanFile):
             for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
                 tools.replace_in_file(find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.replace_in_file(cmakelists,
                                 "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
 
         for cascade in ["lbpcascades", "haarcascades"]:
             tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
                                   "share/OpenCV/%s" % cascade, "res/%s" % cascade)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "staticlib", "lib")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
+        tools.replace_in_file(cmakelists, "staticlib", "lib")
+        tools.replace_in_file(cmakelists, "ANDROID OR NOT UNIX", "FALSE")
+        tools.replace_in_file(cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # relocatable shared lib on macOS
         tools.replace_in_file(cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
         # Cleanup RPATH
@@ -155,6 +157,9 @@ class OpenCVConan(ConanFile):
                               "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
         tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+
+        # Do not try to detect Python
+        tools.replace_in_file(cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
 
     def _configure_cmake(self):
         if self._cmake:
