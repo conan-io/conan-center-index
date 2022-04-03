@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.10")
         if self.options.with_libiconv:
@@ -264,7 +264,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_lz4"):
             self.requires("lz4/1.9.3")
         if self.options.with_pg:
-            self.requires("libpq/13.6")
+            self.requires("libpq/14.2")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
@@ -314,7 +314,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.7")
+            self.requires("expat/2.4.8")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
