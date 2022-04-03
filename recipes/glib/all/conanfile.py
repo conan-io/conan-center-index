@@ -1,10 +1,11 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import os
 import shutil
 import glob
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.45.0"
 
 
 class GLibConan(ConanFile):
@@ -36,10 +37,6 @@ class GLibConan(ConanFile):
     short_paths = True
     generators = "pkg_config"
 
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc"
-
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
@@ -56,7 +53,7 @@ class GLibConan(ConanFile):
                 "glib < 2.71.1 can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
-        if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
+        if tools.Version(self.version) < "2.67.0" and not is_msvc(self) and not self.options.with_elf:
             raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def config_options(self):
@@ -67,6 +64,8 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
+        if is_msvc(self):
+            del self.options.with_elf
 
     def build_requirements(self):
         self.build_requires("meson/0.60.2")
@@ -77,7 +76,7 @@ class GLibConan(ConanFile):
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
             self.requires("pcre/8.45")
-        if self.options.with_elf:
+        if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.36.2")
@@ -110,7 +109,7 @@ class GLibConan(ConanFile):
             defs["tests"] = "false"
 
         if tools.Version(self.version) >= "2.67.0":
-            defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
+            defs["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
 
         meson.configure(
             source_folder=self._source_subfolder,
@@ -167,7 +166,7 @@ class GLibConan(ConanFile):
         self._patch_sources()
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc else tools.no_op():
+        ) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
@@ -183,7 +182,7 @@ class GLibConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc else tools.no_op():
+        ) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
@@ -294,7 +293,7 @@ class GLibConan(ConanFile):
         )
 
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
-        if self.options.get_safe("with_elf", True):
+        if self.options.get_safe("with_elf"):
             self.cpp_info.components["gresource"].requires.append(
                 "libelf::libelf"
             )  # this is actually an executable
