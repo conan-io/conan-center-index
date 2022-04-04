@@ -9,10 +9,10 @@ required_conan_version = ">=1.36.0"
 class packageConan(ConanFile):
     name = "package"
     description = "shortd escription"
-    license = "" # conform to SPDX License List
+    license = "" # conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2") # no "conan" in topics
+    topics = ("topic1", "topic2") # no "conan"  and project name in topics
     settings = "os", "arch", "compiler", "build_type" # even for header only
     options = {
         "shared": [True, False],
@@ -31,6 +31,7 @@ class packageConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
     def _build_subfolder(self):
         return "build_subfolder"
 
