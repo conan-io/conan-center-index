@@ -28,6 +28,14 @@ class LexborConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +47,9 @@ class LexborConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def validate(self):
+        if str(self.version) == "2.1.0" and self.options.shared == False and (self._is_msvc or self._is_mingw):
+            raise tools.ConanInvalidConfiguration("{}/{} doesn't support static build on Windows(please use cci.20220301).".format(self.name, self.version))
+
         if self.options.build_separately:
             raise tools.ConanInvalidConfiguration("{}/{} doesn't support build_separately option(yet).".format(self.name, self.version))
 
