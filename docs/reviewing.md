@@ -86,7 +86,8 @@ When working with CMake based upstream projects it is prefered to follow these p
 
 Due to build times and the lenght to configure CMake multiple times, there is a strong motivation to cache the `CMake` build helper from Conan between the `build()` and `package()` methods.
 
-This can be done by adding a `_cmake` attribute to the `ConanFile` class.
+This can be done by adding a `_cmake` attribute to the `ConanFile` class, but consider it as outdated. The current option is using `@functools.lru_cache(1)` decorator.
+As example, take a look on [miniz](https://github.com/conan-io/conan-center-index/blob/16780f87ad3db3be81323ddafc668145e4348513/recipes/miniz/all/conanfile.py#L57) recipe.
 
 ### Build Folder
 
