@@ -99,11 +99,11 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
 
-        if (self.options.enable_asio):
-                self.cpp_info.components["asio"].libs = ["rotor_asio"]
-                self.cpp_info.components["asio"].requires = ["core"]
+        if self.options.enable_asio:
+            self.cpp_info.components["asio"].libs = ["rotor_asio"]
+            self.cpp_info.components["asio"].requires = ["core"]
 
-        if (self.options.enable_thread):
+        if self.options.enable_thread:
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
             self.cpp_info.components["thread"].requires = ["core"]
 
