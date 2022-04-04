@@ -92,3 +92,4 @@ class LexborConan(ConanFile):
         self.cpp_info.components["_lexbor"].names["cmake_find_package_multi"] = target
 
         self.cpp_info.components["_lexbor"].libs = [target]
+        self.cpp_info.components["_lexbor"].defines = ["LEXBOR_BUILD_SHARED" if self.options.shared else "LEXBOR_BUILD_STATIC"]
