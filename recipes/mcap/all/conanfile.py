@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class McapConan(ConanFile):
     name = "mcap"
@@ -12,7 +14,6 @@ class McapConan(ConanFile):
     topics = ("mcap", "serialization", "deserialization", "recording")
 
     settings = ("os", "compiler", "build_type", "arch")
-    requires = ("lz4/1.9.3", "zstd/1.5.2")
     generators = ("cmake", "cmake_find_package")
 
     @property
@@ -27,6 +28,8 @@ class McapConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
+        self.requires("lz4/1.9.3")
+        self.requires("zstd/1.5.2")
         if tools.Version(self.version) < "0.1.1":
             self.requires("fmt/8.1.1")
 
