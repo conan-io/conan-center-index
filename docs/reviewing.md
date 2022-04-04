@@ -78,6 +78,24 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
+## Applying Patches
+
+Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
+For simple cases, `tools.replace_in_file` is allowed.
+
+```py
+def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # remove bundled xxhash
+        tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
+        tools.replace_in_file(
+            os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"),
+            "...",
+            "",
+        )
+```
+
 ## CMake
 
 When working with CMake based upstream projects it is prefered to follow these principals. They are not applicable to all projects so they can not be enforced.
