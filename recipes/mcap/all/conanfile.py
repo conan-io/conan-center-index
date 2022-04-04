@@ -12,7 +12,7 @@ class McapConan(ConanFile):
     topics = ("mcap", "serialization", "deserialization", "recording")
 
     settings = ("os", "compiler", "build_type", "arch")
-    requires = ("fmt/8.1.1", "lz4/1.9.3", "zstd/1.5.2")
+    requires = ("lz4/1.9.3", "zstd/1.5.2")
     generators = ("cmake", "cmake_find_package")
 
     @property
@@ -26,6 +26,10 @@ class McapConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    def requirements(self):
+        if tools.Version(self.version) < "0.1.1":
+            self.requires("fmt/8.1.1")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
@@ -33,7 +37,7 @@ class McapConan(ConanFile):
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
         if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 8:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "16.8":
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
     def package(self):
