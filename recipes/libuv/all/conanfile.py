@@ -105,7 +105,7 @@ class LibuvConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libuv")
         self.cpp_info.set_property("cmake_target_name", self._target_lib_name)
-        self.cpp_info.set_property("pkg_config_name", "libuv")
+        self.cpp_info.set_property("pkg_config_name", "libuv" if self.options.shared else "libuv-static")
         self.cpp_info.libs = [self._target_lib_name]
         if self.options.shared:
             self.cpp_info.defines = ["USING_UV_SHARED=1"]
@@ -114,6 +114,7 @@ class LibuvConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = "libuv" if self.options.shared else "libuv-static"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
