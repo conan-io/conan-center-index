@@ -23,4 +23,4 @@ if ("${CONAN_PACKAGE_VERSION}" VERSION_GREATER "1.10")
 endif()
 
 
-add_subdirectory(source_subfolder)
+add_subdirectory(src)
