@@ -40,6 +40,8 @@ class McapConan(ConanFile):
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
         if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 8:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
+        if tools.Version(self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio compiler support is added in 0.1.1")
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
