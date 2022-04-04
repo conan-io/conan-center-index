@@ -16,10 +16,12 @@ class DiligentCoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC":   [True, False],
+        "with_glslang": [True, False],
     }
     default_options = {
         "shared": False	,
         "fPIC": True,
+        "with_glslang": True
     }
     generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
@@ -91,7 +93,8 @@ class DiligentCoreConan(ConanFile):
 
         self.requires("spirv-cross/1.3.204.0")
         self.requires("spirv-tools/1.3.204.0")
-        self.requires("glslang/1.3.204.0")
+        if self.options.with_glslang:
+            self.requires("glslang/1.3.204.0")
         self.requires("vulkan-headers/1.3.204.0")
         self.requires("volk/1.3.204")
         self.requires("xxhash/0.8.1")
@@ -125,7 +128,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
-        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = True
+        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
 
