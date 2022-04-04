@@ -63,8 +63,8 @@ class IgnitionUitlsConan(ConanFile):
                     )
                 )
 
-    def requirements(self):
-        self.requires("ruby/3.1.0")
+    #def requirements(self):
+    #    self.requires("ruby/3.1.0")
 
     #def build_requirements(self):
     #    self.build_requires("ignition-cmake/2.5.0")
@@ -113,9 +113,9 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
 
 
-        self.cpp_info.components["libignition-tools"].libs = ["ignition-tools{}".format(version_major)]
+        self.cpp_info.components["libignition-tools"].libs = ["ignition-tools-backward"]
         self.cpp_info.components["libignition-tools"].includedirs.append("include/ignition/tools{}".format(version_major))
         self.cpp_info.components["libignition-tools"].names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["pkg_config"] = "ignition-tools{}".format(version_major)
-        self.cpp_info.components["libignition-tools"].requires = ["ruby::ruby"]
+        #self.cpp_info.components["libignition-tools"].requires = ["ruby::ruby"]
