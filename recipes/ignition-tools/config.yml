@@ -2,6 +2,6 @@ versions:
   #"1.0.0":
   #  folder: all
   #"1.2.0":
-    folder: all
+  #  folder: all
   "1.4.0":
     folder: all
