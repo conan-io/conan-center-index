@@ -85,15 +85,11 @@ For simple cases, `tools.replace_in_file` is allowed.
 
 ```py
 def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # remove bundled xxhash
-        tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
-        tools.replace_in_file(
-            os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"),
-            "...",
-            "",
-        )
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        tools.patch(**patch)
+    # remove bundled xxhash
+    tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
+    tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")
 ```
 
 ## CMake
@@ -116,12 +112,12 @@ Ideally use out-of-source builds by calling `cmake.configure(build_folder=self._
 Use a seperate method to handle the common patterns with using CMake based projects. This method is `_configure_cmake` and looks like the follow in the most basic cases:
 
 ```py
+@functools.lru_cache(1)
 def _configure_cmake(self):
-    if not self._cmake:
-       self._cmake = CMake(self)
-       self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-       self._cmake.configure(build_folder=self._build_subfolder)
-    return self._cmake
+    cmake = CMake(self)
+    cmake.definitions["BUILD_STATIC"] = not self.options.shared
+    cmake.configure(build_folder=self._build_subfolder)
+    return cmake
 ```
 
 ## Test Package
