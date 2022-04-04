@@ -5,22 +5,24 @@ required_conan_version = ">=1.43.0"
 
 class LexborConan(ConanFile):
     name = "lexbor"
-    license = "Apache-2.0"
-    homepage = "https://github.com/lexbor/lexbor/"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Lexbor is development of an open source HTML Renderer library"
     topics = ("html5", "css", "parser", "renderer")
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/lexbor/lexbor/"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", ]
     options = {
         "shared": [True, False], 
         "fPIC": [True, False],
+        "build_separately": [True, False],
     }
     default_options = {
         "shared": False, 
         "fPIC": True,
+        "build_separately": False,
     }
+    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", ]
 
     @property
     def _source_subfolder(self):
@@ -36,6 +38,10 @@ class LexborConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def validate(self):
+        if self.options.build_separately:
+            raise tools.ConanInvalidConfiguration("{}/{} doesn't support build_separately option(yet).".format(self.name, self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -48,7 +54,7 @@ class LexborConan(ConanFile):
         cmake.definitions["LEXBOR_BUILD_STATIC"] = not self.options.shared
         cmake.definitions["LEXBOR_TESTS_CPP"] = False
         # TODO: enable build_separately option
-        cmake.definitions["LEXBOR_BUILD_SEPARATELY"] = False
+        cmake.definitions["LEXBOR_BUILD_SEPARATELY"] = self.options.build_separately
         cmake.definitions["LEXBOR_INSTALL_HEADERS"] = True
 
         cmake.configure()
@@ -67,10 +73,11 @@ class LexborConan(ConanFile):
         target = "lexbor" if self.options.shared else "lexbor_static"
         self.cpp_info.set_property("cmake_file_name", "lexbor")
         self.cpp_info.set_property("cmake_target_name", "lexbor::{}".format(target))
-        self.cpp_info.components["_lexbor"].libs = [target]
-
         self.cpp_info.names["cmake_find_package"] = "lexbor"
         self.cpp_info.names["cmake_find_package_multi"] = "lexbor"
+
+        self.cpp_info.components["_lexbor"].set_property("cmake_target_name", "lexbor::{}".format(target))
         self.cpp_info.components["_lexbor"].names["cmake_find_package"] = target
         self.cpp_info.components["_lexbor"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["_lexbor"].set_property("cmake_target_name", "lexbor::{}".format(target))
+
+        self.cpp_info.components["_lexbor"].libs = [target]
