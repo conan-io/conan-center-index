@@ -1,10 +1,10 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.45.0"
 
 class packageConan(ConanFile):
     name = "package"
@@ -34,10 +34,6 @@ class packageConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     # don't use self.settings_build
     @property
@@ -72,7 +68,7 @@ class packageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("package can't be built as shared on visual studio")
 
     def source(self):
@@ -93,7 +89,7 @@ class packageConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        if self._is_msvc:
+        if is_msvc(self):
             # don't use self.settings.compiler.runtime
             cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
         cmake.configure(build_folder=self._build_subfolder)
