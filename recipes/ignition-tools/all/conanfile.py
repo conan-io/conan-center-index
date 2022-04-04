@@ -112,17 +112,10 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
 
-        # cmake_find_package filename: ignition-tools-config.cmake
+
         self.cpp_info.components["libignition-tools"].libs = ["ignition-tools{}".format(version_major)]
         self.cpp_info.components["libignition-tools"].includedirs.append("include/ignition/tools{}".format(version_major))
         self.cpp_info.components["libignition-tools"].names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["pkg_config"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].requires = ["ruby::ruby"]
-        #self.cpp_info.components["libignition-tools"].requires = ["cli11::cli11"]
-        self.env_info.LD_LIBRARY_PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.libdirs
-        ])
-        self.env_info.PATH.extend([
-            os.path.join(self.package_folder, x) for x in self.cpp_info.bindirs
-        ])
