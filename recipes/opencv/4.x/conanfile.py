@@ -165,6 +165,7 @@ class OpenCVConan(ConanFile):
             del self.options.with_cudnn
             del self.options.with_cufft
             del self.options.dnn_cuda
+            del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
