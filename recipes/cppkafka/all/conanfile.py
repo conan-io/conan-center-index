@@ -82,9 +82,6 @@ class CppKafkaConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        opts = dict()
-        opts["RDKAFKA_LIBRARY"] = self.deps_cpp_info["librdkafka"].rootpath
-        opts["RDKAFKA_INCLUDE_DIR"] = self.deps_cpp_info["librdkafka"].rootpath + "/include"
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = not self.deps_cpp_info["librdkafka"].shared
@@ -104,7 +101,7 @@ class CppKafkaConan(ConanFile):
         if len(cxx_flags) > 0:
             cmake.definitions["CMAKE_CXX_FLAGS"] = ' '.join(cxx_flags)
 
-        cmake.configure(defs=opts, build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
