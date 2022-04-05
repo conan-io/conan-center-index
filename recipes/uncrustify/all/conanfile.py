@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.43.0"
@@ -23,6 +24,10 @@ class UncrustifyConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("oatpp-sqlite requires GCC >=8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
