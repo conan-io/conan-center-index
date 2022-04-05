@@ -75,6 +75,7 @@ class LibuvConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
