@@ -2,10 +2,9 @@ from conans import ConanFile, tools
 
 required_conan_version = ">=1.43.0"
 
-
 class CloveUnitConan(ConanFile):
     name = "clove-unit"
-    description = "Single-header Unit Testing framework for C (mainly, but also C++) with test autodiscovery feature"
+    description = "Single-header Unit Testing framework for C (interoperable with C++) with test autodiscovery feature"
     topics = ("clove-unit", "unit-testing", "testing", "unit testing", "test")
     homepage = "https://github.com/fdefelici/clove-unit"
     url = "https://github.com/conan-io/conan-center-index"
