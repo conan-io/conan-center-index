@@ -277,11 +277,11 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.openssl:
             self.requires("openssl/1.1.1n")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.37")
+            self.requires("pcre2/10.39")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
