@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import is_msvc
 import functools
 
 required_conan_version = ">=1.43.0"
