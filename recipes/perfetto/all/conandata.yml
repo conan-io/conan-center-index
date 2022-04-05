@@ -17,6 +17,9 @@ sources:
   "24.2":
     url: https://github.com/google/perfetto/archive/refs/tags/v24.2.tar.gz
     sha256: b296d0a939e694fd2e73ed6c6418b774b5ef6809ddf60988989416e5cbf90b41
+  "25.0":
+    url: https://github.com/google/perfetto/archive/refs/tags/v25.0.tar.gz
+    sha256: 73a4b895df9222ddb231b8d903099d6da08cd079f27983f540e89156fa88ba67
 
 patches:
   "20.1":
