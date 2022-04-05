@@ -39,9 +39,6 @@ class IgnitionCmakeConan(ConanFile):
         os.rename(glob.glob("ign-cmake*")[0], self._source_subfolder)
 
     def build(self):
-        version_major = tools.Version(self.version).major
-        ignition_cmake_dir = os.path.join(self.package_folder, "lib", "cmake", f"ignition-cmake{version_major}", "cmake2")
-        os. environ['IGNITION_CMAKE_DIR'] = f"{ignition_cmake_dir}"
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
@@ -61,13 +58,12 @@ class IgnitionCmakeConan(ConanFile):
 
     def package_info(self):
         version_major = tools.Version(self.version).major
-        self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.builddirs = [
             os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major)),
             os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)),
         ]
-        self.cpp_info.libdirs.append(os.path.join(self.package_folder, "lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)))
+        self.cpp_info.libdirs.append(os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)))
         self.cpp_info.includedirs.append("include/ignition/cmake{}".format(version_major))
 

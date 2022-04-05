@@ -1,7 +1,0 @@
-\page tutorials Tutorials
-
-This is a test file 
-
-## Purpose
-
-This is a test markdown file to test the functionality of `ign_create_docs` utility providedby [ign-cmake2](https://github.com/ignitionrobotics/ign-cmake)
