@@ -10,14 +10,11 @@ class DracoConan(ConanFile):
                   "geometric meshes and point clouds. It is intended to " \
                   "improve the storage and transmission of 3D graphics."
     license = "Apache-2.0"
-    topics = ("draco", "3d", "graphics", "mesh",
-              "compression", "decompression")
+    topics = ("draco", "3d", "graphics", "mesh", "compression", "decompression")
     homepage = "https://google.github.io/draco/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,7 +23,7 @@ class DracoConan(ConanFile):
         "enable_mesh_compression": [True, False],
         "enable_standard_edgebreaker": [True, False],
         "enable_predictive_edgebreaker": [True, False],
-        "enable_backwards_compatibility": [True, False]
+        "enable_backwards_compatibility": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,8 +33,11 @@ class DracoConan(ConanFile):
         "enable_mesh_compression": True,
         "enable_standard_edgebreaker": True,
         "enable_predictive_edgebreaker": True,
-        "enable_backwards_compatibility": True
+        "enable_backwards_compatibility": True,
     }
+
+    short_paths = True
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -47,18 +47,25 @@ class DracoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
         if not self.options.enable_mesh_compression:
             del self.options.enable_standard_edgebreaker
             del self.options.enable_predictive_edgebreaker
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -174,5 +181,5 @@ class DracoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Draco"
         self.cpp_info.names["pkg_config"] = "draco"
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
