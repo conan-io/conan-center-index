@@ -1,4 +1,7 @@
 sources:
+  "2.1.3":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.1.3.tar.gz"
+    sha256: "dbda0c685942aa3ea908496592491e5ec8160d2cf1ec9d5fd5470e50768e7859"
   "2.1.2":
     url: "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.1.2.tar.gz"
     sha256: "e7fdc8a255c45bc8fbd9aa11c1a49c23092fcd7379296aeaeb14d3343a3d1bed"
