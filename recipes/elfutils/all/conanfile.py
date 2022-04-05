@@ -57,10 +57,10 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.version >= "0.186":
-            if self.settings.compiler in ["Visual Studio", "apple-clang"]:
+        if tools.Version(self.version) >= "0.186":
+            if self.settings.compiler in ["Visual Studio", "apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
-                            "elfutils only supports gcc" % self.settings.compiler)
+                            "elfutils only supports gcc and clang" % self.settings.compiler)
         else:
             if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
@@ -77,7 +77,7 @@ class ElfutilsConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.version >= "0.186" and self.options.libdebuginfod:
+        if self.options.get_safe("libdebuginfod"):
             self.requires("libcurl/7.80.0")
         if self.options.debuginfod:
             # FIXME: missing recipe for libmicrohttpd
@@ -112,7 +112,7 @@ class ElfutilsConan(ConanFile):
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
             ]
-            if self.version >= "0.186":
+            if tools.Version(self.version) >= "0.186":
                 args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
             args.append('BUILD_STATIC={}'.format("0" if self.options.shared else "1"))
 
@@ -153,7 +153,7 @@ class ElfutilsConan(ConanFile):
         self.cpp_info.components["libasm"].libs = ["asm"]
         self.cpp_info.components["libasm"].requires = ["libelf", "libdw"]
 
-        if self.version >= "0.186" and self.options.libdebuginfod:
+        if self.options.get_safe("libdebuginfod"):
             self.cpp_info.components["libdebuginfod"].libs = ["debuginfod"]
             self.cpp_info.components["libdebuginfod"].requires = ["libcurl::curl"]
 
