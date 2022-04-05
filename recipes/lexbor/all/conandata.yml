@@ -1,7 +1,4 @@
 sources:
-  "cci.20220301":
-    url: "https://github.com/lexbor/lexbor/archive/9c6915b98b0c33ac140bc85cc2c9b9eb0a93751b.tar.gz"
-    sha256: "4bcc2ee1c50f3c39c1393b0644c26b741fa723b34ef859135012f4b519ccf5f3"
   "2.1.0":
     url: "https://github.com/lexbor/lexbor/archive/v2.1.0.zip"
     sha256: "58d684d19cec689e40d8d443b3b953697cfa677a0ca59a2cf1fc14cd37ac2404"

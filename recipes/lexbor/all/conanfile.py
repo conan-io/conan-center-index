@@ -47,6 +47,7 @@ class LexborConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def validate(self):
+        # static build on Windows will be support by future release. (https://github.com/lexbor/lexbor/issues/69)
         if str(self.version) == "2.1.0" and self.options.shared == False and (self._is_msvc or self._is_mingw):
             raise tools.ConanInvalidConfiguration("{}/{} doesn't support static build on Windows(please use cci.20220301).".format(self.name, self.version))
 
