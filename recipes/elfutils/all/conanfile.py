@@ -47,7 +47,7 @@ class ElfutilsConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-        if self.version < "0.186":
+        if tools.Version(self.version) < "0.186":
             del self.options.libdebuginfod
 
     def configure(self):
