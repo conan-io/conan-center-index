@@ -47,6 +47,14 @@ class DracoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -148,7 +156,7 @@ class DracoConan(ConanFile):
                 "encode_only": "dracoenc"
             }.get(str(self.options.target))
 
-        if self.settings.os == "Windows":
+        if self._is_msvc or self._is_clang_cl:
             return "draco"
 
         if self.options.shared:
