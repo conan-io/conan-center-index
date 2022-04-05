@@ -96,6 +96,6 @@ int main() {
                       msg.data, msg.data + msg.dataSize),
            "incorrect data");
   }
-  std::cout << "MCAP roundtrip succeeded!" << std::endl;
+  std::cout << "MCAP " << mcap::LibraryVersion << " roundtrip succeeded!" << std::endl;
   return 0;
 }
