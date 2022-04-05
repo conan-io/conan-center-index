@@ -174,15 +174,14 @@ class DracoConan(ConanFile):
 
         build_lib_dir = os.path.join(self._build_subfolder, "lib")
         build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib",
-                  src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib",
-                  src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir,
-                  keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin",
-                  src=build_bin_dir, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=build_lib_dir, keep_path=False)
+            self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
+        else:
+            self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Draco"
