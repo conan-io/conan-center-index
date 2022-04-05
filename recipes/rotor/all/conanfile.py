@@ -18,11 +18,13 @@ class RotorConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
         "enable_asio": [True, False],
         "enable_thread": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "shared": False,
         "enable_asio": False,
         "enable_thread": False,
     }
@@ -41,6 +43,10 @@ class RotorConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
@@ -65,9 +71,13 @@ class RotorConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
+        if self.options.shared:
+            raise ConanInvalidConfiguration("shared option is currently not supported")
+
 
     def _configure_cmake(self):
         if self._cmake:
