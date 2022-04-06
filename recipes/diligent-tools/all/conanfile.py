@@ -48,7 +48,7 @@ class DiligentToolsConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def validate(self):
@@ -58,12 +58,13 @@ class DiligentToolsConan(ConanFile):
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
 
     def requirements(self):
-        self.requires("diligent-core/2.5.1")
+        self.requires("diligent-core/2.5.2")
         self.requires("imgui/1.87")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
         self.requires("zlib/1.2.12")
+        self.requires('taywee-args/6.3.0')
 
     @property
     def _diligent_platform(self):
