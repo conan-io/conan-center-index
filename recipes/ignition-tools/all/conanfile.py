@@ -44,6 +44,8 @@ class IgnitionUitlsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
@@ -63,23 +65,8 @@ class IgnitionUitlsConan(ConanFile):
                     )
                 )
 
-    #def requirements(self):
-    #    self.requires("ruby/3.1.0")
-
-    #def build_requirements(self):
-    #    self.build_requires("ignition-cmake/2.5.0")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        version_data_array = self.version.split(".")
-        assert(len(version_data_array)<=3)
-        version_major = version_data_array[0]
-        version_minor = version_data_array[1]
-        version_patch = version_data_array[2]
-        conan.tools.files.rename(
-             self, "ign-tools-ignition-tools_{}.{}.{}".format(version_major, version_minor, version_patch),
-             self._source_subfolder
-            )
+        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -118,4 +105,3 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.components["libignition-tools"].names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
         self.cpp_info.components["libignition-tools"].names["pkg_config"] = "ignition-tools{}".format(version_major)
-        #self.cpp_info.components["libignition-tools"].requires = ["ruby::ruby"]
