@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -47,14 +48,6 @@ class DracoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_clang_cl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -79,12 +72,7 @@ class DracoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build(target=self._get_target())
-
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
 
@@ -147,41 +135,21 @@ class DracoConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def _get_target(self):
-        if tools.Version(self.version) < "1.4.0":
-            return {
-                "decode_only": "dracodec",
-                "draco": "draco",
-                "encode_and_decode": "draco",
-                "encode_only": "dracoenc"
-            }.get(str(self.options.target))
-
-        if self._is_msvc or self._is_clang_cl:
-            return "draco"
-
-        if self.options.shared:
-            return "draco_shared"
-
-        return "draco_static"
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-        self.copy(pattern="*.h", dst="include",
-                  src=os.path.join(self._source_subfolder, "src"))
-        self.copy(pattern="*.h", dst=os.path.join("include", "draco"),
-                  src=os.path.join(self._build_subfolder, "draco"))
-
-        build_lib_dir = os.path.join(self._build_subfolder, "lib")
-        build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
-        if self.options.shared:
-            self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_lib_dir, keep_path=False)
-            self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if tools.Version(self.version) < "1.4.0":
+            tools.rmdir(os.path.join(self.package_folder, "lib", "draco"))
         else:
-            self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Draco"
