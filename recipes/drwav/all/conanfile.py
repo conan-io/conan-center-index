@@ -48,11 +48,7 @@ class DrwavConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        info = self.conan_data["sources"][self.version]
-        tools.download(info["url"], "drwav.zip", sha256=info["sha256"])
-        for file in ("dr_wav.h", "LICENSE"):
-            tools.unzip("drwav.zip", destination=self._source_subfolder, pattern=os.path.join("*", file), strip_root=True)
-        os.unlink("drwav.zip")
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

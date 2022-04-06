@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(dr_wav C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 option(NO_CONVERSION_API "Build with define DR_WAV_NO_CONVERSION_API" OFF)
 option(NO_STDIO "Build with define DR_WAV_NO_STDIO" OFF)
