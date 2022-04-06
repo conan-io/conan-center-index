@@ -174,6 +174,7 @@ class GlslangConan(ConanFile):
         # glslang
         self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"
         self.cpp_info.components["glslang-core"].names["cmake_find_package_multi"] = "glslang"
+        self.cpp_info.components["glslang-core"].includedirs.append(os.path.join("include", "glslang"))
         self.cpp_info.components["glslang-core"].libs = ["glslang" + lib_suffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
