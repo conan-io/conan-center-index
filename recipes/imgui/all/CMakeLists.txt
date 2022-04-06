@@ -37,7 +37,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:include>
 )
-target_compile_definitions(${PROJECT_NAME} PUBLIC "IMGUI_EXPORT_HEADERS=\"${IMGUI_EXPORT_HEADERS}\"")
 
 include(GNUInstallDirs)
 

@@ -46,7 +46,7 @@ class IMGUIConan(ConanFile):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "imgui.h"),
             "#ifdef IMGUI_USER_CONFIG",
-            "#ifdef IMGUI_EXPORT_HEADERS\n#include IMGUI_EXPORT_HEADERS\n#endif\n\n#ifdef IMGUI_USER_CONFIG"
+            "#include \"imgui_export_headers.h\"\n\n#ifdef IMGUI_USER_CONFIG"
         )
 
     def _configure_cmake(self):
@@ -76,7 +76,6 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["imgui"]
-        self.cpp_info.defines.append("IMGUI_EXPORT_HEADERS=\"imgui_export_headers.h\"")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         self.cpp_info.srcdirs = [os.path.join("res", "bindings")]
