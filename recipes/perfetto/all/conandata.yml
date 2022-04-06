@@ -34,3 +34,6 @@ patches:
   "22.1":
     - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
       base_path: "source_subfolder"
+  "25.0":
+    - patch_file: "patches/v25.0/0001-MSVC-Fix-narrowing-conversion-error.patch"
+      base_path: "source_subfolder"
