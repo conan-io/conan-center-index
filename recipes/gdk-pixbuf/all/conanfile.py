@@ -144,7 +144,7 @@ class GdkPixbufConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["gdk_pixbuf-2.0"]
         self.cpp_info.includedirs = [os.path.join("include", "gdk-pixbuf-2.0")]
         if not self.options.shared:
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
