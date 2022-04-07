@@ -125,9 +125,7 @@ class CppKafkaConan(ConanFile):
                 self.cpp_info.components["_cppkafka"].system_libs = ["mswsock", "ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_cppkafka"].system_libs = ["pthread"]
-        if not self.deps_cpp_info["librdkafka"].shared:
-            self.cpp_info.components["_cppkafka"].defines.append("CPPKAFKA_RDKAFKA_STATIC_LIB")
-        if self.options.shared == False:
+        if not self.options.shared:
             self.cpp_info.components["_cppkafka"].defines.append("CPPKAFKA_STATIC")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
