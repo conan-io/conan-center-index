@@ -85,6 +85,8 @@ class CppKafkaConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["CPPKAFKA_DISABLE_TESTS"] = True
+        cmake.definitions["CPPKAFKA_DISABLE_EXAMPLES"] = True
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
 
