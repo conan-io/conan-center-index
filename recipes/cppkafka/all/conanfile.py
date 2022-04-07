@@ -18,12 +18,10 @@ class CppKafkaConan(ConanFile):
     options = {
        "shared": [True, False],
        "fPIC": [True, False],
-       "multithreaded": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "multithreaded": True,
     }
 
     generators = "cmake", "cmake_find_package_multi"
@@ -87,7 +85,6 @@ class CppKafkaConan(ConanFile):
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
         cmake.definitions["CPPKAFKA_DISABLE_TESTS"] = True
         cmake.definitions["CPPKAFKA_DISABLE_EXAMPLES"] = True
-        cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
 
         cxx_flags = list()
