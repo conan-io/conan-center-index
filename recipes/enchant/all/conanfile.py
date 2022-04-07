@@ -18,12 +18,17 @@ class EnchantConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
     requires = "glib/2.71.3", "hunspell/1.7.0"
-    exports_sources = \
-        "CMakeLists.txt", "configure.cmake", "configmake.h", "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        self.copy("configmake.h")
+        self.copy("configure.cmake")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         root = self._source_subfolder
