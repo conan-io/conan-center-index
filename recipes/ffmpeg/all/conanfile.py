@@ -534,7 +534,7 @@ class FFMpegConan(ConanFile):
             if self.options.postproc:
                 self.cpp_info.components["postproc"].system_libs = ["m"]
             if self.options.get_safe("fPIC"):
-                if self.settings.compiler in ("gcc", ):
+                if self.settings.compiler in ("gcc", "clang"):
                     # https://trac.ffmpeg.org/ticket/1713
                     # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                     # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
