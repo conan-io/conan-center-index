@@ -152,8 +152,9 @@ class Llvm(ConanFile):
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if self.settings.compiler == "Visual Studio" and Version(
-                self.settings.compiler.version) < "16.4":
+        if (self.settings.compiler == "Visual Studio"
+                or self.settings.compiler == "msvc") and Version(
+                    self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required."
             )
