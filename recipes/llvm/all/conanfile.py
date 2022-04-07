@@ -4,28 +4,13 @@ from conans.errors import ConanInvalidConfiguration
 import os, shutil, glob
 
 projects = [
-    'clang',
-    'clang-tools-extra',
-    'compiler-rt',
-    'debuginfo-tests',
-    'libc',
-    'libclc',
-    'libcxx',
-    'libcxxabi',
-    'libunwind',
-    'lld',
-    'lldb',
-    'mlir',
-    'openmp',
-    'parallel-libs',
-    'polly',
-    'pstl'
+    'clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc',
+    'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir',
+    'openmp', 'parallel-libs', 'polly', 'pstl'
 ]
 
-default_projects = [
-    'clang',
-    'compiler-rt'
-]
+default_projects = ['clang', 'compiler-rt']
+
 
 class Llvm(ConanFile):
     name = 'llvm'
@@ -40,14 +25,26 @@ class Llvm(ConanFile):
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
-    options = {**{ 'with_' + project : [True, False] for project in projects }, **{
-        'fPIC': [True, False],
-        'rtti': [True, False],
-    }}
-    default_options = {**{ 'with_' + project : project in default_projects for project in projects }, **{
-        'fPIC': True,
-        'rtti': True,
-    }}
+    options = {
+        **{'with_' + project: [True, False]
+           for project in projects},
+        **{
+            'fPIC': [True, False],
+            'rtti': [True, False],
+            'enable_debug': [True, False]
+        }
+    }
+    default_options = {
+        **{
+            'with_' + project: project in default_projects
+            for project in projects
+        },
+        **{
+            'fPIC': True,
+            'rtti': True,
+            'enable_debug': False,
+        }
+    }
     generators = 'cmake_find_package'
 
     @property
@@ -70,18 +67,21 @@ class Llvm(ConanFile):
             tools.check_min_cppstd(self, '14')
 
     def _cmake_configure(self):
-        enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
-        self.output.info('Enabled LLVM subprojects: {}'.format(', '.join(enabled_projects)))
+        enabled_projects = [
+            project for project in projects
+            if getattr(self.options, 'with_' + project)
+        ]
+        self.output.info('Enabled LLVM subprojects: {}'.format(
+            ', '.join(enabled_projects)))
 
-        cmake = CMake(self, parallel=False);
-        cmake.configure(
-            defs = {
-                'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
-                'LLVM_ENABLE_BINDINGS': False,
-                'LLVM_ENABLE_RTTI': self.options.rtti,
-            },
-            source_folder = os.path.join(self._source_subfolder, 'llvm')
-        )
+        cmake = CMake(self, parallel=False)
+        cmake.configure(defs={
+            'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
+            'LLVM_ENABLE_BINDINGS': False,
+            'LLVM_ENABLE_RTTI': self.options.rtti,
+        },
+                        source_folder=os.path.join(self._source_subfolder,
+                                                   'llvm'))
         return cmake
 
     def build(self):
@@ -92,24 +92,20 @@ class Llvm(ConanFile):
         cmake = self._cmake_configure()
         cmake.install()
 
-        self.copy(
-            'LICENSE.TXT',
-            src=self.project_folder('clang'),
-            dst='licenses',
-            keep_path=False)
+        self.copy('LICENSE.TXT',
+                  src=self.project_folder('clang'),
+                  dst='licenses',
+                  keep_path=False)
 
-        ignore = [
-            'share',
-            'libexec',
-            '**/Find*.cmake',
-            '**/*Config.cmake'
-        ]
+        ignore = ['share', 'libexec', '**/Find*.cmake', '**/*Config.cmake']
 
         for ignore_entry in ignore:
             ignore_glob = os.path.join(self.package_folder, ignore_entry)
 
             for ignore_path in glob.glob(ignore_glob, recursive=True):
-                self.output.info('Remove ignored file/directory "{}" from package'.format(ignore_path))
+                self.output.info(
+                    'Remove ignored file/directory "{}" from package'.format(
+                        ignore_path))
 
                 if os.path.isfile(ignore_path):
                     os.remove(ignore_path)
@@ -117,14 +113,20 @@ class Llvm(ConanFile):
                     shutil.rmtree(ignore_path)
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
-            raise ConanInvalidConfiguration("Compiler version too low for this package.")
+        if self.settings.compiler == "gcc" and tools.Version(
+                self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration(
+                "Compiler version too low for this package.")
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16.4":
-            raise ConanInvalidConfiguration("An up to date version of Microsoft Visual Studio 2019 or newer is required.")
+        if self.settings.compiler == "Visual Studio" and Version(
+                self.settings.compiler.version) < "16.4":
+            raise ConanInvalidConfiguration(
+                "An up to date version of Microsoft Visual Studio 2019 or newer is required."
+            )
 
-        if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("Debug builds are too heavy for CCI")
+        if self.settings.build_type == "Debug" and not self.options.enable_debug:
+            raise ConanInvalidConfiguration(
+                "Set the 'enable_debug' option to allow debug builds")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
