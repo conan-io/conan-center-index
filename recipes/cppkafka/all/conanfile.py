@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -51,30 +50,9 @@ class CppKafkaConan(ConanFile):
         self.requires("boost/1.78.0")
         self.requires("librdkafka/1.8.2")
 
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "gcc": "6",
-            "clang": "4",
-            "apple-clang": "5.1",
-        }
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(
-                "{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version,))
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                "{}/{} requires C++14, which your compiler does not support.".format(self.name, self.version,))
-
-        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.get_safe("libcxx") == "libc++":
-            raise ConanInvalidConfiguration(
-                "{}/{} doesn't support {} with libc++".format(self.name, self.version, self.settings.compiler))
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -87,13 +65,9 @@ class CppKafkaConan(ConanFile):
         cmake.definitions["CPPKAFKA_DISABLE_EXAMPLES"] = True
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
 
-        cxx_flags = list()
-        # disable max/min in Windows.h
+        # TODO: move to a patch
         if self.settings.os == "Windows":
-            cxx_flags.append("-DNOMINMAX")
-
-        if len(cxx_flags) > 0:
-            cmake.definitions["CMAKE_CXX_FLAGS"] = ' '.join(cxx_flags)
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-DNOMINMAX"
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -101,7 +75,6 @@ class CppKafkaConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
         cmake = self._configure_cmake()
         cmake.build()
 
