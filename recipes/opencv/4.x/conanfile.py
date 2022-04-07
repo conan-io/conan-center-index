@@ -47,6 +47,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
+        "cuda_arch_bin": "ANY",
         "cpu_baseline": "ANY",
         "cpu_dispatch": "ANY",
         "nonfree": [True, False],
@@ -82,6 +83,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
+        "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "nonfree": False,
@@ -163,6 +165,7 @@ class OpenCVConan(ConanFile):
             del self.options.with_cudnn
             del self.options.with_cufft
             del self.options.dnn_cuda
+            del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
@@ -474,6 +477,8 @@ class OpenCVConan(ConanFile):
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+            if self.options.cuda_arch_bin:
+                self._cmake.definitions["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
         self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
