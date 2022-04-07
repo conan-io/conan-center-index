@@ -28,6 +28,9 @@ default_projects = [
 ]
 default_runtimes = [
     'libcxx',
+    # libcxxabi appears to be required to build libcxx.
+    # See: https://reviews.llvm.org/D63883
+    'libcxxabi',
 ]
 
 default_projects = ['clang', 'compiler-rt']
