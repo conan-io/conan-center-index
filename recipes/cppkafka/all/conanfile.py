@@ -48,12 +48,10 @@ class CppKafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.options["librdkafka"].shared = self.options.shared
 
     def requirements(self):
         self.requires("boost/1.78.0")
         self.requires("librdkafka/1.8.2")
-
 
     @property
     def _minimum_compilers_version(self):
@@ -88,16 +86,9 @@ class CppKafkaConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
         cmake.definitions["CPPKAFKA_BOOST_USE_MULTITHREADED"] = self.options.multithreaded
-        cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = not self.deps_cpp_info["librdkafka"].shared
+        cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
 
         cxx_flags = list()
-        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
-            cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=0")
-        elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
-            cxx_flags.append("-D_GLIBCXX_USE_CXX11_ABI=1")
-        if not self.options.shared:
-            cxx_flags.append("-DCPPKAFKA_STATIC")
-
         # disable max/min in Windows.h
         if self.settings.os == "Windows":
             cxx_flags.append("-DNOMINMAX")
@@ -109,8 +100,6 @@ class CppKafkaConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"${CMAKE_CURRENT_SOURCE_DIR}/cmake/\")", "")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
