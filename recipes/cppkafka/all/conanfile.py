@@ -64,11 +64,8 @@ class CppKafkaConan(ConanFile):
         cmake.definitions["CPPKAFKA_DISABLE_TESTS"] = True
         cmake.definitions["CPPKAFKA_DISABLE_EXAMPLES"] = True
         cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
-
-        # TODO: move to a patch
         if self.settings.os == "Windows":
             cmake.definitions["CMAKE_CXX_FLAGS"] = "-DNOMINMAX"
-
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
