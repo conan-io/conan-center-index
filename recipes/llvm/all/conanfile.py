@@ -3,10 +3,31 @@ from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os, shutil, glob
 
+# https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
 projects = [
-    'clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc',
-    'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir',
-    'openmp', 'parallel-libs', 'polly', 'pstl'
+    'clang',
+    'clang-tools-extra',
+    'libc',
+    'libclc',
+    'lld',
+    'lldb',
+    'openmp',
+    'polly',
+    'pstl',
+]
+runtimes = [
+    'compiler-rt',
+    'libc',
+    'libcxx',
+    'libcxxabi',
+    'libunwind',
+    'openmp',
+]
+default_projects = [
+    'clang',
+]
+default_runtimes = [
+    'libcxx',
 ]
 
 default_projects = ['clang', 'compiler-rt']
@@ -26,18 +47,24 @@ class Llvm(ConanFile):
     _source_subfolder = 'source_subfolder'
 
     options = {
-        **{'with_' + project: [True, False]
+        **{'with_project_' + project: [True, False]
            for project in projects},
+        **{"with_runtime_" + runtime: [True, False]
+           for runtime in runtimes},
         **{
             'fPIC': [True, False],
             'rtti': [True, False],
             'enable_debug': [True, False]
-        }
+        },
     }
     default_options = {
         **{
-            'with_' + project: project in default_projects
+            'with_project_' + project: project in default_projects
             for project in projects
+        },
+        **{
+            "with_runtime_" + runtime: runtime in default_runtimes
+            for runtime in runtimes
         },
         **{
             'fPIC': True,
@@ -69,14 +96,21 @@ class Llvm(ConanFile):
     def _cmake_configure(self):
         enabled_projects = [
             project for project in projects
-            if getattr(self.options, 'with_' + project)
+            if getattr(self.options, 'with_project_' + project)
+        ]
+        enabled_runtimes = [
+            runtime for runtime in runtimes
+            if getattr(self.options, 'with_runtime_' + runtime)
         ]
         self.output.info('Enabled LLVM subprojects: {}'.format(
             ', '.join(enabled_projects)))
+        self.output.info('Enabled LLVM runtimes: {}'.format(
+            ', '.join(enabled_runtimes)))
 
         cmake = CMake(self, parallel=False)
         cmake.configure(defs={
             'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
+            'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
             'LLVM_ENABLE_BINDINGS': False,
             'LLVM_ENABLE_RTTI': self.options.rtti,
         },
