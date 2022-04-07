@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -80,6 +81,7 @@ class CppKafkaConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
