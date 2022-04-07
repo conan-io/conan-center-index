@@ -41,10 +41,12 @@ class Llvm(ConanFile):
     _source_subfolder = 'source_subfolder'
 
     options = {**{ 'with_' + project : [True, False] for project in projects }, **{
-        'fPIC': [True, False]
+        'fPIC': [True, False],
+        'rtti': [True, False],
     }}
     default_options = {**{ 'with_' + project : project in default_projects for project in projects }, **{
-        'fPIC': True
+        'fPIC': True,
+        'rtti': True,
     }}
     generators = 'cmake_find_package'
 
@@ -76,6 +78,7 @@ class Llvm(ConanFile):
             defs = {
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_BINDINGS': False,
+                'LLVM_ENABLE_RTTI': self.options.rtti,
             },
             source_folder = os.path.join(self._source_subfolder, 'llvm')
         )
