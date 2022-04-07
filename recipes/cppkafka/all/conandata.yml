@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-cppstd.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-clean-rpath.patch"
+      base_path: "source_subfolder"
