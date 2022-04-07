@@ -119,6 +119,7 @@ class CppKafkaConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_cppkafka"].libs = ["cppkafka"]
+        self.cpp_info.components["_cppkafka"].requires = ["boost::headers", "librdkafka::librdkafka"]
         if self.settings.os == "Windows":
             if not self.options.shared:
                 self.cpp_info.components["_cppkafka"].system_libs = ["mswsock", "ws2_32"]
