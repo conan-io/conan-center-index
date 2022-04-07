@@ -4,7 +4,5 @@ sources:
     sha256: "f4f05eb7a180a856663b02ec0b777283275ef88e5523f3013fd51c6c4ab63b5a"
 patches:
   "0.4.0":
-    # this patch is needed to fix a compilation error in Visual Studio.
-    # https://github.com/mfontanini/cppkafka/issues/206#issuecomment-570204404
-    - patch_file: "patches/0.4.0-0001-fix-windows-dllimport-error.patch"
+    - patch_file: "patches/0001-no-template-export.patch"
       base_path: "source_subfolder"
