@@ -17,10 +17,12 @@ class CglmConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "header_only": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "header_only": False,
     }
 
     _cmake = None
@@ -42,6 +44,11 @@ class CglmConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.header_only:
+            del self.settings.arch
+            del self.settings.build_type
+            del self.settings.compiler
+            del self.settings.os
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -62,26 +69,31 @@ class CglmConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
-        cmake = self._configure_cmake()
-        cmake.install()
+        if self.options.header_only:
+            self.copy("*", src=os.path.join(self._source_subfolder, "include"), dst="include")
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cglm")
         self.cpp_info.set_property("cmake_target_name", "cglm::cglm")
         self.cpp_info.set_property("pkg_config_name", "cglm")
 
-        self.cpp_info.libs = ["cglm"]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.append("m")
+        if not self.options.header_only:
+            self.cpp_info.libs = ["cglm"]
+            if self.settings.os in ("Linux", "FreeBSD"):
+                self.cpp_info.system_libs.append("m")
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.names["pkg_config"] = "cglm"
