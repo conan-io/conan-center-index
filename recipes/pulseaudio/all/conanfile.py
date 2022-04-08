@@ -58,6 +58,7 @@ class PulseAudioConan(ConanFile):
         self.requires("libiconv/1.16")
         self.requires("libsndfile/1.0.31")
         self.requires("libcap/2.62")
+        self.requires("libtool/2.4.6")
         if self.options.with_alsa:
             self.requires("libalsa/1.2.5.1")
         if self.options.with_glib:
