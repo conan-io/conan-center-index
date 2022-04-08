@@ -72,7 +72,7 @@ class FreeImageConan(ConanFile):
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
