@@ -98,7 +98,7 @@ class grpcConan(ConanFile):
             # libabsl_time.a(duration.cc.o): undefined reference to symbol '_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7compareEPKc@@GLIBCXX_3.4.21'
             if (self.settings.os == "Linux" and self.settings.compiler == "gcc") and not self.options["abseil"].shared:
                 raise ConanInvalidConfiguration(
-                    "gRPC shared not supported yet without abseil shared"
+                    "gRPC shared not supported yet without abseil static"
                 )
 
             if self._is_msvc:
