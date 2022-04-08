@@ -67,7 +67,7 @@ class LibbacktraceConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     @contextlib.contextmanager
     def _build_context(self):
