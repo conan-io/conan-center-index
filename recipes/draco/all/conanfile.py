@@ -150,6 +150,11 @@ class DracoConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "draco"))
         else:
             tools.rmdir(os.path.join(self.package_folder, "share"))
+            if self.options.shared:
+                tools.remove_files_by_mask(
+                    os.path.join(self.package_folder, "lib"),
+                    "*draco.a",
+                )
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Draco"

@@ -1,6 +1,6 @@
 --- a/cmake/draco_install.cmake
 +++ b/cmake/draco_install.cmake
-@@ -70,14 +70,14 @@ macro(draco_setup_install_target)
+@@ -70,14 +70,12 @@ macro(draco_setup_install_target)
                    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
  
    if(MSVC)
@@ -8,10 +8,8 @@
 -                    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 +    install(TARGETS draco RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
    else()
-+    if(NOT BUILD_SHARED_LIBS)
      install(TARGETS draco_static DESTINATION
                      "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-+    endif()
      if(BUILD_SHARED_LIBS)
 -      install(TARGETS draco_shared DESTINATION
 -                      "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
