@@ -67,10 +67,6 @@ class LibbacktraceConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        # If using the experimental feature with different context for host and
-        # build, the 'user_info' attributes of the 'build_requires' packages
-        # will be located into the 'user_info_build' object. In other cases they
-        # will be located into the 'deps_user_info' object.
         return getattr(self, "user_info_build", None) or self.deps_user_info
 
     @contextlib.contextmanager
