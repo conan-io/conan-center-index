@@ -1,8 +1,8 @@
+import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class AvahiConan(ConanFile):
@@ -90,11 +90,13 @@ class AvahiConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Avahi")
         self.cpp_info.names["cmake_find_package"] = "Avahi"
         self.cpp_info.names["cmake_find_package_multi"] = "Avahi"
 
         for lib in ("client", "common", "core", "glib", "gobject", "libevent", "compat-libdns_sd"):
             avahi_lib = "avahi-{}".format(lib)
+            self.cpp_info.components[lib].set_property("cmake_target_name", "Avahi::{}".format(lib))
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].names["pkg_config"] = avahi_lib
@@ -112,6 +114,7 @@ class AvahiConan(ConanFile):
 
         for app in ("autoipd", "browse", "daemon", "dnsconfd", "publish", "resolve", "set-host-name"):
             avahi_app = "avahi-{}".format(app)
+            self.cpp_info.components[app].set_property("cmake_target_name", "Avahi::{}".format(app))
             self.cpp_info.components[app].names["cmake_find_package"] = app
             self.cpp_info.components[app].names["cmake_find_package_multi"] = app
             self.cpp_info.components[app].names["pkg_config"] = avahi_app
