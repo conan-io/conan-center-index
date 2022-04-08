@@ -1,12 +1,11 @@
 import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import conan.tools.files
 
 required_conan_version = ">=1.29.1"
 
 
-class IgnitionUitlsConan(ConanFile):
+class IgnitionToolsConan(ConanFile):
     name = "ignition-tools"
     license = "Apache-2.0"
     homepage = "https://ignitionrobotics.org/libs/tools"
@@ -66,7 +65,7 @@ class IgnitionUitlsConan(ConanFile):
                 )
 
     def source(self):
-        tools.get(**self.conan_data["sources"],destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is not None:
