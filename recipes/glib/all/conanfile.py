@@ -68,11 +68,11 @@ class GLibConan(ConanFile):
             del self.options.with_elf
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.61.2")
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
             self.requires("pcre/8.45")
@@ -99,7 +99,7 @@ class GLibConan(ConanFile):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        
+
         if tools.Version(self.version) < "2.69.0":
             defs["internal_pcre"] = not self.options.with_pcre
 
