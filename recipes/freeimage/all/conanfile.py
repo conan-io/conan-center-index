@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -94,6 +95,8 @@ class FreeImageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
+            if tools.valid_min_cppstd(self, "17"):
+                raise ConanInvalidConfiguration("freeimage relies on auto_ptr, removed in C++17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -110,6 +113,9 @@ class FreeImageConan(ConanFile):
         cmake.definitions["FREEIMAGE_WITH_RAW"] = self.options.with_raw
         cmake.definitions["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
         cmake.definitions["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
+        if tools.valid_min_cppstd(self, "17"):
+            # If default C++ standard of the compiler is C++17 or higher, force C++14 instead
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 14
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
