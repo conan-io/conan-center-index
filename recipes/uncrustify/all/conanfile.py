@@ -52,13 +52,15 @@ class UncrustifyConan(ConanFile):
 
         if self.settings.os == "Windows":
             shutil.move(os.path.join(self.package_folder, "uncrustify.exe"),
-                    os.path.join(self.package_folder, "bin"))
+                    os.path.join(self.package_folder, "bin", "uncrustify.exe"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
             os.remove(os.path.join(self.package_folder, "BUGS"))
+            os.remove(os.path.join(self.package_folder, "COPYING"))
             os.remove(os.path.join(self.package_folder, "ChangeLog"))
             os.remove(os.path.join(self.package_folder, "HELP"))
             os.remove(os.path.join(self.package_folder, "README.md"))
             tools.rmdir(os.path.join(self.package_folder, "cfg"))
+            tools.rmdir(os.path.join(self.package_folder, "doc"))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
