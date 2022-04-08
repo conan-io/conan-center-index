@@ -52,7 +52,7 @@ class UncrustifyConan(ConanFile):
 
         if self.settings.os == "Windows":
             shutil.move(os.path.join(self.package_folder, "uncrustify.exe"),
-                    os.path.join(self.package_folder, "bin", "uncrustify.exe"))
+                    os.path.join(self.package_folder, "bin"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
             os.remove(os.path.join(self.package_folder, "BUGS"))
             os.remove(os.path.join(self.package_folder, "ChangeLog"))
