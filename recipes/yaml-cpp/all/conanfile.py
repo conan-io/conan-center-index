@@ -1,7 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -121,7 +121,7 @@ class YamlCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaml-cpp")
-        self.cpp_info.set_property("cmake_target_name", "yaml-cpp")
+        self.cpp_info.set_property("cmake_target_name", "yaml-cpp::yaml-cpp")
         self.cpp_info.set_property("pkg_config_name", "yaml-cpp")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
