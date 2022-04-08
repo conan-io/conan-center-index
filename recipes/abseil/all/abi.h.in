@@ -1,0 +1,5 @@
+#cmakedefine01 USE_STD_STRING_VIEW
+#cmakedefine01 USE_STD_ANY
+#cmakedefine01 USE_STD_OPTIONAL
+#cmakedefine01 USE_STD_VARIANT
+

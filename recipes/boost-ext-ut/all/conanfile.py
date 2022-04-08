@@ -1,24 +1,27 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
-    description = ("C++17/20 single header/single module, "
+    description = ("C++20 single header/single module, "
                    "macro-free micro Unit Testing Framework")
-    topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("ut", "header-only", "unit-test", "test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
     license = "BSL-1.0"
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
+    options = { "disable_module": [True, False], }
+    default_options = { "disable_module": False, }
+    _cmake = None
 
     @property
     def _minimum_cpp_standard(self):
-        return 17 if self.settings.compiler in ["clang", "gcc"] else 20
+        return 17 if self.settings.compiler in ["clang", "gcc"] and tools.Version(self.version) <= "1.1.8" else 20
 
     @property
     def _minimum_compilers_version(self):
@@ -30,13 +33,16 @@ class UTConan(ConanFile):
             "Visual Studio": "16",
         }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        if tools.Version(self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
+            raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
+                                            "Please use at least version 1.1.9 with MSVC.")
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
@@ -52,17 +58,43 @@ class UTConan(ConanFile):
                         self.settings.compiler,
                         self.settings.compiler.version))
 
+    def config_options(self):
+        if tools.Version(self.version) <= "1.1.8":
+            del self.options.disable_module
+
+    def configure(self):
+        if self.settings.compiler in ["msvc", "Visual Studio"]:
+            if "disable_module" in self.options.values:
+                self.options.disable_module = True
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ut-" + self.version, self._source_subfolder)
-        tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
-                       sha256="c9bff75738922193e67fa726fa225535870d2aa1059f914"
-                       "52c411736284ad566")
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BOOST_UT_BUILD_BENCHMARKS"] = False
+        self._cmake.definitions["BOOST_UT_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BOOST_UT_BUILD_TESTS"] = False
+        self._cmake.definitions["PROJECT_DISABLE_VERSION_SUFFIX"] = True
+        disable_module = self.options.get_safe("disable_module")
+        if disable_module:
+            self._cmake.definitions["BOOST_UT_DISABLE_MODULE"] = disable_module
+        self._cmake.configure()
+        return self._cmake
+    
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
-        self.copy(os.path.join("include", "boost", "ut.hpp"),
-                  src=self._source_subfolder)
+        self.copy("LICENSE*", dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_id(self):
         self.info.header_only()
@@ -77,3 +109,9 @@ class UTConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
+
+        if tools.Version(self.version) > "1.1.8":
+            self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + self.version, "include")]
+
+        if self.options.get_safe("disable_module"):
+            self.cpp_info.components["ut"].defines = ["BOOST_UT_DISABLE_MODULE=1"]
