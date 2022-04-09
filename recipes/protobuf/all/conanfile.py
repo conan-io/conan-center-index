@@ -121,7 +121,7 @@ class ProtobufConan(ConanFile):
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        if self._is_clang_cl:
+        if tools.Version(self.version) < "3.18.0" and self._is_clang_cl:
             cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
