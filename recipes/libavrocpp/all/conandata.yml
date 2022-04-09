@@ -1,20 +1,23 @@
 sources:
-  "1.10.1":
-    url: "https://github.com/apache/avro/archive/release-1.10.1.tar.gz"
-    sha256: "8fd1f850ce37e60835e6d8335c0027a959aaa316773da8a9660f7d33a66ac142"
+  "1.11.0":
+    url: "https://github.com/apache/avro/archive/release-1.11.0.tar.gz"
+    sha256: "c205140e7936d552286ba7131122a34e522d66f601ee912f272109d801f89773"
   "1.10.2":
     url: "https://github.com/apache/avro/archive/release-1.10.2.tar.gz"
     sha256: "c849ef7f7af58ce66e7b999b8d9815507d69ae434e7e058a44f7818515455a03"
-patches:
   "1.10.1":
+    url: "https://github.com/apache/avro/archive/release-1.10.1.tar.gz"
+    sha256: "8fd1f850ce37e60835e6d8335c0027a959aaa316773da8a9660f7d33a66ac142"
+patches:
+  "1.11.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-add-iterator-include.patch"
+      patch_file: "patches/0001-add-iterator-include-1-11-0.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/0002-disable-tests-1-10-1.patch"
+      patch_file: "patches/0002-disable-tests-1-11-0.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/0003-allow-static-boost-linkage.patch"
+      patch_file: "patches/0003-allow-static-boost-linkage-1-11-0.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/0004-fix-windows-shared-installation-1-10-1.patch"
+      patch_file: "patches/0004-fix-windows-shared-installation-1-11-0.patch"
   "1.10.2":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-add-iterator-include.patch"
@@ -24,3 +27,12 @@ patches:
       patch_file: "patches/0003-allow-static-boost-linkage.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0004-fix-windows-shared-installation-1-10-2.patch"
+  "1.10.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-add-iterator-include.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-disable-tests-1-10-1.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-allow-static-boost-linkage.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-fix-windows-shared-installation-1-10-1.patch"
