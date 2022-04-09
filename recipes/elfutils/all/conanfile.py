@@ -62,7 +62,7 @@ class ElfutilsConan(ConanFile):
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
                             "elfutils only supports gcc and clang" % self.settings.compiler)
         else:
-            if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
+            if self.settings.compiler in ["Visual Studio", "clang", "apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
                             "elfutils only supports gcc" % self.settings.compiler)
         if self.settings.compiler != "gcc":
