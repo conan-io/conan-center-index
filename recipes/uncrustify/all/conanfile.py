@@ -1,7 +1,7 @@
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 required_conan_version = ">=1.43.0"
 
@@ -51,8 +51,9 @@ class UncrustifyConan(ConanFile):
         cmake.install()
 
         if self.settings.os == "Windows":
-            shutil.move(os.path.join(self.package_folder, "uncrustify.exe"),
-                    os.path.join(self.package_folder, "bin", "uncrustify.exe"))
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
+                         os.path.join(self.package_folder, "bin", "uncrustify.exe"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
             os.remove(os.path.join(self.package_folder, "BUGS"))
             os.remove(os.path.join(self.package_folder, "COPYING"))
