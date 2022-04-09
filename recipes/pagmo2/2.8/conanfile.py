@@ -12,7 +12,6 @@ class Pagmo2Conan(ConanFile):
     topics = ("pagmo", "optimization", "parallel-computing", "genetic-algorithm", "metaheuristics")
     homepage = "https://esa.github.io/pagmo2"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["patches/*", "CMakeLists.txt", "include/*"]
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -32,6 +31,11 @@ class Pagmo2Conan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         self.requires("boost/1.78.0")
