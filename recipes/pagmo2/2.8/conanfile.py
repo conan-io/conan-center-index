@@ -39,7 +39,7 @@ class Pagmo2Conan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.78.0")
-        self.requires("tbb/2020.3")
+        self.requires("onetbb/2020.3")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_nlopt:
