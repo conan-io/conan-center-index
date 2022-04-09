@@ -8,7 +8,7 @@ index c2dd85f3..cc83e707 100644
          PRIVATE
 -            SPIRV
 -            glslang
-+            spirv-tools::SPIRV-Tools-opt
++            SPIRV-Tools-opt
 +            glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL
          )
      endif()
