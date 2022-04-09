@@ -91,7 +91,7 @@ class Pagmo2Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pagmo")
         self.cpp_info.set_property("cmake_target_name", "Pagmo::pagmo")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["_pagmo"].requires = ["boost::headers", "boost::serialization", "tbb::tbb"]
+        self.cpp_info.components["_pagmo"].requires = ["boost::headers", "boost::serialization", "onetbb::onetbb"]
         if self.options.with_eigen:
             self.cpp_info.components["_pagmo"].requires.append("eigen::eigen")
         if self.options.with_nlopt:
