@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -31,7 +32,6 @@ class Pagmo2Conan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -105,20 +105,19 @@ class Pagmo2Conan(ConanFile):
         tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
         tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PAGMO_BUILD_TESTS"] = False
-        self._cmake.definitions["PAGMO_BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["PAGMO_BUILD_TUTORIALS"] = False
-        self._cmake.definitions["PAGMO_WITH_EIGEN3"] = self.options.with_eigen
-        self._cmake.definitions["PAGMO_WITH_NLOPT"] = self.options.with_nlopt
-        self._cmake.definitions["PAGMO_WITH_IPOPT"] = self.options.with_ipopt
-        self._cmake.definitions["PAGMO_ENABLE_IPO"] = False
-        self._cmake.definitions["PAGMO_BUILD_STATIC_LIBRARY"] = not self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["PAGMO_BUILD_TESTS"] = False
+        cmake.definitions["PAGMO_BUILD_BENCHMARKS"] = False
+        cmake.definitions["PAGMO_BUILD_TUTORIALS"] = False
+        cmake.definitions["PAGMO_WITH_EIGEN3"] = self.options.with_eigen
+        cmake.definitions["PAGMO_WITH_NLOPT"] = self.options.with_nlopt
+        cmake.definitions["PAGMO_WITH_IPOPT"] = self.options.with_ipopt
+        cmake.definitions["PAGMO_ENABLE_IPO"] = False
+        cmake.definitions["PAGMO_BUILD_STATIC_LIBRARY"] = not self.options.shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
