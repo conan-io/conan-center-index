@@ -1,0 +1,8 @@
+sources:
+  "2.8":
+    url: "https://github.com/esa/pagmo2/archive/refs/tags/v2.8.tar.gz"
+    sha256: "7eec84a0d6a1e4b99def01241f52678e749c16b0055d386d1a71d3ea8b8d2589"
+patches:
+  "2.8":
+    - patch_file: "patches/0001-fix-cmake-module-path-2-8.patch"
+      base_path: "source_subfolder" 
