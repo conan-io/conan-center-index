@@ -50,10 +50,10 @@ class LibkmlConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.78.0")
-        self.requires("expat/2.4.2")
-        self.requires("minizip/1.2.11")
+        self.requires("expat/2.4.8")
+        self.requires("minizip/1.2.12")
         self.requires("uriparser/0.9.6")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.options.shared and \
