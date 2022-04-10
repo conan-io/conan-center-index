@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conan.tools.microsoft import is_msvc
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -57,8 +58,7 @@ class TomlPlusPlusConan(ConanFile):
             raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
                     self.settings.compiler, self.settings.compiler.version))
         
-        if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.version) == "2.1.0":
+        if is_msvc(self) and tools.Version(self.version) == "2.1.0":
                 raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
                         self.settings.compiler, self.settings.compiler.version))
 
