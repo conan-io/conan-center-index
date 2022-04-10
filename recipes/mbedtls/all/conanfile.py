@@ -58,7 +58,7 @@ class MBedTLSConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if tools.Version(self.version) >= "2.23.0" \
