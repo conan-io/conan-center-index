@@ -1,5 +1,6 @@
 versions:
   "2.17.0":
     folder: all
-  "2.8":
-    folder: 2.8
+  "2.10":
+    folder: pre_2.11
+
