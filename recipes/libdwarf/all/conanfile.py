@@ -79,8 +79,6 @@ class LibdwarfConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "libdwarf"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.libs = ["dwarf"]
