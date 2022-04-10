@@ -1,0 +1,8 @@
+sources:
+  "13.0.0":
+    url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang-13.0.0.src.tar.xz"
+    sha256: "5d611cbb06cfb6626be46eb2f23d003b2b80f40182898daa54b1c4e8b5b9e17e"
+patches:
+  "13.0.0":
+    - patch_file: "patches/0001-add-build-standalone-option.patch"
+      base_path: "source_subfolder"

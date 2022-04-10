@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,7 +2,7 @@
+ 
+ # If we are not building as a part of LLVM, build Clang as an
+ # standalone project, using LLVM as an external library:
+-if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
++if( CLANG_BUILT_STANDALONE )
+   project(Clang)
+ 
+   set(CMAKE_CXX_STANDARD 14 CACHE STRING "C++ standard to conform to")
