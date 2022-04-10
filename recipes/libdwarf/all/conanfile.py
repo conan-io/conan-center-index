@@ -50,7 +50,7 @@ class LibdwarfConan(ConanFile):
 
     def requirements(self):
         self.requires("libelf/0.8.13")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
