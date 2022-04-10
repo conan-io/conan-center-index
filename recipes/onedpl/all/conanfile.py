@@ -32,7 +32,7 @@ class OneDplConan(ConanFile):
 
     def requirements(self):
         if self.options.backend == "tbb":
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def package_id(self):
         self.info.header_only()
@@ -62,4 +62,4 @@ class OneDplConan(ConanFile):
         self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = "ParallelSTL"
         self.cpp_info.components["_onedpl"].set_property("cmake_target_name", "pstl::ParallelSTL")
         if self.options.backend == "tbb":
-            self.cpp_info.components["_onedpl"].requires = ["tbb::tbb"]
+            self.cpp_info.components["_onedpl"].requires = ["onetbb::onetbb"]
