@@ -30,11 +30,11 @@ class GDCMConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return "src"
 
     @property
     def _build_subfolder(self):
-        return "build_subfolder"
+        return "build"
 
     @property
     def _is_msvc(self):
