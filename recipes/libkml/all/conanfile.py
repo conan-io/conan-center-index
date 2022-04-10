@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
@@ -25,7 +26,6 @@ class LibkmlConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -71,12 +71,13 @@ class LibkmlConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        # To install relocatable shared libs on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
