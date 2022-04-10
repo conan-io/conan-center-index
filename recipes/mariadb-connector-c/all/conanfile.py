@@ -106,6 +106,8 @@ class MariadbConnectorcConan(ConanFile):
         self._cmake.definitions["INSTALL_BINDIR"] = "bin"
         self._cmake.definitions["INSTALL_LIBDIR"] = "lib"
         self._cmake.definitions["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure()
         return self._cmake
 
