@@ -1608,10 +1608,10 @@ index 5018e65ce..709bd0ee4 100644
  # if !defined(vms)
 diff --git a/cmake/checks.cmake b/cmake/checks.cmake
 new file mode 100644
-index 000000000..907179ee6
+index 000000000..446b25e8b
 --- /dev/null
 +++ b/cmake/checks.cmake
-@@ -0,0 +1,1043 @@
+@@ -0,0 +1,1041 @@
 +include(CheckIncludeFile)
 +include(CheckIncludeFiles)
 +include(CheckSymbolExists)
@@ -2247,9 +2247,7 @@ index 000000000..907179ee6
 +
 +  # Check if `vsnprintf' exists
 +  check_symbol_exists(vsnprintf stdio.h HAVE_VSNPRINTF)
-+  if(NOT HAVE_VSNPRINTF)
-+    check_function_exists(vsnprintf HAVE_DECL_VSNPRINTF)
-+  endif()
++  check_function_exists(vsnprintf HAVE_DECL_VSNPRINTF)
 +
 +  # Check if `vsnprintf_l' exists
 +  check_symbol_exists(vsnprintf_l stdio.h HAVE_VSNPRINTF_L)
