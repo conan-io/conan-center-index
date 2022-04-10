@@ -79,12 +79,12 @@ class grpcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires('zlib/1.2.11')
-        self.requires('openssl/1.1.1m')
-        self.requires('protobuf/3.19.2')
-        self.requires('c-ares/1.17.2')
-        self.requires('abseil/20211102.0')
-        self.requires('re2/20211101')
+        self.requires("abseil/20211102.0")
+        self.requires("c-ares/1.18.1")
+        self.requires("openssl/1.1.1n")
+        self.requires("protobuf/3.19.2")
+        self.requires("re2/20220201")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
