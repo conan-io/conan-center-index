@@ -62,7 +62,7 @@ class ITKConan(ConanFile):
         self.requires("expat/2.4.8")
         self.requires("fftw/3.3.9")
         self.requires("gdcm/3.0.9")
-        self.requires("hdf5/1.12.1")
+        self.requires("hdf5/1.12.0")
         self.requires("icu/71.1") # TODO: to remove? Seems to be a transitivie dependency through dcmtk
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
