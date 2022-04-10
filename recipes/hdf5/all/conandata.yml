@@ -5,12 +5,21 @@ sources:
   "1.12.0":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_12_0.tar.gz"
     sha256: "c64ffec2539ae6b6041f97952a40b0893c3c0df4d5b1c0177fb8aba567808158"
+  "1.10.8":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_8.tar.gz"
+    sha256: "6fcaf2e5f10bb758d2d5fafa7bd0fd560d4047faf6b397fe1278c06e4e9f3564   "
+  "1.10.7":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_7.tar.gz"
+    sha256: "a1b7c2a477090508365d79bb1356d995a90d5c75e9e3ff0f2bd09d54d8a225d0"
   "1.10.6":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_6.tar.gz"
     sha256: "e524b374b1c6f14f1aa87595c0761608c861fe7838549dab84639ae564ff48e8"
   "1.10.5":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_5.tar.gz"
     sha256: "22a4a48f94b013e9fd482c0bb0251de02ff9963787a107c5dde26a3f903b3b90"
+  "1.8.22":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_22.tar.gz"
+    sha256: "afad23abf0935a39840745222adb71ca08d59db12b2a7eb3679e15b2aac52ec4"
   "1.8.21":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
@@ -19,6 +28,20 @@ patches:
     - patch_file: "patches/conanize-link-szip-1.12.1+.patch"
       base_path: "source_subfolder"
   "1.12.0":
+    - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
+      base_path: "source_subfolder"
+  "1.10.8":
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.6.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
+      base_path: "source_subfolder"
+  "1.10.7":
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-missing-function-prototypes-1.10.6.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
       base_path: "source_subfolder"
   "1.10.6":
@@ -40,6 +63,15 @@ patches:
     - patch_file: "patches/mingw-fix-prefix-lib.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/mingw-unused-ellipses.patch"
+      base_path: "source_subfolder"
+  "1.8.22":
+    - patch_file: "patches/conanize-link-szip-1.8.21.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/build-either-static-or-shared-1.8.21.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/mingw-cmake-size-type-checks-1.8.21.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/mingw-fix-prefix-lib.patch"
       base_path: "source_subfolder"
   "1.8.21":
     - patch_file: "patches/conanize-link-szip-1.8.21.patch"
