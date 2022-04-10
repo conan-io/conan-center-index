@@ -68,19 +68,19 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         elif self.options.with_ssl == "libressl":
-            self.requires("libressl/3.2.1")
+            self.requires("libressl/3.4.3")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.with_icu:
-            self.requires("icu/70.1")
+            self.requires("icu/71.1")
 
     def validate(self):
         if self.options.with_ssl == "darwin" and not tools.is_apple_os(self.settings.os):
