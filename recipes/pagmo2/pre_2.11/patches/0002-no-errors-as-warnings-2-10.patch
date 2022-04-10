@@ -1,0 +1,22 @@
+diff --git a/ap_examples/udp_basic/cmake_modules/yacma/YACMACompilerLinkerSettings.cmake b/ap_examples/udp_basic/cmake_modules/yacma/YACMACompilerLinkerSettings.cmake
+index 5f27fd26..0b0e1c5e 100644
+--- a/ap_examples/udp_basic/cmake_modules/yacma/YACMACompilerLinkerSettings.cmake
++++ b/ap_examples/udp_basic/cmake_modules/yacma/YACMACompilerLinkerSettings.cmake
+@@ -96,7 +96,6 @@ if(NOT _YACMACompilerLinkerSettingsRun)
+         # for the time being.
+         _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(-Wshadow)
+         # Clang is better at this flag than GCC.
+-        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(-Werror)
+     endif()
+ 
+     # Common configuration for GCC, clang and Intel.
+@@ -132,9 +131,7 @@ if(NOT _YACMACompilerLinkerSettingsRun)
+     # MSVC setup.
+     if(YACMA_COMPILER_IS_MSVC)
+         # Enable higher warning level than usual.
+-        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)
+         # Treat warnings as errors.
+-        _YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)
+     endif()
+ 
+     # Set the cache variables.
