@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException
+import functools
 import requests
 
 required_conan_version = ">=1.33.0"
@@ -26,13 +27,16 @@ class LibnovaConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,13 +75,12 @@ class LibnovaConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBRARY"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_SHARED_LIBRARY"] = self.options.shared
+        cmake.configure()
+        return cmake
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)

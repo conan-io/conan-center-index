@@ -27,6 +27,7 @@ class AngelScriptConan(ConanFile):
         "no_exceptions": False,
     }
 
+    short_paths = True
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None

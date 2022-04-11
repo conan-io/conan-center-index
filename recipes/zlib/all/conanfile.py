@@ -62,11 +62,6 @@ class ZlibConan(ConanFile):
             tools.patch(**patch)
 
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268
-            tools.replace_in_file('gzguts.h',
-                                  '#if defined(_WIN32) || defined(__CYGWIN__)',
-                                  '#if defined(_WIN32) || defined(__MINGW32__)')
-
             is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
             if not is_apple_clang12:
                 for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
@@ -101,14 +96,14 @@ class ZlibConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
-                if self._is_msvc and suffix:
+                if (self._is_msvc or self.settings.compiler == "clang") and suffix:
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
-                if self._is_msvc:
+                if self._is_msvc or self.settings.compiler == "clang":
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler in ("clang", "gcc", ):
+                elif self.settings.compiler == "gcc":
                     if not self.settings.os.subsystem:
                         current_lib = os.path.join(lib_path, "libzlibstatic.a")
                         tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))

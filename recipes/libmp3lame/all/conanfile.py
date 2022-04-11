@@ -81,7 +81,11 @@ class LibMP3LameConan(ConanFile):
     def _build_vs(self):
         with self._msvc_build_environment():
             shutil.copy("configMS.h", "config.h")
+            # Honor vc runtime
             tools.replace_in_file("Makefile.MSVC", "CC_OPTS = $(CC_OPTS) /MT", "")
+            # Do not hardcode LTO
+            tools.replace_in_file("Makefile.MSVC", " /GL", "")
+            tools.replace_in_file("Makefile.MSVC", " /LTCG", "")
             command = "nmake -f Makefile.MSVC comp=msvc asm=yes"
             if self.settings.arch == "x86_64":
                 tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")

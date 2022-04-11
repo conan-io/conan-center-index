@@ -9,3 +9,7 @@ versions:
     folder: all
   "23.0":
     folder: all
+  "24.2":
+    folder: all
+  "25.0":
+    folder: all

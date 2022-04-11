@@ -6,8 +6,8 @@ import shutil
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _test_shared_library(self):
@@ -32,6 +32,6 @@ class TestPackageConan(ConanFile):
         for fn in glob.glob(os.path.join("lib", "*")):
             shutil.copy(src=fn, dst="bin")
             shutil.copy(src=fn, dst=".")
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

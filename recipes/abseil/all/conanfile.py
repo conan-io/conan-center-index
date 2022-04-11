@@ -39,6 +39,7 @@ class AbseilConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        self.copy("abi.h.in")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -77,6 +78,17 @@ class AbseilConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
+        abi_h = tools.load("abi.h")
+        abi = dict()
+        for line in abi_h.splitlines():
+            if line.startswith("#define"):
+                tokens = line.split()
+                if len(tokens) == 3:
+                    abi[tokens[1]] = tokens[2]
+        for name, value in abi.items():
+            tools.replace_in_file(os.path.join(self._source_subfolder, "absl", "base", "options.h"),
+                    "#define ABSL_OPTION_{} 2".format(name),
+                    "#define ABSL_OPTION_{} {}".format(name, value))
         cmake.build()
 
     def package(self):

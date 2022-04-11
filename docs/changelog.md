@@ -1,5 +1,32 @@
 # Changelog
 
+### 31-March-2022 - 11:55 CEST
+
+- [config] Upgrade Conan client version to 1.45.0.
+
+### 25-March-2022 - 09:54 CET
+
+- [feature] Updated CMake version to 3.20 only in MacOS machines.
+- [feature] Collect requirements from test_package as well.
+- [feature] Make the conan-center-bot write a comment after merging a `Bump version` or `Bump dependencies` labeled pull request.
+- [feature] Allow SecheduledExportCheck job to report in any issue.
+- [feature] DSL: Add cron triggers to some jobs.
+- [feature] DSL: Disable concurrent builds on some jobs.
+- [feature] Adapt paths for Ansible machines.
+- [bugfix] Fix wrong log links in conan-center-bot message.
+- [fix] Use consistent slashes in paths.
+- [fix] Fix alert for job cancellation.
+
+### 09-March-2022 - 13:37 CET
+
+- [feature] Merge pull-requests that bump version automatically.
+- [feature] Get requirements from `conan info --dry-build` command.
+- [feature] Use reference with recipe revision for `conan info` commands.
+- [feature] Add possibility to load the configuration from file.
+- [fix] Fix DSL typo for access request job.
+- [fix] Removed retries from pull-request builds (introduced long ago to avoid timeout issues).
+- [refactor] Completely remove resource locking for executors.
+
 ### 24-February-2022 - 14:03 CET
 
 - [fix] Fix encoding issues in `summary.html` file.

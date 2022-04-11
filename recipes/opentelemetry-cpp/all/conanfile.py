@@ -14,14 +14,14 @@ class OpenTelemetryCppConan(ConanFile):
     homepage = "https://github.com/open-telemetry/opentelemetry-cpp"
     description = "The C++ OpenTelemetry API and SDK"
     requires = [
-        "abseil/20210324.2",
-        "grpc/1.37.1",
-        "libcurl/7.79.1",
-        "nlohmann_json/3.10.4",
+        "abseil/20211102.0",
+        "grpc/1.44.0",
+        "libcurl/7.80.0",
+        "nlohmann_json/3.10.5",
+        "openssl/1.1.1m",
         "opentelemetry-proto/0.11.0",
-        "openssl/1.1.1l",
-        "protobuf/3.17.1",
-        "thrift/0.14.2"
+        "protobuf/3.19.2",
+        "thrift/0.14.2",
     ]
     topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     generators = "cmake", "cmake_find_package_multi"
@@ -90,11 +90,13 @@ class OpenTelemetryCppConan(ConanFile):
 
         self._cmake = CMake(self)
         defs = {
+          "BUILD_TESTING": False,
           "WITH_ABSEIL": True,
-          "WITH_OTLP": True,
-          "WITH_JAEGER": True,
+          "WITH_ETW": True,
           "WITH_EXAMPLES": False,
-          "BUILD_TESTING": False
+          "WITH_JAEGER": True,
+          "WITH_OTLP": True,
+          "WITH_ZIPKIN": True,
         }
         self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
         return self._cmake
@@ -140,19 +142,26 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _otel_libraries(self):
-        return [
-            "opentelemetry_version",
-            "opentelemetry_exporter_otlp_grpc",
-            "opentelemetry_exporter_otlp_http",
+        libraries = [
+            "http_client_curl",
+            "opentelemetry_common",
+            "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_jaeger_trace",
             "opentelemetry_exporter_ostream_span",
+            "opentelemetry_exporter_otlp_grpc",
+            "opentelemetry_exporter_otlp_http",
+            "opentelemetry_exporter_zipkin_trace",
             "opentelemetry_otlp_recordable",
             "opentelemetry_proto",
-            "opentelemetry_trace",
             "opentelemetry_resources",
-            "opentelemetry_common",
-            "http_client_curl"
+            "opentelemetry_trace",
+            "opentelemetry_version",
         ]
+        if self.settings.os == "Windows":
+            libraries.extend([
+                "opentelemetry_exporter_etw",
+            ])
+        return libraries
 
     def package_info(self):
         for lib in self._otel_libraries:
@@ -161,49 +170,68 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._otel_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._otel_build_modules
 
+        self.cpp_info.components["http_client_curl"].requires.extend(["libcurl::libcurl"])
+
+        self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_ABSEIL")
+        self.cpp_info.components["opentelemetry_common"].requires.extend([
+            "abseil::abseil",
+        ])
+
+        if self.settings.os == "Windows":
+            self.cpp_info.components["opentelemetry_exporter_etw"].libs = []
+            self.cpp_info.components["opentelemetry_exporter_etw"].requires.extend([
+                "nlohmann_json::nlohmann_json",
+            ])
+
+        self.cpp_info.components["opentelemetry_exporter_in_memory"].libs = []
+
+        self.cpp_info.components["opentelemetry_exporter_jaeger_trace"].requires.extend([
+            "http_client_curl",
+            "openssl::openssl",
+            "opentelemetry_resources",
+            "thrift::thrift",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_ostream_span"].requires.extend([
+            "opentelemetry_trace",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
+            "grpc::grpc++",
+            "opentelemetry_otlp_recordable",
+            "protobuf::protobuf",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
+            "http_client_curl",
+            "nlohmann_json::nlohmann_json",
+            "opentelemetry_otlp_recordable",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_zipkin_trace"].requires.extend([
+            "http_client_curl",
+            "nlohmann_json::nlohmann_json",
+            "opentelemetry_trace",
+        ])
+
+        self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
+            "opentelemetry_proto",
+            "opentelemetry_resources",
+            "opentelemetry_trace",
+        ])
+
         self.cpp_info.components["opentelemetry_proto"].requires.extend([
             "opentelemetry-proto::opentelemetry-proto",
             "protobuf::protobuf",
         ])
 
-        self.cpp_info.components["opentelemetry_resources"].requires.extend(["opentelemetry_common"])
-        self.cpp_info.components["http_client_curl"].requires.extend(["libcurl::libcurl"])
-
-        self.cpp_info.components["opentelemetry_common"].requires.extend(["abseil::abseil"])
-        self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_ABSEIL")
-
-        self.cpp_info.components["opentelemetry_exporter_ostream_span"].requires.extend([
-            "opentelemetry_trace"
+        self.cpp_info.components["opentelemetry_resources"].requires.extend([
+            "opentelemetry_common",
         ])
 
         self.cpp_info.components["opentelemetry_trace"].requires.extend([
             "opentelemetry_common",
             "opentelemetry_resources",
-        ])
-
-        self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
-            "opentelemetry_trace",
-            "opentelemetry_resources",
-            "opentelemetry_proto"
-        ])
-
-        self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
-            "opentelemetry_otlp_recordable",
-            "http_client_curl",
-            "nlohmann_json::nlohmann_json"
-        ])
-
-        self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
-            "opentelemetry_otlp_recordable",
-            "protobuf::protobuf",
-            "grpc::grpc",
-        ])
-
-        self.cpp_info.components["opentelemetry_exporter_jaeger_trace"].requires.extend([
-            "opentelemetry_resources",
-            "http_client_curl",
-            "thrift::thrift",
-            "openssl::openssl",
         ])
 
         if self.settings.os in ("Linux", "FreeBSD"):

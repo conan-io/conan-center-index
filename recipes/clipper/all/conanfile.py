@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
+import requests
 
 required_conan_version = ">=1.36.0"
 
@@ -9,7 +11,7 @@ class ClipperConan(ConanFile):
     description = "Clipper is an open source freeware polygon clipping library"
     topics = ("clipper", "clipping", "polygon")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/skyrpex/clipper"
+    homepage = "http://www.angusj.com/delphi/clipper.php"
     license = "BSL-1.0"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -46,14 +48,40 @@ class ClipperConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @staticmethod
+    def _generate_git_tag_archive_sourceforge(url, timeout=10, retry=2):
+        def try_post(retry_count):
+            try:
+                requests.post(url, timeout=timeout)
+            except:
+                if retry_count < retry:
+                    try_post(retry_count + 1)
+                else:
+                    raise ConanException("All the attempt to generate archive url have failed.")
+        try_post(0)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        conan_data_version = self.conan_data["sources"][self.version]
+        if "post" in conan_data_version["url"]:
+            # Generate the archive download link
+            self._generate_git_tag_archive_sourceforge(
+                conan_data_version["url"]["post"],
+            )
+
+            # Download archive
+            archive_url = conan_data_version["url"]["archive"]
+            sha256 = conan_data_version["sha256"]
+            tools.get(url=archive_url, sha256=sha256,
+                      destination=self._source_subfolder, strip_root=True)
+        else:
+            tools.get(**conan_data_version, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

@@ -45,7 +45,7 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.2")
+        self.requires("expat/2.4.6")
         if self.options.with_glib:
             self.requires("glib/2.70.1")
         if self.options.get_safe("with_x11"):
@@ -63,6 +63,7 @@ class DbusConan(ConanFile):
             args.append("--disable-doxygen-docs")
             args.append("--disable-xml-docs")
 
+            args.append("--with-x=%s" % ("yes" if self.options.get_safe("with_x11", False) else "no"))
             args.append("--%s-x11-autolaunch" % ("enable" if self.options.get_safe("with_x11", False) else "disable"))
             args.append("--disable-asserts")
             args.append("--disable-checks")

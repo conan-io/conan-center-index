@@ -15,6 +15,9 @@
 #ifdef BUILD_WITH_FFMPEF
 #include <opencv2/videoio.hpp>
 #endif
+#ifdef BUILT_CONTRIB_SFM
+#include <opencv2/sfm.hpp>
+#endif
 
 #define w 400
 
@@ -28,6 +31,7 @@ void MyLine( Mat img, Point start, Point end );
 // to test `with_ade` option
 void TestGAPI();
 void TestVideo();
+void TestSFM();
 
 /**
  * @function main
@@ -84,6 +88,7 @@ int main( void ){
   //![draw_rook]
   TestGAPI();
   TestVideo();
+  TestSFM();
 
   return(0);
 }
@@ -216,5 +221,14 @@ void TestVideo()
 #ifdef BUILD_WITH_FFMPEG
     if (!videoio_registry::hasBackend(CAP_FFMPEG))
         throw std::runtime_error("FFmpeg backend was not found");
+#endif
+}
+
+void TestSFM()
+{
+#ifdef BUILT_CONTRIB_SFM
+  Vec3f a;
+  a << 1,2,3;
+  Matx33f ax = sfm::skew(a);
 #endif
 }

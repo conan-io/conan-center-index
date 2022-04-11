@@ -115,10 +115,10 @@ index 941a006..34d3242 100644
 -    ZLib
 +PRIVATE
 +    diligent-core::diligent-core
-+    CONAN_PKG::libpng
-+    CONAN_PKG::libtiff
-+    CONAN_PKG::zlib
-+    CONAN_PKG::libjpeg
++    JPEG::JPEG
++    PNG::PNG
++    TIFF::TIFF
++    ZLIB::ZLIB
  )
  
  if (NOT DILIGENT_EXTERNAL_LIBJPEG)

@@ -78,7 +78,7 @@ index 11e7294..0119ba7 100644
  			*/
  			s_plugins->AddNode(InitBMP);
  			s_plugins->AddNode(InitICO);
-+#if WITH_JPEG
++#if FREEIMAGE_WITH_JPEG
  			s_plugins->AddNode(InitJPEG);
 +#endif
  			s_plugins->AddNode(InitJNG);
@@ -88,14 +88,14 @@ index 11e7294..0119ba7 100644
  			s_plugins->AddNode(InitPCX);
  			s_plugins->AddNode(InitPNM, NULL, "PGM", "Portable Greymap (ASCII)", "pgm", "^P2");
  			s_plugins->AddNode(InitPNM, NULL, "PGMRAW", "Portable Greymap (RAW)", "pgm", "^P5");
-+#if WITH_PNG
++#if FREEIMAGE_WITH_PNG
  			s_plugins->AddNode(InitPNG);
 +#endif
  			s_plugins->AddNode(InitPNM, NULL, "PPM", "Portable Pixelmap (ASCII)", "ppm", "^P3");
  			s_plugins->AddNode(InitPNM, NULL, "PPMRAW", "Portable Pixelmap (RAW)", "ppm", "^P6");
  			s_plugins->AddNode(InitRAS);
  			s_plugins->AddNode(InitTARGA);
-+#if WITH_TIFF
++#if FREEIMAGE_WITH_TIFF
  			s_plugins->AddNode(InitTIFF);
 +#endif
  			s_plugins->AddNode(InitWBMP);
@@ -111,22 +111,22 @@ index 11e7294..0119ba7 100644
  			s_plugins->AddNode(InitG3);
 +#endif
  			s_plugins->AddNode(InitSGI);
-+#if WITH_OPENEXR
++#if FREEIMAGE_WITH_OPENEXR
  			s_plugins->AddNode(InitEXR);
 +#endif
-+#if WITH_OPENJPEG
++#if FREEIMAGE_WITH_OPENJPEG
  			s_plugins->AddNode(InitJ2K);
  			s_plugins->AddNode(InitJP2);
 +#endif
  			s_plugins->AddNode(InitPFM);
  			s_plugins->AddNode(InitPICT);
-+#if WITH_RAW
++#if FREEIMAGE_WITH_RAW
  			s_plugins->AddNode(InitRAW);
 +#endif
-+#if WITH_WEBP
++#if FREEIMAGE_WITH_WEBP
  			s_plugins->AddNode(InitWEBP);
 +#endif
-+#if WITH_JXR
++#if FREEIMAGE_WITH_JXR
  #if !(defined(_MSC_VER) && (_MSC_VER <= 1310))
  			s_plugins->AddNode(InitJXR);
  #endif // unsupported by MS Visual Studio 2003 !!!
