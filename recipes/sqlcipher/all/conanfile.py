@@ -123,7 +123,11 @@ class SqlcipherConan(ConanFile):
             nmake_flags.append("USE_CRT_DLL=1")
         if self.settings.build_type == "Debug":
             nmake_flags.append("DEBUG=2")
-        nmake_flags.append("FOR_WIN10=1")
+        # It is very unlikely that __stdcall convetions are really wanted for 32bit windows
+        # It would also not work with tcl extensions are enabled, so deactivate it
+        # Ff someone really needs that, please feel free to add it as on option for 32bit msvc builds only
+        if self.settings.arch != "x86":
+            nmake_flags.append("FOR_WIN10=1")
         platforms = {"x86": "x86", "x86_64": "x64"}
         nmake_flags.append("PLATFORM=%s" % platforms[str(self.settings.arch)])
         vcvars = tools.vcvars_command(self.settings)
