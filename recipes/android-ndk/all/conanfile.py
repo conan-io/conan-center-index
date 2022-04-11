@@ -24,11 +24,19 @@ class AndroidNDKConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_universal2(self):
+        return self.version in ["r23b", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+
+    @property
+    def _arch(self):
+        return "x86_64" if self._is_universal2 else self.settings.arch
+
     def _settings_os_supported(self):
         return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
+        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self._arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
@@ -38,11 +46,15 @@ class AndroidNDKConan(ConanFile):
 
     def build(self):
         if self.version in ['r23', 'r23b', 'r24']:
-            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
+            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
+
+    def package_id(self):
+        if self._is_universal2:
+            self.info.settings.arch = "universal:armv8/x86_64"
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
@@ -240,7 +252,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_targe.os} != Android")
+            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         cmake_system_processor = self._cmake_system_processor
