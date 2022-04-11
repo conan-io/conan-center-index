@@ -29,7 +29,7 @@ class TomlPlusPlusConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" else "15",
+            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" or tools.Version(self.version) >= "3.0.0" else "15",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
@@ -57,7 +57,7 @@ class TomlPlusPlusConan(ConanFile):
         if self.settings.compiler == "apple-clang" and tools.Version(self.version) < "2.3.0":
             raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
                     self.settings.compiler, self.settings.compiler.version))
-        
+
         if is_msvc(self) and tools.Version(self.version) == "2.1.0":
                 raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
                         self.settings.compiler, self.settings.compiler.version))
