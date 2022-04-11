@@ -123,7 +123,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_libalsa": False,
         "with_openal": True,
-        "with_gstreamer": True,
+        "with_gstreamer": False,
         "with_pulseaudio": False,
 
         "gui": True,
