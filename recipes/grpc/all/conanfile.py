@@ -1,3 +1,4 @@
+from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -87,24 +88,16 @@ class grpcConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            compiler_version = tools.Version(self.settings.compiler.version)
-            if compiler_version < 14:
+        if self._is_msvc:
+            if self.settings.compiler == "Visual Studio":
+                vs_ide_version = self.settings.compiler.version
+            else:
+                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            if tools.Version(vs_ide_version) < "14":
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
-        if self.options.shared:
-            # FIXME: try to support grpc shared and abseil static with gcc on Linux
-            # current error while linking internal check_epollexclusive executable:
-            # libabsl_time.a(duration.cc.o): undefined reference to symbol '_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7compareEPKc@@GLIBCXX_3.4.21'
-            if (self.settings.os == "Linux" and self.settings.compiler == "gcc") and not self.options["abseil"].shared:
-                raise ConanInvalidConfiguration(
-                    "gRPC shared not supported yet without abseil shared"
-                )
-
-            if self._is_msvc:
-                raise ConanInvalidConfiguration(
-                    "gRPC shared not supported yet with {} on {}".format(self.settings.compiler, self.settings.os)
-                )
+            if self.options.shared:
+                raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
