@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class CppRestSDKConan(ConanFile):
     name = "cpprestsdk"
@@ -8,10 +10,9 @@ class CppRestSDKConan(ConanFile):
                   "C++ API design"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Microsoft/cpprestsdk"
-    topics = ("conan", "cpprestsdk", "rest", "client", "http", "https")
+    topics = ("cpprestsdk", "rest", "client", "http", "https")
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,7 +21,7 @@ class CppRestSDKConan(ConanFile):
         "with_compression": [True, False],
         "pplx_impl": ["win", "winpplx"],
         "http_client_impl": ["winhttp", "asio"],
-        "http_listener_impl": ["httpsys", "asio"]
+        "http_listener_impl": ["httpsys", "asio"],
     }
     default_options = {
         "shared": False,
@@ -29,9 +30,10 @@ class CppRestSDKConan(ConanFile):
         "with_compression": True,
         "pplx_impl": "win",
         "http_client_impl": "winhttp",
-        "http_listener_impl": "httpsys"
+        "http_listener_impl": "httpsys",
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -41,6 +43,11 @@ class CppRestSDKConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
