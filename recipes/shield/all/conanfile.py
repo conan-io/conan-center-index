@@ -1,17 +1,17 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
 class ShieldConan(ConanFile):
     name = "shield"
-    version = "0.1"
-    topics = ("shield", "utility", "warnings", "suppression")
+    topics = ("utility", "warnings", "suppression")
     description = "C++ warning suppression headers."
     settings = "os", "compiler", "build_type", "arch"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = url
+    homepage = "https://github.com/holoplot/shield"
     license = "MIT"
     no_copy_source = True
-    required_conan_version = ">=1.33.0"
 
     @property
     def _source_subfolder(self):
