@@ -91,8 +91,8 @@ class ZlibConan(ConanFile):
         cmake.build()
 
     def _rename_libraries(self):
+        lib_path = os.path.join(self.package_folder, "lib")
         if self.settings.os == "Windows":
-            lib_path = os.path.join(self.package_folder, "lib")
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
@@ -107,6 +107,11 @@ class ZlibConan(ConanFile):
                     if not self.settings.os.subsystem:
                         current_lib = os.path.join(lib_path, "libzlibstatic.a")
                         tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+        if self.settings.os == "Linux":
+            fullname = os.path.join(lib_path, "libzlibstatic.a")
+            shortname = os.path.join(lib_path, "libz.a")
+            if os.path.exists(fullname) and not os.path.exists(shortname):
+                tools.rename(fullname, shortname)
 
     def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
