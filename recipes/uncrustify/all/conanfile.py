@@ -9,7 +9,7 @@ required_conan_version = ">=1.43.0"
 class UncrustifyConan(ConanFile):
     name = "uncrustify"
     description = "Code beautifier"
-    license = "GPL2"
+    license = "GPL-2.0-or-later"
     topics = ("beautifier", "command-line")
     homepage = "https://github.com/uncrustify/uncrustify"
     url = "https://github.com/conan-io/conan-center-index"
@@ -28,7 +28,7 @@ class UncrustifyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("oatpp-sqlite requires GCC >=8")
+            raise ConanInvalidConfiguration(f"{self.name} requires GCC >=8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -52,7 +52,7 @@ class UncrustifyConan(ConanFile):
 
         if self.settings.os == "Windows":
             tools.mkdir(os.path.join(self.package_folder, "bin"))
-            rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
+            tools.rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
                          os.path.join(self.package_folder, "bin", "uncrustify.exe"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
             os.remove(os.path.join(self.package_folder, "BUGS"))
