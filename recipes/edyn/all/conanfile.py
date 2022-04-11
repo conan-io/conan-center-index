@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -49,9 +50,21 @@ class EdynConan(ConanFile):
     def requirements(self):
         self.requires("entt/3.9.0")
 
+    @property
+    def _compiler_required(self):
+        return {
+            "gcc": "9.3", # GCC 9.3 started supporting attributes in constructor arguments
+        }
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
+        try:
+            minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
+            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
+        except KeyError:
+            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
    
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
