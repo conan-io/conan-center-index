@@ -34,6 +34,7 @@ class EdynConan(ConanFile):
         return "build_subfolder"
 
     def export_sources(self):
+        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -63,7 +64,8 @@ class EdynConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.definitions["EDYN_INSTALL"] = True
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
