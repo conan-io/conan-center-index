@@ -6,7 +6,7 @@ class SDLMixerConan(ConanFile):
     name = "sdl_mixer"
     description = "SDL_mixer is a sample multi-channel audio mixer library"
     topics = ("sdl_mixer", "sdl2", "sdl", "mixer", "audio", "multimedia", "sound", "music")
-    url = "https://github.com/bincrafters/community"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org/projects/SDL_mixer/"
     license = "Zlib"
     exports_sources = ["CMakeLists.txt"]
