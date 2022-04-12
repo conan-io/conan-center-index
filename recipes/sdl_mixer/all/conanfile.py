@@ -53,6 +53,8 @@ class SDLMixerConan(ConanFile):
             del self.options.nativemidi
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -130,5 +132,6 @@ class SDLMixerConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["sdl2_mixer"]
-        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
+        self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
+        self.cpp_info.libs = ["SDL2_mixer"]
+        self.cpp_info.includedirs = [os.path.join("include", "SDL2")]
