@@ -56,4 +56,3 @@ class StructoptConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst="include")
         self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
-
