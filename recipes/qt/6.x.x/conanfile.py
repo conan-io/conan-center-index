@@ -281,7 +281,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1n")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.39")
+            self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
