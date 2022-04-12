@@ -900,6 +900,9 @@ class QtConan(ConanFile):
             core_reqs.append("glib::glib")
 
         _create_module("Core", core_reqs)
+        if self.settings.os == "Windows":
+            if tools.Version(self.version) >= "6.3.0":
+                self.cpp_info.components["qtCore"].system_libs.append("authz")
         if self._is_msvc:
             if tools.Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
