@@ -79,7 +79,7 @@ class grpcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires('zlib/1.2.11')
+        self.requires('zlib/1.2.12')
         self.requires('openssl/1.1.1m')
         self.requires('protobuf/3.19.2')
         self.requires('c-ares/1.17.2')
