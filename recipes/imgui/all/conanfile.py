@@ -70,7 +70,7 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["imgui"]
-        self.cpp_info.defines.append("IMGUI_USER_CONFIG=\"imgui_user_config.h\"")
+        self.cpp_info.defines.append("IMGUI_USER_CONFIG='\"imgui_user_config.h\"'")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         self.cpp_info.srcdirs = [os.path.join("res", "bindings")]
