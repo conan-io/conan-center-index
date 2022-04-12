@@ -901,6 +901,8 @@ class QtConan(ConanFile):
 
         _create_module("Core", core_reqs)
         if self._is_msvc:
+            if tools.Version(self.version) >= "6.3.0":
+                self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
             if tools.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
