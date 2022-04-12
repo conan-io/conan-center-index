@@ -97,8 +97,7 @@ class EdynConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
-        suffix = "_d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["Edyn" + suffix]
+        self.cpp_info.libs = tools.collect_libs(self)
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "Edyn")
