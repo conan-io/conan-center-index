@@ -120,15 +120,13 @@ class LibtiffConan(ConanFile):
             tools.patch(**patch)
 
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
-        if self.options.jbig:
-            rename(self, os.path.join(self.build_folder, "Findjbig.cmake"),
-                         os.path.join(self.build_folder, "ConanFindjbig.cmake"))
-        else:
-            os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
-        if self._has_zstd_option:
+        if tools.Version(self.version) >= "4.3.0":
+            if self.options.jbig:
+                rename(self, "Findjbig.cmake", "ConanFindjbig.cmake")
+            else:
+                os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
             if self.options.zstd:
-                rename(self, os.path.join(self.build_folder, "Findzstd.cmake"),
-                             os.path.join(self.build_folder, "ConanFindzstd.cmake"))
+                rename(self, "Findzstd.cmake", "ConanFindzstd.cmake")
             else:
                 os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
 
