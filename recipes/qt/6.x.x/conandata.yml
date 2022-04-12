@@ -50,5 +50,3 @@ patches:
       patch_file: "patches/qt6-pri-helpers-fix.diff"
     - patch_file: "patches/c72097e.diff"
       base_path: "qt6/qtwebengine"
-    - patch_file: "patches/138a720.diff"
-      base_path: "qt6/qtwebengine/src/3rdparty"
