@@ -140,7 +140,7 @@ class SDLConan(ConanFile):
                 self.requires("xkbcommon/1.4.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.5.0")
+                self.requires("libunwind/1.6.2")
 
     def validate(self):
         if self.settings.os == "Macos" and not self.options.iconv:
