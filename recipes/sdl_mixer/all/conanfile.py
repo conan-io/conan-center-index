@@ -57,13 +57,13 @@ class SDLMixerConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("sdl/[>2.0 <3.0]")
+        self.requires("sdl/2.0.20")
         if self.options.flac:
-            self.requires("flac/[>1.3 <2.0]")
+            self.requires("flac/1.3.3")
         if self.options.mpg123:
-            self.requires("mpg123/[>1.26 <2.0]") # TODO: this package is missing on the conan-center-index
+            self.requires("mpg123/1.26") # TODO: this package is missing on the conan-center-index
         if self.options.mad:
-            self.requires("libmad/[>0.15 <1.0]") # TODO: this package is missing on the conan-center-index
+            self.requires("libmad/0.15") # TODO: this package is missing on the conan-center-index
         if self.options.ogg:
             self.requires("ogg/1.3.4")
             self.requires("vorbis/1.3.7")
@@ -71,11 +71,11 @@ class SDLMixerConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
-            self.requires("libmikmod/[>3.3 <4.0]") # TODO: this package is missing on the conan-center-index
+            self.requires("libmikmod/3.3") # TODO: this package is missing on the conan-center-index
         if self.options.modplug:
-            self.requires("libmodplug/[>0.8 <1.0]") # TODO: this package is missing on the conan-center-index
+            self.requires("libmodplug/0.8") # TODO: this package is missing on the conan-center-index
         if self.options.fluidsynth:
-            self.requires("fluidsynth/[>2.2 <3.0]") # TODO: this package is missing on the conan-center-index
+            self.requires("fluidsynth/2.2") # TODO: this package is missing on the conan-center-index
         if self.settings.os == "Linux":
             if self.options.tinymidi:
                 self.requires("tinymidi/cci.20130325") # TODO: this package is missing on the conan-center-index
