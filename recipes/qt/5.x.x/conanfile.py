@@ -330,13 +330,13 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1n")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.37")
+            self.requires("pcre2/10.39")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.204.1")
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.8")
         if self.options.with_glib:
-            self.requires("glib/2.71.3")
+            self.requires("glib/2.72.0")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion:
@@ -346,9 +346,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/70.1")
+            self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False):
-            self.requires("harfbuzz/4.0.1")
+            self.requires("harfbuzz/4.2.0")
         if self.options.get_safe("with_libjpeg", False):
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -357,12 +357,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False):
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.0")
+            self.requires("sqlite3/3.38.1")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.6")
+            self.requires("libpq/14.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
@@ -378,7 +378,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.4.6")
+            self.requires("expat/2.4.8")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
@@ -1240,21 +1240,21 @@ Examples = bin/datadir/examples""")
             _create_module("AxServer", ["Core", "Gui", "Widgets", "AxBase"])
             self.cpp_info.components["qtAxServer"].includedirs = [os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
-        
+
         if self.options.qtscript:
             _create_module("Script")
             if self.options.widgets:
                 _create_module("ScriptTools", ["Gui", "Widgets", "Script"])
-        
+
         if self.options.qtandroidextras:
             _create_module("AndroidExtras")
-            
+
         if self.options.qtwebview:
             _create_module("WebView", ["Gui", "Quick"])
-            
+
         if self.options.qtvirtualkeyboard:
             _create_module("VirtualKeyboard", ["Qml", "Quick", "Gui"])
-        
+
         if self.options.qtspeech:
             _create_module("TextToSpeech")
 
