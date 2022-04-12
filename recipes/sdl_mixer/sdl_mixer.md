@@ -18,3 +18,7 @@ The [ticket](https://github.com/conan-io/conan-center-index/issues/9018) that le
 # integration plan
 
 Roughly speaking I will grab whatever is in the new bincrafters repo and convert it to fit the other sdl images in this repo.
+
+There are dependencies missing on conan-center which would have to be ported down the road.
+
+Missing dependencies are exluded through the build options and set to False per default.
