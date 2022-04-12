@@ -1,5 +1,6 @@
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
+from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -52,7 +53,7 @@ class UncrustifyConan(ConanFile):
 
         if self.settings.os == "Windows":
             tools.mkdir(os.path.join(self.package_folder, "bin"))
-            tools.rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
+            rename(self, os.path.join(self.package_folder, "uncrustify.exe"),
                          os.path.join(self.package_folder, "bin", "uncrustify.exe"))
             os.remove(os.path.join(self.package_folder, "AUTHORS"))
             os.remove(os.path.join(self.package_folder, "BUGS"))
