@@ -4,4 +4,4 @@ project(cmake_wrapper C)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
-add_subdirectory(source_folder)
+add_subdirectory(source_subfolder)
