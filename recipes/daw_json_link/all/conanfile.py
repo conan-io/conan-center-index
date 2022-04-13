@@ -6,7 +6,7 @@ required_conan_version = ">=1.43.0"
 
 class DawJsonLinkConan(ConanFile):
     name = "daw_json_link"
-    description = "Static JSON parsing in C++ "
+    description = "Static JSON parsing in C++"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/daw_json_link"
@@ -32,7 +32,7 @@ class DawJsonLinkConan(ConanFile):
         elif tools.Version(self.version) < "2.12.0":
             self.requires("daw_header_libraries/2.5.3")
         else:
-            self.requires("daw_header_libraries/2.23.0")
+            self.requires("daw_header_libraries/2.33.2")
         self.requires("daw_utf_range/2.2.0")
 
     def validate(self):
