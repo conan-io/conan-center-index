@@ -197,7 +197,6 @@ class grpcConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -377,6 +376,7 @@ class grpcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gRPC")
+        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = os.path.join(self.package_folder, "share", "grpc", "roots.pem")
 
         for component, values in self._grpc_components.items():
             target = values.get("lib")
