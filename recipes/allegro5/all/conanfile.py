@@ -112,6 +112,7 @@ class Allegro5Conan(ConanFile):
                list(APPEND FREETYPE_STATIC_LIBRARIES "${Brotli_LIBRARIES}")
                run_c_compile_test("${FREETYPE_TEST_SOURCE}" TTF_COMPILES_WITH_EXTRA_DEPS)''')
         self._patch_addon(None, "set(INSTALL_PKG_CONFIG_FILES true)", "set(INSTALL_PKG_CONFIG_FILES false)")
+        self._patch_addon(None, "include(Common)", "include(Common)\nadd_definitions(-DFREEIMAGE_LIB)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
