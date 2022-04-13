@@ -25,6 +25,13 @@ class Antlr4CppRuntimeConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "pkg_config"
 
+    compiler_required_cpp17 = {
+            "Visual Studio": "17",
+            "gcc": "7",
+            "clang": "5.0",
+            "apple-clang": "9.1"
+    }
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -68,18 +75,31 @@ class Antlr4CppRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(f"arm architectures are not supported")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
-        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
-        if compiler == "Visual Studio" and version < "16":
+        compiler, compiler_version = self.settings.compiler, tools.Version(self.settings.compiler.version)
+
+        if compiler == "Visual Studio" and compiler_version < "16":
             raise ConanInvalidConfiguration(f"library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
+
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, "17")
+
+        minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if compiler_version < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+        else:
+            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ANTLR4_INSTALL"] = True
         cmake.definitions["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = "OFF"
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["WITH_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
         cmake.definitions["WITH_DEMO"] = False
