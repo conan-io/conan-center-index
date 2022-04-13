@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-message("Dir: ${CMAKE_BINARY_DIR}")
 conan_basic_setup(TARGETS)
 
 find_package(allegro5 REQUIRED)

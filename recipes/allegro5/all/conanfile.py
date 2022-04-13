@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 class Allegro5Conan(ConanFile):
     name = "allegro5"
-    license = ("ZLib", "BSD", "SDL", "Dejavu-fonts", "Creative Commons BY Attribution", "CBString")
+    license = ("ZLib", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/liballeg/allegro5"
     description = "Cross-platform graphics framework for basic game development and desktop applications"
@@ -19,7 +19,7 @@ class Allegro5Conan(ConanFile):
         "fPIC": True
     }
     
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     def requirements(self):       # Conditional dependencies
@@ -36,13 +36,12 @@ class Allegro5Conan(ConanFile):
         self.requires("theora/1.1.1")
         self.requires("opengl/system")
 
-        if self.settings.os != "Windows":
+        if self.settings.os == "Linux":
             self.requires("xorg/system")
+            self.requires("gtk/system")
             self.requires("glu/system")
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
-            self.requires("gtk/system")
-            self.requires("openssl/1.1.1m")
 
     @property
     def _source_subfolder(self):
@@ -115,6 +114,7 @@ class Allegro5Conan(ConanFile):
         self._patch_addon(None, "include(Common)", "include(Common)\nadd_definitions(-DFREEIMAGE_LIB)")
 
     def source(self):
+        #self.run("git clone https://github.com/liballeg/allegro5.git --depth=1 --single-branch source_subfolder")
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
