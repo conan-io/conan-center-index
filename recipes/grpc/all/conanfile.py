@@ -249,8 +249,8 @@ class grpcConan(ConanFile):
         # Rename it
         dst_file = os.path.join(self.package_folder, self._module_path,
                                 "{}.cmake".format(executable))
-        rename(os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
-               dst_file)
+        rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
+                     dst_file)
 
         # Replace placeholders
         tools.replace_in_file(dst_file, "@target_name@", target)
