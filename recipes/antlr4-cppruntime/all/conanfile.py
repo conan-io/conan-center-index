@@ -166,3 +166,5 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
