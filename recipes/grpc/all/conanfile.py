@@ -376,7 +376,9 @@ class grpcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gRPC")
-        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = os.path.join(self.package_folder, "share", "grpc", "roots.pem")
+        ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
+        self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
+        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path # remove in conan v2?
 
         for component, values in self._grpc_components.items():
             target = values.get("lib")
