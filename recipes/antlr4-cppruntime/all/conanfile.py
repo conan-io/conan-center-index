@@ -99,7 +99,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["ANTLR4_INSTALL"] = True
         cmake.definitions["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
-        cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = "OFF"
+        cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = False
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["WITH_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
         cmake.definitions["WITH_DEMO"] = False
