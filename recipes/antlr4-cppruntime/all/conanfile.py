@@ -23,7 +23,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         "fPIC": True,
     }
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "pkg_config"
 
     @property
     def _source_subfolder(self):
