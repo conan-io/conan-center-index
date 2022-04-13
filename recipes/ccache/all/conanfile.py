@@ -46,7 +46,7 @@ class CcacheConan(ConanFile):
             "gcc": "6",
             "clang": "6",
             "apple-clang": "10",
-            "Visual Studio": "15.7",
+            "Visual Studio": "15.7" if tools.Version(self.version) < "4.6" else "16.2",
         }
 
     def export_sources(self):
