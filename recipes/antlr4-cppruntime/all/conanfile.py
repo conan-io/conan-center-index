@@ -23,7 +23,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         "fPIC": True,
     }
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
     @property
     def _source_subfolder(self):
@@ -34,7 +34,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def config_options(self):
@@ -53,6 +53,10 @@ class Antlr4CppRuntimeConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build_requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires("utfcpp/3.2.1")
