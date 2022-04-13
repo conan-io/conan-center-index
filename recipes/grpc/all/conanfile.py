@@ -1,4 +1,5 @@
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -134,6 +135,7 @@ class grpcConan(ConanFile):
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         self._cmake.definitions["gRPC_INSTALL"] = True
+        self._cmake.definitions["gRPC_INSTALL_SHAREDIR"] = "res/grpc"
 
         # tell grpc to use the find_package versions
         self._cmake.definitions["gRPC_ZLIB_PROVIDER"] = "package"
@@ -247,9 +249,8 @@ class grpcConan(ConanFile):
         # Rename it
         dst_file = os.path.join(self.package_folder, self._module_path,
                                 "{}.cmake".format(executable))
-        tools.rename(os.path.join(self.package_folder, self._module_path,
-                                  self._grpc_plugin_template),
-                     dst_file)
+        rename(os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
+               dst_file)
 
         # Replace placeholders
         tools.replace_in_file(dst_file, "@target_name@", target)
