@@ -1,5 +1,6 @@
 #include <visit_struct/visit_struct.hpp>
 
+#include <string>
 #include <iostream>
 
 struct my_type {
