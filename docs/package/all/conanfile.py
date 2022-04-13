@@ -6,9 +6,9 @@ import os
 
 required_conan_version = ">=1.45.0"
 
-class packageConan(ConanFile):
+class PackageConan(ConanFile):
     name = "package"
-    description = "shortd escription"
+    description = "short description"
     license = "" # conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
@@ -22,6 +22,11 @@ class packageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    # cmake generator as a bare minimum
+    # cmake_find_package if at least one dependency is listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
+    # cmake_find_package_multi for other dependencies (but cmake_find_package may be a better choice if you have to take precedence over custom Find modules files in upstream source code).
+    # pkg_config if at least one dependency is discovered with pkg_check_modules in upstream CMakeLists (don't forget to also add pkgconf in build requirements)
     generators = "cmake", "cmake_find_package_multi"
 
     # no manual caching of build helper like  _cmake = None
@@ -71,6 +76,10 @@ class packageConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("package can't be built as shared on visual studio")
 
+    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
+    def build_requirements(self):
+        self.build_requires("tool/x.y.z")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -109,14 +118,20 @@ class packageConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.libs = ["package_lib"]
 
+        # if package has an official FindPACKAGE.cmake listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
+        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "PACKAGE")
+        self.cpp_info.set_property("cmake_module_target_name", "PACKAGE::PACKAGE")
+        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "package")
-        self.cpp_info.set_property("cmake_target_name", "PACKAGE::PACKAGE")
+        self.cpp_info.set_property("cmake_target_name", "package::package")
+        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
@@ -129,6 +144,6 @@ class packageConan(ConanFile):
 
         #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "PACKAGE"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "package"
         self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.names["cmake_find_package_multi"] = "PACKAGE"
+        self.cpp_info.names["cmake_find_package_multi"] = "package"
