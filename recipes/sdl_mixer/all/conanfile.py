@@ -67,7 +67,7 @@ class SDLMixerConan(ConanFile):
         if self.options.mad:
             self.requires("libmad/0.15") # TODO: this package is missing on the conan-center-index
         if self.options.ogg:
-            self.requires("ogg/1.3.4")
+            self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
         if self.options.opus:
             self.requires("openssl/1.1.1n")
