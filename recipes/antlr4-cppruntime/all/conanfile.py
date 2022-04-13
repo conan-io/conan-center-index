@@ -78,7 +78,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         compiler, compiler_version = self.settings.compiler, tools.Version(self.settings.compiler.version)
 
         if compiler == "Visual Studio" and compiler_version < "16":
-            raise ConanInvalidConfiguration(f"library claims C2668 'Ambiguous call to overloaded function'")
+            raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
