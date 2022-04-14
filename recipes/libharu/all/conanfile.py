@@ -63,6 +63,8 @@ class LibharuConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["LIBHPDF_SHARED"] = self.options.shared
         cmake.definitions["LIBHPDF_STATIC"] = not self.options.shared
+        # To install relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
