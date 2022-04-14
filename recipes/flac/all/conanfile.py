@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -44,7 +45,7 @@ class FlacConan(ConanFile):
 
     def requirements(self):
         self.requires("ogg/1.3.5")
-        self.requires("libiconv/1.16")
+        # self.requires("libiconv/1.16")
 
     def build_requirements(self):
         if self.settings.arch in ["x86", "x86_64"]:
@@ -54,15 +55,14 @@ class FlacConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_DOCS"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_DOCS"] = False
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
