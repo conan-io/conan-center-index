@@ -1032,7 +1032,7 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_vulkan"):
                     cocoa_reqs.append("VulkanSupport")
                 if self.options.widgets:
-                    cocoa_reqs.append("printsupport")                    
+                    cocoa_reqs.append("PrintSupport")                    
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
                 self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
@@ -1045,14 +1045,16 @@ Examples = bin/datadir/examples""")
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui", "EventDispatcherSupport", "FontDatabaseSupport", "EglSupport"])
             elif self.settings.os in ["Linux", "FreeBSD"]:
-                _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport"])
                 service_support_reqs = ["Core", "Gui"]                
                 if self.options.with_dbus:
                     service_support_reqs.extend("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
                 _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
-                xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "LinuxAccessibilitySupport", "xorg::xorg"]
+                xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
+                if self.options.with_dbus:
+                    _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport"])
+                    xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
                 _create_module("XcbQpa", xcb_qpa_reqs)
