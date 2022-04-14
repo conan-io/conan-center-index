@@ -4,6 +4,7 @@ import re
 
 required_conan_version = ">=1.33.0"
 
+
 class LibharuConan(ConanFile):
     name = "libharu"
     description = "Haru is a free, cross platform, open-sourced software library for generating PDF."
@@ -44,7 +45,7 @@ class LibharuConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("libpng/1.6.37")
 
     def source(self):
