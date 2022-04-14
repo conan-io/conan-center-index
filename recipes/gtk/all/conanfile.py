@@ -89,38 +89,38 @@ class GtkConan(ConanFile):
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.61.2")
         if self._gtk4:
-            self.build_requires("libxml2/2.9.12") # for xmllint
+            self.build_requires("libxml2/2.9.13") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.6")
-        self.requires("glib/2.70.1")
+        self.requires("glib/2.72.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
-            self.requires("graphene/1.10.6")
+            self.requires("graphene/1.10.8")
         if self.settings.os == "Linux":
             if self._gtk4:
-                self.requires("xkbcommon/1.3.1")
+                self.requires("xkbcommon/1.4.0")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
-                    self.requires("xkbcommon/1.3.1")
+                    self.requires("xkbcommon/1.4.0")
                 self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
-            self.requires("atk/2.36.0")
-        self.requires("libepoxy/1.5.9")
+            self.requires("atk/2.38.0")
+        self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
             self.requires("pango/1.49.3")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/5.0")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.2")
 
