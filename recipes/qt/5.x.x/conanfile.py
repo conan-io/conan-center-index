@@ -991,9 +991,9 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtFontDatabaseSupport"].frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText","Foundation"])
                 self.cpp_info.components["qtFontDatabaseSupport"].frameworks.append("AppKit" if self.settings.os == "Macos" else "UIKit")
             if self.options.get_safe("with_fontconfig"):
-                 self.cpp_info.components["qtFontDatabaseSupport"].requirements.append("fontconfig::fontconfig")
+                self.cpp_info.components["qtFontDatabaseSupport"].requirements.append("fontconfig::fontconfig")
             if self.options.get_safe("with_freetype"):
-                 self.cpp_info.components["qtFontDatabaseSupport"].requirements.append("freetype::freetype")
+                self.cpp_info.components["qtFontDatabaseSupport"].requirements.append("freetype::freetype")
                 
             
             _create_module("ThemeSupport", ["Core", "Gui"])
