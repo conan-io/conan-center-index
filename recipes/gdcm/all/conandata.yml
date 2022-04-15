@@ -5,6 +5,6 @@ sources:
 patches:
   "3.0.9":
     - patch_file: "patches/0001-charls-linking.patch"
-      base_path: "source_subfolder"
+      base_path: "src"
     - patch_file: "patches/0002-openjpeg-integration.patch"
-      base_path: "source_subfolder"
+      base_path: "src"

@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package)
-set(CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(tl-expected REQUIRED)
+find_package(tl-expected REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} example.cpp)
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} tl::expected)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)

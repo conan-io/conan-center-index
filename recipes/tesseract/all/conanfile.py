@@ -1,10 +1,9 @@
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
-from conans import ConanFile, CMake, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TesseractConan(ConanFile):
@@ -23,7 +22,7 @@ class TesseractConan(ConanFile):
         "with_march_native": [True, False],
         "with_training": [True, False],
         "with_libcurl": [True, False],
-        "with_libarchive": [True, False]
+        "with_libarchive": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,10 +31,9 @@ class TesseractConan(ConanFile):
         "with_march_native": False,
         "with_training": False,
         "with_libcurl": True,
-        "with_libarchive": True
+        "with_libarchive": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
@@ -46,6 +44,11 @@ class TesseractConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,18 +71,18 @@ class TesseractConan(ConanFile):
             self.requires("libarchive/3.5.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/7.79.1")
+            self.requires("libcurl/7.80.0")
 
     def validate(self):
         # Check compiler version
         compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
+        compiler_version = tools.Version(self.settings.compiler.version.value)
 
         if tools.Version(self.version) >= "5.0.0":
             # 5.0.0 requires C++-17 compiler
             minimal_version = {
                 "Visual Studio": "16",
-                "gcc": "9",
+                "gcc": "7",
                 "clang": "7",
                 "apple-clang": "11"
             }
@@ -105,6 +108,7 @@ class TesseractConan(ConanFile):
             return self._cmake
         cmake = self._cmake = CMake(self)
         cmake.definitions["BUILD_TRAINING_TOOLS"] = self.options.with_training
+        cmake.definitions["INSTALL_CONFIGS"] = self.options.with_training
 
         # pre-5.0.0 uses custom STATIC variable instead of BUILD_SHARED_LIBS
         if tools.Version(self.version) < "5.0.0":
@@ -127,13 +131,12 @@ class TesseractConan(ConanFile):
             cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
             cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
-        if tools.cross_building(self) and not tools.get_env("CMAKE_SYSTEM_PROCESSOR"):
-            # FIXME: too specific and error prone, should be delegated to CMake helper
+        if tools.cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
+            self._cmake.definitions["CONAN_TESSERACT_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -152,11 +155,11 @@ class TesseractConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        # required for 5.0
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"libtesseract": "Tesseract::libtesseract"}
@@ -175,28 +178,20 @@ class TesseractConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         # Official CMake imported target is:
         # - libtesseract if < 5.0.0
         # - Tesseract::libtesseract if >= 5.0.0 (not yet released)
         # We provide both targets
-        self.cpp_info.names["cmake_find_package"] = "Tesseract"
-        self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
-        self.cpp_info.names["pkg_config"] = "tesseract"
-        self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
-        self.cpp_info.components["libtesseract"].names["cmake_find_package_multi"] = "libtesseract"
-        self.cpp_info.components["libtesseract"].names["pkg_config"] = "tesseract"
-        self.cpp_info.components["libtesseract"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_file_name", "Tesseract")
+        self.cpp_info.set_property("cmake_target_name", "Tesseract::libtesseract")
+        self.cpp_info.set_property("cmake_target_aliases", ["libtesseract"])
+        self.cpp_info.set_property("pkg_config_name", "tesseract")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libtesseract"].libs = [self._libname]
         self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica"]
         if self.options.get_safe("with_libcurl", default=False):
@@ -213,6 +208,15 @@ class TesseractConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "Tesseract"
+        self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
+        self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].names["cmake_find_package_multi"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["libtesseract"].set_property("pkg_config_name", "tesseract")
 
     @property
     def _libname(self):

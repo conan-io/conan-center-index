@@ -1,5 +1,4 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 import re
 
@@ -57,35 +56,14 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if self.options.get_safe("enable_udev"):
-            if self.settings.os == "Android":
-                raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
-            if self.settings.os == "Linux" and self._settings_build.os != "Linux":
-                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling to Linux from a non-Linux machine")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
-    def system_requirements(self):
-        if self._settings_build.os == "Linux" and self.settings.os == "Linux":
+    def requirements(self):
+        if self.settings.os == "Linux":
             if self.options.enable_udev:
-                package_tool = tools.SystemPackageTool(conanfile=self)
-                libudev_name = ""
-                os_info = tools.OSInfo()
-                if os_info.with_apt:
-                    libudev_name = "libudev-dev"
-                elif os_info.with_yum:
-                    libudev_name = "libudev-devel"
-                elif os_info.with_zypper:
-                    libudev_name = "libudev-devel"
-                elif os_info.with_pacman:
-                    libudev_name = "libsystemd systemd"
-                else:
-                    self.output.warn("Could not install libudev: Undefined package name for current platform.")
-                    return
-                package_tool.install(packages=libudev_name, update=True)
+                self.requires("libudev/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -170,13 +148,10 @@ class LibUSBConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        if self.settings.os in ["Linux", "Android"]:
-            if self.options.enable_udev:
-                self.cpp_info.system_libs.append("udev")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]
-            self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
+            self.cpp_info.frameworks = ["IOKit", "CoreFoundation", "Security"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["advapi32"]

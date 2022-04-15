@@ -101,7 +101,7 @@ class MimallocConan(ConanFile):
         if self.options.override and \
            self.options.get_safe("single_object") and \
            self.options.get_safe("inject"):
-            raise ConanInvalidConfiguration("Single object is incompatible with library injection");
+            raise ConanInvalidConfiguration("Single object is incompatible with library injection")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")

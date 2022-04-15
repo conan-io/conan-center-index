@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TinyObjLoaderConan(ConanFile):
@@ -11,7 +11,7 @@ class TinyObjLoaderConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
-    topics = ("conan", "tinyobjloader", "wavefront", "geometry")
+    topics = ("tinyobjloader", "wavefront", "geometry")
 
     settings = "os", "arch", "build_type", "compiler"
     options = {
@@ -46,9 +46,8 @@ class TinyObjLoaderConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,6 +70,8 @@ class TinyObjLoaderConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "tinyobjloader"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         cmake_target = "tinyobjloader_double" if self.options.double else "tinyobjloader"
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -90,22 +91,19 @@ class TinyObjLoaderConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "tinyobjloader"
-        self.cpp_info.names["cmake_find_package_multi"] = "tinyobjloader"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         suffix = "_double" if self.options.double else ""
-        self.cpp_info.names["pkg_config"] = "tinyobjloader" + suffix
-        self.cpp_info.libs = ["tinyobjloader" + suffix]
+        self.cpp_info.set_property("cmake_file_name", "tinyobjloader")
+        self.cpp_info.set_property("cmake_target_name", "tinyobjloader{}".format(suffix))
+        self.cpp_info.set_property("pkg_config_name", "tinyobjloader{}".format(suffix))
+        self.cpp_info.libs = ["tinyobjloader{}".format(suffix)]
         if self.options.double:
             self.cpp_info.defines.append("TINYOBJLOADER_USE_DOUBLE")
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "tinyobjloader{}".format(suffix)

@@ -10,16 +10,16 @@ class TestPackageConan(ConanFile):
     generators = "qt", "cmake", "cmake_find_package_multi", "cmake_find_package", "pkg_config", "qmake"
 
     def build_requirements(self):
-        self.build_requires("cmake/3.21.3")
+        self.build_requires("cmake/3.22.0")
         if self._meson_supported():
-            self.build_requires("meson/0.59.0")
+            self.build_requires("meson/0.60.2")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def _meson_supported(self):
         return False and self.options["qt"].shared and\
-            not tools.cross_building(self.settings) and\
+            not tools.cross_building(self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 
@@ -125,7 +125,7 @@ class TestPackageConan(ConanFile):
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake_find_package_multi()

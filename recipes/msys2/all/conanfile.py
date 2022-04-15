@@ -134,7 +134,7 @@ class MSYS2Conan(ConanFile):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
             for package in ['pkgconf']:
-                self.run('bash -l -c "pacman -Rs $(pacman -Qsq %s) --noconfirm"' % package)
+                self.run('bash -l -c "pacman -Rs -d -d $(pacman -Qsq %s) --noconfirm"' % package)
 
         self._kill_pacman()
 
@@ -179,3 +179,6 @@ class MSYS2Conan(ConanFile):
 
         self.output.info("Appending PATH env var with : " + msys_bin)
         self.env_info.path.append(msys_bin)
+        
+        self.conf_info["tools.microsoft.bash:subsystem"] = "msys2"
+        self.conf_info["tools.microsoft.bash:path"] = os.path.join(msys_bin, "bash.exe")

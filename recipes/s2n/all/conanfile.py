@@ -1,18 +1,18 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class S2n(ConanFile):
     name = "s2n"
     description = "An implementation of the TLS/SSL protocols"
-    topics = ("conan", "aws", "amazon", "cloud", )
+    topics = ("aws", "amazon", "cloud", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aws/s2n-tls"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,11 +23,17 @@ class S2n(ConanFile):
         "fPIC": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.shared:
@@ -36,15 +42,15 @@ class S2n(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("openssl/1.1.1l")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        self.requires("openssl/1.1.1n")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Not supported (yet)")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -56,6 +62,7 @@ class S2n(ConanFile):
         return self._cmake
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -66,13 +73,18 @@ class S2n(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "s2n"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "s2n")
+        self.cpp_info.set_property("cmake_target_name", "AWS::s2n")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["s2n-lib"].libs = ["s2n"]
+        self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.components["s2n-lib"].system_libs = ["m", "pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "s2n"
         self.cpp_info.filenames["cmake_find_package_multi"] = "s2n"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["s2n-lib"].names["cmake_find_package"] = "s2n"
         self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
-        self.cpp_info.components["s2n-lib"].libs = ["s2n"]
-        self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["s2n-lib"].system_libs = ["m", "pthread"]

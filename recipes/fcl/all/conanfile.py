@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FclConan(ConanFile):
@@ -11,23 +11,23 @@ class FclConan(ConanFile):
     description = "C++11 library for performing three types of proximity " \
                   "queries on a pair of geometric models composed of triangles."
     license = "BSD-3-Clause"
-    topics = ("conan", "fcl", "geometry", "collision")
+    topics = ("fcl", "geometry", "collision")
     homepage = "https://github.com/flexible-collision-library/fcl"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_octomap": [True, False]
+        "with_octomap": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_octomap": True
+        "with_octomap": True,
     }
 
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -38,6 +38,11 @@ class FclConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,17 +50,20 @@ class FclConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{0} {1} doesn't properly support shared lib on Windows".format(self.name,
-                                                                                                            self.version))
 
     def requirements(self):
-        self.requires("eigen/3.3.9")
+        self.requires("eigen/3.4.0")
         self.requires("libccd/2.1")
         if self.options.with_octomap:
-            self.requires("octomap/1.9.6")
+            self.requires("octomap/1.9.7")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "fcl {} doesn't properly support shared lib on Windows".format(self.version)
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -75,18 +83,20 @@ class FclConan(ConanFile):
         self._cmake.definitions["FCL_TREAT_WARNINGS_AS_ERRORS"] = False
         self._cmake.definitions["FCL_HIDE_ALL_SYMBOLS"] = False
         self._cmake.definitions["FCL_STATIC_LIBRARY"] = not self.options.shared
-        self._cmake.definitions["FCL_USE_X64_SSE"] = False # Let consumer decide to add relevant compile options, ftl doesn't have simd intrinsics
+        self._cmake.definitions["FCL_USE_X64_SSE"] = False # Let consumer decide to add relevant compile options, fcl doesn't have simd intrinsics
         self._cmake.definitions["FCL_USE_HOST_NATIVE_ARCH"] = False
         self._cmake.definitions["FCL_USE_SSE"] = False
         self._cmake.definitions["FCL_COVERALLS"] = False
         self._cmake.definitions["FCL_COVERALLS_UPLOAD"] = False
         self._cmake.definitions["FCL_WITH_OCTOMAP"] = self.options.with_octomap
         if self.options.with_octomap:
+            self._cmake.definitions["OCTOMAP_VERSION"] = self.deps_cpp_info["octomap"].version
             octomap_major, octomap_minor, octomap_patch = self.deps_cpp_info["octomap"].version.split(".")
             self._cmake.definitions["OCTOMAP_MAJOR_VERSION"] = octomap_major
             self._cmake.definitions["OCTOMAP_MINOR_VERSION"] = octomap_minor
             self._cmake.definitions["OCTOMAP_PATCH_VERSION"] = octomap_patch
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["FCL_NO_DEFAULT_RPATH"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -98,6 +108,8 @@ class FclConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"fcl": "fcl::fcl"}
@@ -116,19 +128,15 @@ class FclConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "fcl"
-        self.cpp_info.names["cmake_find_package_multi"] = "fcl"
-        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.set_property("cmake_file_name", "fcl")
+        self.cpp_info.set_property("cmake_target_name", "fcl")
+        self.cpp_info.set_property("pkg_config_name", "fcl")
+        self.cpp_info.libs = ["fcl"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "fcl"
-        self.cpp_info.libs = tools.collect_libs(self)

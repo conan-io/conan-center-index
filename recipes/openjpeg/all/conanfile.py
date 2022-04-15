@@ -25,13 +25,17 @@ class OpenjpegConan(ConanFile):
         "build_codec": False,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,6 +77,8 @@ class OpenjpegConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+           tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -81,6 +87,8 @@ class OpenjpegConan(ConanFile):
         cmake.install()
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"openjp2": "OpenJPEG::OpenJPEG"}
@@ -99,13 +107,8 @@ class OpenjpegConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     @property
     def _openjpeg_subdir(self):
@@ -128,7 +131,6 @@ class OpenjpegConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "libopenjp2"

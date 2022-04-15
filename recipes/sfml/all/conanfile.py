@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class SfmlConan(ConanFile):
@@ -32,7 +32,6 @@ class SfmlConan(ConanFile):
         "audio": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
@@ -43,6 +42,20 @@ class SfmlConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_vc_static_runtime(self):
+        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
+               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,7 +73,7 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
             self.requires("stb/cci.20210713")
         if self.options.audio:
             self.requires("flac/1.3.3")
@@ -91,8 +104,8 @@ class SfmlConan(ConanFile):
         self._cmake.definitions["SFML_INSTALL_PKGCONFIG_FILES"] = False
         self._cmake.definitions["SFML_GENERATE_PDB"] = False
         self._cmake.definitions["SFML_USE_SYSTEM_DEPS"] = True
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["SFML_USE_STATIC_STD_LIBS"] = "MT" in self.settings.compiler.runtime
+        if self._is_msvc:
+            self._cmake.definitions["SFML_USE_STATIC_STD_LIBS"] = self._is_vc_static_runtime
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -106,6 +119,8 @@ class SfmlConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {values["target"]: "SFML::{}".format(component) for component, values in self._sfml_components.items()}
@@ -124,13 +139,8 @@ class SfmlConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     @property
     def _sfml_components(self):
@@ -261,9 +271,8 @@ class SfmlConan(ConanFile):
         return sfml_components
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "SFML"
-        self.cpp_info.names["cmake_find_package_multi"] = "SFML"
-        self.cpp_info.names["pkgconfig"] = "sfml-all"
+        self.cpp_info.set_property("cmake_file_name", "SFML")
+        self.cpp_info.set_property("pkg_config_name", "sfml-all")
 
         def _register_components(components):
             defines = [] if self.options.shared else ["SFML_STATIC"]
@@ -273,16 +282,27 @@ class SfmlConan(ConanFile):
                 requires = values.get("requires", [])
                 system_libs = values.get("system_libs", [])
                 frameworks = values.get("frameworks", [])
-                self.cpp_info.components[component].names["cmake_find_package"] = component
-                self.cpp_info.components[component].names["cmake_find_package_multi"] = component
-                self.cpp_info.components[component].names["pkg_config"] = target
-                self.cpp_info.components[component].builddirs.append(self._module_subfolder)
-                self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                # TODO: Properly model COMPONENTS names in CMakeDeps for find_package() call
+                #       (see https://github.com/conan-io/conan/issues/10258)
+                #       It should be:
+                #         find_package(SFML REQUIRED COMPONENTS system window graphics network audio)
+                #         target_link_libraries(myApp sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+                #       Do not use cmake_target_aliases to model this, names are too generic!
+                self.cpp_info.components[component].set_property("cmake_target_name", target)
+                self.cpp_info.components[component].set_property("pkg_config_name", target)
                 self.cpp_info.components[component].libs = libs
                 self.cpp_info.components[component].defines = defines
                 self.cpp_info.components[component].requires = requires
                 self.cpp_info.components[component].system_libs = system_libs
                 self.cpp_info.components[component].frameworks = frameworks
 
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components[component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
         _register_components(self._sfml_components)
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "SFML"
+        self.cpp_info.names["cmake_find_package_multi"] = "SFML"
+        self.cpp_info.names["pkgconfig"] = "sfml-all"

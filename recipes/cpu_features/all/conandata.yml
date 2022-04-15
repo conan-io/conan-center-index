@@ -1,8 +1,14 @@
 sources:
+  "0.7.0":
+    url: "https://github.com/google/cpu_features/archive/refs/tags/v0.7.0.tar.gz"
+    sha256: "df80d9439abf741c7d2fdcdfd2d26528b136e6c52976be8bd0cd5e45a27262c0"
   "0.6.0":
     url: "https://github.com/google/cpu_features/archive/refs/tags/v0.6.0.tar.gz"
     sha256: "95a1cf6f24948031df114798a97eea2a71143bd38a4d07d9a758dda3924c1932"
 patches:
   "0.6.0":
-    - patch_file: "patches/0001-fix-bundle-install.patch"
+    - patch_file: "patches/0.6.0-0001-fix-bundle-install.patch"
+      base_path: "source_subfolder"
+  "0.7.0":
+    - patch_file: "patches/0.7.0-0001-support-aarch64-macos.patch"
       base_path: "source_subfolder"

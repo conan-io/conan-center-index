@@ -1,15 +1,16 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Pagmo2Conan(ConanFile):
     name = "pagmo2"
     description = "pagmo is a C++ scientific library for massively parallel optimization."
     license = ("LGPL-3.0-or-later", "GPL-3.0-or-later")
-    topics = ("conan", "pagmo", "optimization", "parallel-computing", "genetic-algorithm", "metaheuristics")
+    topics = ("pagmo", "optimization", "parallel-computing", "genetic-algorithm", "metaheuristics")
     homepage = "https://esa.github.io/pagmo2"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -31,7 +32,6 @@ class Pagmo2Conan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -46,12 +46,12 @@ class Pagmo2Conan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
-        self.requires("tbb/2020.3")
+        self.requires("boost/1.78.0")
+        self.requires("onetbb/2020.3")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.with_nlopt:
-            self.requires("nlopt/2.7.0")
+            self.requires("nlopt/2.7.1")
 
     @property
     def _compilers_minimum_version(self):
@@ -105,20 +105,19 @@ class Pagmo2Conan(ConanFile):
         tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
         tools.replace_in_file(yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PAGMO_BUILD_TESTS"] = False
-        self._cmake.definitions["PAGMO_BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["PAGMO_BUILD_TUTORIALS"] = False
-        self._cmake.definitions["PAGMO_WITH_EIGEN3"] = self.options.with_eigen
-        self._cmake.definitions["PAGMO_WITH_NLOPT"] = self.options.with_nlopt
-        self._cmake.definitions["PAGMO_WITH_IPOPT"] = self.options.with_ipopt
-        self._cmake.definitions["PAGMO_ENABLE_IPO"] = False
-        self._cmake.definitions["PAGMO_BUILD_STATIC_LIBRARY"] = not self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["PAGMO_BUILD_TESTS"] = False
+        cmake.definitions["PAGMO_BUILD_BENCHMARKS"] = False
+        cmake.definitions["PAGMO_BUILD_TUTORIALS"] = False
+        cmake.definitions["PAGMO_WITH_EIGEN3"] = self.options.with_eigen
+        cmake.definitions["PAGMO_WITH_NLOPT"] = self.options.with_nlopt
+        cmake.definitions["PAGMO_WITH_IPOPT"] = self.options.with_ipopt
+        cmake.definitions["PAGMO_ENABLE_IPO"] = False
+        cmake.definitions["PAGMO_BUILD_STATIC_LIBRARY"] = not self.options.shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -132,17 +131,23 @@ class Pagmo2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "pagmo"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "pagmo"
-        self.cpp_info.names["cmake_find_package"] = "Pagmo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Pagmo"
-        self.cpp_info.components["_pagmo"].names["cmake_find_package"] = "pagmo"
-        self.cpp_info.components["_pagmo"].names["cmake_find_package_multi"] = "pagmo"
+        self.cpp_info.set_property("cmake_file_name", "pagmo")
+        self.cpp_info.set_property("cmake_target_name", "Pagmo::pagmo")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_pagmo"].libs = ["pagmo"]
-        self.cpp_info.components["_pagmo"].requires = ["boost::headers", "boost::serialization", "tbb::tbb"]
+        self.cpp_info.components["_pagmo"].requires = ["boost::headers", "boost::serialization", "onetbb::onetbb"]
         if self.options.with_eigen:
             self.cpp_info.components["_pagmo"].requires.append("eigen::eigen")
         if self.options.with_nlopt:
             self.cpp_info.components["_pagmo"].requires.append("nlopt::nlopt")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_pagmo"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "pagmo"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "pagmo"
+        self.cpp_info.names["cmake_find_package"] = "Pagmo"
+        self.cpp_info.names["cmake_find_package_multi"] = "Pagmo"
+        self.cpp_info.components["_pagmo"].names["cmake_find_package"] = "pagmo"
+        self.cpp_info.components["_pagmo"].names["cmake_find_package_multi"] = "pagmo"
+        self.cpp_info.components["_pagmo"].set_property("cmake_target_name", "Pagmo::pagmo")

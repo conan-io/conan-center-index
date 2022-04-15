@@ -1,6 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
 
 
 class DatadogOpenTracingConan(ConanFile):
@@ -10,12 +11,18 @@ class DatadogOpenTracingConan(ConanFile):
     topics = ("instrumentration", "monitoring", "security", "tracing")
     homepage = "https://github.com/DataDog/dd-opentracing-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -35,6 +42,11 @@ class DatadogOpenTracingConan(ConanFile):
             "apple-clang": "7",
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,7 +55,15 @@ class DatadogOpenTracingConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.compiler.cppstd:
+    def requirements(self):
+        self.requires("opentracing-cpp/1.6.0")
+        self.requires("zlib/1.2.11")
+        self.requires("libcurl/7.80.0")
+        self.requires("msgpack/3.3.0")
+        self.requires("nlohmann_json/3.10.5")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -52,13 +72,6 @@ class DatadogOpenTracingConan(ConanFile):
                 raise ConanInvalidConfiguration("Datadog-opentracing requires C++14, which your compiler does not support.")
         else:
             self.output.warn("Datadog-opentracing requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-
-    def requirements(self):
-        self.requires("opentracing-cpp/1.6.0")
-        self.requires("zlib/1.2.11")
-        self.requires("libcurl/7.73.0")
-        self.requires("msgpack/3.3.0")
-        self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -85,21 +98,23 @@ class DatadogOpenTracingConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "DataDogOpenTracing"
-        self.cpp_info.names["cmake_find_package_multi"] = "DataDogOpenTracing"
-
-        target_suffix = "" if self.options.shared else "-static"
-
-        # dd_opentracing
-        self.cpp_info.components["dd_opentracing"].names["cmake_find_package"] = "dd_opentracing" + target_suffix
-        self.cpp_info.components["dd_opentracing"].names["cmake_find_package_multi"] = "dd_opentracing" + target_suffix
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["dd_opentracing"].libs = ["dd_opentracing"]
-        self.cpp_info.components["dd_opentracing"].requires = ["opentracing-cpp::opentracing-cpp", "zlib::zlib", "libcurl::libcurl", "msgpack::msgpack", "nlohmann_json::nlohmann_json"]
-
-        self.cpp_info.components["dd_opentracing"].defines.append("DD_OPENTRACING_SHARED" if self.options.shared else "DD_OPENTRACING_STATIC")
-
+        self.cpp_info.components["dd_opentracing"].defines.append(
+            "DD_OPENTRACING_SHARED" if self.options.shared else "DD_OPENTRACING_STATIC"
+        )
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["dd_opentracing"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed.
+        #       Do not support these names in CMakeDeps, it was a mistake, upstream doesn't export targets
+        self.cpp_info.names["cmake_find_package"] = "DataDogOpenTracing"
+        self.cpp_info.names["cmake_find_package_multi"] = "DataDogOpenTracing"
+        target_suffix = "" if self.options.shared else "-static"
+        self.cpp_info.components["dd_opentracing"].names["cmake_find_package"] = "dd_opentracing" + target_suffix
+        self.cpp_info.components["dd_opentracing"].names["cmake_find_package_multi"] = "dd_opentracing" + target_suffix
+        self.cpp_info.components["dd_opentracing"].requires = [
+            "opentracing-cpp::opentracing-cpp", "zlib::zlib", "libcurl::libcurl",
+            "msgpack::msgpack", "nlohmann_json::nlohmann_json",
+        ]

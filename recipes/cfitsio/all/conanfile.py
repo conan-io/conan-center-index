@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import glob
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class CfitsioConan(ConanFile):
@@ -10,7 +10,7 @@ class CfitsioConan(ConanFile):
     description = "C library for reading and writing data files in FITS " \
                   "(Flexible Image Transport System) data format"
     license = "ISC"
-    topics = ("conan", "cfitsio", "fits", "image", "nasa", "astronomy", "astrophysics", "space")
+    topics = ("cfitsio", "fits", "image", "nasa", "astronomy", "astrophysics", "space")
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -32,7 +32,6 @@ class CfitsioConan(ConanFile):
         "with_curl": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -43,6 +42,11 @@ class CfitsioConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,14 +63,14 @@ class CfitsioConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.threadsafe and self.settings.os == "Windows" and \
            (not self.settings.compiler == "gcc" or self.settings.compiler.threads == "win32"):
             self.requires("pthreads4w/3.0.0")
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.78.0")
+            self.requires("libcurl/7.80.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -112,7 +116,7 @@ class CfitsioConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "cfitsio"
+        self.cpp_info.set_property("pkg_config_name", "cfitsio")
         self.cpp_info.libs = ["cfitsio"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

@@ -6,6 +6,6 @@ if(WIN32 AND BUILD_SHARED_LIBS)
 endif()
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 add_subdirectory("source_subfolder/cpp")

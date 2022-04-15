@@ -10,11 +10,11 @@ When pull requests are merged, the CI will upload the generated packages to the 
   * [Request access](#request-access)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
-  * [More Information about Recipes](#more-information-about-recipes)
-    * [The recipe folder](#the-recipe-folder)
-    * [The version folder(s)](#the-version-folders)
-    * [The `conanfile.py` and `test_package` folder](#the-conanfilepy-and-test_package-folder)
-    * [The `conandata.yml`](#the-conandatayml)
+  * [Recipe files structure](#recipe-files-structure)
+    * [`config.yml`](#configyml)
+    * [`conandata.yml`](#conandatayml)
+    * [The _recipe folder_: `conanfile.py`](#the-_recipe-folder_-conanfilepy)
+    * [The test package folders: `test_package` and `test_<something>`](#the-test-package-folders-test_package-and-test_something)
   * [How to provide a good recipe](#how-to-provide-a-good-recipe)
     * [Header Only](#header-only)
     * [CMake](#cmake)
@@ -64,86 +64,55 @@ The pipeline will report errors and build logs by creating a comment in the pull
 
 Packages generated and uploaded by this build service don't include any _user_ or _channel_ (existing references with any `@user/channel` should be considered as deprecated in favor of packages without it). Once the packages are uploaded, you will be able to install them using the reference as `name/version` (requires Conan >= 1.21): `conan install cmake/3.18.2@`.
 
-## More Information about Recipes
+## Recipe files structure
 
-### The recipe folder
+Every entry in the `recipes` folder contains all the files required by Conan to create the binaries for all the versions of one library. Those
+files don't depend on any other file in the repository (we are not using `python_requires`) and every pull-request can modify only one of those
+folders at a time.
 
-Create a new subfolder in the [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) folder with the name of the package in lowercase.
-
-e.g:
+This is the canonical structure of one of these folders, where the same `conanfile.py` recipe is suitable to build all the versions of the library:
 
 ```
 .
 +-- recipes
-|   +-- zlib
-|       +-- 1.2.8
+|   +-- library_name/
+|       +-- config.yml
+|       +-- all/
 |           +-- conanfile.py
+|           +-- conandata.yml
 |           +-- test_package/
-|       +-- 1.2.11
-|           +-- conanfile.py
-|           +-- test_package/
+|               +-- conanfile.py
+|               +-- CMakeLists.txt
+|               +-- main.cpp
 ```
 
-### The version folder(s)
+If it becomes too complex to maintain the logic for all the versions in a single `conanfile.py`, it is possible to split the folder `all` into
+two or more folders, dedicated to different versions, each one with its own `conanfile.py` recipe. In any case, those folders should replicate the 
+same structure.
 
-The system supports to use the same recipe for several versions of the library and also to create different recipes for different versions
+### `config.yml`
 
-- **1 version => 1 recipe**
+This file lists the versions and the folders where they are located (if there are more than a single `all` folder):
 
-  When the recipe changes significantly between different library versions and reusing the recipe is not worth it, it is recommended to create different folders and group together the
-  versions that can share the same recipe. Each of these folders will require its own `conanfile.py` and `test_package` folder:
+```yml
+versions:
+  "1.1.0":
+    folder: 1.x.x
+  "1.1.1":
+    folder: 1.x.x
+  "2.0.0":
+    folder: all
+  "2.1.0":
+    folder: all
+```
 
-  ```
-  .
-  +-- recipes
-  |   +-- zlib
-  |       +-- 1.2.8
-  |           +-- conanfile.py
-  |           +-- test_package/
 
-  ```
+### `conandata.yml`
 
-
-- **N versions => 1 recipe**
-
-   Create a folder named `all` (just a convention) and put both the `conanfile.py` and the `test_package` folder there.
-
-   You will need to create a `config.yml` file to declare the matching between the versions and the folders. e.g:
-
-  ```
-  .
-  +-- recipes
-  |   +-- mylibrary
-  |       +-- all
-  |           +-- conanfile.py
-  |           +-- test_package/
-          +-- config.yml
-  ```
-
-  **config.yml** file
-
-  ```yml
-  versions:
-    "1.1.0":
-      folder: all
-    "1.1.1":
-      folder: all
-    "1.1.2":
-      folder: all
-  ```
-
-- **N versions => M recipes**
-
-   This is the same approach as the previous one, you can use one recipe for a range of versions and a different one for another range of versions. Create the `config.yml` file and declare the folder for each version.
-
-### The `conanfile.py` and `test_package` folder
-
-In the folder(s) created in the previous step, you have to create the `conanfile.py` and a [`test_package`](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder) folder.
-
-### The `conandata.yml`
-
-In the same directory as the `conanfile.py`, create a file named `conandata.yml`. This file has to be used in the recipe to indicate the origins of the source code.
-It must have an entry for each version, indicating the URL for downloading the source code and a checksum.
+This file lists **all the sources that are needed to build the package**: source code, license files,... any file that will be used by the recipe
+should be listed here. The file is organized into two sections, `sources` and `patches`, each one of them contains the files that are required
+for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
+they are not changed:
 
 ```yml
 sources:
@@ -153,19 +122,75 @@ sources:
   "1.1.1":
     url: "https://www.url.org/source/mylib-1.0.1.tar.gz"
     sha256: "15b6393c20030aab02c8e2fe0243cb1d1d18062f6c095d67bca91871dc7f324a"
+patches:
+  "1.1.1":
+    - patch_file: "patches/1.1.1-001-simpler-cmakelists.patch"
+      base_path: "source_subfolder"
 ```
 
-You must specify the checksum algorithm `sha256`.
-If your sources are on GitHub, you can copy the link of the "Download ZIP" located in the "Clone or download" repository, make sure you are in the correct branch or TAG.
-
-Then in your `conanfile.py` method, it has to be used to download the sources:
+Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
 ```py
- def source(self):
+def source(self):
      tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+def build(self):
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        tools.patch(**patch)
+    [...]
 ```
 
-> :warning: Please be aware that `conan-center-index` only builds from sources and pre-compiled binaries are not acceptable. For more information see our [packaging policy](packaging_policy.md).
+### The _recipe folder_: `conanfile.py`
+
+The main files in this repository are the `conanfile.py` ones that contain the logic to build the libraries from sources for all the configurations,
+as we said before there can be one single recipe suitable for all the versions inside the `all` folder, or there can be several recipes targetting
+different versions in different folders. For mainteinance reasons, we prefer to have only one recipe, but sometimes the extra effort doesn't worth
+it and it makes sense to split and duplicate it, there is no common rule for it.
+
+Together with the recipe, there can be other files that are needed to build the library: patches, other files related to build systems (many recipes
+include a `CMakeLists.txt` to run some Conan logic before using the one from the library),... all these files will usually be listed in the
+`exports_sources` attribute and used during the build process.
+
+Also, **every `conanfile.py` should be accompanied by one or several folder to test the generated packages** as we will see below.
+
+### The test package folders: `test_package` and `test_<something>`
+
+All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its corresponding `conanfile.py` and
+a minimal project to test the package is strictly required. You can read about it in the 
+[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder).
+
+Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
+`test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
+way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
+(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files ([see example](https://github.com/conan-io/conan-center-index/tree/master/recipes/fmt/all)).
+
+When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
+project files as simple as possible, without the need of extra logic to handle different scenarios.
+
+```
+.
++-- recipes
+|   +-- library_name/
+|       +-- config.yml
+|       +-- all/
+|           +-- conanfile.py
+|           +-- conandata.yml
+|           +-- test_package/
+|               +-- conanfile.py
+|               +-- CMakeLists.txt
+|               +-- main.cpp
+|           +-- test_cmakedeps/
+|               +-- conanfile.py
+|               +-- CMakeLists.txt
+|               +-- conanfile.py
+```
+
+The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
+of them together in the testing logs.
+
+> Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
+> it will fail in crossbuilding scenarios.
+
 
 ## How to provide a good recipe
 

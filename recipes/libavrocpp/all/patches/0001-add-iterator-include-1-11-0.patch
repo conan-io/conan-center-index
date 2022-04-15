@@ -1,0 +1,96 @@
+diff --git a/lang/c++/api/buffer/detail/BufferDetail.hh b/lang/c++/api/buffer/detail/BufferDetail.hh
+index b487cdb..89783fb 100644
+--- a/lang/c++/api/buffer/detail/BufferDetail.hh
++++ b/lang/c++/api/buffer/detail/BufferDetail.hh
+@@ -30,6 +30,7 @@
+ #endif
+ #include <cassert>
+ #include <deque>
++#include <iterator>
+ #include <exception>
+ 
+ /**
+diff --git a/lang/c++/impl/DataFile.cc b/lang/c++/impl/DataFile.cc
+index 18fb3f6..f8679a2 100644
+--- a/lang/c++/impl/DataFile.cc
++++ b/lang/c++/impl/DataFile.cc
+@@ -20,6 +20,7 @@
+ #include "Compiler.hh"
+ #include "Exception.hh"
+ 
++#include <iterator>
+ #include <sstream>
+ 
+ #include <boost/crc.hpp> // for boost::crc_32_type
+diff --git a/lang/c++/impl/Stream.cc b/lang/c++/impl/Stream.cc
+index 63a8b4e..39556d1 100644
+--- a/lang/c++/impl/Stream.cc
++++ b/lang/c++/impl/Stream.cc
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include "Stream.hh"
++#include <iterator>
+ #include <vector>
+ 
+ namespace avro {
+diff --git a/lang/c++/impl/parsing/JsonCodec.cc b/lang/c++/impl/parsing/JsonCodec.cc
+index 4fd0481..3de5150 100644
+--- a/lang/c++/impl/parsing/JsonCodec.cc
++++ b/lang/c++/impl/parsing/JsonCodec.cc
+@@ -20,6 +20,7 @@
+ #include <boost/math/special_functions/fpclassify.hpp>
+ #include <map>
+ #include <memory>
++#include <iterator>
+ #include <string>
+ 
+ #include "Decoder.hh"
+diff --git a/lang/c++/impl/parsing/ResolvingDecoder.cc b/lang/c++/impl/parsing/ResolvingDecoder.cc
+index d86f6e5..3b961ea 100644
+--- a/lang/c++/impl/parsing/ResolvingDecoder.cc
++++ b/lang/c++/impl/parsing/ResolvingDecoder.cc
+@@ -21,6 +21,7 @@
+ #include <memory>
+ #include <string>
+ #include <utility>
++#include <iterator>
+ 
+ #include "Decoder.hh"
+ #include "Encoder.hh"
+diff --git a/lang/c++/impl/parsing/ValidatingCodec.cc b/lang/c++/impl/parsing/ValidatingCodec.cc
+index cfb8222..8a0817a 100644
+--- a/lang/c++/impl/parsing/ValidatingCodec.cc
++++ b/lang/c++/impl/parsing/ValidatingCodec.cc
+@@ -19,6 +19,7 @@
+ #include "ValidatingCodec.hh"
+ 
+ #include <algorithm>
++#include <iterator>
+ #include <boost/any.hpp>
+ #include <map>
+ #include <memory>
+diff --git a/lang/c++/test/CodecTests.cc b/lang/c++/test/CodecTests.cc
+index a99cdd6..07f560c 100644
+--- a/lang/c++/test/CodecTests.cc
++++ b/lang/c++/test/CodecTests.cc
+@@ -25,6 +25,7 @@
+ #include "Specific.hh"
+ #include "ValidSchema.hh"
+ 
++#include <iterator>
+ #include <boost/bind.hpp>
+ #include <cstdint>
+ #include <functional>
+diff --git a/lang/c++/test/DataFileTests.cc b/lang/c++/test/DataFileTests.cc
+index fec7f31..aced825 100644
+--- a/lang/c++/test/DataFileTests.cc
++++ b/lang/c++/test/DataFileTests.cc
+@@ -24,6 +24,7 @@
+ #include <boost/test/unit_test.hpp>
+ 
+ #include <chrono>
++#include <iterator>
+ #include <thread>
+ 
+ #include <sstream>

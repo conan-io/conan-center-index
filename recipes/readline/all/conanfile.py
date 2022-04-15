@@ -6,11 +6,10 @@ from conans.errors import ConanInvalidConfiguration
 class ReadLineConan(ConanFile):
     name = "readline"
     description = "A set of functions for use by applications that allow users to edit command lines as they are typed in"
-    topics = ("conan", "readline", "cli", "terminal", "command")
+    topics = ("cli", "terminal", "command")
     license = "GPL-3.0-only"
     homepage = "https://tiswww.case.edu/php/chet/readline/rltop.html"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,12 +43,13 @@ class ReadLineConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("readline does not support Visual Studio")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("readline-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:

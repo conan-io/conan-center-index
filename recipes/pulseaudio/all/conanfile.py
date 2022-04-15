@@ -8,7 +8,7 @@ required_conan_version = ">=1.32.0"
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
     description = "PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for sound applications."
-    topics = ("conan", "pulseaudio", "sound")
+    topics = "sound",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
@@ -47,8 +47,6 @@ class PulseAudioConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -59,21 +57,25 @@ class PulseAudioConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.16")
         self.requires("libsndfile/1.0.31")
-        self.requires("libcap/2.50")
+        self.requires("libcap/2.62")
+        self.requires("libtool/2.4.6")
         if self.options.with_alsa:
-            self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.5.1")
         if self.options.with_glib:
-            self.requires("glib/2.69.0")
+            self.requires("glib/2.72.0")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.9")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1n")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
     def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
+
         if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
             raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
                                             "Either set option fftw:precision=single"
@@ -81,7 +83,7 @@ class PulseAudioConan(ConanFile):
                                             % self.options["fftw"].precision)
 
     def build_requirements(self):
-        self.build_requires("gettext/0.20.1")
+        self.build_requires("gettext/0.21")
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
 
@@ -128,7 +130,7 @@ class PulseAudioConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["pulse"].libs.append("pulsecommon-%s" % self.version)
         self.cpp_info.components["pulse"].libdirs = ["lib", os.path.join("lib", "pulseaudio")]
-        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap"]
+        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap", "libtool::libtool"]
         if self.options.with_alsa:
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
         if self.options.get_safe("with_fftw"):

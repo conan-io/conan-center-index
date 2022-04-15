@@ -23,7 +23,7 @@ class ZstrConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def package_id(self):
         self.info.header_only()

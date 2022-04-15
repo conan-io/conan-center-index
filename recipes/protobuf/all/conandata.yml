@@ -5,6 +5,9 @@ sources:
   "3.19.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.19.1.tar.gz"
     sha256: "87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422"
+  "3.18.1":
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.1.tar.gz"
+    sha256: "9111bf0b542b631165fadbd80aa60e7fb25b25311c532139ed2089d76ddf6dd7"
   "3.17.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"

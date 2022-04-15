@@ -103,7 +103,6 @@ class OpenSSLConan(ConanFile):
             self.options.no_asm = True
             self.options.no_threads = True
             self.options.no_stdio = True
-            self.options.no_tests = True
 
     def configure(self):
         if self.options.shared:
@@ -113,7 +112,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if not self.options.no_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":

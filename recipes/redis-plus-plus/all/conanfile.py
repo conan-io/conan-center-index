@@ -4,7 +4,6 @@ import os
 
 required_conan_version = ">=1.43.0"
 
-
 class RedisPlusPlusConan(ConanFile):
     name = "redis-plus-plus"
     homepage = "https://github.com/sewenew/redis-plus-plus"
@@ -17,12 +16,14 @@ class RedisPlusPlusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_tls": [True, False]
+        "with_tls": [True, False],
+        "build_async": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tls": False
+        "with_tls": False,
+        "build_async": False
     }
 
     _cmake = None
@@ -57,6 +58,8 @@ class RedisPlusPlusConan(ConanFile):
 
     def requirements(self):
         self.requires("hiredis/1.0.2")
+        if self.options.build_async:  
+            self.requires("libuv/1.44.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -85,6 +88,8 @@ class RedisPlusPlusConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
+            if self.options.build_async: 
+                self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_TEST"] = False
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared

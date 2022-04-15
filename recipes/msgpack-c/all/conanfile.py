@@ -70,6 +70,7 @@ class MsgpackCConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"msgpackc": "msgpack::msgpack"}
@@ -88,23 +89,18 @@ class MsgpackCConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msgpack")
         self.cpp_info.set_property("cmake_target_name", "msgpackc")
         self.cpp_info.set_property("pkg_config_name", "msgpack")
+        self.cpp_info.libs = ["msgpackc"]
 
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "msgpack"
         self.cpp_info.names["cmake_find_package_multi"] = "msgpack"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
-        self.cpp_info.libs = ["msgpackc"]
+        self.cpp_info.names["pkg_config"] = "msgpack"

@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.43.0"
 
 
 class PROPOSALConan(ConanFile):
@@ -33,6 +33,10 @@ class PROPOSALConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,22 +47,21 @@ class PROPOSALConan(ConanFile):
 
     def requirements(self):
         self.requires("cubicinterpolation/0.1.4")
-        self.requires("spdlog/1.8.2")
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("spdlog/1.9.2")
+        self.requires("nlohmann_json/3.10.5")
         if self.options.with_python:
-            self.requires("pybind11/2.6.2")
+            self.requires("pybind11/2.9.1")
 
     @property
     def _minimum_compilers_version(self):
         return {"Visual Studio": "15", "gcc": "5", "clang": "5", "apple-clang": "5"}
 
     def validate(self):
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Can not build shared library on Visual Studio."
             )
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
 
         minimum_version = self._minimum_compilers_version.get(
@@ -74,9 +77,8 @@ class PROPOSALConan(ConanFile):
             )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "PROPOSAL-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -99,6 +101,10 @@ class PROPOSALConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "PROPOSAL")
+        self.cpp_info.set_property("cmake_target_name", "PROPOSAL::PROPOSAL")
+        self.cpp_info.libs = ["PROPOSAL"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "PROPOSAL"
         self.cpp_info.names["cmake_find_package_multi"] = "PROPOSAL"
-        self.cpp_info.libs = ["PROPOSAL"]
