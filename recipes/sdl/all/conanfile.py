@@ -453,5 +453,5 @@ class SDLConan(ConanFile):
         # Workaround to avoid unwanted sdl::sdl target in CMakeDeps generator
         self.cpp_info.set_property(
             "cmake_target_name",
-            "SDL2::".format("SDL2main" if self.options.sdl2main else sdl2_cmake_target),
+            "SDL2::{}".format("SDL2main" if self.options.sdl2main else sdl2_cmake_target),
         )
