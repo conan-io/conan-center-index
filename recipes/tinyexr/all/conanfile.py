@@ -32,9 +32,9 @@ class TinyExrConan(ConanFile):
 
     def requirements(self):
         if self.options.with_z == "miniz":
-            self.requires("miniz/2.1.0")
+            self.requires("miniz/2.2.0")
         else:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_zfp:
             self.requires("zfp/0.5.5")
 
