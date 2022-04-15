@@ -105,6 +105,9 @@ class PodofoConan(ConanFile):
         if not tools.valid_min_cppstd(self, 11) and tools.Version(self.version) >= "0.9.7":
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
+        # To install relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+
         # Custom CMake options injected in our patch, required to ensure reproducible builds
         cmake.definitions["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
         cmake.definitions["PODOFO_WITH_LIBIDN"] = self.options.with_libidn
