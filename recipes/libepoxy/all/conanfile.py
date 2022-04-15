@@ -44,6 +44,11 @@ class EpoxyConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -81,6 +86,10 @@ class EpoxyConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def _configure_meson(self):
         if self._meson:
             return self._meson
@@ -94,15 +103,11 @@ class EpoxyConan(ConanFile):
             defs[opt] = "true" if self.options.get_safe(opt, False) else "false"
         args=[]
         args.append("--wrap-mode=nofallback")
-
-        if self._is_msvc:
-            # Fix error C4819
-            args.append("-Dc_args=/source-charset:utf-8")
-
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
         return self._meson
 
     def build(self):
+        self._patch_sources()
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
