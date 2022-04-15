@@ -18,6 +18,9 @@ on:
       - '.github/workflows/mac-clang11-release.yml'
       - 'trassir/mac-clang11/conanfile.txt'
       - 'trassir/mac-clang11/conanprofile.release'
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 env:
   LDAP_USERNAME: ${{ secrets.LDAP_USERNAME }}
