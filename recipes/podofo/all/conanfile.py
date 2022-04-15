@@ -132,8 +132,10 @@ class PodofoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libpodofo-{}".format(tools.Version(self.version).major))
-        self.cpp_info.names["pkg_config"] = "libpodofo-{}".format(tools.Version(self.version).major)
+        podofo_version = tools.Version(self.version)
+        pkg_config_name = f"libpodofo-{podofo_version.major}" if podofo_version < "0.9.7" else "libpodofo"
+        self.cpp_info.set_property("pkg_config_name", pkg_config_name)
+        self.cpp_info.names["pkg_config"] = pkg_config_name
         self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("USING_SHARED_PODOFO")
