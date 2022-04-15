@@ -43,6 +43,9 @@ void test_gio()
     GInetAddress *add = g_inet_address_new_any(G_SOCKET_FAMILY_IPV4);
     printf("Any ipv4 address: %s\n", g_inet_address_to_string(add));
     g_object_unref(add);
+
+    GSocket *socket = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM, 0, NULL);
+    g_object_unref(socket);
 }
 
 void test_gthread()

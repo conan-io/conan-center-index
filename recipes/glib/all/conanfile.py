@@ -266,6 +266,13 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
+        if self.settings.os == "Windows":
+            # See source "gio/meson.build"
+            self.cpp_info.components["gio-2.0"].system_libs.extend([
+                "shlwapi",
+                "dnsapi",
+                "iphlpapi",
+            ])
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
         if self.settings.os in ["Linux", "FreeBSD"]:
