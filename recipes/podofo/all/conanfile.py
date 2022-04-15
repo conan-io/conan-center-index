@@ -70,11 +70,11 @@ class PodofoConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.11.1")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.13.93")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
         if self.options.with_jpeg:
