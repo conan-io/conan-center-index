@@ -98,7 +98,11 @@ class UwebsocketsConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.includedirs.append(os.path.join("include", "uWebSockets"))
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         if not self.options.with_zlib:
             self.cpp_info.defines.append("UWS_NO_ZLIB")
         if self.options.get_safe("with_libdeflate"):
