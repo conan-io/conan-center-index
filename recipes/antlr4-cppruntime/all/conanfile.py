@@ -95,6 +95,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         else:
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+        if compiler == "Visual Studio" and version == "4.10":
+            raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use higher 4.10.1 or above.".format(self.name))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
