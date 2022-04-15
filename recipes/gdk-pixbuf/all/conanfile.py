@@ -58,12 +58,10 @@ class GdkPixbufConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.settings.compiler == "clang":
-            # FIXME: cannot bump glib due to "undefined reference to `__muloti4'""
-            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
-            self.requires("glib/2.70.4")
-        else:
-            self.requires("glib/2.72.0")
+        # FIXME: cannot bump glib due to at least:
+        # - "undefined reference to `__muloti4'" with clang (https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794)
+        # - several link errors to glib symbols with Visual Studio (https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1100016580)
+        self.requires("glib/2.70.4")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
