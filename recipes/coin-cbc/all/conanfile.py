@@ -153,6 +153,8 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["libcbc"].includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.components["libcbc"].requires = ["coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl"]
         self.cpp_info.components["libcbc"].names["pkg_config"] = "cbc"
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
+            self.cpp_info.components["libcbc"].system_libs.append("pthread")
 
         self.cpp_info.components["osi-cbc"].libs = ["OsiCbc"]
         self.cpp_info.components["osi-cbc"].requires = ["libcbc"]
