@@ -40,6 +40,10 @@ class EpoxyConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -90,6 +94,11 @@ class EpoxyConan(ConanFile):
             defs[opt] = "true" if self.options.get_safe(opt, False) else "false"
         args=[]
         args.append("--wrap-mode=nofallback")
+
+        if self._is_msvc:
+            # Fix error C4819
+            args.append("-Dc_args=/source-charset:utf-8")
+
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
         return self._meson
 
