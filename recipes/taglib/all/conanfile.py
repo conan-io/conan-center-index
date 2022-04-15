@@ -51,6 +51,16 @@ class TaglibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # relocatable shared libs on macOS
+        for cmakelists in [
+            os.path.join(self._source_subfolder, "taglib", "CMakeLists.txt"),
+            os.path.join(self._source_subfolder, "bindings", "c", "CMakeLists.txt"),
+        ]:
+            tools.replace_in_file(cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -63,8 +73,7 @@ class TaglibConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
