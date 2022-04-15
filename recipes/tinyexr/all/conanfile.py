@@ -72,11 +72,11 @@ class TinyExrConan(ConanFile):
         self.copy("tinyexr.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.defines.append("TINYEXR_USE_MINIZ=" + ( "1" if self.options.with_z == "miniz" else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_PIZ=" + ( "1" if self.options.with_piz else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_ZFP=" + ( "1" if self.options.with_zfp else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_THREAD=" + ( "1" if self.options.with_zfp else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_OPENMP=" + ( "1" if self.options.with_zfp else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_MINIZ={}".format("1" if self.options.with_z == "miniz" else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_PIZ={}".format("1" if self.options.with_piz else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_ZFP={}".format("1" if self.options.with_zfp else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_THREAD={}".format("1" if self.options.with_thread else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_OPENMP={}".format("1" if self.options.with_openmp else "0"))
 
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_thread:
             self.cpp_info.system_libs = ["pthread"]
