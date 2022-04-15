@@ -17,10 +17,12 @@ class CoinCbcConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "parallel": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "parallel": False,
     }
     generators = "pkg_config"
 
@@ -41,6 +43,7 @@ class CoinCbcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.parallel
 
     def configure(self):
         if self.options.shared:
@@ -105,6 +108,10 @@ class CoinCbcConan(ConanFile):
             "--without-blas"
             "--without-lapack"
         ]
+        if self.settings.os != "Windows":
+            configure_args = [
+                "--enable-cbc-parallel={}".format(yes_no(self.options.parallel))
+            ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
