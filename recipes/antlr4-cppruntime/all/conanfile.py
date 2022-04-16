@@ -26,9 +26,9 @@ class Antlr4CppRuntimeConan(ConanFile):
     generators = "cmake", "pkg_config"
 
     compiler_required_cpp17 = {
-            "Visual Studio": "17",
+            "Visual Studio": "16",
             "gcc": "7",
-            "clang": "5.0",
+            "clang": "5",
             "apple-clang": "9.1"
     }
 
@@ -166,5 +166,5 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
