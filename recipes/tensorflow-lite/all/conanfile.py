@@ -119,6 +119,9 @@ class TensorflowLiteConan(ConanFile):
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[^3.16]")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
