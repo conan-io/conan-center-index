@@ -176,9 +176,10 @@ class ProtobufConan(ConanFile):
                  "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
+            cmd_str = "COMMAND  protobuf::protoc" if tools.Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
             tools.replace_in_file(
                 protobuf_config_cmake,
-                "COMMAND  protobuf::protoc",
+                cmd_str,
                 "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
             )
 
