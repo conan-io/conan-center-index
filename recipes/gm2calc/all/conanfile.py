@@ -10,7 +10,7 @@ class Gm2calcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/GM2Calc/GM2Calc"
     description = "C++ library to calculate the anomalous magnetic moment of the muon in the MSSM"
-    topics = ("conan", "high-energy", "physics", "hep", "magnetic moment", "muon", "MSSM")
+    topics = ("high-energy", "physics", "hep", "magnetic moment", "muon", "MSSM", "2HDM")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
