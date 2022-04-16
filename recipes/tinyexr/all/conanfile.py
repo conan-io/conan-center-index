@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class TinyExrConan(ConanFile):
@@ -8,9 +10,9 @@ class TinyExrConan(ConanFile):
     homepage = "https://github.com/syoyo/tinyexr"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    topics = ("conan", "exr", "header-only")
-    exports_sources = ["patches/*"]
-    settings = "os"
+    topics = ("exr", "header-only")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_z": ["zlib", "miniz"],
         "with_piz": [True, False],
@@ -30,22 +32,28 @@ class TinyExrConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def requirements(self):
         if self.options.with_z == "miniz":
-            self.requires("miniz/2.1.0")
+            self.requires("miniz/2.2.0")
         else:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_zfp:
             self.requires("zfp/0.5.5")
 
-    def configure(self):
-        if self.options.with_thread and self.settings.compiler.get_safe("cppstd") :
+    def package_id(self):
+        self.info.header_only()
+
+    def validate(self):
+        if self.options.with_thread and self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _extracted_license(self):
@@ -63,15 +71,16 @@ class TinyExrConan(ConanFile):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
         self.copy("tinyexr.h", dst="include", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
-        self.cpp_info.defines.append("TINYEXR_USE_MINIZ=" + ( "1" if self.options.with_z == "miniz" else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_PIZ=" + ( "1" if self.options.with_piz else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_ZFP=" + ( "1" if self.options.with_zfp else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_THREAD=" + ( "1" if self.options.with_zfp else "0"))
-        self.cpp_info.defines.append("TINYEXR_USE_OPENMP=" + ( "1" if self.options.with_zfp else "0"))
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.defines.append("TINYEXR_USE_MINIZ={}".format("1" if self.options.with_z == "miniz" else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_PIZ={}".format("1" if self.options.with_piz else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_ZFP={}".format("1" if self.options.with_zfp else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_THREAD={}".format("1" if self.options.with_thread else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_OPENMP={}".format("1" if self.options.with_openmp else "0"))
 
-        if self.settings.os == "Linux" and self.options.with_thread:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_thread:
             self.cpp_info.system_libs = ["pthread"]
