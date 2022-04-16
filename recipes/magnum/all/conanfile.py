@@ -221,7 +221,7 @@ class MagnumConan(ConanFile):
         if self.options.gl:
             self.requires("opengl/system")
         if self.options.vk:
-            self.requires("vulkan-loader/1.2.190")
+            self.requires("vulkan-loader/1.3.204.1")
 
         if self.options.get_safe("egl_context", False) or \
            self.options.get_safe("xegl_application", False) or \
@@ -232,10 +232,10 @@ class MagnumConan(ConanFile):
             self.requires("egl/system")
 
         if self.options.glfw_application:
-            self.requires("glfw/3.3.4")
+            self.requires("glfw/3.3.7")
 
         if self.options.sdl2_application:
-            self.requires("sdl/2.0.16")
+            self.requires("sdl/2.0.20")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -362,7 +362,7 @@ class MagnumConan(ConanFile):
                               "")
         # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
         #   let the Conan user decide what to use and what not.
-        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
+        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+', encoding="utf-8") as f:
             text = f.read()
             text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
             f.seek(0)
