@@ -16,7 +16,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
-    # TODO: Add shared option
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -84,7 +84,7 @@ class grpcConan(ConanFile):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
         self.requires("openssl/1.1.1n")
-        self.requires("protobuf/3.19.2")
+        self.requires("protobuf/3.20.0")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
 
@@ -108,7 +108,7 @@ class grpcConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.19.2')
+            self.build_requires('protobuf/3.20.0')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
