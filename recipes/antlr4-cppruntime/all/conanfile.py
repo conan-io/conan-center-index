@@ -24,6 +24,7 @@ class Antlr4CppRuntimeConan(ConanFile):
     }
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "pkg_config"
+    short_paths = True
 
     compiler_required_cpp17 = {
             "Visual Studio": "16",
@@ -31,6 +32,7 @@ class Antlr4CppRuntimeConan(ConanFile):
             "clang": "5",
             "apple-clang": "9.1"
     }
+
 
     @property
     def _source_subfolder(self):
