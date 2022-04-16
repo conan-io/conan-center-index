@@ -364,7 +364,7 @@ class MagnumConan(ConanFile):
         #   let the Conan user decide what to use and what not.
         with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+', encoding="utf-8") as f:
             text = f.read()
-            text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
+            text = re.sub(r'cmake_dependent_option(([0-9A-Z_]+) .*)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
             f.seek(0)
             f.write(text)
             f.truncate()
