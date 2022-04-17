@@ -3,7 +3,7 @@
 #include <pcl/surface/convex_hull.h>
 
 #include <iostream>
-
+    
 using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
 
 int main() {

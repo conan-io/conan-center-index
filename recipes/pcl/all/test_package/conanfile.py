@@ -1,24 +1,9 @@
+from conans import ConanFile, CMake, tools
 import os
-
-from conan import ConanFile
-from conan.tools.cmake import (
-    CMakeToolchain,
-    CMakeDeps,
-    CMake
-)
-from conan.tools.build import cross_building
-
 
 class PclTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -26,6 +11,6 @@ class PclTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join(".", "pcl_test_package")
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "pcl_test_package")
             self.run(bin_path, run_environment=True)
