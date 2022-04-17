@@ -1,4 +1,5 @@
 import os
+import conan
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.30.0"
@@ -40,7 +41,7 @@ class Gm2calcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("GM2Calc-{}".format(self.version), self._source_subfolder)
+        conan.tools.files.rename(self, "GM2Calc-{}".format(self.version), self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
