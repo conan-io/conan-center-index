@@ -1,7 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+
 import os
 import textwrap
+import math
 
 required_conan_version = ">=1.33.0"
 
@@ -169,7 +171,13 @@ class PclConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
-        cmake.build()
+        if self.settings.compiler == "clang":
+            # Workaround for OOM when building with clang. 
+            # See https://github.com/conan-io/conan-center-index/pull/1891 for discussion
+            compile_jobs = os.getenv("CONAN_CPU_COUNT", int(math.ceil(tools.cpu_count() / 2)))
+            self.run(f"cmake --build {cmake.build_folder} {cmake.build_config} -- -j{compile_jobs}")
+        else:
+            cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
