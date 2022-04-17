@@ -86,10 +86,6 @@ class PclConan(ConanFile):
         self._check_msvc()
         self._check_cxx_standard()
         self._check_libcxx_compatibility()
-        if self.options.with_qhull:
-            # TODO: pcl might switch to reentrant qhull in the next release:
-            #       don't forget to check https://github.com/PointCloudLibrary/pcl/pull/4540 when you bump pcl version
-            self.options["qhull"].reentrant = False
 
     def requirements(self):
         self.requires("boost/1.75.0")
@@ -99,10 +95,6 @@ class PclConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
-
-    def validate(self):
-        if self.options.with_qhull and self.options["qhull"].reentrant:
-            raise ConanInvalidConfiguration("pcl requires non-reentrant qhull, you must set qhull:reentrant=False")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
