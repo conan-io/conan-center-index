@@ -85,7 +85,8 @@ class YASMConan(ConanFile):
                 "x86_64": "x64",
             }[str(self.settings.arch)]
             tools.mkdir(os.path.join(self.package_folder, "bin"))
-            shutil.copy(os.path.join(self._msvc_subfolder, arch, str(self.settings.build_type), "yasm.exe"),
+            build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+            shutil.copy(os.path.join(self._msvc_subfolder, arch, build_type, "yasm.exe"),
                         os.path.join(self.package_folder, "bin", "yasm.exe"))
             self.copy(pattern="yasm.exe*", src=self._source_subfolder, dst="bin", keep_path=False)
         else:
