@@ -43,7 +43,7 @@ class XtensorConan(ConanFile):
             else:
                 self.requires("xsimd/8.0.3")
         if self.options.tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def validate(self):
         if self.options.tbb and self.options.openmp:
