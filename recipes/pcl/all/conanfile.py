@@ -110,17 +110,15 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # Eigen already included by conan_basic_setup(), we don't want that PCL custom FindEigen injects a system installed eigen
-        tools.replace_in_file(cmake_lists, "find_package(Eigen 3.1 REQUIRED)", "")
-        # Flann already handled in CMake wrapper
-        tools.replace_in_file(cmake_lists, "find_package(FLANN 1.7.0 REQUIRED)", "")
+        # Use conan supplied Eigen
+        tools.replace_in_file(cmake_lists, "include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})", "")
         # Qhull already handled in CMake wrapper
         tools.replace_in_file(cmake_lists, "find_package(Qhull)", "")
         # Temporary hack for https://github.com/conan-io/conan/issues/8206
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "pcl_find_boost.cmake"),
-                "find_package(Boost 1.55.0 QUIET COMPONENTS serialization mpi)",
-                "find_package(Boost 1.55.0 QUIET OPTIONAL_COMPONENTS serialization)"
+                "find_package(Boost 1.65.0 QUIET COMPONENTS serialization mpi)",
+                "find_package(Boost 1.65.0 QUIET OPTIONAL_COMPONENTS serialization)"
         )
 
     def _configure_cmake(self):

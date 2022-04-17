@@ -1,4 +1,4 @@
 sources:
-  "1.11.1":
-    url: "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.11.1.tar.gz"
-    sha256: "a61558e53abafbc909e0996f91cfd2d7a400fcadf6b8cfb0ea3172b78422c74e"
+  "1.12.1":
+    url: "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.12.1.tar.gz"
+    sha256: "dc0ac26f094eafa7b26c3653838494cc0a012bd1bdc1f1b0dc79b16c2de0125a"
