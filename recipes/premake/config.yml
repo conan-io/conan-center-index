@@ -3,3 +3,5 @@ versions:
     folder: "5.x"
   "5.0.0-alpha15":
     folder: "5.x"
+  "5.0.0-beta1":
+    folder: "5.x"

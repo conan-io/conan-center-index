@@ -4,10 +4,12 @@ import glob
 import os
 import re
 
+required_conan_version = ">=1.33.0"
+
 
 class PremakeConan(ConanFile):
     name = "premake"
-    topics = ("conan", "premake", "build", "build-systems")
+    topics = ("premake", "build", "build-systems")
     description = "Describe your software project just once, using Premake's simple and easy to read syntax, and build it everywhere"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://premake.github.io"
@@ -26,9 +28,7 @@ class PremakeConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def config_options(self):
         if self.settings.os != "Windows" or self.settings.compiler == "Visual Studio":
@@ -40,12 +40,15 @@ class PremakeConan(ConanFile):
 
     @property
     def _msvc_version(self):
-        return {
+        available = {
             "12": "2013",
             "14": "2015",
             "15": "2017",
             "16": "2019",
-        }.get(str(self.settings.compiler.version), "2017")
+        }
+        if tools.Version(self.version) > "5.0.0-alpha15":
+            available["17"] = "2022"
+        return available.get(str(self.settings.compiler.version), "2019")
 
     @property
     def _msvc_build_dirname(self):
@@ -108,7 +111,12 @@ class PremakeConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.chdir(os.path.join(self._source_subfolder, "build", self._msvc_build_dirname)):
                 msbuild = MSBuild(self)
-                msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"})
+                if self.settings.compiler.version == "17" and tools.Version(self.version) > "5.0.0-alpha15":
+                    # 5.0.0-beta1 VS2022 solution file seems to have only Win32 targets available
+                    platforms_available={"x86": "Win32", "x86_64": "Win32"}
+                else:
+                    platforms_available={"x86": "Win32", "x86_64": "x64"}
+                msbuild.build("Premake5.sln", platforms=platforms_available)
         else:
             with tools.chdir(os.path.join(self._source_subfolder, "build", self._gmake_build_dirname)):
                 env_build = AutoToolsBuildEnvironment(self)
