@@ -4,6 +4,10 @@ project(cmake_wrapper)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(Eigen3 REQUIRED)
+set(EIGEN_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
+set(EIGEN_FOUND TRUE)
+
 # PCL expects FLANN::FLANN target
 find_package(flann REQUIRED CONFIG)
 add_library(FLANN::FLANN INTERFACE IMPORTED)

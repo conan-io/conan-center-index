@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(PclTestPackage)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(PCL REQUIRED surface CONFIG)
 
 add_executable(pcl_test_package example.cpp)

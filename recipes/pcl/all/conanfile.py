@@ -102,8 +102,8 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # Use conan supplied Eigen
-        tools.replace_in_file(cmake_lists, "include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})", "")
+        # Eigen already handled in CMake wrapper, we don't want that PCL custom FindEigen injects a system installed eigen
+        tools.replace_in_file(cmake_lists, "find_package(Eigen 3.1 REQUIRED)", "")
         # Qhull already handled in CMake wrapper
         tools.replace_in_file(cmake_lists, "find_package(Qhull)", "")
         # Temporary hack for https://github.com/conan-io/conan/issues/8206
@@ -252,14 +252,26 @@ class PclConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PCL"
         self.cpp_info.names["cmake_find_package_multi"] = "PCL"
 
+        self.cpp_info.set_property("cmake_file_name", "PCL")
+        self.cpp_info.set_property("cmake_module_file_name", "PCL")
+
         def _update_components(components):
             for comp, values in components.items():
                 self.cpp_info.components[comp].names["cmake_find_package"] = comp
                 self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
+                self.cpp_info.components[comp].set_property("cmake_file_name", comp)
+                self.cpp_info.components[comp].set_property("cmake_module_file_name", comp)
+                self.cpp_info.components[comp].set_property("cmake_target_name", f"PCL::{comp}")
+
                 self.cpp_info.components[comp].builddirs.append(self._module_subfolder)
+
                 self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
+
                 self.cpp_info.components[comp].names["pkg_config"] = "pcl_{}-{}".format(comp, self._version_suffix)
+                self.cpp_info.components[comp].set_property("pkg_config_name", "pcl_{}-{}".format(comp, self._version_suffix))
+
                 self.cpp_info.components[comp].includedirs = [os.path.join("include", "pcl-{}".format(self._version_suffix))]
                 if not values.get("header_only", False):
                     libs = [comp] + values.get("extra_libs", [])
