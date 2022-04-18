@@ -23,7 +23,7 @@ class DrflacConan(ConanFile):
     default_options = {
         "shared": False, 
         "fPIC": True,
-        "buffer_size": 0,
+        "buffer_size": 0, # zero means the default buffer size is used
         "no_crc": False,
         "no_ogg": False,
         "no_simd": False,
