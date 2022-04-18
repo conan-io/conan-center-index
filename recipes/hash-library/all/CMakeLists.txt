@@ -6,7 +6,6 @@ conan_basic_setup(KEEP_RPATHS)
 
 add_library(${CMAKE_PROJECT_NAME}
     source_subfolder/crc32.cpp
-    source_subfolder/digest.cpp
     source_subfolder/keccak.cpp
     source_subfolder/md5.cpp
     source_subfolder/sha1.cpp
