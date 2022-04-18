@@ -67,6 +67,8 @@ class SAILConan(ConanFile):
         self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rename(self.package_folder + "/share/sail", self.package_folder + "/res")
+        tools.rmdir(self.package_folder + "/share")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"]       = "Sail"
