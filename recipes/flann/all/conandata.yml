@@ -6,3 +6,5 @@ patches:
   "1.9.1":
     - patch_file: "patches/external-lz4-and-export-symbols.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/random-shuffle.patch"
+      base_path: "source_subfolder"

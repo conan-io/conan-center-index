@@ -1,0 +1,159 @@
+diff --git a/src/cpp/flann/algorithms/kdtree_index.h b/src/cpp/flann/algorithms/kdtree_index.h
+index 1f609fb..3f2efed 100644
+--- a/src/cpp/flann/algorithms/kdtree_index.h
++++ b/src/cpp/flann/algorithms/kdtree_index.h
+@@ -265,7 +265,7 @@ protected:
+         /* Construct the randomized trees. */
+         for (int i = 0; i < trees_; i++) {
+             /* Randomize the order of vectors to allow for unbiased sampling. */
+-            std::random_shuffle(ind.begin(), ind.end());
++            rand_shuffle(ind.begin(), ind.end());
+             tree_roots_[i] = divideTree(&ind[0], int(size_) );
+         }
+         delete[] mean_;
+diff --git a/src/cpp/flann/util/lsh_table.h b/src/cpp/flann/util/lsh_table.h
+index f023fb4..94b2db4 100644
+--- a/src/cpp/flann/util/lsh_table.h
++++ b/src/cpp/flann/util/lsh_table.h
+@@ -50,6 +50,7 @@
+ 
+ #include "flann/util/dynamic_bitset.h"
+ #include "flann/util/matrix.h"
++#include "flann/util/random.h"
+ 
+ namespace flann
+ {
+@@ -364,7 +365,7 @@ inline LshTable<unsigned char>::LshTable(unsigned int feature_size, unsigned int
+     // A bit brutal but fast to code
+     std::vector<size_t> indices(feature_size * CHAR_BIT);
+     for (size_t i = 0; i < feature_size * CHAR_BIT; ++i) indices[i] = i;
+-    std::random_shuffle(indices.begin(), indices.end());
++    rand_shuffle(indices.begin(), indices.end());
+ 
+     // Generate a random set of order of subsignature_size_ bits
+     for (unsigned int i = 0; i < key_size_; ++i) {
+diff --git a/src/cpp/flann/util/random.h b/src/cpp/flann/util/random.h
+index b7b51b4..38a7776 100644
+--- a/src/cpp/flann/util/random.h
++++ b/src/cpp/flann/util/random.h
+@@ -32,8 +32,11 @@
+ #define FLANN_RANDOM_H
+ 
+ #include <algorithm>
++#include <cassert>
+ #include <cstdlib>
+ #include <cstddef>
++#include <mutex>
++#include <random>
+ #include <vector>
+ 
+ #include "flann/general.h"
+@@ -41,13 +44,36 @@
+ namespace flann
+ {
+ 
++typedef std::mt19937 UniformRandomNumberGenerator;
++
++/**
++ * Initializes and returns a singleton uniform random number generator.
++ */
++inline UniformRandomNumberGenerator& GetRandomNumberGenerator()
++{
++    static UniformRandomNumberGenerator generator;
++    return generator;
++}
++
++/**
++ * Returns a mutex that must be locked before using the generator returned by
++ * GetRandomNumberGenerator().
++ */
++inline std::mutex& GetRandomNumberGeneratorMutex()
++{
++    static std::mutex mutex;
++    return mutex;
++}
++
+ /**
+  * Seeds the random number generator
+  *  @param seed Random seed
+  */
+ inline void seed_random(unsigned int seed)
+ {
+-    srand(seed);
++    std::lock_guard<std::mutex> guard(GetRandomNumberGeneratorMutex());
++    GetRandomNumberGenerator().seed(
++        static_cast<UniformRandomNumberGenerator::result_type>(seed));
+ }
+ 
+ /*
+@@ -55,33 +81,42 @@ inline void seed_random(unsigned int seed)
+  */
+ /**
+  * Generates a random double value.
+- * @param high Upper limit
+- * @param low Lower limit
++ * @param high Upper limit (inclusive)
++ * @param low Lower limit (inclusive)
+  * @return Random double value
+  */
+ inline double rand_double(double high = 1.0, double low = 0)
+ {
+-    return low + ((high-low) * (std::rand() / (RAND_MAX + 1.0)));
++    assert(low <= high);
++    std::uniform_real_distribution<double> distribution(low, high);
++    std::lock_guard<std::mutex> guard(GetRandomNumberGeneratorMutex());
++    return distribution(GetRandomNumberGenerator());
+ }
+ 
+ /**
+  * Generates a random integer value.
+- * @param high Upper limit
+- * @param low Lower limit
++ * @param high Upper limit (exclusive)
++ * @param low Lower limit (inclusive)
+  * @return Random integer value
+  */
+ inline int rand_int(int high = RAND_MAX, int low = 0)
+ {
+-    return low + (int) ( double(high-low) * (std::rand() / (RAND_MAX + 1.0)));
++    assert(low < high);
++    std::uniform_int_distribution<int> distribution(low, high - 1);
++    std::lock_guard<std::mutex> guard(GetRandomNumberGeneratorMutex());
++    return distribution(GetRandomNumberGenerator());
+ }
+ 
+-
+-class RandomGenerator
++/**
++ * Reorders the elements in the given range [first, last) such that all
++ * permutations of those elements are equally probable.
++ */
++template<typename RandomIt>
++inline void rand_shuffle(RandomIt first, RandomIt last)
+ {
+-public:
+-    ptrdiff_t operator() (ptrdiff_t i) { return rand_int(i); }
+-};
+-
++    std::lock_guard<std::mutex> guard(GetRandomNumberGeneratorMutex());
++    std::shuffle(first, last, GetRandomNumberGenerator());
++}
+ 
+ /**
+  * Random number generator that returns a distinct number from
+@@ -110,14 +145,13 @@ public:
+      */
+     void init(int n)
+     {
+-        static RandomGenerator generator;
+         // create and initialize an array of size n
+         vals_.resize(n);
+         size_ = n;
+         for (int i = 0; i < size_; ++i) vals_[i] = i;
+ 
+         // shuffle the elements in the array
+-        std::random_shuffle(vals_.begin(), vals_.end(), generator);
++        rand_shuffle(vals_.begin(), vals_.end());
+ 
+         counter_ = 0;
+     }
