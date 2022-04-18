@@ -80,3 +80,13 @@ class DrflacConan(ConanFile):
         self.cpp_info.libs = ["dr_flac"]
         if self.options.shared:
             self.cpp_info.defines.append("DRFLAC_DLL")
+        if self.options.buffer_size != "0":
+            self.cpp_info.defines.append("DR_FLAC_BUFFER_SIZE={}".format(self.options.buffer_size))
+        if self.options.no_crc:
+            self.cpp_info.defines.append("DR_FLAC_NO_CRC")
+        if self.options.no_ogg:
+            self.cpp_info.defines.append("DR_FLAC_NO_OGG")
+        if self.options.no_simd:
+            self.cpp_info.defines.append("DR_FLAC_NO_SIMD")
+        if self.options.no_stdio:
+            self.cpp_info.defines.append("DR_FLAC_NO_STDIO")
