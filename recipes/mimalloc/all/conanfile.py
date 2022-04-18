@@ -90,6 +90,14 @@ class MimallocConan(ConanFile):
                 del self.options.inject
 
     def validate(self):
+        # (TEST)
+        if self.settings.compiler == "Visual Studio" and \
+           self.options.shared and \
+           str(self.settings.compiler.runtime) in ["MDd", "MD"] and \
+           tools.Version(self.version) == "2.0.6":
+            raise ConanInvalidConfiguration(
+                "Dynamic runtime (MD/MDd) is not supported when using mimalloc as a shared library for override")
+
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
            self.options.shared and \
