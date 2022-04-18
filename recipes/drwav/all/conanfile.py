@@ -71,3 +71,7 @@ class DrwavConan(ConanFile):
         self.cpp_info.libs = ["dr_wav"]
         if self.options.shared:
             self.cpp_info.defines.append("DRWAV_DLL")
+        if self.options.no_conversion_api:
+            self.cpp_info.defines.append("DR_WAV_NO_CONVERSION_API")
+        if self.options.no_stdio:
+            self.cpp_info.defines.append("DR_WAV_NO_STDIO")
