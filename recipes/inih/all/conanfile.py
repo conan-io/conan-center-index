@@ -43,6 +43,8 @@ class InihConan(ConanFile):
     def validate(self):
         if self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared inih is not supported")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def build_requirements(self):
         self.build_requires("meson/0.61.2")
