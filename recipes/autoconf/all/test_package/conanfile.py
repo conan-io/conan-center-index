@@ -4,7 +4,7 @@ import contextlib
 import os
 import shutil
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.45.0"
 
 
 class TestPackageConan(ConanFile):
