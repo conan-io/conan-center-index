@@ -71,3 +71,7 @@ class Drmp3Conan(ConanFile):
         self.cpp_info.libs = ["dr_mp3"]
         if self.options.shared:
             self.cpp_info.defines.append("DRMP3_DLL")
+        if self.options.no_simd:
+            self.cpp_info.defines.append("DR_MP3_NO_SIMD")
+        if self.options.no_stdio:
+            self.cpp_info.defines.append("DR_MP3_NO_STDIO")
