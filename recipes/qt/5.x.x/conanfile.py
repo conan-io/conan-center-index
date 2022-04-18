@@ -980,28 +980,85 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
             self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
+            event_dispatcher_reqs = ["Core", "Gui"]
+            if self.options.with_glib:
+                event_dispatcher_reqs.append("glib::glib")
+            _create_module("EventDispatcherSupport", event_dispatcher_reqs)
+            _create_module("FontDatabaseSupport", ["Core", "Gui"])
             if self.settings.os == "Windows":
-                _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtFontDatabaseSupport"].system_libs.extend(["advapi32", "ole32", "user32", "gdi32"])
+            elif tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["qtFontDatabaseSupport"].frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText","Foundation"])
+                self.cpp_info.components["qtFontDatabaseSupport"].frameworks.append("AppKit" if self.settings.os == "Macos" else "UIKit")
+            if self.options.get_safe("with_fontconfig"):
+                self.cpp_info.components["qtFontDatabaseSupport"].requires.append("fontconfig::fontconfig")
+            if self.options.get_safe("with_freetype"):
+                self.cpp_info.components["qtFontDatabaseSupport"].requires.append("freetype::freetype")
+                
+            
+            _create_module("ThemeSupport", ["Core", "Gui"])
+            _create_module("AccessibilitySupport", ["Core", "Gui"])
+            if self.options.get_safe("with_vulkan"):
+                _create_module("VulkanSupport", ["Core", "Gui"])
+
+            if tools.is_apple_os(self.settings.os):
+                _create_module("ClipboardSupport", ["Core", "Gui"])
+                self.cpp_info.components["qtClipboardSupport"].frameworks = ["ImageIO"]
+                if self.settings.os == "Macos":
+                    self.cpp_info.components["qtClipboardSupport"].frameworks.append("AppKit")
+                _create_module("GraphicsSupport", ["Core", "Gui"])
+
+            if self.settings.os in ["Android", "Emscripten"]:
+                _create_module("EglSupport", ["Core", "Gui"])
+                
+            if self.settings.os == "Windows":
+                windows_reqs = ["Core", "Gui"]
+                windows_reqs.extend(["EventDispatcherSupport", "FontDatabaseSupport", "ThemeSupport", "AccessibilitySupport"])
+                _create_module("WindowsUIAutomationSupport", ["Core", "Gui"])
+                windows_reqs.append("WindowsUIAutomationSupport")
+                if self.options.get_safe("with_vulkan"):
+                    windows_reqs.append("VulkanSupport")
+                _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", windows_reqs)
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
                     "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
             elif self.settings.os == "Android":
-                _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
+                android_reqs = ["Core", "Gui", "EventDispatcherSupport", "AccessibilitySupport", "FontDatabaseSupport", "EglSupport"]
+                if self.options.get_safe("with_vulkan"):
+                    android_reqs.append("VulkanSupport")
+                _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", android_reqs)
                 self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
             elif self.settings.os == "Macos":
-                _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
+                cocoa_reqs = ["Core", "Gui", "ClipboardSupport", "ThemeSupport", "FontDatabaseSupport", "GraphicsSupport"]
+                if self.options.get_safe("with_vulkan"):
+                    cocoa_reqs.append("VulkanSupport")
+                if self.options.widgets:
+                    cocoa_reqs.append("PrintSupport")                    
+                _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
                 self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
             elif self.settings.os in ["iOS", "tvOS"]:
-                _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
+                _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", ["ClipboardSupport", "FontDatabaseSupport", "GraphicsSupport"])
                 self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
                     "QuartzCore", "UIKit"]
             elif self.settings.os == "watchOS":
-                _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
+                _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", ["EventDispatcherSupport", "FontDatabaseSupport"])
             elif self.settings.os == "Emscripten":
-                _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
+                _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui", "EventDispatcherSupport", "FontDatabaseSupport", "EglSupport"])
             elif self.settings.os in ["Linux", "FreeBSD"]:
-                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
-                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
+                service_support_reqs = ["Core", "Gui"]                
+                if self.options.with_dbus:
+                    service_support_reqs.extend("DBus")
+                _create_module("ServiceSupport", service_support_reqs)
+                _create_module("EdidSupport")
+                _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
+                xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
+                if self.options.with_dbus:
+                    _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport"])
+                    xcb_qpa_reqs.append("LinuxAccessibilitySupport")
+                if self.options.get_safe("with_vulkan"):
+                    xcb_qpa_reqs.append("VulkanSupport")
+                _create_module("XcbQpa", xcb_qpa_reqs)
+                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
