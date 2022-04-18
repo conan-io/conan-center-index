@@ -48,6 +48,10 @@ class GlogConan(ConanFile):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
 
+    def build_requirements(self):
+        if tools.Version(self.version) >= "0.6.0":
+            self.build_requires("cmake/3.22.3")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -56,9 +60,10 @@ class GlogConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # do not force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                              "")
+        if tools.Version(self.version) <= "0.5.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
+                                  "")
 
     def _configure_cmake(self):
         if self._cmake:
