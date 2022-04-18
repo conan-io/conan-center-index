@@ -20,7 +20,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake_find_package", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt"
 
     _cmake = None
@@ -77,22 +77,19 @@ class SAILConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"]       = "Sail"
         self.cpp_info.names["cmake_find_package_multi"] = "Sail"
-
-        self.cpp_info.components["sail-common"].names["cmake_find_package"]       = "SailCommon"
-        self.cpp_info.components["sail-common"].names["cmake_find_package_multi"] = "SailCommon"
-        self.cpp_info.components["sail-common"].libs = ["sail-common"]
-
-        self.cpp_info.components["sail"].names["cmake_find_package"]       = "Sail"
-        self.cpp_info.components["sail"].names["cmake_find_package_multi"] = "Sail"
-        self.cpp_info.components["sail"].libs = ["sail"]
-        self.cpp_info.components["sail"].requires = ["sail-common"]
+        self.cpp_info.libs = ["sail"]
+        self.cpp_info.requires = ["sail-common"]
         # Exists in static build only
         if not self.options.shared:
             self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
             self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
             self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
             self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
-            self.cpp_info.components["sail"].requires.append("sail-codecs")
+            self.cpp_info.requires.append("sail-codecs")
+
+        self.cpp_info.components["sail-common"].names["cmake_find_package"]       = "SailCommon"
+        self.cpp_info.components["sail-common"].names["cmake_find_package_multi"] = "SailCommon"
+        self.cpp_info.components["sail-common"].libs = ["sail-common"]
 
         self.cpp_info.components["sail-manip"].names["cmake_find_package"]       = "SailManip"
         self.cpp_info.components["sail-manip"].names["cmake_find_package_multi"] = "SailManip"
