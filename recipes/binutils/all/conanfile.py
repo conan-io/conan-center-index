@@ -19,18 +19,16 @@ class BinutilsConan(ConanFile):
     license = "GPL-2.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
+    options = { "target": "ANY" }
+    default_options = { "target": "None" }
 
     _source_subfolder = "source_subfolder"
-
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
-
+            
     def package_id(self):
         del self.info.settings.compiler
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("readline/8.0")
 
     def generate(self):
@@ -43,6 +41,9 @@ class BinutilsConan(ConanFile):
         ac = AutotoolsToolchain(self)
         ac.default_configure_install_args = True
         ac.configure_args.extend(["--with-system-zlib", "--with-system-readline"])
+        target = self.options.get_safe("target", None)
+        if target:
+            ac.configure_args.extend(["--target=" + str(target)])
         ac.generate()
 
     def source(self):
