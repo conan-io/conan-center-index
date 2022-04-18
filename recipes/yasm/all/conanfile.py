@@ -53,7 +53,7 @@ class YASMConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
             build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-            msbuild.build(project_file="yasm.sln", build_type=build_type,
+            msbuild.build(project_file="yasm.sln", build_type=build_type, upgrade_project=False,
                           targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
 
     def _configure_autotools(self):
