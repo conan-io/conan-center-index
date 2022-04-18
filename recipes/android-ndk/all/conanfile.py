@@ -165,7 +165,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _host(self):
-        return f"{self._platform}-{self.settings.arch}"
+        return f"{self._platform}-{self._arch}"
 
     @property
     def _ndk_root(self):
@@ -317,7 +317,7 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-        
+
         # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
@@ -351,7 +351,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     import zipfile
     with zipfile.ZipFile(filename, "r") as z:
         zip_info = z.infolist()
-        
+
         names = [n.replace("\\", "/") for n in z.namelist()]
         common_folder = os.path.commonprefix(names).split("/", 1)[0]
 
