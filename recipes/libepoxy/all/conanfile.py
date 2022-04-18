@@ -8,7 +8,7 @@ required_conan_version = ">=1.36.0"
 class EpoxyConan(ConanFile):
     name = "libepoxy"
     description = "libepoxy is a library for handling OpenGL function pointer management"
-    topics = ("conan", "libepoxy", "opengl")
+    topics = ("libepoxy", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/anholt/libepoxy"
     license = "MIT"
@@ -39,6 +39,10 @@ class EpoxyConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -77,6 +81,10 @@ class EpoxyConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def _configure_meson(self):
         if self._meson:
             return self._meson
@@ -94,6 +102,7 @@ class EpoxyConan(ConanFile):
         return self._meson
 
     def build(self):
+        self._patch_sources()
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
