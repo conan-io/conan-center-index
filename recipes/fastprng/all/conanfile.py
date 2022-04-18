@@ -6,7 +6,7 @@ class FastPRNGConan(ConanFile):
     name = "fastprng"
     description = "FAST 32/64 bit PRNG (pseudo-random generator), highly optimized, based on xoshiro* / xoroshiro*, xorshift and other Marsaglia algorithms."
     topics = ("random", "prng", "xorshift", "xoshiro", )
-    license = "BSD 2-Clause"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/BrutPitt/fastPRNG"
     settings = "os", "arch", "compiler", "build_type"
