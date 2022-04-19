@@ -81,6 +81,11 @@ class GreeterServiceImpl final : public Greeter::Service {
   }
 };
 
+
+void WaitServer(std::unique_ptr<Server>& server) {
+  server->Wait();
+}
+
 int main(int argc, char** argv) {
   std::string server_address("127.0.0.1:0");
   GreeterServiceImpl service;
@@ -95,7 +100,11 @@ int main(int argc, char** argv) {
   builder.RegisterService(&service);
   // Finally assemble the server.
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on 127.0.0.1:" << selected_port << std::endl;
+  std::thread serverThread([&](){
+    std::cout << "Server listening on 127.0.0.1:" << selected_port << std::endl;
+    server->Wait();
+    std::cout << "Server closed" << std::endl;
+  });
 
   // Instantiate the client. It requires a channel, out of which the actual RPCs
   // are created. This channel models a connection to an endpoint (in this case,
@@ -110,7 +119,6 @@ int main(int argc, char** argv) {
   std::cout << "Greeter received: " << reply << std::endl;
 
   server->Shutdown();
-  server->Wait();
-
+  serverThread.join();
   return 0;
 }
