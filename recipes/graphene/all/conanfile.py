@@ -36,12 +36,12 @@ class LibnameConan(ConanFile):
                 raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
     
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.61.2")
         self.build_requires("pkgconf/1.7.4")
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.72.0")
 
     def configure(self):
         if self.options.shared:
