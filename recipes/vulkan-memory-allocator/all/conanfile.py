@@ -23,7 +23,7 @@ class VulkanMemoryAllocatorConan(ConanFile):
         return "11" if tools.Version(self.version) < "3.0.0" else "14"
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.204.1")
+        self.requires("vulkan-headers/1.3.211.0")
 
     def package_id(self):
         self.info.header_only()
