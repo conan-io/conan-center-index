@@ -37,7 +37,7 @@ class UncrustifyConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.configure(build_folder=self._build_subfolder)
-        cmake
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
