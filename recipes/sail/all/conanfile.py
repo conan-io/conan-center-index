@@ -29,6 +29,10 @@ class SAILConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
 
@@ -53,7 +57,7 @@ class SAILConan(ConanFile):
         self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["SAIL_BUILD_TESTS"]    = "OFF"
         self._cmake.definitions["SAIL_COMBINE_CODECS"] = "ON"
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
 
