@@ -34,8 +34,7 @@ class SAILConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+        tools.check_min_cppstd(self, "17")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -47,6 +46,8 @@ class SAILConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+        tools.check_min_cppstd(self, "17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
