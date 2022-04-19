@@ -31,8 +31,6 @@ class TestPackageConan(ConanFile):
             return
         with self._buildenv():
             cmake = CMake(self)
-            if not tools.valid_min_cppstd(self, 11):
-                cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             cmake.configure()
             cmake.build()
 
