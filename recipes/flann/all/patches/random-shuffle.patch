@@ -1,5 +1,5 @@
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index 4927a85..492541b 100644
+index 4927a85..20a998f 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
 @@ -14,6 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
@@ -18,6 +18,14 @@ index 4927a85..492541b 100644
  
  if (BUILD_CUDA_LIB)
      set_target_properties(flann_cuda PROPERTIES
+@@ -104,6 +106,7 @@ if (BUILD_C_BINDINGS)
+        SOVERSION ${FLANN_SOVERSION}
+        DEFINE_SYMBOL FLANN_EXPORTS
+     )
++target_compile_features(flann_s PRIVATE cxx_std_11)
+ endif()
+ 
+ if(WIN32)
 diff --git a/src/cpp/flann/algorithms/kdtree_index.h b/src/cpp/flann/algorithms/kdtree_index.h
 index 1f609fb..3f2efed 100644
 --- a/src/cpp/flann/algorithms/kdtree_index.h
