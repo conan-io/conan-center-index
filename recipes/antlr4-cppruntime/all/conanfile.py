@@ -77,7 +77,10 @@ class Antlr4CppRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration("arm architectures are not supported")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
-        compiler, compiler_version = self.settings.compiler, tools.Version(self.settings.compiler.version)
+
+        compiler = self.settings.compiler
+        compiler_version = tools.Version(self.settings.compiler.version)
+        antlr_version = tools.Version(self.version)
 
         if compiler == "Visual Studio" and compiler_version < "16":
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
@@ -85,18 +88,22 @@ class Antlr4CppRuntimeConan(ConanFile):
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
 
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
+        if antlr_version != "4.9.3":
+            # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
+            # for newest version we need C++17 compatible compiler here
 
-        minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if compiler_version < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+            if self.settings.get_safe("compiler.cppstd"):
+                tools.check_min_cppstd(self, "17")
 
-        if compiler == "Visual Studio" and self.version == "4.10":
-            raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use higher 4.10.1 or above.".format(self.name))
+            minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
+            if minimum_version:
+                if compiler_version < minimum_version:
+                    raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+            else:
+                self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+
+        if compiler == "Visual Studio" and antlr_version == "4.10":
+            raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use 4.10.1 or above.".format(self.name))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
