@@ -41,6 +41,7 @@ protobuf/0.0@trassir/sdk120
 qt/4.8.7@trassir/sdk120
 sdl/1.2.11@trassir/sdk120
 signalr-qt/0.0@trassir/sdk120
+sip/4.7.7@trassir/sdk120
 zlib/1.2.8@trassir/sdk120
 
 [options]
