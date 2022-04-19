@@ -61,9 +61,6 @@ class QuillConan(ConanFile):
         else:
             self.output.warn("Quill requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
-        if tools.Version(self.version) < "1.3.3" and tools.Version(self.deps_cpp_info["fmt"].version) > "6.2.1":
-            raise ConanInvalidConfiguration("The project {}/{} requires fmt <= 6.2.1".format(self.name, self.version))
-
     def requirements(self):
         if tools.Version(self.version) >= "1.6.3":
             self.requires("fmt/8.1.1")
@@ -89,6 +86,9 @@ class QuillConan(ConanFile):
         return cmake
 
     def build(self):
+        if tools.Version(self.version) < "1.3.3" and tools.Version(self.deps_cpp_info["fmt"].version) > "6.2.1":
+            raise ConanInvalidConfiguration("The project {}/{} requires fmt <= 6.2.1".format(self.name, self.version))
+
         # remove bundled fmt
         tools.rmdir(os.path.join(self._source_subfolder, "quill", "quill", "include", "quill", "bundled", "fmt"))
         tools.rmdir(os.path.join(self._source_subfolder, "quill", "quill", "src", "bundled", "fmt"))
