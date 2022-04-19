@@ -50,6 +50,10 @@ class FlannConan(ConanFile):
         if self.options.with_hdf5 != "deprecated":
             self.output.warn("with_hdf5 is a deprecated option. Do not use.")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def requirements(self):
         self.requires("lz4/1.9.3")
 
