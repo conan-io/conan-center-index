@@ -188,12 +188,27 @@ having the same naming conventions for the options may help consumers, e.g. they
 
 ## Supported Versions
 
-Keeping older versions is needed due to users who are still using legacy versions and can not update their packages. However, some points should be considered:
-- Adding older versions should be allowed only in strict cases, when required by a user. The committer should express their needs on the PR.
-- Removing older versions is allowed, so long as it keeps:
-  - for each older major release available, at least one version
-  - for the latest major version, at least three last versions should be available (if there are more than three such versions).
+In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
+are released and old ones stop to be used. 
 
-Also, consider these FAQs:
-- [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)
-- [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
+We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons: 
+the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
+more chances of failing because of unexpected errors).
+
+### Removing old versions
+
+When removing old versions, please follow these considerations:
+ - keep one version for every major release
+ - for the latest major release, at least three versions should be available (latest three minor versions)
+
+Logic associated to removed revisions, and entries in `config.yml` and `conandata.yml` files should be removed as well. If anyone needs to
+recover them in the future, Git contains the full history and changes can be recovered from it.
+
+Please, note that even if those versions are removed from this repository, **the packages will always be accessible in ConanCenter remote**
+associated to the recipe revision used to build them.
+
+### Adding old versions
+
+We usually don't add old versions unless there is a specific request for it. If you need some old version, please
+share in the pull-request what is the motivation. Take into account that the version might be removed in future
+pull-requests according to the statements above.
