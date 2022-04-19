@@ -88,7 +88,7 @@ class Antlr4CppRuntimeConan(ConanFile):
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
 
-        if antlr_version != "4.9.3":
+        if antlr_version >= "4.10":
             # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
             # for newest version we need C++17 compatible compiler here
 
