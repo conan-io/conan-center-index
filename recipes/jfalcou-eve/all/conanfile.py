@@ -1,9 +1,7 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.33.0"
-
 
 class JfalcouEveConan(ConanFile):
     name = "jfalcou-eve"
@@ -28,12 +26,20 @@ class JfalcouEveConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "11",
-            "Visual Studio": "16.9",
-            "clang": "13",
-            "apple-clang": "13",
-        }
+        if tools.Version(self.version) >= "2022.03.0":
+                return {
+                    "gcc": "11",
+                    "Visual Studio": "16.9",
+                    "clang": "13",
+                    "apple-clang": "13",
+                    }
+        else:
+                return {
+                    "gcc": "10.2",
+                    "Visual Studio": "16.9",
+                    "clang": "12",
+                    "apple-clang": "13",
+                    }
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
