@@ -12,7 +12,8 @@ class CreateDmgConan(ConanFile):
     topics = "command-line", "dmg"
     homepage = "https://github.com/create-dmg/create-dmg"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -22,7 +23,7 @@ class CreateDmgConan(ConanFile):
         if self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"{self.name} works only on MacOS")
 
-    def source(self):
+    def build(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
