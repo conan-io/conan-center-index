@@ -12,7 +12,6 @@ class VulkanMemoryAllocatorConan(ConanFile):
     description = "Easy to integrate Vulkan memory allocation library."
     topics = ("vulkan", "memory-allocator", "graphics")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -21,6 +20,10 @@ class VulkanMemoryAllocatorConan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11" if tools.Version(self.version) < "3.0.0" else "14"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         self.requires("vulkan-headers/1.3.211.0")
@@ -35,6 +38,10 @@ class VulkanMemoryAllocatorConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
