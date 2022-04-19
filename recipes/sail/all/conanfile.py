@@ -20,7 +20,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt"
 
     _cmake = None
