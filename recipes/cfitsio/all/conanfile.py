@@ -95,10 +95,17 @@ class CfitsioConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["USE_PTHREADS"] = self.options.threadsafe
-        self._cmake.definitions["CFITSIO_USE_SSE2"] = self.options.get_safe("simd_intrinsics") == "sse2"
-        self._cmake.definitions["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
+        if tools.Version(self.version) >= "4.1.0":
+            self._cmake.definitions["USE_SSE2"] = self.options.get_safe("simd_intrinsics") == "sse2"
+            self._cmake.definitions["USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
+        else:
+            self._cmake.definitions["CFITSIO_USE_SSE2"] = self.options.get_safe("simd_intrinsics") == "sse2"
+            self._cmake.definitions["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
         if self.settings.os != "Windows":
-            self._cmake.definitions["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
+            if tools.Version(self.version) >= "4.1.0":
+                self._cmake.definitions["USE_BZIP2"] = self.options.with_bzip2
+            else:
+                self._cmake.definitions["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
             if tools.Version(self.version) >= "4.0.0":
                 self._cmake.definitions["USE_CURL"] = self.options.with_curl
             else:
