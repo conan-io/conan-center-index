@@ -45,6 +45,7 @@ class Llvm(ConanFile):
 
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
+    short_paths = True
 
     options = {
         **{'with_project_' + project: [True, False]
