@@ -114,20 +114,17 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["sail"].names["cmake_find_package"] = "Sail"
         self.cpp_info.components["sail"].names["cmake_find_package_multi"] = "Sail"
-        self.cpp_info.components["sail"].includedirs = ["include/sail"]
         self.cpp_info.components["sail"].libs = ["sail"]
         self.cpp_info.components["sail"].requires = ["sail-common", "sail-codecs"]
 
         self.cpp_info.components["sail-manip"].set_property("cmake_target_name", "SAIL::SailManip")
         self.cpp_info.components["sail-manip"].names["cmake_find_package"]       = "SailManip"
         self.cpp_info.components["sail-manip"].names["cmake_find_package_multi"] = "SailManip"
-        self.cpp_info.components["sail-manip"].includedirs = ["include/sail"]
         self.cpp_info.components["sail-manip"].libs = ["sail-manip"]
         self.cpp_info.components["sail-manip"].requires = ["sail-common"]
 
         self.cpp_info.components["sail-c++"].set_property("cmake_target_name", "SAIL::SailC++")
         self.cpp_info.components["sail-c++"].names["cmake_find_package"]       = "SailC++"
         self.cpp_info.components["sail-c++"].names["cmake_find_package_multi"] = "SailC++"
-        self.cpp_info.components["sail-c++"].includedirs = ["include/sail"]
         self.cpp_info.components["sail-c++"].libs = ["sail-c++"]
         self.cpp_info.components["sail-c++"].requires = ["sail", "sail-manip"]
