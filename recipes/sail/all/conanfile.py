@@ -91,10 +91,11 @@ class SAILConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Sail")
+
         self.cpp_info.filenames["cmake_find_package"]       = "Sail"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Sail"
-        self.cpp_info.names["cmake_find_package"]       = "SAIL"
-        self.cpp_info.names["cmake_find_package_multi"] = "SAIL"
+        self.cpp_info.names["cmake_find_package"]           = "SAIL"
+        self.cpp_info.names["cmake_find_package_multi"]     = "SAIL"
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
