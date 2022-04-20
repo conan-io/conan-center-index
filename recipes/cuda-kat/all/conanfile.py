@@ -25,6 +25,8 @@ class CudaKatConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("CUDA-kat library are not compatible on Windows")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
 
 
     def source(self):
