@@ -103,9 +103,10 @@ class SAILConan(ConanFile):
         self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        # Move icons
+        # Remove CMake and pkg-config rules
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # Move icons
         rename(self, os.path.join(self.package_folder, "share"),
                      os.path.join(self.package_folder, "res"))
 
