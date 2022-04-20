@@ -41,6 +41,14 @@ class SAILConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("giflib/5.2.1")
+        self.requires("libavif/0.9.3")
+        self.requires("libjpeg/9d")
+        self.requires("libpng/1.6.37")
+        self.requires("libtiff/4.3.0")
+        self.requires("libwebp/1.2.2")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
