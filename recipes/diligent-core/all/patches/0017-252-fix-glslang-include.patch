@@ -1,0 +1,13 @@
+diff --git a/Graphics/ShaderTools/src/GLSLangUtils.cpp b/Graphics/ShaderTools/src/GLSLangUtils.cpp
+index eb2f4a9a..085bc61b 100644
+--- a/Graphics/ShaderTools/src/GLSLangUtils.cpp
++++ b/Graphics/ShaderTools/src/GLSLangUtils.cpp
+@@ -34,7 +34,7 @@
+ #    include <MoltenGLSLToSPIRVConverter/GLSLToSPIRVConverter.h>
+ #else
+ #    define ENABLE_HLSL
+-#    include "SPIRV/GlslangToSpv.h"
++#    include <glslang/SPIRV/GlslangToSpv.h>
+ #endif
+ 
+ #include "GLSLangUtils.hpp"
