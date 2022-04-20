@@ -1,0 +1,39 @@
+--- src/kadmin/dbutil/kdb5_util.c
++++ src/kadmin/dbutil/kdb5_util.c
+@@ -106,7 +106,7 @@
+     exit(1);
+ }
+ 
+-krb5_keyblock master_keyblock;
++extern krb5_keyblock master_keyblock;
+ krb5_kvno   master_kvno; /* fetched */
+ extern krb5_principal master_princ;
+ char *mkey_fullname;
+--- src/tests/create/kdb5_mkdums.c
++++ src/tests/create/kdb5_mkdums.c
+@@ -69,9 +69,9 @@
+ }
+ 
+ int master_princ_set = 0;
+-krb5_keyblock master_keyblock;
+-krb5_principal master_princ;
+-krb5_pointer master_random;
++extern krb5_keyblock master_keyblock;
++static krb5_principal master_princ;
++static krb5_pointer master_random;
+ krb5_context test_context;
+ 
+ static char *progname;
+--- src/tests/verify/kdb5_verify.c
++++ src/tests/verify/kdb5_verify.c
+@@ -62,8 +62,8 @@
+     exit(status);
+ }
+ 
+-krb5_keyblock master_keyblock;
+-krb5_principal master_princ;
++extern krb5_keyblock master_keyblock;
++extern krb5_principal master_princ;
+ krb5_encrypt_block master_encblock;
+ krb5_pointer master_random;
+ char *str_master_princ;

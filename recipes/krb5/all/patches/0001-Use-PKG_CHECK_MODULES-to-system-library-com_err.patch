@@ -1,0 +1,373 @@
+From ccd48457ae137a32c627afe56f3d6dcfaf6ec1bd Mon Sep 17 00:00:00 2001
+From: Anonymous Maarten <anonymous.maarten@gmail.com>
+Date: Thu, 3 Sep 2020 20:55:07 +0200
+Subject: [PATCH] Use PKG_CHECK_MODULES to system library com_err
+To: krbdev@mit.edu
+
+When having a static com_err system library, linking to this static
+library fails because of missing symbols. The system com_err needs to
+link to -lrt too (when using com_err from e2fsutils).
+
+By using com_err.pc, we can fill in COM_ERR_LIB and use this in the
+Makefiles.
+
+An alternative to this would be to add a COM_ERR_LIB variable like is
+done for SS_LIB now.
+---
+ source/source_subfolder/src/aclocal.m4                   | 9 +++++++++
+ source/source_subfolder/src/build-tools/krb5-config.in   | 2 +-
+ source/source_subfolder/src/build-tools/mit-krb5.pc.in   | 2 +-
+ source/source_subfolder/src/ccapi/lib/Makefile.in        | 2 +-
+ source/source_subfolder/src/config/pre.in                | 2 +-
+ .../src/lib/crypto/builtin/des/Makefile.in               | 2 +-
+ source/source_subfolder/src/lib/gssapi/Makefile.in       | 2 +-
+ source/source_subfolder/src/lib/gssapi/krb5/Makefile.in  | 2 +-
+ source/source_subfolder/src/lib/kadm5/clnt/Makefile.in   | 2 +-
+ source/source_subfolder/src/lib/kadm5/srv/Makefile.in    | 2 +-
+ source/source_subfolder/src/lib/kdb/Makefile.in          | 2 +-
+ source/source_subfolder/src/lib/krb5/Makefile.in         | 2 +-
+ source/source_subfolder/src/lib/rpc/Makefile.in          | 2 +-
+ source/source_subfolder/src/man/krb5-config.man          | 2 +-
+ .../src/plugins/authdata/greet_client/Makefile.in        | 2 +-
+ .../src/plugins/authdata/greet_server/Makefile.in        | 2 +-
+ .../src/plugins/kadm5_hook/test/Makefile.in              | 2 +-
+ source/source_subfolder/src/plugins/kdb/db2/Makefile.in  | 2 +-
+ source/source_subfolder/src/plugins/kdb/ldap/Makefile.in | 2 +-
+ .../src/plugins/preauth/pkinit/Makefile.in               | 2 +-
+ .../src/plugins/preauth/securid_sam2/Makefile.in         | 2 +-
+ source/source_subfolder/src/util/et/Makefile.in          | 4 ++--
+ source/source_subfolder/src/util/profile/Makefile.in     | 4 ++--
+ 23 files changed, 33 insertions(+), 24 deletions(-)
+
+diff --git a/src/aclocal.m4 b/src/aclocal.m4
+index 2394f7e..aaa9ebf 100644
+--- a/src/aclocal.m4
++++ b/src/aclocal.m4
+@@ -1433,7 +1433,14 @@ else
+   COM_ERR_VERSION=k5
+   AC_MSG_RESULT(krb5)
+ fi
++OLDLIBS="$LIBS"
++COM_ERR_LIB=-lcom_err
+ if test $COM_ERR_VERSION = sys; then
++  PKG_CHECK_MODULES(COM_ERR, com_err, [have_com_err=yes], [have_com_err=no])
++  if test "x$have_com_err = xyes"; then
++    COM_ERR_LIB="$COM_ERR_LIBS"
++  fi
++  LIBS="$LIBS $COM_ERR_LIB"
+   # check for various functions we need
+   AC_CHECK_LIB(com_err, add_error_table, :, AC_MSG_ERROR(cannot find add_error_table in com_err library))
+   AC_CHECK_LIB(com_err, remove_error_table, :, AC_MSG_ERROR(cannot find remove_error_table in com_err library))
+@@ -1474,6 +1481,8 @@ EOF
+   rm -f conf$$e.et
+ fi
+ AC_SUBST(COM_ERR_VERSION)
++AC_SUBST(COM_ERR_LIB)
++LIBS="$OLDLIBS"
+ if test "$COM_ERR_VERSION" = k5 -o "$COM_ERR_VERSION" = intlsys; then
+   AC_DEFINE(HAVE_COM_ERR_INTL,1,
+             [Define if com_err has compatible gettext support])
+diff --git a/src/build-tools/krb5-config.in b/src/build-tools/krb5-config.in
+index f6184da..9f96a87 100755
+--- a/src/build-tools/krb5-config.in
++++ b/src/build-tools/krb5-config.in
+@@ -251,7 +251,7 @@ if test -n "$do_libs"; then
+     fi
+ 
+     if test $library = 'krb5'; then
+-	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err"
++	lib_flags="$lib_flags -lkrb5 -lk5crypto @COM_ERR_LIB@"
+     fi
+ 
+     # If we ever support a flag to generate output suitable for static
+diff --git a/src/build-tools/mit-krb5.pc.in b/src/build-tools/mit-krb5.pc.in
+index 0308815..fdc5577 100644
+--- a/src/build-tools/mit-krb5.pc.in
++++ b/src/build-tools/mit-krb5.pc.in
+@@ -11,5 +11,5 @@ Name: mit-krb5
+ Description: An implementation of Kerberos network authentication
+ Version: @KRB5_VERSION@
+ Cflags: -I${includedir}
+-Libs: -L${libdir} -lkrb5 -lk5crypto -lcom_err
++Libs: -L${libdir} -lkrb5 -lk5crypto @COM_ERR_LIB@
+ Libs.private: -lkrb5support
+diff --git a/src/ccapi/lib/Makefile.in b/src/ccapi/lib/Makefile.in
+index 14e7d7b..241e28b 100644
+--- a/src/ccapi/lib/Makefile.in
++++ b/src/ccapi/lib/Makefile.in
+@@ -4,7 +4,7 @@ SUBDIRS=unix
+ LOCALINCLUDES=-I$(srcdir)/../common -I.
+ 
+ SHLIB_EXPDEPS= $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-SHLIB_EXPLIBS=-lcom_err $(SUPPORT_LIB)
++SHLIB_EXPLIBS=$(COM_ERR_LIB) $(SUPPORT_LIB)
+ RELDIR=../ccapi/lib
+ 
+ LIBBASE=krb5-ccapi
+diff --git a/src/config/pre.in b/src/config/pre.in
+index ce87e21..7b3a583 100644
+--- a/src/config/pre.in
++++ b/src/config/pre.in
+@@ -331,6 +331,7 @@ COM_ERR_DEPLIB	= $(COM_ERR_DEPLIB-@COM_ERR_VERSION@)
+ COM_ERR_DEPLIB-sys = # empty
+ COM_ERR_DEPLIB-intlsys = # empty
+ COM_ERR_DEPLIB-k5 = $(TOPLIBD)/libcom_err$(DEPLIBEXT)
++COM_ERR_LIB = @COM_ERR_LIB@
+ SUPPORT_LIBNAME=krb5support
+ SUPPORT_DEPLIB	= $(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(DEPLIBEXT)
+ 
+@@ -395,7 +396,6 @@ LMDB_LIBS	= @LMDB_LIBS@
+ 
+ KRB5_LIB			= -lkrb5
+ K5CRYPTO_LIB			= -lk5crypto
+-COM_ERR_LIB			= -lcom_err
+ GSS_KRB5_LIB			= -lgssapi_krb5
+ SUPPORT_LIB			= -l$(SUPPORT_LIBNAME)
+ 
+diff --git a/src/lib/crypto/builtin/des/Makefile.in b/src/lib/crypto/builtin/des/Makefile.in
+index ed25dab..54b329d 100644
+--- a/src/lib/crypto/builtin/des/Makefile.in
++++ b/src/lib/crypto/builtin/des/Makefile.in
+@@ -51,7 +51,7 @@ TOBJS = $(OUTPRE)key_sched.$(OBJEXT) $(OUTPRE)f_sched.$(OBJEXT) \
+ verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+ 	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+-		-lcom_err $(SUPPORT_LIB)
++		$(COM_ERR_LIB) $(SUPPORT_LIB)
+ 
+ destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
+ 	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB)
+diff --git a/src/lib/gssapi/Makefile.in b/src/lib/gssapi/Makefile.in
+index 1e8db4e..64ed0a4 100644
+--- a/src/lib/gssapi/Makefile.in
++++ b/src/lib/gssapi/Makefile.in
+@@ -27,7 +27,7 @@ STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
+ SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
+ SHLIB_EXPDEPS=\
+ 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
+-SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
++SHLIB_EXPLIBS=-lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+ RELDIR=gssapi
+ 
+ all-unix: all-liblinks @MAINT@ verify-calling-conventions-gssapi
+diff --git a/src/lib/gssapi/krb5/Makefile.in b/src/lib/gssapi/krb5/Makefile.in
+index 364a7a4..be43995 100644
+--- a/src/lib/gssapi/krb5/Makefile.in
++++ b/src/lib/gssapi/krb5/Makefile.in
+@@ -12,7 +12,7 @@ DEFINES=-D_GSS_STATIC_LINK=1
+ #STOBJLISTS=../generic/OBJS.ST OBJS.ST
+ #SUBDIROBJLISTS=../generic/OBJS.ST
+ #SHLIB_EXPDEPS=$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
+-#SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
++#SHLIB_EXPLIBS=-lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+ #RELDIR=gssapi/krb5
+ 
+ ##DOS##BUILDTOP = ..\..\..
+diff --git a/src/lib/kadm5/clnt/Makefile.in b/src/lib/kadm5/clnt/Makefile.in
+index 2bc385a..800f938 100644
+--- a/src/lib/kadm5/clnt/Makefile.in
++++ b/src/lib/kadm5/clnt/Makefile.in
+@@ -12,7 +12,7 @@ SHLIB_EXPDEPS=\
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_LIBDEP)
+-SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto $(SUPPORT_LIB) -lcom_err $(LIBS)
++SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto $(SUPPORT_LIB) $(COM_ERR_LIB) $(LIBS)
+ RELDIR=kadm5/clnt
+ 
+ ##DOSBUILDTOP = ..\..\..
+diff --git a/src/lib/kadm5/srv/Makefile.in b/src/lib/kadm5/srv/Makefile.in
+index 89e6097..7491faf 100644
+--- a/src/lib/kadm5/srv/Makefile.in
++++ b/src/lib/kadm5/srv/Makefile.in
+@@ -21,7 +21,7 @@ SHLIB_EXPDEPS=\
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_LIBDEP)
+ SHLIB_EXPLIBS =	-lgssrpc -lgssapi_krb5 -lkdb5 $(KDB5_DB_LIB) \
+-		-lkrb5 -lk5crypto $(SUPPORT_LIB) -lcom_err @GEN_LIB@ $(LIBS)
++		-lkrb5 -lk5crypto $(SUPPORT_LIB) $(COM_ERR_LIB) @GEN_LIB@ $(LIBS)
+ RELDIR=kadm5/srv
+ 
+ SRCS =	$(srcdir)/pwqual.c \
+diff --git a/src/lib/kdb/Makefile.in b/src/lib/kdb/Makefile.in
+index 25da081..8b346c7 100644
+--- a/src/lib/kdb/Makefile.in
++++ b/src/lib/kdb/Makefile.in
+@@ -16,7 +16,7 @@ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libgssrpc$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
++SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+ 
+ adb_err.$(OBJEXT): adb_err.c
+ adb_err.c adb_err.h: $(srcdir)/adb_err.et
+diff --git a/src/lib/krb5/Makefile.in b/src/lib/krb5/Makefile.in
+index 1b8f2d7..3adaeeb 100644
+--- a/src/lib/krb5/Makefile.in
++++ b/src/lib/krb5/Makefile.in
+@@ -56,7 +56,7 @@ RELDIR=krb5
+ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
++SHLIB_EXPLIBS=-lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
+ 
+ all-unix: all-liblinks
+ 
+diff --git a/src/lib/rpc/Makefile.in b/src/lib/rpc/Makefile.in
+index 6b5f1e7..39db2d3 100644
+--- a/src/lib/rpc/Makefile.in
++++ b/src/lib/rpc/Makefile.in
+@@ -15,7 +15,7 @@ SHLIB_EXPDEPS= \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(COM_ERR_DEPLIB)
+-SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err $(LIBS)
++SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto $(COM_ERR_LIB) $(LIBS)
+ RELDIR=rpc
+ 
+ SRCS = $(srcdir)/auth_none.c \
+diff --git a/src/man/krb5-config.man b/src/man/krb5-config.man
+index e1f0be0..1916947 100644
+--- a/src/man/krb5-config.man
++++ b/src/man/krb5-config.man
+@@ -125,7 +125,7 @@ the following output:
+ .nf
+ .ft C
+ shell% krb5\-config \-\-libs krb5
+-\-L/opt/krb5/lib \-Wl,\-rpath \-Wl,/opt/krb5/lib \-L/usr/local/lib \-lkrb5 \-lk5crypto \-lcom_err
++\-L/opt/krb5/lib \-Wl,\-rpath \-Wl,/opt/krb5/lib \-L/usr/local/lib \-lkrb5 \-lk5crypto \$(COM_ERR_LIB)
+ .ft P
+ .fi
+ .UNINDENT
+diff --git a/src/plugins/authdata/greet_client/Makefile.in b/src/plugins/authdata/greet_client/Makefile.in
+index ffa29ac..f1f759d 100644
+--- a/src/plugins/authdata/greet_client/Makefile.in
++++ b/src/plugins/authdata/greet_client/Makefile.in
+@@ -6,7 +6,7 @@ LIBMAJOR=0
+ LIBMINOR=0
+ SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
++SHLIB_EXPLIBS= -lkrb5 $(COM_ERR_LIB) -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ STLIBOBJS= greet.o
+ 
+ SRCS=	greet.c
+diff --git a/src/plugins/authdata/greet_server/Makefile.in b/src/plugins/authdata/greet_server/Makefile.in
+index 78a062d..186ca9c 100644
+--- a/src/plugins/authdata/greet_server/Makefile.in
++++ b/src/plugins/authdata/greet_server/Makefile.in
+@@ -6,7 +6,7 @@ LIBMAJOR=1
+ LIBMINOR=0
+ SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
++SHLIB_EXPLIBS= -lkrb5 $(COM_ERR_LIB) -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS= greet_auth.o
+ 
+diff --git a/src/plugins/kadm5_hook/test/Makefile.in b/src/plugins/kadm5_hook/test/Makefile.in
+index 2d48ec7..593c3bc 100644
+--- a/src/plugins/kadm5_hook/test/Makefile.in
++++ b/src/plugins/kadm5_hook/test/Makefile.in
+@@ -9,7 +9,7 @@ RELDIR=../plugins/kadm5_hook/test
+ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
++SHLIB_EXPLIBS= -lkrb5 $(COM_ERR_LIB) -lk5crypto $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS=main.o
+ 
+diff --git a/src/plugins/kdb/db2/Makefile.in b/src/plugins/kdb/db2/Makefile.in
+index 3a064ff..8c0d5fe 100644
+--- a/src/plugins/kdb/db2/Makefile.in
++++ b/src/plugins/kdb/db2/Makefile.in
+@@ -31,7 +31,7 @@ SHLIB_EXPDEPS = \
+ 	$(GSSRPC_DEPLIBS) \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(KADMSRV_LIBS) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
++SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 $(COM_ERR_LIB) -lk5crypto $(KDB5_DB_LIB) $(KADMSRV_LIBS) $(SUPPORT_LIB) $(LIBS) @DB_EXTRA_LIBS@
+ 
+ DBDIR = libdb2
+ DBOBJLISTS = $(DBOBJLISTS-@DB_VERSION@)
+diff --git a/src/plugins/kdb/ldap/Makefile.in b/src/plugins/kdb/ldap/Makefile.in
+index 94df816..69c120e 100644
+--- a/src/plugins/kdb/ldap/Makefile.in
++++ b/src/plugins/kdb/ldap/Makefile.in
+@@ -19,7 +19,7 @@ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+ 	$(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(SHLIBEXT)
+-SHLIB_EXPLIBS= -lkdb_ldap $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto -lkrb5support $(LIBS)
++SHLIB_EXPLIBS= -lkdb_ldap $(GSSRPC_LIBS) -lkrb5 $(COM_ERR_LIB) -lk5crypto -lkrb5support $(LIBS)
+ 
+ SRCS= 	$(srcdir)/ldap_exp.c
+ 
+diff --git a/src/plugins/preauth/pkinit/Makefile.in b/src/plugins/preauth/pkinit/Makefile.in
+index d8b9398..15ca0eb 100644
+--- a/src/plugins/preauth/pkinit/Makefile.in
++++ b/src/plugins/preauth/pkinit/Makefile.in
+@@ -10,7 +10,7 @@ RELDIR=../plugins/preauth/pkinit
+ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto -lcrypto $(DL_LIB) $(SUPPORT_LIB) $(LIBS)
++SHLIB_EXPLIBS= -lkrb5 $(COM_ERR_LIB) -lk5crypto -lcrypto $(DL_LIB) $(SUPPORT_LIB) $(LIBS)
+ 
+ STLIBOBJS= \
+ 	pkinit_accessor.o \
+diff --git a/src/plugins/preauth/securid_sam2/Makefile.in b/src/plugins/preauth/securid_sam2/Makefile.in
+index f278d1a..cfab482 100644
+--- a/src/plugins/preauth/securid_sam2/Makefile.in
++++ b/src/plugins/preauth/securid_sam2/Makefile.in
+@@ -12,7 +12,7 @@ SHLIB_EXPDEPS = \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT) $(KADMSRV_DEPLIBS)
+ ACELIB= -laceclnt
+-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(KADMSRV_LIBS) \
++SHLIB_EXPLIBS= -lkrb5 $(COM_ERR_LIB) -lk5crypto $(SUPPORT_LIB) $(KADMSRV_LIBS) \
+ 	$(LIBS) $(ACELIB)
+ 
+ STLIBOBJS=securid_sam2_main.o securid2.o grail.o
+diff --git a/src/util/et/Makefile.in b/src/util/et/Makefile.in
+index 71d59da..47fde03 100644
+--- a/src/util/et/Makefile.in
++++ b/src/util/et/Makefile.in
+@@ -78,9 +78,9 @@ t_com_err.o: et1.h et2.h t_com_err.c
+ #	$(CC) -o t_com_err t_com_err.o et1.o et2.o $(LIBOBJS)
+ 
+ test_et: test_et.o test1.o test2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-	$(CC_LINK) -o test_et test_et.o test1.o test2.o -lcom_err $(SUPPORT_LIB)
++	$(CC_LINK) -o test_et test_et.o test1.o test2.o $(COM_ERR_LIB) $(SUPPORT_LIB)
+ t_com_err: t_com_err.o et1.o et2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-	$(CC_LINK) -o t_com_err t_com_err.o et1.o et2.o -lcom_err $(SUPPORT_LIB)
++	$(CC_LINK) -o t_com_err t_com_err.o et1.o et2.o $(COM_ERR_LIB) $(SUPPORT_LIB)
+ 
+ $(OUTPRE)test_et.exe: $(OUTPRE)test_et.$(OBJEXT) $(OUTPRE)test1.$(OBJEXT) \
+ 	$(OUTPRE)test2.$(OBJEXT) $(CLIB)
+diff --git a/src/util/profile/Makefile.in b/src/util/profile/Makefile.in
+index 079443e..6ee264a 100644
+--- a/src/util/profile/Makefile.in
++++ b/src/util/profile/Makefile.in
+@@ -41,13 +41,13 @@ EXTRADEPSRCS=$(srcdir)/test_load.c $(srcdir)/test_parse.c \
+ 	$(srcdir)/profile_tcl.c
+ 
+ DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
++MLIBS = $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+ 
+ LIBBASE=profile
+ LIBMAJOR=1
+ LIBMINOR=1
+ SHLIB_EXPDEPS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+-SHLIB_EXPLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
++SHLIB_EXPLIBS = $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+ 
+ PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
+ 
+-- 
+2.21.3
+
