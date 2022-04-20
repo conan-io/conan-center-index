@@ -27,14 +27,11 @@ default_projects = [
     'clang',
 ]
 default_runtimes = [
-    'libcxx',
+    #'libcxx',
     # libcxxabi appears to be required to build libcxx.
     # See: https://reviews.llvm.org/D63883
-    'libcxxabi',
+    #'libcxxabi',
 ]
-
-default_projects = ['clang', 'compiler-rt']
-
 
 class Llvm(ConanFile):
     name = 'llvm'
@@ -154,7 +151,7 @@ class Llvm(ConanFile):
             'BUILD_SHARED_LIBS': False,
             'CMAKE_SKIP_RPATH': True,
             'CMAKE_POSITION_INDEPENDENT_CODE': \
-                self.options.get_safe('fPIC', default=False) or self.options.shared
+                self.options.get_safe('fPIC', default=False) or self.options.shared,
             'LLVM_TARGET_ARCH': 'host',
             'LLVM_TARGETS_TO_BUILD': self.options.targets,
             'LLVM_BUILD_LLVM_DYLIB': self.options.shared,
