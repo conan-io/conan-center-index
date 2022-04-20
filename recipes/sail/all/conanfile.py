@@ -72,11 +72,10 @@ class SAILConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # Move icons
-        tools.rename(self.package_folder + "/share/sail", self.package_folder + "/res")
-        tools.rmdir(self.package_folder + "/share")
-        # Remove unwanted configurations
-        for d in ["lib/cmake", "lib/pkgconfig"]:
-            tools.rmdir(self.package_folder + "/" + d)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rename(self, os.path.join(self.package_folder, "share"),
+                     os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"]       = "Sail"
