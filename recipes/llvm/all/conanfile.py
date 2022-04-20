@@ -129,6 +129,10 @@ class Llvm(ConanFile):
         self.build_requires("cmake/3.21.3")
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '14')
 
