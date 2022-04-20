@@ -11,7 +11,6 @@ class SAILConan(ConanFile):
     topics = ( "image", "encoding", "decoding", "graphics" )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    requires = "giflib/5.2.1", "libavif/0.9.3", "libjpeg/9d", "libpng/1.6.37", "libtiff/4.3.0", "libwebp/1.2.2"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
