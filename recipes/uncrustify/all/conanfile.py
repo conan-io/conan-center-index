@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -10,13 +11,11 @@ class UncrustifyConan(ConanFile):
     name = "uncrustify"
     description = "Code beautifier"
     license = "GPL-2.0-or-later"
-    topics = ("beautifier", "command-line")
+    topics = "beautifier", "command-line"
     homepage = "https://github.com/uncrustify/uncrustify"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = "CMakeLists.txt"
-    short_paths = True
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -34,12 +33,11 @@ class UncrustifyConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -65,8 +63,10 @@ class UncrustifyConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
