@@ -1,0 +1,100 @@
+From 229608e2e6a7bc8f4df3b4548a843f6f3432dfe6 Mon Sep 17 00:00:00 2001
+From: Anonymous Maarten <anonymous.maarten@gmail.com>
+Date: Thu, 3 Sep 2020 22:01:06 +0200
+Subject: [PATCH] Allow to pass crypto and ssl libraries through CRYPTO_LIBS
+ and SSL_LIBS env
+
+---
+ src/config/pre.in     |  3 +++
+ src/configure.ac      | 20 ++++++++++++++-----
+ .../src/tests/softpkcs11/Makefile.in          |  2 +-
+ 3 files changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/src/config/pre.in b/src/config/pre.in
+index 7b3a583..72dd335 100644
+--- a/src/config/pre.in
++++ b/src/config/pre.in
+@@ -438,6 +438,9 @@ TCL_INCLUDES	= @TCL_INCLUDES@
+ CRYPTO_IMPL	= @CRYPTO_IMPL@
+ PRNG_ALG	= @PRNG_ALG@
+ 
++# Crypto implementation selection
++CRYPTO_IMPL_LIBS = @CRYPTO_IMPL_LIBS@
++
+ # TLS implementation selection
+ TLS_IMPL	= @TLS_IMPL@
+ TLS_IMPL_CFLAGS = @TLS_IMPL_CFLAGS@
+diff --git a/src/configure.ac b/src/configure.ac
+index 234f428..73779fa 100644
+--- a/src/configure.ac
++++ b/src/configure.ac
+@@ -271,7 +271,10 @@ case "$withval" in
+ builtin)
+   ;;
+ openssl)
+-  AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
++  AC_CHECK_LIB(crypto, PKCS7_get_signer_info, [],
++               AC_MSG_ERROR([libcrypto not found or undefined symbol PKCS7_get_signer_info]),
++               $CRYPTO_LIBS)
++  CRYPTO_IMPL_LIBS=$CRYPTO_LIBS
+   ;;
+ *)
+   AC_MSG_ERROR([Unknown crypto implementation $withval])
+@@ -293,6 +296,13 @@ if test "$PRNG_ALG" = fortuna; then
+ 	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
+ fi
+ 
++
++AC_ARG_VAR(CRYPTO_LIBS, [libraries for crypto [-lssl]])
++test "x${CRYPTO_LIBS}" = xset || TLS_IMPL_LIBS="-lcrypto"
++AC_ARG_VAR(TLS_LIBS, [libraries for tls [-lssl -lcrypto]])
++test "x${TLS_LIBS}" = xset || TLS_IMPL_LIBS="-lssl -lcrypto"
++
++
+ # WITH_TLS_IMPL
+ 
+ AC_ARG_WITH([tls-impl],
+@@ -302,12 +312,12 @@ AC_HELP_STRING([--with-tls-impl=IMPL],
+ case "$TLS_IMPL" in
+ openssl|auto)
+   AC_CHECK_LIB(ssl,SSL_CTX_new,[have_lib_ssl=true],[have_lib_ssl=false],
+-               -lcrypto)
++               $CRYPTO_LIBS)
+   AC_MSG_CHECKING([for OpenSSL])
+   if test x$have_lib_ssl = xtrue ; then
+     AC_DEFINE(TLS_IMPL_OPENSSL,1,[Define if TLS implementation is OpenSSL])
+     AC_MSG_RESULT([yes])
+-    TLS_IMPL_LIBS="-lssl -lcrypto"
++    TLS_IMPL_LIBS="$TLS_LIBS"
+     TLS_IMPL=openssl
+     AC_MSG_NOTICE([TLS module will use OpenSSL])
+   else
+@@ -364,10 +374,10 @@ AC_ARG_WITH([spake-openssl],
+ AC_HELP_STRING([--with-spake-openssl],
+                [use OpenSSL for SPAKE preauth @<:@auto@:>@]),,[withval=auto])
+ if test "$withval" = auto -o "$withval" = yes; then
+-  AC_CHECK_LIB([crypto],[EC_POINT_new],[have_crypto=true],[have_crypto=false])
++  AC_CHECK_LIB([crypto],[EC_POINT_new],[have_crypto=true],[have_crypto=false],$CRYPTO_LIBS)
+   if test "$have_crypto" = true; then
+     AC_DEFINE(SPAKE_OPENSSL,1,[Define to use OpenSSL for SPAKE preauth])
+-    SPAKE_OPENSSL_LIBS=-lcrypto
++    SPAKE_OPENSSL_LIBS="$CRYPTO_LIBS"
+     HAVE_SPAKE_OPENSSL=yes
+   elif test "$withval" = yes; then
+     AC_MSG_ERROR([OpenSSL libcrypto not found])
+diff --git a/src/tests/softpkcs11/Makefile.in b/src/tests/softpkcs11/Makefile.in
+index e896781..0ed3c64 100644
+--- a/src/tests/softpkcs11/Makefile.in
++++ b/src/tests/softpkcs11/Makefile.in
+@@ -7,7 +7,7 @@ LIBBASE=softpkcs11
+ LIBMAJOR=0
+ LIBMINOR=0
+ 
+-SHLIB_EXPLIBS=$(SUPPORT_LIB) -lcrypto
++SHLIB_EXPLIBS=$(SUPPORT_LIB) $(CRYPTO_IMPL_LIBS)
+ SHLIB_EXPDEPS=$(SUPPORT_DEPLIB)
+ 
+ STLIBOBJS=main.o
+-- 
+2.21.3
+
