@@ -1,5 +1,137 @@
 diff --git a/src/caffe/proto/caffe.proto b/src/caffe/proto/caffe.proto
 index 81a8c69..f9b5b13 100644
+--- a/include/caffe/util/db_leveldb.hpp
++++ b/include/caffe/util/db_leveldb.hpp
+@@ -4,71 +4,11 @@
+ 
+ #include <string>
+ 
+-#include "leveldb/db.h"
+-#include "leveldb/write_batch.h"
+ 
+ #include "caffe/util/db.hpp"
+ 
+ namespace caffe { namespace db {
+ 
+-class LevelDBCursor : public Cursor {
+- public:
+-  explicit LevelDBCursor(leveldb::Iterator* iter)
+-    : iter_(iter) {
+-    SeekToFirst();
+-    CHECK(iter_->status().ok()) << iter_->status().ToString();
+-  }
+-  ~LevelDBCursor() { delete iter_; }
+-  virtual void SeekToFirst() { iter_->SeekToFirst(); }
+-  virtual void Next() { iter_->Next(); }
+-  virtual string key() { return iter_->key().ToString(); }
+-  virtual string value() { return iter_->value().ToString(); }
+-  virtual bool valid() { return iter_->Valid(); }
+-
+- private:
+-  leveldb::Iterator* iter_;
+-};
+-
+-class LevelDBTransaction : public Transaction {
+- public:
+-  explicit LevelDBTransaction(leveldb::DB* db) : db_(db) { CHECK_NOTNULL(db_); }
+-  virtual void Put(const string& key, const string& value) {
+-    batch_.Put(key, value);
+-  }
+-  virtual void Commit() {
+-    leveldb::Status status = db_->Write(leveldb::WriteOptions(), &batch_);
+-    CHECK(status.ok()) << "Failed to write batch to leveldb "
+-                       << std::endl << status.ToString();
+-  }
+-
+- private:
+-  leveldb::DB* db_;
+-  leveldb::WriteBatch batch_;
+-
+-  DISABLE_COPY_AND_ASSIGN(LevelDBTransaction);
+-};
+-
+-class LevelDB : public DB {
+- public:
+-  LevelDB() : db_(NULL) { }
+-  virtual ~LevelDB() { Close(); }
+-  virtual void Open(const string& source, Mode mode);
+-  virtual void Close() {
+-    if (db_ != NULL) {
+-      delete db_;
+-      db_ = NULL;
+-    }
+-  }
+-  virtual LevelDBCursor* NewCursor() {
+-    return new LevelDBCursor(db_->NewIterator(leveldb::ReadOptions()));
+-  }
+-  virtual LevelDBTransaction* NewTransaction() {
+-    return new LevelDBTransaction(db_);
+-  }
+-
+- private:
+-  leveldb::DB* db_;
+-};
+ 
+ 
+ }  // namespace db
+
+--- a/src/caffe/util/db.cpp
++++ b/src/caffe/util/db.cpp
+@@ -8,10 +8,6 @@ namespace caffe { namespace db {
+ 
+ DB* GetDB(DataParameter::DB backend) {
+   switch (backend) {
+-#ifdef USE_LEVELDB
+-  case DataParameter_DB_LEVELDB:
+-    return new LevelDB();
+-#endif  // USE_LEVELDB
+ #ifdef USE_LMDB
+   case DataParameter_DB_LMDB:
+     return new LMDB();
+@@ -23,11 +19,6 @@ DB* GetDB(DataParameter::DB backend) {
+ }
+ 
+ DB* GetDB(const string& backend) {
+-#ifdef USE_LEVELDB
+-  if (backend == "leveldb") {
+-    return new LevelDB();
+-  }
+-#endif  // USE_LEVELDB
+ #ifdef USE_LMDB
+   if (backend == "lmdb") {
+     return new LMDB();
+--- a/src/caffe/util/db_leveldb.cpp
++++ b/src/caffe/util/db_leveldb.cpp
+@@ -5,18 +5,6 @@
+ 
+ namespace caffe { namespace db {
+ 
+-void LevelDB::Open(const string& source, Mode mode) {
+-  leveldb::Options options;
+-  options.block_size = 65536;
+-  options.write_buffer_size = 268435456;
+-  options.max_open_files = 100;
+-  options.error_if_exists = mode == NEW;
+-  options.create_if_missing = mode != READ;
+-  leveldb::Status status = leveldb::DB::Open(options, source, &db_);
+-  CHECK(status.ok()) << "Failed to open leveldb " << source
+-                     << std::endl << status.ToString();
+-  LOG(INFO) << "Opened leveldb " << source;
+-}
+ 
+ }  // namespace db
+ }  // namespace caffe
+--- a/src/caffe/layers/memory_data_layer.cpp
++++ b/src/caffe/layers/memory_data_layer.cpp
+@@ -87,7 +87,7 @@ void MemoryDataLayer<Dtype>::Reset(Dtype* data, Dtype* labels, int n) {
+   // Warn with transformation parameters since a memory array is meant to
+   // be generic and no transformations are done with Reset().
+   if (this->layer_param_.has_transform_param()) {
+-    LOG(WARNING) << this->type() << " does not transform array data on Reset()";
++    // LOG(WARNING) << this->type() << " does not transform array data on Reset()";
+   }
+   data_ = data;
+   labels_ = labels;
 --- a/src/caffe/proto/caffe.proto
 +++ b/src/caffe/proto/caffe.proto
 @@ -254,6 +254,7 @@

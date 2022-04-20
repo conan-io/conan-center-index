@@ -69,17 +69,13 @@ class CaffeConan(ConanFile):
         # Choose Accelerate for MAC and openblas otherwise
         if self.settings.os != "Macos":
             self.requires.add("openblas/0.3.7.dssl1")
-        self.requires.add("protobuf/3.9.1.dssl1")
+        self.requires.add("protobuf/3.9.1.dssl2")
         if self.options.with_opencv:
             self.requires.add("opencv/2.4.13.7")
         if self.options.with_leveldb:
             self.requires.add("leveldb/1.22")
         if self.options.with_lmdb:
             self.requires.add("lmdb/0.9.28.dssl1")
-
-
-    def build_requirements(self):
-        self.build_requires("protoc/3.9.1.dssl2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.original_version])
@@ -104,7 +100,7 @@ class CaffeConan(ConanFile):
             cmake.definitions["INSTALL_PREREQUISITES"] = False
 
         protoc = "protoc.exe" if self.settings.os == "Windows" else "protoc"
-        cmake.definitions["PROTOBUF_PROTOC_EXECUTABLE"] = os.path.join(self.deps_cpp_info['protoc'].rootpath, 'bin', protoc)
+        cmake.definitions["PROTOBUF_PROTOC_EXECUTABLE"] = os.path.join(self.deps_cpp_info['protobuf'].rootpath, 'bin', protoc)
 
         if self.options.with_gpu:
             cmake.definitions["CUDA_ARCH_NAME"] = self.options.gpu_arch
@@ -153,6 +149,7 @@ class CaffeConan(ConanFile):
                 self.cpp_info.libs = ["caffe-d", "caffeproto-d"]
             else:
                 self.cpp_info.libs = ["caffe", "caffeproto"]
+            self.cpp_info.bindirs = ['bin', 'lib']
         else:
             if self.settings.build_type == "Debug":
                 self.cpp_info.libs = ["caffe-d", "proto-d"]
