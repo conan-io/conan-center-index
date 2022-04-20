@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <sail/sail.h>
 
 int main(int argc, char *argv[])
