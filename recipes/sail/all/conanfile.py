@@ -102,17 +102,14 @@ class SAILConan(ConanFile):
         self.cpp_info.components["libsail"].names["cmake_find_package"] = "Sail"
         self.cpp_info.components["libsail"].names["cmake_find_package_multi"] = "Sail"
         self.cpp_info.components["libsail"].libs = ["sail"]
-        self.cpp_info.components["libsail"].requires = ["sail-common"]
+        self.cpp_info.components["libsail"].requires = ["sail-common", "sail-codecs"]
 
-        # Exists in static build only
-        if not self.options.shared:
-            self.cpp_info.components["sail-codecs"].set_property("cmake_target_name", "SAIL::SailCodecs")
-            self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
-            self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
-            self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
-            self.cpp_info.components["sail-codecs"].requires = ["sail-common", "avif::avif", "giflib::giflib", "JPEG::JPEG",
-                                                                "PNG::PNG", "TIFF::TIFF", "WebP::webpdecoder", "WebP::webpdemux"]
-            self.cpp_info.components["libsail"].requires.append("sail-codecs")
+        self.cpp_info.components["sail-codecs"].set_property("cmake_target_name", "SAIL::SailCodecs")
+        self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
+        self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
+        self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
+        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "avif::avif", "giflib::giflib", "JPEG::JPEG",
+                                                            "PNG::PNG", "TIFF::TIFF", "WebP::webpdecoder", "WebP::webpdemux"]
 
         self.cpp_info.components["sail-common"].set_property("cmake_target_name", "SAIL::SailCommon")
         self.cpp_info.components["sail-common"].set_property("pkg_config_name", "libsail-common")
