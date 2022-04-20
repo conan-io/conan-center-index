@@ -97,12 +97,11 @@ class SAILConan(ConanFile):
         self.cpp_info.names["cmake_find_package"]           = "SAIL"
         self.cpp_info.names["cmake_find_package_multi"]     = "SAIL"
 
-        self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
-        self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
-        self.cpp_info.components["libsail"].names["cmake_find_package"] = "Sail"
-        self.cpp_info.components["libsail"].names["cmake_find_package_multi"] = "Sail"
-        self.cpp_info.components["libsail"].libs = ["sail"]
-        self.cpp_info.components["libsail"].requires = ["sail-common", "sail-codecs"]
+        self.cpp_info.components["sail-common"].set_property("cmake_target_name", "SAIL::SailCommon")
+        self.cpp_info.components["sail-common"].set_property("pkg_config_name", "libsail-common")
+        self.cpp_info.components["sail-common"].names["cmake_find_package"]       = "SailCommon"
+        self.cpp_info.components["sail-common"].names["cmake_find_package_multi"] = "SailCommon"
+        self.cpp_info.components["sail-common"].libs = ["sail-common"]
 
         self.cpp_info.components["sail-codecs"].set_property("cmake_target_name", "SAIL::SailCodecs")
         self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
@@ -111,11 +110,12 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].requires = ["sail-common", "avif::avif", "giflib::giflib", "JPEG::JPEG",
                                                             "PNG::PNG", "TIFF::TIFF", "WebP::webpdecoder", "WebP::webpdemux"]
 
-        self.cpp_info.components["sail-common"].set_property("cmake_target_name", "SAIL::SailCommon")
-        self.cpp_info.components["sail-common"].set_property("pkg_config_name", "libsail-common")
-        self.cpp_info.components["sail-common"].names["cmake_find_package"]       = "SailCommon"
-        self.cpp_info.components["sail-common"].names["cmake_find_package_multi"] = "SailCommon"
-        self.cpp_info.components["sail-common"].libs = ["sail-common"]
+        self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
+        self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
+        self.cpp_info.components["libsail"].names["cmake_find_package"] = "Sail"
+        self.cpp_info.components["libsail"].names["cmake_find_package_multi"] = "Sail"
+        self.cpp_info.components["libsail"].libs = ["sail"]
+        self.cpp_info.components["libsail"].requires = ["sail-common", "sail-codecs"]
 
         self.cpp_info.components["sail-manip"].set_property("cmake_target_name", "SAIL::SailManip")
         self.cpp_info.components["sail-manip"].set_property("pkg_config_name", "libsail-manip")
