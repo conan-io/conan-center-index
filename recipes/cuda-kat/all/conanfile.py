@@ -22,6 +22,15 @@ class CudaKatConan(ConanFile):
     def package_id(self):
         self.info.header_only()
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
+            }
+
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("CUDA-kat library are not compatible on Windows")
