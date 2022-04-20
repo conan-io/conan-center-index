@@ -109,6 +109,8 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
             self.cpp_info.components["libsail"].requires.append("sail-codecs")
 
+        self.cpp_info.components["sail-common"].set_property("cmake_target_name", "SAIL::SailCommon")
+        self.cpp_info.components["sail-common"].set_property("pkg_config_name", "libsail-common")
         self.cpp_info.components["sail-common"].names["cmake_find_package"]       = "SailCommon"
         self.cpp_info.components["sail-common"].names["cmake_find_package_multi"] = "SailCommon"
         self.cpp_info.components["sail-common"].libs = ["sail-common"]
