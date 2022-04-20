@@ -33,9 +33,6 @@ class SAILConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
-        tools.check_min_cppstd(self, "17")
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
 
