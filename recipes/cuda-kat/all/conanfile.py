@@ -8,12 +8,12 @@ class CudaKatConan(ConanFile):
     name = "cuda-kat"
     homepage = "https://github.com/eyalroz/cuda-kat"
     description = "CUDA kernel author's tools"
-    topics = ("GPGPU", "CUDA", "cuda-kat", "header-only")
+    topics = ("gpgpu", "cuda", "cuda-kat", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
-    license = "BSD 3-Clause License"
+    license = "BSD-3-Clause"
 
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _source_subfolder(self):
