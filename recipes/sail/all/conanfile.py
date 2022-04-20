@@ -107,8 +107,8 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
         self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
-        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "avif", "GIF::GIF", "JPEG::JPEG",
-                                                            "PNG::PNG", "TIFF::TIFF", "WebP::webpdecoder", "WebP::webpdemux"]
+        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "libavif::libavif", "giflib::giflib", "libjpeg::libjpeg",
+                                                            "libpng::libpng", "libtiff::libtiff", "libwebp::libwebp"]
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
