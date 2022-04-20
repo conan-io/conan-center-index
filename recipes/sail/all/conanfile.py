@@ -44,7 +44,9 @@ class SAILConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        tools.check_min_cppstd(self, "17")
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
