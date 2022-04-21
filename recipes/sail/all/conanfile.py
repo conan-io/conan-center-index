@@ -35,7 +35,7 @@ class SAILConan(ConanFile):
 
     @property
     def _build_subfolder(self):
-        return "build_subfolder"
+        return "build"
 
     def config_options(self):
         if self.settings.os == "Windows":
