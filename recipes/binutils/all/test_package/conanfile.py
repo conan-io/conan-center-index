@@ -30,6 +30,8 @@ class TestPackageConan(ConanFile):
         part_arch = self._target_arch
         if "armv7" in part_arch:
             part_arch = "armv7"
+        elif part_arch in ("riscv32", "riscv64"):
+            part_arch = "riscv"
         return os.path.join(self.source_folder, f"{self._target_os}-{part_arch}.s")
 
     def _append_gnu_triplet(self, exe):
@@ -39,7 +41,7 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
 
             if not os.path.isfile(self._test_package_assembly_source):
-                self.output.warn(f"test_package does not support this target os/arch. Please consider adding it. (It's a great learning experience)")
+                self.output.warn(f"Missing {self._test_package_assembly_source}.\ntest_package does not support this target os/arch. Please consider adding it. (It's a great learning experience)")
             else:
                 tools.mkdir(os.path.join(self.build_folder, "bin"))
                 tools.mkdir(os.path.join(self.build_folder, "lib"))
