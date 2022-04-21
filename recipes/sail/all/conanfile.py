@@ -46,7 +46,6 @@ class SAILConan(ConanFile):
     def requirements(self):
         self.requires("giflib/5.2.1")
         self.requires("jasper/2.0.33")
-        self.requires("libavif/0.9.3")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
@@ -108,7 +107,7 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
         self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
-        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "giflib::giflib", "jasper::jasper", "libavif::libavif",
+        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "giflib::giflib", "jasper::jasper",
                                                             "libjpeg::libjpeg", "libpng::libpng", "libtiff::libtiff", "libwebp::libwebp"]
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
