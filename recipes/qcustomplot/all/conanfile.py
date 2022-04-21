@@ -48,7 +48,7 @@ class QcustomplotConan(ConanFile):
 
     def requirements(self):
         if int(tools.Version(self.version).major) >= 2:
-            self.requires("qt/6.2.4")
+            self.requires("qt/6.3.0")
         else:
             self.requires("qt/5.15.3")
 
