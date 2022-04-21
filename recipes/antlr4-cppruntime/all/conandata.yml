@@ -2,6 +2,12 @@ sources:
   "4.9.3":
     url: "https://github.com/antlr/antlr4/archive/refs/tags/4.9.3.tar.gz"
     sha256: "efe4057d75ab48145d4683100fec7f77d7f87fa258707330cadd1f8e6f7eecae"
+  "4.10":
+    url: "https://github.com/antlr/antlr4/archive/refs/tags/4.10.tar.gz"
+    sha256: "39b2604fc75fa77323bd7046f2fb750c818cf11fcce2cd6cca06b6697f60ffbb"
+  "4.10.1":
+    url: "https://github.com/antlr/antlr4/archive/refs/tags/4.10.1.tar.gz"
+    sha256: "a320568b738e42735946bebc5d9d333170e14a251c5734e8b852ad1502efa8a2"
 patches:
   "4.9.3":
     - patch_file: "patches/0001-update-cmakelist.patch"
