@@ -103,18 +103,18 @@ class TensorflowLiteConan(ConanFile):
         self.build_requires("ninja/1.10.2")
 
     def requirements(self):
-        self.requires("abseil/20210324.2")
+        self.requires("abseil/20211102.0")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.0")
+        self.requires("flatbuffers/2.0.5")
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         self.requires("ruy/cci.20210622")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20211026")
-            self.requires("fp16/cci.20200514")
+            self.requires("xnnpack/cci.20211210")
+            self.requires("fp16/cci.20210320")
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
