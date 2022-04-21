@@ -37,7 +37,7 @@ libxml2/2.9.9
 libxslt/1.1.33
 lmdb/0.9.28.dssl1
 miniupnpc/2.1
-onnxruntime/1.7.2
+onnxruntime/1.7.2.dssl1
 openal/1.20.1
 openblas/0.3.7.dssl1
 opencv/2.4.13.7
