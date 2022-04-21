@@ -202,7 +202,7 @@ class _ArchOs:
     }
 
     @classmethod
-    def calculate_archs(cls, triplet: "_GNUTriplet") -> tuple[str]:
+    def calculate_archs(cls, triplet: "_GNUTriplet") -> typing.Tuple[str]:
         if triplet.machine == "arm":
             archs = "armv7" + ("hf" if "hf" in triplet.abi else "")
         else:
