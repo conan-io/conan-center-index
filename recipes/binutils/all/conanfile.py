@@ -4,7 +4,7 @@ import functools
 import os
 
 
-required_conan_version = ">=1.40.0"
+required_conan_version = ">=1.43.0"
 
 
 class BinutilsConan(ConanFile):
@@ -30,6 +30,18 @@ class BinutilsConan(ConanFile):
         "target_os": None,  # Initialized in config_options
     }
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _settings_target(self):
+        return getattr(self, "settings_target") or self.settings
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -37,14 +49,14 @@ class BinutilsConan(ConanFile):
     def config_options(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        self.options.target_arch = str(getattr(self, "settings_target", self.settings).arch)
-        self.options.target_os = str(getattr(self, "settings_target", self.settings).os)
+        self.options.target_arch = str(self._settings_target.arch)
+        self.options.target_os = str(self._settings_target.os)
 
     def validate(self):
-        if self.settings.os not in ("Linux", "FreeBSD"):
-            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
+        if self.settings.compiler in ("msvc", "Visual Studio"):
+            raise ConanInvalidConfiguration("This recipe does not support building binutils by this compiler")
 
-        # Check whether the actual target_arch and target_os option are valid conan options
+        # Check whether the actual target_arch and target_os option are valid (they should be in settings.yml)
         # FIXME: does there exist a stable Conan API to accomplish this?
         if self.options.target_arch not in self.settings.arch.values_range:
             raise ConanInvalidConfiguration(f"target_arch={self.options.target_arch} is invalid (possibilities={self.settings.arch.values_range})")
@@ -55,14 +67,6 @@ class BinutilsConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
@@ -141,6 +145,8 @@ class BinutilsConan(ConanFile):
         autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
