@@ -261,4 +261,5 @@ sqlite3:shared=True
 sqlite3:threadsafe=1
 sqlite3:use_alloca=False
 xz_utils:shared=True
+zlib:minizip=False
 zlib:shared=True
