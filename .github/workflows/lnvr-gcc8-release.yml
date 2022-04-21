@@ -37,9 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure git
-        run: |
-          git config --system core.longpaths true
-          git config --global core.autocrlf false        
+        run: git config --global core.autocrlf false
         shell: bash
       - name: Checkout
         uses: actions/checkout@v2
