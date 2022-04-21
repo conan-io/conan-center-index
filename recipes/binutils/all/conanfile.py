@@ -2,6 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
+import re
 import typing
 import unittest
 
@@ -63,9 +64,6 @@ class BinutilsConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def configure(self):
-        # print(dir(self.settings))
-        # print(self.settings.values_list)
-        # print(dir(self.settings.os.as_list))
         if self.options.target_triplet == self._PLACEHOLDER_TEXT:
             if self.options.target_arch == self._PLACEHOLDER_TEXT:
                 # If target triplet and target arch are not set, initialize it from the target settings
@@ -240,17 +238,29 @@ class _ArchOs:
     def from_triplet(cls, triplet: "_GNUTriplet") -> "_ArchOs":
         archs = cls.calculate_archs(triplet)
         os = cls.calculate_os(triplet)
+        extra = {}
+
+        if os == "Android" and triplet.abi:
+            m = re.match(".*([0-9]+)", triplet.abi)
+            if m:
+                extra["os.api_level"] = m.group(1)
 
         # Assume first architecture
-        return cls(arch=archs[0], os=os)
+        return cls(arch=archs[0], os=os, extra=extra)
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):
             return False
-        return self.arch == other.arch and self.os == other.os
+        if not (self.arch == other.arch and self.os == other.os):
+            return False
+        self_extra_keys = set(self.extra.keys())
+        other_extra_keys = set(other.extra.keys())
+        if (self_extra_keys - other_extra_keys) or (other_extra_keys - self_extra_keys):
+            return False
+        return True
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__}:arch='{self.arch}',os='{self.os}'>"
+        return f"<{type(self).__name__}:arch='{self.arch}',os='{self.os}',extra={self.extra}>"
 
 
 class _GNUTriplet:
@@ -492,6 +502,7 @@ class _TestOsArch2GNUTriplet(unittest.TestCase):
 
     def test_android_x86_64(self):
         self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="Android", extra={"os.api_level": "29"}), _GNUTriplet(machine="x86_64", vendor=None, os="linux", abi="android29"), "x86_64-linux-android29")
+        self.assertEqual(_ArchOs(arch="x86_64", os="Android", extra={"os.api_level": "25"}), _ArchOs.from_triplet(_GNUTriplet.from_text("x86_64-linux-android29")))
 
     def _test_osarch_to_gnutriplet(self, archos: _ArchOs, gnuobj_ref: _GNUTriplet, triplet_ref: str):
         gnuobj = _GNUTriplet.from_archos(archos)
