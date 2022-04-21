@@ -62,12 +62,12 @@ class SAILConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON" if self.options.get_safe("fPIC", default=True) or self.options.shared else "OFF"
-        self._cmake.definitions["SAIL_BUILD_APPS"]     = "OFF"
-        self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["SAIL_BUILD_TESTS"]    = "OFF"
-        self._cmake.definitions["SAIL_COMBINE_CODECS"] = "ON"
-        self._cmake.definitions["SAIL_THREAD_SAFE"]    = "ON" if self.options.thread_safe else "OFF"
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["SAIL_BUILD_APPS"]     = False
+        self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["SAIL_BUILD_TESTS"]    = False
+        self._cmake.definitions["SAIL_COMBINE_CODECS"] = False
+        self._cmake.definitions["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
