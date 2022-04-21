@@ -37,8 +37,8 @@ jobs:
     steps:
       - name: Configure git
         run: |
-            git config --system core.longpaths true
-            git config --global core.autocrlf false        
+          git config --system core.longpaths true
+          git config --global core.autocrlf false        
         shell: bash
       - name: Checkout
         uses: actions/checkout@v2
