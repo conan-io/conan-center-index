@@ -44,7 +44,7 @@ class EnjinCppSdk(ConanFile):
         return {
             "Visual Studio": "16",
             "gcc": "9",
-            "clang": "9",
+            "clang": "10",
         }
 
     def export_sources(self):
@@ -72,6 +72,9 @@ class EnjinCppSdk(ConanFile):
 
         self.requires("rapidjson/1.1.0")
         self.requires("spdlog/1.8.2")
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.16.9")
 
     def validate(self):
         # Validations for OS
