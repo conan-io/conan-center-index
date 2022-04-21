@@ -36,8 +36,8 @@ class BinutilsConan(ConanFile):
     default_options = {
         "multilib": True,
         "with_libquadmath": True,
-        "target_arch": None,  # Initialized in config_options
-        "target_os": None,  # Initialized in config_options
+        "target_arch": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
+        "target_os": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
         "target_triplet": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
         "prefix": _PLACEHOLDER_TEXT,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
@@ -61,12 +61,26 @@ class BinutilsConan(ConanFile):
     def config_options(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        self.options.target_arch = str(self._settings_target.arch)
-        self.options.target_os = str(self._settings_target.os)
 
     def configure(self):
         if self.options.target_triplet == self._PLACEHOLDER_TEXT:
+            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+                # If target triplet and target arch are not set, initialize it from the target settings
+                self.options.target_arch = str(self._settings_target.arch)
+            if self.options.target_os == self._PLACEHOLDER_TEXT:
+                # If target triplet and target os are not set, initialize it from the target settings
+                self.options.target_os = str(self._settings_target.os)
+            # Initialize the target_triplet from the target arch and target os
             self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(arch=str(self.options.target_arch), os=str(self.options.target_os))).triplet
+        else:
+            gnu_triplet_obj = _GNUTriplet.from_text(str(self.options.target_triplet))
+            archos = _ArchOs.from_triplet(gnu_triplet_obj)
+            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+                # If target arch is not set, deduce it from the target triplet
+                self.options.target_arch = archos.arch
+            if self.options.target_os == self._PLACEHOLDER_TEXT:
+                # If target arch is not set, deduce it from the target triplet
+                self.options.target_os = archos.os
 
         if self.options.prefix == self._PLACEHOLDER_TEXT:
             self.options.prefix = f"{self.options.target_triplet}-"
@@ -88,7 +102,9 @@ class BinutilsConan(ConanFile):
         target_archos = _ArchOs(str(self.options.target_arch), str(self.options.target_os))
         target_gnu_triplet = _GNUTriplet.from_text(str(self.options.target_triplet))
         if not target_archos.is_compatible(target_gnu_triplet):
-            raise ConanInvalidConfiguration(f"target_arch={target_archos.arch}/target_os={target_archos.os} are not compatible with {target_gnu_triplet.triplet}. Suggested triplet is {_GNUTriplet.from_archos(target_archos).triplet}.")
+            suggested_gnu_triplet = _GNUTriplet.from_archos(target_archos)
+            suggested_archos = _ArchOs.from_triplet(target_gnu_triplet)
+            raise ConanInvalidConfiguration(f"target_arch={target_archos.arch}/target_os={target_archos.os} is not compatible with {target_gnu_triplet.triplet}. Change target triplet to {suggested_gnu_triplet.triplet}, or change target_arch/target_os to {suggested_archos.arch}/{suggested_archos.os}.")
 
         # Check, when used as build requirement in a cross build, whether the target arch/os agree
         settings_target = getattr(self, "settings_target", None)
