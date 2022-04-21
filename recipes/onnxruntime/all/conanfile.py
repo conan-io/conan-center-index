@@ -25,9 +25,16 @@ class OnnxRuntimeConan(ConanFile):
     def _build_subfolder(self):
         return os.path.join(self.source_folder, "build_subfolder")
 
+    @property 
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
     def source(self):
         git_version = tools.Git.get_version()
-        target_revision = self.conan_data['sources'][self.version]['revision']
+        target_revision = self.conan_data['sources'][self.original_version]['revision']
         if git_version > "2.5.0":
             git = tools.Git(folder=self._source_subfolder)
             git.clone(url=self.repo_url)
@@ -50,12 +57,18 @@ class OnnxRuntimeConan(ConanFile):
         if tools.os_info.is_windows:
             args += ['--cmake_generator', f'\"{get_generator(self)}\"']
         args = ' '.join(args)
-        self.run(f"python3 {build_script} {args}")
-        cmake = CMake(self)
-        cmake.install(build_dir=os.path.join(self._build_subfolder, build_type))
+        self.run(f"python {build_script} {args}")
 
     def package(self):
+        build_type = self.settings.get_safe("build_type", default="Release")
+        cmake = CMake(self)
+        cmake.install(build_dir=os.path.join(self._build_subfolder, build_type))
         if tools.os_info.is_windows:
             os.remove(os.path.join(self.package_folder, "bin", "onnx_test_runner.exe"))
         else:
             tools.rmdir(os.path.join(self.package_folder, "bin"))
+            
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "onnxruntime"
+        self.cpp_info.names["cmake_find_package_multi"] = "onnxruntime"
+        self.cpp_info.libs = ["onnxruntime"]
