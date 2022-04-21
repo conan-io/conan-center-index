@@ -1,8 +1,6 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException
 from io import StringIO
 import os
-import shlex
 
 
 class TestPackageConan(ConanFile):
@@ -53,14 +51,14 @@ class TestPackageConan(ConanFile):
                     dlltool = f"{self.deps_user_info['binutils'].gnu_triplet}-dlltool"
 
                     dlltool_args = [dlltool, "--input-def", f"{self.source_folder}/Windows-kernel32.def", "--output-lib", f"{self.build_folder}/lib/libkernel32.a"]
-                    self.run(shlex.join(dlltool_args))
+                    self.run(" ".join(dlltool_args))
 
 
                 assembler_args = [gas, self._test_package_assembly_source, "-o", f"{self.build_folder}/object.o"]
                 linker_args = [ld, f"{self.build_folder}/object.o", "-o", f"{self.build_folder}/bin/test_package{extension}"] + self._test_linker_args
 
-                self.run(shlex.join(assembler_args))
-                self.run(shlex.join(linker_args))
+                self.run(" ".join(assembler_args))
+                self.run(" ".join(linker_args))
 
     def _can_run_target(self):
         if self._settings_build.os != self._target_os:
