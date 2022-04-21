@@ -121,7 +121,7 @@ class BinutilsConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         yes_no = lambda tf : "yes" if tf else "no"
         conf_args = [
             "--target={}".format(self._triplet_target),
