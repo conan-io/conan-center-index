@@ -31,17 +31,20 @@ class TestPackageConan(ConanFile):
     def _test_package_assembly_source(self):
         return os.path.join(self.source_folder, f"{self._target_os}-{self._target_arch}.s")
 
+    def _append_gnu_triplet(self, exe):
+        return f"{self.deps_user_info['binutils'].gnu_triplet}-{exe}"
+
     def build(self):
         if not tools.cross_building(self):
 
             if not os.path.isfile(self._test_package_assembly_source):
-                self.output.warn(f"Test is missing a test for this target ({self._test_package_assembly_source}. Please consider adding one. (It's a great learning experience)")
+                self.output.warn(f"test_package does not support this target os/arch. Please consider adding it. (It's a great learning experience)")
             else:
                 tools.mkdir(os.path.join(self.build_folder, "bin"))
                 tools.mkdir(os.path.join(self.build_folder, "lib"))
 
-                gas = f"{self.deps_user_info['binutils'].gnu_triplet}-as"
-                ld = f"{self.deps_user_info['binutils'].gnu_triplet}-ld"
+                gas = self._append_gnu_triplet("as")
+                ld = self._append_gnu_triplet("ld")
                 extension = ""
                 if self._target_os == "Windows":
                     extension = ".exe"
@@ -66,6 +69,16 @@ class TestPackageConan(ConanFile):
             return self._target_arch in ("x86", "x86_64")
         return self._settings_build.arch == self._target_arch
 
+    def _has_as(self):
+        if self._target_os in ("Macos"):
+            return False
+        return True
+
+    def _has_ld(self):
+        if self._target_os in ("Macos"):
+            return False
+        return True
+
     def test(self):
         if not tools.cross_building(self):
             if self._can_run_target() and os.path.isfile(self._test_package_assembly_source):
@@ -75,10 +88,15 @@ class TestPackageConan(ConanFile):
                 print(text)
                 assert "Hello, world!" in text
 
-            bins = ["ar", "as", "ld", "nm", "objcopy", "objdump", "ranlib", "readelf", "strip"]
+            bins = ["ar", "nm", "objcopy", "objdump", "ranlib", "readelf", "strip"]
+            if self._has_as():
+                bins.append("as")
+            if self._has_ld():
+                bins.append("ld")
+
             for bin in bins:
                 bin_path = os.path.realpath(tools.which(bin))
-                print(f"Found {bin} at {bin_path}")
+                self.output.info(f"Found {bin} at {bin_path}")
                 assert bin_path.startswith(self.deps_cpp_info["binutils"].rootpath)
 
                 output = StringIO()

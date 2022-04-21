@@ -84,7 +84,7 @@ class BinutilsConan(ConanFile):
     _triplet_os_lut = {
         "FreeBSD": "freebsd",
         "Linux": "linux",
-        "MacOS": "darwin",
+        "Macos": "darwin",
         "Windows": "mingw32",
     }
 
