@@ -34,6 +34,8 @@ class TensorflowLiteConan(ConanFile):
         "with_xnnpack": True,
     }
 
+
+    short_paths = True
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     @property
