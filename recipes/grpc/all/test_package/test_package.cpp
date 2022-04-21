@@ -82,10 +82,6 @@ class GreeterServiceImpl final : public Greeter::Service {
 };
 
 
-void WaitServer(std::unique_ptr<Server>& server) {
-  server->Wait();
-}
-
 int main(int argc, char** argv) {
   std::string server_address("127.0.0.1:0");
   GreeterServiceImpl service;
