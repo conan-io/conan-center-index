@@ -27,7 +27,10 @@ class TestPackageConan(ConanFile):
 
     @property
     def _test_package_assembly_source(self):
-        return os.path.join(self.source_folder, f"{self._target_os}-{self._target_arch}.s")
+        part_arch = self._target_arch
+        if "armv7" in part_arch:
+            part_arch = "armv7"
+        return os.path.join(self.source_folder, f"{self._target_os}-{part_arch}.s")
 
     def _append_gnu_triplet(self, exe):
         return f"{self.deps_user_info['binutils'].prefix}{exe}"

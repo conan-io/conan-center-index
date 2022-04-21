@@ -14,7 +14,7 @@ _start:
     xor %rdi, %rdi                  # we want return code 0
     syscall                         # do syscall into os
 
-    .data
+    .section .data
 
 message:
     .ascii  "Hello, world!\n"

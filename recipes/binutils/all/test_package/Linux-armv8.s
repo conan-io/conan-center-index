@@ -14,8 +14,6 @@ _start:
     mov x0, 0                       // we want return code 0
     svc 0                           // do syscall into os (supervisor call)
 
-    .data
-
     .section .rodata
 message:
     .ascii  "Hello, world!\n"
