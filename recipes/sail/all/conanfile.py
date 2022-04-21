@@ -111,6 +111,7 @@ class SAILConan(ConanFile):
                                                             "libjpeg::libjpeg", "libpng::libpng", "libtiff::libtiff", "libwebp::libwebp"]
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
+        self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
         self.cpp_info.components["libsail"].names["cmake_find_package"] = "Sail"
         self.cpp_info.components["libsail"].names["cmake_find_package_multi"] = "Sail"
         self.cpp_info.components["libsail"].libs = ["sail"]
