@@ -63,6 +63,9 @@ class BinutilsConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def configure(self):
+        # print(dir(self.settings))
+        # print(self.settings.values_list)
+        # print(dir(self.settings.os.as_list))
         if self.options.target_triplet == self._PLACEHOLDER_TEXT:
             if self.options.target_arch == self._PLACEHOLDER_TEXT:
                 # If target triplet and target arch are not set, initialize it from the target settings
@@ -71,7 +74,7 @@ class BinutilsConan(ConanFile):
                 # If target triplet and target os are not set, initialize it from the target settings
                 self.options.target_os = str(self._settings_target.os)
             # Initialize the target_triplet from the target arch and target os
-            self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(arch=str(self.options.target_arch), os=str(self.options.target_os))).triplet
+            self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(arch=str(self.options.target_arch), os=str(self.options.target_os), extra=dict(self._settings_target.values_list))).triplet
         else:
             gnu_triplet_obj = _GNUTriplet.from_text(str(self.options.target_triplet))
             archos = _ArchOs.from_triplet(gnu_triplet_obj)
@@ -84,6 +87,10 @@ class BinutilsConan(ConanFile):
 
         if self.options.prefix == self._PLACEHOLDER_TEXT:
             self.options.prefix = f"{self.options.target_triplet}-"
+
+        self.output.info(f"binutils:target_arch={self.options.target_arch}")
+        self.output.info(f"binutils:target_os={self.options.target_os}")
+        self.output.info(f"binutils:target_triplet={self.options.target_triplet}")
 
     def validate(self):
         if self.settings.compiler in ("msvc", "Visual Studio"):
@@ -182,9 +189,10 @@ class BinutilsConan(ConanFile):
 
 
 class _ArchOs:
-    def __init__(self, arch: str, os: str):
+    def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]]=None):
         self.arch = arch
         self.os = os
+        self.extra = extra if extra is not None else {}
 
     def is_compatible(self, triplet: "_GNUTriplet") -> bool:
         return self.arch in self.calculate_archs(triplet) and self.os == self.calculate_os(triplet)
@@ -213,6 +221,7 @@ class _ArchOs:
 
     _GNU_OS_TO_OS_LUT = {
         None: "baremetal",
+        "android": "Android",
         "mingw32": "Windows",
         "linux": "Linux",
         "freebsd": "FreeBSD",
@@ -223,6 +232,8 @@ class _ArchOs:
 
     @classmethod
     def calculate_os(cls, triplet: "_GNUTriplet") -> str:
+        if triplet.abi and "android" in triplet.abi:
+            return "Android"
         return cls._GNU_OS_TO_OS_LUT[triplet.os]
 
     @classmethod
@@ -239,7 +250,6 @@ class _ArchOs:
         return self.arch == other.arch and self.os == other.os
 
     def __repr__(self) -> str:
-        # raise ValueError
         return f"<{type(self).__name__}:arch='{self.arch}',os='{self.os}'>"
 
 
@@ -259,7 +269,7 @@ class _GNUTriplet:
         gnu_machine = cls.calculate_gnu_machine(archos)
         gnu_vendor = cls.calculate_gnu_vendor(archos)
         gnu_os = cls.calculate_gnu_os(archos)
-        gnu_abi = cls.calculate_gnu_abi((archos))
+        gnu_abi = cls.calculate_gnu_abi(archos)
 
         return cls(gnu_machine, gnu_vendor, gnu_os, gnu_abi)
 
@@ -276,7 +286,7 @@ class _GNUTriplet:
 
         gnu_machine = parts[0]
         parts = parts[1:]
-        if parts[-1] in cls.KNOWN_GNU_ABIS:
+        if any(v in parts[-1] for v in  cls.KNOWN_GNU_ABIS):
             gnu_abi = parts[-1]
             parts = parts[:-1]
         else:
@@ -323,6 +333,7 @@ class _GNUTriplet:
 
     OS_TO_GNU_OS_LUT = {
         "baremetal": "none",
+        "Android": "linux",
         "FreeBSD": "freebsd",
         "Linux": "linux",
         "Macos": "darwin",
@@ -345,7 +356,7 @@ class _GNUTriplet:
 
     @classmethod
     def calculate_gnu_vendor(cls, archos: _ArchOs) -> typing.Optional[str]:
-        if cls in ("baremetal", ):
+        if archos.os in ("baremetal", "Android"):
             return None
         if archos.os in ("Macos", "iOS", "tvOS", "watchOS"):
             return "apple"
@@ -358,19 +369,27 @@ class _GNUTriplet:
                 return "eabi"
             else:
                 return "elf"
+        abi_start = None
         if archos.os in ("Linux", ):
-            if archos.arch in ("armv7",):
-                return "gnueabi"
-            elif archos.arch in ("armv7hf",):
-                return "gnueabihf"
-            else:
-                return "gnu"
-        return None
+            abi_start = "gnu"
+        elif archos.os in ("Android", ):
+            abi_start = "android"
+        else:
+            return None
+        if archos.arch in ("armv7",):
+            abi_suffix = "eabi"
+        elif archos.arch in ("armv7hf",):
+            abi_suffix = "eabihf"
+        else:
+            abi_suffix = ""
+        if archos.os in ("Android", ):
+            abi_suffix += str(archos.extra.get("os.api_level", ""))
+
+        return abi_start + abi_suffix
 
     KNOWN_GNU_ABIS = (
+        "android",
         "gnu",
-        "gnueabi",
-        "gnueabihf",
         "eabi",
         "elf",
     )
@@ -461,6 +480,18 @@ class _TestOsArch2GNUTriplet(unittest.TestCase):
 
     def test_baremetal_riscv64(self):
         self._test_osarch_to_gnutriplet(_ArchOs(arch="riscv64", os="baremetal"), _GNUTriplet(machine="riscv64", vendor=None, os="unknown", abi="elf"), "riscv64-unknown-elf")
+
+    def test_android_armv7(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="armv7", os="Android", extra={"os.api_level": "31"}), _GNUTriplet(machine="arm", vendor=None, os="linux", abi="androideabi31"), "arm-linux-androideabi31")
+
+    def test_android_armv8(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="armv8", os="Android", extra={"os.api_level": "24"}), _GNUTriplet(machine="aarch64", vendor=None, os="linux", abi="android24"), "aarch64-linux-android24")
+
+    def test_android_x86(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86", os="Android", extra={"os.api_level": "16"}), _GNUTriplet(machine="i686", vendor=None, os="linux", abi="android16"), "i686-linux-android16")
+
+    def test_android_x86_64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="Android", extra={"os.api_level": "29"}), _GNUTriplet(machine="x86_64", vendor=None, os="linux", abi="android29"), "x86_64-linux-android29")
 
     def _test_osarch_to_gnutriplet(self, archos: _ArchOs, gnuobj_ref: _GNUTriplet, triplet_ref: str):
         gnuobj = _GNUTriplet.from_archos(archos)
