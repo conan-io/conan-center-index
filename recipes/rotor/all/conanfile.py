@@ -21,12 +21,14 @@ class RotorConan(ConanFile):
         "shared": [True, False],
         "enable_asio": [True, False],
         "enable_thread": [True, False],
+        "multithreading": [True, False],  # enables multithreading support
     }
     default_options = {
         "fPIC": True,
         "shared": False,
         "enable_asio": False,
         "enable_thread": False,
+        "multithreading": True,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -75,8 +77,8 @@ class RotorConan(ConanFile):
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-        if self.options.shared:
-            raise ConanInvalidConfiguration("shared option is currently not supported")
+        if self.options.shared and tools.Version(self.version) < "0.22":
+            raise ConanInvalidConfiguration("shared option is available from v0.22")
 
 
     def _configure_cmake(self):
@@ -86,7 +88,9 @@ class RotorConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_BOOST_ASIO"] = self.options.enable_asio
         self._cmake.definitions["BUILD_THREAD"] = self.options.enable_thread
+        self._cmake.definitions["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
