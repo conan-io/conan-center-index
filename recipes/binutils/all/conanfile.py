@@ -20,7 +20,8 @@ class BinutilsConan(ConanFile):
         "multilib": [True, False],
         "with_libquadmath": [True, False],
         "target_arch": "ANY",
-        "target_os": "ANY"
+        "target_os": "ANY",
+        "prefix": "ANY",
     }
 
     default_options = {
@@ -28,6 +29,7 @@ class BinutilsConan(ConanFile):
         "with_libquadmath": True,
         "target_arch": None,  # Initialized in config_options
         "target_os": None,  # Initialized in config_options
+        "prefix": None,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
 
     @property
@@ -46,11 +48,18 @@ class BinutilsConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
+    PLACEHOLDER_TEXT = "__PLACEHOLDER__"
+
     def config_options(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         self.options.target_arch = str(self._settings_target.arch)
         self.options.target_os = str(self._settings_target.os)
+        self.options.prefix = self.PLACEHOLDER_TEXT
+
+    def configure(self):
+        if self.options.prefix == self.PLACEHOLDER_TEXT:
+            self.options.prefix = self._triplet_target + "-"
 
     def validate(self):
         if self.settings.compiler in ("msvc", "Visual Studio"):
@@ -81,7 +90,7 @@ class BinutilsConan(ConanFile):
     }
 
     @property
-    def _triplet_arch_target(self):
+    def _triplet_target_arch(self):
         return self._triplet_arch_lut[str(self.options.target_arch)]
 
     _triplet_os_lut = {
@@ -92,7 +101,7 @@ class BinutilsConan(ConanFile):
     }
 
     @property
-    def _triplet_os_part(self):
+    def _triplet_target_os(self):
         return self._triplet_os_lut[str(self.options.target_os)]
 
     _vendor_default = {
@@ -100,12 +109,12 @@ class BinutilsConan(ConanFile):
     }
 
     @property
-    def _triplet_vendor_part(self):
+    def _triplet_target_vendor(self):
         return self._vendor_default.get(str(self.options.target_os), "cci")
 
     @property
     def _triplet_target(self):
-        return "{}-{}-{}".format(self._triplet_arch_target, self._triplet_vendor_part, self._triplet_os_part)
+        return "{}-{}-{}".format(self._triplet_target_arch, self._triplet_target_vendor, self._triplet_target_os)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -127,11 +136,12 @@ class BinutilsConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         yes_no = lambda tf : "yes" if tf else "no"
         conf_args = [
-            "--target={}".format(self._triplet_target),
-            "--enable-multilib={}".format(yes_no(self.options.multilib)),
+            f"--target={self._triplet_target}",
+            f"--enable-multilib={yes_no(self.options.multilib)}",
             "--with-system-zlib",
             "--disable-nls",
-            "exec_prefix={}".format(tools.unix_path(self._exec_prefix)),
+            f"--program-prefix={self.options.prefix}",
+            f"exec_prefix={tools.unix_path(self._exec_prefix)}",
         ]
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return autotools
@@ -160,4 +170,8 @@ class BinutilsConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(target_bindir))
         self.env_info.PATH.append(target_bindir)
 
+        self.output.info(f"GNU triplet={self._triplet_target}")
         self.user_info.gnu_triplet = self._triplet_target
+
+        self.output.info(f"executable prefix={self.options.prefix}")
+        self.user_info.prefix = self.options.prefix

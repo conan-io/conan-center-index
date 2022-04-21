@@ -30,7 +30,7 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.source_folder, f"{self._target_os}-{self._target_arch}.s")
 
     def _append_gnu_triplet(self, exe):
-        return f"{self.deps_user_info['binutils'].gnu_triplet}-{exe}"
+        return f"{self.deps_user_info['binutils'].prefix}{exe}"
 
     def build(self):
         if not tools.cross_building(self):
