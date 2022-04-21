@@ -83,17 +83,18 @@ class BinutilsConan(ConanFile):
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
-    _triplet_arch_lut = {
+    _triplet_machine_lut = {
         "x86": "i686",
         "x86_64": "x86_64",
         "armv8": "aarch64",
     }
 
     @property
-    def _triplet_target_arch(self):
-        return self._triplet_arch_lut[str(self.options.target_arch)]
+    def _triplet_target_machine(self):
+        return self._triplet_machine_lut[str(self.options.target_arch)]
 
     _triplet_os_lut = {
+        "baremetal": "none",
         "FreeBSD": "freebsd",
         "Linux": "linux",
         "Macos": "darwin",
@@ -104,17 +105,36 @@ class BinutilsConan(ConanFile):
     def _triplet_target_os(self):
         return self._triplet_os_lut[str(self.options.target_os)]
 
-    _vendor_default = {
+    _triplet_vendor_lut = {
         "Windows": "w64",
     }
 
     @property
     def _triplet_target_vendor(self):
-        return self._vendor_default.get(str(self.options.target_os), "cci")
+        if self.options.target_os in ("baremetal", ):
+            return None
+        return self._triplet_vendor_lut.get(str(self.options.target_os), "pc")
+
+    @property
+    def _triplet_target_abi(self):
+        if self.options.target_os in ("baremetal", ):
+            if self.options.target_arch in ("armv7",):
+                return "eabi"
+            else:
+                return "elf"
+        else:
+            return None
 
     @property
     def _triplet_target(self):
-        return "{}-{}-{}".format(self._triplet_target_arch, self._triplet_target_vendor, self._triplet_target_os)
+        parts = [self._triplet_target_machine]
+        if self._triplet_target_vendor:
+            parts.append(self._triplet_target_vendor)
+        if self._triplet_target_os:
+            parts.append(self._triplet_target_os)
+        if self._triplet_target_abi:
+            parts.append(self._triplet_target_abi)
+        return "-".join(parts)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
