@@ -40,7 +40,7 @@ class BinutilsConan(ConanFile):
 
     @property
     def _settings_target(self):
-        return getattr(self, "settings_target") or self.settings
+        return getattr(self, "settings_target", None) or self.settings
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
