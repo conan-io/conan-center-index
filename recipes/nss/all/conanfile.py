@@ -29,7 +29,8 @@ class NSSConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
-        self.build_requires("sqlite3/3.38.1")
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.38.1")
 
     def configure(self):
         self.options["nspr"].shared = True
