@@ -62,6 +62,7 @@ class SAILConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON" if self.options.get_safe("fPIC", default=True) or self.options.shared else "OFF"
         self._cmake.definitions["SAIL_BUILD_APPS"]     = "OFF"
         self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["SAIL_BUILD_TESTS"]    = "OFF"
