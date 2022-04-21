@@ -53,6 +53,7 @@ class FFMpegConan(ConanFile):
         "with_pulse": [True, False],
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
+        "with_vulkan": [True, False],
         "with_xcb": [True, False],
         "with_appkit": [True, False],
         "with_avfoundation": [True, False],
@@ -93,6 +94,7 @@ class FFMpegConan(ConanFile):
         "with_pulse": True,
         "with_vaapi": True,
         "with_vdpau": True,
+        "with_vulkan": True,
         "with_xcb": True,
         "with_appkit": True,
         "with_avfoundation": True,
@@ -152,6 +154,7 @@ class FFMpegConan(ConanFile):
         if not self.settings.os in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
+            del self.options.with_vulkan
             del self.options.with_xcb
             del self.options.with_libalsa
             del self.options.with_pulse
@@ -217,6 +220,8 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
+        if self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-headers/1.3.211.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
@@ -328,6 +333,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
+            opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
@@ -376,7 +382,11 @@ class FFMpegConan(ConanFile):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
         if tools.cross_building(self):
-            args.append("--target-os={}".format(self._target_os))
+            if self._target_os == "emscripten":
+                args.append("--target-os=none")
+            else:
+                args.append("--target-os={}".format(self._target_os))
+            
             if tools.is_apple_os(self.settings.os):
                 xcrun = tools.XCRun(self.settings)
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
@@ -637,3 +647,5 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avutil"].requires.extend(["vaapi::vaapi", "xorg::x11"])
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
+        if self.options.get_safe("with_vulkan"):
+            self.cpp_info.components["avutil"].requires.append("vulkan::vulkan")
