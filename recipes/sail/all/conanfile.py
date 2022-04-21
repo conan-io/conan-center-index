@@ -1,4 +1,3 @@
-from conans.errors import ConanInvalidConfiguration
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 import os
