@@ -17,10 +17,12 @@ class SAILConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "thread_safe": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "thread_safe": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt"
@@ -51,10 +53,6 @@ class SAILConan(ConanFile):
         self.requires("libtiff/4.3.0")
         self.requires("libwebp/1.2.2")
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
@@ -68,6 +66,7 @@ class SAILConan(ConanFile):
         self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["SAIL_BUILD_TESTS"]    = "OFF"
         self._cmake.definitions["SAIL_COMBINE_CODECS"] = "ON"
+        self._cmake.definitions["SAIL_THREAD_SAFE"]    = "ON" if self.options.thread_safe else "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
@@ -116,6 +115,8 @@ class SAILConan(ConanFile):
         self.cpp_info.components["libsail"].libs = ["sail"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libsail"].system_libs.append("dl")
+            if self.options.thread_safe:
+                self.cpp_info.components["libsail"].system_libs.append("pthread")
         self.cpp_info.components["libsail"].requires = ["sail-common", "sail-codecs"]
 
         self.cpp_info.components["sail-manip"].set_property("cmake_target_name", "SAIL::SailManip")
