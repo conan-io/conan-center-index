@@ -32,7 +32,7 @@ class TensorflowLiteConan(ConanFile):
         "with_mmap": True,
         "with_xnnpack": True,
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
