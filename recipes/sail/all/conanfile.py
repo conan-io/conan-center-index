@@ -65,7 +65,7 @@ class SAILConan(ConanFile):
         self._cmake.definitions["SAIL_BUILD_APPS"]     = False
         self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
         self._cmake.definitions["SAIL_BUILD_TESTS"]    = False
-        self._cmake.definitions["SAIL_COMBINE_CODECS"] = False
+        self._cmake.definitions["SAIL_COMBINE_CODECS"] = True
         self._cmake.definitions["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         self._cmake.configure(build_folder=self._build_subfolder)
 
