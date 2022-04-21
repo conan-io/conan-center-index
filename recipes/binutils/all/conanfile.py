@@ -2,9 +2,15 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
+import typing
+import unittest
 
 
 required_conan_version = ">=1.43.0"
+
+
+# This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
+# Run it using `python -m unittest conanfile.py`
 
 
 class BinutilsConan(ConanFile):
@@ -16,11 +22,14 @@ class BinutilsConan(ConanFile):
     topics = ("binutils", "ld", "linker", "as", "assembler", "objcopy", "objdump")
     settings = "os", "arch", "compiler", "build_type"
 
+    _PLACEHOLDER_TEXT = "__PLACEHOLDER__"
+
     options = {
         "multilib": [True, False],
         "with_libquadmath": [True, False],
         "target_arch": "ANY",
         "target_os": "ANY",
+        "target_triplet": "ANY",
         "prefix": "ANY",
     }
 
@@ -29,7 +38,8 @@ class BinutilsConan(ConanFile):
         "with_libquadmath": True,
         "target_arch": None,  # Initialized in config_options
         "target_os": None,  # Initialized in config_options
-        "prefix": None,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
+        "target_triplet": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
+        "prefix": _PLACEHOLDER_TEXT,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
 
     @property
@@ -48,18 +58,18 @@ class BinutilsConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
-    PLACEHOLDER_TEXT = "__PLACEHOLDER__"
-
     def config_options(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         self.options.target_arch = str(self._settings_target.arch)
         self.options.target_os = str(self._settings_target.os)
-        self.options.prefix = self.PLACEHOLDER_TEXT
 
     def configure(self):
-        if self.options.prefix == self.PLACEHOLDER_TEXT:
-            self.options.prefix = self._triplet_target + "-"
+        if self.options.target_triplet == self._PLACEHOLDER_TEXT:
+            self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(arch=str(self.options.target_arch), os=str(self.options.target_os))).triplet
+
+        if self.options.prefix == self._PLACEHOLDER_TEXT:
+            self.options.prefix = f"{self.options.target_triplet}-"
 
     def validate(self):
         if self.settings.compiler in ("msvc", "Visual Studio"):
@@ -74,67 +84,25 @@ class BinutilsConan(ConanFile):
             raise ConanInvalidConfiguration(f"target_arch={self.options.target_arch} is invalid (possibilities={self.settings.arch.values_range})")
         if self.options.target_os not in self.settings.os.values_range:
             raise ConanInvalidConfiguration(f"target_os={self.options.target_os} is invalid (possibilities={self.settings.os.values_range})")
-        if self._triplet_target is None:
-            self._raise_unsupported_configuration("everython", "not ok")
+
+        target_archos = _ArchOs(str(self.options.target_arch), str(self.options.target_os))
+        target_gnu_triplet = _GNUTriplet.from_text(str(self.options.target_triplet))
+        if not target_archos.is_compatible(target_gnu_triplet):
+            raise ConanInvalidConfiguration(f"target_arch={target_archos.arch}/target_os={target_archos.os} are not compatible with {target_gnu_triplet.triplet}. Suggested triplet is {_GNUTriplet.from_archos(target_archos).triplet}.")
+
+        # Check, when used as build requirement in a cross build, whether the target arch/os agree
+        settings_target = getattr(self, "settings_target", None)
+        if settings_target is not None:
+            if self.options.target_arch != settings_target.arch:
+                raise ConanInvalidConfiguration(f"binutils:target_arch={self.options.target_arch} does not match target architecture={settings_target.arch}")
+            if self.options.target_os != settings_target.os:
+                raise ConanInvalidConfiguration(f"binutils:target_os={self.options.target_os} does not match target os={settings_target.os}")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
-
-    _triplet_machine_lut = {
-        "x86": "i686",
-        "x86_64": "x86_64",
-        "armv8": "aarch64",
-    }
-
-    @property
-    def _triplet_target_machine(self):
-        return self._triplet_machine_lut[str(self.options.target_arch)]
-
-    _triplet_os_lut = {
-        "baremetal": "none",
-        "FreeBSD": "freebsd",
-        "Linux": "linux",
-        "Macos": "darwin",
-        "Windows": "mingw32",
-    }
-
-    @property
-    def _triplet_target_os(self):
-        return self._triplet_os_lut[str(self.options.target_os)]
-
-    _triplet_vendor_lut = {
-        "Windows": "w64",
-    }
-
-    @property
-    def _triplet_target_vendor(self):
-        if self.options.target_os in ("baremetal", ):
-            return None
-        return self._triplet_vendor_lut.get(str(self.options.target_os), "pc")
-
-    @property
-    def _triplet_target_abi(self):
-        if self.options.target_os in ("baremetal", ):
-            if self.options.target_arch in ("armv7",):
-                return "eabi"
-            else:
-                return "elf"
-        else:
-            return None
-
-    @property
-    def _triplet_target(self):
-        parts = [self._triplet_target_machine]
-        if self._triplet_target_vendor:
-            parts.append(self._triplet_target_vendor)
-        if self._triplet_target_os:
-            parts.append(self._triplet_target_os)
-        if self._triplet_target_abi:
-            parts.append(self._triplet_target_abi)
-        return "-".join(parts)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -156,7 +124,7 @@ class BinutilsConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         yes_no = lambda tf : "yes" if tf else "no"
         conf_args = [
-            f"--target={self._triplet_target}",
+            f"--target={self.options.target_triplet}",
             f"--enable-multilib={yes_no(self.options.multilib)}",
             "--with-system-zlib",
             "--disable-nls",
@@ -186,12 +154,301 @@ class BinutilsConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        target_bindir = os.path.join(self._exec_prefix, self._triplet_target, "bin")
+        target_bindir = os.path.join(self._exec_prefix, str(self.options.target_triplet), "bin")
         self.output.info("Appending PATH environment variable: {}".format(target_bindir))
         self.env_info.PATH.append(target_bindir)
 
-        self.output.info(f"GNU triplet={self._triplet_target}")
-        self.user_info.gnu_triplet = self._triplet_target
+        self.output.info(f"GNU triplet={self.options.target_triplet}")
+        self.user_info.gnu_triplet = self.options.target_triplet
 
         self.output.info(f"executable prefix={self.options.prefix}")
         self.user_info.prefix = self.options.prefix
+
+
+class _ArchOs:
+    def __init__(self, arch: str, os: str):
+        self.arch = arch
+        self.os = os
+
+    def is_compatible(self, triplet: "_GNUTriplet") -> bool:
+        return self.arch in self.calculate_archs(triplet) and self.os == self.calculate_os(triplet)
+
+    _MACHINE_TO_ARCH_LUT = {
+        "arm": "armv7",
+        "aarch64": ("armv8", "armv9"),
+        "i386": "x86",
+        "i486": "x86",
+        "i586": "x86",
+        "i686": "x86",
+        "x86_64": "x86_64",
+        "riscv32": "riscv32",
+        "riscv64": "riscv64",
+    }
+
+    @classmethod
+    def calculate_archs(cls, triplet: "_GNUTriplet") -> tuple[str]:
+        if triplet.machine == "arm":
+            archs = "armv7" + ("hf" if "hf" in triplet.abi else "")
+        else:
+            archs = cls._MACHINE_TO_ARCH_LUT[triplet.machine]
+        if isinstance(archs, str):
+            archs = (archs, )
+        return archs
+
+    _GNU_OS_TO_OS_LUT = {
+        None: "baremetal",
+        "mingw32": "Windows",
+        "linux": "Linux",
+        "freebsd": "FreeBSD",
+        "darwin": "Macos",
+        "none": "baremetal",
+        "unknown": "baremetal",
+    }
+
+    @classmethod
+    def calculate_os(cls, triplet: "_GNUTriplet") -> str:
+        return cls._GNU_OS_TO_OS_LUT[triplet.os]
+
+    @classmethod
+    def from_triplet(cls, triplet: "_GNUTriplet") -> "_ArchOs":
+        archs = cls.calculate_archs(triplet)
+        os = cls.calculate_os(triplet)
+
+        # Assume first architecture
+        return cls(arch=archs[0], os=os)
+
+    def __eq__(self, other) -> bool:
+        if type(self) != type(other):
+            return False
+        return self.arch == other.arch and self.os == other.os
+
+    def __repr__(self) -> str:
+        # raise ValueError
+        return f"<{type(self).__name__}:arch='{self.arch}',os='{self.os}'>"
+
+
+class _GNUTriplet:
+    def __init__(self, machine: str, vendor: typing.Optional[str], os: typing.Optional[str], abi: typing.Optional[str]):
+        self.machine = machine
+        self.vendor = vendor
+        self.os = os
+        self.abi = abi
+
+    @property
+    def triplet(self) -> str:
+        return "-".join(p for p in (self.machine, self.vendor, self.os, self.abi) if p)
+
+    @classmethod
+    def from_archos(cls, archos: _ArchOs) -> "_GNUTriplet":
+        gnu_machine = cls.calculate_gnu_machine(archos)
+        gnu_vendor = cls.calculate_gnu_vendor(archos)
+        gnu_os = cls.calculate_gnu_os(archos)
+        gnu_abi = cls.calculate_gnu_abi((archos))
+
+        return cls(gnu_machine, gnu_vendor, gnu_os, gnu_abi)
+
+    @classmethod
+    def from_text(cls, text: str) -> "_GNUTriplet":
+        gnu_machine: str
+        gnu_vendor: typing.Optional[str]
+        gnu_os: typing.Optional[str]
+        gnu_abi: typing.Optional[str]
+
+        parts = text.split("-")
+        if not 2 <= len(parts) <= 4:
+            raise ValueError("Wrong number of GNU triplet components. Count must lie in range [2, 4]. format=$machine(-$vendor)?(-$os)?(-$abi)?")
+
+        gnu_machine = parts[0]
+        parts = parts[1:]
+        if parts[-1] in cls.KNOWN_GNU_ABIS:
+            gnu_abi = parts[-1]
+            parts = parts[:-1]
+        else:
+            gnu_abi = None
+
+        if len(parts) == 2:
+            gnu_vendor = parts[0]
+            gnu_os = parts[1]
+        elif len(parts) == 1:
+            if parts[0] in _GNUTriplet.UNKNOWN_OS_ALIASES:
+                gnu_vendor = None
+                gnu_os = parts[0]
+            elif parts[0] in cls.OS_TO_GNU_OS_LUT.values():
+                gnu_vendor = None
+                gnu_os = parts[0]
+            else:
+                gnu_vendor = parts[0]
+                gnu_os = None
+        else:
+            gnu_vendor = None
+            gnu_os = None
+
+        return cls(gnu_machine, gnu_vendor, gnu_os, gnu_abi)
+
+
+    ARCH_TO_GNU_MACHINE_LUT = {
+        "x86": "i686",
+        "x86_64": "x86_64",
+        "armv7": "arm",
+        "armv7hf": "arm",
+        "armv8": "aarch64",
+        "riscv32": "riscv32",
+        "riscv64": "riscv64",
+    }
+
+    @classmethod
+    def calculate_gnu_machine(cls, archos: _ArchOs) -> str:
+        return cls.ARCH_TO_GNU_MACHINE_LUT[archos.arch]
+
+    UNKNOWN_OS_ALIASES = (
+        "unknown",
+        "none",
+    )
+
+    OS_TO_GNU_OS_LUT = {
+        "baremetal": "none",
+        "FreeBSD": "freebsd",
+        "Linux": "linux",
+        "Macos": "darwin",
+        "Windows": "mingw32",
+    }
+
+    @classmethod
+    def calculate_gnu_os(cls, archos: _ArchOs) -> typing.Optional[str]:
+        if archos.os in ("baremetal", ):
+            if archos.arch in ("x86", "x86_64", ):
+                return None
+            elif archos.arch in ("riscv32", "riscv64"):
+                return "unknown"
+        return cls.OS_TO_GNU_OS_LUT[archos.os]
+
+    OS_TO_GNU_VENDOR_LUT = {
+        "Windows": "w64",
+        "baremetal": None,
+    }
+
+    @classmethod
+    def calculate_gnu_vendor(cls, archos: _ArchOs) -> typing.Optional[str]:
+        if cls in ("baremetal", ):
+            return None
+        if archos.os in ("Macos", "iOS", "tvOS", "watchOS"):
+            return "apple"
+        return cls.OS_TO_GNU_VENDOR_LUT.get(archos.os, "pc")
+
+    @classmethod
+    def calculate_gnu_abi(self, archos: _ArchOs) -> typing.Optional[str]:
+        if archos.os in ("baremetal", ):
+            if archos.arch in ("armv7",):
+                return "eabi"
+            else:
+                return "elf"
+        if archos.os in ("Linux", ):
+            if archos.arch in ("armv7",):
+                return "gnueabi"
+            elif archos.arch in ("armv7hf",):
+                return "gnueabihf"
+            else:
+                return "gnu"
+        return None
+
+    KNOWN_GNU_ABIS = (
+        "gnu",
+        "gnueabi",
+        "gnueabihf",
+        "eabi",
+        "elf",
+    )
+
+    def __eq__(self, other: object) -> bool:
+        if type(self) != type(other):
+            return False
+        other: "_GNUTriplet"
+        return self.machine == other.machine and self.vendor == other.vendor and self.os == other.os and self.abi == other.abi
+
+    def __repr__(self) -> str:
+        def x(v):
+            if v is None:
+                return None
+            return f"'{v}'"
+        return f"<{type(self).__name__}:machine={x(self.machine)},vendor={x(self.vendor)},os={x(self.os)},abi={x(self.abi)}>"
+
+
+class _TestOsArch2GNUTriplet(unittest.TestCase):
+    def shortDescription(self) -> typing.Optional[str]:
+        return "Test conversion of conan os/arch to GNU triplet"
+
+    def test_linux_x86(self):
+        archos = _ArchOs(arch="x86", os="Linux")
+        self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="i686", vendor="pc", os="linux", abi="gnu"), "i686-pc-linux-gnu")
+        self.assertEqual(_ArchOs("x86", "Linux"), _ArchOs.from_triplet(_GNUTriplet.from_text("i386-linux")))
+        self.assertEqual(_ArchOs("x86", "Linux"), _ArchOs.from_triplet(_GNUTriplet.from_text("i686-linux")))
+        self.assertEqual(_GNUTriplet("i486", None, "linux", None), _GNUTriplet.from_text("i486-linux"))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("i486-linux")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("i486-linux-gnu")))
+
+    def test_linux_x86_64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="Linux"), _GNUTriplet(machine="x86_64", vendor="pc", os="linux", abi="gnu"), "x86_64-pc-linux-gnu")
+
+    def test_linux_armv7(self):
+        archos = _ArchOs(arch="armv7", os="Linux")
+        self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="arm", vendor="pc", os="linux", abi="gnueabi"), "arm-pc-linux-gnueabi")
+        self.assertEqual(_GNUTriplet("arm", "pc", None, "gnueabi"), _GNUTriplet.from_text("arm-pc-gnueabi"))
+        self.assertEqual(_GNUTriplet("arm", "pc", None, "eabi"), _GNUTriplet.from_text("arm-pc-eabi"))
+        self.assertEqual(_ArchOs("armv7hf", "baremetal"), _ArchOs.from_triplet(_GNUTriplet.from_text("arm-pc-gnueabihf")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("arm-linux-gnueabi")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("arm-linux-eabi")))
+        self.assertFalse(archos.is_compatible(_GNUTriplet.from_text("arm-pc-linux-gnueabihf")))
+        self.assertFalse(archos.is_compatible(_GNUTriplet.from_text("arm-pc-gnueabihf")))
+
+    def test_linux_armv7hf(self):
+        archos = _ArchOs(arch="armv7hf", os="Linux")
+        self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="arm", vendor="pc", os="linux", abi="gnueabihf"), "arm-pc-linux-gnueabihf")
+        self.assertEqual(_GNUTriplet("arm", "pc", None, "gnueabihf"), _GNUTriplet.from_text("arm-pc-gnueabihf"))
+        self.assertEqual(_ArchOs("armv7", "baremetal"), _ArchOs.from_triplet(_GNUTriplet.from_text("arm-pc-gnueabi")))
+        self.assertFalse(archos.is_compatible(_GNUTriplet.from_text("arm-linux-gnueabi")))
+        self.assertFalse(archos.is_compatible(_GNUTriplet.from_text("arm-linux-eabi")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("arm-pc-linux-gnueabihf")))
+        self.assertFalse(archos.is_compatible(_GNUTriplet.from_text("arm-pc-gnueabihf")))
+
+    def test_windows_x86(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86", os="Windows"), _GNUTriplet(machine="i686", vendor="w64", os="mingw32", abi=None), "i686-w64-mingw32")
+
+    def test_windows_x86_64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="Windows"), _GNUTriplet(machine="x86_64", vendor="w64", os="mingw32", abi=None), "x86_64-w64-mingw32")
+
+    def test_macos_x86_64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="Macos"), _GNUTriplet(machine="x86_64", vendor="apple", os="darwin", abi=None), "x86_64-apple-darwin")
+
+    def test_freebsd_x86_64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86_64", os="FreeBSD"), _GNUTriplet(machine="x86_64", vendor="pc", os="freebsd", abi=None), "x86_64-pc-freebsd")
+
+    def test_baremetal_x86(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="x86", os="baremetal"), _GNUTriplet(machine="i686", vendor=None, os=None, abi="elf"), "i686-elf")
+
+    def test_baremetal_x86_64(self):
+        archos = _ArchOs(arch="x86_64", os="baremetal")
+        self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="x86_64", vendor=None, os=None, abi="elf"), "x86_64-elf")
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("x86_64-elf")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("x86_64-none-elf")))
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("x86_64-unknown-elf")))
+
+    def test_baremetal_armv7(self):
+        archos = _ArchOs(arch="armv7", os="baremetal")
+        self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="arm", vendor=None, os="none", abi="eabi"), "arm-none-eabi")
+        self.assertTrue(archos.is_compatible(_GNUTriplet.from_text("arm-none-eabi")))
+
+    def test_baremetal_armv8(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="armv8", os="baremetal"), _GNUTriplet(machine="aarch64", vendor=None, os="none", abi="elf"), "aarch64-none-elf")
+
+    def test_baremetal_riscv32(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="riscv32", os="baremetal"), _GNUTriplet(machine="riscv32", vendor=None, os="unknown", abi="elf"), "riscv32-unknown-elf")
+
+    def test_baremetal_riscv64(self):
+        self._test_osarch_to_gnutriplet(_ArchOs(arch="riscv64", os="baremetal"), _GNUTriplet(machine="riscv64", vendor=None, os="unknown", abi="elf"), "riscv64-unknown-elf")
+
+    def _test_osarch_to_gnutriplet(self, archos: _ArchOs, gnuobj_ref: _GNUTriplet, triplet_ref: str):
+        gnuobj = _GNUTriplet.from_archos(archos)
+        self.assertEqual(gnuobj_ref, gnuobj)
+        self.assertEqual(triplet_ref, gnuobj.triplet)
+        self.assertEqual(gnuobj_ref, _GNUTriplet.from_text(triplet_ref))
+        # self.assertEqual(triplet_ref, tools.get_gnu_triplet(archos.os, archos.arch, compiler="gcc"))
