@@ -4,6 +4,8 @@ project(sdl2_mixer)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+include(CheckTypeSize)
+
 macro(add_music_option type)
   option(${type} "${type} music support" OFF)
   message(STATUS "${type} ${${type}}")
@@ -102,6 +104,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/
 
 if(${BUILD_SHARED_LIBS})
   target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
+endif()
+
+check_type_size("ssize_t" SSIZE_T)
+if(SSIZE_T STREQUAL "")
+  target_compile_definitions(${PROJECT_NAME} PRIVATE ssize_t=signed) # non-standard type
 endif()
 
 install(TARGETS ${PROJECT_NAME}
