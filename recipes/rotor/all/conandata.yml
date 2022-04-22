@@ -5,3 +5,8 @@ sources:
   "0.22":
     url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.22.tar.gz"
     sha256: "89f9138c33b9054f79747e1379e576979e863fa94df4d9a990feedd178f16226"
+
+patches:
+  "0.22":
+    - patch_file: "patches/0.22-fix-missing-header.patch"
+      base_path: "source_subfolder"

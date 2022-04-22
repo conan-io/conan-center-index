@@ -1,0 +1,8 @@
+--- src/rotor/message.cpp
++++ src/rotor/message.cpp
+@@ -1,4 +1,5 @@
+ #include "rotor/message.h"
++#include <unordered_map>
+ 
+ using type_map_t = std::unordered_map<std::string_view, const void *>;
+ 
