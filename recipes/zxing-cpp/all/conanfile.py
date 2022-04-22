@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 
@@ -49,6 +50,10 @@ class ZXingCppConan(ConanFile):
                 raise ConanInvalidConfiguration("This compiler is too old. This library needs a compiler with c++14 support")
         except KeyError:
             self.output.warn("This recipe might not support the compiler. Consider adding it.")
+
+    def validate(self):
+        if is_msvc_static_runtime(self) and self.options.shared:
+            raise ConanInvalidConfiguration("MT + DLL is not supported")
 
     def configure(self):
         if self.options.shared:
