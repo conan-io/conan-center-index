@@ -71,7 +71,6 @@ class FastDDSConan(ConanFile):
         self.requires("asio/1.21.0")
         self.requires("fast-cdr/1.0.23")
         self.requires("foonathan-memory/0.7.1")
-        self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
         if self.options.with_ssl:
             self.requires("openssl/1.1.1m")
 
@@ -166,7 +165,6 @@ class FastDDSConan(ConanFile):
             "asio::asio",
             "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory",
-            "boost::boost"
         ]
         if self.settings.os in ["Linux", "FreeBSD", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")
