@@ -27,7 +27,6 @@ class SentryNativeConan(ConanFile):
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "with_breakpad": ["google", "sentry"],
-        "performance": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,7 +36,6 @@ class SentryNativeConan(ConanFile):
         "qt": False,
         "with_crashpad": "sentry",
         "with_breakpad": "sentry",
-        "performance": False,
     }
 
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
@@ -130,9 +128,6 @@ class SentryNativeConan(ConanFile):
         if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
-        if self.options.performance and tools.Version(self.version) < "0.4.14":
-            raise ConanInvalidConfiguration("Performance monitoring was introduced in 0.4.14")
-
     def build_requirements(self):
         if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
             self.build_requires("cmake/3.22.0")
@@ -152,7 +147,6 @@ class SentryNativeConan(ConanFile):
         cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.qt
-        cmake.definitions["SENTRY_PERFORMANCE_MONITORING"] = self.options.performance
         cmake.configure()
         return cmake
 
