@@ -66,3 +66,6 @@ class LibmodplugConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libmodplug"))
         if not self.options.shared:
             self.cpp_info.defines.append("MODPLUG_STATIC")
+            stdcpp_library = tools.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.system_libs.extend([stdcpp_library])
