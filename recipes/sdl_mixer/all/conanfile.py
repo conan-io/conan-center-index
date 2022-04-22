@@ -63,7 +63,7 @@ class SDLMixerConan(ConanFile):
         if self.options.flac:
             self.requires("flac/1.3.3")
         if self.options.mpg123:
-            self.requires("mpg123/1.26") # TODO: this package is missing on the conan-center-index
+            self.requires("mpg123/1.29.3")
         if self.options.mad:
             self.requires("libmad/0.15.1b")
         if self.options.ogg:
