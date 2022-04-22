@@ -6,7 +6,6 @@ required_conan_version = ">=1.43.0"
 
 class SAILConan(ConanFile):
     name = "sail"
-    version = "0.9.0"
     description = "The missing small and fast image decoding library for humans (not for machines)"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sail.software"
@@ -17,11 +16,23 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
+        "with_gif": [True, False],
+        "with_jpeg2000": [True, False],
+        "with_jpeg": [True, False],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_webp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
+        "with_gif": True,
+        "with_jpeg2000": True,
+        "with_jpeg": True,
+        "with_png": True,
+        "with_tiff": True,
+        "with_webp": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt"
@@ -45,12 +56,18 @@ class SAILConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("giflib/5.2.1")
-        self.requires("jasper/2.0.33")
-        self.requires("libjpeg/9d")
-        self.requires("libpng/1.6.37")
-        self.requires("libtiff/4.3.0")
-        self.requires("libwebp/1.2.2")
+        if self.options.with_gif:
+            self.requires("giflib/5.2.1")
+        if self.options.with_jpeg2000:
+            self.requires("jasper/2.0.33")
+        if self.options.with_jpeg:
+            self.requires("libjpeg/9d")
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self.options.with_tiff:
+            self.requires("libtiff/4.3.0")
+        if self.options.with_webp:
+            self.requires("libwebp/1.2.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -60,11 +77,27 @@ class SAILConan(ConanFile):
         if self._cmake:
             return self._cmake
 
+        except_codecs = []
+
+        if not self.options.with_gif:
+            except_codecs.append("GIF")
+        if not self.options.with_jpeg2000:
+            except_codecs.append("JPEG2000")
+        if not self.options.with_jpeg:
+            except_codecs.append("JPEG")
+        if not self.options.with_png:
+            except_codecs.append("PNG")
+        if not self.options.with_tiff:
+            except_codecs.append("TIFF")
+        if not self.options.with_webp:
+            except_codecs.append("WEBP")
+
         self._cmake = CMake(self)
         self._cmake.definitions["SAIL_BUILD_APPS"]     = False
         self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
         self._cmake.definitions["SAIL_BUILD_TESTS"]    = False
         self._cmake.definitions["SAIL_COMBINE_CODECS"] = True
+        self._cmake.definitions["SAIL_EXCEPT_CODECS"]  = ";".join(except_codecs)
         self._cmake.definitions["SAIL_INSTALL_PDB"]    = False
         self._cmake.definitions["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -106,8 +139,19 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].names["cmake_find_package"]       = "SailCodecs"
         self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
-        self.cpp_info.components["sail-codecs"].requires = ["sail-common", "giflib::giflib", "jasper::jasper",
-                                                            "libjpeg::libjpeg", "libpng::libpng", "libtiff::libtiff", "libwebp::libwebp"]
+        self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
+        if self.options.with_gif:
+            self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
+        if self.options.with_jpeg2000:
+            self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
+        if self.options.with_jpeg:
+            self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
+        if self.options.with_png:
+            self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
+        if self.options.with_tiff:
+            self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
+        if self.options.with_webp:
+            self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["libsail"].names["cmake_find_package"] = "Sail"
