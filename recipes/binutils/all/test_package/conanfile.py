@@ -83,6 +83,10 @@ class TestPackageConan(ConanFile):
         return True
 
     def test(self):
+        # Run selftest (conversion between conan os/arch <=> gnu triplet)
+        with tools.chdir(os.path.dirname(self.deps_user_info["binutils"].recipe_path)):
+            self.run(f"python -m unittest {os.path.basename(self.deps_user_info['binutils'].recipe_path)} --verbose")
+
         if not tools.cross_building(self):
             if self._can_run_target() and os.path.isfile(self._test_package_assembly_source):
                 output = StringIO()

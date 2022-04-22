@@ -185,6 +185,10 @@ class BinutilsConan(ConanFile):
         self.output.info(f"executable prefix={self.options.prefix}")
         self.user_info.prefix = self.options.prefix
 
+        # Add recipe path to enable running the self test in the test package,
+        # don't use this property in production code. It's unsupported.
+        self.user_info.recipe_path = os.path.realpath(__file__)
+
 
 class _ArchOs:
     def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]]=None):
