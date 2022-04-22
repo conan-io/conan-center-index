@@ -11,7 +11,6 @@ class PbcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://crypto.stanford.edu/pbc/"
     license = "LGPL-3.0"
-    author = "Ben Lynn <blynn@cs.stanford.edu>, Kareem Shehata <kareem@shehata.ca>"
     description = "The PBC (Pairing-Based Crypto) library is a C library providing low-level routines for pairing-based cryptosystems."
 
     settings = "os", "arch", "compiler", "build_type"
