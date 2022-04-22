@@ -1,4 +1,8 @@
 sources:
-  "0.9.0":
-    url: "https://github.com/HappySeaFox/sail/archive/cd76148af5ab.tar.gz"
-    sha256: "1093d146a75d560dea71a09a4402a2515fa4337b28716e0d4913c3d040599a10"
+  "0.9.0-pre22":
+    url: "https://github.com/smoked-herring/sail/archive/v0.9.0-pre22.tar.gz"
+    sha256: "3328cf91a436ed2a856942577e5ab8bdc92845a5a5a31d3116bf660df873b5a7"
+patches:
+  "0.9.0-pre22":
+    - patch_file: "patches/0.9.0-pre22-avif-find-package.patch"
+      base_path: "src"

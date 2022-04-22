@@ -16,6 +16,7 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
+        "with_avif": [True, False],
         "with_gif": [True, False],
         "with_jpeg2000": [True, False],
         "with_jpeg": [True, False],
@@ -27,6 +28,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
+        "with_avif": True,
         "with_gif": True,
         "with_jpeg2000": True,
         "with_jpeg": True,
@@ -35,7 +37,7 @@ class SAILConan(ConanFile):
         "with_webp": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
 
@@ -56,6 +58,8 @@ class SAILConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        if self.options.with_avif:
+            self.requires("libavif/0.9.3")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg2000:
@@ -79,6 +83,8 @@ class SAILConan(ConanFile):
 
         except_codecs = []
 
+        if not self.options.with_avif:
+            except_codecs.append("AVIF")
         if not self.options.with_gif:
             except_codecs.append("GIF")
         if not self.options.with_jpeg2000:
@@ -105,6 +111,9 @@ class SAILConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -141,6 +150,8 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
         self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
+        if self.options.with_avif:
+            self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
         if self.options.with_gif:
             self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
         if self.options.with_jpeg2000:
