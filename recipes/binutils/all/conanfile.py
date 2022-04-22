@@ -423,9 +423,6 @@ class _GNUTriplet:
 
 
 class _TestOsArch2GNUTriplet(unittest.TestCase):
-    def shortDescription(self) -> typing.Optional[str]:
-        return "Test conversion of conan os/arch to GNU triplet"
-
     def test_linux_x86(self):
         archos = _ArchOs(arch="x86", os="Linux")
         self._test_osarch_to_gnutriplet(archos, _GNUTriplet(machine="i686", vendor="pc", os="linux", abi="gnu"), "i686-pc-linux-gnu")
