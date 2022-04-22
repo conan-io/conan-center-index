@@ -31,15 +31,15 @@ class SDLMixerConan(ConanFile):
                        "cmd": False,  # needs sys/wait.h
                        "wav": True,
                        "flac": True,
-                       "mpg123": False,
-                       "mad": False,
+                       "mpg123": True,
+                       "mad": True,
                        "ogg": True,
                        "opus": True,
-                       "mikmod": False,
-                       "modplug": False,
-                       "fluidsynth": False,
+                       "mikmod": True,
+                       "modplug": True,
+                       "fluidsynth": False, # TODO: add fluidsynth to Conan Center
                        "nativemidi": True,
-                       "tinymidi": False}
+                       "tinymidi": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
