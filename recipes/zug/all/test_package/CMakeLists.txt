@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.1)
 project(PackageTest CXX)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-set(CMAKE_CXX_STANDARD 14)
+find_package(zug CONFIG REQUIRED)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-
-# CTest is a testing tool that can be used to test your project.
-# enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+add_executable(test_package example.cpp)
+target_link_libraries(test_package zug::zug)
+set_target_properties(test_package PROPERTIES CXX_STANDARD 14)
