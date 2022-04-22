@@ -81,7 +81,6 @@ class GreeterServiceImpl final : public Greeter::Service {
   }
 };
 
-
 int main(int argc, char** argv) {
   std::string server_address("127.0.0.1:0");
   GreeterServiceImpl service;
@@ -89,18 +88,20 @@ int main(int argc, char** argv) {
   ServerBuilder builder;
   int selected_port = 0;
   // Listen on the given address without any authentication mechanism.
-  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials(),
-                           &selected_port);
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials(), &selected_port);
   // Register "service" as the instance through which we'll communicate with
   // clients. In this case it corresponds to an *synchronous* service.
   builder.RegisterService(&service);
+
   // Finally assemble the server.
+#ifdef TEST_ACTUAL_SERVER
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::thread serverThread([&](){
     std::cout << "Server listening on 127.0.0.1:" << selected_port << std::endl;
     server->Wait();
     std::cout << "Server closed" << std::endl;
   });
+#endif
 
   // Instantiate the client. It requires a channel, out of which the actual RPCs
   // are created. This channel models a connection to an endpoint (in this case,
@@ -108,13 +109,14 @@ int main(int argc, char** argv) {
   // authenticated (use of InsecureChannelCredentials()).
   std::ostringstream addr;
   addr << "localhost:" << selected_port;
-  GreeterClient greeter(grpc::CreateChannel(
-      addr.str(), grpc::InsecureChannelCredentials()));
+  GreeterClient greeter(grpc::CreateChannel(addr.str(), grpc::InsecureChannelCredentials()));
   std::string user("world");
   std::string reply = greeter.SayHello(user);
   std::cout << "Greeter received: " << reply << std::endl;
 
+#ifdef TEST_ACTUAL_SERVER
   server->Shutdown();
   serverThread.join();
+#endif
   return 0;
 }
