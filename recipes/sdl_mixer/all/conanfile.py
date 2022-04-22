@@ -81,7 +81,7 @@ class SDLMixerConan(ConanFile):
             self.requires("fluidsynth/2.2") # TODO: this package is missing on the conan-center-index
         if self.settings.os == "Linux":
             if self.options.tinymidi:
-                self.requires("tinymidi/cci.20130325") # TODO: this package is missing on the conan-center-index
+                self.requires("tinymidi/cci.20130325")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
