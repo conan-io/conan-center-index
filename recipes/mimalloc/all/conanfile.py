@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import textwrap
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -34,7 +35,6 @@ class MimallocConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -90,14 +90,6 @@ class MimallocConan(ConanFile):
                 del self.options.inject
 
     def validate(self):
-        # (TEST)
-        if self.settings.compiler == "Visual Studio" and \
-           self.options.shared and \
-           str(self.settings.compiler.runtime) in ["MDd", "MD"] and \
-           tools.Version(self.version) == "2.0.6":
-            raise ConanInvalidConfiguration(
-                "Dynamic runtime (MD/MDd) is not supported when using mimalloc as a shared library for override")
-
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
            self.options.shared and \
@@ -125,22 +117,21 @@ class MimallocConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if self._cmake.is_multi_configuration:
-            self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        self._cmake.definitions["MI_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
-        self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
-        self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        cmake = CMake(self)
+        if cmake.is_multi_configuration:
+            cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
+        cmake.definitions["MI_BUILD_TESTS"] = "OFF"
+        cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared
+        cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
+        cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
+        cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
         if tools.Version(self.version) >= "1.7.0":
-            self._cmake.definitions["MI_INSTALL_TOPLEVEL"] = "ON"
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            cmake.definitions["MI_INSTALL_TOPLEVEL"] = "ON"
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
