@@ -54,3 +54,5 @@ patches:
       base_path: "qt5/qtbase"
     - patch_file: "patches/QTBUG-98813.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/d3396fb6fc.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
