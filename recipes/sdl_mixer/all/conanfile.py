@@ -74,7 +74,7 @@ class SDLMixerConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
-            self.requires("libmikmod/3.3") # TODO: this package is missing on the conan-center-index
+            self.requires("libmikmod/3.3.11.1")
         if self.options.modplug:
             self.requires("libmodplug/0.8.9.0")
         if self.options.fluidsynth:
