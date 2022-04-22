@@ -51,7 +51,7 @@ class CppcheckConan(ConanFile):
         cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
         cmake.definitions["ENABLE_OSS_FUZZ"] = False
         cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        return cmake
 
     def build(self):
         self._patch_sources()
