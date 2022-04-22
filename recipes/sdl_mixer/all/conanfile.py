@@ -136,3 +136,6 @@ class SDLMixerConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
         self.cpp_info.libs = ["SDL2_mixer"]
         self.cpp_info.includedirs = [os.path.join("include", "SDL2")]
+        
+        self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"        
