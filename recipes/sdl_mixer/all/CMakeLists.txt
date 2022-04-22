@@ -106,6 +106,8 @@ if(${BUILD_SHARED_LIBS})
   target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
 endif()
 
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "SDL2_mixer")
+
 check_type_size("ssize_t" SSIZE_T)
 if(SSIZE_T STREQUAL "")
   target_compile_definitions(${PROJECT_NAME} PRIVATE ssize_t=signed) # non-standard type
