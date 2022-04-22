@@ -76,7 +76,7 @@ class SDLMixerConan(ConanFile):
         if self.options.mikmod:
             self.requires("libmikmod/3.3") # TODO: this package is missing on the conan-center-index
         if self.options.modplug:
-            self.requires("libmodplug/0.8") # TODO: this package is missing on the conan-center-index
+            self.requires("libmodplug/0.8.9.0")
         if self.options.fluidsynth:
             self.requires("fluidsynth/2.2") # TODO: this package is missing on the conan-center-index
         if self.settings.os == "Linux":
