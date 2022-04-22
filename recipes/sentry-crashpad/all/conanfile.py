@@ -41,7 +41,7 @@ class SentryCrashpadConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "gcc": "5",
+            "gcc": "9",
             "clang": "3.4",
             "apple-clang": "5.1",
         }
