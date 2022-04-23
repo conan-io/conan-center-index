@@ -30,7 +30,7 @@ class RotorConan(ConanFile):
         "multithreading": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
