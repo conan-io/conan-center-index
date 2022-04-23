@@ -113,21 +113,19 @@ class FmtConan(ConanFile):
 
     @staticmethod
     def _rm_folder(folder):
-        try:
-            shutil.rmtree(folder)
-        except Exception:
-            pass
+        shutil.rmtree(folder, ignore_errors=True)
 
     def package(self):
-        copy(self, "LICENSE.rst", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="*LICENSE.rst", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
-            copy(self, "*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+            copy(self, pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         else:
             cmake = CMake(self)
             cmake.install()
             self._rm_folder(os.path.join(self.package_folder, "lib", "cmake"))
             self._rm_folder(os.path.join(self.package_folder, "lib", "pkgconfig"))
             self._rm_folder(os.path.join(self.package_folder, "res"))
+            self._rm_folder(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fmt"
