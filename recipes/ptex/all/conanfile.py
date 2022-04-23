@@ -44,7 +44,7 @@ class PtexConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
