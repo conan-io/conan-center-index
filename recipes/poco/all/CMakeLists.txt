@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 if(MYSQL_ROOT_DIR)
   find_package(MySQL REQUIRED)
@@ -23,4 +23,4 @@ if ("${CONAN_PACKAGE_VERSION}" VERSION_GREATER "1.10")
 endif()
 
 
-add_subdirectory(source_subfolder)
+add_subdirectory(src)

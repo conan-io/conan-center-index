@@ -197,15 +197,15 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 ## What is the policy for adding older versions of a package?
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
-This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+Adding versions that are not used by consumer only requires more resources and time from the CI servers.
 
 ## What is the policy for removing older versions of a package?
 
-Keeping many older versions can be a problem, as over time they may become incompatible with newer versions of the package's Python code and/or dependencies. They also become downloaded less often than newer versions, and yet continue to consume CI resources during Pull Requests.
+Older versions can be removed from packages given the considerations below. When removing those version, remove everything
+that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
+are never removed from ConanCenter remote.
 
-Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective recipes and binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
-
-There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
+When removing older versions, please take into account [these considerations](docs/reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 

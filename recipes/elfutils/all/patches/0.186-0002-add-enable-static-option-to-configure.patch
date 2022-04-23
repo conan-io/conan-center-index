@@ -1,0 +1,29 @@
+--- configure.ac
++++ configure.ac
+@@ -364,8 +364,25 @@
+                [install_elfh=$enableval], [install_elfh=no])
+ AM_CONDITIONAL(INSTALL_ELFH, test "$install_elfh" = yes)
+ 
++
++AC_MSG_CHECKING([whether to build elfutils as a static library])
++AC_ARG_ENABLE([static],
++AS_HELP_STRING([--enable-static],[build elfutils as static libraries]),
++[static_elfutils=$enableval], [static_elfutils=no])
++
++static_elfutils=$static_elfutils
++
++if test "$static_elfutils" = yes ; then
++  AC_MSG_RESULT([yes])
++else
++  if test "$use_gprof" = yes -o "$use_gcov" = yes ; then
++    AC_MSG_ERROR([cannot build a shared elfutils with gprof or gcov enabled])
++  fi
++  AC_MSG_RESULT([no])
++fi
++
+ AM_CONDITIONAL(BUILD_STATIC, [dnl
+-test "$use_gprof" = yes -o "$use_gcov" = yes])
++test "$static_elfutils" = yes])
+ 
+ AC_ARG_ENABLE([tests-rpath],
+ AS_HELP_STRING([--enable-tests-rpath],[build $ORIGIN-using rpath into tests]),

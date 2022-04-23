@@ -87,13 +87,13 @@ class LibarchiveConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.9.13")
         if self.options.with_expat:
-            self.requires("expat/2.4.6")
+            self.requires("expat/2.4.8")
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
@@ -101,7 +101,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:

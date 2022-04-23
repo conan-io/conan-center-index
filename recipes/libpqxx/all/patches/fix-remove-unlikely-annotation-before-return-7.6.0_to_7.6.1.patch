@@ -1,0 +1,13 @@
+fix: Remove `unlikely` annotation before `return` (https://github.com/jtv/libpqxx/pull/476)
+diff --git a/src/robusttransaction.cxx b/src/robusttransaction.cxx
+index ba110b12..88d8bd32 100644
+--- a/src/robusttransaction.cxx
++++ b/src/robusttransaction.cxx
+@@ -64,7 +64,6 @@ constexpr tx_stat parse_status(std::string_view text) noexcept
+       PQXX_LIKELY return tx_in_progress;
+     break;
+   }
+-  PQXX_UNLIKELY
+   return tx_unknown;
+ }
+ 

@@ -1,11 +1,12 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
 required_conan_version = ">=1.43.0"
 
 
-class Assimp(ConanFile):
+class AssimpConan(ConanFile):
     name = "assimp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
@@ -106,6 +107,10 @@ class Assimp(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -170,22 +175,22 @@ class Assimp(ConanFile):
         if tools.Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
-            self.requires("pugixml/1.11")
+            self.requires("pugixml/1.12.1")
 
-        self.requires("minizip/1.2.11")
-        self.requires("utfcpp/3.1.2")
+        self.requires("minizip/1.2.12")
+        self.requires("utfcpp/3.2.1")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.1.31")
+            self.requires("kuba-zip/0.2.2")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
-            self.requires("rapidjson/cci.20200410")
+            self.requires("rapidjson/cci.20211112")
         if self._depends_on_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self._depends_on_draco:
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.2")
         if self._depends_on_clipper:
-            self.requires("clipper/4.8.8")
+            self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
         if self._depends_on_openddlparser:
@@ -256,26 +261,29 @@ class Assimp(ConanFile):
         return cmake
 
     def build(self):
+        # TODO: Move to 'validate()' once there is a way to get the resolved version of dependencies there
+        if self._depends_on_clipper and tools.Version(self.deps_cpp_info["clipper"].version).major != "4":
+            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "assimp"
-        self.cpp_info.names["cmake_find_package_multi"] = "assimp"
-        self.cpp_info.names["pkg_config"] = "assimp"
+        self.cpp_info.set_property("cmake_file_name", "assimp")
+        self.cpp_info.set_property("cmake_target_name", "assimp::assimp")
+        self.cpp_info.set_property("pkg_config_name", "assimp")
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             self.cpp_info.defines.append("ASSIMP_DLL")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
         if not self.options.shared:
             stdcpp_library = tools.stdcpp_library(self)

@@ -140,7 +140,7 @@ class SDLConan(ConanFile):
                 self.requires("xkbcommon/1.4.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.5.0")
+                self.requires("libunwind/1.6.2")
 
     def validate(self):
         if self.settings.os == "Macos" and not self.options.iconv:
@@ -449,3 +449,9 @@ class SDLConan(ConanFile):
 
             self.cpp_info.components["sdl2main"].libs = ["SDL2main" + postfix]
             self.cpp_info.components["sdl2main"].requires = ["libsdl2"]
+
+        # Workaround to avoid unwanted sdl::sdl target in CMakeDeps generator
+        self.cpp_info.set_property(
+            "cmake_target_name",
+            "SDL2::{}".format("SDL2main" if self.options.sdl2main else sdl2_cmake_target),
+        )

@@ -2,6 +2,6 @@ cmake_minimum_required(VERSION 3.13.4)
 project(conanllvm)
 
 include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 add_subdirectory("source")

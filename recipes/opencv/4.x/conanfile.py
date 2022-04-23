@@ -47,6 +47,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
+        "cuda_arch_bin": "ANY",
         "cpu_baseline": "ANY",
         "cpu_dispatch": "ANY",
         "nonfree": [True, False],
@@ -82,6 +83,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
+        "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "nonfree": False,
@@ -163,6 +165,7 @@ class OpenCVConan(ConanFile):
             del self.options.with_cudnn
             del self.options.with_cufft
             del self.options.dnn_cuda
+            del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
@@ -173,7 +176,7 @@ class OpenCVConan(ConanFile):
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -350,6 +353,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_WEBP"] = False
         self._cmake.definitions["BUILD_TBB"] = False
         self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -474,11 +478,14 @@ class OpenCVConan(ConanFile):
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+            if self.options.cuda_arch_bin:
+                self._cmake.definitions["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
         self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)

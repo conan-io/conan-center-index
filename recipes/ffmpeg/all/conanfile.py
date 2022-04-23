@@ -172,7 +172,7 @@ class FFMpegConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
@@ -206,7 +206,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.2")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -534,7 +534,7 @@ class FFMpegConan(ConanFile):
             if self.options.postproc:
                 self.cpp_info.components["postproc"].system_libs = ["m"]
             if self.options.get_safe("fPIC"):
-                if self.settings.compiler in ("gcc", ):
+                if self.settings.compiler in ("gcc", "clang"):
                     # https://trac.ffmpeg.org/ticket/1713
                     # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                     # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html

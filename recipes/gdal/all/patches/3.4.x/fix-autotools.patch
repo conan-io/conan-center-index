@@ -267,12 +267,13 @@
          else
              if test "$with_pcre" = "yes"; then
                  AC_MSG_ERROR([cannot find libpcre])
-@@ -4648,13 +4641,16 @@ dnl ---------------------------------------------------------------------------
+@@ -4648,13 +4641,18 @@ dnl ---------------------------------------------------------------------------
  dnl Check if geos library is available.
  dnl ---------------------------------------------------------------------------
  
 -GEOS_INIT(3.1.0)
 +AC_ARG_WITH(geos, AS_HELP_STRING([--with-geos[=ARG]], [Include GEOS support (ARG=yes or no)]),,)
++HAVE_GEOS=no
 +if test x"$with_geos" = x"no" ; then
 +  AC_MSG_RESULT([GEOS support disabled])
 +else
@@ -284,10 +285,11 @@
    LIBS="${GEOS_LIBS} ${LIBS}"
  fi
 +fi
++AC_SUBST(HAVE_GEOS, $HAVE_GEOS)
  
  dnl ---------------------------------------------------------------------------
  dnl Check if SFCGAL library is available.
-@@ -4684,11 +4680,10 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
+@@ -4684,11 +4682,10 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
  
    AC_CHECK_HEADERS([libqhull_r/libqhull_r.h])
    if test "$ac_cv_header_libqhull_r_libqhull_r_h" = "yes"; then
@@ -300,7 +302,7 @@
      fi
    else
      # Only qhull 2012 is reliable on certain datasets. Older Ubuntu have
-@@ -4798,7 +4793,9 @@ AC_MSG_CHECKING([for FreeXL support])
+@@ -4798,7 +4795,9 @@ AC_MSG_CHECKING([for FreeXL support])
  HAVE_FREEXL=no
  FREEXL_INCLUDE=
  
@@ -311,7 +313,7 @@
    AC_CHECK_HEADERS(freexl.h)
    AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
  
-@@ -4904,8 +4901,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
+@@ -4904,8 +4903,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
  elif test "$with_libjson_c" = "internal" ; then
    LIBJSONC_SETTING=internal
  elif test "$with_libjson_c" != "no"; then
@@ -321,7 +323,7 @@
  else
    AC_MSG_ERROR([libjson-c (internal or external) is required])
  fi
-@@ -6079,7 +6075,6 @@ else
+@@ -6079,7 +6077,6 @@ else
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$EXR_LIBS"

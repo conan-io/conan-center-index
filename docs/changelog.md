@@ -1,5 +1,20 @@
 # Changelog
 
+### 21-April-2022 - 13:46 CEST
+
+- [feature] Updated Python version to > 3.7 in all build agents.
+- [feature] Added CMake and Python versions to the infrastructure information.
+- [config] Added new community reviewers.
+- [feature] Moved Jenkins and Slack to the configuration file.
+- [feature] Retry each build config if there is an unexpected error.
+- [feature] Added logging to collect information about some jobs.
+- [feature] Use a real build profile for cross-building configurations.
+- [bugfix] Improve export error report.
+
+### 31-March-2022 - 11:55 CEST
+
+- [config] Upgrade Conan client version to 1.45.0.
+
 ### 25-March-2022 - 09:54 CET
 
 - [feature] Updated CMake version to 3.20 only in MacOS machines.

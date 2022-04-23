@@ -53,13 +53,13 @@ class Hdf4Conan(ConanFile):
             del self.options.szip_encoding
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.2")
         else:
             self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
-            self.requires("libaec/1.0.4")
+            self.requires("libaec/1.0.6")
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
 
