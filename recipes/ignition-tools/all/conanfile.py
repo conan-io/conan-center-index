@@ -98,7 +98,6 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
 
-
         self.cpp_info.components["libignition-tools"].libs = ["ignition-tools-backward"]
         self.cpp_info.components["libignition-tools"].includedirs.append("include/ignition/tools{}".format(version_major))
         self.cpp_info.components["libignition-tools"].names["cmake_find_package"] = "ignition-tools{}".format(version_major)
