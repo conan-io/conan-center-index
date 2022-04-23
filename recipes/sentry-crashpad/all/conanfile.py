@@ -66,7 +66,10 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
-            tools.check_min_cppstd(self, 14)
+            if tools.Version(self.version) < "0.4.16":
+                tools.check_min_cppstd(self, 14)
+            else:
+                tools.check_min_cppstd(self, 17)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
