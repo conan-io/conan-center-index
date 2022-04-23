@@ -2,13 +2,29 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.tools.scm import Version
+try:
+    from conan.tools.scm import Version
+except ImportError:
+    from conans.tools import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, apply_conandata_patches
+try:
+    from conan.tools.files import get, apply_conandata_patches
+except ImportError:
+    from conans.tools import get, apply_conandata_patches
 from conan.tools.microsoft.visual import is_msvc, msvc_runtime_flag
-from conan.errors import ConanInvalidConfiguration
+try:
+    from conan.errors import ConanInvalidConfiguration
+except ImportError:
+    from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
+
+def copy(conanfile, *args, **kwargs):
+    if hasattr(conanfile, 'copy'):
+        conanfile.copy(*args, **kwargs)
+    else:
+        from conan.tools import files
+        files.copy(conanfile, *args, **kwargs)
 
 
 class FmtConan(ConanFile):
@@ -80,7 +96,7 @@ class FmtConan(ConanFile):
             )
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.header_only()
         else:
             del self.info.options.with_fmt_alias

@@ -1,7 +1,10 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.build import cross_building as tools_cross_building
+try:
+    from conan.tools.build import cross_building as tools_cross_building
+except ImportError:
+    from conan.tools.cross_building import cross_building as tools_cross_building
 from conan.tools.layout import cmake_layout
 
 required_conan_version = ">=1.43.0"
