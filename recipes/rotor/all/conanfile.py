@@ -76,8 +76,8 @@ class RotorConan(ConanFile):
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-        if self.options.shared and tools.Version(self.version) < "0.22":
-            raise ConanInvalidConfiguration("shared option is available from v0.22")
+        if self.options.shared and tools.Version(self.version) < "0.23":
+            raise ConanInvalidConfiguration("shared option is available from v0.23")
 
 
     def _configure_cmake(self):
