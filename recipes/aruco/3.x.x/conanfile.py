@@ -43,9 +43,9 @@ class ArucoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("opencv/4.5.1")
-        self.requires("eigen/3.3.9")
-        self.requires("zlib/1.2.11")
+        self.requires("opencv/4.5.5")
+        self.requires("eigen/3.4.0")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
