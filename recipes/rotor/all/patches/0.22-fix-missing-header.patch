@@ -5,4 +5,87 @@
 +#include <unordered_map>
  
  using type_map_t = std::unordered_map<std::string_view, const void *>;
+
+--- include/rotor/plugin/registry.h
++++ include/rotor/plugin/registry.h
+@@ -65,7 +65,7 @@ struct ROTOR_API registry_plugin_t : public plugin_base_t {
+ 
+       private:
+         discovery_task_t(registry_plugin_t &plugin_, address_ptr_t *address_, std::string service_name_, bool delayed_)
+-            : plugin{plugin_},
++            : plugin{&plugin_},
+               address(address_), service_name{service_name_}, delayed{delayed_}, state{state_t::PASSIVE} {}
+         operator bool() const noexcept { return address; }
+ 
+@@ -74,7 +74,8 @@ struct ROTOR_API registry_plugin_t : public plugin_base_t {
+         bool do_cancel() noexcept;
+         void post_discovery(const extended_error_ptr_t &ec) noexcept;
+ 
+-        registry_plugin_t &plugin;
++        // allow implicit copy-assignment operator
++        registry_plugin_t *plugin;
+         address_ptr_t *address;
+         std::string service_name;
+         bool delayed;
+
+--- src/rotor/plugin/registry.cpp
++++ src/rotor/plugin/registry.cpp
+@@ -1,5 +1,5 @@
+ //
+-// Copyright (c) 2019-2021 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
++// Copyright (c) 2019-2022 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+ //
+ // Distributed under the MIT Software License
+ //
+@@ -195,10 +195,10 @@ void registry_plugin_t::discovery_task_t::on_discovery(address_ptr_t *service_ad
+         }
+     }
+ 
+-    auto actor_state = plugin.actor->access<to::state>();
++    auto actor_state = plugin->actor->access<to::state>();
+     if (actor_state == rotor::state_t::INITIALIZING) {
+         if (!ec) {
+-            auto p = plugin.actor->access<to::get_plugin>(link_client_plugin_t::class_identity);
++            auto p = plugin->actor->access<to::get_plugin>(link_client_plugin_t::class_identity);
+             auto &link_plugin = *static_cast<link_client_plugin_t *>(p);
+             link_plugin.link(*address, operational_only, [this](auto &ec) {
+                 if (task_callback)
+@@ -213,23 +213,23 @@ void registry_plugin_t::discovery_task_t::on_discovery(address_ptr_t *service_ad
+ 
+ void registry_plugin_t::discovery_task_t::post_discovery(const extended_error_ptr_t &ec) noexcept {
+     auto &plugin = this->plugin;
+-    auto &dm = plugin.discovery_map;
++    auto &dm = plugin->discovery_map;
+     auto it = dm.find(service_name);
+     assert(it != dm.end());
+     dm.erase(it);
+     if (dm.empty() || ec) {
+-        auto actor_state = plugin.actor->access<to::state>();
++        auto actor_state = plugin->actor->access<to::state>();
+         if (actor_state == rotor::state_t::INITIALIZING) {
+-            plugin.continue_init(error_code_t::discovery_failed, ec);
++            plugin->continue_init(error_code_t::discovery_failed, ec);
+         } else {
+-            plugin.actor->shutdown_continue();
++            plugin->actor->shutdown_continue();
+         }
+     }
+ }
+ 
+ void registry_plugin_t::discovery_task_t::do_discover() noexcept {
+     state = state_t::DISCOVERING;
+-    auto &actor = plugin.actor;
++    auto &actor = plugin->actor;
+     auto &registry_addr = actor->get_supervisor().get_registry_address();
+     auto timeout = actor->access<to::init_timeout>();
+     if (!delayed) {
+@@ -242,7 +242,7 @@ void registry_plugin_t::discovery_task_t::do_discover() noexcept {
+ bool registry_plugin_t::discovery_task_t::do_cancel() noexcept {
+     if (delayed && state == state_t::DISCOVERING) {
+         using payload_t = rotor::message::discovery_cancel_t::payload_t;
+-        auto &actor = plugin.actor;
++        auto &actor = plugin->actor;
+         auto &registry_addr = actor->get_supervisor().get_registry_address();
+         actor->send<payload_t>(registry_addr, request_id, actor->get_address());
+         state = state_t::CANCELLING;
  
