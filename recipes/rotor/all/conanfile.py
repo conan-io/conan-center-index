@@ -4,7 +4,6 @@ import os
 
 required_conan_version = ">=1.43.0"
 
-
 class RotorConan(ConanFile):
     name = "rotor"
     license = "MIT"
