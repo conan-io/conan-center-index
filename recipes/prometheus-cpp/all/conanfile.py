@@ -50,11 +50,11 @@ class PrometheusCppConan(ConanFile):
 
     def requirements(self):
         if self.options.with_pull:
-            self.requires("civetweb/1.14")
+            self.requires("civetweb/1.15")
         if self.options.with_push:
-            self.requires("libcurl/7.79.1")
+            self.requires("libcurl/7.80.0")
         if self.options.get_safe("with_compression"):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
