@@ -31,5 +31,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools_cross_building(self):
-            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"))
-            self.run(os.path.join(self.cpp.build.bindirs[0], "test_ranges"))
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), run_environment=True)
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_ranges"), run_environment=True)
