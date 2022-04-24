@@ -97,7 +97,7 @@ class XapianCoreConan(ConanFile):
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         autotools.libs = []
-        autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in self._autotools.library_paths])
+        autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in autotools.library_paths])
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
