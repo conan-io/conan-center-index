@@ -50,6 +50,9 @@ class ZintConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.with_qt:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("zlib/1.2.12")
