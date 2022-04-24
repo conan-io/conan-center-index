@@ -66,6 +66,16 @@ class ZintConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
+    def _patch_source(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't override CMAKE_OSX_SYSROOT, it can easily break consumers.
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "set(CMAKE_OSX_SYSROOT \"/\")",
+            "",
+        )
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -78,8 +88,7 @@ class ZintConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_source()
         cmake = self._configure_cmake()
         cmake.build()
 
