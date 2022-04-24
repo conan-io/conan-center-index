@@ -87,6 +87,8 @@ class Libssh2Conan(ConanFile):
             cmake.definitions["CRYPTO_BACKEND"] = "mbedTLS"
         cmake.definitions["BUILD_EXAMPLES"] = False
         cmake.definitions["BUILD_TESTING"] = False
+        # To install relocatable shared lib on Macos by default
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure()
         return cmake
 
