@@ -65,14 +65,14 @@ class LibGit2Conan(ConanFile):
         return "openssl" in (self.options.with_https, self.options.with_sha1)
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
+            self.requires("libssh2/1.10.0")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.80.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1n")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

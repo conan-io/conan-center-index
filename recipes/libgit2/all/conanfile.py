@@ -65,12 +65,12 @@ class LibGit2Conan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
+            self.requires("libssh2/1.10.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1n")
         if self._need_mbedtls:
             self.requires("mbedtls/2.25.0")
         if self.options.get_safe("with_iconv"):
@@ -78,7 +78,7 @@ class LibGit2Conan(ConanFile):
         if self.options.with_regex == "pcre":
             self.requires("pcre/8.45")
         elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.37")
+            self.requires("pcre2/10.40")
 
     @property
     def _need_openssl(self):

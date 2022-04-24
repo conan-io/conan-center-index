@@ -71,14 +71,14 @@ class LibGit2Conan(ConanFile):
         return "mbedtls" in (self.options.with_https, self.options.with_sha1)
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
+            self.requires("libssh2/1.10.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1n")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.24.0")
+            self.requires("mbedtls/2.25.0")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
 
