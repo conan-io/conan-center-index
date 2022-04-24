@@ -38,11 +38,11 @@ class ZintConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_qt:
-            self.requires("qt/5.15.2")
+            self.requires("qt/5.15.3")
 
     def validate(self):
         if self.options.with_qt:
