@@ -51,7 +51,7 @@ class QDBMConan(ConanFile):
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
