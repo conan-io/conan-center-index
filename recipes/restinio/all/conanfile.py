@@ -51,33 +51,33 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/8.0.1")
+        self.requires("fmt/8.1.1")
         self.requires("expected-lite/0.5.0")
-        self.requires("optional-lite/3.4.0")
+        self.requires("optional-lite/3.5.0")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/2.0.0")
 
         if self.options.asio == "standalone":
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("asio/1.18.1")
+                self.requires("asio/1.22.1")
             else:
                 self.requires("asio/1.16.1")
         else:
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("boost/1.77.0")
+                self.requires("boost/1.78.0")
             else:
                 self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1n")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
         if self.options.with_pcre == 1:
             self.requires("pcre/8.45")
         elif self.options.with_pcre == 2:
-            self.requires("pcre2/10.37")
+            self.requires("pcre2/10.40")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
