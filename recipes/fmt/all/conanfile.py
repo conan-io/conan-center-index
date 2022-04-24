@@ -132,6 +132,7 @@ class FmtConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "fmt"
         self.cpp_info.names["pkg_config"] = "fmt"
         if self.options.header_only:
+            self.cpp_info.components["fmt-header-only"].includedirs.extend(["include"])
             self.cpp_info.components["fmt-header-only"].defines.append("FMT_HEADER_ONLY=1")
             if self.options.with_fmt_alias:
                 self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
