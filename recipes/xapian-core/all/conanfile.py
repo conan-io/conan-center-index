@@ -1,5 +1,6 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
@@ -100,8 +101,11 @@ class XapianCoreConan(ConanFile):
         autotools.library_paths = []
         if is_msvc(self):
             autotools.cxx_flags.append("-EHsc")
-            if not (self.settings.compiler == "Visual Studio" and \
-                    tools.Version(self.settings.compiler.version) < "12"):
+            if self.settings.compiler == "Visual Studio":
+                vs_ide_version = self.settings.compiler.version
+            else:
+                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            if vs_ide_version >= "12":
                 autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
