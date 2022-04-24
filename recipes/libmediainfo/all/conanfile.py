@@ -48,7 +48,7 @@ class LibmediainfoConan(ConanFile):
         self.requires("libcurl/7.80.0")
         self.requires("libzen/0.4.38")
         self.requires("tinyxml2/9.0.0")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if not self.options["libzen"].enable_unicode:
