@@ -64,6 +64,8 @@ class LibmediainfoConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["BUILD_ZENLIB"] = False
         cmake.definitions["BUILD_ZLIB"] = False
+        # Generate a relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure()
         return cmake
 
