@@ -55,9 +55,9 @@ class ZintConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
+            self.requires("zlib/1.2.12")
         if self.options.with_qt:
             self.requires("qt/5.15.3")
 
@@ -106,11 +106,10 @@ class ZintConan(ConanFile):
 
         self.cpp_info.components["libzint"].set_property("cmake_target_name", "Zint::Zint")
         self.cpp_info.components["libzint"].libs = ["zint" if self.options.shared else "zint-static"]
-        self.cpp_info.components["libzint"].requires = ["zlib::zlib"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["libzint"].defines = ["ZINT_DLL"]
         if self.options.with_libpng:
-            self.cpp_info.components["libzint"].requires.append("libpng::libpng")
+            self.cpp_info.components["libzint"].requires.extend(["libpng::libpng", "zlib::zlib"])
 
         if self.options.with_qt:
             self.cpp_info.components["libqzint"].set_property("cmake_target_name", "Zint::QZint")
