@@ -1,5 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">= 1.36.0"
