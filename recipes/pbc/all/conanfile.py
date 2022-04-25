@@ -77,6 +77,12 @@ class PbcConan(ConanFile):
                 self.settings.os.version)
             args.append("CC={} -isysroot {} -target {} {}".format(
                 cc, sdk_path, target, min_ios))
+        elif self.settings.os == "Macos" and self.settings.arch != "x86_64":
+            target = "arm64-apple-darwin"
+            sdk_path = self.run_get_output("xcrun", "-show-sdk-path")
+            cc = self.run_get_output("xcrun", "-find", "cc")
+            args.append("CC={} -isysroot {} -target {}".format(
+                cc, sdk_path, target))
 
         self._autotools.configure(args=args)
         return self._autotools
