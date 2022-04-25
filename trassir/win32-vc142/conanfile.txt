@@ -19,7 +19,7 @@ axtls/1.5.3.dssl4
 boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
-caffe/1.0.windows.dssl2
+caffe/1.0.windows.dssl3
 dlib/19.4
 ffmpeg/3.3.1.dssl1
 freetype/2.10.1
@@ -49,7 +49,6 @@ openh264/1.7.0.dssl2
 openssl/1.1.1d.dssl2
 pjsip/2.9
 protobuf/3.9.1.dssl2
-protoc/3.9.1.dssl2
 signalr-qt/0.1.dssl3
 #sip/4.19.3 need to port tech1scripts
 sdl/2.0.16
