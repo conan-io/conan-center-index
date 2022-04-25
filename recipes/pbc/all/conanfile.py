@@ -96,3 +96,5 @@ class PbcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["pbc"]
+        # Make sure to link in the system math library
+        self.cpp_info.exelinkflags = ["-lm"]
