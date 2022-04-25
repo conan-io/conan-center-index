@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class PbcConan(ConanFile):
     name = "pbc"
     version = "0.5.14"
@@ -20,7 +21,7 @@ class PbcConan(ConanFile):
     exports_sources = "patches/**"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -52,7 +53,9 @@ class PbcConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(
+            self, win_bash=tools.os_info.is_windows
+        )
         # Need to override environment or configure will fail despite that flex
         # is actually available.
         args = ["LEX=flex"]
@@ -63,19 +66,23 @@ class PbcConan(ConanFile):
 
         # No idea why this is necessary, but if you don't set CC this way, then
         # configure complains that it can't find gmp.
-        if (tools.cross_building(self.settings) and
-                self.settings.compiler == "apple-clang"):
+        if (
+            tools.cross_building(self.settings)
+            and self.settings.compiler == "apple-clang"
+        ):
 
             xcr = tools.XCRun(self.settings)
             target = tools.to_apple_arch(self.settings.arch) + "-apple-darwin"
 
             min_ios = ""
             if self.settings.os == "iOS":
-                min_ios = "-miphoneos-version-min={}".format(
-                    self.settings.os.version)
+                min_ios = "-miphoneos-version-min={}".format(self.settings.os.version)
 
-            args.append("CC={} -isysroot {} -target {} {}".format(
-                xcr.cc, xcr.sdk_path, target, min_ios))
+            args.append(
+                "CC={} -isysroot {} -target {} {}".format(
+                    xcr.cc, xcr.sdk_path, target, min_ios
+                )
+            )
 
         self._autotools.configure(args=args)
         return self._autotools
