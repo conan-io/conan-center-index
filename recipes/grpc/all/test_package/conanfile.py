@@ -33,7 +33,7 @@ class TestPackageConan(ConanFile):
             cmake = CMake(self)
             # FIXME: This combination of settings fail
             cmake.definitions["TEST_ACTUAL_SERVER"] = not (self.deps_cpp_info["grpc"].version == "1.45.2"
-                                                           and self.settings.os == "Windows"
+                                                           and self.settings.compiler == "Visual Studio"
                                                            and self.settings.compiler.version == "15"
                                                            and self.settings.build_type == "Release")
             cmake.configure()
