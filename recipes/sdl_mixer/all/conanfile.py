@@ -11,7 +11,7 @@ class SDLMixerConan(ConanFile):
     homepage = "https://www.libsdl.org/projects/SDL_mixer/"
     license = "Zlib"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
