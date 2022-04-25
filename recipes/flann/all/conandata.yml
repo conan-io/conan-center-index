@@ -9,3 +9,6 @@ patches:
   "1.9.1":
     - patch_file: "patches/external-lz4-and-export-symbols.patch"
       base_path: "source_subfolder"
+  "1.9.2":
+    - patch_file: "patches/cxx-11-required.patch"
+      base_path: "source_subfolder"
