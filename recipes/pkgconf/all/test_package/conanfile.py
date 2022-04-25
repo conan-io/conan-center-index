@@ -39,7 +39,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            if self.options["pkgconf"].enable_lib:
+                self.run(os.path.join("bin", "test_package"), run_environment=True)
 
             pkg_config = tools.get_env("PKG_CONFIG")
             self.output.info("Read environment variable PKG_CONFIG='{}'".format(pkg_config))
@@ -51,7 +52,6 @@ class TestPackageConan(ConanFile):
             if not pkgconf_path or not pkgconf_path.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
                 raise ConanException("pkgconf executable not found")
 
-            if self.options["pkgconf"].enable_lib:
-                with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
-                    self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]), run_environment=True)
-                    self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]), run_environment=True)
+            with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
+                self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]), run_environment=True)
+                self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]), run_environment=True)
