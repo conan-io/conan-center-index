@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, CMake
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
@@ -55,6 +56,11 @@ class LibpqxxConan(ConanFile):
         self.requires("libpq/14.2")
 
     def validate(self):
+        if self.options.shared and msvc_runtime_flag(self) == "MTd":
+            raise ConanInvalidConfiguration(
+                "{} recipes does not support build shared library with MTd runtime."
+                .format(self.name,))
+
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 

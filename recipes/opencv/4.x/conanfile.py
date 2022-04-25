@@ -176,7 +176,7 @@ class OpenCVConan(ConanFile):
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -353,6 +353,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_WEBP"] = False
         self._cmake.definitions["BUILD_TBB"] = False
         self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -484,6 +485,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)

@@ -1,12 +1,15 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
+
+required_conan_version = ">=1.33.0"
 
 class QuillConan(ConanFile):
     name = "quill"
     description = "C++14 Asynchronous Low Latency Logging Library"
     homepage = "https://github.com/odygrd/quill/"
-    topics = ("conan", "quill", "logging", "log")
+    topics = ("quill", "logging", "log")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
@@ -20,8 +23,6 @@ class QuillConan(ConanFile):
     default_options = {"fPIC": True,
                        "with_bounded_queue": False,
                        "with_no_exceptions": False}
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -44,13 +45,13 @@ class QuillConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
 
         if not any(arch in str(self.settings.arch) for arch in supported_archs):
             raise ConanInvalidConfiguration("{} is not supported by {}".format(self.settings.arch, self.name))
 
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -73,18 +74,16 @@ class QuillConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["QUILL_FMT_EXTERNAL"] = True
+        cmake.definitions["QUILL_ENABLE_INSTALL"] = True
+        cmake.definitions["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
+        cmake.definitions["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
+        cmake.configure(build_folder=self._build_subfolder)
 
-        self._cmake = CMake(self)
-        self._cmake.definitions["QUILL_FMT_EXTERNAL"] = True
-        self._cmake.definitions["QUILL_ENABLE_INSTALL"] = True
-        self._cmake.definitions["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
-        self._cmake.definitions["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
-        self._cmake.configure(build_folder=self._build_subfolder)
-
-        return self._cmake
+        return cmake
 
     def build(self):
         if tools.Version(self.version) < "1.3.3" and tools.Version(self.deps_cpp_info["fmt"].version) > "6.2.1":
@@ -110,5 +109,5 @@ class QuillConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.defines = ["QUILL_FMT_EXTERNAL"]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

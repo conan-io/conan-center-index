@@ -23,7 +23,16 @@ class Antlr4CppRuntimeConan(ConanFile):
         "fPIC": True,
     }
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "pkg_config"
+    short_paths = True
+
+    compiler_required_cpp17 = {
+            "Visual Studio": "16",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "9.1"
+    }
+
 
     @property
     def _source_subfolder(self):
@@ -34,7 +43,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def config_options(self):
@@ -54,6 +63,10 @@ class Antlr4CppRuntimeConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def build_requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.build_requires("pkgconf/1.7.4")
+
     def requirements(self):
         self.requires("utfcpp/3.2.1")
         if self.settings.os in ("FreeBSD", "Linux"):
@@ -61,21 +74,43 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     def validate(self):
         if str(self.settings.arch).startswith("arm"):
-            raise ConanInvalidConfiguration(f"arm architectures are not supported")
+            raise ConanInvalidConfiguration("arm architectures are not supported")
             # Need to deal with missing libuuid on Arm.
             # So far ANTLR delivers macOS binary package.
-        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
-        if compiler == "Visual Studio" and version < "16":
-            raise ConanInvalidConfiguration(f"library claims C2668 'Ambiguous call to overloaded function'")
+
+        compiler = self.settings.compiler
+        compiler_version = tools.Version(self.settings.compiler.version)
+        antlr_version = tools.Version(self.version)
+
+        if compiler == "Visual Studio" and compiler_version < "16":
+            raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")
             # Compilation of this library on version 15 claims C2668 Error.
             # This could be Bogus error or malformed Antl4 libary.
             # Version 16 compiles this code correctly.
+
+        if antlr_version >= "4.10":
+            # Antlr4 for 4.9.3 does not require C++17 - C++11 is enough.
+            # for newest version we need C++17 compatible compiler here
+
+            if self.settings.get_safe("compiler.cppstd"):
+                tools.check_min_cppstd(self, "17")
+
+            minimum_version = self.compiler_required_cpp17.get(str(self.settings.compiler), False)
+            if minimum_version:
+                if compiler_version < minimum_version:
+                    raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+            else:
+                self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+
+        if compiler == "Visual Studio" and antlr_version == "4.10":
+            raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use 4.10.1 or above.".format(self.name))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ANTLR4_INSTALL"] = True
         cmake.definitions["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = False
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["WITH_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
         cmake.definitions["WITH_DEMO"] = False
@@ -142,3 +177,5 @@ class Antlr4CppRuntimeConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["pthread"]
