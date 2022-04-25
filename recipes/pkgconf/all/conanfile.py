@@ -79,7 +79,7 @@ class PkgConfConan(ConanFile):
         meson = Meson(self)
         meson.options["tests"] = False
         meson.options["sharedstatedir"] = self._sharedstatedir
-        if not self.enable_lib:
+        if not self.options.enable_lib:
             meson.options["default_library"] = "static"
         meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return meson
