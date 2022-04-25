@@ -18,22 +18,24 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
-        self.build_requires("automake/1.16.3")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self.options["pkgconf"].enable_lib:
+            self.build_requires("automake/1.16.3")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def build(self):
-        # Test pkg.m4 integration into automake
-        shutil.copy(os.path.join(self.source_folder, "configure.ac"),
-                    os.path.join(self.build_folder, "configure.ac"))
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.environment_append(RunEnvironment(self).vars):
-            autotools.configure()
+        if self.options["pkgconf"].enable_lib:
+            # Test pkg.m4 integration into automake
+            shutil.copy(os.path.join(self.source_folder, "configure.ac"),
+                        os.path.join(self.build_folder, "configure.ac"))
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
+            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            with tools.environment_append(RunEnvironment(self).vars):
+                autotools.configure()
 
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
@@ -49,6 +51,7 @@ class TestPackageConan(ConanFile):
             if not pkgconf_path or not pkgconf_path.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
                 raise ConanException("pkgconf executable not found")
 
-            with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
-                self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]), run_environment=True)
-                self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]), run_environment=True)
+            if self.options["pkgconf"].enable_lib:
+                with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
+                    self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]), run_environment=True)
+                    self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]), run_environment=True)
