@@ -99,8 +99,10 @@ class AbseilConan(ConanFile):
         components = self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "absl", "abslTargets.cmake"))
         tools.rmdir(cmake_folder)
 
+        # Create a build-module that will propagate the required cxx_std to consumers of this recipe's targets
         os.makedirs(os.path.join(self.package_folder, self._module_path))
         with open(os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module), 'w', encoding='utf-8') as f:
+            f.write("cmake_minimum_required(VERSION 3.1)\n\n")
             cxx_std_required = _ABIFile("abi.h").cxx_std()
             for _, values in components.items():
                 cmake_target = values["cmake_target"]
