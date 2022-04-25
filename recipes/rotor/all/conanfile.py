@@ -89,7 +89,6 @@ class RotorConan(ConanFile):
         self._cmake.definitions["BUILD_THREAD"] = self.options.enable_thread
         self._cmake.definitions["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
