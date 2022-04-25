@@ -12,3 +12,5 @@ patches:
   "1.9.2":
     - patch_file: "patches/cxx-11-required.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/cmake-lz4.patch"
+      base_path: "source_subfolder"

@@ -24,7 +24,7 @@ class FlannConan(ConanFile):
         "with_hdf5": "deprecated",
     }
 
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
