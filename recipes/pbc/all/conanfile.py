@@ -32,6 +32,10 @@ class PbcConan(ConanFile):
     def requirements(self):
         self.requires("gmp/6.2.1")
 
+    def build_requirements(self):
+        self.build_requires("bison/3.7.6")
+        self.build_requires("flex/2.6.4")
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
