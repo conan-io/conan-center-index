@@ -24,7 +24,7 @@ class FlannConan(ConanFile):
         "with_hdf5": "deprecated",
     }
 
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     @property
@@ -113,6 +113,7 @@ class FlannConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         # Remove vc runtimes
         if self.settings.os == "Windows":
             if self.options.shared:
