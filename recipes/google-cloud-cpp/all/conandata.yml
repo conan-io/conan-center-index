@@ -11,6 +11,9 @@ sources:
   "1.31.1":
     url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.31.1.tar.gz"
     sha256: "dc7cbf95b506a84b48cf71e0462985d262183edeaabdacaaee2109852394a609"
+  "1.39.1":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.39.1.tar.gz"
+    sha256: "9f9a2f1250efd47a3c8fbe2a3874b3d8aa45ef43c6d54cfcc764ad27bc78d21d"
 patches:
   "1.26.1":
     - patch_file: "patches/0001-googleapis-folder.patch"

@@ -13,7 +13,6 @@ class GoogleCloudCppConan(ConanFile):
     topics = "google", "cloud", "google-cloud-storage", "google-cloud-platform", "google-cloud-pubsub", "google-cloud-spanner", "google-cloud-bigtable"
     homepage = "https://github.com/googleapis/google-cloud-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,6 +30,11 @@ class GoogleCloudCppConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -99,17 +103,18 @@ class GoogleCloudCppConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # Do not override CMAKE_CXX_STANDARD if provided
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            textwrap.dedent("""\
-                set(CMAKE_CXX_STANDARD
-                    11
-                    CACHE STRING "Configure the C++ standard version for all targets.")"""),
-            textwrap.dedent("""\
-                if(NOT "${CMAKE_CXX_STANDARD}")
-                    set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
-                endif()
-                """))
+        if tools.Version(self.version) < "1.33.0":
+            # Do not override CMAKE_CXX_STANDARD if provided
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                textwrap.dedent("""\
+                    set(CMAKE_CXX_STANDARD
+                        11
+                        CACHE STRING "Configure the C++ standard version for all targets.")"""),
+                textwrap.dedent("""\
+                    if(NOT "${CMAKE_CXX_STANDARD}")
+                        set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
+                    endif()
+                    """))
 
     def build(self):
         self._patch_sources()
