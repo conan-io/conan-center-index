@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conan.tools.microsoft import is_msvc
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -49,3 +50,8 @@ class ZugConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
         self.copy(pattern="*.hpp", dst=os.path.join("include", "zug"), src=os.path.join(self.source_folder, "zug"))
+
+    def package_info(self):
+        if is_msvc(self):
+            self.cpp_info.cxxflags = ["/Zc:externConstexpr"]
+
