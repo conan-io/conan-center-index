@@ -30,3 +30,6 @@ patches:
   "0.4.25":
     - patch_file: "patches/0001-disable-fPIC.patch"
       base_path: "source_subfolder"
+  "0.6.19":
+    - patch_file: "patches/0002-fix-902-unset-moutline-atomics-flag-under-iOS-arm64.patch"
+      base_path: "source_subfolder"

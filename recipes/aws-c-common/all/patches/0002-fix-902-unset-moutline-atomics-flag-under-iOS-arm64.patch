@@ -1,0 +1,26 @@
+From f96fdbcbaf5cefbcb7623a63705a10166ff8aefa Mon Sep 17 00:00:00 2001
+From: Dylan <2894220@gmail.com>
+Date: Mon, 25 Apr 2022 17:03:23 +0800
+Subject: [PATCH] fix: #902 unset -moutline-atomics flag under iOS arm64
+
+Signed-off-by: Dylan <2894220@gmail.com>
+---
+ cmake/AwsCFlags.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/AwsCFlags.cmake b/cmake/AwsCFlags.cmake
+index a0a4708..d6ef775 100644
+--- a/cmake/AwsCFlags.cmake
++++ b/cmake/AwsCFlags.cmake
+@@ -123,7 +123,7 @@ function(aws_set_common_properties target)
+        # -moutline-atomics generates code for both older load/store exclusive atomics and also
+        # Arm's Large System Extensions (LSE) which scale substantially better on large core count systems
+         check_c_compiler_flag("-moutline-atomics -Werror" HAS_MOUTLINE_ATOMICS)
+-        if (HAS_MOUTLINE_ATOMICS AND AWS_ARCH_ARM64)
++        if (HAS_MOUTLINE_ATOMICS AND AWS_ARCH_ARM64 AND NOT IOS)
+             list(APPEND AWS_C_FLAGS -moutline-atomics)
+         endif()
+ 
+-- 
+2.35.1
+
