@@ -286,9 +286,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.204.1")
+            self.requires("vulkan-loader/1.3.211.0")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.8")
+                self.requires("moltenvk/1.1.9")
         if self.options.with_glib:
             self.requires("glib/2.72.0")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -300,7 +300,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/4.2.0")
+            self.requires("harfbuzz/4.2.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -338,7 +338,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.72")
+            self.requires("nss/3.77")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -348,7 +348,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.23.1")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.os == "Windows":
