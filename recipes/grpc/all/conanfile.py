@@ -307,7 +307,8 @@ class grpcConan(ConanFile):
                 "requires": [
                     "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
                     "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor", "c-ares::cares", "openssl::crypto",
+                    "abseil::absl_statusor", "abseil::absl_random_random",
+                    "c-ares::cares", "openssl::crypto",
                     "openssl::ssl", "re2::re2", "zlib::zlib",
                 ],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
