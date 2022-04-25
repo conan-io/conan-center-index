@@ -109,7 +109,7 @@ class AbseilConan(ConanFile):
     def _create_components_file_from_cmake_target_file(self, absl_target_file_path):
         components = {}
 
-        abs_target_file = open(absl_target_file_path, "r")
+        abs_target_file = open(absl_target_file_path, "r", encoding="utf-8")
         abs_target_content = abs_target_file.read()
         abs_target_file.close()
 
@@ -158,7 +158,7 @@ class AbseilConan(ConanFile):
                             components[potential_lib_name].setdefault("defines", []).append(definition)
 
         # Save components informations in json file
-        with open(self._components_helper_filepath, "w") as json_file:
+        with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
 
         return components
