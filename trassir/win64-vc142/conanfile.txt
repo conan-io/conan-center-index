@@ -9,7 +9,7 @@ axtls/1.5.3.dssl4
 boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
-caffe/1.0.windows.dssl3
+caffe/1.0.windows.dssl2
 cpython-distro/2.7.18.dssl1
 dlib/19.4
 dojo-toolkit/1.11.4@trassir/sdk142
@@ -45,6 +45,7 @@ openh264/1.7.0.dssl2
 openssl/1.1.1k
 pjsip/2.9
 protobuf/3.9.1.dssl2
+protoc/3.9.1.dssl2
 sdl/2.0.16
 signalr-qt/0.1.dssl3
 sip/4.14.3@trassir/sdk142
@@ -55,6 +56,9 @@ qt/5.14.1.dssl3
 qtwebkit/5.212.0-alpha4.dssl3
 xz_utils/5.2.4.dssl2
 zlib/1.2.11
+
+# grpc and its dependencies
+abseil/20211102.0
 
 [options]
 tevian:shared=True
@@ -163,7 +167,7 @@ openssl:openssldir=None
 openssl:shared=True
 
 pjsip:shared=False
-protobuf:shared=False
+protobuf:shared=True
 protobuf:with_zlib=False
 
 
