@@ -18,21 +18,20 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
-        if self.options["pkgconf"].enable_lib:
-            self.build_requires("automake/1.16.3")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        self.build_requires("automake/1.16.3")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def build(self):
-        if self.options["pkgconf"].enable_lib:
-            # Test pkg.m4 integration into automake
-            shutil.copy(os.path.join(self.source_folder, "configure.ac"),
-                        os.path.join(self.build_folder, "configure.ac"))
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            with tools.environment_append(RunEnvironment(self).vars):
-                autotools.configure()
+        # Test pkg.m4 integration into automake
+        shutil.copy(os.path.join(self.source_folder, "configure.ac"),
+                    os.path.join(self.build_folder, "configure.ac"))
+        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        with tools.environment_append(RunEnvironment(self).vars):
+            autotools.configure()
 
+        if self.options["pkgconf"].enable_lib:
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
