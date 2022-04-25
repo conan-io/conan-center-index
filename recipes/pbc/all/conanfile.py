@@ -63,26 +63,19 @@ class PbcConan(ConanFile):
 
         # No idea why this is necessary, but if you don't set CC this way, then
         # configure complains that it can't find gmp.
-        if self.settings.os == "iOS":
-            if self.settings.arch == "x86_64":
-                platform = "iphonesimulator"
-                target = "x86_64-apple-darwin"
-            else:
-                platform = "iphoneos"
-                target = "arm64-apple-darwin"
-            sdk_path = self.run_get_output(
-                "xcrun", "-sdk", platform, "-show-sdk-path")
-            cc = self.run_get_output("xcrun", "-sdk", platform, "-find", "cc")
-            min_ios = "-miphoneos-version-min={}".format(
-                self.settings.os.version)
+        if (tools.cross_building(self.settings) and
+                self.settings.compiler == "apple-clang"):
+
+            xcr = tools.XCRun(self.settings)
+            target = tools.to_apple_arch(self.settings.arch) + "-apple-darwin"
+
+            min_ios = ""
+            if self.settings.os == "iOS":
+                min_ios = "-miphoneos-version-min={}".format(
+                    self.settings.os.version)
+
             args.append("CC={} -isysroot {} -target {} {}".format(
-                cc, sdk_path, target, min_ios))
-        elif self.settings.os == "Macos" and self.settings.arch != "x86_64":
-            target = "arm64-apple-darwin"
-            sdk_path = self.run_get_output("xcrun", "-show-sdk-path")
-            cc = self.run_get_output("xcrun", "-find", "cc")
-            args.append("CC={} -isysroot {} -target {}".format(
-                cc, sdk_path, target))
+                xcr.cc, xcr.sdk_path, target, min_ios))
 
         self._autotools.configure(args=args)
         return self._autotools
