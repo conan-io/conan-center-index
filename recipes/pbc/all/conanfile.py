@@ -53,7 +53,9 @@ class PbcConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = []
+        # Need to override environment or configure will fail despite that flex
+        # is actually available.
+        args = ["LEX=flex"]
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
         else:
