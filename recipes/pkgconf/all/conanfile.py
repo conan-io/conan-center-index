@@ -114,6 +114,9 @@ class PkgConfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libpkgconf")
         if tools.Version(self.version) >= "1.7.4":
