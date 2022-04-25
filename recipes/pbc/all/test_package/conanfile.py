@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["TEST_PIC"] = "fPIC" in self.options["pbc"] and self.options["pbc"].fPIC
         cmake.configure()
         cmake.build()
 

@@ -6,8 +6,3 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
-if (TEST_PIC)
-    add_library(${PROJECT_NAME}_shared SHARED test_package.c)
-    target_link_libraries(${PROJECT_NAME}_shared ${CONAN_LIBS})
-endif()
