@@ -60,6 +60,9 @@ snappy/1.1.8.dssl1
 xz_utils/5.2.4.dssl1
 zlib/1.2.11
 
+# grpc and its dependencies
+abseil/20211102.0
+
 [options]
 atl:shared=False
 axtls:shared=True

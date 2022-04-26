@@ -56,6 +56,9 @@ qtwebkit/5.212.0-alpha4.dssl3
 xz_utils/5.2.4.dssl2
 zlib/1.2.11
 
+# grpc and its dependencies
+abseil/20211102.0
+
 [options]
 tevian:shared=True
 axtls:shared=True

@@ -1,4 +1,36 @@
 sources:
-  "20200205":
-    sha256: 3c554df4909c5c55a6d251f6eadc2c78ff20db5ad4471fd9cbf8085c51b76797
-    url: https://github.com/abseil/abseil-cpp/archive/08a7e7bf972c8451855a5022f2faf3d3655db015.tar.gz
+  "20211102.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
+    sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
+  "20210324.2":
+    url: "https://github.com/abseil/abseil-cpp/archive/20210324.2.tar.gz"
+    sha256: "59b862f50e710277f8ede96f083a5bb8d7c9595376146838b9580be90374ee1f"
+  "20200923.3":
+    url: "https://github.com/abseil/abseil-cpp/archive/20200923.3.tar.gz"
+    sha256: "ebe2ad1480d27383e4bf4211e2ca2ef312d5e6a09eba869fd2e8a5c5d553ded2"
+  "20200225.3":
+    url: "https://github.com/abseil/abseil-cpp/archive/20200225.3.tar.gz"
+    sha256: "66d4d009050f39c104b03f79bdca9d930c4964016f74bf24867a43fbdbd00d23"
+patches:
+  "20211102.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+  "20210324.2":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-cpp-standard-20210324.patch"
+      base_path: "source_subfolder"
+  "20200923.3":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-cpp-standard-20200923.patch"
+      base_path: "source_subfolder"
+  "20200225.3":
+    - patch_file: "patches/0001-cmake-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-cpp-standard-20200225.patch"
+      base_path: "source_subfolder"

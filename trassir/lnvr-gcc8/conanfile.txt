@@ -95,6 +95,8 @@ xtrans/1.4.0 # GHA: noexport
 xz_utils/5.2.4.dssl1
 zlib/1.2.11
 
+# grpc and its dependencies
+abseil/20211102.0
 
 [options]
 ffmpeg:pulse=False
@@ -150,6 +152,7 @@ sdl:libunwind=False
 sdl:nas=False
 
 axtls:shared=True
+abseil:shared=True
 boost:shared=True
 bzip2:shared=True
 c-ares:shared=True
