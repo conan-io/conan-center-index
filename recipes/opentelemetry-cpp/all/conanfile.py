@@ -1,5 +1,6 @@
 import os
 import textwrap
+import functools
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -15,13 +16,13 @@ class OpenTelemetryCppConan(ConanFile):
     description = "The C++ OpenTelemetry API and SDK"
     requires = [
         "abseil/20211102.0",
-        "grpc/1.44.0",
+        "grpc/1.45.2",
         "libcurl/7.80.0",
         "nlohmann_json/3.10.5",
-        "openssl/1.1.1m",
-        "opentelemetry-proto/0.11.0",
-        "protobuf/3.19.2",
-        "thrift/0.14.2",
+        "openssl/1.1.1n",
+        "opentelemetry-proto/0.16.0",
+        "protobuf/3.20.0",
+        "thrift/0.15.0",
     ]
     topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     generators = "cmake", "cmake_find_package_multi"
@@ -35,9 +36,7 @@ class OpenTelemetryCppConan(ConanFile):
         "shared": False,
     }
     exports_sources = "CMakeLists.txt"
-
     short_paths = True
-    _cmake = None
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -84,11 +83,9 @@ class OpenTelemetryCppConan(ConanFile):
             destination=self._source_subfolder,
             strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         defs = {
           "BUILD_TESTING": False,
           "WITH_ABSEIL": True,
@@ -98,8 +95,8 @@ class OpenTelemetryCppConan(ConanFile):
           "WITH_OTLP": True,
           "WITH_ZIPKIN": True,
         }
-        self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(defs=defs, build_folder=self._build_subfolder)
+        return cmake
 
     def _patch_sources(self):
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
@@ -107,6 +104,10 @@ class OpenTelemetryCppConan(ConanFile):
             self._source_subfolder,
             "cmake",
             "opentelemetry-proto.cmake")
+        tools.replace_in_file(
+            protos_cmake_path,
+            "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
+            "if(1)")
         tools.replace_in_file(
             protos_cmake_path,
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
