@@ -7,7 +7,6 @@ required_conan_version = ">=1.33.0"
 
 class PbcConan(ConanFile):
     name = "pbc"
-    version = "0.5.14"
     topics = ("pbc", "crypto", "cryptography", "security", "pairings" "cryptographic")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://crypto.stanford.edu/pbc/"
