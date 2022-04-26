@@ -77,7 +77,7 @@ class SDLImageConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("sdl/2.0.16")
+        self.requires("sdl/2.0.20")
         if self.options.with_libtiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_libjpeg:
@@ -85,8 +85,8 @@ class SDLImageConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.1")
-        self.requires("zlib/1.2.11")
+            self.requires("libwebp/1.2.2")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
