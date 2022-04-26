@@ -104,10 +104,11 @@ class OpenTelemetryCppConan(ConanFile):
             self._source_subfolder,
             "cmake",
             "opentelemetry-proto.cmake")
-        tools.replace_in_file(
-            protos_cmake_path,
-            "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
-            "if(1)")
+        if tools.Version(self.version) >= "1.1.0":
+            tools.replace_in_file(
+                protos_cmake_path,
+                "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
+                "if(1)")
         tools.replace_in_file(
             protos_cmake_path,
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
