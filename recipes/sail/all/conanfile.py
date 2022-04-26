@@ -99,17 +99,17 @@ class SAILConan(ConanFile):
         if not self.options.with_webp:
             except_codecs.append("WEBP")
 
-        self._cmake = CMake(self)
-        self._cmake.definitions["SAIL_BUILD_APPS"]     = False
-        self._cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["SAIL_BUILD_TESTS"]    = False
-        self._cmake.definitions["SAIL_COMBINE_CODECS"] = True
-        self._cmake.definitions["SAIL_EXCEPT_CODECS"]  = ";".join(except_codecs)
-        self._cmake.definitions["SAIL_INSTALL_PDB"]    = False
-        self._cmake.definitions["SAIL_THREAD_SAFE"]    = self.options.thread_safe
-        self._cmake.configure(build_folder=self._build_subfolder)
+        cmake = CMake(self)
+        cmake.definitions["SAIL_BUILD_APPS"] = False
+        cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
+        cmake.definitions["SAIL_BUILD_TESTS"] = False
+        cmake.definitions["SAIL_COMBINE_CODECS"] = True
+        cmake.definitions["SAIL_EXCEPT_CODECS"] = ";".join(except_codecs)
+        cmake.definitions["SAIL_INSTALL_PDB"] = False
+        cmake.definitions["SAIL_THREAD_SAFE"] = self.options.thread_safe
+        cmake.configure(build_folder=self._build_subfolder)
 
-        return self._cmake
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
