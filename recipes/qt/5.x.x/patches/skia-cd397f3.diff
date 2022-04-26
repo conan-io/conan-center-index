@@ -9,16 +9,6 @@ Reviewed-by: Brian Salomon <bsalomon@google.com>
 Commit-Queue: Brian Salomon <bsalomon@google.com>
 ---
 
-diff --git a/AUTHORS b/AUTHORS
-index dc06975..db2fac8 100755
---- a/AUTHORS
-+++ b/AUTHORS
-@@ -76,6 +76,7 @@
- LG Electronics <*@lge.com>
- Shekhar Dutta <sherlockdoyle1904@gmail.com>
- ColdPaleLight <coldpalelight@gmail.com>
-+Jordan Williams <jordan@jwillikers.com>
- 
  # Trusted service accounts.
  Recipe roller SA <recipe-mega-autoroller@chops-service-accounts.iam.gserviceaccount.com>
 diff --git a/src/utils/SkParseColor.cpp b/src/utils/SkParseColor.cpp
