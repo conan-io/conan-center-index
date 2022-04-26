@@ -3,6 +3,7 @@ from conans import ConanFile, tools, RunEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 import configparser
+import functools
 import glob
 import os
 import textwrap
@@ -139,8 +140,6 @@ class QtConan(ConanFile):
 
     short_paths = True
 
-    _cmake = None
-
     _submodules_tree = None
 
     @property
@@ -261,6 +260,42 @@ class QtConan(ConanFile):
             if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
+            if tools.Version(self.version) < "6.3.0":
+                # Check if a valid python2 is available in PATH or it will failflex
+                # Start by checking if python2 can be found
+                python_exe = tools.which("python2")
+                if not python_exe:
+                    # Fall back on regular python
+                    python_exe = tools.which("python")
+
+                if not python_exe:
+                    msg = ("Python2 must be available in PATH "
+                           "in order to build Qt WebEngine")
+                    raise ConanInvalidConfiguration(msg)
+
+                # In any case, check its actual version for compatibility
+                from six import StringIO  # Python 2 and 3 compatible
+                mybuf = StringIO()
+                cmd_v = "\"{}\" --version".format(python_exe)
+                self.run(cmd_v, output=mybuf)
+                verstr = mybuf.getvalue().strip().split("Python ")[1]
+                if verstr.endswith("+"):
+                    verstr = verstr[:-1]
+                version = tools.Version(verstr)
+                # >= 2.7.5 & < 3
+                v_min = "2.7.5"
+                v_max = "3.0.0"
+                if (version >= v_min) and (version < v_max):
+                    msg = ("Found valid Python 2 required for QtWebengine:"
+                           " version={}, path={}".format(mybuf.getvalue(), python_exe))
+                    self.output.success(msg)
+                else:
+                    msg = ("Found Python 2 in path, but with invalid version {}"
+                           " (QtWebEngine requires >= {} & < "
+                           "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
+                           "python2(.exe)".format(verstr, v_min, v_max))
+                    raise ConanInvalidConfiguration(msg)
+
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
@@ -363,41 +398,6 @@ class QtConan(ConanFile):
                 self.build_requires("flex/2.6.4")
             else:
                 self.build_requires("winflexbison/2.5.24")
-
-            # Check if a valid python2 is available in PATH or it will failflex
-            # Start by checking if python2 can be found
-            python_exe = tools.which("python2")
-            if not python_exe:
-                # Fall back on regular python
-                python_exe = tools.which("python")
-
-            if not python_exe:
-                msg = ("Python2 must be available in PATH "
-                       "in order to build Qt WebEngine")
-                raise ConanInvalidConfiguration(msg)
-
-            # In any case, check its actual version for compatibility
-            from six import StringIO  # Python 2 and 3 compatible
-            mybuf = StringIO()
-            cmd_v = "\"{}\" --version".format(python_exe)
-            self.run(cmd_v, output=mybuf)
-            verstr = mybuf.getvalue().strip().split("Python ")[1]
-            if verstr.endswith("+"):
-                verstr = verstr[:-1]
-            version = tools.Version(verstr)
-            # >= 2.7.5 & < 3
-            v_min = "2.7.5"
-            v_max = "3.0.0"
-            if (version >= v_min) and (version < v_max):
-                msg = ("Found valid Python 2 required for QtWebengine:"
-                       " version={}, path={}".format(mybuf.getvalue(), python_exe))
-                self.output.success(msg)
-            else:
-                msg = ("Found Python 2 in path, but with invalid version {}"
-                       " (QtWebEngine requires >= {} & < "
-                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
-                       "python2(.exe)".format(verstr, v_min, v_max))
-                raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
             self.build_requires("wayland/1.20.0")
@@ -538,49 +538,48 @@ class QtConan(ConanFile):
 
         return None
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self, generator="Ninja")
+        cmake = CMake(self, generator="Ninja")
 
-        self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
-        self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
-        self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
-        self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
+        cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
+        cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
+        cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
+        cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
+        cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
 
-        self._cmake.definitions["QT_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
+        cmake.definitions["QT_BUILD_TESTS"] = "OFF"
+        cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
 
         if self._is_msvc and "MT" in msvc_runtime_flag(self):
-            self._cmake.definitions["FEATURE_static_runtime"] = "ON"
+            cmake.definitions["FEATURE_static_runtime"] = "ON"
 
         if self.options.multiconfiguration:
-            self._cmake.generator = "Ninja Multi-Config"
-            self._cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
-        self._cmake.definitions["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
+            cmake.generator = "Ninja Multi-Config"
+            cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
+        cmake.definitions["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
 
         for module in self._get_module_tree:
             if module != 'qtbase':
-                self._cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
+                cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
 
-        self._cmake.definitions["FEATURE_system_zlib"] = "ON"
+        cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        self._cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
+        cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
 
         # openSSL
         if not self.options.openssl:
-            self._cmake.definitions["INPUT_openssl"] = "no"
+            cmake.definitions["INPUT_openssl"] = "no"
         else:
             if self.options["openssl"].shared:
-                self._cmake.definitions["INPUT_openssl"] = "runtime"
+                cmake.definitions["INPUT_openssl"] = "runtime"
             else:
-                self._cmake.definitions["INPUT_openssl"] = "linked"
+                cmake.definitions["INPUT_openssl"] = "linked"
 
         if self.options.with_dbus:
-            self._cmake.definitions["INPUT_dbus"] = "linked"
+            cmake.definitions["INPUT_dbus"] = "linked"
         else:
-            self._cmake.definitions["FEATURE_dbus"] = "OFF"
+            cmake.definitions["FEATURE_dbus"] = "OFF"
 
 
         for opt, conf_arg in [("with_glib", "glib"),
@@ -594,7 +593,7 @@ class QtConan(ConanFile):
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
                               ("with_brotli", "brotli")]:
-            self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
+            cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
         for opt, conf_arg in [
@@ -607,50 +606,50 @@ class QtConan(ConanFile):
                               ("with_pcre2", "pcre2"),]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
-                    self._cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
+                    cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
                 else:
-                    self._cmake.definitions["FEATURE_system_%s" % conf_arg] = "ON"
+                    cmake.definitions["FEATURE_system_%s" % conf_arg] = "ON"
             else:
-                self._cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
-                self._cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+                cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
+                cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
 
-        for feature in str(self.options.disabled_features).split(" "):
-            self._cmake.definitions["FEATURE_%s" % feature] = "OFF"
+        for feature in str(self.options.disabled_features).split():
+            cmake.definitions["FEATURE_%s" % feature] = "OFF"
 
         if self.settings.os == "Macos":
-            self._cmake.definitions["FEATURE_framework"] = "OFF"
+            cmake.definitions["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
-            self._cmake.definitions["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            self._cmake.definitions["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
+            cmake.definitions["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            cmake.definitions["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
                                            "x86_64": "x86_64"}.get(str(self.settings.arch))
 
         if self.options.sysroot:
-            self._cmake.definitions["CMAKE_SYSROOT"] = self.options.sysroot
+            cmake.definitions["CMAKE_SYSROOT"] = self.options.sysroot
 
         if self.options.device:
-            self._cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
+            cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                self._cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
+                cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
             else:
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
                                   self.settings.compiler.version, self.settings.arch))
         if self.options.cross_compile:
-            self._cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
+            cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
 
-        self._cmake.definitions["FEATURE_pkg_config"] = "ON"
+        cmake.definitions["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
-            self._cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+            cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
         if self.settings.os == "Windows":
-            self._cmake.definitions["HOST_PERL"] = self.deps_user_info["strawberryperl"].perl
+            cmake.definitions["HOST_PERL"] = self.deps_user_info["strawberryperl"].perl
 
         try:
-            self._cmake.configure(source_folder="qt6")
+            cmake.configure(source_folder="qt6")
         except:
             cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
             cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
@@ -659,7 +658,7 @@ class QtConan(ConanFile):
             if (os.path.isfile(cmake_out_log)):
                 self.output.info(tools.load(cmake_out_log))
             raise
-        return self._cmake
+        return cmake
 
     def build(self):
         for f in glob.glob("*.cmake"):
