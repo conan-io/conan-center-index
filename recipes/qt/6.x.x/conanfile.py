@@ -646,6 +646,9 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             self._cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
+        if self.settings.os == "Windows":
+            self._cmake.definitions["HOST_PERL"] = self.deps_user_info["strawberryperl"].perl
+
         try:
             self._cmake.configure(source_folder="qt6")
         except:
@@ -704,7 +707,8 @@ class QtConan(ConanFile):
                     "BASH_ENV": os.path.abspath("bash_env")
                 }) if tools.os_info.is_macos else tools.no_op():
                     with tools.run_environment(self):
-                        cmake.build()
+                        with tools.remove_from_path("perl") if self.settings.os == "Windows" else tools.no_op():
+                            cmake.build()
     @property
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
