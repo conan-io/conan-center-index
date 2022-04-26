@@ -313,6 +313,8 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
             raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
+        if not self.options.with_pcre2:
+            raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
