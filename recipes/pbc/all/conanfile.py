@@ -1,5 +1,4 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from six import StringIO
 import os
 
 required_conan_version = ">=1.33.0"
