@@ -32,7 +32,7 @@ class QuaZIPConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("qt/6.2.3")
+        self.requires("qt/6.3.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
