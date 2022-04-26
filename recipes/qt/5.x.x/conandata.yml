@@ -59,6 +59,6 @@ patches:
     - patch_file: "patches/b498f4ce3f.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
     - patch_file: "patches/chromium-v8-missing-constexpr.patch"
-      base_path: "qt5/qtwebengine/src/3rdparty"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/v8"
     - patch_file: "patches/chromium-skia-missing-iterator-include.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
