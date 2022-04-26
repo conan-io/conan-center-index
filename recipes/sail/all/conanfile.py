@@ -38,9 +38,6 @@ class SAILConan(ConanFile):
         "with_webp": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
