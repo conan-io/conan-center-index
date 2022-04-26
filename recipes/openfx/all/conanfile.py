@@ -85,3 +85,7 @@ class openfx(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = self._build_modules
 
         self.cpp_info.libs = ["OfxHost", "OfxSupport"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs.extend(["GL"])
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreFoundation", "OpenGL"]
