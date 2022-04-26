@@ -19,5 +19,12 @@ sources:
     sha256: "cc9d4367c55b724832f6b09ab85481738ea456871f0381768a6a99335a98378a"
 patches:
   "4.4.0":
-    - patch_file: "patches/0001-fix-windows-rc-error.patch"
+    - patch_file: "patches/0001-fix-UAC-manifest-rc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-version-resource-for-Windows-11-sdk.patch"
+      base_path: "source_subfolder"
+  "4.3.2":
+    - patch_file: "patches/0001-fix-UAC-manifest-rc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-version-resource-for-Windows-11-sdk.patch"
       base_path: "source_subfolder"

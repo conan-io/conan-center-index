@@ -1,0 +1,25 @@
+From 3481ebdafb474ce7e312914e998e7212ecdbc5ba Mon Sep 17 00:00:00 2001
+From: Chun-wei Fan <fanchunwei@src.gnome.org>
+Date: Wed, 13 Oct 2021 12:16:06 +0800
+Subject: [PATCH] gtk: Fix version resource on for Windows 11 SDK
+
+The rc.exe that comes with the Windows 11 SDK does not allow one to include
+winuser.h directly in the .rc scripts, so make sure that it is not included
+by gtk-win32.rc.body.in, but instead include windows.h with WIN32_LEAN_AND_MEAN
+defined.
+---
+ gtk/gtk-win32.rc.body.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gtk/gtk-win32.rc.body.in b/gtk/gtk-win32.rc.body.in
+index b876a6ddf5..fc2dfd2ed3 100644
+--- a/gtk/gtk-win32.rc.body.in
++++ b/gtk/gtk-win32.rc.body.in
+@@ -1,5 +1,5 @@
+-#include <winuser.h>
+-#include <winver.h>
++#define WIN32_LEAN_AND_MEAN
++#include <windows.h>
+ 
+ GTK_ICON		ICON			"gtk.ico"
+ 
