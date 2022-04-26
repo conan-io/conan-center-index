@@ -1,5 +1,6 @@
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
