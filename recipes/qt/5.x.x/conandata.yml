@@ -62,3 +62,5 @@ patches:
       base_path: "qt5/qtwebengine/src/3rdparty/chromium/v8"
     - patch_file: "patches/chromium-skia-missing-iterator-include.patch"
       base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/skia-cd397f3.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/third_party/skia"
