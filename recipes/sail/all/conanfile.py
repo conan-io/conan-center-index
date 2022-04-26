@@ -80,10 +80,8 @@ class SAILConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
         except_codecs = []
 
         if not self.options.with_avif:
