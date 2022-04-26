@@ -43,12 +43,6 @@ class PbcConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
-    # Helper to run a command and return the output as a stripped string
-    def run_get_output(self, *args):
-        buf = StringIO()
-        self.run(args, output=buf)
-        return buf.getvalue().strip()
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
