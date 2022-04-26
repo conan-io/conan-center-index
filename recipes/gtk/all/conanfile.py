@@ -63,6 +63,8 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
+            # The upstream meson file does not create a static library
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_wayland
             del self.options.with_x11
@@ -77,6 +79,8 @@ class GtkConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared cairo")
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("MSVC build supports shared gtk only")
 
     def configure(self):
         if self.options.shared:
