@@ -1,11 +1,14 @@
 from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class XapianCoreConan(ConanFile):
@@ -29,8 +32,6 @@ class XapianCoreConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -38,10 +39,6 @@ class XapianCoreConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -54,13 +51,15 @@ class XapianCoreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.shared and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("shared builds are unavailable due to libtool's inability to create shared libraries")
 
     def requirements(self):
+        self.requires("zlib/1.2.12")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
-        self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("shared builds are unavailable due to libtool's inability to create shared libraries")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -72,7 +71,7 @@ class XapianCoreConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        if is_msvc(self):
             with tools.vcvars(self.settings):
                 msvc_cl_sh =  os.path.join(self.build_folder, "msvc_cl.sh").replace("\\", "/")
                 env = {
@@ -94,15 +93,20 @@ class XapianCoreConan(ConanFile):
     def _datarootdir(self):
         return os.path.join(self.package_folder, "bin", "share")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        self._autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in self._autotools.library_paths])
-        self._autotools.library_paths = []
-        if self._is_msvc:
-            self._autotools.cxx_flags.extend(["-EHsc", "-FS"])
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
+        autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in autotools.library_paths])
+        autotools.library_paths = []
+        if is_msvc(self):
+            autotools.cxx_flags.append("-EHsc")
+            if self.settings.compiler == "Visual Studio":
+                vs_ide_version = self.settings.compiler.version
+            else:
+                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            if tools.Version(vs_ide_version) >= "12":
+                autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",
@@ -111,8 +115,8 @@ class XapianCoreConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return autotools
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -134,7 +138,7 @@ class XapianCoreConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        if self._is_msvc and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "libxapian.lib"),
                          os.path.join(self.package_folder, "lib", "xapian.lib"))
 
