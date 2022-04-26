@@ -9,6 +9,8 @@ patches:
   "1.2.12":
     - patch_file: "patches/minizip.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/ioapi.patch"
+      base_path: "source_subfolder"
   "1.2.11":
     - patch_file: "patches/minizip.patch"
       base_path: "source_subfolder"
