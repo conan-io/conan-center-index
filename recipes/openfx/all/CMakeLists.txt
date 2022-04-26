@@ -1,0 +1,63 @@
+cmake_minimum_required(VERSION 3.16.0)
+project(openfx VERSION 1.4.0 LANGUAGES CXX)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_definitions(-D_HAS_AUTO_PTR_ETC)
+
+# Flags
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWINDOWS -DNOMINMAX")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated -Wno-deprecated-declarations")
+endif()
+
+# Conan
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+# Macros
+set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+
+# Sources
+set(OFX_HEADER_DIR "${SOURCE_SUBFOLDER}/include")
+set(OFX_SUPPORT_HEADER_DIR "${SOURCE_SUBFOLDER}/Support/include")
+set(OFX_SUPPORT_LIBRARY_DIR "${SOURCE_SUBFOLDER}/Support/Library")
+set(OFX_HOSTSUPPORT_HEADER_DIR "${SOURCE_SUBFOLDER}/HostSupport/include")
+set(OFX_HOSTSUPPORT_LIBRARY_DIR "${SOURCE_SUBFOLDER}/HostSupport/src")
+
+file(GLOB_RECURSE OFX_HEADER_FILES "${OFX_HEADER_DIR}/*.h")
+file(GLOB_RECURSE OFX_SUPPORT_HEADER_FILES "${OFX_SUPPORT_HEADER_DIR}/*.h")
+file(GLOB_RECURSE OFX_SUPPORT_LIBRARY_FILES "${OFX_SUPPORT_LIBRARY_DIR}/*.cpp")
+file(GLOB_RECURSE OFX_HOSTSUPPORT_HEADER_FILES "${OFX_HOSTSUPPORT_HEADER_DIR}/*.h")
+file(GLOB_RECURSE OFX_HOSTSUPPORT_LIBRARY_FILES "${OFX_HOSTSUPPORT_LIBRARY_DIR}/*.cpp")
+
+# Support
+add_library(OfxSupport STATIC
+	${OFX_HEADER_FILES}
+	${OFX_SUPPORT_HEADER_FILES}
+	${OFX_SUPPORT_LIBRARY_FILES})
+
+target_include_directories(OfxSupport PUBLIC
+	${OFX_HEADER_DIR}
+	${OFX_SUPPORT_HEADER_DIR})
+
+# HostSupport
+add_library(OfxHost STATIC
+	${OFX_HEADER_FILES}
+	${OFX_HOSTSUPPORT_HEADER_FILES}
+	${OFX_HOSTSUPPORT_LIBRARY_FILES})
+
+target_link_libraries(OfxHost PUBLIC ${CONAN_LIBS})
+
+target_include_directories(OfxHost PUBLIC
+	${OFX_HEADER_DIR}
+	${OFX_HOSTSUPPORT_HEADER_DIR})
+
+# Link
+set_target_properties(OfxSupport PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(OfxHost PROPERTIES LINKER_LANGUAGE CXX)
+if(NOT MSVC)
+	set_target_properties(OfxSupport PROPERTIES COMPILE_FLAGS "-fPIC")
+	set_target_properties(OfxHost PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
