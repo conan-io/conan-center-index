@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
 project(openfx VERSION 1.4.0 LANGUAGES CXX)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_definitions(-D_HAS_AUTO_PTR_ETC)
