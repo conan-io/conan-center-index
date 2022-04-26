@@ -1,0 +1,25 @@
+winnt.h requires architecture defines such as _AMD64_. This is defined in Windows.h but not in winuser.h
+diff --git a/tools/generate-uac-manifest.py b/tools/generate-uac-manifest.py
+index ede6ba5..783a6e4 100644
+--- a/tools/generate-uac-manifest.py
++++ b/tools/generate-uac-manifest.py
+@@ -92,7 +92,7 @@ def write_rc_file(name, resource, outdir):
+ 
+     if resource is None:
+         outfile = open(output_file_base_name + '.rc', 'w+')
+-        outfile.write('#include <winuser.h>')
++        outfile.write('#include <Windows.h>')
+     else:
+         if resource != output_file_base_name + '.rc':
+             outfile = open(output_file_base_name + '.rc', 'w+')
+diff --git a/gtk/gtk-win32.rc.body.in b/gtk/gtk-win32.rc.body.in
+index b876a6d..ff16e7c 100644
+--- a/gtk/gtk-win32.rc.body.in
++++ b/gtk/gtk-win32.rc.body.in
+@@ -1,5 +1,4 @@
+-#include <winuser.h>
+-#include <winver.h>
++#include <Windows.h>
+ 
+ GTK_ICON		ICON			"gtk.ico"
+ 

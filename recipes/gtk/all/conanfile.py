@@ -51,10 +51,14 @@ class GtkConan(ConanFile):
     @property
     def _gtk4(self):
         return tools.Version("4.0.0") <= tools.Version(self.version) < tools.Version("5.0.0")
-    @property
 
+    @property
     def _gtk3(self):
         return tools.Version("3.0.0") <= tools.Version(self.version) < tools.Version("4.0.0")
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -160,6 +164,8 @@ class GtkConan(ConanFile):
         return meson
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self._gtk3:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         if tools.Version(self.version) >= "4.2.0":

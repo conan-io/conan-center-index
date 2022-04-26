@@ -17,3 +17,7 @@ sources:
   "3.24.24":
     url: "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.24.tar.xz"
     sha256: "cc9d4367c55b724832f6b09ab85481738ea456871f0381768a6a99335a98378a"
+patches:
+  "4.4.0":
+    - patch_file: "patches/0001-fix-windows-rc-error.patch"
+      base_path: "source_subfolder"
