@@ -153,6 +153,11 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
         self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
+        # Require C++11 at least. Consumed targets (abseil) via interface target_compiler_feature
+        #  can propagate newer standards
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+
         if tools.cross_building(self):
             # otherwise find_package() can't find config files since
             # conan doesn't populate CMAKE_FIND_ROOT_PATH
