@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 # Otherwise, at least C++14 is required.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND ${PfrMajorVersion} EQUAL 1)
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_PFR_USE_CPP17=1 BOOST_PFR_USE_LOOPHOLE=0)
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 endif()
