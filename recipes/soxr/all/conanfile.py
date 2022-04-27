@@ -1,8 +1,8 @@
 import functools
+import os
 from conans import ConanFile, CMake, tools
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-import os
-import re
+
 
 required_conan_version = ">=1.45.0"
 
@@ -75,7 +75,7 @@ class SoxrConan(ConanFile):
 
     def _extract_pffft_license(self):
         pffft_c = tools.load(os.path.join(self._source_subfolder, "src", "pffft.c"))
-        license_contents = pffft_c[2:pffft_c.find("*/", 1)]
+        license_contents = pffft_c[pffft_c.find("/* Copyright")+3:pffft_c.find("modern CPUs.")+13]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
