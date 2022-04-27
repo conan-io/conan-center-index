@@ -166,6 +166,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not tools.is_apple_os(self.settings.os):
             del self.options.with_avfoundation
+        if not self._version_supports_vulkan():
+            del self.options.with_vulkan
 
     def configure(self):
         if self.options.shared:
@@ -220,7 +222,7 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
-        if self.options.get_safe("with_vulkan"):
+        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.211.0")
 
     def validate(self):
@@ -333,7 +335,6 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
-            opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
@@ -350,6 +351,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac or ( self.options.with_ssl and ( self.options.with_libx264 or self.options.with_libx265 or self.options.postproc ) ) ),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
+        if self._version_supports_vulkan():
+            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
         if tools.is_apple_os(self.settings.os):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -647,5 +650,8 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avutil"].requires.extend(["vaapi::vaapi", "xorg::x11"])
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
-        if self.options.get_safe("with_vulkan"):
+        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append("vulkan::vulkan")
+
+    def _version_supports_vulkan(self):
+        return tools.Version(self.version) >= "4.3.0"
