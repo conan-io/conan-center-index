@@ -11,6 +11,12 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["PfrMajorVersion"] = Version(
             self.deps_cpp_info["pfr"].version).major
+        # PFR 1.0.4 doesn't support Visual Studio in C++14 mode, requires C++17.
+        # Otherwise, at least C++14 is required.
+        cmake.definitions["CMAKE_CXX_STANDARD"] = "14" \
+            if Version(self.deps_cpp_info["pfr"].version) >= "2.0.0" \
+                or self.settings.compiler != "Visual Studio" \
+            else "17"
         cmake.configure()
         cmake.build()
 
