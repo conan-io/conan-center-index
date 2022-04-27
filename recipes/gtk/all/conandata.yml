@@ -28,3 +28,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-version-resource-for-Windows-11-sdk.patch"
       base_path: "source_subfolder"
+  "4.2.1":
+    - patch_file: "patches/0001-fix-UAC-manifest-rc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-version-resource-for-Windows-11-sdk.patch"
+      base_path: "source_subfolder"

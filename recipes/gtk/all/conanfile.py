@@ -79,8 +79,8 @@ class GtkConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.3":
-                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.3")
+            if tools.Version(self.version) < "4.2":
+                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             if not self.options["gdk-pixbuf"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
