@@ -114,6 +114,10 @@ class GtkConan(ConanFile):
             self.requires("cairo/1.17.4")
         if self._gtk4:
             self.requires("graphene/1.10.8")
+            self.requires("fribidi/1.0.12")
+            self.requires("libpng/1.6.37")
+            self.requires("libtiff/4.3.0")
+            self.requires("libjpeg/9d")
         if self.settings.os == "Linux":
             if self._gtk4:
                 self.requires("xkbcommon/1.4.0")
@@ -175,6 +179,10 @@ class GtkConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                   "gtk_update_icon_cache: true",
                                   "gtk_update_icon_cache: false")
+        if "4.6.2" <= tools.Version(self.version):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                  "dependency(is_msvc_like ? ",
+                                  "dependency(false ? ")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
