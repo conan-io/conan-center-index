@@ -129,7 +129,7 @@ class GtkConan(ConanFile):
             self.requires("atk/2.38.0")
         self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
-            self.requires("pango/1.49.3")
+            self.requires("pango/1.50.7")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
         if self.options.with_gstreamer:
