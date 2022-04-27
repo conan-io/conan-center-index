@@ -100,6 +100,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": [True, False],
         "buildid": "ANY",
         "python_buildid": "ANY",
+        "system_use_utf8": [True, False],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -136,6 +137,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": True,
         "buildid": None,
         "python_buildid": None,
+        "system_use_utf8": False,
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -1041,6 +1043,8 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.system_use_utf8:
+            flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
             flags.extend(["segmented-stacks=on",
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
@@ -1398,6 +1402,9 @@ class BoostConan(ConanFile):
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            
+        if self.options.system_use_utf8:
+            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_USE_UTF8")
 
         if self.options.buildid:
             # If you built Boost using the --buildid option then set this macro to the same value
