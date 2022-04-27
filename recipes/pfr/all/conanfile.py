@@ -27,7 +27,8 @@ class PfrConan(ConanFile):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
-            "gcc": "5.5"
+            "gcc": "5.5",
+            "Visual Studio": "14",
         }
 
     def configure(self):
