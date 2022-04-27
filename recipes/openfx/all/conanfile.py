@@ -1,12 +1,9 @@
 from conans import ConanFile, CMake, tools
-
 import os
-import textwrap
 
 
 class openfx(ConanFile):
     name = "openfx"
-    version = "1.4.0"
     license = "LICENCE"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://openeffects.org"
@@ -59,16 +56,7 @@ class openfx(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        self.copy("*.h", src="source_subfolder/include", dst="include")
-        self.copy("*.h", src="source_subfolder/HostSupport/include", dst="include")
-        self.copy("*.h", src="source_subfolder/Support/include", dst="include")
-        self.copy("*.h", src="source_subfolder/Support/Plugins/include", dst="include")
-
-        self.copy("*.a", dst="lib", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.ofx", dst="bin", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="bin", keep_path=False)
+        cmake.install()
 
         self.copy("*.symbols", src="symbols", dst="lib/symbols")
         self.copy("*.cmake", src="cmake", dst="lib/cmake")
