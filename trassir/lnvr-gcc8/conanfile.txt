@@ -65,7 +65,7 @@ libxxf86vm/1.1.4 # GHA: noexport
 mesa/19.3.1
 miniupnpc/2.1
 odbc/2.3.7
-onnxruntime/1.7.2
+onnxruntime/1.7.2.dssl1
 openal/1.20.1
 opencv/2.4.13.7
 openh264/1.7.0.dssl2
