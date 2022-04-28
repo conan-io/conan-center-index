@@ -10,7 +10,7 @@ class FastDoubleParserConan(ConanFile):
     topics = ("numerical", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/fast_double_parser"
-    license = "Apache-2.0"
+    license = ("Apache-2.0", "BSL-1.0")
 
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
@@ -33,4 +33,4 @@ class FastDoubleParserConan(ConanFile):
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy("*.h", dst="include", src=include_folder)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
