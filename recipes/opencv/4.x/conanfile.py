@@ -220,7 +220,7 @@ class OpenCVConan(ConanFile):
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
-            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
+            raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.with_cuda and not self.options.contrib:
             raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if self.options.get_safe("dnn_cuda", False) and \
