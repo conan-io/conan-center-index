@@ -1,46 +1,62 @@
 from conans import ConanFile, CMake, tools
 import os
 
-def version_to_date(ver):
-    return ver[0:4] + "-" + ver[4:6] + "-" + ver[6:8]
+required_conan_version = ">=1.43.0"
+
 
 class Re2Conan(ConanFile):
     name = "re2"
     description = "Fast, safe, thread-friendly regular expression library"
-    topics = ("conan", "re2", "regex")
+    topics = ("regex")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/re2"
     license = "BSD-3-Clause"
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-
-    settings = "os", "arch", "build_type", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("re2-" + version_to_date(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["RE2_BUILD_TESTING"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["RE2_BUILD_TESTING"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -53,7 +69,12 @@ class Re2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "re2")
+        self.cpp_info.set_property("cmake_target_name", "re2::re2")
 
-        if self.settings.os == "Linux":
+        self.cpp_info.names["cmake_find_package"] = "re2"
+        self.cpp_info.names["cmake_find_package_multi"] = "re2"
+
+        self.cpp_info.libs = ["re2"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
