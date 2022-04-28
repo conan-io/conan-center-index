@@ -59,17 +59,17 @@ class ITKConan(ConanFile):
         self.requires("dcmtk/3.6.6")
         self.requires("double-conversion/3.2.0")
         self.requires("eigen/3.4.0")
-        self.requires("expat/2.4.3")
+        self.requires("expat/2.4.8")
         self.requires("fftw/3.3.9")
         self.requires("gdcm/3.0.9")
         self.requires("hdf5/1.12.0")
-        self.requires("icu/70.1") # TODO: to remove? Seems to be a transitivie dependency through dcmtk
+        self.requires("icu/71.1") # TODO: to remove? Seems to be a transitivie dependency through dcmtk
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
         self.requires("openjpeg/2.4.0")
         self.requires("onetbb/2020.3")
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     @property
     def _minimum_cpp_standard(self):

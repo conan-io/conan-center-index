@@ -221,7 +221,7 @@ class MagnumConan(ConanFile):
         if self.options.gl:
             self.requires("opengl/system")
         if self.options.vk:
-            self.requires("vulkan-loader/1.2.190")
+            self.requires("vulkan-loader/1.3.204.1")
 
         if self.options.get_safe("egl_context", False) or \
            self.options.get_safe("xegl_application", False) or \
@@ -232,10 +232,10 @@ class MagnumConan(ConanFile):
             self.requires("egl/system")
 
         if self.options.glfw_application:
-            self.requires("glfw/3.3.4")
+            self.requires("glfw/3.3.7")
 
         if self.options.sdl2_application:
-            self.requires("sdl/2.0.16")
+            self.requires("sdl/2.0.20")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -362,9 +362,9 @@ class MagnumConan(ConanFile):
                               "")
         # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
         #   let the Conan user decide what to use and what not.
-        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
+        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+', encoding="utf-8") as f:
             text = f.read()
-            text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
+            text = re.sub(r'cmake_dependent_option(([0-9A-Z_]+) .*)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
             f.seek(0)
             f.write(text)
             f.truncate()
@@ -405,7 +405,7 @@ class MagnumConan(ConanFile):
         os.makedirs(build_modules_folder)
         for executable in self._executables:
             build_module_path = os.path.join(build_modules_folder, "conan-magnum-{}.cmake".format(executable))
-            with open(build_module_path, "w+") as f:
+            with open(build_module_path, "w+", encoding="utf-8") as f:
                 f.write(textwrap.dedent("""\
                     if(NOT TARGET Magnum::{exec})
                         if(CMAKE_CROSSCOMPILING)
@@ -421,9 +421,9 @@ class MagnumConan(ConanFile):
                 """.format(exec=executable)))
 
         if not self.options.shared_plugins:
-            for component, target, library, folder, deps in self._plugins:
+            for component, target, library, _, _ in self._plugins:
                 build_module_path = os.path.join(build_modules_folder, "conan-magnum-plugins-{}.cmake".format(component))
-                with open(build_module_path, "w+") as f:
+                with open(build_module_path, "w+", encoding="utf-8") as f:
                     f.write(textwrap.dedent("""\
                         if(NOT ${{CMAKE_VERSION}} VERSION_LESS "3.0")
                             if(TARGET Magnum::{target})
@@ -604,12 +604,10 @@ class MagnumConan(ConanFile):
         if self.options.get_safe("windowless_windows_egl_application", False):
             raise Exception("Recipe doesn't define this component")
 
-        """
-            # If there is only one application, here it is an alias
-            self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
-            self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
-            self.cpp_info.components["application"].requires = ["sdl2_application"]
-        """
+        # # If there is only one application, here it is an alias
+        # self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
+        # self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
+        # self.cpp_info.components["application"].requires = ["sdl2_application"]
 
         #### CONTEXTS ####
         if self.options.get_safe("cgl_context", False):

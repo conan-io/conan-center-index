@@ -58,9 +58,9 @@ class SentryCrashpadConan(ConanFile):
             del self.options.with_tls
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.get_safe("with_tls"):
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

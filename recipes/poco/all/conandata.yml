@@ -1,4 +1,7 @@
 sources:
+  "1.11.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.2-release.tar.gz"
+    sha256: "9774651a02e4cfa79fc43b7db617e45d353ede00b7be8afd0e74e6afb23d3793"
   "1.11.1":
     url: "https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz"
     sha256: "2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0"
@@ -21,34 +24,39 @@ sources:
     url: "https://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz"
     sha256: "43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af"
 patches:
+  "1.11.2":
+    - patch_file: patches/1.11.2.patch
+      base_path: src
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: src
   "1.11.1":
     - patch_file: patches/1.11.1.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: source_subfolder
+      base_path: src
   "1.11.0":
     - patch_file: patches/1.11.0.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/0002-mysql-include.patch
-      base_path: source_subfolder
+      base_path: src
   "1.10.1":
     - patch_file: patches/1.10.1.patch
-      base_path: source_subfolder
+      base_path: src
   "1.10.0":
     - patch_file: patches/1.10.0.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
-      base_path: source_subfolder
+      base_path: src
   "1.9.4":
     - patch_file: patches/1.9.2.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.9.2-2.patch
-      base_path: source_subfolder
+      base_path: src
   "1.9.3":
     - patch_file: patches/1.9.2.patch
-      base_path: source_subfolder
+      base_path: src
     - patch_file: patches/1.9.2-2.patch
-      base_path: source_subfolder
+      base_path: src
   "1.8.1":
     - patch_file: patches/1.8.1.patch
-      base_path: source_subfolder
+      base_path: src

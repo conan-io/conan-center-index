@@ -1,8 +1,9 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class Librasterlite2Conan(ConanFile):
@@ -36,13 +37,23 @@ class Librasterlite2Conan(ConanFile):
         "with_zstd": True,
     }
 
-    exports_sources = "patches/**"
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,35 +67,31 @@ class Librasterlite2Conan(ConanFile):
 
     def requirements(self):
         self.requires("cairo/1.17.4")
-        self.requires("freetype/2.10.4")
+        self.requires("freetype/2.11.1")
         self.requires("giflib/5.2.1")
-        self.requires("libcurl/7.78.0")
-        self.requires("libgeotiff/1.7.0")
+        self.requires("libcurl/7.80.0")
+        self.requires("libgeotiff/1.7.1")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.3.0")
-        self.requires("libxml2/2.9.12")
-        self.requires("sqlite3/3.36.0")
-        self.requires("zlib/1.2.11")
+        self.requires("libxml2/2.9.13")
+        self.requires("sqlite3/3.38.1")
+        self.requires("zlib/1.2.12")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.2")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_lz4:
             self.requires("lz4/1.9.3")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             raise ConanInvalidConfiguration("Visual Studio not supported yet")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
@@ -108,9 +115,8 @@ class Librasterlite2Conan(ConanFile):
                               "AC_CHECK_LIB(z,",
                               "AC_CHECK_LIB({},".format(self.deps_cpp_info["zlib"].libs[0]))
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -122,14 +128,24 @@ class Librasterlite2Conan(ConanFile):
             "--enable-lz4={}".format(yes_no(self.options.with_lz4)),
             "--enable-zstd={}".format(yes_no(self.options.with_zstd)),
         ]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=args)
-        return self._autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.configure(args=args)
+        return autotools
 
     def build(self):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared libs on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            # avoid SIP issues on macOS when dependencies are shared
+            if tools.is_apple_os(self.settings.os):
+                libpaths = ":".join(self.deps_cpp_info.lib_paths)
+                tools.replace_in_file(
+                    "configure",
+                    "#! /bin/sh\n",
+                    "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+                )
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.make()
@@ -144,7 +160,10 @@ class Librasterlite2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "rasterlite2"
+        self.cpp_info.set_property("pkg_config_name", "rasterlite2")
         self.cpp_info.libs = ["rasterlite2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "rasterlite2"

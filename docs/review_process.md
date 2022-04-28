@@ -101,6 +101,9 @@ The list includes conan-center-index contributors who are very active and proven
 - [@mathbunnyru](https://github.com/mathbunnyru)
 - [@ericriff](https://github.com/ericriff)
 - [@toge](https://github.com/toge)
+- [@AndreyMlashkin](https://github.com/AndreyMlashkin)
+- [@MartinDelille](https://github.com/MartinDelille)
+- [@dmn-star](https://github.com/dmn-star)
 
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
@@ -126,8 +129,7 @@ It doesn't always mean accepting all the suggestions, but at least providing a r
 
 ## Automatic Merges
 
-The bot checks for pull requests that can be merged several times every hour. Only one pull request will be merge in each execution,
-so there is a theoretical limit of ~70 PRs merged per day (in practice, it's less for reasons listed below).
+The bot runs Automatic Merges every 20 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of ~70 PRs merged per day (in practice, it's even less for reasons listed below).
 PR is selected for the merge only if:
 
 - Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).

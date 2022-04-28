@@ -1,3 +1,5 @@
+from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -14,7 +16,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
-    # TODO: Add shared option
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -79,32 +81,24 @@ class grpcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires('zlib/1.2.11')
-        self.requires('openssl/1.1.1m')
-        self.requires('protobuf/3.19.2')
-        self.requires('c-ares/1.17.2')
-        self.requires('abseil/20211102.0')
-        self.requires('re2/20211101')
+        self.requires("abseil/20211102.0")
+        self.requires("c-ares/1.18.1")
+        self.requires("openssl/1.1.1n")
+        self.requires("protobuf/3.20.0")
+        self.requires("re2/20220201")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            compiler_version = tools.Version(self.settings.compiler.version)
-            if compiler_version < 14:
+        if self._is_msvc:
+            if self.settings.compiler == "Visual Studio":
+                vs_ide_version = self.settings.compiler.version
+            else:
+                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            if tools.Version(vs_ide_version) < "14":
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
-        if self.options.shared:
-            # FIXME: try to support grpc shared and abseil static with gcc on Linux
-            # current error while linking internal check_epollexclusive executable:
-            # libabsl_time.a(duration.cc.o): undefined reference to symbol '_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7compareEPKc@@GLIBCXX_3.4.21'
-            if (self.settings.os == "Linux" and self.settings.compiler == "gcc") and not self.options["abseil"].shared:
-                raise ConanInvalidConfiguration(
-                    "gRPC shared not supported yet without abseil shared"
-                )
-
-            if self._is_msvc:
-                raise ConanInvalidConfiguration(
-                    "gRPC shared not supported yet with {} on {}".format(self.settings.compiler, self.settings.os)
-                )
+            if self.options.shared:
+                raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
@@ -114,7 +108,7 @@ class grpcConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.19.2')
+            self.build_requires('protobuf/3.20.0')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
@@ -141,6 +135,7 @@ class grpcConan(ConanFile):
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         self._cmake.definitions["gRPC_INSTALL"] = True
+        self._cmake.definitions["gRPC_INSTALL_SHAREDIR"] = "res/grpc"
 
         # tell grpc to use the find_package versions
         self._cmake.definitions["gRPC_ZLIB_PROVIDER"] = "package"
@@ -204,7 +199,6 @@ class grpcConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -255,8 +249,7 @@ class grpcConan(ConanFile):
         # Rename it
         dst_file = os.path.join(self.package_folder, self._module_path,
                                 "{}.cmake".format(executable))
-        tools.rename(os.path.join(self.package_folder, self._module_path,
-                                  self._grpc_plugin_template),
+        rename(self, os.path.join(self.package_folder, self._module_path, self._grpc_plugin_template),
                      dst_file)
 
         # Replace placeholders
@@ -314,7 +307,8 @@ class grpcConan(ConanFile):
                 "requires": [
                     "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
                     "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor", "c-ares::cares", "openssl::crypto",
+                    "abseil::absl_statusor", "abseil::absl_random_random",
+                    "c-ares::cares", "openssl::crypto",
                     "openssl::ssl", "re2::re2", "zlib::zlib",
                 ],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
@@ -384,6 +378,9 @@ class grpcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gRPC")
+        ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
+        self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
+        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path # remove in conan v2?
 
         for component, values in self._grpc_components.items():
             target = values.get("lib")

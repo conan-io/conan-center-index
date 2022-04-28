@@ -1,0 +1,5 @@
+sources:
+  # NOTE: https://github.com/mackron/dr_libs/blob/089deaa62268e6dacf2026754b1b228e54eb3993/dr_flac.h#L3
+  "0.12.38":
+    url: https://github.com/mackron/dr_libs/archive/089deaa62268e6dacf2026754b1b228e54eb3993.zip
+    sha256: "1b9fa02c56c2b42c99dd070c7dc3d4e8dee6a4e49139055e7f79e21aa88070d7"

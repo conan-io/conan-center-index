@@ -3,7 +3,7 @@ sources:
     url:
       - "https://constexpr.org/innoextract/files/innoextract-1.9.tar.gz"
       - "https://github.com/dscharrer/innoextract/releases/download/1.9/innoextract-1.9.tar.gz"
-    md5: "964f39bb3f8fd2313629e69ffd3dab9f"
+    sha256: "6344a69fc1ed847d4ed3e272e0da5998948c6b828cb7af39c6321aba6cf88126"
 patches:
   "1.9.0":
     - patch_file: "patches/0001-cmake-fix-module.patch"

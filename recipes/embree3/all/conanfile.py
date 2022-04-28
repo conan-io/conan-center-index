@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import save, load
 import glob
 import os
 import textwrap
@@ -170,6 +171,13 @@ class EmbreeConan(ConanFile):
         return self._cmake
 
     def build(self):
+        # some compilers (e.g. clang) do not like UTF-16 sources
+        rc = os.path.join(self._source_subfolder, "kernels", "embree.rc")
+        content = load(self, rc, encoding="utf_16_le")
+        if content[0] == '\ufeff':
+            content = content[1:]
+        content = "#pragma code_page(65001)\n" + content
+        save(self, rc, content)
         os.remove(os.path.join(self._source_subfolder, "common", "cmake", "FindTBB.cmake"))
         cmake = self._configure_cmake()
         cmake.build()

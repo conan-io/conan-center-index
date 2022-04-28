@@ -1,0 +1,41 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,8 +82,14 @@ IF(NOT WIN32)
+ ENDIF(NOT WIN32)
+ 
+ IF(USE_PTHREADS)
++   SET(CMAKE_THREAD_PREFER_PTHREAD TRUE)
++   SET(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    FIND_PACKAGE(Threads REQUIRED)
+-   ADD_DEFINITIONS(-D_REENTRANT)
++   IF(CMAKE_USE_PTHREADS_INIT)
++      LIST(APPEND LINK_LIBS "Threads::Threads")
++   ELSE()
++      LIST(APPEND LINK_LIBS "CONAN_PKG::pthreads4w")
++   ENDIF()
+ ENDIF(USE_PTHREADS)
+ 
+ IF(USE_BZIP2)
+@@ -99,19 +105,13 @@ ELSE()
+ ENDIF()
+ 
+ # Support for remote file drivers is not implemented for native Windows:
+-IF (NOT MSVC)
++IF (NOT WIN32)
+ 
+     # Find library needed for gethostbyname:
+-    CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
+-    IF (NOT CMAKE_HAVE_GETHOSTBYNAME)
+-        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_HAVE_GETHOSTBYNAME)
+-    ENDIF ()
++    CHECK_SYMBOL_EXISTS(gethostbyname "netdb.h" CMAKE_HAVE_GETHOSTBYNAME)
+ 
+     # Find library needed for connect:
+-    CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
+-    IF (NOT CMAKE_HAVE_CONNECT)
+-        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_HAVE_CONNECT)
+-    ENDIF ()
++    CHECK_SYMBOL_EXISTS(connect "sys/types.h;sys/socket.h" CMAKE_HAVE_CONNECT)
+ 
+     # Define HAVE_NET_SERVICES if gethostbyname & connect were found:
+     IF (CMAKE_HAVE_GETHOSTBYNAME AND CMAKE_HAVE_CONNECT)

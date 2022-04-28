@@ -24,11 +24,19 @@ class AndroidNDKConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_universal2(self):
+        return self.version in ["r23b", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+
+    @property
+    def _arch(self):
+        return "x86_64" if self._is_universal2 else self.settings.arch
+
     def _settings_os_supported(self):
         return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
+        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self._arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
@@ -37,12 +45,16 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b']:
-            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+        if self.version in ['r23', 'r23b', 'r24']:
+            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
+            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
+
+    def package_id(self):
+        if self._is_universal2:
+            self.info.settings.arch = "universal:armv8/x86_64"
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
@@ -50,6 +62,7 @@ class AndroidNDKConan(ConanFile):
         self.copy("*NOTICE.toolchain", src=self._source_subfolder, dst="licenses")
         self.copy("cmake-wrapper.cmd")
         self.copy("cmake-wrapper")
+        self._fix_broken_links()
         self._fix_permissions()
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
@@ -135,6 +148,20 @@ class AndroidNDKConan(ConanFile):
                          sig == [0xCE, 0xFA, 0xED, 0xFE]:
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
+
+    def _fix_broken_links(self):
+        # https://github.com/android/ndk/issues/1671
+        # https://github.com/android/ndk/issues/1569
+        if self.version == "r23b" and self.settings.os in ["Linux", "Macos"]:
+            platform = "darwin" if self.settings.os == "Macos" else "linux"
+            links = {f"toolchains/llvm/prebuilt/{platform}-x86_64/aarch64-linux-android/bin/as": "../../bin/aarch64-linux-android-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/arm-linux-androideabi/bin/as": "../../bin/arm-linux-androideabi-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/x86_64-linux-android/bin/as": "../../bin/x86_64-linux-android-as",
+                     f"toolchains/llvm/prebuilt/{platform}-x86_64/i686-linux-android/bin/as": "../../bin/i686-linux-android-as"}
+            for path, target in links.items():
+                path = os.path.join(self.package_folder, path)
+                os.unlink(path)
+                os.symlink(target, path)
 
     @property
     def _host(self):
@@ -225,7 +252,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_targe.os} != Android")
+            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         cmake_system_processor = self._cmake_system_processor

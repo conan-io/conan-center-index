@@ -27,7 +27,7 @@ class QuaZIPConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("qt/5.15.3")
 
     def config_options(self):

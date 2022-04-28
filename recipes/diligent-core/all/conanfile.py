@@ -16,10 +16,12 @@ class DiligentCoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC":   [True, False],
+        "with_glslang": [True, False],
     }
     default_options = {
         "shared": False	,
         "fPIC": True,
+        "with_glslang": True
     }
     generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
@@ -80,7 +82,7 @@ class DiligentCoreConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build_requirements(self):
@@ -89,17 +91,13 @@ class DiligentCoreConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("libjpeg/9d")
-        self.requires("libtiff/4.3.0")
-        self.requires("zlib/1.2.11")
-        self.requires("libpng/1.6.37")
-
-        self.requires("spirv-cross/cci.20210930")
+        self.requires("spirv-cross/1.3.204.0")
         self.requires("spirv-tools/1.3.204.0")
-        self.requires("vulkan-headers/1.3.204")
+        if self.options.with_glslang:
+            self.requires("glslang/1.3.204.0")
+        self.requires("vulkan-headers/1.3.204.1")
         self.requires("volk/1.3.204")
-        self.requires("glslang/1.3.204.0")
-        self.requires("xxhash/0.8.0")
+        self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
@@ -130,6 +128,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
+        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
 

@@ -60,6 +60,10 @@ class DiligentToolsConan(ConanFile):
     def requirements(self):
         self.requires("diligent-core/2.5.1")
         self.requires("imgui/1.87")
+        self.requires("libjpeg/9d")
+        self.requires("libpng/1.6.37")
+        self.requires("libtiff/4.3.0")
+        self.requires("zlib/1.2.12")
 
     @property
     def _diligent_platform(self):

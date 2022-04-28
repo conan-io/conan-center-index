@@ -47,6 +47,7 @@ class OpenCVConan(ConanFile):
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
+        "cuda_arch_bin": "ANY",
         "cpu_baseline": "ANY",
         "cpu_dispatch": "ANY",
         "nonfree": [True, False],
@@ -82,6 +83,7 @@ class OpenCVConan(ConanFile):
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
+        "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "nonfree": False,
@@ -163,6 +165,7 @@ class OpenCVConan(ConanFile):
             del self.options.with_cudnn
             del self.options.with_cufft
             del self.options.dnn_cuda
+            del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
@@ -173,7 +176,7 @@ class OpenCVConan(ConanFile):
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -298,6 +301,21 @@ class OpenCVConan(ConanFile):
             gapi_cmake = os.path.join(self._source_subfolder, "modules", "gapi", "CMakeLists.txt")
             tools.replace_in_file(gapi_cmake, " ade)", " ade::ade)")
 
+        if self.options.contrib and self.options.contrib_sfm and tools.Version(self.version) <= "4.5.2":
+            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
+            ver = tools.Version(self.version)
+            if ver <= "4.5.0":
+                search = '  find_package(Glog QUIET)\nendif()'
+            else:
+                search = '  set(GLOG_INCLUDE_DIRS "${GLOG_INCLUDE_DIR}")\nendif()'
+            tools.replace_in_file(sfm_cmake, search, """{}
+            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
+              set(GFLAGS_LIBRARIES gflags::gflags)
+            endif()
+            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
+              set(GLOG_LIBRARIES glog::glog)
+            endif()""".format(search))
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -335,6 +353,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_WEBP"] = False
         self._cmake.definitions["BUILD_TBB"] = False
         self._cmake.definitions["OPENCV_FORCE_3RDPARTY_BUILD"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -459,11 +478,14 @@ class OpenCVConan(ConanFile):
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+            if self.options.cuda_arch_bin:
+                self._cmake.definitions["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
         self._cmake.definitions["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
@@ -713,8 +735,10 @@ class OpenCVConan(ConanFile):
         def get_lib_name(module):
             if module == "ippiw":
                 return "%s%s" % (module, debug)
-            prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
-            return "%s%s%s%s" % (prefix, module, version, debug)
+            elif module in ("correspondence", "multiview", "numeric"):
+                return module
+            else:
+                return "opencv_%s%s%s" % (module, version, debug)
 
         def add_components(components):
             for component in components:
