@@ -89,10 +89,12 @@ class LibSigCppConanV2(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            rename(self,
-                   os.path.join(self.package_folder, "lib", "libsigc-2.0.a"),
-                   os.path.join(self.package_folder, "lib", "sigc-2.0.lib"))
+        if self.settings.compiler == "Visual Studio":
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            if not self.options.shared:
+                rename(self,
+                       os.path.join(self.package_folder, "lib", "libsigc-2.0.a"),
+                       os.path.join(self.package_folder, "lib", "sigc-2.0.lib"))
 
         for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-2.0", "include", "*.h")):
             shutil.move(
