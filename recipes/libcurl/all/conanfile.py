@@ -98,7 +98,7 @@ class LibcurlConan(ConanFile):
         "with_unix_sockets": True,
     }
 
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi", "pkg_config", "cmake_find_package"
     _autotools = None
     _autotools_vars = None
     _cmake = None
@@ -309,7 +309,7 @@ class LibcurlConan(ConanFile):
         tools.replace_in_file(
             cmakelists,
             "find_package(NGHTTP2 REQUIRED)",
-            "find_package(libnghttp2 REQUIRED CONFIG)",
+            "find_package(libnghttp2 REQUIRED)",
         )
         tools.replace_in_file(
             cmakelists,
@@ -321,12 +321,17 @@ class LibcurlConan(ConanFile):
             "list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})",
             "list(APPEND CURL_LIBS libnghttp2::nghttp2)",
         )
-
-        tools.replace_in_file(
-            cmakelists,
-            "find_package(OpenSSL REQUIRED)",
-            "find_package(OpenSSL REQUIRED CONFIG)",
-        )
+        if tools.Version(self.version) >= "7.80.0":
+            tools.replace_in_file(
+                cmakelists,
+                'get_target_property(_lib "${_libname}" LOCATION)',
+                """get_target_property(_type "${_libname}" TYPE)
+    if(${_type} STREQUAL "INTERFACE_LIBRARY")
+      # Reading the INTERFACE_LIBRARY property on non-imported target will error out.
+      continue()
+    endif()
+    get_target_property(_lib "${_libname}" LOCATION)""",
+            )
 
     def _get_configure_command_args(self):
         yes_no = lambda v: "yes" if v else "no"
@@ -543,7 +548,6 @@ class LibcurlConan(ConanFile):
                 self._cmake.definitions["CURL_DISABLE_NTLM"] = True
         self._cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
-        self._cmake.definitions["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.get_safe("build_type", default="Release")
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
