@@ -32,3 +32,6 @@ sources:
   "1.7.0":
     url: "https://github.com/odygrd/quill/archive/v1.7.0.tar.gz"
     sha256: "f6eb9711b949effbd8caf06ee464f66f619b94d3b39f820fa288d0745c620ed1"
+  "1.7.2":
+    url: "https://github.com/odygrd/quill/archive/v1.7.2.tar.gz"
+    sha256: "e2153c6e25f3a6cee47c2a9edbabdace418f6d64f62cd701dfdae38d5892bb1b"
