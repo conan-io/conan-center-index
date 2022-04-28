@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class DracoConan(ConanFile):
@@ -157,9 +157,9 @@ class DracoConan(ConanFile):
                 )
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Draco"
-        self.cpp_info.names["cmake_find_package_multi"] = "Draco"
-        self.cpp_info.names["pkg_config"] = "draco"
+        self.cpp_info.set_property("cmake_file_name", "draco")
+        self.cpp_info.set_property("cmake_target_name", "draco::draco")
+        self.cpp_info.set_property("pkg_config_name", "draco")
         self.cpp_info.libs = ["draco"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
