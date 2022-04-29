@@ -130,8 +130,9 @@ class SentryNativeConan(ConanFile):
         if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
-        if self.options.performance and tools.Version(self.version) < "0.4.14":
-            raise ConanInvalidConfiguration("Performance monitoring was introduced in 0.4.14")
+        if self.options.performance:
+            if tools.Version(self.version) < "0.4.14" or tools.Version(self.version) > "0.4.15":
+                raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def build_requirements(self):
         if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
