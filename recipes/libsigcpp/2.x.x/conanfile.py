@@ -110,4 +110,4 @@ class LibSigCppConanV2(ConanFile):
     def package_info(self):
         self.cpp_info.components["sigc++-2.0"].names["pkg_config"] = "sigc++-2.0"
         self.cpp_info.components["sigc++-2.0"].includedirs.append(os.path.join("include", "sigc++-2.0"))
-        self.cpp_info.components["sigc++-2.0"].libs = tools.collect_libs(self)
+        self.cpp_info.components["sigc++-2.0"].libs = ["sigc-2.0"]
