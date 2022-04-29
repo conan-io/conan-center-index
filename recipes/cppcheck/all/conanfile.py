@@ -17,6 +17,7 @@ class CppcheckConan(ConanFile):
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
+    build_policy = "always"
 
     @property
     def _source_subfolder(self):
