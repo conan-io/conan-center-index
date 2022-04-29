@@ -149,8 +149,15 @@ class LibxsltConan(ConanFile):
                 tools.replace_in_file("Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
                 tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
 
+                # Avoid to indirectly build both static & shared when we build utils
+                tools.replace_in_file(
+                    "Makefile.msvc",
+                    "$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt libxslta libexslt libexslta",
+                    "$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt{0} libexslt{0}".format("" if self.options.shared else "a"),
+                )
+
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    targets = "libxslt{0} libexslt{0}".format("" if self.options.shared else "a")
+                    targets = "libxslt{0} libexslt{0} utils".format("" if self.options.shared else "a")
                     self.run("nmake /f Makefile.msvc {}".format(targets))
 
     @functools.lru_cache(1)
@@ -179,13 +186,11 @@ class LibxsltConan(ConanFile):
             build_dir = os.path.join(self._source_subfolder, "win32", "bin.msvc")
             self.copy("*.lib", src=build_dir, dst="lib")
             self.copy("*.dll", src=build_dir, dst="bin")
+            self.copy("*.exe", src=build_dir, dst="bin")
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            if self.settings.os == "Windows" and self.options.shared:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
-            else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+            os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.sh")
@@ -216,6 +221,10 @@ class LibxsltConan(ConanFile):
         self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
         self.cpp_info.components["exslt"].libs = ["{}exslt{}".format(prefix, suffix)]
         self.cpp_info.components["exslt"].requires = ["xslt"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibXslt"
