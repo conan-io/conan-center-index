@@ -12,5 +12,5 @@ add_executable(${PROJECT_NAME}
     Calculator.cpp
     test_package.cpp
 )
-target_link_libraries(${PROJECT_NAME} thriftnb::thriftnb)
+target_link_libraries(${PROJECT_NAME} thrift::thrift)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
