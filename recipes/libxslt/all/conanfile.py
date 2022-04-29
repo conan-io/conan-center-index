@@ -64,7 +64,7 @@ class LibxsltConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.12")
+        self.requires("libxml2/2.9.13")
 
     def validate(self):
         if self.options.plugins and not self.options.shared:
