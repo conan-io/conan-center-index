@@ -5,6 +5,9 @@ sources:
   "2.0.2":
     - url: "https://github.com/boostorg/pfr/archive/refs/tags/2.0.2.tar.gz"
       sha256: "1f03ebd3728d7df166d40d992ac071927d483474aa0f947e78a573c4ca288c04"
+  "2.0.3":
+    - url: "https://github.com/boostorg/pfr/archive/refs/tags/2.0.3.tar.gz"
+      sha256: "c7d1950b56a07678423759f0bcdf37312f9861e3e9e59c45331903891213e2f2"
 patches:
   "1.0.4":
     - patch_file: "patches/50_add_license.patch"

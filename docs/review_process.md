@@ -108,10 +108,10 @@ The list includes conan-center-index contributors who are very active and proven
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
 
-### Rule of 3 reviews
+### Rule of 2 reviews
 
-At least 3 approving reviews are required, and at least one of them has to be from the official reviewers.
-So, it might be 1 official + 2 community, or 3 official, but it couldn't be just 3 community reviews.
+At least 2 approving reviews are required, and at least one of them has to be from the official reviewers.
+So, it might be 1 official + 1 community, or 2 official, but it couldn't be just 2 community reviews.
 Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
 
 > **Note.-** Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)

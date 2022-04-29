@@ -1,6 +1,9 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
+
+required_conan_version = ">=1.43.0"
 
 
 class SeasocksConan(ConanFile):
@@ -10,6 +13,7 @@ class SeasocksConan(ConanFile):
     homepage = "https://github.com/mattgodbolt/seasocks"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,41 +25,52 @@ class SeasocksConan(ConanFile):
         "fPIC": True,
         "with_zlib": True,
     }
+
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt"
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Seasocks doesn't support this os")
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration(f"Seasocks {self.version} doesn't support this os")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("seasocks-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # No warnings as errors
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "-Werror", "")
+        tools.replace_in_file(cmakelists, "-pedantic-errors", "")
+
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DEFLATE_SUPPORT"] = self.options.with_zlib
-        self._cmake.definitions["SEASOCKS_SHARED"] = self.options.shared
-        self._cmake.definitions["SEASOCKS_EXAMPLE_APP"] = False
-        self._cmake.definitions["UNITTESTS"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["DEFLATE_SUPPORT"] = self.options.with_zlib
+        cmake.definitions["SEASOCKS_SHARED"] = self.options.shared
+        cmake.definitions["SEASOCKS_EXAMPLE_APP"] = False
+        cmake.definitions["UNITTESTS"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -67,14 +82,19 @@ class SeasocksConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        # Set the name of the generated `FindSeasocks.cmake` and
-        # `SeasocksConfig.cmake` cmake scripts
+        self.cpp_info.set_property("cmake_file_name", "Seasocks")
+        self.cpp_info.set_property("cmake_target_name", "Seasocks::seasocks")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["libseasocks"].libs = ["seasocks"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libseasocks"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Seasocks"
         self.cpp_info.names["cmake_find_package_multi"] = "Seasocks"
-        self.cpp_info.components["libseasocks"].libs = ["seasocks"]
-        self.cpp_info.components["libseasocks"].system_libs = ["pthread"]
-        # Set the name of the generated seasocks target: `Seasocks::seasocks`
         self.cpp_info.components["libseasocks"].names["cmake_find_package"] = "seasocks"
         self.cpp_info.components["libseasocks"].names["cmake_find_package_multi"] = "seasocks"
+        self.cpp_info.components["libseasocks"].set_property("cmake_target_name", "Seasocks::seasocks")
         if self.options.with_zlib:
             self.cpp_info.components["libseasocks"].requires = ["zlib::zlib"]

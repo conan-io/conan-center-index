@@ -1,0 +1,36 @@
+From 53705a537c1aa51ffbecfaaf685501b9ea1cb6ba Mon Sep 17 00:00:00 2001
+From: Chun-wei Fan <fanchunwei@src.gnome.org>
+Date: Wed, 13 Oct 2021 12:17:44 +0800
+Subject: [PATCH] tools/generate-uac-manifest.py: Fix UAC manifest .rc
+
+The resource compiler in the Windows 11 SDK does not allow one to include
+winuser.h directly in resource scripts (.rc) with a rather cryptic error
+message, so fix generating the .rc file to embed the UAC manifest by including
+windows.h with WIN32_LEAN_AND_MEAN instead.
+---
+ tools/generate-uac-manifest.py | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/tools/generate-uac-manifest.py b/tools/generate-uac-manifest.py
+index ede6ba5044..62f063a8bb 100644
+--- a/tools/generate-uac-manifest.py
++++ b/tools/generate-uac-manifest.py
+@@ -24,7 +24,7 @@ def main():
+                         help='require admin access to application')
+     parser.add_argument('--input-resource-file', dest='resource',
+                         default=None,
+-                        help='existing .rc file to embed UAC manifest (do not generate a new .rc file), must have included winuser.h in it')
++                        help='existing .rc file to embed UAC manifest (do not generate a new .rc file), must have included windows.h in it')
+     parser.add_argument('--output-dir', dest='outdir',
+                         default=None,
+                         help='directory to output resulting files')
+@@ -92,7 +92,8 @@ def write_rc_file(name, resource, outdir):
+ 
+     if resource is None:
+         outfile = open(output_file_base_name + '.rc', 'w+')
+-        outfile.write('#include <winuser.h>')
++        outfile.write('#define WIN32_LEAN_AND_MEAN\n')
++        outfile.write('#include <windows.h>\n')
+     else:
+         if resource != output_file_base_name + '.rc':
+             outfile = open(output_file_base_name + '.rc', 'w+')
