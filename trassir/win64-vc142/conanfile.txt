@@ -58,6 +58,7 @@ zlib/1.2.11
 
 # grpc and its dependencies
 abseil/20211102.0
+re2/20211101
 
 [options]
 tevian:shared=True
