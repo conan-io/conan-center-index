@@ -1,3 +1,133 @@
-@Library('c3i') _
-
-c3iManager.runBuild(this)
+pipeline {
+    agent none 
+    environment {
+        JENKINS_LDAP_CREDS = credentials('jenkins-ldap')
+        LDAP_USERNAME = "${JENKINS_LDAP_CREDS_USR}"
+        LDAP_PASSWORD = "${JENKINS_LDAP_CREDS_PSW}"
+        GITHUB_SERVER_URL = "https://github.com"
+        GITHUB_REPOSITORY = "trassir/conan-center-index.git"
+        BUILD_ALL = "NO"
+    }
+    stages {
+        stage('build windows') {
+            parallel {
+                stage('gcc') {
+                    agent {
+                        docker { image 'devops/cci:gcc_ubuntu'
+                                 args '-u root'
+                        }
+                    }
+                    environment {
+                    CONAN_USER_HOME = "${WORKSPACE}"
+                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
+                    CONAN_TXT = "trassir/lnvr-gcc8/conanfile.txt"
+                    CONAN_PROFILE = "trassir/lnvr-gcc8/conanprofile.release"
+                    }
+                    steps {
+                        sh("rm -rf ./*")
+                        dir('sources'){
+                            checkout scm
+                        }
+                        sh("python3 sources/builder/build.py")
+                    }
+                }
+                stage('win64-vc142-debug') {
+                    when { 
+                        anyOf {
+                            changeset '.jenkins*'
+                            changeset "trassir/win64-vc142/conanfile.txt"
+                            changeset "trassir/win64-vc142/conanprofile.debug"
+                            environment name: 'BUILD_ALL', value: 'YES'
+                        }
+                    }
+                    agent { label 'conan-builder' } 
+                    environment {
+                    CONAN_USER_HOME = "${WORKSPACE}"
+                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
+                    CONAN_TXT = "trassir/win64-vc142/conanfile.txt"
+                    CONAN_PROFILE = "trassir/win64-vc142/conanprofile.debug"
+                    }
+                    steps {
+                        deleteDir()
+                        dir('sources'){
+                            checkout scm
+                        }
+                        sh('python3 sources/builder/build.py')
+                    }
+                }
+                stage('win64-vc142-release') {
+                    when { 
+                        anyOf {
+                            changeset '.jenkins*'
+                            changeset "trassir/win64-vc142/conanfile.txt"
+                            changeset "trassir/win64-vc142/conanprofile.release"
+                            environment name: 'BUILD_ALL', value: 'YES'
+                        }
+                    }
+                    agent { label 'conan-builder' } 
+                    environment {
+                    CONAN_USER_HOME = "${WORKSPACE}"
+                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
+                    CONAN_TXT = "trassir/win64-vc142/conanfile.txt"
+                    CONAN_PROFILE = "trassir/win64-vc142/conanprofile.release"
+                    }
+                    steps {
+                        deleteDir()
+                        dir('sources'){
+                            checkout scm
+                        }
+                        sh('python3 sources/builder/build.py')
+                    }
+                }
+                stage('win32-vc142-debug') {
+                    when { 
+                        anyOf {
+                            changeset '.jenkins*'
+                            changeset "trassir/win64-vc142/conanfile.txt"
+                            changeset "trassir/win64-vc142/conanprofile.debug"
+                            environment name: 'BUILD_ALL', value: 'YES'
+                        }
+                    }
+                    agent { label 'conan-builder' } 
+                    environment {
+                    CONAN_USER_HOME = "${WORKSPACE}"
+                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
+                    CONAN_TXT = "trassir/win64-vc142/conanfile.txt"
+                    CONAN_PROFILE = "trassir/win64-vc142/conanprofile.debug"
+                    }
+                    steps {
+                        deleteDir()
+                        dir('sources'){
+                            checkout scm
+                        }
+                        sh('python3 sources/builder/build.py')
+                    }
+                }
+                stage('win32-vc142-release') {
+                    when { 
+                        anyOf {
+                            changeset '.jenkins*'
+                            changeset "trassir/win32-vc142/conanfile.txt"
+                            changeset "trassir/win32-vc142/conanprofile.release"
+                            environment name: 'BUILD_ALL', value: 'YES'
+                        }
+                    }
+                    agent { label 'conan-builder' } 
+                    environment {
+                    CONAN_USER_HOME = "${WORKSPACE}"
+                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
+                    CONAN_TXT = "trassir/win32-vc142/conanfile.txt"
+                    CONAN_PROFILE = "trassir/win32-vc142/conanprofile.release"
+                    }
+                    steps {
+                        deleteDir()
+                        dir('sources'){
+                            checkout scm
+                        }
+                        sh('python3 sources/builder/build.py')
+                    }
+                }
+            }
+        }       
+    }
+}
