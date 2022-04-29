@@ -1,10 +1,10 @@
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibxsltConan(ConanFile):
@@ -38,10 +38,6 @@ class LibxsltConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -71,7 +67,7 @@ class LibxsltConan(ConanFile):
             raise ConanInvalidConfiguration("plugins require shared")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and \
+        if self._settings_build.os == "Windows" and not is_msvc(self) and \
            not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -82,7 +78,7 @@ class LibxsltConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self._is_msvc:
+        if is_msvc(self):
             self._build_msvc()
         else:
             # Relocatable shared libs on macOS
@@ -178,7 +174,7 @@ class LibxsltConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self._is_msvc:
+        if is_msvc(self):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "libxslt"),
                              dst=os.path.join("include", "libxslt"))
             self.copy("*.h", src=os.path.join(self._source_subfolder, "libexslt"),
@@ -201,8 +197,8 @@ class LibxsltConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LibXslt")
         self.cpp_info.set_property("pkg_config_name", "libxslt_full_package") # unofficial, avoid conflicts in conan generators
 
-        prefix = "lib" if self._is_msvc else ""
-        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+        prefix = "lib" if is_msvc(self) else ""
+        suffix = "_a" if is_msvc(self) and not self.options.shared else ""
 
         # xslt
         self.cpp_info.components["xslt"].set_property("cmake_target_name", "LibXslt::LibXslt")
