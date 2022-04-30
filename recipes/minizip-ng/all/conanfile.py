@@ -1,8 +1,9 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, CMake
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class MinizipNgConan(ConanFile):
@@ -51,6 +52,10 @@ class MinizipNgConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -133,7 +138,9 @@ class MinizipNgConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "minizip")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["minizip"].libs = tools.collect_libs(self)
+        prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
+        suffix = "" if tools.Version(self.version) < "3.0.5" or self.options.mz_compatibility else "-ng"
+        self.cpp_info.components["minizip"].libs = [f"{prefix}minizip{suffix}"]
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append("HAVE_LZMA")
         if tools.is_apple_os(self.settings.os) and self.options.get_safe("with_libcomp"):
