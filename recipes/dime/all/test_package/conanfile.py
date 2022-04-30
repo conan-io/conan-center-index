@@ -13,4 +13,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            dxf_path = os.path.join(self.source_folder, "testFile_Bug01.dxf")
+            self.run("{} {}".format(bin_path, dxf_path), run_environment=True)

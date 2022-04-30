@@ -18,10 +18,12 @@ class DimeConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        "fixbig": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
+        "fixbig": False,
     }
 
     @property
@@ -48,6 +50,8 @@ class DimeConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["DIME_BUILD_SHARED_LIBS"] = self.options.shared
+        if self.options.fixbig:
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-DDIME_FIXBIG"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -64,7 +68,9 @@ class DimeConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["dime"]
+        if self.options.fixbig:
+            self.cpp_info.cxxflags = ["-DDIME_FIXBIG"]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
