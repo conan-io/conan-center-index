@@ -8,5 +8,6 @@ int main() {
   colors[0][1].format().font_color(Color::blue).font_style({FontStyle::bold});
   colors[0][2].format().font_color(Color::green).font_style({FontStyle::bold});
   std::cout << colors << std::endl;
+  return 0;
 }
 
