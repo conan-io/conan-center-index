@@ -58,7 +58,7 @@ class MinizipNgConan(ConanFile):
             del self.options.with_libcomp
 
     def build_requirements(self):
-        self.build_requires('pkgconf/1.7.3')
+        self.build_requires("pkgconf/1.7.4")
 
     def configure(self):
         if self.options.shared:
@@ -72,15 +72,15 @@ class MinizipNgConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1n")
         if self.settings.os != "Windows":
             if self.options.get_safe("with_iconv"):
                 self.requires("libiconv/1.16")
