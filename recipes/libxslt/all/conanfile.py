@@ -180,9 +180,12 @@ class LibxsltConan(ConanFile):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "libexslt"),
                              dst=os.path.join("include", "libexslt"))
             build_dir = os.path.join(self._source_subfolder, "win32", "bin.msvc")
-            self.copy("*.lib", src=build_dir, dst="lib")
-            self.copy("*.dll", src=build_dir, dst="bin")
             self.copy("*.exe", src=build_dir, dst="bin")
+            if self.options.shared:
+                self.copy("*xslt.lib", src=build_dir, dst="lib")
+                self.copy("*xslt.dll", src=build_dir, dst="bin")
+            else:
+                self.copy("*xslt_a.lib", src=build_dir, dst="lib")
         else:
             autotools = self._configure_autotools()
             autotools.install()
