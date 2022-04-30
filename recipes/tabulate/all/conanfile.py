@@ -19,35 +19,38 @@ class TabulateConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _min_cppstd(self):
+        return "17" if tools.Version(self.version) < "1.3.0" else "11"
+
+    @property
+    def _min_compiler_cpp17(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "7.3",
+            "clang": "6",
+            "apple-clang": "10.0",
+        }
+
     def package_id(self):
         self.info.header_only()
 
     def validate(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
-
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        else:
-            self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support" % (self.name, compiler))
+            tools.check_min_cppstd(self, self._min_cppstd)
 
-        minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6",
-            "apple-clang": "10.0"
-        }
+        if tools.Version(self.version) < "1.3.0":
+            compiler = str(self.settings.compiler)
+            compiler_version = tools.Version(self.settings.compiler.version)
 
-        if compiler not in minimal_version:
-            self.output.info("%s requires a compiler that supports at least"
-                             " C++17" % self.name)
-            return
-
-        if compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not"
-                                            " supported." % (self.name, compiler, tools.Version(self.settings.compiler.version)))
+            if compiler in self._min_compiler_cpp17 and compiler_version < self._min_compiler_cpp17[compiler]:
+                raise ConanInvalidConfiguration(
+                    "{} {} requires a compiler that supports at least C++{}. "
+                    "{} {} is not supported.".format(
+                        self.name, self.version, self._min_cppstd,
+                        compiler, compiler_version,
+                    )
+                )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
