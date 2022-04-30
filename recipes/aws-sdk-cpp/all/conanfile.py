@@ -370,12 +370,12 @@ class AwsSdkCppConan(ConanFile):
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-        if (tools.Version(self.version) < "1.9.243"
+        if (tools.Version(self.version) < "1.9.234"
             and self.settings.compiler == "gcc"
             and tools.Version(self.settings.compiler.version) >= "11.0"
             and self.settings.build_type == "Release"):
             raise ConanInvalidConfiguration(
-                "Versions prior to 1.9.243 don't support release builds on >= gcc 11 "
+                "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "
                 "See https://github.com/aws/aws-sdk-cpp/issues/1505"
             )
         if self._use_aws_crt_cpp:
