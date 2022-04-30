@@ -12,8 +12,16 @@ class lmdbConan(ConanFile):
     description = "Fast and compat memory-mapped key-value database"
     topics = ("LMDB", "database", "key-value", "memory-mapped")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+            "shared": [True, False],
+            "fPIC": [True, False],
+            "disable_robust_mutex": [True, False], # switches MDB_USE_ROBUST
+    }
+    default_options = {
+            "shared": False,
+            "fPIC": True,
+            "disable_robust_mutex": False,
+    }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
@@ -51,6 +59,8 @@ class lmdbConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if self.options.get_safe("disable_robust_mutex", False) == True:
+            self._cmake.definitions["LMDB_DISABLE_ROBUST_MUTEX"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
