@@ -18,3 +18,4 @@ class TestPackageConan(ConanFile):
             xsl_path = os.path.join(self.source_folder, "example.xsl")
             cmd = "%s %s %s" % (bin_path, xsl_path, xml_path)
             self.run(cmd, run_environment=True)
+            self.run("xsltproc -V", run_environment=True)
