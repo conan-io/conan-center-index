@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 
 class DimeConan(ConanFile):
     name = "dime"
-    description = ""
+    description = "DXF (Data eXchange Format) file format support library."
     topics = ("dxf", "coin3d", "opengl", "graphics")
     homepage = "https://github.com/coin3d/dime"
     url = "https://github.com/conan-io/conan-center-index"
@@ -49,14 +49,12 @@ class DimeConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["DIME_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(build_folder=self._build_subfolder)
-
         return cmake
 
     def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "configure_file(${CMAKE_SOURCE_DIR}/${PROJECT_NAME_LOWER}.pc.cmake.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME_LOWER}.pc @ONLY)",
             "configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME_LOWER}.pc.cmake.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME_LOWER}.pc @ONLY)")
-
         cmake = self._configure_cmake()
         cmake.build()
 
