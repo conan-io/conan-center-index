@@ -66,11 +66,16 @@ class DimeConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["dime"]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.cxxflags.append("-DDIME_DLL" if self.options.shared else "-DDIME_NOT_DLL")
         if self.options.fixbig:
-            self.cpp_info.cxxflags = ["-DDIME_FIXBIG"]
+            self.cpp_info.cxxflags.append("-DDIME_FIXBIG")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
