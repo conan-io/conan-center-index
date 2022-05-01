@@ -76,10 +76,12 @@ class DimeConan(ConanFile):
     def package_info(self):
         libname = "dime"
         if self.settings.os == "Windows" and is_msvc(self):
-            libname = "{}{}{}".format(
+            libname = "{}{}{}{}".format(
                 libname,
                 tools.Version(self.version).major,
-                "" if self.options.shared else "s")
+                "" if self.options.shared else "s",
+                "d" if self.settings.build_type == "Debug" else "",
+                )
         self.cpp_info.libs = [libname]
 
         if self.settings.os == "Windows":

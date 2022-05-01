@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     dimeInput in;
 
-    if (not in.setFile(filename)) {
+    if (!in.setFile(filename)) {
         std::cerr << "could not read dxf file : " << filename << std::endl;
         return 1;
     }
