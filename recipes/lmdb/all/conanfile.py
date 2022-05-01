@@ -13,14 +13,14 @@ class lmdbConan(ConanFile):
     topics = ("LMDB", "database", "key-value", "memory-mapped")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-            "shared": [True, False],
-            "fPIC": [True, False],
-            "disable_robust_mutex": [True, False], # switches MDB_USE_ROBUST
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "disable_robust_mutex": [True, False],
     }
     default_options = {
-            "shared": False,
-            "fPIC": True,
-            "disable_robust_mutex": False,
+        "shared": False,
+        "fPIC": True,
+        "disable_robust_mutex": False,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
