@@ -59,8 +59,7 @@ class lmdbConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if self.options.get_safe("disable_robust_mutex", False) == True:
-            self._cmake.definitions["LMDB_DISABLE_ROBUST_MUTEX"] = True
+        self._cmake.definitions["LMDB_DISABLE_ROBUST_MUTEX"] = self.options.disable_robust_mutex
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
