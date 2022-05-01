@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import os
 import functools
 
@@ -74,7 +74,13 @@ class DimeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["dime"]
+        libname = "dime"
+        if self.settings.os == "Windows" and is_msvc(self):
+            libname = "{}{}{}".format(
+                libname,
+                tools.Version(self.version).major,
+                "" if self.options.shared else "s")
+        self.cpp_info.libs = [libname]
 
         if self.settings.os == "Windows":
             self.cpp_info.cxxflags.append("-DDIME_DLL" if self.options.shared else "-DDIME_NOT_DLL")
