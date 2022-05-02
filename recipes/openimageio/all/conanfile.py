@@ -88,19 +88,18 @@ class OpenImageIOConan(ConanFile):
 
     def requirements(self):
         # Required libraries
-        self.requires("zlib/1.2.11")
-        self.requires("boost/1.76.0")
+        self.requires("zlib/1.2.12")
+        self.requires("boost/1.78.0")
         self.requires("libtiff/4.3.0")
         self.requires("openexr/2.5.7")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.1")
-        self.requires("pugixml/1.11")
+            self.requires("libjpeg-turbo/2.1.2")
+        self.requires("pugixml/1.12.1")
         self.requires("libsquish/1.15")
-        self.requires("tsl-robin-map/0.6.3")
-        self.requires("libsquish/1.15")
-        self.requires("fmt/8.0.1")
+        self.requires("tsl-robin-map/1.0.1")
+        self.requires("fmt/8.1.1")
 
         # Optional libraries
         if self.options.with_libpng:
@@ -108,13 +107,13 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.11.1")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.12.0")
+            self.requires("hdf5/1.12.1")
         if self.options.with_opencolorio:
-            self.requires("opencolorio/1.1.1")
+            self.requires("opencolorio/2.1.0")
         if self.options.with_opencv:
-            self.requires("opencv/4.5.3")
+            self.requires("opencv/4.5.5")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.6")
         if self.options.with_ffmpeg:
