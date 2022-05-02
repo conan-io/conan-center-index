@@ -7,6 +7,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires(str(self.requires["magnum"]))
+
     @property
     def _executables(self):
         available = []
