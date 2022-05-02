@@ -52,15 +52,16 @@ class OpenColorIOConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        # TODO: add GLUT (needed for ociodisplay tool)
-        self.requires("lcms/2.13.1")
-        self.requires("yaml-cpp/0.7.0")
-        if tools.Version(self.version) < "2.1.0":
-            self.requires("tinyxml/2.6.2")
-        if tools.Version(self.version) >= "2.1.0":
-            self.requires("pystring/1.1.3")
         self.requires("expat/2.4.8")
         self.requires("openexr/2.5.7")
+        self.requires("yaml-cpp/0.7.0")
+        if tools.Version(self.version) < "2.0.0":
+            self.requires("tinyxml/2.6.2")
+        else:
+            self.requires("pystring/1.1.3")
+        # for tools only
+        self.requires("lcms/2.13.1")
+        # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
