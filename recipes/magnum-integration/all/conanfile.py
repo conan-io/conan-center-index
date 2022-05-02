@@ -55,13 +55,13 @@ class MagnumIntegrationConan(ConanFile):
     def requirements(self):
         self.requires("magnum/{}".format(self.version))
         if self.options.with_bullet:
-            self.requires("bullet3/3.17")
+            self.requires("bullet3/3.22a")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_glm:
             self.requires("glm/0.9.9.8")
         if self.options.with_imgui:
-            self.requires("imgui/1.84.2")
+            self.requires("imgui/1.87")
 
     def validate(self):
         if self.options.with_dart:
