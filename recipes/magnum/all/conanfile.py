@@ -218,7 +218,7 @@ class MagnumConan(ConanFile):
         if self.options.gl:
             self.requires("opengl/system")
         if self.options.vk:
-            self.requires("vulkan-loader/1.3.204.1")
+            self.requires("vulkan-loader/1.3.211.0")
 
         if self.options.get_safe("egl_context", False) or \
            self.options.get_safe("xegl_application", False) or \
