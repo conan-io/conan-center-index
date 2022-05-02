@@ -4,7 +4,7 @@ on:
 
 jobs:
   comment:
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request && github.event.sender.login == 'conan-center-bot' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
