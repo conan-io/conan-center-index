@@ -144,7 +144,7 @@ class OpenColorIOConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenColorIO::OpenColorIO")
         self.cpp_info.set_property("pkg_config_name", "OpenColorIO")
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["OpenColorIO"]
 
         if tools.Version(self.version) < "2.1.0":
             if not self.options.shared:
