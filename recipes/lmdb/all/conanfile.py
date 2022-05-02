@@ -15,12 +15,12 @@ class lmdbConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "disable_robust_mutex": [True, False],
+        "enable_robust_mutex": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "disable_robust_mutex": False,
+        "enable_robust_mutex": True,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -38,6 +38,10 @@ class lmdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.options.enable_robust_mutex = True
+        else:
+            self.options.enable_robust_mutex = False
 
     def configure(self):
         if self.options.shared:
@@ -59,7 +63,7 @@ class lmdbConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["LMDB_DISABLE_ROBUST_MUTEX"] = self.options.disable_robust_mutex
+        self._cmake.definitions["LMDB_ENABLE_ROBUST_MUTEX"] = self.options.enable_robust_mutex
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
