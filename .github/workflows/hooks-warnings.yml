@@ -46,14 +46,21 @@ jobs:
             if(warnings_map.size > 0)
             {
               comment = "<details>\n"
-              comment += "<summary>Hooks produced the following warnings</summary>\n\n"
+              comment += "<summary>Hooks produced the following warnings"
+              const shaRegex = /(All green|Failure) in build \d+ \((?<sha>(\d|[a-z])+)\):/g;
+              const shaMatch = shaRegex.exec(context.payload.comment.body)
+              if(shaMatch)
+              {
+                comment += " for commit " + shaMatch.groups.sha
+              }
+              comment += "</summary>\n\n"
               for (const [ref, warnings] of warnings_map)
               {
                 comment += "<details>\n"
                 comment += "<summary>" + ref + "</summary>\n\n```\n"
                 for(const warning of warnings)
                   comment += warning + "\n"
-                comment += "\n```\n</details>\n"
+                comment += "```\n</details>\n"
               }
               comment += "</details>\n"
               github.rest.issues.createComment({
