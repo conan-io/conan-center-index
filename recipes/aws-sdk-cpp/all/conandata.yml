@@ -21,6 +21,8 @@ patches:
       patch_file: patches/1.9.100-0001-disable-sort-links.patch
     - base_path: source_subfolder
       patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
+    - base_path: source_subfolder
+      patch_file: patches/1.9.100-0003-issue-1816.patch
   "1.8.130":
     - base_path: source_subfolder
       patch_file: patches/1.8.130-0001-disable-sort-links.patch
