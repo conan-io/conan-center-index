@@ -53,13 +53,13 @@ class OpenColorIOConan(ConanFile):
 
     def requirements(self):
         # TODO: add GLUT (needed for ociodisplay tool)
-        self.requires("lcms/2.12")
+        self.requires("lcms/2.13.1")
         self.requires("yaml-cpp/0.7.0")
         if tools.Version(self.version) < "2.1.0":
             self.requires("tinyxml/2.6.2")
         if tools.Version(self.version) >= "2.1.0":
             self.requires("pystring/1.1.3")
-        self.requires("expat/2.4.1")
+        self.requires("expat/2.4.8")
         self.requires("openexr/2.5.7")
 
     def validate(self):
