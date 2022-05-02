@@ -105,11 +105,11 @@ class CoinCbcConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--without-blas"
-            "--without-lapack"
+            "--without-blas",
+            "--without-lapack",
         ]
         if self.settings.os != "Windows":
-            configure_args = [
+            configure_args += [
                 "--enable-cbc-parallel={}".format(yes_no(self.options.parallel))
             ]
         if self.settings.compiler == "Visual Studio":
