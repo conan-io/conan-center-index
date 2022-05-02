@@ -1,0 +1,34 @@
+commit efa44a75124859cf980ea68ff91620e6711d076c
+Author: Martin Delille <martin@delille.org>
+Date:   Sun May 1 19:32:12 2022 +0200
+
+    Handle exename on macos
+
+diff --git a/cli/main.cpp b/cli/main.cpp
+index ca48497d2..5cf5b6d78 100644
+--- a/cli/main.cpp
++++ b/cli/main.cpp
+@@ -76,6 +76,12 @@
+ static char exename[1024] = {0};
+ #endif
+ 
++#if defined(__APPLE__)
++#include <mach-o/dyld.h>
++
++static char exename[1024] = {0};
++#endif
++
+ /**
+  * Main function of cppcheck
+  *
+@@ -95,6 +101,10 @@ int main(int argc, char* argv[])
+     GetModuleFileNameA(nullptr, exename, sizeof(exename)/sizeof(exename[0])-1);
+     argv[0] = exename;
+ #endif
++#if defined(__APPLE__)
++	uint32_t size = sizeof(exename);
++	_NSGetExecutablePath(exename, &size);
++#endif
+ // *INDENT-OFF*
+ #ifdef NDEBUG
+     try {
