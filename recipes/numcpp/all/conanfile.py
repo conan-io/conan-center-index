@@ -36,7 +36,7 @@ class NumCppConan(ConanFile):
 
     def requirements(self):
         if tools.Version(self.version) < "2.5.0" or self.options.with_boost:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.78.0")
 
     def package_id(self):
         self.info.header_only()
