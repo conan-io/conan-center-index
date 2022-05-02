@@ -4,6 +4,4 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
 add_subdirectory("source_subfolder")

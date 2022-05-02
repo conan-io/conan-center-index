@@ -1,0 +1,90 @@
+--- a/include/qarchive_enums.hpp
++++ b/include/qarchive_enums.hpp
+@@ -1,11 +1,12 @@
+ #ifndef QARCHIVE_ENUMS_HPP_INCLUDED
+ #define QARCHIVE_ENUMS_HPP_INCLUDED
++#include "qarchive_global.hpp"
+ class QString;
+ namespace QArchive {
+ /* A function that converts the enum value to its variable
+  * name to be used by users.
+ */
+-QString errorCodeToString(short);
++QARCHIVE_EXPORT QString errorCodeToString(short);
+ 
+ /*
+  * Common error codes , these are most likely will be
+--- a/include/qarchivediskcompressor_p.hpp
++++ b/include/qarchivediskcompressor_p.hpp
+@@ -10,9 +10,10 @@
+ #include <QScopedPointer>
+ #include <QSharedPointer>
+ #include <qarchiveutils_p.hpp>
++#include "qarchive_global.hpp"
+ 
+ namespace QArchive {
+-class DiskCompressorPrivate : public QObject {
++class QARCHIVE_EXPORT DiskCompressorPrivate : public QObject {
+     Q_OBJECT
+   public:
+     DiskCompressorPrivate();
+--- a/include/qarchivediskextractor_p.hpp
++++ b/include/qarchivediskextractor_p.hpp
+@@ -9,9 +9,10 @@
+ #include <QSharedPointer>
+ #include <QJsonObject>
+ #include <qarchiveutils_p.hpp>
++#include "qarchive_global.hpp"
+ 
+ namespace QArchive {
+-class DiskExtractorPrivate : public QObject {
++class QARCHIVE_EXPORT DiskExtractorPrivate : public QObject {
+     Q_OBJECT
+   public:
+     DiskExtractorPrivate();
+--- a/include/qarchiveioreader_p.hpp
++++ b/include/qarchiveioreader_p.hpp
+@@ -3,9 +3,10 @@
+ #include <QIODevice>
+ #include <QObject>
+ #include <QtGlobal>
++#include "qarchive_global.hpp"
+ 
+ namespace QArchive {
+-class IOReaderPrivate {
++class QARCHIVE_EXPORT IOReaderPrivate {
+   public:
+     IOReaderPrivate();
+     IOReaderPrivate(const IOReaderPrivate&);
+--- a/include/qarchiveutils_p.hpp
++++ b/include/qarchiveutils_p.hpp
+@@ -1,6 +1,8 @@
+ #ifndef QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
+ #define QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
+ 
++#include "qarchive_global.hpp"
++
+ #ifndef OperationCanceled
+ #define OperationCanceled -1
+ #endif
+@@ -15,14 +17,14 @@ class QString;
+ class QIODevice;
+ 
+ /* Smart pointer destructors. */
+-void ArchiveReadDestructor(archive*);
+-void ArchiveWriteDestructor(archive*);
+-void ArchiveEntryDestructor(archive_entry*);
++QARCHIVE_EXPORT void ArchiveReadDestructor(archive*);
++QARCHIVE_EXPORT void ArchiveWriteDestructor(archive*);
++QARCHIVE_EXPORT void ArchiveEntryDestructor(archive_entry*);
+ 
+ /* Open Archive from QIODevice. (non-sequential) */
+-int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device);
++QARCHIVE_EXPORT int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device);
+ 
+ /* Basic string manupilators.  */
+-char *concat(const char*, const char*);
+-QString getDirectoryFileName(const QString&);
++QARCHIVE_EXPORT char *concat(const char*, const char*);
++QARCHIVE_EXPORT QString getDirectoryFileName(const QString&);
+ #endif // QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
