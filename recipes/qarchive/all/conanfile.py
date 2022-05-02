@@ -47,11 +47,11 @@ class QarchiveConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libarchive/3.4.0")
-        self.requires("qt/5.15.2")
+        self.requires("libarchive/3.6.0")
+        self.requires("qt/5.15.3")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.19.6")
+        self.build_requires("cmake/3.23.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
