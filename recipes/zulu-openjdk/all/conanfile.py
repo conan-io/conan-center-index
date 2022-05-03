@@ -11,7 +11,7 @@ class ZuluOpenJDK(ConanFile):
     homepage = "https://www.azul.com"
     license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
     topics = ("java", "jdk", "openjdk")
-    settings = "os", "arch"
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
@@ -22,10 +22,15 @@ class ZuluOpenJDK(ConanFile):
         folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self.settings.os))
         return os.path.join("include", folder)
 
-    def configure(self):
+    def package_id(self):
+        del self.info.settings.build_type
+        del self.info.settings.compiler
+
+    def validate(self):
         if Version(self.version) < Version("11.0.12"):
-            if self.settings.arch not in ["x86_64", "armv8"]:
-                raise ConanInvalidConfiguration("Unsupported Architecture. This package currently only supports x86_64.")
+            supported_archs = ["x86_64", "armv8"]
+            if self.settings.arch not in supported_archs:
+                raise ConanInvalidConfiguration(f"Unsupported Architecture {self.settings.arch}. This package currently only supports {supported_archs}.")
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
