@@ -109,7 +109,10 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.1")
         if self.options.with_opencolorio:
-            self.requires("opencolorio/2.1.0")
+            if tools.Version(self.version) < "2.3.7.2":
+                self.requires("opencolorio/1.1.1")
+            else:
+                self.requires("opencolorio/2.1.0")
         if self.options.with_opencv:
             self.requires("opencv/4.5.5")
         if self.options.with_tbb:
