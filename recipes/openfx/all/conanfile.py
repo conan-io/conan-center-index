@@ -4,15 +4,21 @@ import os
 
 class openfx(ConanFile):
     name = "openfx"
-    license = "LICENCE"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://openeffects.org"
     description = "OpenFX image processing plug-in standard."
     topics = ("image-processing", "standard")
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
     requires = ("opengl/system", "expat/2.4.8")
     exports_sources = "CMakeLists.txt", "cmake/*", "symbols/*"
 
@@ -25,6 +31,10 @@ class openfx(ConanFile):
             destination="source_subfolder",
             strip_root=True
         )
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -72,7 +82,11 @@ class openfx(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = self._build_modules
         self.cpp_info.build_modules["cmake_find_package_multi"] = self._build_modules
 
-        self.cpp_info.libs = ["OfxHost", "OfxSupport"]
+        if self.options.shared:
+            self.cpp_info.libs = ["OfxSupport"]
+        else:
+            self.cpp_info.libs = ["OfxHost", "OfxSupport"]
+
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["GL"])
         if self.settings.os == "Macos":

@@ -44,7 +44,7 @@ target_include_directories(OfxSupport PUBLIC
 	${OFX_SUPPORT_HEADER_DIR})
 
 # HostSupport
-add_library(OfxHost STATIC
+add_library(OfxHost
 	${OFX_HEADER_FILES}
 	${OFX_HOSTSUPPORT_HEADER_FILES}
 	${OFX_HOSTSUPPORT_LIBRARY_FILES})
@@ -58,10 +58,6 @@ target_include_directories(OfxHost PUBLIC
 # Link
 set_target_properties(OfxSupport PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(OfxHost PROPERTIES LINKER_LANGUAGE CXX)
-if(NOT MSVC)
-	set_target_properties(OfxSupport PROPERTIES COMPILE_FLAGS "-fPIC")
-	set_target_properties(OfxHost PROPERTIES COMPILE_FLAGS "-fPIC")
-endif()
 
 # Install
 install(FILES
