@@ -36,7 +36,7 @@ class MagnumIntegrationConan(ConanFile):
         "with_ovr": False,
     }
 
-    export_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     short_paths = True
 
