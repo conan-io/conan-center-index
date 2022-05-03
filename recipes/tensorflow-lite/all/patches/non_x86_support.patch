@@ -4,7 +4,7 @@ index e135b08a0b..c2605f9075 100644
 +++ b/tensorflow/lite/CMakeLists.txt
 @@ -124,7 +124,6 @@ find_package(farmhash REQUIRED)
  find_package(fft REQUIRED)
- find_package(Flatbuffers REQUIRED)
+ find_package(Flatbuffers REQUIRED CONFIG)
  find_package(gemmlowp REQUIRED)
 -find_package(NEON_2_SSE REQUIRED)
  find_package(ruy REQUIRED)
