@@ -1,5 +1,6 @@
 import os
 import textwrap
+import functools
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -78,26 +79,27 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('openssl/1.1.1n')
         # TODO: Add googleapis once it is available in CCI (now it is embedded)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = 0
+        # Do not build in parallel for certain configurations, it fails writting/reading files at the same time
+        parallel = not (self.settings.compiler == "Visual Studio" and self.compiler.compiler.version == "16" and self.version == "1.31.1")
+        cmake = CMake(self, parallel=parallel)
+        cmake.definitions["BUILD_TESTING"] = 0
 
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
 
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
 
-        self._cmake.configure()
-        return self._cmake
+        cmake.configure()
+        return cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
