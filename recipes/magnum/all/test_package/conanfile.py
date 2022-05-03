@@ -7,7 +7,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
-
     @property
     def _executables(self):
         available = []
