@@ -1,4 +1,7 @@
 sources:
+  "3.6.1":
+    url: "https://github.com/libarchive/libarchive/releases/download/v3.6.1/libarchive-3.6.1.tar.xz"
+    sha256: "5a411aceb978f43e626f0c2d1812ddd8807b645ed892453acabd532376c148e6"
   "3.6.0":
     url: "https://github.com/libarchive/libarchive/releases/download/v3.6.0/libarchive-3.6.0.tar.xz"
     sha256: "df283917799cb88659a5b33c0a598f04352d61936abcd8a48fe7b64e74950de7"
@@ -15,6 +18,12 @@ sources:
     url: "https://github.com/libarchive/libarchive/releases/download/v3.4.0/libarchive-3.4.0.tar.gz"
     sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
 patches:
+  "3.6.1":
+    - patch_file: "patches/android_compile.patch"
+      base_path: "source_subfolder"
+  "3.6.0":
+    - patch_file: "patches/android_compile.patch"
+      base_path: "source_subfolder"
   "3.4.0":
     - patch_file: "patches/msvc-no-we4061.patch"
       base_path: "source_subfolder"
