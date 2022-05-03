@@ -32,6 +32,7 @@ class MagnumExtrasConan(ConanFile):
         "application": "sdl2",
     }
 
+    short_paths = True
     generators = "cmake", "cmake_find_package"
 
     @property
