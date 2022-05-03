@@ -106,6 +106,11 @@ class LibpngConan(ConanFile):
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
+        if self.settings.os == "Android" and self.settings.os == "armv7":
+            filter_neon = os.path.join(self._source_subfolder, "arm", "filter_neon.S")
+            tools.replace_in_file(filter_neon, ".func", ".hidden")
+            tools.replace_in_file(filter_neon, ".endfunc", "")
+
     @property
     def _neon_msa_sse_vsx_mapping(self):
         return {
