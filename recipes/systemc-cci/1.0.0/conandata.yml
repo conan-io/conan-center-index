@@ -14,4 +14,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/rapidjson.patch"
       base_path: "source_subfolder"
-
+    - patch_file: "patches/CMakeLists.patch"
+      base_path: "source_subfolder"

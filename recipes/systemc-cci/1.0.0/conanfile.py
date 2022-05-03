@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -14,14 +14,16 @@ class SystemccciConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+         "stdcxx":[11,14]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "stdcxx": 11
     }
     requires = "systemc/2.3.3"
-    generators = "make"
+    generators = "cmake"
     exports_sources = "patches/**"
 
     @property
@@ -33,10 +35,6 @@ class SystemccciConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows build not supported")
-
         tools.check_min_cppstd(self, "11")
 
     def source(self):
@@ -47,12 +45,19 @@ class SystemccciConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
-        env_build = AutoToolsBuildEnvironment(self)
-        args = ['CONAN_MAKE_FILE={}'.format(
-            os.path.join(self.build_folder, "conanbuildinfo.mak"))]
-        with tools.chdir(os.path.join(self._source_subfolder, "src")):
-            env_build.make(args=args, target='clean')
-            env_build.make(args=args)
+        cmake = CMake(self, parallel=True)
+        cmake.configure(
+                source_folder=self._source_subfolder,
+                args=[
+                    '-DCMAKE_CXX_FLAGS:="-D_GLIBCXX_USE_CXX11_ABI=%d"' % (0 if self.settings.compiler.libcxx == 'libstdc++' else 1),
+                    '-DBUILD_SHARED_LIBS=ON' if self.options.shared else '-DBUILD_SHARED_LIBS=OFF',
+                    '-DCMAKE_INSTALL_LIBDIR=lib', 
+                    '-DCMAKE_CXX_STANDARD=%s' % self.options.stdcxx,
+                    '-DSYSTEMC_ROOT=%s' % self.deps_cpp_info["systemc"].rootpath
+                    ]
+                )
+        cmake.build()
+        cmake.install()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
