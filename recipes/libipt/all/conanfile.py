@@ -6,7 +6,7 @@ class LibIptConan(ConanFile):
     name = "libipt"
     license = "BSD-3-Clause"
     homepage = "https://github.com/intel/libipt"
-    url = "https://github.com/intel/libipt"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Intel(R) Processor Trace Decoder Library"
     topics = ("profiling", "tracing")
     settings = "os", "compiler", "build_type", "arch"
