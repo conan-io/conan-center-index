@@ -14,13 +14,11 @@ class SystemccciConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-         "stdcxx":[11,14]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "stdcxx": 11
+        "fPIC": True
     }
     requires = "systemc/2.3.3"
     generators = "cmake"
@@ -36,6 +34,9 @@ class SystemccciConan(ConanFile):
 
     def configure(self):
         tools.check_min_cppstd(self, "11")
+        if self.options.shared:
+            del self.options.fPIC
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -46,13 +47,13 @@ class SystemccciConan(ConanFile):
             tools.patch(**patch)
 
         cmake = CMake(self, parallel=True)
+        cmake.verbose = False
         cmake.configure(
                 source_folder=self._source_subfolder,
                 args=[
-                    '-DCMAKE_CXX_FLAGS:="-D_GLIBCXX_USE_CXX11_ABI=%d"' % (0 if self.settings.compiler.libcxx == 'libstdc++' else 1),
+                    '-DCMAKE_CXX_FLAGS:=-D_GLIBCXX_USE_CXX11_ABI=%d' % (0 if self.settings.compiler.libcxx == 'libstdc++' else 1),
                     '-DBUILD_SHARED_LIBS=ON' if self.options.shared else '-DBUILD_SHARED_LIBS=OFF',
                     '-DCMAKE_INSTALL_LIBDIR=lib', 
-                    '-DCMAKE_CXX_STANDARD=%s' % self.options.stdcxx,
                     '-DSYSTEMC_ROOT=%s' % self.deps_cpp_info["systemc"].rootpath
                     ]
                 )
