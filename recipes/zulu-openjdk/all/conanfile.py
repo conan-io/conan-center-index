@@ -24,8 +24,8 @@ class ZuluOpenJDK(ConanFile):
 
     def configure(self):
         if Version(self.version) < Version("11.0.12"):
-            if self.settings.arch != "x86_64":
-                raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
+            if self.settings.arch not in ["x86_64", "armv8"]:
+                raise ConanInvalidConfiguration("Unsupported Architecture. This package currently only supports x86_64.")
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
