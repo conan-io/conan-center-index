@@ -12,10 +12,10 @@ class AndroidNDKConan(ConanFile):
     description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
-    topics = ("android", "NDK", "toolchain", "compiler")
+    topics = ("android", "ndk", "toolchain", "compiler")
     license = "Apache-2.0"
 
-    settings = "os", "arch"
+    settings = "os", "arch", "build_type", "compiler"
 
     short_paths = True
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
@@ -55,6 +55,8 @@ class AndroidNDKConan(ConanFile):
     def package_id(self):
         if self._is_universal2:
             self.info.settings.arch = "universal:armv8/x86_64"
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
