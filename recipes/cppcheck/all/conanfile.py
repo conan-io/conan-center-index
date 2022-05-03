@@ -50,7 +50,6 @@ class CppcheckConan(ConanFile):
         cmake.definitions["HAVE_RULES"] = self.options.have_rules
         cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
         cmake.definitions["ENABLE_OSS_FUZZ"] = False
-        cmake.definitions["FILESDIR"] = os.path.join(self.package_folder, "bin")
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
