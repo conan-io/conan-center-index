@@ -36,7 +36,9 @@ jobs:
     runs-on: macos-10.15
     steps:
       - name: Configure git
-        run: git config --global core.autocrlf false
+        run: |
+          git config --system core.longpaths true
+          git config --global core.autocrlf false        
         shell: bash
       - name: Checkout
         uses: actions/checkout@v2
