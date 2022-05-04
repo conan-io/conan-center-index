@@ -1,7 +1,6 @@
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 
 required_conan_version = ">=1.45.0"
@@ -15,9 +14,7 @@ class H5ppConan(ConanFile):
     topics = ("h5pp", "hdf5", "binary", "storage")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -54,29 +51,13 @@ class H5ppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["H5PP_ENABLE_TESTS"] = False
-        cmake.definitions["H5PP_BUILD_EXAMPLES"] = False
-        cmake.definitions["H5PP_PRINT_INFO"] = False
-        if tools.Version(self.version) >= "1.9.0":
-            cmake.definitions["H5PP_PACKAGE_MANAGER"] = "none"
-        cmake.configure()
-        return cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if tools.Version(self.version) <= "1.8.6":
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+        if tools.Version(self.version) < "1.9.0":
+            includedir = os.path.join(self._source_subfolder, "h5pp", "include")
         else:
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            includedir = os.path.join(self._source_subfolder, "include")
+        self.copy("*", src=includedir, dst="include")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
