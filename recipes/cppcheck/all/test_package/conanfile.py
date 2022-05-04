@@ -1,13 +1,17 @@
 from conans import ConanFile, tools
 import sys
+import os
+import shutil
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"
 
     def test(self):
+        shutil.copy(os.path.join(self.source_folder, "file_to_check.cpp"),
+                    os.path.join(self.build_folder, "file_to_check.cpp"))
         if not tools.cross_building(self.settings):
-            self.run("cppcheck --enable=warning,style,performance --std=c++11 ./file_to_check.cpp",
+            self.run("cppcheck --enable=warning,style,performance --std=c++11 .",
                     cwd=self.source_folder, run_environment=True)
             # On windows we need to explicitly use python to run the python script
             if self.settings.os == 'Windows':
