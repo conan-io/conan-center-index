@@ -53,7 +53,7 @@ class TaoCPPTaopqConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libpq/13.3")
+        self.requires("libpq/14.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
