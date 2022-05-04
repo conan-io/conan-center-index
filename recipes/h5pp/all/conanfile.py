@@ -66,7 +66,8 @@ class H5ppConan(ConanFile):
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
         self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
+        if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9") or \
+           (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
             self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
         if is_msvc(self):
             self.cpp_info.components["h5pp_flags"].defines = ["NOMINMAX"]
