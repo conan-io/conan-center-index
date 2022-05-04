@@ -25,6 +25,7 @@ class ICUBase(ConanFile):
         "with_unit_tests": [True, False],
         "silent": [True, False],
         "with_dyload": [True, False],
+        "with_rpath": [True, False],
         "dat_package_file": "ANY",
         "with_icuio": [True, False],
         "with_extras": [True, False],
@@ -36,6 +37,7 @@ class ICUBase(ConanFile):
         "with_unit_tests": False,
         "silent": True,
         "with_dyload": True,
+        "with_rpath": False,
         "dat_package_file": None,
         "with_icuio": True,
         "with_extras": False,
@@ -208,6 +210,9 @@ class ICUBase(ConanFile):
 
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
+
+        if self.options.with_rpath:
+            args.append("--enable-rpath")
 
         if not self._enable_icu_tools:
             args.append("--disable-tools")
