@@ -104,10 +104,6 @@ class EnjinCppSdk(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} requires cpp-httplib:with_openssl=True when using "
                                             f"with_default_http_client=True.")
 
-    def package_id(self):
-        if self.options.shared:
-            self.info.shared_library_package_id()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
