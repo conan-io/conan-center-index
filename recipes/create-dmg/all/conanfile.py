@@ -34,9 +34,7 @@ class CreateDmgConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        del self.info.settings.build_type
-        del self.info.settings.compiler
-        del self.info.settings.arch
+        self.info.header_only() 
 
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
