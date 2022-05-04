@@ -101,7 +101,7 @@ class SentryNativeConan(ConanFile):
             if self.options.with_breakpad == "google":
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
-            self.requires("qt/5.15.2")
+            self.requires("qt/5.15.3")
             self.requires("openssl/1.1.1n")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
