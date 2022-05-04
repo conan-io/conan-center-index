@@ -1,8 +1,9 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class SDLConan(ConanFile):
@@ -92,7 +93,7 @@ class SDLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.compiler in ["Visual Studio", "msvc"]:
+            if is_msvc(self):
                 del self.options.iconv
         if self.settings.os != "Linux":
             del self.options.alsa
@@ -199,7 +200,7 @@ class SDLConan(ConanFile):
         self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
         if self.settings.os != "Windows" and not self.options.shared:
             self._cmake.definitions["SDL_STATIC_PIC"] = self.options.fPIC
-        if self.settings.compiler in ["Visual Studio", "msvc"] and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             self._cmake.definitions["HAVE_LIBC"] = True
         self._cmake.definitions["SDL_SHARED"] = self.options.shared
         self._cmake.definitions["SDL_STATIC"] = not self.options.shared
