@@ -55,7 +55,7 @@ class UwebsocketsConan(ConanFile):
 
         minimal_version = {
             "Visual Studio": "15",
-            "gcc": "7",
+            "gcc": "7" if tools.Version(self.version) < "20.11.0" else "8",
             "clang": "5",
             "apple-clang": "10",
         }
