@@ -162,7 +162,8 @@ class SDLConan(ConanFile):
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
     def package_id(self):
-        del self.info.options.sdl2main
+        if tools.Version(self.version) < "2.0.22":
+            del self.info.options.sdl2main
 
     def build_requirements(self):
         if self.settings.os == "Linux":
@@ -336,6 +337,9 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
                 self._cmake.definitions["SDL_DIRECTX"] = self.options.directx
+
+        if tools.Version(self.version) >= "2.0.22":
+            self._cmake.definitions["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
         self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
