@@ -372,10 +372,12 @@ class SDLConan(ConanFile):
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
-        sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
-        self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::{}".format(sdl2_cmake_target))
+        self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
+        if not self.options.shared:
+            self.cpp_info.components["libsdl2"].set_property("cmake_target_aliases", ["SDL2::SDL2-static"])
         self.cpp_info.components["libsdl2"].set_property("pkg_config_name", "sdl2")
 
+        sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
         self.cpp_info.components["libsdl2"].names["cmake_find_package"] = sdl2_cmake_target
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
 
@@ -453,5 +455,5 @@ class SDLConan(ConanFile):
         # Workaround to avoid unwanted sdl::sdl target in CMakeDeps generator
         self.cpp_info.set_property(
             "cmake_target_name",
-            "SDL2::{}".format("SDL2main" if self.options.sdl2main else sdl2_cmake_target),
+            "SDL2::{}".format("SDL2main" if self.options.sdl2main else "SDL2"),
         )
