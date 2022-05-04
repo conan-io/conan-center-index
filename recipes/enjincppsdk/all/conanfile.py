@@ -24,7 +24,7 @@ class EnjinCppSdk(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
         "with_default_http_client": False,
         "with_default_ws_client": False,
     }
