@@ -82,7 +82,7 @@ class GoogleCloudCppConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         # Do not build in parallel for certain configurations, it fails writting/reading files at the same time
-        parallel = not (self.settings.compiler == "Visual Studio" and self.compiler.compiler.version == "16" and self.version == "1.31.1")
+        parallel = not (self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16" and self.version == "1.31.1")
         cmake = CMake(self, parallel=parallel)
         cmake.definitions["BUILD_TESTING"] = 0
 
