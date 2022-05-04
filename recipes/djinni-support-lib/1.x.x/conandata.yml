@@ -10,4 +10,4 @@ sources:
     sha256: "3630870c2b3305dc6216f8ca8e37139f3f59f2ea7bd600a1154c5aa1c4d983a9"
   "1.2.1":
     url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v1.2.1.tar.gz
-    sha256: "d810d8f5cb2687513a1260f787bd94f0304e2dcdf7031fbee067abca12dd5b79"
+    sha256: "ed64d3466ad7f13971913b5bd70c608a558a6b8574d9dbd8779dcdce9b97521b"
