@@ -33,9 +33,9 @@ class H5ppConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("eigen/3.3.9")
-        self.requires("hdf5/1.12.0")
-        self.requires("spdlog/1.8.5")
+        self.requires("eigen/3.4.0")
+        self.requires("hdf5/1.12.1")
+        self.requires("spdlog/1.10.0")
 
     def package_id(self):
         self.info.header_only()
