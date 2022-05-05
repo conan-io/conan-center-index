@@ -1,0 +1,4 @@
+sources:
+  "1.3.3":
+    url: "https://github.com/rlogiacco/CircularBuffer/archive/refs/tags/1.3.3.tar.gz"
+    sha256: "d558029c9ab5012a8bbf9a89bd130eb320bdeb69e3f8bd96851ddc1e5dc24eba"
