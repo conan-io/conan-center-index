@@ -118,6 +118,8 @@ class YamlCppConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         if is_msvc(self):
             self.cpp_info.defines.append("_NOEXCEPT=noexcept")
+            if self.options.shared:
+                self.cpp_info.defines.append("YAML_CPP_DLL")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
