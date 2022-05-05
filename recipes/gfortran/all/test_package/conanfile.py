@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             self.run("gfortran --version", run_environment=True)
             tools.mkdir("bin")
-            self.run("gfortran %s -o %s" % (self._source, self._exe), run_environment=True)
+            self.run("gfortran -m64 %s -o %s" % (self._source, self._exe), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self):
