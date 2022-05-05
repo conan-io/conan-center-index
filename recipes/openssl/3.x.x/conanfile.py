@@ -1,3 +1,4 @@
+from conan.tools.files import rename
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
@@ -652,8 +653,8 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             if self.settings.build_type == "Debug":
                 with tools.chdir(os.path.join(self.package_folder, "lib")):
-                    tools.rename("libssl.lib", "libssld.lib")
-                    tools.rename("libcrypto.lib", "libcryptod.lib")
+                    rename(self, "libssl.lib", "libssld.lib")
+                    rename(self, "libcrypto.lib", "libcryptod.lib")
 
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
