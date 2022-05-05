@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6d310a2c..012cb264 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -116,13 +116,21 @@ if(PAGMO_BUILD_PAGMO)
+     # Eigen3
+     if(PAGMO_WITH_EIGEN3)
+         find_package(Eigen3 REQUIRED)
++        if(Eigen3_FOUND)
++            set(EIGEN3_INCLUDE_DIR ${Eigen3_INCLUDE_DIR})
++            set(EIGEN3_VERSION ${Eigen3_VERSION})
++        endif()
+         message(STATUS "Eigen include directory: ${EIGEN3_INCLUDE_DIR}")
+         message(STATUS "Eigen version detected: ${EIGEN3_VERSION}")
+     endif()
+ 
+     # NLopt
+     if(PAGMO_WITH_NLOPT)
+-        find_package(NLOPT REQUIRED)
++        find_package(NLopt REQUIRED)
++        if(NLopt_FOUND)
++            set(NLOPT_INCLUDE_DIR ${NLopt_INCLUDE_DIR})
++            set(NLOPT_LIBRARY ${NLopt_LIBRARIES})
++        endif()
+         message(STATUS "NLopt include directory: ${NLOPT_INCLUDE_DIR}")
+         message(STATUS "NLopt library: ${NLOPT_LIBRARY}")
+     endif()
+@@ -167,13 +175,13 @@ if(PAGMO_BUILD_PAGMO)
+ 
+     if(PAGMO_WITH_EIGEN3)
+         # Link pagmo to eigen3.
+-        target_link_libraries(pagmo INTERFACE Eigen3::eigen3)
++        target_link_libraries(pagmo INTERFACE Eigen3::Eigen3)
+         set(PAGMO_ENABLE_EIGEN3 "#define PAGMO_WITH_EIGEN3")
+     endif()
+ 
+     if(PAGMO_WITH_NLOPT)
+         # Link pagmo to NLopt.
+-        target_link_libraries(pagmo INTERFACE NLOPT::nlopt)
++        target_link_libraries(pagmo INTERFACE NLopt::nlopt)
+         set(PAGMO_ENABLE_NLOPT "#define PAGMO_WITH_NLOPT")
+     endif()
+ 
