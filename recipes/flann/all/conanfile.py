@@ -50,6 +50,14 @@ class FlannConan(ConanFile):
         if self.options.with_hdf5 != "deprecated":
             self.output.warn("with_hdf5 is a deprecated option. Do not use.")
 
+    @property
+    def _min_cppstd(self):
+        return 11 if tools.Version(self.version) > "1.9.1" else None
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd)
+
     def requirements(self):
         self.requires("lz4/1.9.3")
 
@@ -63,6 +71,13 @@ class FlannConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)
+
+        # remove embedded lz4
+        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
+
+        if tools.Version(self.version) > "1.9.1":
+            return
+
         # Workaround issue with empty sources for a CMake target
         flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
         tools.save(os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
@@ -77,8 +92,6 @@ class FlannConan(ConanFile):
             'add_library(flann SHARED "")',
             'add_library(flann SHARED empty.cpp)'
         )
-        # remove embeded lz4
-        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -113,6 +126,7 @@ class FlannConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         # Remove vc runtimes
         if self.settings.os == "Windows":
             if self.options.shared:

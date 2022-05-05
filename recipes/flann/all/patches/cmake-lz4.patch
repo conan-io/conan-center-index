@@ -1,0 +1,55 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e1a6f54..2dfa2b5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -146,9 +146,7 @@ if (BUILD_CUDA_LIB)
+     endif(CUDA_FOUND)
+ endif(BUILD_CUDA_LIB)
+ 
+-find_package(PkgConfig REQUIRED)
+-pkg_check_modules(LZ4 REQUIRED liblz4)
+-include_directories(${LZ4_INCLUDE_DIRS})
++find_package(lz4 REQUIRED)
+ 
+ #set the C/C++ include path to the "include" directory
+ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/src/cpp)
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index daec3d6..b613f20 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -10,7 +10,7 @@ file(GLOB_RECURSE CU_SOURCES *.cu)
+ 
+ add_library(flann_cpp_s STATIC ${CPP_SOURCES})
+ target_compile_features(flann_cpp_s PUBLIC cxx_std_11)
+-target_link_libraries(flann_cpp_s ${LZ4_LINK_LIBRARIES})
++target_link_libraries(flann_cpp_s PRIVATE lz4::lz4)
+ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
+ endif()
+@@ -44,7 +44,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
+     endif()
+ else()
+     add_library(flann_cpp SHARED ${CPP_SOURCES})
+-    target_link_libraries(flann_cpp ${LZ4_LINK_LIBRARIES})
++    target_link_libraries(flann_cpp PRIVATE lz4::lz4)
+     # export lz4 headers, so that MSVC to creates flann_cpp.lib
+     set_target_properties(flann_cpp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS YES)
+     if (BUILD_CUDA_LIB)
+@@ -83,7 +83,7 @@ endif()
+ if (BUILD_C_BINDINGS)
+     add_library(flann_s STATIC ${C_SOURCES})
+     target_compile_features(flann_s PRIVATE cxx_std_11)
+-    target_link_libraries(flann_s ${LZ4_LINK_LIBRARIES})
++    target_link_libraries(flann_s PRIVATE lz4::lz4)
+     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+         set_target_properties(flann_s PROPERTIES COMPILE_FLAGS -fPIC)
+     endif()
+@@ -95,7 +95,7 @@ if (BUILD_C_BINDINGS)
+         target_link_libraries(flann -Wl,-whole-archive flann_s -Wl,-no-whole-archive)
+     else()
+         add_library(flann SHARED ${C_SOURCES})
+-        target_link_libraries(flann ${LZ4_LINK_LIBRARIES})
++        target_link_libraries(flann PRIVATE lz4::lz4)
+ 
+         if(MINGW AND OPENMP_FOUND)
+           target_link_libraries(flann gomp)
