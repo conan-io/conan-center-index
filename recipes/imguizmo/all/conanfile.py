@@ -1,5 +1,3 @@
-import os
-import glob
 import functools
 from conans import ConanFile, CMake, tools
 
