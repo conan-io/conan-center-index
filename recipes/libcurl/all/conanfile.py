@@ -490,19 +490,29 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CURL_STATICLIB"] = not self.options.shared
         self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
-        if tools.Version(self.version) >= "7.72.0":
+        if tools.Version(self.version) >= "7.81.0":
+            self._cmake.definitions["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        elif tools.Version(self.version) >= "7.72.0":
             self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         else:
             self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
-        self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
-        if tools.Version(self.version) >= "7.70.0":
+        if tools.Version(self.version) >= "7.81.0":
+            self._cmake.definitions["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+        else:
+            self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+        if tools.Version(self.version) >= "7.81.0":
+            self._cmake.definitions["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        elif tools.Version(self.version) >= "7.70.0":
             self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         self._cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
         self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
         if self._has_zstd_option:
             self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
+        if tools.Version(self.version) >= "7.81.0":
+            self._cmake.definitions["CURL_USE_LIBSSH2"] = self.options.with_libssh2
+        else:
+            self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
         self._cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         self._cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp

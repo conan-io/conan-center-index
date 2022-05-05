@@ -29,7 +29,7 @@ index f5cc9b97924..c83d8903621 100644
 -find_package(fft2d REQUIRED)
 -find_package(flatbuffers REQUIRED)
 +find_package(fft REQUIRED)
-+find_package(Flatbuffers REQUIRED)
++find_package(Flatbuffers REQUIRED CONFIG)
  find_package(gemmlowp REQUIRED)
 -find_package(neon2sse REQUIRED)
 +find_package(NEON_2_SSE REQUIRED)

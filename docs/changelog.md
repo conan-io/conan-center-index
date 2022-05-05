@@ -1,5 +1,13 @@
 # Changelog
 
+### 28-April-2022 - 9:56 CEST
+
+- [config] Update Conan client to 1.46.2
+- [fix] Do not create GitHub pull-request statuses in advance.
+- [fix] Move some Conan command calls to the wrapper.
+- [feature] Added compatibility for Conan v2 export command.
+- [config] Changed the required number of reviewers: 1 team and 1 community is enough
+
 ### 21-April-2022 - 13:46 CEST
 
 - [feature] Updated Python version to > 3.7 in all build agents.

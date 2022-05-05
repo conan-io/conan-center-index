@@ -15,6 +15,9 @@ target_link_libraries(${PROJECT_NAME}
         $<IF:$<TARGET_EXISTS:gRPC::grpc++_unsecure>,gRPC::grpc++_unsecure,gRPC::grpc++>
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+if(TEST_ACTUAL_SERVER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DTEST_ACTUAL_SERVER)
+endif()
 protobuf_generate(
     TARGET ${PROJECT_NAME}
     LANGUAGE cpp

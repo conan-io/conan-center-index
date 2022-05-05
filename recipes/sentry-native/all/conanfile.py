@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -40,7 +41,6 @@ class SentryNativeConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -101,7 +101,7 @@ class SentryNativeConan(ConanFile):
             if self.options.with_breakpad == "google":
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
-            self.requires("qt/5.15.2")
+            self.requires("qt/5.15.3")
             self.requires("openssl/1.1.1n")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
@@ -130,8 +130,9 @@ class SentryNativeConan(ConanFile):
         if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
-        if self.options.performance and tools.Version(self.version) < "0.4.14":
-            raise ConanInvalidConfiguration("Performance monitoring was introduced in 0.4.14")
+        if self.options.performance:
+            if tools.Version(self.version) < "0.4.14" or tools.Version(self.version) > "0.4.15":
+                raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def build_requirements(self):
         if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
@@ -142,20 +143,19 @@ class SentryNativeConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend
-        self._cmake.definitions["SENTRY_CRASHPAD_SYSTEM"] = True
-        self._cmake.definitions["SENTRY_BREAKPAD_SYSTEM"] = True
-        self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
-        self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
-        self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.qt
-        self._cmake.definitions["SENTRY_PERFORMANCE_MONITORING"] = self.options.performance
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["SENTRY_BACKEND"] = self.options.backend
+        cmake.definitions["SENTRY_CRASHPAD_SYSTEM"] = True
+        cmake.definitions["SENTRY_BREAKPAD_SYSTEM"] = True
+        cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
+        cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
+        cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
+        cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.qt
+        cmake.definitions["SENTRY_PERFORMANCE_MONITORING"] = self.options.performance
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

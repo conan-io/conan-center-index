@@ -1,7 +1,10 @@
 sources:
+  "1.14.1":
+    url: "https://github.com/kthohr/gcem/archive/v1.14.1.tar.gz"
+    sha256: "fd0860e89f47eeddf5a2280dd6fb3f9b021ce36fe8798116b3f703fa0e01409d"
   "1.13.1":
     url: "https://github.com/kthohr/gcem/archive/v1.13.1.tar.gz"
     sha256: "69a1973f146a4a5e584193af062359f50bd5b948c4175d58ea2622e1c066b99b"
   "1.12.0":
-    sha256: debbd6bf125126fb92499026b37aab70ed08df819baf9cf3948a2623fd5fa165
-    url: https://github.com/kthohr/gcem/archive/v1.12.0.tar.gz
+    url: "https://github.com/kthohr/gcem/archive/v1.12.0.tar.gz"
+    sha256: "debbd6bf125126fb92499026b37aab70ed08df819baf9cf3948a2623fd5fa165"

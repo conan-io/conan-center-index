@@ -1,11 +1,11 @@
 sources:
-  "0.8.1":
-    url: "https://github.com/zaphoyd/websocketpp/archive/0.8.1.tar.gz"
-    sha256: "178899de48c02853b55b1ea8681599641cedcdfce59e56beaff3dd0874bf0286"
   "0.8.2":
     url: "https://github.com/zaphoyd/websocketpp/archive/0.8.2.tar.gz"
     sha256: "6ce889d85ecdc2d8fa07408d6787e7352510750daa66b5ad44aacb47bea76755"
+  "0.8.1":
+    url: "https://github.com/zaphoyd/websocketpp/archive/0.8.1.tar.gz"
+    sha256: "178899de48c02853b55b1ea8681599641cedcdfce59e56beaff3dd0874bf0286"
 patches:
   "0.8.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/websocket_boost_support_1_7_x.patch"
+    - patch_file: "patches/websocket_boost_support_1_7_x.patch"
+      base_path: "source_subfolder"
