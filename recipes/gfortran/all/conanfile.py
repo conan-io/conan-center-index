@@ -65,6 +65,7 @@ class GFortranConan(ConanFile):
         }[str(self.settings.os)]
 
         self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib64"))
 
         self.copy("liblto_plugin*", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
 
