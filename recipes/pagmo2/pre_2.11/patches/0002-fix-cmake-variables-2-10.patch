@@ -30,7 +30,7 @@ index 6d310a2c..012cb264 100644
      if(PAGMO_WITH_EIGEN3)
          # Link pagmo to eigen3.
 -        target_link_libraries(pagmo INTERFACE Eigen3::eigen3)
-+        target_link_libraries(pagmo INTERFACE Eigen3::Eigen3)
++        target_link_libraries(pagmo INTERFACE Eigen3::Eigen)
          set(PAGMO_ENABLE_EIGEN3 "#define PAGMO_WITH_EIGEN3")
      endif()
  
