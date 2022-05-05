@@ -9,7 +9,7 @@ axtls/1.5.3.dssl4
 boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
-caffe/1.0.windows.dssl3
+caffe/1.0.windows.dssl4
 cpython-distro/2.7.18.dssl1
 dlib/19.4
 dojo-toolkit/1.11.4@trassir/sdk142
