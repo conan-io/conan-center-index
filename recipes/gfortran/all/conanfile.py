@@ -32,7 +32,7 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        sources = self.conan_data["sources"][self.version][self.settings.os]
+        sources = self.conan_data["sources"][self.version][str(self.settings.os)]
         if sources["url"].endswith(".7z"):
             tools.download(**sources)
             url = sources["url"]
