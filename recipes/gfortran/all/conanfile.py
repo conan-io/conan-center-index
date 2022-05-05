@@ -34,9 +34,8 @@ class GFortranConan(ConanFile):
     def source(self):
         sources = self.conan_data["sources"][self.version][str(self.settings.os)]
         if sources["url"].endswith(".7z"):
-            tools.download(**sources)
-            url = sources["url"]
-            filename = url[url.rfind("/")+1:]
+            filename = "archive.7z"
+            tools.download(**sources, filename=filename)
             self.run("7z x {0}".format(filename))
             os.unlink(filename)
             tools.rename("mingw64", self._source_subfolder)
