@@ -49,8 +49,7 @@ class GFortranConan(ConanFile):
         tools.rename(root_folder[str(self.settings.os)], self._source_subfolder)
 
     def _extract_license(self):
-        base_folder = "local" if self.settings.os == "Macos" else ""
-        info = tools.load(os.path.join(self.source_folder, self._source_subfolder, base_folder, "share", "info", "gfortran.info"))
+        info = tools.load(os.path.join(self.source_folder, self._source_subfolder, "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
         tools.save("LICENSE", license_contents)
 
