@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
-
+import functools
 
 class ZyreConan(ConanFile):
     name = "zyre"
@@ -8,10 +8,9 @@ class ZyreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/zyre"
     description = "Local Area Clustering for Peer-to-Peer Applications."
-    topics = ("conan", "zyre", "czmq", "zmq", "zeromq",
+    topics = ("zyre", "czmq", "zmq", "zeromq",
               "message-queue", "asynchronous")
-    exports_sources = "CMakeLists.txt", "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = ["cmake", "cmake_find_package"]
     options = {
         "shared": [True, False],
@@ -24,8 +23,6 @@ class ZyreConan(ConanFile):
         "drafts": False,
     }
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -33,6 +30,11 @@ class ZyreConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,21 +46,20 @@ class ZyreConan(ConanFile):
 
     def requirements(self):
         self.requires("czmq/4.2.0")
-        self.requires("zeromq/4.3.2")
+        self.requires("zeromq/4.3.4")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("libsystemd/249.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.verbose = True
-        self._cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
-        self._cmake.configure(build_dir=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
+        cmake.configure(build_dir=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -72,11 +73,12 @@ class ZyreConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libzyre"
         self.cpp_info.libs = ["zyre"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]
         if not self.options.shared:
             self.cpp_info.defines = ["ZYRE_STATIC"]
