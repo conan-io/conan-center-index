@@ -9,3 +9,6 @@ sources:
     "Macos":
       url: https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz
       sha256: 2de46f571eefc2b544db4ed6c958c78a5e3e78c4b4b5daab38aabc1b08dd5666
+    "Linux-infrastructure":
+      url: https://gfortran.meteodat.ch/download/x86_64/gcc-infrastructure.tar.xz
+      sha256: bc4bb9931d0d94de70de3488183a76178e2d3a3447cd1f4fbbd5539223034693

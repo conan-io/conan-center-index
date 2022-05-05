@@ -48,6 +48,9 @@ class GFortranConan(ConanFile):
         }
         tools.rename(root_folder[str(self.settings.os)], self._source_subfolder)
 
+        if self.settings.os == "Linux":
+            tools.get(**self.conan_data["sources"][self.version]["Linux-infrastructure"], destination=self._source_subfolder)
+
     def _extract_license(self):
         info = tools.load(os.path.join(self.source_folder, self._source_subfolder, "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
