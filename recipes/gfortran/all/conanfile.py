@@ -19,7 +19,7 @@ class GFortranConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder_{}".format(str(self.settings.os)))
+        return "source_subfolder"
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -32,21 +32,19 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        url = self.conan_data["sources"][self.version]
-        for it in url.keys():
-            if self.settings.os == "Windows" and it == "Windows":
-                filename = url[it]["filename"]
-                tools.download(**url[it])
-                self.run("7z x {0}".format(filename))
-                os.unlink(filename)
-                os.rename("mingw64", "source_subfolder_Windows")
-            elif it != "Windows":
-                tools.get(**url[it])
-                pattern = "gcc-*" if it == "Linux" else "usr"
-                os.rename(glob.glob(pattern)[0], "source_subfolder_{}".format(it))
+        sources = self.conan_data["sources"][self.version][self.settings.os]
+        if sources["url"].endswith(".7z"):
+            tools.download(**sources)
+            url = sources["url"]
+            filename = url[url.rfind("/")+1:]
+            self.run("7z x {0}".format(filename))
+            os.unlink(filename)
+            tools.rename("mingw64", self._source_subfolder)
+        else:
+            tools.get(**sources, strip_root=True, destination =self._source_subfolder)
 
     def _extract_license(self):
-        info = tools.load(os.path.join(self.source_folder, "source_subfolder_Linux", "share", "info", "gfortran.info"))
+        info = tools.load(os.path.join(self.source_folder, self._source_subfolder, "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
         tools.save("LICENSE", license_contents)
 
