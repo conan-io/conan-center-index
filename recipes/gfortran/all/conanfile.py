@@ -32,7 +32,7 @@ class GFortranConan(ConanFile):
             self.build_requires("7zip/19.00")
 
     def source(self):
-        url = self.conan_data["sources"][self.version]["url"]
+        url = self.conan_data["sources"][self.version]
         for it in url.keys():
             if self.settings.os == "Windows" and it == "Windows":
                 filename = url[it]["filename"]
