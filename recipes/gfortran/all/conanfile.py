@@ -66,7 +66,7 @@ class GFortranConan(ConanFile):
 
         self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
 
-        self.copy("liblto_plugin-0.dll", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
+        self.copy("liblto_plugin*", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
 
         self.copy("f951*", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
         self.copy("as.exe", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
