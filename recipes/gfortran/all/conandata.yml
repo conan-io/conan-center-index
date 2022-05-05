@@ -4,7 +4,7 @@ sources:
       url: https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z
       sha256: 5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44
     "Linux":
-      url: https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.3.0.tar.xz
+      url: https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.2.0.tar.xz
       sha256: df89539786951fee8a97ade67b5a24bdf24734f1057fedd50d8335e9309c432b
     "Macos":
       url: https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz
