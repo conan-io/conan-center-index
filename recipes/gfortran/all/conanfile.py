@@ -37,9 +37,16 @@ class GFortranConan(ConanFile):
             tools.download(**sources, filename=filename)
             self.run("7z x {0}".format(filename))
             os.unlink(filename)
-            tools.rename("mingw64", self._source_subfolder)
         else:
-            tools.get(**sources, strip_root=True, destination =self._source_subfolder)
+            # can't use strip_root here because if fails with:
+            # KeyError: "linkname 'gcc-10.2.0/bin/g++' not found"
+            tools.get(**sources)
+        root_folder = {
+            "Linux": "gcc-%s" % self.version,
+            "Macos": "usr",
+            "Windows": "mingw64"
+        }
+        os.rename(root_folder[str(self.settings.os)], self._source_subfolder)
 
     def _extract_license(self):
         base_folder = "local" if self.settings.os == "Macos" else ""
