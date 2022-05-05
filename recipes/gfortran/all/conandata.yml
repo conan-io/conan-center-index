@@ -5,7 +5,7 @@ sources:
       sha256: 5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44
     "Linux":
       url: https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.2.0.tar.xz
-      sha256: df89539786951fee8a97ade67b5a24bdf24734f1057fedd50d8335e9309c432b
+      sha256: 5cfaf152db442bb967963ca62d4590980cb2664c5902c1a9578fc8a9c6efe40f
     "Macos":
       url: https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz
       sha256: 2de46f571eefc2b544db4ed6c958c78a5e3e78c4b4b5daab38aabc1b08dd5666
