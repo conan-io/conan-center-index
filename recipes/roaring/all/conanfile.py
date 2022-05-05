@@ -69,6 +69,8 @@ class RoaringConan(ConanFile):
         cmake.definitions["ROARING_DISABLE_NATIVE"] = not self.options.native_optimization
         cmake.definitions["ROARING_BUILD_STATIC"] = not self.options.shared
         cmake.definitions["ENABLE_ROARING_TESTS"] = False
+        # Relocatable shared lib on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
