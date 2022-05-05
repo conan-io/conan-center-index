@@ -64,11 +64,7 @@ class GFortranConan(ConanFile):
             "Macos": "x86_64-apple-darwin19"
         }[str(self.settings.os)]
 
-        self.copy("libgfortran.spec", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
-        self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib", "gcc", tripplet, self.version))
-
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib64"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
 
         self.copy("liblto_plugin-0.dll", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
 
@@ -79,6 +75,19 @@ class GFortranConan(ConanFile):
         self.copy("*", dst=".", src=os.path.join(self._source_subfolder, tripplet))
 
         tools.remove_files_by_mask(self.package_folder, "*.la*")
+        tools.rmdir(os.path.join(self.package_folder, "include"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "include"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "include-fixed"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "finclude"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "32", "finclude"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "plugin", "include"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "install-tools"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "include"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "include-fixed"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "finclude"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "32", "finclude"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "plugin", "include"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "gcc", tripplet, self.version, "install-tools"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
