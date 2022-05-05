@@ -60,6 +60,10 @@ class DlibConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
 
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("dlib doesn't support macOS M1")
+
     def requirements(self):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
