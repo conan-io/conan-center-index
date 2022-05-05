@@ -38,15 +38,15 @@ class GFortranConan(ConanFile):
             self.run("7z x {0}".format(filename))
             os.unlink(filename)
         else:
-            # can't use strip_root here because if fails with:
+            # can't use strip_root on linux because if fails with:
             # KeyError: "linkname 'gcc-10.2.0/bin/g++' not found"
-            tools.get(**sources)
+            tools.get(**sources, strip_root=(self.settings.os == "Macos"))
         root_folder = {
             "Linux": "gcc-%s" % self.version,
-            "Macos": "usr",
+            "Macos": "local",
             "Windows": "mingw64"
         }
-        os.rename(root_folder[str(self.settings.os)], self._source_subfolder)
+        tools.rename(root_folder[str(self.settings.os)], self._source_subfolder)
 
     def _extract_license(self):
         base_folder = "local" if self.settings.os == "Macos" else ""
@@ -58,10 +58,28 @@ class GFortranConan(ConanFile):
         self._extract_license()
         self.copy("LICENSE", dst="licenses")
         self.copy("gfortran*", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
-        self.copy("gfortran", dst="bin", src=os.path.join(self._source_subfolder, "local", "bin"))
+
+        tripplet = {
+            "Linux": "x86_64-pc-linux-gnu",
+            "Windows": "x86_64-w64-mingw32",
+            "Macos": "x86_64-apple-darwin19"
+        }[str(self.settings.os)]
+
+        self.copy("libgfortran.spec", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy("*", dst="lib", src=os.path.join(self._source_subfolder, "lib", "gcc", tripplet, self.version))
+
         self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib64"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "local", "lib"))
-        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib", "gcc", "x86_64-w64-mingw32", "10.2.0"))
+        self.copy("libgfortran.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+
+        self.copy("liblto_plugin-0.dll", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
+
+        self.copy("f951*", dst=os.path.join("libexec", "gcc", tripplet, self.version), src=os.path.join(self._source_subfolder, "libexec", "gcc", tripplet, self.version))
+        self.copy("as.exe", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
+        self.copy("ld.exe", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
+
+        self.copy("*", dst=".", src=os.path.join(self._source_subfolder, tripplet))
+
+        tools.remove_files_by_mask(self.package_folder, "*.la*")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
