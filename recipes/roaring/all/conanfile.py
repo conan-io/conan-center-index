@@ -73,9 +73,6 @@ class RoaringConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "cmake_minimum_required(VERSION 2.8)",
-            "cmake_minimum_required(VERSION 3.1)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "set(CMAKE_MACOSX_RPATH OFF)", "")
         cmake = self._configure_cmake()
         cmake.build()
