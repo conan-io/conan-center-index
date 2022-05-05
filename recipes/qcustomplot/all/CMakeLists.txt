@@ -9,8 +9,13 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         AUTOMOC ON
         DEBUG_POSTFIX "d"
+        VERSION ${CONAN_PACKAGE_VERSION}
 )
 if(BUILD_SHARED_LIBS)
+    # get major version via 'conanbuildinfo.cmake'
+    string(REPLACE "." ";" VERSION_LIST ${CONAN_PACKAGE_VERSION})
+    list(GET VERSION_LIST 0 CONAN_PACKAGE_VERSION_MAJOR)
+
     target_compile_definitions(${PROJECT_NAME}
         PRIVATE QCUSTOMPLOT_COMPILE_LIBRARY
         INTERFACE QCUSTOMPLOT_USE_LIBRARY
@@ -19,6 +24,7 @@ if(BUILD_SHARED_LIBS)
         PROPERTIES
             CXX_VISIBILITY_PRESET hidden
             VISIBILITY_INLINES_HIDDEN ON
+            SOVERSION ${CONAN_PACKAGE_VERSION_MAJOR}
     )
 endif()
 
