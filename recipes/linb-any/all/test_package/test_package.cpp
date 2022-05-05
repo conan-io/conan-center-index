@@ -1,3 +1,5 @@
+#include <string>
+
 #include "any.hpp"
 
 struct big_type {
