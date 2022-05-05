@@ -52,6 +52,9 @@ class OnigurumaConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_POSIX_API"] = self.options.posix_api
         self._cmake.definitions["ENABLE_BINARY_COMPATIBLE_POSIX_API"] = self.options.posix_api
+        if tools.Version(self.version) >= "6.9.8":
+            self._cmake.definitions["INSTALL_DOCUMENTATION"] = False
+            self._cmake.definitions["INSTALL_EXAMPLES"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -65,7 +68,13 @@ class OnigurumaConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        if tools.Version(self.version) < "6.9.8":
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+        else:
+            if self.settings.os == "Windows" and self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "onig-config")
+            else:
+                tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oniguruma")
