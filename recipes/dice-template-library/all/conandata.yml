@@ -1,0 +1,6 @@
+sources:
+  "0.1":
+    # this is a workaround, because the template library isn't publicly released currently!
+    # just start a simple http server via `python3 -m http.server 8000' in a folder with the tar.gz file.
+    url: "http://localhost:8000/DiceTemplateLibrary-0.1.tar.gz"
+    sha256: "192ea3d2c14952e7ac49128fed0fb908db60f9b88d24bfa61a7782e6b06feb03"
