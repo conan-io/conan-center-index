@@ -8,11 +8,11 @@ class BrynetConan(ConanFile):
     name = "brynet"
     description = "Header Only Cross platform high performance TCP network library using C++ 11."
     license = "MIT"
-    topics = ("conan", "brynet", "networking", "tcp", "websocket")
+    topics = ("brynet", "networking", "tcp", "websocket")
     homepage = "https://github.com/IronsDu/brynet"
     url = "https://github.com/conan-io/conan-center-index"
 
-    settings = "os", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
     }
