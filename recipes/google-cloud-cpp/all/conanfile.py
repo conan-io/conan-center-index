@@ -135,15 +135,20 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["common"].libs = ["google_cloud_cpp_common"]
         self.cpp_info.components["common"].names["pkg_config"] = "google_cloud_cpp_common"
 
-        self.cpp_info.components["experimental-bigquery"].requires = ["grpc_utils", "common", "cloud_bigquery_protos"]
-        self.cpp_info.components["experimental-bigquery"].libs = ["google_cloud_cpp_bigquery"]
-        self.cpp_info.components["experimental-bigquery"].names["pkg_config"] = "google_cloud_cpp_bigquery"
+        if tools.Version(self.version) >= "1.30.0":  # Bigquery-storage library becomes GA
+            self.cpp_info.components["bigquery"].requires = ["grpc_utils", "common", "cloud_bigquery_protos"]
+            self.cpp_info.components["bigquery"].libs = ["google_cloud_cpp_bigquery"]
+            self.cpp_info.components["bigquery"].names["pkg_config"] = "google_cloud_cpp_bigquery"
+        else:
+            self.cpp_info.components["experimental-bigquery"].requires = ["grpc_utils", "common", "cloud_bigquery_protos"]
+            self.cpp_info.components["experimental-bigquery"].libs = ["google_cloud_cpp_bigquery"]
+            self.cpp_info.components["experimental-bigquery"].names["pkg_config"] = "google_cloud_cpp_bigquery"
 
         self.cpp_info.components["bigtable"].requires = ["abseil::absl_memory", "bigtable_protos", "common", "grpc_utils", "grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf"]
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
         self.cpp_info.components["bigtable"].names["pkg_config"] = "google_cloud_cpp_bigtable"
 
-        if tools.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+        if tools.Version(self.version) < "1.33.0":  # Use canonical library from https://firebase.google.com/docs/reference/cpp
             self.cpp_info.components["experimental-firestore"].requires = ["common"]
             self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
             self.cpp_info.components["experimental-firestore"].names["pkg_config"] = "google_cloud_cpp_firestore"
@@ -353,9 +358,14 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["grpc_utils"].libs = ["google_cloud_cpp_grpc_utils"]
         self.cpp_info.components["grpc_utils"].names["pkg_config"] = "google_cloud_cpp_grpc_utils"
 
-        self.cpp_info.components["experimental-iam"].requires = ["grpc_utils", "common", "iam_protos"]
-        self.cpp_info.components["experimental-iam"].libs = ["google_cloud_cpp_iam"]
-        self.cpp_info.components["experimental-iam"].names["pkg_config"] = "google_cloud_cpp_iam"
+        if tools.Version(self.version) >= "1.30.0":  # IAM library becomes GA
+            self.cpp_info.components["iam"].requires = ["grpc_utils", "common", "iam_protos"]
+            self.cpp_info.components["iam"].libs = ["google_cloud_cpp_iam"]
+            self.cpp_info.components["iam"].names["pkg_config"] = "google_cloud_cpp_iam"
+        else:
+            self.cpp_info.components["experimental-iam"].requires = ["grpc_utils", "common", "iam_protos"]
+            self.cpp_info.components["experimental-iam"].libs = ["google_cloud_cpp_iam"]
+            self.cpp_info.components["experimental-iam"].names["pkg_config"] = "google_cloud_cpp_iam"
 
         self.cpp_info.components["experimental-logging"].requires = ["grpc_utils", "common", "logging_protos"]
         self.cpp_info.components["experimental-logging"].libs = ["google_cloud_cpp_logging"]
