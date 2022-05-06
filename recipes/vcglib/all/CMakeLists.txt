@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(vcglib)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 set(VCGLIB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 
