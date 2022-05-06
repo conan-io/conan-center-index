@@ -24,7 +24,7 @@ class OpenDDLParserConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     @property
@@ -52,8 +52,8 @@ class OpenDDLParserConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "if( WIN32 AND NOT CYGWIN )", "if (MSVC)")
-
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
