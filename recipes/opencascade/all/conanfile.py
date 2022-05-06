@@ -102,11 +102,11 @@ class OpenCascadeConan(ConanFile):
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
-        # TODO: add freeimage support (also vtk?)
+        # TODO: add vtk support?
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
         if self.options.with_freeimage:
-            raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
+            self.requires("freeimage/3.18.0")
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
