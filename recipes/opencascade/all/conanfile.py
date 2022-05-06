@@ -114,7 +114,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.4.3")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -202,14 +202,14 @@ class OpenCascadeConan(ConanFile):
                     occt_csf_cmake,
                     "set (CSF_fontconfig  \"fontconfig\")",
                     "set (CSF_fontconfig  \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
-        ## tbb
+        ## onetbb
         if self.options.with_tbb:
-            conan_targets.append("CONAN_PKG::tbb")
+            conan_targets.append("CONAN_PKG::onetbb")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tbb\")", "")
             tools.replace_in_file(
                 occt_csf_cmake,
                 "set (CSF_TBB \"tbb tbbmalloc\")",
-                "set (CSF_TBB \"{}\")".format(" ".join(self.deps_cpp_info["tbb"].libs)))
+                "set (CSF_TBB \"{}\")".format(" ".join(self.deps_cpp_info["onetbb"].libs)))
         ## ffmpeg
         if self.options.with_ffmpeg:
             conan_targets.append("CONAN_PKG::ffmpeg")
@@ -420,7 +420,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
-            "CSF_TBB": {"externals": ["tbb::tbb"] if self.options.with_tbb else []},
+            "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
             # Android system libs
             "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},
