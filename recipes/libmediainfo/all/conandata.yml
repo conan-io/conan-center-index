@@ -1,4 +1,7 @@
 sources:
+  "22.03":
+    url: "https://mediaarea.net/download/source/libmediainfo/22.03/libmediainfo_22.03.tar.xz"
+    sha256: "fc50babb628e9cfba655288dae06d5c342b0d7e6941a32d64fbbb113248c80b9"
   "21.09":
     url: "https://mediaarea.net/download/source/libmediainfo/21.09/libmediainfo_21.09.tar.xz"
     sha256: "69be9444f6a03a1bdf56713ee31d56e987c502a7ec18eb54ee70fcc171b7f126"
