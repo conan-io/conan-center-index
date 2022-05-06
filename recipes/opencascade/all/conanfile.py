@@ -104,7 +104,7 @@ class OpenCascadeConan(ConanFile):
             self.requires("xorg/system")
         # TODO: add freeimage support (also vtk?)
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/5.0")
         if self.options.with_freeimage:
             raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
         if self.options.with_openvr:
@@ -112,7 +112,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.get_safe("with_draco"):
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.2")
         if self.options.with_tbb:
             self.requires("onetbb/2020.3")
 
