@@ -35,3 +35,9 @@ class ZstrConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "src"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
