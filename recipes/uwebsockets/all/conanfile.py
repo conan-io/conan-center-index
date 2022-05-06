@@ -79,7 +79,7 @@ class UwebsocketsConan(ConanFile):
                 % (self.name, minimal_cpp_standard)
             )
 
-        if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
+        if tools.Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration("{} needs recent libstdc++ with charconv.".format(self.name))
 
     def source(self):
