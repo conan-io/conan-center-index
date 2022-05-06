@@ -1,5 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, CMake
-from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, tools, CMake
 import os
 
 
@@ -47,16 +46,9 @@ class SystemccciConan(ConanFile):
             tools.patch(**patch)
 
         cmake = CMake(self, parallel=True)
-        cmake.verbose = False
-        cmake.configure(
-                source_folder=self._source_subfolder,
-                args=[
-                    '-DCMAKE_CXX_FLAGS:=-D_GLIBCXX_USE_CXX11_ABI=%d' % (0 if self.settings.compiler.libcxx == 'libstdc++' else 1),
-                    '-DBUILD_SHARED_LIBS=ON' if self.options.shared else '-DBUILD_SHARED_LIBS=OFF',
-                    '-DCMAKE_INSTALL_LIBDIR=lib', 
-                    '-DSYSTEMC_ROOT=%s' % self.deps_cpp_info["systemc"].rootpath
-                    ]
-                )
+        cmake.verbose = True
+        cmake.definitions["SYSTEMC_ROOT"] = self.deps_cpp_info["systemc"].rootpath
+        cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
         cmake.install()
 

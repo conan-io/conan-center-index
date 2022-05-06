@@ -22,7 +22,7 @@ index 0000000..ae346cc
 +if(DEFINED ENV{SYSTEMC_HOME})
 +    set(SYSTEMC_ROOT $ENV{SYSTEMC_HOME})
 +else()
-+    message(ERROR "SYSTEMC_HOME environment variable not defined")
++    message("Using SYSTEMC_ROOT = ${SYSTEMC_ROOT}")
 +endif()
 +
 +if(DEFINED ENV{RAPIDJSON_HOME})
