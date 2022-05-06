@@ -42,7 +42,7 @@ class VcglibConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("eigen/3.3.9")
+        self.requires("eigen/3.4.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
