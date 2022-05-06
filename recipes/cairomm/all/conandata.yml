@@ -5,3 +5,11 @@ sources:
   "1.14.3":
     url: "https://cairographics.org/releases/cairomm-1.14.3.tar.xz"
     sha256: "0d37e067c5c4ca7808b7ceddabfe1932c5bd2a750ad64fb321e1213536297e78"
+
+patches:
+  "1.16.1":
+    - patch_file: "patches/enable_static_lib_1_16_1.patch"
+      base_path: "source_subfolder"
+  "1.14.3":
+    - patch_file: "patches/enable_static_lib_1_14_3.patch"
+      base_path: "source_subfolder"

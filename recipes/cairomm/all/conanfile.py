@@ -26,6 +26,7 @@ class CairommConan(ConanFile):
     }
 
     generators = "pkg_config"
+    exports_sources = "patches/**"
     short_paths = True
 
     def _abi_version(self):
@@ -47,6 +48,10 @@ class CairommConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,6 +81,7 @@ class CairommConan(ConanFile):
         )
 
     def build(self):
+        self._patch_sources()
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()

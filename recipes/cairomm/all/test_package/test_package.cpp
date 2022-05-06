@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
 #include <cairommconfig.h>
