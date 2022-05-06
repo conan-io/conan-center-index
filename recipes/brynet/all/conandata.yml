@@ -1,4 +1,7 @@
 sources:
+  "1.11.2":
+    url: "https://github.com/IronsDu/brynet/archive/refs/tags/v1.11.2.tar.gz"
+    sha256: "aa6b176a68f58c4576fd617138859673705c9691f84447c4f7adbb0ff5f7997c"
   "1.11.1":
     url: "https://github.com/IronsDu/brynet/archive/v1.11.1.tar.gz"
     sha256: "780f7e1be5e16a202b75661178209a9dd572d07d548a7f30e9bcc7f4a768c61d"
