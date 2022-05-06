@@ -2,6 +2,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
+import os
 
 required_conan_version = ">=1.45.0"
 
@@ -18,10 +19,14 @@ class QuantlibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "high_resolution_date": [True, False],
+        "with_openmp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "high_resolution_date": False,
+        "with_openmp": False,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -38,6 +43,9 @@ class QuantlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "1.24":
+            del self.options.high_resolution_date
+            del self.options.with_openmp
 
     def configure(self):
         if self.options.shared:
@@ -59,9 +67,19 @@ class QuantlibConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["USE_BOOST_DYNAMIC_LIBRARIES"] = False # even if boost shared, the underlying upstream logic doesn't matter for conan
-        if is_msvc(self):
-            cmake.definitions["MSVC_RUNTIME"] = "static" if is_msvc_static_runtime(self) else "dynamic"
+        if tools.Version(self.version) < "1.24":
+            cmake.definitions["USE_BOOST_DYNAMIC_LIBRARIES"] = False # even if boost shared, the underlying upstream logic doesn't matter for conan
+            if is_msvc(self):
+                cmake.definitions["MSVC_RUNTIME"] = "static" if is_msvc_static_runtime(self) else "dynamic"
+        else:
+            cmake.definitions["QL_BUILD_BENCHMARK"] = False
+            cmake.definitions["QL_BUILD_EXAMPLES"] = False
+            cmake.definitions["QL_BUILD_TEST_SUITE"] = False
+            cmake.definitions["QL_ENABLE_OPENMP"] = self.options.with_openmp
+            cmake.definitions["QL_HIGH_RESOLUTION_DATE"] = self.options.high_resolution_date
+            cmake.definitions["QL_INSTALL_BENCHMARK"] = False
+            cmake.definitions["QL_INSTALL_EXAMPLES"] = False
+            cmake.definitions["QL_INSTALL_TEST_SUITE"] = False
         cmake.configure()
         return self._cmake
 
@@ -75,7 +93,14 @@ class QuantlibConan(ConanFile):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "QuantLib")
+        self.cpp_info.set_property("cmake_target_name", "QuantLib::QuantLib")
         self.cpp_info.set_property("pkg_config_name", "quantlib")
         self.cpp_info.libs = tools.collect_libs(self)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "QuantLib"
+        self.cpp_info.names["cmake_find_package_multi"] = "QuantLib"

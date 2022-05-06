@@ -4,8 +4,8 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(quantlib REQUIRED CONFIG)
+find_package(QuantLib REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} quantlib::quantlib)
+target_link_libraries(${PROJECT_NAME} QuantLib::QuantLib)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

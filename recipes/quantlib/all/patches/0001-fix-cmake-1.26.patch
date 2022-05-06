@@ -1,0 +1,67 @@
+* cxx_std_11 compile feature instead of CMAKE_CXX_STANDARD
+* do not force PIC
+* do not force a specific msvc runtime depending on build type or shared/static lib
+* Allow shared on windows
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -103,6 +103,7 @@ if (NOT DEFINED Boost_USE_STATIC_RUNTIME)
+ endif()
+ 
+ # Require C++11 or higher
++if(0)
+ if (NOT DEFINED CMAKE_CXX_STANDARD)
+     set(CMAKE_CXX_STANDARD 11)
+ elseif(CMAKE_CXX_STANDARD LESS 11)
+@@ -115,6 +116,7 @@ endif()
+ if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
+     set(CMAKE_CXX_EXTENSIONS FALSE)
+ endif()
++endif()
+ 
+ if (NOT DEFINED QL_BOOST_VERSION)
+     # Boost 1.75.0 or greater required for compiling with C++20
+@@ -155,7 +157,7 @@ if (QL_ENABLE_PARALLEL_UNIT_TEST_RUNNER AND UNIX AND NOT APPLE)
+ endif()
+ 
+ # If available, use PIC for shared libs and PIE for executables
+-if (NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
++if (0)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ if (CMAKE_POSITION_INDEPENDENT_CODE)
+--- a/cmake/Platform.cmake
++++ b/cmake/Platform.cmake
+@@ -2,14 +2,10 @@
+ if (MSVC)
+     # See cmake policy CMP00091
+     # One of "MultiThreaded", "MultiThreadedDebug", "MultiThreadedDLL", "MultiThreadedDebugDLL"
+-    set(CMAKE_MSVC_RUNTIME_LIBRARY
+-        "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_LIBS}>:DLL>")
+ 
+     # Export all symbols so MSVC can populate the .lib and .dll
+     if (BUILD_SHARED_LIBS)
+         # Temp: disable DLL builds on MSVC
+-        message(FATAL_ERROR
+-            "Shared library (DLL) builds for QuantLib on MSVC are not supported")
+         set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+     endif()
+ 
+--- a/ql/CMakeLists.txt
++++ b/ql/CMakeLists.txt
+@@ -2317,6 +2317,7 @@ add_library(ql_library
+     ${QL_HEADERS}
+     ${QL_CONFIGURED_HEADERS}
+     ${QL_GENERATED_HEADERS})
++target_compile_features(ql_library PUBLIC cxx_std_11)
+ 
+ set_target_properties(ql_library PROPERTIES
+     EXPORT_NAME ${PACKAGE_NAME}
+@@ -2344,6 +2345,7 @@ target_link_libraries(ql_library PUBLIC
+     ${OpenMP_CXX_LIBRARIES})
+ 
+ install(TARGETS ql_library EXPORT QuantLibTargets
++    RUNTIME DESTINATION ${QL_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${QL_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${QL_INSTALL_LIBDIR})
+ 
