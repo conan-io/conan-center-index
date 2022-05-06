@@ -1,7 +1,9 @@
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class QuantlibConan(ConanFile):
@@ -22,13 +24,16 @@ class QuantlibConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,14 +56,13 @@ class QuantlibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_BOOST_DYNAMIC_LIBRARIES"] = False # even if boost shared, the underlying upstream logic doesn't matter for conan
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["MSVC_RUNTIME"] = "dynamic" if "MD" in str(self.settings.compiler.runtime) else "static"
-        self._cmake.configure()
+        cmake = CMake(self)
+        cmake.definitions["USE_BOOST_DYNAMIC_LIBRARIES"] = False # even if boost shared, the underlying upstream logic doesn't matter for conan
+        if is_msvc(self):
+            cmake.definitions["MSVC_RUNTIME"] = "static" if is_msvc_static_runtime(self) else "dynamic"
+        cmake.configure()
         return self._cmake
 
     def build(self):
@@ -73,5 +77,5 @@ class QuantlibConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "quantlib"
+        self.cpp_info.set_property("pkg_config_name", "quantlib")
         self.cpp_info.libs = tools.collect_libs(self)
