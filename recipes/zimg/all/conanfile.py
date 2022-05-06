@@ -76,6 +76,8 @@ class ZimgConan(ConanFile):
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared lib on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
         autotools = self._configure_autools()
         autotools.make()
 
