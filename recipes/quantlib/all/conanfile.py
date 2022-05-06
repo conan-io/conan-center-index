@@ -81,7 +81,7 @@ class QuantlibConan(ConanFile):
             cmake.definitions["QL_INSTALL_EXAMPLES"] = False
             cmake.definitions["QL_INSTALL_TEST_SUITE"] = False
         cmake.configure()
-        return self._cmake
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
