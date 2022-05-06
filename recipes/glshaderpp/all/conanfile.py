@@ -21,7 +21,7 @@ class GLShaderPPConan(ConanFile):
         self.info.header_only()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
     def source(self):
