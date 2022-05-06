@@ -51,6 +51,10 @@ class OpenDDLParserConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "if( WIN32 AND NOT CYGWIN )", "if (MSVC)")
+
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -61,6 +65,7 @@ class OpenDDLParserConan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
