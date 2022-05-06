@@ -114,7 +114,7 @@ class EnjinCppSdk(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ENJINSDK_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ENJINSDK_BUILD_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
