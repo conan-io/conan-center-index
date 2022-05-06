@@ -2,7 +2,8 @@
 
 int main(int argc, char **argv)
 {
-    auto version = pt_library_version();
+    pt_config cfg;
+    pt_config_init(&cfg);
 
-	return 0;
+    return 0;
 }

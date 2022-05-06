@@ -19,7 +19,6 @@ class LibIptConan(ConanFile):
             "fPIC": True,
     }
 
-    short_paths = True
     generators = "cmake"
     _cmake = None
 
@@ -67,7 +66,4 @@ class LibIptConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
-    def package_info(self):
-        self.cpp_info.libs = ["ipt"]
 
