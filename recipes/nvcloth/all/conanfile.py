@@ -21,7 +21,7 @@ class NvclothConan(ConanFile):
         "use_dx11": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": False,
         "use_cuda": False,
         "use_dx11": False
@@ -113,7 +113,7 @@ class NvclothConan(ConanFile):
         nvcloth_source_subfolder = os.path.join(self.build_folder, self._source_subfolder)
         nvcloth_build_subfolder = os.path.join(self.build_folder, self._build_subfolder, self._get_build_type())
 
-        self.copy(pattern="NvCloth/license.txt", dst="LICENSE", src=nvcloth_source_subfolder)
+        self.copy(pattern="NvCloth/license.txt", dst="licenses", src=nvcloth_source_subfolder, keep_path=False)
         self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "NvCloth", "include"))
         self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "NvCloth", "extensions", "include"))
         self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "PxShared", "include"))
