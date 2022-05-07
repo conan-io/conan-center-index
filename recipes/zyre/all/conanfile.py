@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 import functools
 
+required_conan_version = ">=1.33.0"
+
 class ZyreConan(ConanFile):
     name = "zyre"
     license = "MPL-2.0"
