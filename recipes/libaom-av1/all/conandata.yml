@@ -1,13 +1,13 @@
 sources:
   "3.1.2":
     url: "https://aomedia.googlesource.com/aom/+archive/ae2be8030200925895fa6e98bd274ffdb595cbf6.tar.gz"
-    sha256: "abc"
+    sha256: "8b3ce4f45f7d587205b059c1ead6dd5f103ec830bb6ae21f51fec18ad4455819"
   "3.1.1":
     url: "https://aomedia.googlesource.com/aom/+archive/7fadc0e77130efb05f52979b0deaba9b6a1bba6d.tar.gz"
-    sha256: "abc"
+    sha256: "9db85e589411a0eb641dadb2c6e0aa1df54cad4b8ad654e97e040ad6aa7b394f"
   "2.0.1":
     url: "https://aomedia.googlesource.com/aom/+archive/b52ee6d44adaef8a08f6984390de050d64df9faa.tar.gz"
-    sha256: "abc"
+    sha256: "24a672e5f8b0cf88f59e4fe16bb41aa0b1d4ea6385ff0240cfc883b75a73b556"
 patches:
   "3.1.2":
     - base_path: "source_subfolder"
