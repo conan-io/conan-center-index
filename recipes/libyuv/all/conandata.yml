@@ -1,7 +1,7 @@
 sources:
   "cci.20201106":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/2664f649bc0a32e05f5bc3ff4d12134e41aa08c4.tar.gz"
-    sha256: "abc"
+    sha256: "b7afb93046280a5cbf354629e17db7febf1d5b60f6976ba8bd7810efc77037c9"
 
 patches:
   "cci.20201106":
