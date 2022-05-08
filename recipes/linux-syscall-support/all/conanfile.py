@@ -13,7 +13,7 @@ class LinuxSyscallSupportConan(ConanFile):
     settings = "os"
     no_copy_source = True
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} supported only on Linux".format(self.name))
 
