@@ -1,10 +1,10 @@
 sources:
   "20200407":
     url: "https://chromium.googlesource.com/chromium/tools/depot_tools/+archive/48c5c9c50455c625c58dab2fbb0904cac467168c.tar.gz"
-    sha256: "abc"
+    sha256: "46b6926d3633335901ae561ed85d5040cfbe689d92ca4a3d13fa34b3e7ea5d47"
   "cci.20201009":
     url: "https://chromium.googlesource.com/chromium/tools/depot_tools.git/+archive/b073999c6f90103a36a923e63ae8cf7a5c9c6c8c.tar.gz"
-    sha256: "abc"
+    sha256: "52ee73edbba94a80e2cf32f3a6be78e5771741d4b9fe0a237dcb6d4730944613"
 patches:
   "cci.20201009":
     - patch_file: "patches/001-use-system-python.patch"
