@@ -33,7 +33,7 @@ class LibyuvConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self)
+    def validate(self):
         if str(self.options.with_jpeg) == "libjpeg-turbo":
             raise ConanInvalidConfiguration(
                 "libjpeg-turbo is an invalid option right now, as it is not supported by the cmake script.")
