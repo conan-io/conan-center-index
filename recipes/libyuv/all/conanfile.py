@@ -8,7 +8,7 @@ class LibyuvConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://chromium.googlesource.com/libyuv/libyuv/"
     description = "libyuv is an open source project that includes YUV scaling and conversion functionality."
-    topics = ["YUV", "libyuv", "google", "chromium"]
+    topics = ("YUV", "libyuv", "google", "chromium")
     license = "BSD-3-Clause"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False],
@@ -41,7 +41,7 @@ class LibyuvConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.1.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"]
