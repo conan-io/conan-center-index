@@ -1,0 +1,30 @@
+diff --git a/NvCloth/include/NvCloth/Callbacks.h b/NvCloth/include/NvCloth/Callbacks.h
+index f5b54a9..ec6e06b 100644
+--- a/NvCloth/include/NvCloth/Callbacks.h
++++ b/NvCloth/include/NvCloth/Callbacks.h
+@@ -79,25 +79,6 @@ NV_CLOTH_API(void)
+ //Allocator
+ NV_CLOTH_API(physx::PxAllocatorCallback*) GetNvClothAllocator(); //Only use internally
+ 
+-#if !PX_DOXYGEN
+-namespace physx
+-{
+-#endif
+-
+-/* Base class to handle assert failures */
+-class PxAssertHandler
+-{
+-public:
+-	virtual ~PxAssertHandler()
+-	{
+-	}
+-	virtual void operator()(const char* exp, const char* file, int line, bool& ignore) = 0;
+-};
+-
+-#if !PX_DOXYGEN
+-} // namespace physx
+-#endif
+-
+ namespace nv
+ {
+ namespace cloth

@@ -1,0 +1,54 @@
+diff --git a/NvCloth/compiler/cmake/common/NvCloth.cmake b/NvCloth/compiler/cmake/common/NvCloth.cmake
+index 8d59261..ca972a8 100644
+--- a/NvCloth/compiler/cmake/common/NvCloth.cmake
++++ b/NvCloth/compiler/cmake/common/NvCloth.cmake
+@@ -153,6 +153,12 @@ SET( NV_CLOTH_SOURCE_LIST
+ 
+ ADD_LIBRARY(NvCloth ${NVCLOTH_LIBTYPE} ${NV_CLOTH_SOURCE_LIST})
+ 
++IF(DEFINED PX_STATIC_LIBRARIES)
++	TARGET_COMPILE_DEFINITIONS(NvCloth PRIVATE PX_STATIC)
++ELSE()
++	TARGET_COMPILE_DEFINITIONS(NvCloth PRIVATE PX_BUILD_DLL_EXPORT)
++ENDIF()
++
+ foreach(source IN LISTS NV_CLOTH_SOURCE_LIST)
+ 	string(LENGTH ${PROJECT_ROOT_DIR} strlen)
+ 	string(SUBSTRING ${source} ${strlen} -1 timmedSource)
+diff --git a/NvCloth/compiler/cmake/windows/NvCloth.cmake b/NvCloth/compiler/cmake/windows/NvCloth.cmake
+index 065ea18..c2cb1a7 100644
+--- a/NvCloth/compiler/cmake/windows/NvCloth.cmake
++++ b/NvCloth/compiler/cmake/windows/NvCloth.cmake
+@@ -162,7 +162,11 @@ LIST(APPEND NVCLOTH_COMPILE_DEFS
+ )
+ ENDIF()
+ 
+-SET(NVCLOTH_LIBTYPE SHARED)
++IF(DEFINED PX_STATIC_LIBRARIES)
++	SET(NVCLOTH_LIBTYPE STATIC)
++ELSE()
++	SET(NVCLOTH_LIBTYPE SHARED)
++ENDIF()
+ 
+ # include common NvCloth settings
+ INCLUDE(../common/NvCloth.cmake)
+diff --git a/PxShared/include/foundation/PxPreprocessor.h b/PxShared/include/foundation/PxPreprocessor.h
+index 55dc196..51befbb 100644
+--- a/PxShared/include/foundation/PxPreprocessor.h
++++ b/PxShared/include/foundation/PxPreprocessor.h
+@@ -293,8 +293,13 @@ DLL export macros
+ #endif
+ 
+ #if PX_WINDOWS_FAMILY
+-#define PX_DLL_EXPORT __declspec(dllexport)
+-#define PX_DLL_IMPORT __declspec(dllimport)
++#ifdef PX_BUILD_DLL_EXPORT
++	#define PX_DLL_EXPORT __declspec(dllexport)
++	#define PX_DLL_IMPORT __declspec(dllimport)
++#else
++	#define PX_DLL_EXPORT
++	#define PX_DLL_IMPORT
++#endif
+ #else
+ #define PX_DLL_EXPORT PX_UNIX_EXPORT
+ #define PX_DLL_IMPORT
