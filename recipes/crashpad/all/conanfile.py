@@ -62,7 +62,7 @@ class CrashpadConan(ConanFile):
         if self.options.http_transport == "libcurl":
             self.requires("libcurl/7.75.0")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1m")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
