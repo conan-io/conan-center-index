@@ -155,6 +155,10 @@ class CairommConan(ConanFile):
             self.cpp_info.components["cairomm-1.16"].requires = [
                 "libsigcpp::sigc++", "cairo::cairo_"
             ]
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["cairomm-1.16"].frameworks = [
+                    "CoreFoundation"
+                ]
         else:
             self.cpp_info.components["cairomm-1.0"].names[
                 "pkg_config"] = "cairomm-1.0"
@@ -165,3 +169,7 @@ class CairommConan(ConanFile):
             self.cpp_info.components["cairomm-1.0"].requires = [
                 "libsigcpp::sigc++-2.0", "cairo::cairo_"
             ]
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["cairomm-1.0"].frameworks = [
+                    "CoreFoundation"
+                ]
