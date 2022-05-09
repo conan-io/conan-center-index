@@ -144,12 +144,12 @@ class CPythonConan(ConanFile):
                and (not is_msvc(self) or tools.Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self._supports_modules:
-            self.requires("openssl/1.1.1l")
-            self.requires("expat/2.4.1")
+            self.requires("openssl/1.1.1o")
+            self.requires("expat/2.4.8")
             if self._with_libffi:
-                self.requires("libffi/3.2.1")
+                self.requires("libffi/3.4.2")
             if tools.Version(self._version_number_only) < "3.8":
                 self.requires("mpdecimal/2.4.2")
             elif tools.Version(self._version_number_only) < "3.10":
@@ -159,7 +159,7 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             if not tools.is_apple_os(self.settings.os):
                 self.requires("libuuid/1.0.3")
-            self.requires("libxcrypt/4.4.25")
+            self.requires("libxcrypt/4.4.28")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -168,11 +168,11 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.38.4")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.3")
         if self.options.get_safe("with_bsddb", False):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
