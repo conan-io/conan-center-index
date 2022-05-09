@@ -2,14 +2,14 @@ sources:
   "cci.20210507":
     crashpad:
       url: "https://github.com/chromium/crashpad/archive/d9bc7cf06aef74e928f9afc3dee33b60121b9c73.tar.gz"
-      sha256: "34c2d4bf7be49c2db1d2f50e3410b506aab15a06d245f8c02ea0046e9295eaa6"
+      sha256: "49f4b10f1de9b6d33743eccecace6b0fc9d7fe92e5e550ba5e099e6db9a11f0f"
     mini_chromium:
       url: "https://github.com/chromium/mini_chromium/archive/ccb198907cecf072d8f5b2543d4d348e834a298a.tar.gz"
       sha256: "d526f659b0d44932bb4b5ff1277d855569572eb3fcad6ec1c69a71aac6a3d6ee"
   "cci.20220219":
     crashpad:
       url: "https://github.com/chromium/crashpad/archive/e9937cb36cd12f24d73a07c4b91168cf1885b5db.tar.gz"
-      sha256: "5cdeb5913253034663a91844f029d6311a68e253e7ee0e14b9faab20235a1904"
+      sha256: "3876ada53bfb35ca58ac4c27fba79ec56d9436046ab28477fb06c9e8d1a97c7e"
     mini_chromium:
       url: "https://github.com/chromium/mini_chromium/archive/822fada4a9972e3e2f36a981da770539025beb0a.tar.gz"
       sha256: "0c672b8b86f609d95a49faa007102a85f3950fb966b54b70b4e5a1d4abf7895f"
