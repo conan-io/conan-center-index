@@ -33,10 +33,10 @@ class AndroidNDKConan(ConanFile):
         return "x86_64" if self._is_universal2 else self.settings.arch
 
     def _settings_os_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os)) is not None
+        return self.conan_data["sources"][self.version].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self._arch)) is not None
+        return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self._arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
@@ -46,10 +46,10 @@ class AndroidNDKConan(ConanFile):
 
     def build(self):
         if self.version in ['r23', 'r23b', 'r24']:
-            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)]
+            data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self._arch)],
+            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):

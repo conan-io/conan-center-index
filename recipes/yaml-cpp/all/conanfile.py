@@ -1,9 +1,11 @@
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class YamlCppConan(ConanFile):
@@ -25,20 +27,10 @@ class YamlCppConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
-    def _is_vc_static_runtime(self):
-        return (self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime) or \
-               (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime == "static")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -56,7 +48,7 @@ class YamlCppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
-        if self.options.shared and self._is_msvc and self._is_vc_static_runtime:
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for {} shared library with MT runtime is not supported".format(self.name))
 
     def source(self):
@@ -67,21 +59,19 @@ class YamlCppConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
+        cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
+        cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
+        cmake.definitions["YAML_CPP_INSTALL"] = True
+        cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
+        if is_msvc(self):
+            cmake.definitions["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
 
-        self._cmake = CMake(self)
-        self._cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
-        self._cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
-        self._cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
-        self._cmake.definitions["YAML_CPP_INSTALL"] = True
-        self._cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
-        if self._is_msvc:
-            self._cmake.definitions["YAML_MSVC_SHARED_RT"] = not self._is_vc_static_runtime
-
-        self._cmake.configure()
-        return self._cmake
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -126,8 +116,10 @@ class YamlCppConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("m")
-        if self._is_msvc:
+        if is_msvc(self):
             self.cpp_info.defines.append("_NOEXCEPT=noexcept")
+            if self.options.shared:
+                self.cpp_info.defines.append("YAML_CPP_DLL")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
