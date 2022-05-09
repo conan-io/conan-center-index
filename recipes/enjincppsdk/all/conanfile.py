@@ -30,6 +30,7 @@ class EnjinCppSdk(ConanFile):
     }
 
     _cmake = None
+    short_paths = True
 
     @property
     def _source_subfolder(self):
