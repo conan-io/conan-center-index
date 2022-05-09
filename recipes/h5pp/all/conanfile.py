@@ -63,7 +63,6 @@ class H5ppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
-        self.cpp_info.components["h5pp_headers"].includedirs = ["include"]
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
         self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
