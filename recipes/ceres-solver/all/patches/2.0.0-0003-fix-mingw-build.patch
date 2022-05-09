@@ -12,5 +12,4 @@ index 3828e33..30ef8cb 100644
  endif (MINGW)
  
  # After the tweaks for the compile settings, disable some warnings on MSVC.
- 
- 
+
