@@ -66,9 +66,10 @@ class H5ppConan(ConanFile):
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
         self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
-        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
-        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
-        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+        if tools.Version(self.version) >= "1.10.0":
+            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
+            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
+            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
 
         if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
