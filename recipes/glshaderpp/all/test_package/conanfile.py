@@ -6,7 +6,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def requirements(self):
-        self.requires("glew/2.1.0")
+        self.requires("glew/2.2.0")
 
     def build(self):
         cmake = CMake(self)
