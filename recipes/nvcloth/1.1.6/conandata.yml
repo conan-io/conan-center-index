@@ -4,7 +4,7 @@ sources:
     sha256: "fe29af2e8783383d2ede8fb23a51ce9a5c59fa016e8a1d68af45a69a1828e042"
 patches:
   "1.1.6":
-    - patch_file: "patches/1.1.6/0001-PsAllocator-include-typeinfo.patch"
+    - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/1.1.6/0002-CallbackFix.patch"
+    - patch_file: "patches/0002-CallbackFix.patch"
       base_path: "source_subfolder"
