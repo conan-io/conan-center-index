@@ -6,6 +6,8 @@
 #
 # recipes/zlib @myusername
 #
+# NOTE: Github uses case-sensitive filesystem, so your name must be the same from your account.
+#
 # Github will add you are reviewer, which will notify you by e-mail.
 # This feature is named as Code Owner, however, it's a Github's feature name.
 # On Conan Center Index, there are no owners/maintainers, all recipes are owned by the
@@ -15,4 +17,4 @@
 # Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
 
-recipes/aaf @martindelille
+recipes/aaf @MartinDelille
