@@ -11,7 +11,7 @@ class H5ppConan(ConanFile):
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage")
+    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "c++17")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -63,9 +63,14 @@ class H5ppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
+        self.cpp_info.components["h5pp_headers"].includedirs = ["include"]
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
         self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
+        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
+        self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+
         if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
             self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
