@@ -5,7 +5,8 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(glshaderpp CONFIG REQUIRED)
+find_package(glew CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} example.cpp)
-target_link_libraries(${PROJECT_NAME} glshaderpp::glshaderpp glew::glew)
+target_link_libraries(${PROJECT_NAME} glshaderpp::glshaderpp GLEW::GLEW)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
