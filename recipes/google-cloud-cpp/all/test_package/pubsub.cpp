@@ -4,7 +4,7 @@
 
 namespace pubsub = ::google::cloud::pubsub;
 
-int main(int argc, char *argv[]) try
+int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
@@ -18,17 +18,11 @@ int main(int argc, char *argv[]) try
     // Create a namespace alias to make the code easier to read.
     auto publisher = pubsub::Publisher(pubsub::MakePublisherConnection(pubsub::Topic(project_id, topic_id), {}));
     auto id = publisher.Publish(pubsub::MessageBuilder{}.SetData("Hello World!").Build()).get();
-
     if (!id)
     {
-        throw std::runtime_error(id.status().message());
+        std::cerr << "Failed to send message\n";
+        return 0;
     }
     std::cout << "Hello World published with id=" << *id << "\n";
-
-    return 0;
-}
-catch (std::exception const &ex)
-{
-    std::cerr << "Standard exception raised: " << ex.what() << "\n";
     return 0;
 }
