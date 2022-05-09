@@ -81,7 +81,7 @@ class NvclothConan(ConanFile):
         cmake.definitions["CMAKE_BUILD_TYPE"]=self.settings.build_type
         cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", False)
 
-        if not self.options.shared and self.settings.os != "Windows":
+        if not self.options.shared:
             cmake.definitions["PX_STATIC_LIBRARIES"] = "ON"
 
         if self.settings.compiler.runtime in ["MT", "MTd"]:
@@ -167,7 +167,4 @@ class NvclothConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
     
     def requirements(self):
-        return self.requires("physx/4.1.1")
-    
-    def build_requirements(self):
-        self.build_requires("physx/4.1.1")
+        self.requires("physx/4.1.1")

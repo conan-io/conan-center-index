@@ -37,6 +37,5 @@ int main()
     }
 
     NvClothDestroyFactory(factory);
-    std::cout << "Goodbye, NvCloth!" << std::endl;
     return 0;
 }

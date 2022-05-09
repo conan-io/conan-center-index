@@ -9,14 +9,10 @@ patches:
   "1.1.5":
     - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-WindowsCmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-CallbackFix.patch"
+    - patch_file: "patches/0002-CallbackFix.patch"
       base_path: "source_subfolder"
   "1.1.6":
     - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-WindowsCmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-CallbackFix.patch"
+    - patch_file: "patches/0002-CallbackFix.patch"
       base_path: "source_subfolder"

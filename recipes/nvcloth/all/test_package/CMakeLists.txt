@@ -8,5 +8,5 @@ find_package(nvcloth REQUIRED nvcloth CONFIG)
 find_package(PhysX REQUIRED PhysX PhysXExtensions CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PhysX::PhysX PhysX::PhysXExtensions)
 target_link_libraries(${PROJECT_NAME} nvcloth::nvcloth)
+target_link_libraries(${PROJECT_NAME} PhysX::PhysX PhysX::PhysXExtensions)
