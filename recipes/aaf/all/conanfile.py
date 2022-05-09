@@ -14,7 +14,6 @@ class AafConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    maintainers = ["martindelille"]
     options = {
         "structured_storage": [True, False],
     }
