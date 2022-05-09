@@ -1,5 +1,5 @@
 versions:
   "1.2.0":
     folder: "all"
-maintainers:
+watchers:
   - martindelille
