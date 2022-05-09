@@ -11,7 +11,7 @@ class GLShaderPPConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
     license = "LGPL-3.0-or-later"
-    settings = "compiler"
+    settings = "compiler", "os", "arch", "build_type"
 
     @property
     def _source_subfolder(self):
