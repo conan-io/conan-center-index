@@ -18,6 +18,12 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # Disable the default "prefer config" behaviour, required for other recipes.
+        # This demonstrates the problem with Fontconfig's test_package,
+        # the same behaviour appears in other contexts.
+        tc.variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = "OFF"
+
         tc.generate()
 
     def build(self):
