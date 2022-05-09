@@ -84,7 +84,7 @@ class NvclothConan(ConanFile):
         if not self.options.shared:
             cmake.definitions["PX_STATIC_LIBRARIES"] = "ON"
 
-        if self.settings.compiler.runtime in ["MT", "MTd"]:
+        if self._is_msvc and self.settings.compiler.runtime in ["MT", "MTd"]:
             cmake.definitions["STATIC_WINCRT"]="1"
 
         cmake.definitions["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
@@ -108,10 +108,8 @@ class NvclothConan(ConanFile):
         # Copy patches
         if "patches" in self.conan_data and not os.path.exists("patches"):
             os.mkdir("patches")
-        if not os.path.exists(os.path.join("patches", self.version)):
-            os.mkdir(os.path.join("patches", self.version))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            shutil.copy(os.path.join(self.source_folder, patch["patch_file"]), os.path.join("patches", self.version))
+            shutil.copy(os.path.join(self.source_folder, patch["patch_file"]), "patches")
         
         # Copy PhysX source code
         subfolders_to_copy = [
