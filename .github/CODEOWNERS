@@ -17,4 +17,7 @@
 # Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
 
+.github @ericLemanissier 
 recipes/aaf @MartinDelille
+recipes/gtk @ericLemanissier 
+recipes/qt @ericLemanissier 
