@@ -8,4 +8,4 @@ find_package(any CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} any::any)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
