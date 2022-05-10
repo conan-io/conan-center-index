@@ -73,12 +73,17 @@ class TrantorConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["BUILD_TRANTOR_SHARED"] = self.options.shared
         cmake.definitions["BUILD_C-ARES"] = self.options.with_c_ares
         cmake.configure(build_folder=self._build_subfolder)
 
         return cmake
 
     def build(self):
+        if self.options.with_c_ares:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), 
+                "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares_lib)", 
+                "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares::cares)")
         cmake = self._configure_cmake()
         cmake.build()
 
