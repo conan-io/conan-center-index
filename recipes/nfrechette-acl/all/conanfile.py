@@ -18,7 +18,7 @@ class AclConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("rtm/2.1.2")
+        self.requires("rtm/2.1.3")
 
     def configure(self):
         minimal_cpp_standard = "11"
