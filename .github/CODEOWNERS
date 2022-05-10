@@ -8,10 +8,10 @@
 #
 # NOTE: Github uses case-sensitive filesystem, so your name must be the same from your account.
 #
-# Github will add you are reviewer, which will notify you by e-mail.
-# This feature is named as Code Owner, however, it's a Github's feature name.
+# Github will add you as a reviewer and will notify you by e-mail.
+# This feature is named 'CodeOwners', however, it's a Github's feature name.
 # On Conan Center Index, there are no owners/maintainers, all recipes are owned by the
-# community. This feature only helps people which are more interested to watch and follow
+# community. This feature only helps people that are more interested in watching and following
 # specific recipes, instead of receiving a new notification for each new pull request.
 #
 # Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
