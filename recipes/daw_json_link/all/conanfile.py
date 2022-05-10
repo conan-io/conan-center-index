@@ -32,7 +32,7 @@ class DawJsonLinkConan(ConanFile):
         elif tools.Version(self.version) < "2.12.0":
             self.requires("daw_header_libraries/2.5.3")
         else:
-            self.requires("daw_header_libraries/2.33.2")
+            self.requires("daw_header_libraries/2.46.0")
         self.requires("daw_utf_range/2.2.0")
 
     def validate(self):
