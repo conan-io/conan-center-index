@@ -10,11 +10,11 @@ sources:
     sha256: "a0cff299621e2ef885aba219c498fa39a7d9a7ddf47585a118fd66c64ad1b312"
 patches:
   "3.1.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-3.1.1-msvc-install.patch"
+    - patch_file: "patches/0001-3.1.1-fix-install.patch"
+      base_path: "source_subfolder"
   "3.1.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-3.1.1-msvc-install.patch"
+    - patch_file: "patches/0001-3.1.1-fix-install.patch"
+      base_path: "source_subfolder"
   "2.0.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-2.0.1-msvc-install.patch"
+    - patch_file: "patches/0001-2.0.1-fix-install.patch"
+      base_path: "source_subfolder"
