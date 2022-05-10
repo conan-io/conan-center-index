@@ -54,15 +54,15 @@ class CrashpadConan(ConanFile):
 
     def requirements(self):
         # FIXME: use mini_chromium conan package instead of embedded package (if possible)
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.requires("linux-syscall-support/cci.20200813")
         if self.options.http_transport != "socket":
             del self.options.with_tls
         if self.options.http_transport == "libcurl":
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.82.0")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1o")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -82,8 +82,8 @@ class CrashpadConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder, strip_root=True)
-        tools.get(**self.conan_data["sources"][self.version]["url"]["mini_chromium"],
+        tools.get(**self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version]["mini_chromium"],
                   destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
 
     @property
