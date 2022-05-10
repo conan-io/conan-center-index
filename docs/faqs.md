@@ -382,4 +382,4 @@ Conan will build from sources all the packages and use the shared libraries when
 By default, Github allows us to receive notifications for any new PR, or PRs where we are mentioned directly, or even when added as a reviewer.
 However, if you want to subscribe to review or even watch one or more recipes and avoid receiving emails for any new pull request in Conan Center Index,
 you should add a new entry in the file `.github/CODEOWNERS`, which is a Github feature to customize notifications.
-Remember that it's just a feature name, the Conan Center Index has no maintainers, nor owners for recipes, all of them a maintained by all the community.
+Remember that it's just a feature name, the Conan Center Index has no maintainers, nor owners for recipes, all of them are maintained by the whole community.
