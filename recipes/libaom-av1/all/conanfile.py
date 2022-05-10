@@ -82,7 +82,8 @@ class LibaomAv1Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder)
+                  destination=self._source_subfolder,
+                  strip_root=tools.Version(self.version) >= "3.3.0")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
