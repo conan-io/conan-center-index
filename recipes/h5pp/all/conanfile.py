@@ -11,7 +11,7 @@ class H5ppConan(ConanFile):
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "c++17")
+    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "cpp17")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
