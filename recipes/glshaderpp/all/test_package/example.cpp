@@ -5,7 +5,7 @@
 #include <GLShaderPP/ShaderException.h>
 
 int main() {
-
-    std::cout << "It compiles so it works!\n";
+    GLShaderPP::CShaderException e("If you read this, GLShaderPP is happy :)", GLShaderPP::CShaderException::ExceptionType::LinkError);
+    std::cout << e.what() << '\n';
     return EXIT_SUCCESS;
 }
