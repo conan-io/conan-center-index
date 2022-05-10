@@ -3,9 +3,6 @@
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
 #include <cairommconfig.h>
-#include <cmath>
-#include <iostream>
-#include <string>
 
 int main() {
 #if CAIROMM_MINOR_VERSION == 16

@@ -8,12 +8,11 @@ find_package(PkgConfig REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-pkg_search_module(CAIROMM IMPORTED_TARGET cairomm-1.16)
-if (TARGET PkgConfig::CAIROMM)
+find_package(cairomm REQUIRED CONFIG)
+if (TARGET cairomm::cairomm-1.16)
   set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+  target_link_libraries(${PROJECT_NAME} cairomm::cairomm-1.16)
 else()
-  pkg_search_module(CAIROMM IMPORTED_TARGET REQUIRED cairomm-1.0)
   set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+  target_link_libraries(${PROJECT_NAME} cairomm::cairomm-1.0)
 endif()
-
-target_link_libraries(${PROJECT_NAME} PkgConfig::CAIROMM)
