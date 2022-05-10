@@ -46,11 +46,11 @@ class GoogleCloudCppConan(ConanFile):
             del self.options.fPIC
     
     def validate(self):
-        if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
-
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
+
+        if self.settings.os == 'Windows' and self.options.shared:
+            raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
 
         if tools.Version(self.version) >= "1.30.0":
             if self.settings.compiler == 'clang' and tools.Version(self.settings.compiler.version) < "6.0":
@@ -65,6 +65,10 @@ class GoogleCloudCppConan(ConanFile):
             raise ConanInvalidConfiguration("Building requires clang >= 3.8")
         if self.settings.compiler == 'Visual Studio' and tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Building requires VS >= 2019")
+
+        if not self.options["protobuf"].shared and self.options.shared:
+            raise ConanInvalidConfiguration("shared `google-cloud-cpp` cannot link to static `protobuf`")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
