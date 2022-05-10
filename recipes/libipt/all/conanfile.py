@@ -70,5 +70,5 @@ class LibIptConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["libipt"] if self.settings.os == "Windows" else ["ipt"]
         self.cpp_info.set_property("cmake_file_name", "libipt")
-        self.cpp_info.set_property("cmake_target_name", "libipt")
+        self.cpp_info.set_property("cmake_target_name", "libipt::libipt")
 
