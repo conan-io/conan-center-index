@@ -62,12 +62,11 @@ class LibnovaConan(ConanFile):
 
     def source(self):
         # Generate the archive download link
-        self._generate_git_tag_archive_sourceforge(self.conan_data["sources"][self.version]["url"]["post"])
+        self._generate_git_tag_archive_sourceforge(self.conan_data["sources"][self.version]["post"]["url"])
 
         # Download archive
-        archive_url = self.conan_data["sources"][self.version]["url"]["archive"]
-        sha256 = self.conan_data["sources"][self.version]["sha256"]
-        tools.get(url=archive_url, sha256=sha256, destination=self._source_subfolder, strip_root=True)
+        tools.get(*self.conan_data["sources"][self.version]["archive"],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
