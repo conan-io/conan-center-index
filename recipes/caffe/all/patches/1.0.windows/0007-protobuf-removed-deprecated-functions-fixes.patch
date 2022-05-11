@@ -1,0 +1,11 @@
+--- ./src/caffe/util/io.cpp	2018-01-03 12:20:53.000000000 +0300
++++ ./src/caffe/util/io.new.cpp	2022-05-05 18:01:29.943430116 +0300
+@@ -63,7 +63,7 @@
+   CHECK_NE(fd, -1) << "File not found: " << filename;
+   ZeroCopyInputStream* raw_input = new FileInputStream(fd);
+   CodedInputStream* coded_input = new CodedInputStream(raw_input);
+-  coded_input->SetTotalBytesLimit(kProtoReadBytesLimit, 536870912);
++  coded_input->SetTotalBytesLimit(kProtoReadBytesLimit);
+ 
+   bool success = proto->ParseFromCodedStream(coded_input);
+ 

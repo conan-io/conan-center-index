@@ -1,0 +1,7 @@
+1. Originally forked from:
+https://github.com/conan-io/conan-center-index
+cf2e6aff34f7841abe0137918f3d8acdcb554339 (branch: master)
+
+2. Updated with
+https://github.com/conan-io/conan-center-index
+07c9197c3bbb794aa162d01529ec3bcd2798792b (branch: master)
