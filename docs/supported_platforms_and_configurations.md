@@ -39,10 +39,10 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Python: 3.7.9
 - CMake: 3.15.6
 - Compilers: Visual Studio:
-  
+
   - 2017 (19.16.27045)
   - 2019 (19.29.30139)
-  
+
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
 - Build types: Release, Debug
@@ -50,6 +50,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Options:
   - Shared, Static (option `"shared": [True, False]` in the recipe when available)
   - Header Only (option `"header_only": [True, False]` if available)
+
+> :warn: The profile with the option `shared=True` and runtime `MT/MTd` is not built.
 
 ## Linux
 
@@ -78,4 +80,3 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Options:
   - Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
   - Header Only (option `"header_only": [True, False]` is only added with the value True)
-
