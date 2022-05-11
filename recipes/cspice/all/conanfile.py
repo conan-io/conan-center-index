@@ -48,7 +48,7 @@ class CspiceConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
+        sources_url_per_triplet = self.conan_data["sources"][self.version]
         the_os = self._get_os_or_subsystem()
         if the_os not in sources_url_per_triplet:
             raise ConanInvalidConfiguration(
