@@ -56,10 +56,6 @@ class CryptoPPConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
         # Get CMakeLists
-        cmake_cryptopp = {
-            "url": data["url"]["cmake"],
-            "sha256": data["sha256"]["cmake"],
-        }
         tools.get(**self.conan_data["sources"][self.version]["cmake"])
         src_folder = os.path.join(self.source_folder, "cryptopp-cmake-" + suffix)
         dst_folder = os.path.join(self.source_folder, self._source_subfolder)
