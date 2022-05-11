@@ -19,7 +19,7 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.4/single/qt-everywhere-opensource-src-5.15.4.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.4/single/qt-everywhere-opensource-src-5.15.4.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.4/single/qt-everywhere-opensource-src-5.15.4.tar.xz"
-    sha256: "b7412734698a87f4a0ae20751bab32b1b07fdc351476ad8e35328dbe10efdedb"
+    sha256: "615ff68d7af8eef3167de1fd15eac1b150e1fd69d1e2f4239e54447e7797253b"
 patches:
   "5.15.2":
     - patch_file: "patches/aa2a39dea5.diff"
