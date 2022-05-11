@@ -1,14 +1,15 @@
 # Preparing recipes for Conan 2.0
 
-As you may know, [Conan 2.0-alpha is already
-released](https://github.com/conan-io/conan/releases/tag/2.0.0-alpha1). Conan Center Index
-will run Conan 1.X for a long time, but it's time to start preparing recipes to make them
-as compatible as possible with Conan 2.0. Then, when the time comes that we update to 2.0
-in Conan Center, the transition will be smooth.
+<!-- toc --><!-- endToc -->
 
-For more information about Conan 2.0 breaking changes and how to prepare the migration
-from Conan 1.X to 2.0, please read the [migration
-guide](https://docs.conan.io/en/latest/conan_v2.html) in the Conan documentation.
+> ⚠️  Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
+> will be taken in ConanCenter and this repository to start running
+> Conan v2 in pull requests.
+
+It's time to start thinking seriously about Conan v2 and prepare recipes
+for the incoming changes. Conan v2 comes with many
+changes and improvements, you can read about then in the
+[Conan documentation](https://docs.conan.io/en/latest/conan_v2.html).
 
 This document is a practical guide, offering extended information particular to Conan
 Center Index recipes to get them ready to upgrade to Conan 2.0.
