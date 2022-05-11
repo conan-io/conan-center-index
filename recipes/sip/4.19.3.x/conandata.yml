@@ -1,0 +1,4 @@
+sources:
+  "4.19.3":
+    sha256: b504b69c57f698125abe1f65cd114c33e76335dcf2215038f68a36319e58c21f
+    url: https://www.riverbankcomputing.com/hg/sip/archive/4.19.3.tar.gz
