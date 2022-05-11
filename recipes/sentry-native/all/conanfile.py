@@ -134,6 +134,8 @@ class SentryNativeConan(ConanFile):
                 raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def build_requirements(self):
+        if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
+            self.build_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 
