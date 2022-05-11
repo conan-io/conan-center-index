@@ -1,5 +1,4 @@
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index 3c7406f..586129e 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -7,7 +7,6 @@ install(FILES libtiff/COPYRIGHT DESTINATION ${LICENSE_INSTALL_PATH} RENAME libti
