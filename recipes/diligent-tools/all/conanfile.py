@@ -95,6 +95,8 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
+        self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
+        self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
 
         self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
