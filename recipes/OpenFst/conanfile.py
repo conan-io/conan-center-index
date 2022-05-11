@@ -76,6 +76,20 @@ class OpenFstConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "OpenFst is supported only on linux")
 
+        compilers = {
+            "gcc": "7",
+            "clang": "6",
+        }
+
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+        minimum_compiler = compilers.get(str(self.settings.compiler))
+        if minimum_compiler:
+            if tools.Version(self.settings.compiler.version) < minimum_compiler:
+                raise ConanInvalidConfiguration(f"{self.name} requires c++17, which your compiler does not support.")
+        else:
+            self.output.warn(f"{self.name} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
