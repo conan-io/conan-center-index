@@ -1,0 +1,7 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..d2393db
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1 @@
++include(cmake-tcf-lib.txt)

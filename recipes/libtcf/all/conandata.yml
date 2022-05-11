@@ -1,0 +1,9 @@
+sources:
+  "1.7.0":
+    url: https://git.eclipse.org/c/tcf/org.eclipse.tcf.agent.git/snapshot/org.eclipse.tcf.agent-1.7.0.zip
+    sha256: 5123b4cf745c53e00509cd9dd8813d29b775ecfa75a111daf0670ee6555d1229
+
+patches:
+  "1.7.0":
+    - patch_file: "patches/0001-Add-synthetic-CMakeLists.txt.patch"
+      base_path: "source_subfolder"
