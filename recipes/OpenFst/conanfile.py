@@ -96,6 +96,7 @@ class OpenFstConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self)
         yes_no = lambda v: "yes" if v else "no"
         args = [
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-bin={}".format(yes_no(self.options.enable_bin)),
