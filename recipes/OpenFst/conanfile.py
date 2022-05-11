@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 
 class OpenFstConan(ConanFile):
-    name = "OpenFst"
+    name = "openfst"
     description = "A library for constructing, combining, optimizing and searching weighted finite-state-transducers (FSTs)."
     topics = ("asr", "fst", "wfst", "openfst")
     url = "https://github.com/conan-io/conan-center-index"
