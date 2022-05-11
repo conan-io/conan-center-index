@@ -62,16 +62,14 @@ class ClipperConan(ConanFile):
 
     def source(self):
         conan_data_version = self.conan_data["sources"][self.version]
-        if "post" in conan_data_version["url"]:
+        if "post" in conan_data_version:
             # Generate the archive download link
             self._generate_git_tag_archive_sourceforge(
-                conan_data_version["url"]["post"],
+                conan_data_version["post"]["url"],
             )
 
             # Download archive
-            archive_url = conan_data_version["url"]["archive"]
-            sha256 = conan_data_version["sha256"]
-            tools.get(url=archive_url, sha256=sha256,
+            tools.get(**conan_data_version["archive"],
                       destination=self._source_subfolder, strip_root=True)
         else:
             tools.get(**conan_data_version, destination=self._source_subfolder)
