@@ -8,7 +8,7 @@
 
 It's time to start thinking seriously about Conan v2 and prepare recipes
 for the incoming changes. Conan v2 comes with many
-changes and improvements, you can read about then in the
+changes and improvements, you can read about them in the
 [Conan documentation](https://docs.conan.io/en/latest/conan_v2.html).
 
 This document is a practical guide, offering extended information particular to Conan

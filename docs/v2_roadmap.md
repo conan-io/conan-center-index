@@ -6,10 +6,10 @@
 
 > ⚠️ **Note.-** This is a working document that will be updated as we walk
 > this path. There are no dates intentionally, and if any they should be
-> considered as an estimation, there are still too many unknows to provide
+> considered as an estimation, there are still some unknowns to provide
 > certain steps and dates.
 
-Canan v2 is under heavy development and it will be realease in the
+Canan v2 is under heavy development and it will be released in the
 following months. It comes with many improvements that will benefit
 recipes and users, and we are willing to adopt it.
 
@@ -34,16 +34,17 @@ planning for the following months.
 
 ### Prepare the CI infrastructure
 
-Workers for Conan v2 will be ready for Windows, Macos and Linux alternatives. [Modern docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern) with Conan v2 are already 
+Workers for Conan v2 will be ready for Windows, Macos and Linux alternatives. 
+[Modern docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern) with Conan v2 are already 
 available to use, for example `conanio/gcc11-ubuntu16.04:2.0.0-pre`. 
 Note that we will be using tag name `2.0.0-pre` until there is an
-actual Conan v2 release, that tag will have the latest pre-release
-installed (alpha, beta or release candidate).
+actual Conan v2 release, this tag will use the latest pre-release
+available (alpha, beta or release candidate).
 
 ### Export recipes using Conan v2 (warning)
 
 We will start to run `conan export` using Conan v2 and the result will be
-added to the comments by the bot. Failing this command won´t make the 
+added to the comments by the bot. Failing this command won't make the 
 pull-request fail at this moment, but we expect contributors to start
 gaining awareness about changes in Conan v2.
 
@@ -53,13 +54,14 @@ We want to provide a Conan recipe's linter in this repository. We will add
 warnings and errors to it following the pace dictated by the community.
 The purpose is that this linter will fail pull-requests if there is any
 error and, this way, we can start to migrate small (and easy) bits of 
-recipes... and ensure that future pull-request don't introduce regressions.
+recipes... and ensure that future pull-requests don't introduce
+regressions.
 
 This linter can (and surely will) implement some of the checks that are
 being currently done by [hooks](https://github.com/conan-io/hooks), but
 the purpose is not replace them:
 * hooks are really useful from the CLI, and are easier to install and run.
-* linter provides much better output in GitHub interface
+* linter provides much better output in GitHub interface.
 
 ### Run an scheduled job exporting all recipes
 
