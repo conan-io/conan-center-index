@@ -51,7 +51,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
   - Shared, Static (option `"shared": [True, False]` in the recipe when available)
   - Header Only (option `"header_only": [True, False]` if available)
 
-> :warn: The profile with the option `shared=True` and runtime `MT/MTd` is not built.
+:warn: The profile with the option `shared=True` and runtime `MT/MTd` is not built.
 
 ## Linux
 
