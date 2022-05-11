@@ -159,3 +159,4 @@ class OpenFstConan(ConanFile):
         if self.options.enable_bin:
             self.cpp_info.libs.append("fstscript")
             bindir = os.path.join(self.package_folder, "bin")
+        self.cpp_info.system_libs = ["pthread"]
