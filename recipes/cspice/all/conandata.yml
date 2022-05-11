@@ -63,7 +63,7 @@ sources:
     "Linux":
       "gcc":
         "x86":
-          url:"https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
           sha256: "59f5a2e865ff8dee3e415477fe55cf366bad5498948bf7b034ee00b46ec80720"
         "x86_64":
           url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_64bit/packages/cspice.tar.Z"
@@ -71,7 +71,7 @@ sources:
     "Windows":
       "Visual Studio":
         "x86":
-          url:"https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
           sha256: "db48e5beddc0e50f7a0224bb2c6f2b39fc38f84628ad5cd455e847fc70aa5e75"
         "x86_64":
           url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
