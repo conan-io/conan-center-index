@@ -33,6 +33,28 @@ class SipConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def system_requirements(self):
+        packages = []
+        if tools.os_info.is_linux and self.settings.os == "Linux":
+            if tools.os_info.with_apt:
+                packages = []
+                if self.options.python == "python3":
+                    packages.append( "python3-dev" )
+                else:
+                    if ((tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "20") or
+                        (tools.os_info.linux_distro == "debian" and tools.os_info.os_version < "11")):
+                        packages.append( "python-dev")
+                    else:
+                        packages.append( "python2-dev" )
+            else:
+                self.output.warn("Do not know how to install Python headers for {}-{}.".format(
+                    tools.os_info.linux_distro, tools.os_info.os_version)
+                )
+
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self)
+            package_tool.install_packages(update=True, packages=packages)
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             self.build_requires("winflexbison/2.5.22")
