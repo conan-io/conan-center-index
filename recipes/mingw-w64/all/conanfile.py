@@ -22,17 +22,17 @@ class MingwConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
-        valid_os = self.conan_data["sources"][self.version]["url"].keys()
+        valid_os = self.conan_data["sources"][self.version].keys()
         if str(self.settings.os) not in valid_os:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following operating systems: {}"
                                             .format(self.version, valid_os))
-        valid_arch = self.conan_data["sources"][self.version]["url"][str(self.settings.os)].keys()
+        valid_arch = self.conan_data["sources"][self.version][str(self.settings.os)].keys()
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
         if self._settings_build.os == "Linux":
-            if "gcc" in self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]:
-                valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
+            if "gcc" in self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]:
+                valid_gcc = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
                 if str(self.options.gcc) not in valid_gcc:
                     raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
                                                     .format(str(self.options.gcc), valid_gcc))
@@ -46,7 +46,7 @@ class MingwConan(ConanFile):
         #     self.build_requires("mpc/1.2.0")
 
     def _download_source(self):
-        arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+        arch_data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
 
         if self.settings.os == "Windows":
             url = arch_data[str(self.options.threads)][str(self.options.exception)]
