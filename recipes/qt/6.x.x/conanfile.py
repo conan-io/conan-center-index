@@ -864,7 +864,7 @@ class QtConan(ConanFile):
                 reqs.append(r if "::" in r else "qt%s" % r)
             return reqs
 
-        def _create_module(module, requires=[]):
+        def _create_module(module, requires=[], has_include_dir=True):
             componentname = "qt%s" % module
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
             self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt6::{}".format(module))
@@ -875,7 +875,8 @@ class QtConan(ConanFile):
             else:
                 libname = module
             self.cpp_info.components[componentname].libs = ["Qt6%s%s" % (libname, libsuffix)]
-            self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
+            if has_include_dir:
+                self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
             self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
@@ -977,7 +978,7 @@ class QtConan(ConanFile):
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
             elif self.settings.os in ["Linux", "FreeBSD"]:
-                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
+                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
         if self.options.with_sqlite3:
