@@ -41,6 +41,8 @@ class GLibConan(ConanFile):
     @property
     def _is_clang_cl(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
