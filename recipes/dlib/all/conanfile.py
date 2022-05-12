@@ -32,7 +32,7 @@ class DlibConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_gif": False,  # Doesn't work out-of-the-box with MSVC
+        "with_gif": True,
         "with_jpeg": True,
         "with_png": True,
         "with_webp": True,
