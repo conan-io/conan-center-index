@@ -1,0 +1,23 @@
+# Conan Center Index - Recipe Watchers
+#
+# If you are interested to watch/subscribe any recipe from Conan Center Index and receive
+# a notification when a new PR is created, add the recipe repo and your @<githubuser>,
+# for instance:
+#
+# recipes/zlib @myusername
+#
+# NOTE: Github uses case-sensitive filesystem, so your name must be the same from your account.
+#
+# Github will add you as a reviewer and will notify you by e-mail.
+# This feature is named 'CodeOwners', however, it's a Github's feature name.
+# On Conan Center Index, there are no owners/maintainers, all recipes are owned by the
+# community. This feature only helps people that are more interested in watching and following
+# specific recipes, instead of receiving a new notification for each new pull request.
+#
+# Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+
+.github @ericLemanissier 
+recipes/aaf @MartinDelille
+recipes/gtk @ericLemanissier 
+recipes/qt @ericLemanissier 
