@@ -85,7 +85,7 @@ We are going to prepare the CI and start running it behind the scenes
 experiment ourself some challenges that will come with Conan v2: syntax,
 configuration defaults,...
 
-### Show CI results to contributors
+### Show CI results to contributors (info)
 
 Once the errors start to make sense, we will start to provide these outputs
 in pull-requests (although successful builds using v2 won't be required to
