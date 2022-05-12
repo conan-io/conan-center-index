@@ -1,9 +1,10 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class ConcurrencppConan(ConanFile):
@@ -47,17 +48,13 @@ class ConcurrencppConan(ConanFile):
             del self.options.fPIC
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _minimum_compilers_version(self):
         return {"Visual Studio": "16", "msvc": "192", "clang": "11"}
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "20")
-        if self.options.shared and self._is_msvc:
+        if self.options.shared and is_msvc(self):
             # see https://github.com/David-Haim/concurrencpp/issues/75
             raise ConanInvalidConfiguration("concurrencpp does not support shared builds with Visual Studio")
         if self.settings.compiler == "gcc":
