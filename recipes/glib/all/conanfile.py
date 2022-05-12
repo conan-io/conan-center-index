@@ -41,17 +41,6 @@ class GLibConan(ConanFile):
     @property
     def _is_clang_cl(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc"
-
-    def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-        if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
-            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -189,7 +178,7 @@ class GLibConan(ConanFile):
         self._patch_sources()
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc or self._is_clang_cl else tools.no_op():
+        ) if is_msvc(self) or self._is_clang_cl else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
@@ -205,7 +194,7 @@ class GLibConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
-        ) if self._is_msvc or self._is_clang_cl else tools.no_op():
+        ) if is_msvc(self) or self._is_clang_cl else tools.no_op():
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
