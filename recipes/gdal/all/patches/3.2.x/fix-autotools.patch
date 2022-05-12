@@ -226,13 +226,14 @@
      LIBS="${SAVED_LIBS}"
    fi
  
-@@ -4567,8 +4559,12 @@ dnl ---------------------------------------------------------------------------
+@@ -4567,8 +4559,13 @@ dnl ---------------------------------------------------------------------------
  dnl Check if geos library is available.
  dnl ---------------------------------------------------------------------------
  
 -GEOS_INIT(3.1.0)
 +AC_ARG_WITH(geos, AS_HELP_STRING([--with-geos[=ARG]], [Include GEOS support (ARG=yes or no)]),,)
  HAVE_GEOS_RESULT="no"
++HAVE_GEOS=no
 +if test x"$with_geos" = x"no" ; then
 +  AC_MSG_RESULT([GEOS support disabled])
 +else
@@ -240,15 +241,16 @@
  if test "${HAVE_GEOS}" = "yes" ; then
  
    AC_MSG_NOTICE([Using C API from GEOS $GEOS_VERSION])
-@@ -4577,6 +4573,7 @@ if test "${HAVE_GEOS}" = "yes" ; then
+@@ -4577,6 +4574,8 @@ if test "${HAVE_GEOS}" = "yes" ; then
    LIBS="${GEOS_LIBS} ${LIBS}"
    HAVE_GEOS_RESULT="yes"
  fi
 +fi
++AC_SUBST(HAVE_GEOS, $HAVE_GEOS)
  
  dnl ---------------------------------------------------------------------------
  dnl Check if SFCGAL library is available.
-@@ -4611,20 +4608,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
+@@ -4611,20 +4610,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
    # qhull/qhull.h
    AC_CHECK_HEADERS([qhull/libqhull.h])
    if test "$ac_cv_header_qhull_libqhull_h" = "yes"; then
@@ -271,7 +273,7 @@
      fi
    fi
  
-@@ -4711,7 +4706,9 @@ AC_MSG_CHECKING([for FreeXL support])
+@@ -4711,7 +4708,9 @@ AC_MSG_CHECKING([for FreeXL support])
  HAVE_FREEXL=no
  FREEXL_INCLUDE=
  
@@ -282,7 +284,7 @@
    AC_CHECK_HEADERS(freexl.h)
    AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
  
-@@ -4817,8 +4814,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
+@@ -4817,8 +4816,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
  elif test "$with_libjson_c" = "internal" ; then
    LIBJSONC_SETTING=internal
  elif test "$with_libjson_c" != "no"; then
@@ -292,7 +294,7 @@
  else
    AC_MSG_ERROR([libjson-c (internal or external) is required])
  fi
-@@ -5928,7 +5924,6 @@ else
+@@ -5928,7 +5926,6 @@ else
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$EXR_LIBS"

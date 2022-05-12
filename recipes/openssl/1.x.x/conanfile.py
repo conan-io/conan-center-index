@@ -239,7 +239,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.settings.os == "Emscripten":

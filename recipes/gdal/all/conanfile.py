@@ -245,14 +245,14 @@ class GdalConan(ConanFile):
 
     def requirements(self):
         self.requires("json-c/0.15")
-        self.requires("libgeotiff/1.7.0")
+        self.requires("libgeotiff/1.7.1")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.3.0")
         self.requires("proj/9.0.0")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.10")
         if self.options.with_libiconv:
@@ -264,7 +264,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_lz4"):
             self.requires("lz4/1.9.3")
         if self.options.with_pg:
-            self.requires("libpq/13.6")
+            self.requires("libpq/14.2")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
@@ -314,7 +314,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.7")
+            self.requires("expat/2.4.8")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
@@ -542,6 +542,7 @@ class GdalConan(ConanFile):
 
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
+        args.append("INCDIR=\"{}\"".format(os.path.join(self.package_folder, "include", "gdal")))
         args.append("DATADIR=\"{}\"".format(os.path.join(self.package_folder, "res", "gdal")))
         if self.settings.arch == "x86_64":
             args.append("WIN64=1")
@@ -697,6 +698,8 @@ class GdalConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ])
+        args.append("--includedir={}".format(tools.unix_path(os.path.join(self.package_folder, "include", "gdal"))))
+
         # Enable C++14 if requested in conan profile or if with_charls enabled
         if (self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14)) or self.options.with_charls:
             args.append("--with-cpp14")
@@ -925,6 +928,7 @@ class GdalConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
+        self.cpp_info.includedirs.append(os.path.join("include", "gdal"))
 
         lib_suffix = ""
         if self._is_msvc:

@@ -1,8 +1,0 @@
-sources:
-  "2.3.0":
-    url: "https://github.com/openexr/openexr/archive/v2.3.0.tar.gz"
-    sha256: "8243b7de12b52239fe9235a6aeb4e35ead2247833e4fbc41541774b222717933"
-patches:
-  "2.3.0":
-    - patch_file: "patches/IlmImf__ImfSystemSpecific.cpp.patch"
-      base_path: "source_subfolder"

@@ -11,3 +11,5 @@ versions:
     folder: all
   "24.2":
     folder: all
+  "25.0":
+    folder: all

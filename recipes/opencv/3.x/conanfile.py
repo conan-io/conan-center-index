@@ -82,7 +82,7 @@ class OpenCVConan(ConanFile):
         self.options["*"].with_jpeg = self.options.with_jpeg
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -196,6 +196,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_js"] = False
         self._cmake.definitions["BUILD_opencv_apps"] = False
         self._cmake.definitions["BUILD_opencv_java"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -278,6 +279,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

@@ -44,7 +44,7 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
 Check the link for further details.
 
@@ -197,15 +197,15 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 ## What is the policy for adding older versions of a package?
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
-This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+Adding versions that are not used by consumer only requires more resources and time from the CI servers.
 
 ## What is the policy for removing older versions of a package?
 
-Keeping many older versions can be a problem, as over time they may become incompatible with newer versions of the package's Python code and/or dependencies. They also become downloaded less often than newer versions, and yet continue to consume CI resources during Pull Requests.
+Older versions can be removed from packages given the considerations below. When removing those version, remove everything
+that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
+are never removed from ConanCenter remote.
 
-Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective recipes and binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
-
-There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
+When removing older versions, please take into account [these considerations](reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 
@@ -216,7 +216,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](how_to_add_packages.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 

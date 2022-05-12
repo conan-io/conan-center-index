@@ -83,9 +83,9 @@ class ThriftConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.78.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
 
@@ -129,6 +129,7 @@ class ThriftConan(ConanFile):
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         if self.options.with_zlib:
             self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
+        self._cmake.definitions["WITH_LIBEVENT"] = self.options.with_libevent
         if self.options.with_libevent:
             self._cmake.definitions["LIBEVENT_ROOT"] = self.deps_cpp_info["libevent"].rootpath
 
@@ -155,9 +156,11 @@ class ThriftConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        targets = {"thriftnb::thriftnb": "thrift::thriftnb"}
+        targets = {}
         if self.options.with_zlib:
             targets.update({"thriftz::thriftz": "thrift::thriftz"})
+        if self.options.with_libevent:
+            targets.update({"thriftnb::thriftnb": "thrift::thriftnb"})
         if self.options.with_qt:
             targets.update({"thriftqt5::thriftqt5": "thrift::thriftqt5"})
         self._create_cmake_module_alias_targets(
@@ -202,8 +205,6 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libthrift"].requires.append("openssl::openssl")
-        if self.options.with_libevent:
-            self.cpp_info.components["libthrift"].requires.append("libevent::libevent")
 
         if self.options.with_zlib:
             self.cpp_info.components["libthrift_z"].set_property("cmake_target_name", "thriftz::thriftz")
@@ -211,10 +212,12 @@ class ThriftConan(ConanFile):
             self.cpp_info.components["libthrift_z"].libs = ["thriftz" + libsuffix]
             self.cpp_info.components["libthrift_z"].requires = ["libthrift", "zlib::zlib"]
 
-        self.cpp_info.components["libthrift_nb"].set_property("cmake_target_name", "thriftnb::thriftnb")
-        self.cpp_info.components["libthrift_nb"].set_property("pkg_config_name", "thrift-nb")
-        self.cpp_info.components["libthrift_nb"].libs = ["thriftnb" + libsuffix]
-        self.cpp_info.components["libthrift_nb"].requires = ["libthrift"]
+
+        if self.options.with_libevent:
+            self.cpp_info.components["libthrift_nb"].set_property("cmake_target_name", "thriftnb::thriftnb")
+            self.cpp_info.components["libthrift_nb"].set_property("pkg_config_name", "thrift-nb")
+            self.cpp_info.components["libthrift_nb"].libs = ["thriftnb" + libsuffix]
+            self.cpp_info.components["libthrift_nb"].requires = ["libthrift", "libevent::libevent"]
 
         if self.options.with_qt:
             self.cpp_info.components["libthrift_qt5"].set_property("cmake_target_name", "thriftqt5::thriftqt5")
@@ -239,10 +242,11 @@ class ThriftConan(ConanFile):
             self.cpp_info.components["libthrift_z"].names["cmake_find_package_multi"] = "thriftz"
             self.cpp_info.components["libthrift_z"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["libthrift_z"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["libthrift_nb"].names["cmake_find_package"] = "thriftnb"
-        self.cpp_info.components["libthrift_nb"].names["cmake_find_package_multi"] = "thriftnb"
-        self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        if self.options.with_libevent:
+            self.cpp_info.components["libthrift_nb"].names["cmake_find_package"] = "thriftnb"
+            self.cpp_info.components["libthrift_nb"].names["cmake_find_package_multi"] = "thriftnb"
+            self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.with_qt:
             self.cpp_info.components["libthrift_qt5"].names["cmake_find_package"] = "thriftqt5"
             self.cpp_info.components["libthrift_qt5"].names["cmake_find_package_multi"] = "thriftqt5"

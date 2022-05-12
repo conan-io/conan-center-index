@@ -130,13 +130,13 @@ In order to make sure that the package will be consumed with any build-system, c
 
 The consumers of the package will be able to consume the packages using a specific [generators](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#generators) for the build system they use.
 
-See also: [Why are CMake find/config files and pkg-config files not packaged?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H017">#KB-H017</a>: "PDB FILES NOT ALLOWED"**
 
 Because of the big size of the [PDB](https://github.com/Microsoft/microsoft-pdb) files (Program Databse, a debug information format) and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
 
-See also: [Why PDB files are not allowed?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-pdb-files-are-not-allowed).
+See also: [Why PDB files are not allowed?](faqs.md#why-pdb-files-are-not-allowed).
 
 #### **<a name="KB-H018">#KB-H018</a>: "LIBTOOL FILES PRESENCE"**
 
@@ -151,7 +151,7 @@ It is only allowed to put build files in `builddirs` because the generators migh
 
 For the same reasons explained at [KB-H016](#KB-H016) it is not allowed to package `*.pc` files.
 
-See also: [Why are CMake find/config files and pkg-config files not packaged?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H021">#KB-H021</a>: "MS RUNTIME FILES"**
 
@@ -279,7 +279,7 @@ patches:
       base_path: "source_subfolder/1.71.0"
 ```
 
-See also: [The conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#the-conandatayml).
+See also: [The conandata.yml](how_to_add_packages.md#the-conandatayml).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
@@ -290,7 +290,7 @@ Any additional field in the YAML file will raise an error.
 
 [System requirements](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can be used as an option when a Conan package is not available ,the same package can be installed by system package manager. However, it can cause reproducibility problems, since the package may vary according the distribution or OS. Conan is not able to track its metadata, so that, installing system packages by recipe is not allowed.
 
-See also: [Can I install packages from the system package manager?](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#can-i-install-packages-from-the-system-package-manager).
+See also: [Can I install packages from the system package manager?](faqs.md#can-i-install-packages-from-the-system-package-manager).
 
 #### **<a name="KB-H034">#KB-H034</a>: "TEST PACKAGE - NO IMPORTS()"**
 
@@ -343,7 +343,7 @@ The attribue [default_options](https://docs.conan.io/en/latest/reference/conanfi
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both [config.yml](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](how_to_add_packages.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
@@ -411,7 +411,7 @@ class SomeRecipe(ConanFile):
 
 ```
 
-See also: [Submitting a Package](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#submitting-a-package).
+See also: [Submitting a Package](how_to_add_packages.md#submitting-a-package).
 
 #### **<a name="KB-H066">#KB-H066</a>: "SHORT_PATHS USAGE"**
 

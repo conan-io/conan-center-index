@@ -1,8 +1,8 @@
-import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CivetwebConan(ConanFile):
@@ -12,8 +12,8 @@ class CivetwebConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
     topics = ("civetweb", "web-server", "embedded")
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -49,6 +49,7 @@ class CivetwebConan(ConanFile):
         "with_zlib": False,
     }
 
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -85,9 +86,9 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:

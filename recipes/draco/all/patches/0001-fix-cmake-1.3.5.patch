@@ -1,0 +1,24 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1107,7 +1107,7 @@ else ()
+ 
+   # Draco app targets.
+   add_executable(draco_decoder "${draco_src_root}/tools/draco_decoder.cc")
+-  target_link_libraries(draco_decoder PRIVATE dracodec)
++  target_link_libraries(draco_decoder PRIVATE draco)
+   add_executable(draco_encoder
+                  "${draco_src_root}/tools/draco_encoder.cc")
+   target_link_libraries(draco_encoder PRIVATE draco)
+@@ -1138,8 +1138,10 @@ else ()
+   endif ()
+ 
+   # Add install rules for lib and executable targets.
+-  install(TARGETS dracodec dracoenc draco
+-          DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
++  install(TARGETS draco
++    RUNTIME DESTINATION bin
++    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION lib)
+   if (BUILD_UNITY_PLUGIN)
+     install(TARGETS dracodec_unity
+             DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")

@@ -47,7 +47,7 @@ class FltkConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         if self.settings.os == "Linux":

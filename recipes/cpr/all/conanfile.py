@@ -151,7 +151,6 @@ class CprConan(ConanFile):
             "CPR_USE_SYSTEM_GTEST": "USE_SYSTEM_GTEST",
             "CPR_FORCE_OPENSSL_BACKEND": "USE_OPENSSL",
             "CPR_FORCE_WINSSL_BACKEND": "USE_WINSSL",
-            "CPR_GENERATE_COVERAGE": "GENERATE_COVERAGE",
         }
 
         if self._uses_old_cmake_options:

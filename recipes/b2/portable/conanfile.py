@@ -76,6 +76,8 @@ class B2Conan(ConanFile):
         os.chdir(build_dir)
         command = os.path.join(
             engine_dir, "b2.exe" if use_windows_commands else "b2")
+        if self.options.toolset != 'auto':
+            command += " toolset=" + str(self.options.toolset)
         full_command = \
             "{0} --ignore-site-config --prefix=../output --abbreviate-paths install b2-install-layout=portable".format(
                 command)

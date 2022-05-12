@@ -72,15 +72,15 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_lz4:
             self.requires("lz4/1.9.3")
         if self.settings.os == "FreeBSD":
-            self.requires("libunwind/1.5.0")
+            self.requires("libunwind/1.6.2")
 
     def validate(self):
         def loose_lt_semver(v1, v2):

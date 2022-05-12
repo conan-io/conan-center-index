@@ -16,10 +16,12 @@ class DiligentCoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC":   [True, False],
+        "with_glslang": [True, False],
     }
     default_options = {
         "shared": False	,
         "fPIC": True,
+        "with_glslang": True
     }
     generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
@@ -91,8 +93,9 @@ class DiligentCoreConan(ConanFile):
 
         self.requires("spirv-cross/1.3.204.0")
         self.requires("spirv-tools/1.3.204.0")
-        self.requires("glslang/1.3.204.0")
-        self.requires("vulkan-headers/1.3.204.0")
+        if self.options.with_glslang:
+            self.requires("glslang/1.3.204.0")
+        self.requires("vulkan-headers/1.3.204.1")
         self.requires("volk/1.3.204")
         self.requires("xxhash/0.8.1")
 
@@ -125,6 +128,7 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
+        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
 
@@ -172,6 +176,10 @@ class DiligentCoreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "dummy1", "dummy2"))
+
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
@@ -186,6 +194,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))

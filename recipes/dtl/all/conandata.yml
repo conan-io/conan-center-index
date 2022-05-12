@@ -1,4 +1,7 @@
 sources:
+  "1.20":
+    url: "https://github.com/cubicdaiya/dtl/archive/v1.20.tar.gz"
+    sha256: "579f81bca88f4b9760a59d99c5a95bd8dd5dc2f20f33f1f9b5f64cb08979f54d"
   "1.19":
     url: "https://github.com/cubicdaiya/dtl/archive/v1.19.tar.gz"
     sha256: "f47b99dd11e5d771ad32a8dc960db4ab2fbe349fb0346fa0795f53c846a99c5d"

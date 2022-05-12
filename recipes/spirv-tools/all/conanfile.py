@@ -39,10 +39,27 @@ class SpirvtoolsConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @staticmethod
+    def _greater_equal_semver(v1, v2):
+        lv1 = [int(v) for v in v1.split(".")]
+        lv2 = [int(v) for v in v2.split(".")]
+        diff_len = len(lv2) - len(lv1)
+        if diff_len > 0:
+            lv1.extend([0] * diff_len)
+        elif diff_len < 0:
+            lv2.extend([0] * -diff_len)
+        return lv1 >= lv2
+
     @property
     def _has_spirv_tools_lint(self):
         return (tools.Version(self.version) < "2016.6" or # spirv-tools with vulkan versioning
                 tools.Version(self.version) >= "2021.3")
+
+    @property
+    def _has_spirv_tools_diff(self):
+        # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
+        return ((self._greater_equal_semver(self.version, "1.3.211") and tools.Version(self.version) < "2016.6") or # spirv-tools with vulkan versioning
+                tools.Version(self.version) >= "2022.2")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -158,6 +175,7 @@ class SpirvtoolsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-opt"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-lint"))
+        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-diff"))
         if self.options.shared:
             for file_name in [
                 "*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link",
@@ -182,6 +200,8 @@ class SpirvtoolsConan(ConanFile):
             }
             if self._has_spirv_tools_lint:
                 targets.update({"SPIRV-Tools-lint": "spirv-tools::SPIRV-Tools-lint"})
+            if self._has_spirv_tools_diff:
+                targets.update({"SPIRV-Tools-diff": "spirv-tools::SPIRV-Tools-diff"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             targets,
@@ -247,6 +267,12 @@ class SpirvtoolsConan(ConanFile):
                 self.cpp_info.components["spirv-tools-lint"].libs = ["SPIRV-Tools-lint"]
                 self.cpp_info.components["spirv-tools-lint"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
+            # SPIRV-Tools-diff
+            if self._has_spirv_tools_diff:
+                self.cpp_info.components["spirv-tools-diff"].set_property("cmake_target_name", "SPIRV-Tools-diff")
+                self.cpp_info.components["spirv-tools-diff"].libs = ["SPIRV-Tools-diff"]
+                self.cpp_info.components["spirv-tools-diff"].requires = ["spirv-tools-core", "spirv-tools-opt"]
+
         if self.options.build_executables:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
@@ -278,3 +304,8 @@ class SpirvtoolsConan(ConanFile):
                 self.cpp_info.components["spirv-tools-lint"].names["cmake_find_package_multi"] = "SPIRV-Tools-lint"
                 self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            if self._has_spirv_tools_diff:
+                self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package"] = "SPIRV-Tools-diff"
+                self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package_multi"] = "SPIRV-Tools-diff"
+                self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

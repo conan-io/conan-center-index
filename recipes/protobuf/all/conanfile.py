@@ -24,6 +24,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": [True, False],
         "with_rtti": [True, False],
         "lite": [True, False],
+        "debug_suffix": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": True,
         "with_rtti": True,
         "lite": False,
+        "debug_suffix": True,
     }
 
     short_paths = True
@@ -47,6 +49,10 @@ class ProtobufConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == 'clang' and self.settings.os == 'Windows'
 
     @property
     def _is_clang_x86(self):
@@ -73,7 +79,7 @@ class ProtobufConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.options.shared and str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
@@ -108,12 +114,19 @@ class ProtobufConan(ConanFile):
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+        if not self.options.debug_suffix:
+            cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
         if tools.Version(self.version) >= "3.14.0":
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
             cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
-        if self._is_msvc:
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        if self._is_msvc or self._is_clang_cl:
+            runtime = msvc_runtime_flag(self)
+            if not runtime:
+                runtime = self.settings.get_safe("compiler.runtime")
+            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+        if tools.Version(self.version) < "3.18.0" and self._is_clang_cl:
+            cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -167,9 +180,10 @@ class ProtobufConan(ConanFile):
                  "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
+            cmd_str = "COMMAND  protobuf::protoc" if tools.Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
             tools.replace_in_file(
                 protobuf_config_cmake,
-                "COMMAND  protobuf::protoc",
+                cmd_str,
                 "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
             )
 
@@ -220,8 +234,8 @@ class ProtobufConan(ConanFile):
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
-        lib_prefix = "lib" if self._is_msvc else ""
-        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
+        lib_prefix = "lib" if (self._is_msvc or self._is_clang_cl) else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")

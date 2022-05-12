@@ -84,8 +84,8 @@ class LibspatialiteConan(ConanFile):
             del self.options.gcp
 
     def requirements(self):
-        self.requires("sqlite3/3.38.0")
-        self.requires("zlib/1.2.11")
+        self.requires("sqlite3/3.38.1")
+        self.requires("zlib/1.2.12")
         if self.options.with_proj:
             self.requires("proj/9.0.0")
         if self.options.with_iconv:
@@ -97,9 +97,9 @@ class LibspatialiteConan(ConanFile):
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.9.13")
         if self.options.with_minizip:
-            self.requires("minizip/1.2.11")
+            self.requires("minizip/1.2.12")
 
     def build_requirements(self):
         if not self._is_msvc:

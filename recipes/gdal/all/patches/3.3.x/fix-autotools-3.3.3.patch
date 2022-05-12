@@ -226,12 +226,13 @@
      LIBS="${SAVED_LIBS}"
    fi
  
-@@ -4550,13 +4542,16 @@ dnl ---------------------------------------------------------------------------
+@@ -4550,13 +4542,18 @@ dnl ---------------------------------------------------------------------------
  dnl Check if geos library is available.
  dnl ---------------------------------------------------------------------------
  
 -GEOS_INIT(3.1.0)
 +AC_ARG_WITH(geos, AS_HELP_STRING([--with-geos[=ARG]], [Include GEOS support (ARG=yes or no)]),,)
++HAVE_GEOS=no
 +if test x"$with_geos" = x"no" ; then
 +  AC_MSG_RESULT([GEOS support disabled])
 +else
@@ -243,10 +244,11 @@
    LIBS="${GEOS_LIBS} ${LIBS}"
  fi
 +fi
++AC_SUBST(HAVE_GEOS, $HAVE_GEOS)
  
  dnl ---------------------------------------------------------------------------
  dnl Check if SFCGAL library is available.
-@@ -4588,20 +4583,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
+@@ -4588,20 +4585,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
    # qhull/qhull.h
    AC_CHECK_HEADERS([qhull/libqhull.h])
    if test "$ac_cv_header_qhull_libqhull_h" = "yes"; then
@@ -269,7 +271,7 @@
      fi
    fi
  
-@@ -4688,7 +4681,9 @@ AC_MSG_CHECKING([for FreeXL support])
+@@ -4688,7 +4683,9 @@ AC_MSG_CHECKING([for FreeXL support])
  HAVE_FREEXL=no
  FREEXL_INCLUDE=
  
@@ -280,7 +282,7 @@
    AC_CHECK_HEADERS(freexl.h)
    AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
  
-@@ -4794,8 +4789,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
+@@ -4794,8 +4791,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
  elif test "$with_libjson_c" = "internal" ; then
    LIBJSONC_SETTING=internal
  elif test "$with_libjson_c" != "no"; then
@@ -290,7 +292,7 @@
  else
    AC_MSG_ERROR([libjson-c (internal or external) is required])
  fi
-@@ -5953,7 +5947,6 @@ else
+@@ -5953,7 +5949,6 @@ else
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$EXR_LIBS"

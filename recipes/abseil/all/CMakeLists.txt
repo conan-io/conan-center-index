@@ -4,6 +4,11 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+# Note: This must appear before adding the Abseil source subdirectory because
+# Abseil's minimum CMake version is 3.5 so it may cause the definition of
+# check_cxx_source_compiles() to have CMP0067 unset
+include(CheckCXXSourceCompiles)
+
 if(MSVC)
     add_definitions("-D_HAS_DEPRECATED_RESULT_OF")
 endif()
@@ -13,8 +18,6 @@ if(NOT CMAKE_SYSTEM_PROCESSOR)
 endif()
 
 add_subdirectory(source_subfolder)
-
-include(CheckCXXSourceCompiles)
 
 get_target_property(ABSL_INCLUDES absl::config INTERFACE_INCLUDE_DIRECTORIES)
 set(CMAKE_REQUIRED_INCLUDES ${ABSL_INCLUDES})

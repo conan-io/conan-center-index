@@ -94,7 +94,11 @@ if(MVK_VERSION VERSION_LESS "1.1.4")
     list(APPEND MVK_SC_SOURCES ${MVK_SC_COMMON_SOURCES})
 endif()
 add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_SOURCES})
-target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVKShaderConverter
     PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKSPIRVToMSLConverter>
@@ -131,7 +135,11 @@ if(MVK_BUILD_SHADERCONVERTER_TOOL)
         ${MVK_SC_DIR}/MoltenVKShaderConverterTool/*.mm
     )
     add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
-    target_compile_features(MoltenVKShaderConverterTool PRIVATE cxx_std_11)
+    if(MVK_VERSION VERSION_LESS "1.1.9")
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_11)
+    else()
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_17)
+    endif()
     set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
     target_include_directories(MoltenVKShaderConverterTool PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKGLSLToSPIRVConverter>
@@ -155,7 +163,11 @@ file(GLOB_RECURSE MVK_SOURCES
     ${MVK_LIB_DIR}/MoltenVK/*.cpp
 )
 add_library(MoltenVK ${MVK_SOURCES})
-target_compile_features(MoltenVK PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVK PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVK PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVK PRIVATE
     ${MVK_LIB_DIR}/MoltenVK/API
     ${MVK_LIB_DIR}/MoltenVK/Commands

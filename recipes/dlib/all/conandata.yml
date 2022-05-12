@@ -5,3 +5,6 @@ sources:
   "19.21":
     sha256: 116f52e58be04b47dab52057eaad4b5c4d5c3032d927fe23d55b0741fc4107a0
     url: https://github.com/davisking/dlib/archive/v19.21.tar.gz
+  "19.23":
+    sha256: 0fc74a39d2046ad15819bab25a695333a63e740c91ed3c620c8594381c132e88
+    url: https://github.com/davisking/dlib/archive/v19.23.tar.gz

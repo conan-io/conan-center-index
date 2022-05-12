@@ -177,7 +177,11 @@ class ICUBase(ConanFile):
         # relocatable shared libs on macOS
         mh_darwin = os.path.join(self._source_subfolder, "source", "config", "mh-darwin")
         tools.replace_in_file(mh_darwin, "-install_name $(libdir)/$(notdir", "-install_name @rpath/$(notdir")
-        tools.replace_in_file(mh_darwin, "-install_name $(notdir", "-install_name @rpath/$(notdir")
+        tools.replace_in_file(
+            mh_darwin,
+            "-install_name $(notdir $(MIDDLE_SO_TARGET)) $(PKGDATA_TRAILING_SPACE)",
+            "-install_name @rpath/$(notdir $(MIDDLE_SO_TARGET))",
+        )
 
     def _configure_autotools(self):
         if self._env_build:
