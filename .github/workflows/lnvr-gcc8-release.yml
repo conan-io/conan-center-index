@@ -53,7 +53,6 @@ jobs:
           python sources/builder/build.py
         env:
           PYTHONUNBUFFERED: "true"
-          CONAN_SYSREQUIRES_MODE: "enabled"
           CONAN_TXT: trassir/lnvr-gcc8/conanfile.txt
           CONAN_PROFILE: trassir/lnvr-gcc8/conanprofile.release
           CONAN_DOCKER_IMAGE: trassiross/conan-gcc8
