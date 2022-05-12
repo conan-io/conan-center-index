@@ -13,7 +13,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0008-2.5.2-use-conan-dependencies.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0005-fix-include-path.diff"
+    - patch_file: "patches/0009-2.5.2-fix-include-path.diff"
       base_path: "source_subfolder"
   "cci.20211009":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
