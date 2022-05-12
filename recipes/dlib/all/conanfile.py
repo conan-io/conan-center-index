@@ -118,11 +118,18 @@ class DlibConan(ConanFile):
         # we want to be able to build it as a shared library too
         cmake.definitions["DLIB_IN_PROJECT_BUILD"] = False
 
+        cmake.definitions["DLIB_ISO_CPP_ONLY"] = False
+        cmake.definitions["DLIB_NO_GUI_SUPPORT"] = True
+
         # Configure external dependencies
         cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         cmake.definitions["DLIB_LINK_WITH_SQLITE3"] = self.options.with_sqlite3
+        cmake.definitions["DLIB_USE_BLAS"] = True    # FIXME: all the logic behind is not sufficiently under control
+        cmake.definitions["DLIB_USE_LAPACK"] = True  # FIXME: all the logic behind is not sufficiently under control
+        cmake.definitions["DLIB_USE_CUDA"] = False   # TODO: add with_cuda option?
         cmake.definitions["DLIB_PNG_SUPPORT"] = self.options.with_png
         cmake.definitions["DLIB_GIF_SUPPORT"] = self.options.with_gif
+        cmake.definitions["DLIB_USE_MKL_FFT"] = False
 
         # Configure SIMD options if possible
         if self.settings.arch in ["x86", "x86_64"]:
