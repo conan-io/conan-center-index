@@ -60,6 +60,8 @@ class ConcurrencppConan(ConanFile):
         if self.options.shared and self._is_msvc:
             # see https://github.com/David-Haim/concurrencpp/issues/75
             raise ConanInvalidConfiguration("concurrencpp does not support shared builds with Visual Studio")
+        if self.settings.compiler == "gcc":
+            raise ConanInvalidConfiguration("gcc is not supported by concurrencpp")
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
