@@ -17,4 +17,10 @@ find_package(diligent-core REQUIRED)
 set(DILIGENT_ARGS_DIR ${CONAN_INCLUDE_DIRS_TAYWEE-ARGS})
 set(DILIGENT_DEAR_IMGUI_PATH ${CONAN_INCLUDE_DIRS_IMGUI})
 
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
+
 add_subdirectory(source_subfolder)
