@@ -20,12 +20,15 @@ elif PY3:
 else:
     raise Exception
 
-
-setup(
-    name="test_package",
-    version="1.0",
-    use_2to3=True,
-    ext_modules=[
+arguments = {
+    "name": "test_package",
+    "version": "1.0",
+    "ext_modules": [
         Extension("spam", [os.path.join(subdir, "test_module.c")]),
     ],
-)
+}
+
+if PY2:
+    arguments["use_2to3"] = (True,)
+
+setup(**arguments)
