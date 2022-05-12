@@ -91,7 +91,7 @@ class H5ppConan(ConanFile):
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
             self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
         if is_msvc(self):
-            self.cpp_info.components["h5pp_flags"].defines = ["NOMINMAX"]
+            self.cpp_info.components["h5pp_flags"].defines.append("NOMINMAX")
             self.cpp_info.components["h5pp_flags"].cxxflags = ["/permissive-"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
