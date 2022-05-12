@@ -34,10 +34,6 @@ class ZlibConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -90,24 +86,6 @@ class ZlibConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _rename_libraries(self):
-        if self.settings.os == "Windows":
-            lib_path = os.path.join(self.package_folder, "lib")
-            suffix = "d" if self.settings.build_type == "Debug" else ""
-
-            if self.options.shared:
-                if (self._is_msvc or self.settings.compiler == "clang") and suffix:
-                    current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
-                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-            else:
-                if self._is_msvc or self.settings.compiler == "clang":
-                    current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
-                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler == "gcc":
-                    if not self.settings.os.subsystem:
-                        current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                        tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
-
     def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
             tmp = tools.load("zlib.h")
@@ -119,7 +97,6 @@ class ZlibConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        self._rename_libraries()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
