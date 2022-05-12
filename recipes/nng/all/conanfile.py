@@ -20,6 +20,7 @@ class NngConan(ConanFile):
         "nngcat": [True, False],
         "http": [True, False],
         "tls": [True, False],
+        "maxTaskqThreads": "ANY"
     }
     default_options = {
         "shared": False,
@@ -27,6 +28,7 @@ class NngConan(ConanFile):
         "nngcat": False,
         "http": True,
         "tls": False,
+        "maxTaskqThreads": None
     }
 
     generators = "cmake"
@@ -76,6 +78,8 @@ class NngConan(ConanFile):
         self._cmake.definitions["NNG_ENABLE_TLS"] = self.options.tls
         self._cmake.definitions["NNG_ENABLE_NNGCAT"] = self.options.nngcat
         self._cmake.definitions["NNG_ENABLE_HTTP"] = self.options.http
+        if self.options.maxTaskqThreads:
+            self._cmake.definitions["NNG_MAX_TASKQ_THREADS"] = self.options.maxTaskqThreads
         self._cmake.configure()
 
         return self._cmake
