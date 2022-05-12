@@ -16,6 +16,15 @@ class H5ppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    options = {
+        "with_eigen": [True, False],
+        "with_spdlog": [True, False],
+    }
+    default_options = {
+        "with_eigen": True,
+        "with_spdlog": True,
+    }
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -30,9 +39,11 @@ class H5ppConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
         self.requires("hdf5/1.12.1")
-        self.requires("spdlog/1.10.0")
+        if self.options.with_eigen:
+            self.requires("eigen/3.4.0")
+        if self.options.with_spdlog:
+            self.requires("spdlog/1.10.0")
 
     def package_id(self):
         self.info.header_only()
@@ -64,12 +75,17 @@ class H5ppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
-        self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
-        if tools.Version(self.version) >= "1.10.0":
-            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
-            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
-            self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+        self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
+        if self.options.with_eigen:
+            self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
+            if tools.Version(self.version) >= "1.10.0":
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
+        if self.options.with_spdlog:
+            self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
+            if tools.Version(self.version) >= "1.10.0":
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
 
         if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
