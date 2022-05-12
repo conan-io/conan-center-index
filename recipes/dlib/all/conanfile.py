@@ -22,6 +22,7 @@ class DlibConan(ConanFile):
         "with_gif": [True, False],
         "with_jpeg": [True, False],
         "with_png": [True, False],
+        "with_sqlite3": [True, False],
         "with_sse2": [True, False, "auto"],
         "with_sse4": [True, False, "auto"],
         "with_avx": [True, False, "auto"],
@@ -33,6 +34,7 @@ class DlibConan(ConanFile):
         "with_gif": False,  # Doesn't work out-of-the-box with MSVC
         "with_jpeg": True,
         "with_png": True,
+        "with_sqlite3": True,
         "with_sse2": "auto",
         "with_sse4": "auto",
         "with_avx": "auto",
@@ -69,6 +71,8 @@ class DlibConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.38.5")
         if self.options.with_openblas:
             self.requires("openblas/0.3.17")
 
@@ -100,6 +104,11 @@ class DlibConan(ConanFile):
             os.path.join(self._source_subfolder, "dlib", "cmake_utils", "test_for_libpng", "CMakeLists.txt"),
         ]:
             tools.replace_in_file(cmake_file, "${PNG_LIBRARIES}", "PNG::PNG")
+        # robust sqlite3 injection
+        tools.replace_in_file(dlib_cmakelists, "find_library(sqlite sqlite3)", "find_package(SQLite3 REQUIRED)")
+        tools.replace_in_file(dlib_cmakelists, "find_path(sqlite_path sqlite3.h)", "")
+        tools.replace_in_file(dlib_cmakelists, "if (sqlite AND sqlite_path)", "if(1)")
+        tools.replace_in_file(dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -110,9 +119,10 @@ class DlibConan(ConanFile):
         cmake.definitions["DLIB_IN_PROJECT_BUILD"] = False
 
         # Configure external dependencies
-        cmake.definitions["DLIB_GIF_SUPPORT"] = self.options.with_gif
         cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
+        cmake.definitions["DLIB_LINK_WITH_SQLITE3"] = self.options.with_sqlite3
         cmake.definitions["DLIB_PNG_SUPPORT"] = self.options.with_png
+        cmake.definitions["DLIB_GIF_SUPPORT"] = self.options.with_gif
 
         # Configure SIMD options if possible
         if self.settings.arch in ["x86", "x86_64"]:
