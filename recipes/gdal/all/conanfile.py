@@ -542,6 +542,7 @@ class GdalConan(ConanFile):
 
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
+        args.append("INCDIR=\"{}\"".format(os.path.join(self.package_folder, "include", "gdal")))
         args.append("DATADIR=\"{}\"".format(os.path.join(self.package_folder, "res", "gdal")))
         if self.settings.arch == "x86_64":
             args.append("WIN64=1")
@@ -697,6 +698,8 @@ class GdalConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ])
+        args.append("--includedir={}".format(tools.unix_path(os.path.join(self.package_folder, "include", "gdal"))))
+
         # Enable C++14 if requested in conan profile or if with_charls enabled
         if (self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14)) or self.options.with_charls:
             args.append("--with-cpp14")
@@ -925,6 +928,7 @@ class GdalConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
+        self.cpp_info.includedirs.append(os.path.join("include", "gdal"))
 
         lib_suffix = ""
         if self._is_msvc:

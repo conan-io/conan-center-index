@@ -176,6 +176,10 @@ class DiligentCoreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "dummy1", "dummy2"))
+
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
@@ -190,6 +194,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))

@@ -86,7 +86,8 @@ class WaylandConan(ConanFile):
     def build(self):
         self._patch_sources()
         meson = self._configure_meson()
-        meson.build()
+        with tools.run_environment(self):
+            meson.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)

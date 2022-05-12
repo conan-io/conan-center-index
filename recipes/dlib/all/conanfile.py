@@ -23,7 +23,8 @@ class DlibConan(ConanFile):
         "with_png": [True, False],
         "with_sse2": [True, False, "auto"],
         "with_sse4": [True, False, "auto"],
-        "with_avx": [True, False, "auto"]
+        "with_avx": [True, False, "auto"],
+        "with_openblas": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,7 +34,9 @@ class DlibConan(ConanFile):
         "with_png": True,
         "with_sse2": "auto",
         "with_sse4": "auto",
-        "with_avx": "auto"
+        "with_avx": "auto",
+        "with_openblas": True,
+
     }
 
     _cmake = None
@@ -71,6 +74,8 @@ class DlibConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
+        if self.options.with_openblas:
+            self.requires("openblas/0.3.17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
