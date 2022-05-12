@@ -1,7 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-import contextlib
 import functools
+from itertools import product
 import os
 
 required_conan_version = ">=1.33.0"
@@ -31,7 +31,6 @@ class OpenFstConan(ConanFile):
         "enable_mpdt": [True, False],
         "enable_ngram_fsts": [True, False],
         "enable_pdt": [True, False],
-        "enable_python": [True, False],
         "enable_special": [True, False],
     }
     default_options = {
@@ -49,7 +48,6 @@ class OpenFstConan(ConanFile):
         "enable_mpdt": False,
         "enable_ngram_fsts": False,
         "enable_pdt": False,
-        "enable_python": False,
         "enable_special": False,
     }
 
@@ -69,7 +67,6 @@ class OpenFstConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -94,17 +91,6 @@ class OpenFstConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        env = {}
-        cc, cxx = self._detect_compilers()
-        if not tools.get_env("CC"):
-            env["CC"] = cc
-        if not tools.get_env("CXX"):
-            env["CXX"] = cxx
-        with tools.environment_append(env):
-            yield
-
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self)
@@ -125,7 +111,6 @@ class OpenFstConan(ConanFile):
             "--enable-mpdt={}".format(yes_no(self.options.enable_mpdt)),
             "--enable-ngram-fsts={}".format(yes_no(self.options.enable_ngram_fsts)),
             "--enable-pdt={}".format(yes_no(self.options.enable_pdt)),
-            "--enable-python={}".format(yes_no(self.options.enable_python)),
             "--enable-special={}".format(yes_no(self.options.enable_special)),
             "LIBS=-lpthread",
         ]
@@ -150,13 +135,69 @@ class OpenFstConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
+        lib_dir = os.path.join(self.package_folder, "lib")
+        lib_subdir = os.path.join(self.package_folder, "lib", "fst")
+        if os.path.exists(lib_subdir):
+            for fn in os.listdir(lib_subdir):
+                tools.rename(os.path.join(lib_subdir, fn), os.path.join(lib_dir, "lib{}".format(fn)))
+            tools.rmdir(lib_subdir)
+
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.remove_files_by_mask(lib_dir, "*.la")
+
+    @property
+    def _get_const_fsts_libs(self):
+        libs = []
+        for n in [8, 16, 64]:
+            libs.append("const{}-fst".format(n))
+        return libs
+
+    @property
+    def _get_compact_fsts_libs(self):
+        libs = []
+        for n, fst in product([8, 16, 64], ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"]):
+            libs.append("compact{}_{}-fst".format(n, fst))
+        return libs
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "OpenFst")
+        self.cpp_info.set_property("cmake_target_name", "OpenFst::OpenFst")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.names["cmake_find_package"] = "OpenFst"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenFst"
+
         self.cpp_info.libs = ["fst"]
+
+        if self.options.enable_fsts or self.options.enable_compact_fsts:
+            self.cpp_info.libs.append("fstcompact")
+        if self.options.enable_fsts or self.options.enable_const_fsts:
+            self.cpp_info.libs.append("fstconst")
+        if self.options.enable_far or self.options.enable_grm:
+            self.cpp_info.libs.append("fstfar")
+        if self.options.enable_fsts or self.options.enable_lookahead_fsts:
+            self.cpp_info.libs.append("fstlookahead")
+        if self.options.enable_fsts or self.options.enable_ngram_fsts:
+            self.cpp_info.libs.append("fstngram")
+        if self.options.enable_special:
+            self.cpp_info.libs.append("fstspecial")
 
         if self.options.enable_bin:
             self.cpp_info.libs.append("fstscript")
+            if self.options.enable_compress:
+                self.cpp_info.libs.append("fstcompressscript")
+            if self.options.enable_fsts or self.options.enable_compact_fsts:
+                self.cpp_info.libs.extend(self._get_compact_fsts_libs)
+            if self.options.enable_fsts or self.options.enable_const_fsts:
+                self.cpp_info.libs.extend(self._get_const_fsts_libs)
+            if self.options.enable_far or self.options.enable_grm:
+                self.cpp_info.libs.append("fstfarscript")
+            if self.options.enable_fsts or self.options.enable_linear_fsts:
+                self.cpp_info.libs.append("fstlinearscript")
+            if self.options.enable_mpdt or self.options.enable_grm:
+                self.cpp_info.libs.append("fstmpdtscript")
+            if self.options.enable_pdt or self.options.enable_grm:
+                self.cpp_info.libs.append("fstpdtscript")
+
             bindir = os.path.join(self.package_folder, "bin")
+
         self.cpp_info.system_libs = ["pthread"]
