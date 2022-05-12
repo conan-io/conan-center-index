@@ -24,7 +24,6 @@ class OpenFstConan(ConanFile):
         "enable_compress": [True, False],
         "enable_const_fsts": [True, False],
         "enable_far": [True, False],
-        "enable_fsts": [True, False],
         "enable_grm": [True, False],
         "enable_linear_fsts": [True, False],
         "enable_lookahead_fsts": [True, False],
@@ -41,7 +40,6 @@ class OpenFstConan(ConanFile):
         "enable_compress": False,
         "enable_const_fsts": False,
         "enable_far": False,
-        "enable_fsts": False,
         "enable_grm": False,
         "enable_linear_fsts": False,
         "enable_lookahead_fsts": False,
@@ -104,7 +102,6 @@ class OpenFstConan(ConanFile):
             "--enable-compress={}".format(yes_no(self.options.enable_compress)),
             "--enable-const-fsts={}".format(yes_no(self.options.enable_const_fsts)),
             "--enable-far={}".format(yes_no(self.options.enable_far)),
-            "--enable-fsts={}".format(yes_no(self.options.enable_fsts)),
             "--enable-grm={}".format(yes_no(self.options.enable_grm)),
             "--enable-linear-fsts={}".format(yes_no(self.options.enable_linear_fsts)),
             "--enable-lookahead-fsts={}".format(yes_no(self.options.enable_lookahead_fsts)),
@@ -168,15 +165,15 @@ class OpenFstConan(ConanFile):
 
         self.cpp_info.libs = ["fst"]
 
-        if self.options.enable_fsts or self.options.enable_compact_fsts:
+        if self.options.enable_compact_fsts:
             self.cpp_info.libs.append("fstcompact")
-        if self.options.enable_fsts or self.options.enable_const_fsts:
+        if self.options.enable_const_fsts:
             self.cpp_info.libs.append("fstconst")
         if self.options.enable_far or self.options.enable_grm:
             self.cpp_info.libs.append("fstfar")
-        if self.options.enable_fsts or self.options.enable_lookahead_fsts:
+        if self.options.enable_lookahead_fsts:
             self.cpp_info.libs.append("fstlookahead")
-        if self.options.enable_fsts or self.options.enable_ngram_fsts:
+        if self.options.enable_ngram_fsts:
             self.cpp_info.libs.append("fstngram")
         if self.options.enable_special:
             self.cpp_info.libs.append("fstspecial")
@@ -185,13 +182,13 @@ class OpenFstConan(ConanFile):
             self.cpp_info.libs.append("fstscript")
             if self.options.enable_compress:
                 self.cpp_info.libs.append("fstcompressscript")
-            if self.options.enable_fsts or self.options.enable_compact_fsts:
+            if self.options.enable_compact_fsts:
                 self.cpp_info.libs.extend(self._get_compact_fsts_libs)
-            if self.options.enable_fsts or self.options.enable_const_fsts:
+            if self.options.enable_const_fsts:
                 self.cpp_info.libs.extend(self._get_const_fsts_libs)
             if self.options.enable_far or self.options.enable_grm:
                 self.cpp_info.libs.append("fstfarscript")
-            if self.options.enable_fsts or self.options.enable_linear_fsts:
+            if self.options.enable_linear_fsts:
                 self.cpp_info.libs.append("fstlinearscript")
             if self.options.enable_mpdt or self.options.enable_grm:
                 self.cpp_info.libs.append("fstmpdtscript")
