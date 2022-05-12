@@ -17,6 +17,8 @@
 # Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
 
+# Testing this feature, let's see if eric is notified
+
 .github @ericLemanissier 
 recipes/aaf @MartinDelille
 recipes/gtk @ericLemanissier 
