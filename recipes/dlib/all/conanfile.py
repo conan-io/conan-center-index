@@ -22,6 +22,7 @@ class DlibConan(ConanFile):
         "with_gif": [True, False],
         "with_jpeg": [True, False],
         "with_png": [True, False],
+        "with_webp": [True, False],
         "with_sqlite3": [True, False],
         "with_sse2": [True, False, "auto"],
         "with_sse4": [True, False, "auto"],
@@ -34,6 +35,7 @@ class DlibConan(ConanFile):
         "with_gif": False,  # Doesn't work out-of-the-box with MSVC
         "with_jpeg": True,
         "with_png": True,
+        "with_webp": True,
         "with_sqlite3": True,
         "with_sse2": "auto",
         "with_sse4": "auto",
@@ -52,6 +54,10 @@ class DlibConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_with_webp_option(self):
+        return tools.Version(self.version) >= "19.24"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,6 +65,8 @@ class DlibConan(ConanFile):
             del self.options.with_sse2
             del self.options.with_sse4
             del self.options.with_avx
+        if not self._has_with_webp_option:
+            del self.options.with_webp
 
     def configure(self):
         if self.options.shared:
@@ -71,6 +79,8 @@ class DlibConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
+        if self.options.get_safe("with_webp"):
+            self.requires("libwebp/1.2.2")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.38.5")
         if self.options.with_openblas:
@@ -109,6 +119,11 @@ class DlibConan(ConanFile):
         tools.replace_in_file(dlib_cmakelists, "find_path(sqlite_path sqlite3.h)", "")
         tools.replace_in_file(dlib_cmakelists, "if (sqlite AND sqlite_path)", "if(1)")
         tools.replace_in_file(dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
+        # robust libwebp injection
+        if self._has_with_webp_option:
+            tools.replace_in_file(dlib_cmakelists, "include(cmake_utils/find_libwebp.cmake)", "find_package(WebP REQUIRED)")
+            tools.replace_in_file(dlib_cmakelists, "if (WEBP_FOUND)", "if(1)")
+            tools.replace_in_file(dlib_cmakelists, "${WEBP_LIBRARY}", "WebP::webp")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -123,6 +138,8 @@ class DlibConan(ConanFile):
 
         # Configure external dependencies
         cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
+        if self._has_with_webp_option:
+            cmake.definitions["DLIB_WEBP_SUPPORT"] = self.options.with_webp
         cmake.definitions["DLIB_LINK_WITH_SQLITE3"] = self.options.with_sqlite3
         cmake.definitions["DLIB_USE_BLAS"] = True    # FIXME: all the logic behind is not sufficiently under control
         cmake.definitions["DLIB_USE_LAPACK"] = True  # FIXME: all the logic behind is not sufficiently under control
