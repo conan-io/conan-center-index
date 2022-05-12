@@ -43,6 +43,7 @@ class Allegro5Conan(ConanFile):
             self.requires("glu/system")
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
+            self.requires("openssl/1.1.1m")
             self.requires("zlib/1.2.12")
             self.requires("expat/2.4.6")
 
