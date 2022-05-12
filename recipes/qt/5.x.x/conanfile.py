@@ -1047,7 +1047,7 @@ Examples = bin/datadir/examples""")
             elif self.settings.os in ["Linux", "FreeBSD"]:
                 service_support_reqs = ["Core", "Gui"]                
                 if self.options.with_dbus:
-                    service_support_reqs.extend("DBus")
+                    service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
                 _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
