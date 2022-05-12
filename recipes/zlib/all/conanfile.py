@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, CMake
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -24,7 +25,6 @@ class ZlibConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -70,16 +70,15 @@ class ZlibConan(ConanFile):
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SKIP_INSTALL_ALL"] = False
-        self._cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
-        self._cmake.definitions["SKIP_INSTALL_HEADERS"] = False
-        self._cmake.definitions["SKIP_INSTALL_FILES"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["SKIP_INSTALL_ALL"] = False
+        cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
+        cmake.definitions["SKIP_INSTALL_HEADERS"] = False
+        cmake.definitions["SKIP_INSTALL_FILES"] = True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
