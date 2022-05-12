@@ -40,7 +40,7 @@ class DlibConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -82,6 +82,25 @@ class DlibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        dlib_cmakelists = os.path.join(self._source_subfolder, "dlib", "CMakeLists.txt")
+        # robust giflib injection
+        tools.replace_in_file(dlib_cmakelists, "${GIF_LIBRARY}", "GIF::GIF")
+        # robust libjpeg injection
+        for cmake_file in [
+            dlib_cmakelists,
+            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "find_libjpeg.cmake"),
+            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "test_for_libjpeg", "CMakeLists.txt"),
+        ]:
+            tools.replace_in_file(cmake_file, "${JPEG_LIBRARY}", "JPEG::JPEG")
+        # robust libpng injection
+        for cmake_file in [
+            dlib_cmakelists,
+            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "find_libpng.cmake"),
+            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "test_for_libpng", "CMakeLists.txt"),
+        ]:
+            tools.replace_in_file(cmake_file, "${PNG_LIBRARIES}", "PNG::PNG")
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -108,6 +127,7 @@ class DlibConan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
