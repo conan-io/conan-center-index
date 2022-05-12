@@ -7,7 +7,7 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler"
     exports_sources = "configure.ac",
-    test_type = "build_requires", "requires"
+    test_type = "explicit"
 
     @property
     def _settings_build(self):
