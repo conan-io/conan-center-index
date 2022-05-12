@@ -30,8 +30,7 @@ This section gathers the most common questions from the community related to pac
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
-  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
-  * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)<!-- endToc -->
+  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -45,7 +44,7 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
 Check the link for further details.
 
@@ -206,7 +205,7 @@ Older versions can be removed from packages given the considerations below. When
 that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
 are never removed from ConanCenter remote.
 
-When removing older versions, please take into account [these considerations](docs/reviewing.md#supported-versions).
+When removing older versions, please take into account [these considerations](reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 
@@ -217,7 +216,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](how_to_add_packages.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -312,7 +311,7 @@ intel-mkl/2021@mycompany/stable
 ## How to protect my project from breaking changes in recipes?
 
 This repository and the CI building recipes is continuosly pushing to new Conan versions,
-sometimes adopting new features as soon as they are released
+sometimes adopting new features as soon as they are released 
 ([Conan client changelog](https://docs.conan.io/en/latest/changelog.html)).
 
 You should expect that latest revision of recipes can introduce breaking changes and new
@@ -326,7 +325,7 @@ The minimum solution involves small changes to your Conan client configuration b
 * **Pin the version of every reference you consume in your project** using either:
   * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
   * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html).
-
+   
 For larger projects and teams it is recommended to add some infrastructure to ensure stability by
 
  * **Cache recipes in your own Artifactory**: your project should use only this remote and
@@ -345,7 +344,7 @@ With version ranges the newest compatible package may yield a different package-
 
 - Build Reproducibility
 
-If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more.
+If consumers try to download and build the recipe at a later time, it may resolve to a different package version that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to only allow exact requirements versions. This is a complicated issue, check [this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more. 
 
 ## How to consume a graph of shared libraries?
 
@@ -355,7 +354,7 @@ library that has just being generated has linked all its requirements as static 
 
 It is important to remark the default [package id mode](https://docs.conan.io/en/latest/creating_packages/define_abi_compatibility.html#versioning-schema)
 used by Conan (which is the same default used by ConanCenter): `semver_direct_mode`. With this default only the major
-version of the requirements is encoded in the package ID.
+version of the requirements is encoded in the package ID. 
 
 The two previous behaviors together can lead to unexpected results for a user that want to consume a graph of
 dependencies as shared libraries from ConanCenter. They might think that using `*:shared=True` in their profile is
@@ -373,13 +372,6 @@ Conan will build from sources all the packages and use the shared libraries when
 > [`shared_library_package_id`](https://docs.conan.io/en/latest/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
 > that will encode this information in the package ID and ensure that any change in the static libraries that are
 > embedded into a shared one is taken into account when computing the package ID.
->
+> 
 > In this repository we are not using it, because it will lead to many missing packages, making it impossible
 > for the CI to actually build consumers in PRs.
-
-## How to watch only specific recipes?
-
-By default, Github allows us to receive notifications for any new PR, or PRs where we are mentioned directly, or even when added as a reviewer.
-However, if you want to subscribe to review or even watch one or more recipes and avoid receiving emails for any new pull request in Conan Center Index,
-you should add a new entry in the file `.github/CODEOWNERS`, which is a Github feature to customize notifications.
-Remember that it's just a feature name, the Conan Center Index has no maintainers, nor owners for recipes, all of them are maintained by the whole community.
