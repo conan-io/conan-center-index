@@ -41,6 +41,8 @@ class Allegro5Conan(ConanFile):
             self.requires("xorg/system")
             self.requires("gtk/3.24.24")
             self.requires("glu/system")
+
+        if not self.settings.os == "Windows":
             self.requires("libalsa/1.2.5.1")
             self.requires("pulseaudio/14.2")
             self.requires("openssl/1.1.1m")
