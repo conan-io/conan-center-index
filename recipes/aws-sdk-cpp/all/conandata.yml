@@ -1,4 +1,7 @@
 sources:
+  "1.9.258":
+    url: "https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.9.258.tar.gz"
+    sha256: "28fa67a424c1913c3a5a2b9efaf747f045b41e0087200684193dce9552bfd24c"
   "1.9.234":
     url: "https://github.com/aws/aws-sdk-cpp/archive/1.9.234.tar.gz"
     sha256: "52e36cf568fe0b2a0fc82a9333c0b31ba843db16670f4ccbb7b9fd142f1b00a5"
@@ -9,6 +12,13 @@ sources:
     url: "https://github.com/aws/aws-sdk-cpp/archive/1.8.130.tar.gz"
     sha256: "5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda"
 patches:
+  "1.9.258":
+    - base_path: source_subfolder
+      patch_file: patches/1.9.255-0001-issue-1816.patch
+    - base_path: source_subfolder
+      patch_file: patches/1.9.234-0002-disable-sort-links.patch
+    - base_path: source_subfolder
+      patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
   "1.9.234":
     - base_path: source_subfolder
       patch_file: patches/1.9.234-0001-issue-1816.patch
