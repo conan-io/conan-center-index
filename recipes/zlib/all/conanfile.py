@@ -1,8 +1,9 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, CMake
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class ZlibConan(ConanFile):
@@ -33,6 +34,10 @@ class ZlibConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -101,7 +106,7 @@ class ZlibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.libs = ["zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z"]
+        self.cpp_info.libs = ["zlib" if is_msvc(self) or self._is_clang_cl else "z"]
 
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
