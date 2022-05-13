@@ -103,9 +103,10 @@ class ZlibConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
-        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("pkg_config_name", "zlib")
         self.cpp_info.libs = ["zlib" if is_msvc(self) or self._is_clang_cl else "z"]
 
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
