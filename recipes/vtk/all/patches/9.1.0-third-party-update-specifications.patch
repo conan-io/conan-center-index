@@ -1,0 +1,147 @@
+diff --git a/ThirdParty/doubleconversion/vtk_doubleconversion.h.in b/ThirdParty/doubleconversion/vtk_doubleconversion.h.in
+index afe28ba6c8..cb7512f7d1 100644
+--- a/ThirdParty/doubleconversion/vtk_doubleconversion.h.in
++++ b/ThirdParty/doubleconversion/vtk_doubleconversion.h.in
+@@ -19,7 +19,7 @@
+ #cmakedefine01 VTK_MODULE_USE_EXTERNAL_vtkdoubleconversion
+ 
+ #if VTK_MODULE_USE_EXTERNAL_vtkdoubleconversion
+-# define VTK_DOUBLECONVERSION_HEADER(header) <header>
++# define VTK_DOUBLECONVERSION_HEADER(header) <double-conversion/header>
+ #else
+ # define VTK_DOUBLECONVERSION_HEADER(header) <vtkdoubleconversion/double-conversion/header>
+ #endif
+diff --git a/ThirdParty/eigen/CMakeLists.txt b/ThirdParty/eigen/CMakeLists.txt
+index 1edabc47a2..aa922dc634 100644
+--- a/ThirdParty/eigen/CMakeLists.txt
++++ b/ThirdParty/eigen/CMakeLists.txt
+@@ -6,7 +6,7 @@ vtk_module_third_party(
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+     PACKAGE Eigen3
+-    TARGETS Eigen3::Eigen3
++    TARGETS Eigen3::Eigen
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+diff --git a/ThirdParty/exprtk/CMakeLists.txt b/ThirdParty/exprtk/CMakeLists.txt
+index 3a8919aea4..06ecd6f860 100644
+--- a/ThirdParty/exprtk/CMakeLists.txt
++++ b/ThirdParty/exprtk/CMakeLists.txt
+@@ -2,11 +2,11 @@ vtk_module_third_party(
+   INTERNAL
+     HEADER_ONLY
+     LICENSE_FILES "vtkexprtk/License.txt"
+-    VERSION       "2.71"
++    VERSION       "0.0.1"
+   EXTERNAL
+-    PACKAGE ExprTk
+-    VERSION 2.7
+-    TARGETS ExprTk::ExprTk
++    PACKAGE exprtk
++    VERSION 0.0.1
++    TARGETS exprtk::exprtk
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+diff --git a/ThirdParty/jsoncpp/CMakeLists.txt b/ThirdParty/jsoncpp/CMakeLists.txt
+index a9581f862c..c7eaa21927 100644
+--- a/ThirdParty/jsoncpp/CMakeLists.txt
++++ b/ThirdParty/jsoncpp/CMakeLists.txt
+@@ -9,8 +9,8 @@ vtk_module_third_party(
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+     PACKAGE JsonCpp
+-    VERSION 0.7.0
+-    TARGETS JsonCpp::JsonCpp
++    VERSION 1.9.4
++    TARGETS jsoncpp::jsoncpp
+     STANDARD_INCLUDE_DIRS)
+ 
+ if (VTK_MODULE_USE_EXTERNAL_vtkjsoncpp)
+@@ -20,7 +20,7 @@ if (VTK_MODULE_USE_EXTERNAL_vtkjsoncpp)
+     set (JsonCpp_FORWARDING_HEADER_NAME "forwards.h")
+   endif ()
+   include(vtkDetectLibraryType)
+-  vtk_detect_library_shared(vtkjsoncpp JsonCpp::JsonCpp)
++  vtk_detect_library_shared(vtkjsoncpp jsoncpp::jsoncpp)
+ else ()
+   set(vtkjsoncpp_is_shared "${BUILD_SHARED_LIBS}")
+ endif ()
+diff --git a/ThirdParty/libproj/CMakeLists.txt b/ThirdParty/libproj/CMakeLists.txt
+index 39e1859bb8..36b0c459df 100644
+--- a/ThirdParty/libproj/CMakeLists.txt
++++ b/ThirdParty/libproj/CMakeLists.txt
+@@ -4,15 +4,21 @@ vtk_module_third_party(
+     VERSION       "4.9.3"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE LibPROJ
+-    TARGETS LibPROJ::LibPROJ
+-    USE_VARIABLES LibPROJ_MAJOR_VERSION
++    PACKAGE proj
++    TARGETS PROJ::proj
++    # not available with conan package
++    # USE_VARIABLES LibPROJ_MAJOR_VERSION
+     STANDARD_INCLUDE_DIRS)
+ 
+ if (NOT VTK_MODULE_USE_EXTERNAL_VTK_libproj)
+   set(LibPROJ_MAJOR_VERSION "4")
+ endif ()
+ 
++if(NOT DEFINED LibPROJ_MAJOR_VERSION )
++  # change this if conan versions change
++  set(LibPROJ_MAJOR_VERSION "9")
++endif ()
++
+ configure_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_libproj.h.in"
+   "${CMAKE_CURRENT_BINARY_DIR}/vtk_libproj.h")
+diff --git a/ThirdParty/lz4/CMakeLists.txt b/ThirdParty/lz4/CMakeLists.txt
+index 90ab696000..f768ea9a2e 100644
+--- a/ThirdParty/lz4/CMakeLists.txt
++++ b/ThirdParty/lz4/CMakeLists.txt
+@@ -4,8 +4,8 @@ vtk_module_third_party(
+     VERSION       "1.9.3"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE LZ4
+-    TARGETS LZ4::LZ4
++    PACKAGE lz4
++    TARGETS lz4::lz4
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+diff --git a/ThirdParty/lzma/CMakeLists.txt b/ThirdParty/lzma/CMakeLists.txt
+index 882d538a0a..4eb8984bf0 100644
+--- a/ThirdParty/lzma/CMakeLists.txt
++++ b/ThirdParty/lzma/CMakeLists.txt
+@@ -4,12 +4,12 @@ vtk_module_third_party(
+     VERSION       "5.2.5"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE LZMA
+-    TARGETS LZMA::LZMA
++    PACKAGE LibLZMA
++    TARGETS LibLZMA::LibLZMA
+     STANDARD_INCLUDE_DIRS)
+ 
+ include(vtkDetectLibraryType)
+-vtk_detect_library_shared(vtklzma LZMA::LZMA)
++vtk_detect_library_shared(vtklzma LibLZMA::LibLZMA)
+ 
+ set(LZMA_BUILT_AS_DYNAMIC_LIB "${vtklzma_is_shared}")
+ 
+diff --git a/ThirdParty/utf8/CMakeLists.txt b/ThirdParty/utf8/CMakeLists.txt
+index 508d17f6fb..290dc881af 100644
+--- a/ThirdParty/utf8/CMakeLists.txt
++++ b/ThirdParty/utf8/CMakeLists.txt
+@@ -6,7 +6,7 @@ vtk_module_third_party(
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+     PACKAGE utf8cpp
+-    TARGETS utf8cpp::utf8cpp
++    TARGETS utf8cpp
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(

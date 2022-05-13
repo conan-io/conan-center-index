@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.16)
+project(test_package)
+
+find_package (VTK
+   COMPONENTS
+      CommonCore
+   REQUIRED
+   )
+
+file(GLOB SOURCE_FILES *.cpp)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME}
+   VTK::loguru
+   VTK::sys
+   )
+
+if (VTK_ENABLE_KITS)
+   target_link_libraries(${PROJECT_NAME}
+      VTK::CommonCore
+   )
+endif ()
