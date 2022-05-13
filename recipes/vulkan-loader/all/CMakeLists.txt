@@ -4,6 +4,4 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS)
 
-option(BUILD_STATIC_LOADER "Build a loader that can be statically linked" OFF)
-
 add_subdirectory("source_subfolder")
