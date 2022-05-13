@@ -78,8 +78,8 @@ class NngConan(ConanFile):
         self._cmake.definitions["NNG_ENABLE_TLS"] = self.options.tls
         self._cmake.definitions["NNG_ENABLE_NNGCAT"] = self.options.nngcat
         self._cmake.definitions["NNG_ENABLE_HTTP"] = self.options.http
-        if self.options.maxTaskqThreads:
-            self._cmake.definitions["NNG_MAX_TASKQ_THREADS"] = self.options.maxTaskqThreads
+        if self.options.max_taskq_threads:
+            self._cmake.definitions["NNG_MAX_TASKQ_THREADS"] = self.options.max_taskq_threads
         self._cmake.configure()
 
         return self._cmake
