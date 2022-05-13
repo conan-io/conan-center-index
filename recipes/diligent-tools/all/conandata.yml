@@ -17,6 +17,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0010-fix-render-state-notation-paths.diff"
       base_path: "source_subfolder"
+    - patch_file: "patches/0011-2.5.2-use-conan-dependencies-part2.diff"
+      base_path: "source_subfolder"
   "cci.20211009":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
