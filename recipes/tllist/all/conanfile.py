@@ -37,4 +37,5 @@ class TllistConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "tllist")
         self.cpp_info.includedirs.append(os.path.join("include"))
