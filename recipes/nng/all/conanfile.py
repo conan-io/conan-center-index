@@ -20,7 +20,7 @@ class NngConan(ConanFile):
         "nngcat": [True, False],
         "http": [True, False],
         "tls": [True, False],
-        "maxTaskqThreads": "ANY"
+        "max_taskq_threads": "ANY"
     }
     default_options = {
         "shared": False,
