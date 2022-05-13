@@ -5,11 +5,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
-   
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def build(self):
         cmake = CMake(self)
