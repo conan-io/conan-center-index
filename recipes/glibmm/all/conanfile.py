@@ -76,6 +76,28 @@ class GlibmmConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+        if is_msvc(self):
+            # GLiBMM_GEN_EXTRA_DEFS_STATIC is not defined anywhere and is not
+            # used anywhere except here
+            # when building a static build !defined(GLiBMM_GEN_EXTRA_DEFS_STATIC)
+            # evaluates to 0
+            if not self.options.shared:
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "tools",
+                                 "extra_defs_gen", "generate_extra_defs.h"),
+                    "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
+                    "#if 0",
+                )
+
+            # when using cpp_std=c++NM the /permissive- flag is added which
+            # attempts enforcing standard conformant c++ code
+            # the problem is that older versions of Windows SDK is not standard
+            # conformant! see:
+            # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "meson.build"),
+                "cpp_std=c++", "cpp_std=vc++")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -92,16 +114,6 @@ class GlibmmConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-
-        if not self.options.shared:
-            if is_msvc(self):
-                tools.replace_in_file(
-                    os.path.join(self._source_subfolder, "tools",
-                                 "extra_defs_gen", "generate_extra_defs.h"),
-                    "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
-                    "#if 0",
-                )
-
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
