@@ -124,6 +124,7 @@ class GetTextConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "gettext-tools", "misc", "autopoint.in"), "@prefix@", "$GETTEXT_ROOT_UNIX")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "gettext-tools", "misc", "autopoint.in"), "@datarootdir@", "$prefix/res")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -153,9 +154,5 @@ class GetTextConan(ConanFile):
         autopoint = tools.unix_path(os.path.join(self.package_folder, "bin", "autopoint"))
         self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = autopoint
-
-        gettext_datadir = tools.unix_path(os.path.join(self.package_folder, "res", "gettext"))
-        self.output.info("Setting gettext_datadir environment variable: {}".format(gettext_datadir))
-        self.env_info.gettext_datadir = gettext_datadir
 
         self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)
