@@ -28,7 +28,7 @@ class NngConan(ConanFile):
         "nngcat": False,
         "http": True,
         "tls": False,
-        "max_taskq_threads": None
+        "max_taskq_threads": "16"
     }
 
     generators = "cmake"
@@ -64,6 +64,8 @@ class NngConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and \
                 tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("MSVC < 14 is not supported")
+        if not self.options.max_taskq_threads.value.isdigit():
+            raise ConanInvalidConfiguration("max_taskq_threads must be an integral number")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -78,8 +80,8 @@ class NngConan(ConanFile):
         self._cmake.definitions["NNG_ENABLE_TLS"] = self.options.tls
         self._cmake.definitions["NNG_ENABLE_NNGCAT"] = self.options.nngcat
         self._cmake.definitions["NNG_ENABLE_HTTP"] = self.options.http
-        if self.options.max_taskq_threads:
-            self._cmake.definitions["NNG_MAX_TASKQ_THREADS"] = self.options.max_taskq_threads
+        self._cmake.definitions["NNG_MAX_TASKQ_THREADS"] = self.options.max_taskq_threads
+
         self._cmake.configure()
 
         return self._cmake
