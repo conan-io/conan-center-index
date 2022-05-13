@@ -21,10 +21,6 @@ class TllistConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
