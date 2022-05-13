@@ -1,16 +1,27 @@
 # TODO LIST
 # - Why are cmake_wrapper cmake files being deployed?
+# - How can I utilise VTK's built-in cmake module dependency system, rather than recreate it here?
+# - 3rd party deps are required for different enabled module configurations, how to take that info out of VTK's module system?
+#
+# - how do i make one component depend on another (in cpp_info), ie i'm attaching the custom-cmake-module to all of the components, but technically it should only be connected to the "common" one.
+#   BUT, logically it is a bit weird, because WHICH "common" module (VTK::Common or VTK::CommonCore) depends on VTK_ENABLE_KITS,
+#   which is what i'm trying to attach and export.
+# So I need some kind of general component that the user could import, to determine which modules they further need to import?
+#
+# freetype_MAJOR_VERSION or whatever it was... proj?
+# SpaceIm: CMakeDeps creates a config version file for each dependency, so if find_package(<package>) is resolved, it will define <package>_VERSION
 
 # RECIPE MAINTAINER NOTES:
 # Read vtk's Documentation/release/9.1.md for important notes about versions and forks
 # Also read vtk's Documentation/build.md for information about build settings and flags
 
 import os
+import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.files import apply_conandata_patches, rmdir
 from conan.tools.system.package_manager import Apt
-from conans.tools import get, remove_files_by_mask
+from conans.tools import get, remove_files_by_mask, save
 
 
 class VtkConan(ConanFile):
@@ -405,12 +416,27 @@ class VtkConan(ConanFile):
         cmake.build()
 
 
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+
+
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
         # TODO there are more licences for the bundled third party libs
 
         cmake = CMake(self)
         cmake.install()
+
+        # create a cmake file with our special variables
+        content = textwrap.dedent("""\
+                set (VTK_ENABLE_KITS {})
+                """
+                .format("ON" if self.options.enable_kits else "OFF")
+                )
+        save(os.path.join(self.package_folder, self._module_file_rel_path),
+                content
+                )
 
 
     def package_info(self):
@@ -458,48 +484,48 @@ class VtkConan(ConanFile):
 
             if self.options.rendering:
                 components += [
-                      # "CommonColor"
-                    # , "CommonComputationalGeometry"
-                    # , "CommonCore"
-                    # , "CommonDataModel"
-                    # , "CommonExecutionModel"
-                    # , "CommonMath"
-                    # , "CommonMisc"
-                    # , "CommonSystem"
-                    # , "CommonTransforms"
-                    # , "DICOMParser"
-                    # , "FiltersCore"
-                    # , "FiltersExtraction"
-                    # , "FiltersGeneral"
-                    # , "FiltersGeometry"
-                    # , "FiltersHybrid"
-                    # , "FiltersModeling"
-                    # , "FiltersSources"
-                    # , "FiltersStatistics"
-                    # , "FiltersTexture"
-                    # , "GUISupportQt"
-                    # , "ImagingColor"
-                    # , "ImagingCore"
-                    # , "ImagingGeneral"
-                    # , "ImagingHybrid"
-                    # , "ImagingSources"
-                    # , "InteractionStyle"
-                    # , "InteractionWidgets"
-                    # , "IOCore"
-                    # , "IOImage"
-                    # , "IOLegacy"
-                    # , "IOXML"
-                    # , "IOXMLParser"
-                    # , "metaio"
-                    # , "ParallelCore"
-                    # , "ParallelDIY"
-                    # , "RenderingAnnotation"
-                    # , "RenderingContext2D"
-                    # , "RenderingCore"
-                    # , "RenderingFreeType"
-                    # , "RenderingOpenGL2"
-                    # , "RenderingUI"
-                    # , "RenderingVolume"
+                    # "CommonColor",
+                    # "CommonComputationalGeometry",
+                    # "CommonCore",
+                    # "CommonDataModel",
+                    # "CommonExecutionModel",
+                    # "CommonMath",
+                    # "CommonMisc",
+                    # "CommonSystem",
+                    # "CommonTransforms",
+                    # "DICOMParser",
+                    # "FiltersCore",
+                    # "FiltersExtraction",
+                    # "FiltersGeneral",
+                    # "FiltersGeometry",
+                    # "FiltersHybrid",
+                    # "FiltersModeling",
+                    # "FiltersSources",
+                    # "FiltersStatistics",
+                    # "FiltersTexture",
+                    # "GUISupportQt",
+                    # "ImagingColor",
+                    # "ImagingCore",
+                    # "ImagingGeneral",
+                    # "ImagingHybrid",
+                    # "ImagingSources",
+                    # "InteractionStyle",
+                    # "InteractionWidgets",
+                    # "IOCore",
+                    # "IOImage",
+                    # "IOLegacy",
+                    # "IOXML",
+                    # "IOXMLParser",
+                    # "metaio",
+                    # "ParallelCore",
+                    # "ParallelDIY",
+                    # "RenderingAnnotation",
+                    # "RenderingContext2D",
+                    # "RenderingCore",
+                    # "RenderingFreeType",
+                    # "RenderingOpenGL2",
+                    # "RenderingUI",
+                    # "RenderingVolume",
                     ]
 
         else:
@@ -516,53 +542,53 @@ class VtkConan(ConanFile):
                     "CommonMath",
                     "CommonMisc",
                     "CommonSystem",
-                    "CommonTransforms"
+                    "CommonTransforms",
                     ]
 
             if self.options.rendering:
                 components += [
-                      # "CommonColor"
-                    # , "CommonComputationalGeometry"
-                    # , "CommonCore"
-                    # , "CommonDataModel"
-                    # , "CommonExecutionModel"
-                    # , "CommonMath"
-                    # , "CommonMisc"
-                    # , "CommonSystem"
-                    # , "CommonTransforms"
-                    # , "DICOMParser"
-                    # , "FiltersCore"
-                    # , "FiltersExtraction"
-                    # , "FiltersGeneral"
-                    # , "FiltersGeometry"
-                    # , "FiltersHybrid"
-                    # , "FiltersModeling"
-                    # , "FiltersSources"
-                    # , "FiltersStatistics"
-                    # , "FiltersTexture"
-                    # , "GUISupportQt"
-                    # , "ImagingColor"
-                    # , "ImagingCore"
-                    # , "ImagingGeneral"
-                    # , "ImagingHybrid"
-                    # , "ImagingSources"
-                    # , "InteractionStyle"
-                    # , "InteractionWidgets"
-                    # , "IOCore"
-                    # , "IOImage"
-                    # , "IOLegacy"
-                    # , "IOXML"
-                    # , "IOXMLParser"
-                    # , "metaio"
-                    # , "ParallelCore"
-                    # , "ParallelDIY"
-                    # , "RenderingAnnotation"
-                    # , "RenderingContext2D"
-                    # , "RenderingCore"
-                    # , "RenderingFreeType"
-                    # , "RenderingOpenGL2"
-                    # , "RenderingUI"
-                    # , "RenderingVolume"
+                    # "CommonColor",
+                    # "CommonComputationalGeometry",
+                    # "CommonCore",
+                    # "CommonDataModel",
+                    # "CommonExecutionModel",
+                    # "CommonMath",
+                    # "CommonMisc",
+                    # "CommonSystem",
+                    # "CommonTransforms",
+                    # "DICOMParser",
+                    # "FiltersCore",
+                    # "FiltersExtraction",
+                    # "FiltersGeneral",
+                    # "FiltersGeometry",
+                    # "FiltersHybrid",
+                    # "FiltersModeling",
+                    # "FiltersSources",
+                    # "FiltersStatistics",
+                    # "FiltersTexture",
+                    # "GUISupportQt",
+                    # "ImagingColor",
+                    # "ImagingCore",
+                    # "ImagingGeneral",
+                    # "ImagingHybrid",
+                    # "ImagingSources",
+                    # "InteractionStyle",
+                    # "InteractionWidgets",
+                    # "IOCore",
+                    # "IOImage",
+                    # "IOLegacy",
+                    # "IOXML",
+                    # "IOXMLParser",
+                    # "metaio",
+                    # "ParallelCore",
+                    # "ParallelDIY",
+                    # "RenderingAnnotation",
+                    # "RenderingContext2D",
+                    # "RenderingCore",
+                    # "RenderingFreeType",
+                    # "RenderingOpenGL2",
+                    # "RenderingUI",
+                    # "RenderingVolume",
                     ]
             
 
@@ -591,3 +617,5 @@ class VtkConan(ConanFile):
             self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
             self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
             self.cpp_info.components[comp].requires      = all_targets
+            self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
+

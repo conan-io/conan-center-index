@@ -17,6 +17,10 @@ target_link_libraries(${PROJECT_NAME}
 
 if (VTK_ENABLE_KITS)
    target_link_libraries(${PROJECT_NAME}
+      VTK::Common
+   )
+else ()
+   target_link_libraries(${PROJECT_NAME}
       VTK::CommonCore
    )
 endif ()
