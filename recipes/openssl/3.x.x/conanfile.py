@@ -1,4 +1,5 @@
 from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
@@ -7,7 +8,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -83,8 +84,6 @@ class OpenSSLConan(ConanFile):
     default_options["fPIC"] = True
     default_options["openssldir"] = None
 
-    exports_sources = "patches/*"
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -92,6 +91,10 @@ class OpenSSLConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -131,10 +134,6 @@ class OpenSSLConan(ConanFile):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["msvc", "Visual Studio"]
-
-    @property
     def _is_clangcl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -144,7 +143,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or self._is_msvc
+        return self._is_clangcl or is_msvc(self)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -565,10 +564,6 @@ class OpenSSLConan(ConanFile):
 
     def _make_install(self):
         with tools.chdir(self._source_subfolder):
-            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
-            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
-                os.makedirs(os.path.join(self.package_folder, "bin"))
-
             self._run_make(targets=["install_sw"], parallel=False)
 
     @property
