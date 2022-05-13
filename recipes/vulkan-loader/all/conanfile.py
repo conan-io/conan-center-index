@@ -117,7 +117,7 @@ class VulkanLoaderConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
         if self.settings.os == "Windows":
             self._cmake.definitions["ENABLE_WIN10_ONECORE"] = False
-       if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
         self._cmake.definitions["BUILD_LOADER"] = True
         if self.settings.os == "Windows":
