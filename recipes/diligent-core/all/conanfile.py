@@ -182,24 +182,30 @@ class DiligentCoreConan(ConanFile):
 
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Linux", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "UWP", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Win32", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngine", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D11", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D12", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineVulkan", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineOpenGL", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
+
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
+        if self.settings.os == "Android":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
+        elif self.settings.os == "Macos" or self.settings.os == "iOS":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
+        elif self.settings.os == "Emscripten":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))
+        elif self.settings.os == "Linux":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Linux", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "UWP", "interface"))
+        else if self.settings.os == "Windows":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Win32", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D11", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D12", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
