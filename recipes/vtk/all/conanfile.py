@@ -170,34 +170,6 @@ class VtkConan(ConanFile):
                     destination=self._source_subfolder,
                     )
 
-        # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
-        # front of the list.  This is ok as long as there is nothing in that
-        # path that will be found before our conan cmake files...
-        # That is why we delete the third party finders.
-        # Else, we have to patch VTK's CMakeLists.txt, like so:
-        #####
-        # diff --git a/CMakeLists.txt b/CMakeLists.txt
-        # index c15890cfdc..022f704d75 100644
-        # --- a/CMakeLists.txt
-        # +++ b/CMakeLists.txt
-        # @@ -7,7 +7,7 @@ if (POLICY CMP0127)
-        #  endif ()
-        #  
-        #  set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
-        # -list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
-        # +list(APPEND CMAKE_MODULE_PATH "${vtk_cmake_dir}")
-        #####
-
-        # DELETE any of the third party finders, before we build - see note above
-        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
-
-        # Delete VTK's cmake patches (these support older cmake programs).
-        # We do not have to support old cmake: we require an updated cmake instead.
-        rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
-
-        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
-        apply_conandata_patches(self)
-
 
     def _third_party(self):
         parties = {
@@ -400,6 +372,34 @@ class VtkConan(ConanFile):
 
 
     def build(self):
+        # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
+        # front of the list.  This is ok as long as there is nothing in that
+        # path that will be found before our conan cmake files...
+        # That is why we delete the third party finders.
+        # Else, we have to patch VTK's CMakeLists.txt, like so:
+        #####
+        # diff --git a/CMakeLists.txt b/CMakeLists.txt
+        # index c15890cfdc..022f704d75 100644
+        # --- a/CMakeLists.txt
+        # +++ b/CMakeLists.txt
+        # @@ -7,7 +7,7 @@ if (POLICY CMP0127)
+        #  endif ()
+        #
+        #  set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
+        # -list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
+        # +list(APPEND CMAKE_MODULE_PATH "${vtk_cmake_dir}")
+        #####
+
+        # DELETE any of the third party finders, before we build - see note above
+        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
+
+        # Delete VTK's cmake patches (these support older cmake programs).
+        # We do not have to support old cmake: we require an updated cmake instead.
+        rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
+
+        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
+        apply_conandata_patches(self)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
