@@ -29,6 +29,7 @@ arguments = {
 }
 
 if PY2:
+    # Failed on 3.10.4, as unknown argument, why didn't it fail before?
     arguments["use_2to3"] = (True,)
 
 setup(**arguments)
