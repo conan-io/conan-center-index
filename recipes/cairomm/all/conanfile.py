@@ -52,6 +52,15 @@ class CairommConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        if is_msvc(self):
+            # when using cpp_std=c++11 the /permissive- flag is added which
+            # attempts enforcing standard conformant c++ code
+            # the problem is that older versions of Windows SDK is not standard
+            # conformant! see:
+            # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "meson.build"),
+                "cpp_std=c++", "cpp_std=vc++")
 
     def config_options(self):
         if self.settings.os == "Windows":
