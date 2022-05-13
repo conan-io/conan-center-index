@@ -8,7 +8,7 @@ import fnmatch
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 @total_ordering
@@ -777,10 +777,6 @@ class OpenSSLConan(ConanFile):
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
-        if self._is_clangcl and not runtime:
-            # TODO: to remove if min conan version bumped to a version
-            #       implementing https://github.com/conan-io/conan/pull/10898
-            runtime = self.settings.get_safe("compiler.runtime")
         for e in ["MDd", "MTd", "MD", "MT"]:
             tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
             tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)

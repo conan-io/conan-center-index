@@ -1,5 +1,5 @@
 from conan.tools.files import rename
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
@@ -8,7 +8,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -622,20 +622,11 @@ class OpenSSLConan(ConanFile):
         make_program = tools.unix_path(make_program)
         return make_program
 
-    @property
-    def _runtime(self):
-        if self.settings.compiler == "msvc":
-            return "M{}{}".format(
-                    "T" if self.settings.compiler.runtime == "static" else "D",
-                    "d" if self.settings.compiler.runtime_type == "Debug" else "",
-                )
-        else:
-            return self.settings.compiler.runtime
-
     def _replace_runtime_in_file(self, filename):
-        for e in ("MDd", "MTd", "MD", "MT"):
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % self._runtime, strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self._runtime, strict=False)
+        runtime = msvc_runtime_flag(self)
+        for e in ["MDd", "MTd", "MD", "MT"]:
+            tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
+            tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
 
     def package(self):
         self.copy("*LICENSE*", src=self._source_subfolder, dst="licenses")
