@@ -1,4 +1,3 @@
-from json import tool
 from conans import ConanFile, CMake, tools
 import os
 import textwrap
