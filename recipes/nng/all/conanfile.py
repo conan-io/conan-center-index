@@ -28,7 +28,7 @@ class NngConan(ConanFile):
         "nngcat": False,
         "http": True,
         "tls": False,
-        "maxTaskqThreads": None
+        "max_taskq_threads": None
     }
 
     generators = "cmake"
