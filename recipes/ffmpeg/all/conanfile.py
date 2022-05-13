@@ -18,7 +18,7 @@ class FFMpegConan(ConanFile):
     license = ("LGPL-2.1-or-later", "GPL-2.0-or-later")
     homepage = "https://ffmpeg.org"
     topics = ("ffmpeg", "multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",
-             "transcoding", "multiplexer", "demultiplexer", "streaming")
+              "transcoding", "multiplexer", "demultiplexer", "streaming")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -61,6 +61,7 @@ class FFMpegConan(ConanFile):
         "with_audiotoolbox": [True, False],
         "with_videotoolbox": [True, False],
         "with_programs": [True, False],
+        "disable_everything": [True, False],
     }
     default_options = {
         "shared": False,
@@ -102,6 +103,7 @@ class FFMpegConan(ConanFile):
         "with_audiotoolbox": True,
         "with_videotoolbox": True,
         "with_programs": True,
+        "disable_everything": False,
     }
 
     generators = "pkg_config"
@@ -227,7 +229,8 @@ class FFMpegConan(ConanFile):
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("securetransport is only available on Apple")
+            raise ConanInvalidConfiguration(
+                "securetransport is only available on Apple")
 
         for dependency, features in self._dependencies.items():
             if not self.options.get_safe(dependency):
@@ -236,7 +239,8 @@ class FFMpegConan(ConanFile):
             for feature in features:
                 used = used or self.options.get_safe(feature)
             if not used:
-                raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(dependency, "' or '".join(features)))
+                raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
+                    dependency, "' or '".join(features)))
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
@@ -252,7 +256,8 @@ class FFMpegConan(ConanFile):
     @property
     def _target_arch(self):
         target_arch, _, _ = tools.get_gnu_triplet(
-            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+            "Macos" if tools.is_apple_os(
+                self.settings.os) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
         ).split("-")
@@ -264,7 +269,8 @@ class FFMpegConan(ConanFile):
             return "win32"
         else:
             _, _, target_os = tools.get_gnu_triplet(
-                "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+                "Macos" if tools.is_apple_os(
+                    self.settings.os) else str(self.settings.os),
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             ).split("-")
@@ -279,7 +285,8 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
-            openssl_libraries = " ".join(["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
+            openssl_libraries = " ".join(
+                ["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   "check_lib openssl openssl/ssl.h OPENSSL_init_ssl %s || " % openssl_libraries)
@@ -295,9 +302,15 @@ class FFMpegConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(
+            self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        opt_enable_disable = lambda what, v: "--{}-{}".format("enable" if v else "disable", what)
+
+        def opt_enable_disable(
+            what, v): return "--{}-{}".format("enable" if v else "disable", what)
+        def opt_disable_if_set(
+            what, v): return "--disable-{}".format(what) if v else ""
+
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
@@ -306,6 +319,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),
             opt_enable_disable("pic", self.options.get_safe("fPIC", True)),
+            # Components
             opt_enable_disable("avdevice", self.options.avdevice),
             opt_enable_disable("avcodec", self.options.avcodec),
             opt_enable_disable("avformat", self.options.avformat),
@@ -313,6 +327,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("swscale", self.options.swscale),
             opt_enable_disable("postproc", self.options.postproc),
             opt_enable_disable("avfilter", self.options.avfilter),
+            # Individual Component Options
+            opt_disable_if_set(
+                "everything", self.options.disable_everything),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -332,27 +349,39 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libwebp", self.options.with_libwebp),
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
-            opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
+            opt_enable_disable(
+                "libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
-            opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
-            opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
-            opt_enable_disable("libxcb-xfixes", self.options.get_safe("with_xcb")),
+            opt_enable_disable(
+                "libxcb-shm", self.options.get_safe("with_xcb")),
+            opt_enable_disable(
+                "libxcb-shape", self.options.get_safe("with_xcb")),
+            opt_enable_disable(
+                "libxcb-xfixes", self.options.get_safe("with_xcb")),
             opt_enable_disable("appkit", self.options.get_safe("with_appkit")),
-            opt_enable_disable("avfoundation", self.options.get_safe("with_avfoundation")),
-            opt_enable_disable("coreimage", self.options.get_safe("with_coreimage")),
-            opt_enable_disable("audiotoolbox", self.options.get_safe("with_audiotoolbox")),
-            opt_enable_disable("videotoolbox", self.options.get_safe("with_videotoolbox")),
-            opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
+            opt_enable_disable(
+                "avfoundation", self.options.get_safe("with_avfoundation")),
+            opt_enable_disable(
+                "coreimage", self.options.get_safe("with_coreimage")),
+            opt_enable_disable(
+                "audiotoolbox", self.options.get_safe("with_audiotoolbox")),
+            opt_enable_disable(
+                "videotoolbox", self.options.get_safe("with_videotoolbox")),
+            opt_enable_disable("securetransport",
+                               self.options.with_ssl == "securetransport"),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_libfdk_aac or ( self.options.with_ssl and ( self.options.with_libx264 or self.options.with_libx265 or self.options.postproc ) ) ),
-            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
+            opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
+                self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
+            opt_enable_disable(
+                "gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
         if self._version_supports_vulkan():
-            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
+            args.append(opt_enable_disable(
+                "vulkan", self.options.get_safe("with_vulkan")))
         if tools.is_apple_os(self.settings.os):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -376,8 +405,10 @@ class FFMpegConan(ConanFile):
         extra_cflags = []
         extra_ldflags = []
         if tools.is_apple_os(self.settings.os) and self.settings.os.version:
-            extra_cflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
-            extra_ldflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
+            extra_cflags.append(tools.apple_deployment_target_flag(
+                self.settings.os, self.settings.os.version))
+            extra_ldflags.append(tools.apple_deployment_target_flag(
+                self.settings.os, self.settings.os.version))
         if self._is_msvc:
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
@@ -389,17 +420,20 @@ class FFMpegConan(ConanFile):
                 args.append("--target-os=none")
             else:
                 args.append("--target-os={}".format(self._target_os))
-            
+
             if tools.is_apple_os(self.settings.os):
                 xcrun = tools.XCRun(self.settings)
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
-                extra_cflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
-                extra_ldflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                extra_cflags.extend(
+                    ["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                extra_ldflags.extend(
+                    ["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
 
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
+        self._autotools.configure(
+            args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
         return self._autotools
 
     def build(self):
@@ -427,8 +461,9 @@ class FFMpegConan(ConanFile):
                 for fn in os.listdir(os.path.join(self.package_folder, "bin")):
                     if fn.endswith(".lib"):
                         rename(self, os.path.join(self.package_folder, "bin", fn),
-                                     os.path.join(self.package_folder, "lib", fn))
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
+                               os.path.join(self.package_folder, "lib", fn))
+                tools.remove_files_by_mask(os.path.join(
+                    self.package_folder, "lib"), "*.def")
             else:
                 # ffmpeg produces `.a` files that are actually `.lib` files
                 with tools.chdir(os.path.join(self.package_folder, "lib")):
@@ -457,89 +492,108 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components[component_name].version = version
         else:
             self.output.warn("cannot determine version of "
-                  "lib%s packaged with ffmpeg!" % component_name)
+                             "lib%s packaged with ffmpeg!" % component_name)
 
     def package_info(self):
         if self.options.with_programs:
             if self.options.with_sdl:
-                self.cpp_info.components["programs"].requires = ["sdl::libsdl2"]
+                self.cpp_info.components["programs"].requires = [
+                    "sdl::libsdl2"]
 
         if self.options.avdevice:
-            self.cpp_info.components["avdevice"].set_property("pkg_config_name", "libavdevice")
+            self.cpp_info.components["avdevice"].set_property(
+                "pkg_config_name", "libavdevice")
             self.cpp_info.components["avdevice"].libs = ["avdevice"]
             self.cpp_info.components["avdevice"].requires = ["avutil"]
             if self.options.avfilter:
-                self.cpp_info.components["avdevice"].requires.append("avfilter")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "avfilter")
             if self.options.swscale:
                 self.cpp_info.components["avdevice"].requires.append("swscale")
             if self.options.avformat:
-                self.cpp_info.components["avdevice"].requires.append("avformat")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "avformat")
             if self.options.avcodec:
                 self.cpp_info.components["avdevice"].requires.append("avcodec")
             if self.options.swresample:
-                self.cpp_info.components["avdevice"].requires.append("swresample")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "swresample")
             if self.options.postproc:
-                self.cpp_info.components["avdevice"].requires.append("postproc")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "postproc")
             self._set_component_version("avdevice")
 
         if self.options.avfilter:
-            self.cpp_info.components["avfilter"].set_property("pkg_config_name", "libavfilter")
+            self.cpp_info.components["avfilter"].set_property(
+                "pkg_config_name", "libavfilter")
             self.cpp_info.components["avfilter"].libs = ["avfilter"]
             self.cpp_info.components["avfilter"].requires = ["avutil"]
             if self.options.swscale:
                 self.cpp_info.components["avfilter"].requires.append("swscale")
             if self.options.avformat:
-                self.cpp_info.components["avfilter"].requires.append("avformat")
+                self.cpp_info.components["avfilter"].requires.append(
+                    "avformat")
             if self.options.avcodec:
                 self.cpp_info.components["avfilter"].requires.append("avcodec")
             if self.options.swresample:
-                self.cpp_info.components["avfilter"].requires.append("swresample")
+                self.cpp_info.components["avfilter"].requires.append(
+                    "swresample")
             if self.options.postproc:
-                self.cpp_info.components["avfilter"].requires.append("postproc")
+                self.cpp_info.components["avfilter"].requires.append(
+                    "postproc")
             self._set_component_version("avfilter")
 
         if self.options.avformat:
-            self.cpp_info.components["avformat"].set_property("pkg_config_name", "libavformat")
+            self.cpp_info.components["avformat"].set_property(
+                "pkg_config_name", "libavformat")
             self.cpp_info.components["avformat"].libs = ["avformat"]
             self.cpp_info.components["avformat"].requires = ["avutil"]
             if self.options.avcodec:
                 self.cpp_info.components["avformat"].requires.append("avcodec")
             if self.options.swresample:
-                self.cpp_info.components["avformat"].requires.append("swresample")
+                self.cpp_info.components["avformat"].requires.append(
+                    "swresample")
             self._set_component_version("avformat")
 
         if self.options.avcodec:
-            self.cpp_info.components["avcodec"].set_property("pkg_config_name", "libavcodec")
+            self.cpp_info.components["avcodec"].set_property(
+                "pkg_config_name", "libavcodec")
             self.cpp_info.components["avcodec"].libs = ["avcodec"]
             self.cpp_info.components["avcodec"].requires = ["avutil"]
             if self.options.swresample:
-                self.cpp_info.components["avcodec"].requires.append("swresample")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "swresample")
             self._set_component_version("avcodec")
 
         if self.options.swscale:
-            self.cpp_info.components["swscale"].set_property("pkg_config_name", "libswscale")
+            self.cpp_info.components["swscale"].set_property(
+                "pkg_config_name", "libswscale")
             self.cpp_info.components["swscale"].libs = ["swscale"]
             self.cpp_info.components["swscale"].requires = ["avutil"]
             self._set_component_version("swscale")
 
         if self.options.swresample:
-            self.cpp_info.components["swresample"].set_property("pkg_config_name", "libswresample")
+            self.cpp_info.components["swresample"].set_property(
+                "pkg_config_name", "libswresample")
             self.cpp_info.components["swresample"].libs = ["swresample"]
             self.cpp_info.components["swresample"].requires = ["avutil"]
             self._set_component_version("swresample")
 
         if self.options.postproc:
-            self.cpp_info.components["postproc"].set_property("pkg_config_name", "libpostproc")
+            self.cpp_info.components["postproc"].set_property(
+                "pkg_config_name", "libpostproc")
             self.cpp_info.components["postproc"].libs = ["postproc"]
             self.cpp_info.components["postproc"].requires = ["avutil"]
             self._set_component_version("postproc")
 
-        self.cpp_info.components["avutil"].set_property("pkg_config_name", "libavutil")
+        self.cpp_info.components["avutil"].set_property(
+            "pkg_config_name", "libavutil")
         self.cpp_info.components["avutil"].libs = ["avutil"]
         self._set_component_version("avutil")
 
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["avutil"].system_libs = ["pthread", "m", "dl"]
+            self.cpp_info.components["avutil"].system_libs = [
+                "pthread", "m", "dl"]
             if self.options.swresample:
                 self.cpp_info.components["swresample"].system_libs = ["m"]
             if self.options.swscale:
@@ -551,107 +605,149 @@ class FFMpegConan(ConanFile):
                     # https://trac.ffmpeg.org/ticket/1713
                     # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                     # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
-                    self.cpp_info.components["avcodec"].exelinkflags.append("-Wl,-Bsymbolic")
-                    self.cpp_info.components["avcodec"].sharedlinkflags.append("-Wl,-Bsymbolic")
+                    self.cpp_info.components["avcodec"].exelinkflags.append(
+                        "-Wl,-Bsymbolic")
+                    self.cpp_info.components["avcodec"].sharedlinkflags.append(
+                        "-Wl,-Bsymbolic")
             if self.options.avformat:
                 self.cpp_info.components["avformat"].system_libs = ["m"]
             if self.options.avfilter:
-                self.cpp_info.components["avfilter"].system_libs = ["m", "pthread"]
+                self.cpp_info.components["avfilter"].system_libs = [
+                    "m", "pthread"]
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             if self.options.avcodec:
-                self.cpp_info.components["avcodec"].system_libs = ["Mfplat", "Mfuuid", "strmiids"]
+                self.cpp_info.components["avcodec"].system_libs = [
+                    "Mfplat", "Mfuuid", "strmiids"]
             if self.options.avdevice:
-                self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
-            self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
+                self.cpp_info.components["avdevice"].system_libs = [
+                    "ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
+            self.cpp_info.components["avutil"].system_libs = [
+                "user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):
             if self.options.avdevice:
-                self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]
+                self.cpp_info.components["avdevice"].frameworks = [
+                    "CoreFoundation", "Foundation", "CoreGraphics"]
             if self.options.avfilter:
-                self.cpp_info.components["avfilter"].frameworks = ["CoreGraphics"]
+                self.cpp_info.components["avfilter"].frameworks = [
+                    "CoreGraphics"]
             if self.options.avcodec:
-                self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
+                self.cpp_info.components["avcodec"].frameworks = [
+                    "CoreVideo", "CoreMedia"]
             if self.settings.os == "Macos":
                 if self.options.avdevice:
-                    self.cpp_info.components["avdevice"].frameworks.append("OpenGL")
+                    self.cpp_info.components["avdevice"].frameworks.append(
+                        "OpenGL")
                 if self.options.avfilter:
-                    self.cpp_info.components["avfilter"].frameworks.append("OpenGL")
+                    self.cpp_info.components["avfilter"].frameworks.append(
+                        "OpenGL")
 
         if self.options.avdevice:
             if self.options.get_safe("with_libalsa"):
-                self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "libalsa::libalsa")
             if self.options.get_safe("with_xcb"):
-                self.cpp_info.components["avdevice"].requires.append("xorg::xcb")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "xorg::xcb")
             if self.options.get_safe("with_pulse"):
-                self.cpp_info.components["avdevice"].requires.append("pulseaudio::pulseaudio")
+                self.cpp_info.components["avdevice"].requires.append(
+                    "pulseaudio::pulseaudio")
             if self.options.get_safe("with_appkit"):
-                self.cpp_info.components["avdevice"].frameworks.append("AppKit")
+                self.cpp_info.components["avdevice"].frameworks.append(
+                    "AppKit")
             if self.options.get_safe("with_avfoundation"):
-                self.cpp_info.components["avdevice"].frameworks.append("AVFoundation")
+                self.cpp_info.components["avdevice"].frameworks.append(
+                    "AVFoundation")
             if self.options.get_safe("with_audiotoolbox"):
-                self.cpp_info.components["avdevice"].frameworks.append("CoreAudio")
+                self.cpp_info.components["avdevice"].frameworks.append(
+                    "CoreAudio")
 
         if self.options.avcodec:
             if self.options.with_zlib:
-                self.cpp_info.components["avcodec"].requires.append("zlib::zlib")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "zlib::zlib")
             if self.options.with_lzma:
-                self.cpp_info.components["avcodec"].requires.append("xz_utils::xz_utils")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "xz_utils::xz_utils")
             if self.options.with_libiconv:
-                self.cpp_info.components["avcodec"].requires.append("libiconv::libiconv")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libiconv::libiconv")
             if self.options.with_openjpeg:
-                self.cpp_info.components["avcodec"].requires.append("openjpeg::openjpeg")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "openjpeg::openjpeg")
             if self.options.with_openh264:
-                self.cpp_info.components["avcodec"].requires.append("openh264::openh264")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "openh264::openh264")
             if self.options.with_vorbis:
-                self.cpp_info.components["avcodec"].requires.append("vorbis::vorbis")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "vorbis::vorbis")
             if self.options.with_opus:
-                self.cpp_info.components["avcodec"].requires.append("opus::opus")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "opus::opus")
             if self.options.with_libx264:
-                self.cpp_info.components["avcodec"].requires.append("libx264::libx264")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libx264::libx264")
             if self.options.with_libx265:
-                self.cpp_info.components["avcodec"].requires.append("libx265::libx265")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libx265::libx265")
             if self.options.with_libvpx:
-                self.cpp_info.components["avcodec"].requires.append("libvpx::libvpx")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libvpx::libvpx")
             if self.options.with_libmp3lame:
-                self.cpp_info.components["avcodec"].requires.append("libmp3lame::libmp3lame")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libmp3lame::libmp3lame")
             if self.options.with_libfdk_aac:
-                self.cpp_info.components["avcodec"].requires.append("libfdk_aac::libfdk_aac")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libfdk_aac::libfdk_aac")
             if self.options.with_libwebp:
-                self.cpp_info.components["avcodec"].requires.append("libwebp::libwebp")
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libwebp::libwebp")
             if self.options.get_safe("with_audiotoolbox"):
-                self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
+                self.cpp_info.components["avcodec"].frameworks.append(
+                    "AudioToolbox")
             if self.options.get_safe("with_videotoolbox"):
-                self.cpp_info.components["avcodec"].frameworks.append("VideoToolbox")
+                self.cpp_info.components["avcodec"].frameworks.append(
+                    "VideoToolbox")
 
         if self.options.avformat:
             if self.options.with_bzip2:
-                self.cpp_info.components["avformat"].requires.append("bzip2::bzip2")
+                self.cpp_info.components["avformat"].requires.append(
+                    "bzip2::bzip2")
             if self.options.with_zeromq:
-                self.cpp_info.components["avformat"].requires.append("zeromq::libzmq")
+                self.cpp_info.components["avformat"].requires.append(
+                    "zeromq::libzmq")
             if self.options.with_ssl == "openssl":
-                self.cpp_info.components["avformat"].requires.append("openssl::ssl")
+                self.cpp_info.components["avformat"].requires.append(
+                    "openssl::ssl")
             elif self.options.with_ssl == "securetransport":
-                self.cpp_info.components["avformat"].frameworks.append("Security")
+                self.cpp_info.components["avformat"].frameworks.append(
+                    "Security")
 
         if self.options.avfilter:
             if self.options.with_freetype:
-                self.cpp_info.components["avfilter"].requires.append("freetype::freetype")
+                self.cpp_info.components["avfilter"].requires.append(
+                    "freetype::freetype")
             if self.options.with_zeromq:
-                self.cpp_info.components["avfilter"].requires.append("zeromq::libzmq")
+                self.cpp_info.components["avfilter"].requires.append(
+                    "zeromq::libzmq")
             if self.options.get_safe("with_appkit"):
-                self.cpp_info.components["avfilter"].frameworks.append("AppKit")
+                self.cpp_info.components["avfilter"].frameworks.append(
+                    "AppKit")
             if self.options.get_safe("with_coreimage"):
-                self.cpp_info.components["avfilter"].frameworks.append("CoreImage")
+                self.cpp_info.components["avfilter"].frameworks.append(
+                    "CoreImage")
             if tools.Version(self.version) >= "5.0" and tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):
-            self.cpp_info.components["avutil"].requires.extend(["vaapi::vaapi", "xorg::x11"])
+            self.cpp_info.components["avutil"].requires.extend(
+                ["vaapi::vaapi", "xorg::x11"])
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.cpp_info.components["avutil"].requires.append("vulkan-loader::vulkan-loader")
+            self.cpp_info.components["avutil"].requires.append(
+                "vulkan-loader::vulkan-loader")
 
     def _version_supports_vulkan(self):
         return tools.Version(self.version) >= "4.3.0"
