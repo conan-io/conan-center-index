@@ -2,6 +2,8 @@
 # - Why are cmake_wrapper cmake files being deployed?
 # - How can I utilise VTK's built-in cmake module dependency system, rather than recreate it here?
 # - 3rd party deps are required for different enabled module configurations, how to take that info out of VTK's module system?
+# - patching with src in local folder seems to fail - export_sources_folder = None?
+# - use build/modules.json to compute the components and dependencies
 #
 # - how do i make one component depend on another (in cpp_info), ie i'm attaching the custom-cmake-module to all of the components, but technically it should only be connected to the "common" one.
 #   BUT, logically it is a bit weird, because WHICH "common" module (VTK::Common or VTK::CommonCore) depends on VTK_ENABLE_KITS,
@@ -36,6 +38,8 @@ class VtkConan(ConanFile):
     topics = ("vtk", "scientific", "image", "processing", "visualization")
 
     short_paths = True
+    no_copy_source = True
+
     generators = "CMakeDeps"
 
     exports = ["CMakeLists.txt"]
@@ -160,12 +164,42 @@ class VtkConan(ConanFile):
             # , "mpi_minimal": False
             }
 
-    no_copy_source = True
-
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+
+
+    def _patch_source(self):
+        # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
+        # front of the list.  This is ok as long as there is nothing in that
+        # path that will be found before our conan cmake files...
+        # That is why we delete the third party finders.
+        # Else, we have to patch VTK's CMakeLists.txt, like so:
+        #####
+        # diff --git a/CMakeLists.txt b/CMakeLists.txt
+        # index c15890cfdc..022f704d75 100644
+        # --- a/CMakeLists.txt
+        # +++ b/CMakeLists.txt
+        # @@ -7,7 +7,7 @@ if (POLICY CMP0127)
+        #  endif ()
+        #
+        #  set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
+        # -list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
+        # +list(APPEND CMAKE_MODULE_PATH "${vtk_cmake_dir}")
+        #####
+
+        # DELETE any of the third party finders, before we build - see note above
+        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
+
+        # Delete VTK's cmake patches (these support older cmake programs).
+        # We do not have to support old cmake: we require an updated cmake instead.
+        rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
+
+        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
+        apply_conandata_patches(self)
+
 
 
     def source(self):
@@ -174,12 +208,15 @@ class VtkConan(ConanFile):
             # note: we give the branch a name so we don't have detached heads
             # TODO change to standard git and python chdir
             git_hash = "v" + self.version
-            self.run("cd " + self._source_subfolder + " && git checkout -b branch-" + self.git_hash + " " + self.git_hash)
+            self.run("cd " + self._source_subfolder + " && git checkout -b branch-" + git_hash + " " + git_hash)
         else:
             get(**self.conan_data["sources"][self.version],
                     strip_root=True,
                     destination=self._source_subfolder,
                     )
+
+        if self.no_copy_source:
+            self._patch_source()
 
 
     def _third_party(self):
@@ -383,33 +420,8 @@ class VtkConan(ConanFile):
 
 
     def build(self):
-        # Note that VTK's cmake will insert its own CMAKE_MODULE_PATH at the
-        # front of the list.  This is ok as long as there is nothing in that
-        # path that will be found before our conan cmake files...
-        # That is why we delete the third party finders.
-        # Else, we have to patch VTK's CMakeLists.txt, like so:
-        #####
-        # diff --git a/CMakeLists.txt b/CMakeLists.txt
-        # index c15890cfdc..022f704d75 100644
-        # --- a/CMakeLists.txt
-        # +++ b/CMakeLists.txt
-        # @@ -7,7 +7,7 @@ if (POLICY CMP0127)
-        #  endif ()
-        #
-        #  set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
-        # -list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
-        # +list(APPEND CMAKE_MODULE_PATH "${vtk_cmake_dir}")
-        #####
-
-        # DELETE any of the third party finders, before we build - see note above
-        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
-
-        # Delete VTK's cmake patches (these support older cmake programs).
-        # We do not have to support old cmake: we require an updated cmake instead.
-        rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
-
-        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
-        apply_conandata_patches(self)
+        if not self.no_copy_source:
+            self._patch_source()
 
         cmake = CMake(self)
         cmake.configure()
@@ -418,7 +430,7 @@ class VtkConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "vtk", "conan-official-{}-variables.cmake".format(self.name))
 
 
     def package(self):
@@ -479,54 +491,40 @@ class VtkConan(ConanFile):
                     "loguru",
                     "sys",
                     "WrappingTools",
+
                     "Common",
                     ]
 
             if self.options.rendering:
                 components += [
-                    # "CommonColor",
-                    # "CommonComputationalGeometry",
-                    # "CommonCore",
-                    # "CommonDataModel",
-                    # "CommonExecutionModel",
-                    # "CommonMath",
-                    # "CommonMisc",
-                    # "CommonSystem",
-                    # "CommonTransforms",
-                    # "DICOMParser",
-                    # "FiltersCore",
-                    # "FiltersExtraction",
-                    # "FiltersGeneral",
-                    # "FiltersGeometry",
-                    # "FiltersHybrid",
-                    # "FiltersModeling",
-                    # "FiltersSources",
-                    # "FiltersStatistics",
-                    # "FiltersTexture",
-                    # "GUISupportQt",
-                    # "ImagingColor",
-                    # "ImagingCore",
-                    # "ImagingGeneral",
-                    # "ImagingHybrid",
-                    # "ImagingSources",
-                    # "InteractionStyle",
-                    # "InteractionWidgets",
-                    # "IOCore",
-                    # "IOImage",
-                    # "IOLegacy",
-                    # "IOXML",
-                    # "IOXMLParser",
-                    # "metaio",
-                    # "ParallelCore",
-                    # "ParallelDIY",
-                    # "RenderingAnnotation",
-                    # "RenderingContext2D",
-                    # "RenderingCore",
-                    # "RenderingFreeType",
-                    # "RenderingOpenGL2",
-                    # "RenderingUI",
-                    # "RenderingVolume",
-                    ]
+                        "ChartsCore",
+                        "DICOMParser",
+                        "DomainsChemistryOpenGL2",
+                        "DomainsChemistry",
+                        "FiltersHybrid",
+                        "Filters",
+                        "GeovisCore",
+                        "gl2ps",
+                        "ImagingHybrid",
+                        "Imaging",
+                        "InfovisCore",
+                        "InfovisLayout",
+                        "Interaction",
+                        "IOExportGL2PS",
+                        "IOExportPDF",
+                        "IO",
+                        "libharu",
+                        "metaio",
+                        "OpenGL",
+                        "Parallel",
+                        "RenderingGL2PSOpenGL2",
+                        "Rendering",
+                        "RenderingUI",
+                        "RenderingVtkJS",
+                        "TestingRendering",
+                        "ViewsInfovis",
+                        "Views",
+                        ]
 
         else:
             # not kits, many more libraries
