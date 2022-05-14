@@ -1,10 +1,12 @@
+from conan.tools.files import apply_conandata_patches
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class GdalConan(ConanFile):
@@ -161,10 +163,6 @@ class GdalConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _has_with_exr_option(self):
         return tools.Version(self.version) >= "3.1.0"
 
@@ -232,7 +230,7 @@ class GdalConan(ConanFile):
         if not self.options.get_safe("with_sqlite3", False):
             del self.options.with_pcre
             del self.options.with_pcre2
-        if self._is_msvc:
+        if is_msvc(self):
             del self.options.threadsafe
             del self.options.with_null
             del self.options.with_zlib # zlib and png are always used in nmake build,
@@ -410,7 +408,7 @@ class GdalConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if not self._is_msvc:
+        if not is_msvc(self):
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -421,8 +419,7 @@ class GdalConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         # Remove embedded dependencies
         embedded_libs = [
@@ -445,7 +442,7 @@ class GdalConan(ConanFile):
                               "#include <CL/opencl.h>")
 
         # More patches for autotools build
-        if not self._is_msvc:
+        if not is_msvc(self):
             configure_ac = os.path.join(self._source_subfolder, "configure.ac")
             # Workaround for nc-config not packaged in netcdf recipe (gdal relies on it to check nc4 and hdf4 support in netcdf):
             if self.options.with_netcdf and self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
@@ -878,7 +875,7 @@ class GdalConan(ConanFile):
     def build(self):
         self._validate_dependency_graph()
         self._patch_sources()
-        if self._is_msvc:
+        if is_msvc(self):
             self._edit_nmake_opt()
             with self._msvc_build_environment():
                 self.run("nmake -f makefile.vc {}".format(" ".join(self._nmake_args)))
@@ -906,7 +903,7 @@ class GdalConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
-        if self._is_msvc:
+        if is_msvc(self):
             with self._msvc_build_environment():
                 self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._nmake_args)))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
@@ -931,7 +928,7 @@ class GdalConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "gdal"))
 
         lib_suffix = ""
-        if self._is_msvc:
+        if is_msvc(self):
             if self.options.shared:
                 lib_suffix += "_i"
             if self.settings.build_type == "Debug":
@@ -943,11 +940,11 @@ class GdalConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
-            if tools.Version(self.version) >= "3.2.0" and self._is_msvc:
+            if tools.Version(self.version) >= "3.2.0" and is_msvc(self):
                 self.cpp_info.system_libs.append("wbemuuid")
             if self.options.with_odbc and not self.options.shared:
                 self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
-                if self._is_msvc:
+                if is_msvc(self):
                     self.cpp_info.system_libs.append("legacy_stdio_definitions")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
