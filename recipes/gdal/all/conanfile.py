@@ -268,7 +268,7 @@ class GdalConan(ConanFile):
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.0.0")
+            self.requires("cfitsio/4.1.0")
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
@@ -304,7 +304,7 @@ class GdalConan(ConanFile):
         if self.options.with_jasper:
             self.requires("jasper/2.0.33")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
@@ -322,19 +322,19 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.83.0")
         if self.options.with_xml2:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.38.1")
+            self.requires("sqlite3/3.38.5")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
             self.requires("pcre/8.45")
         if self.options.get_safe("with_pcre2"):
-            self.requires("pcre2/10.39")
+            self.requires("pcre2/10.40")
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
         if self.options.with_geos:
@@ -363,7 +363,7 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.6.0")
         if self.options.with_crypto:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
