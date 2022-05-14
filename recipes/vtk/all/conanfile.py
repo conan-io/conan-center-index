@@ -21,9 +21,18 @@ import os
 import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import apply_conandata_patches, rmdir
+from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
 from conans.tools import get, remove_files_by_mask, save
+
+_support_old_ci_20220514 = True
+
+if _support_old_ci_20220514:
+    # not yet supported by current CI (2022-05-14)
+    from conans.tools import rmdir
+else:
+    # new stuff!
+    from conan.tools.files import rmdir
 
 
 class VtkConan(ConanFile):
@@ -47,8 +56,8 @@ class VtkConan(ConanFile):
 
     # Alternative method: can use git directly - helpful when hacking VTK
     # TODO allow user to set the git_url from the command line, during conan install
-    git_url = "https://gitlab.kitware.com/vtk/vtk.git"
-    # git_url = "/build/git-mirrors/vtk.git"
+    # git_url = "https://gitlab.kitware.com/vtk/vtk.git"
+    git_url = "/build/git-mirrors/vtk.git"
 
 
     ############
@@ -195,7 +204,10 @@ class VtkConan(ConanFile):
 
         # Delete VTK's cmake patches (these support older cmake programs).
         # We do not have to support old cmake: we require an updated cmake instead.
-        rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
+        if _support_old_ci_20220514:
+            rmdir(os.path.join(self._source_subfolder,"CMake","patches"))
+        else:
+            rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
 
         # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
         apply_conandata_patches(self)
@@ -483,112 +495,237 @@ class VtkConan(ConanFile):
 
         components = []
 
+        # these component lists are cheating by me,
+        # just copy-paste all the .so files in here, chop off the start and end of filenames
+        # TODO use modules.json
+
         # for shared AND KITs (can't be unshared and kits)
         if self.options.shared and self.options.enable_kits:
-            # base components
-            components += [
-                    "kissfft",
-                    "loguru",
-                    "sys",
-                    "WrappingTools",
 
-                    "Common",
-                    ]
-
-            if self.options.rendering:
+            if not self.options.rendering:
+                # base components
                 components += [
-                        "ChartsCore",
-                        "DICOMParser",
-                        "DomainsChemistryOpenGL2",
-                        "DomainsChemistry",
-                        "FiltersHybrid",
-                        "Filters",
-                        "GeovisCore",
-                        "gl2ps",
-                        "ImagingHybrid",
-                        "Imaging",
-                        "InfovisCore",
-                        "InfovisLayout",
-                        "Interaction",
-                        "IOExportGL2PS",
-                        "IOExportPDF",
-                        "IO",
-                        "libharu",
-                        "metaio",
-                        "OpenGL",
-                        "Parallel",
-                        "RenderingGL2PSOpenGL2",
-                        "Rendering",
-                        "RenderingUI",
-                        "RenderingVtkJS",
-                        "TestingRendering",
-                        "ViewsInfovis",
-                        "Views",
+                        "kissfft",
+                        "loguru",
+                        "sys",
+                        "WrappingTools",
+
+                        "Common",
                         ]
 
-        else:
-            # not kits, many more libraries
-            # base components
-            components += [
-                    "kissfft",
-                    "loguru",
-                    "sys",
-                    "WrappingTools",
+            else:   # with Rendering
+                if not self.options.qt:
+                    components += [
+                            "ChartsCore",
+                            "Common",
+                            "DICOMParser",
+                            "DomainsChemistry",
+                            "DomainsChemistryOpenGL2",
+                            "Filters",
+                            "FiltersHybrid",
+                            "GeovisCore",
+                            "gl2ps",
+                            "Imaging",
+                            "ImagingHybrid",
+                            "InfovisCore",
+                            "InfovisLayout",
+                            "Interaction",
+                            "IO",
+                            "IOExportGL2PS",
+                            "IOExportPDF",
+                            "kissfft",
+                            "libharu",
+                            "loguru",
+                            "metaio",
+                            "OpenGL",
+                            "Parallel",
+                            "Rendering",
+                            "RenderingGL2PSOpenGL2",
+                            "RenderingUI",
+                            "RenderingVtkJS",
+                            "sys",
+                            "TestingRendering",
+                            "Views",
+                            "ViewsInfovis",
+                            "WrappingTools",
+                            ]
+                else:   # with QT
+                    components += [
+                            "ChartsCore",
+                            "Common",
+                            "DICOMParser",
+                            "DomainsChemistryOpenGL2",
+                            "DomainsChemistry",
+                            "FiltersHybrid",
+                            "Filters",
+                            "GeovisCore",
+                            "gl2ps",
+                            "GUISupportQt",
+                            "ImagingHybrid",
+                            "Imaging",
+                            "InfovisCore",
+                            "InfovisLayout",
+                            "Interaction",
+                            "IOExportGL2PS",
+                            "IOExportPDF",
+                            "IO",
+                            "kissfft",
+                            "libharu",
+                            "loguru",
+                            "metaio",
+                            "OpenGL",
+                            "Parallel",
+                            "RenderingGL2PSOpenGL2",
+                            "Rendering",
+                            "RenderingUI",
+                            "RenderingVtkJS",
+                            "sys",
+                            "TestingRendering",
+                            "ViewsInfovis",
+                            "Views",
+                            "WrappingTools",
+                            ]
 
-                    "CommonCore",
-                    "CommonDataModel",
-                    "CommonMath",
-                    "CommonMisc",
-                    "CommonSystem",
-                    "CommonTransforms",
-                    ]
+        else: # not kits, many more libraries
 
-            if self.options.rendering:
+            if not self.options.rendering:
                 components += [
-                    # "CommonColor",
-                    # "CommonComputationalGeometry",
-                    # "CommonCore",
-                    # "CommonDataModel",
-                    # "CommonExecutionModel",
-                    # "CommonMath",
-                    # "CommonMisc",
-                    # "CommonSystem",
-                    # "CommonTransforms",
-                    # "DICOMParser",
-                    # "FiltersCore",
-                    # "FiltersExtraction",
-                    # "FiltersGeneral",
-                    # "FiltersGeometry",
-                    # "FiltersHybrid",
-                    # "FiltersModeling",
-                    # "FiltersSources",
-                    # "FiltersStatistics",
-                    # "FiltersTexture",
-                    # "GUISupportQt",
-                    # "ImagingColor",
-                    # "ImagingCore",
-                    # "ImagingGeneral",
-                    # "ImagingHybrid",
-                    # "ImagingSources",
-                    # "InteractionStyle",
-                    # "InteractionWidgets",
-                    # "IOCore",
-                    # "IOImage",
-                    # "IOLegacy",
-                    # "IOXML",
-                    # "IOXMLParser",
-                    # "metaio",
-                    # "ParallelCore",
-                    # "ParallelDIY",
-                    # "RenderingAnnotation",
-                    # "RenderingContext2D",
-                    # "RenderingCore",
-                    # "RenderingFreeType",
-                    # "RenderingOpenGL2",
-                    # "RenderingUI",
-                    # "RenderingVolume",
-                    ]
-            
+                        "kissfft",
+                        "loguru",
+                        "sys",
+                        "WrappingTools",
+
+                        "CommonCore",
+                        "CommonDataModel",
+                        "CommonMath",
+                        "CommonMisc",
+                        "CommonSystem",
+                        "CommonTransforms",
+                        ]
+            else:   # with Rendering
+                # just copy-paste all the .so files in here, chop off the start and end of filenames
+                if not self.options.qt:
+                    components += [
+                            "ChartsCore",
+                            "CommonColor",
+                            "CommonComputationalGeometry",
+                            "CommonCore",
+                            "CommonDataModel",
+                            "CommonExecutionModel",
+                            "CommonMath",
+                            "CommonMisc",
+                            "CommonSystem",
+                            "CommonTransforms",
+                            "DICOMParser",
+                            "DomainsChemistryOpenGL2",
+                            "DomainsChemistry",
+                            "FiltersCore",
+                            "FiltersExtraction",
+                            "FiltersGeneral",
+                            "FiltersGeometry",
+                            "FiltersHybrid",
+                            "FiltersImaging",
+                            "FiltersModeling",
+                            "FiltersSources",
+                            "FiltersStatistics",
+                            "FiltersTexture",
+                            "GeovisCore",
+                            "gl2ps",
+                            "ImagingColor",
+                            "ImagingCore",
+                            "ImagingGeneral",
+                            "ImagingHybrid",
+                            "ImagingMath",
+                            "ImagingSources",
+                            "InfovisCore",
+                            "InfovisLayout",
+                            "InteractionImage",
+                            "InteractionStyle",
+                            "InteractionWidgets",
+                            "IOCore",
+                            "IOExportGL2PS",
+                            "IOExportPDF",
+                            "IOExport",
+                            "IOGeometry",
+                            "IOImage",
+                            "IOLegacy",
+                            "IOXMLParser",
+                            "IOXML",
+                            "kissfft",
+                            "libharu",
+                            "loguru",
+                            "metaio",
+                            "ParallelCore",
+                            "ParallelDIY",
+                            "RenderingAnnotation",
+                            "RenderingContext2D",
+                            "RenderingContextOpenGL2",
+                            "RenderingCore",
+                            "RenderingFreeType",
+                            "RenderingGL2PSOpenGL2",
+                            "RenderingImage",
+                            "RenderingLabel",
+                            "RenderingLOD",
+                            "RenderingOpenGL2",
+                            "RenderingSceneGraph",
+                            "RenderingUI",
+                            "RenderingVolumeOpenGL2",
+                            "RenderingVolume",
+                            "RenderingVtkJS",
+                            "sys",
+                            "TestingRendering",
+                            "ViewsCore",
+                            "ViewsInfovis",
+                            "WrappingTools",
+                            ]
+                else:   # with QT
+                    raise ConanInvalidConfiguration("TODO haven't done this yet")
+
+
+# all components, from a list somewhere, for reference
+# "CommonColor",
+# "CommonComputationalGeometry",
+# "CommonCore",
+# "CommonDataModel",
+# "CommonExecutionModel",
+# "CommonMath",
+# "CommonMisc",
+# "CommonSystem",
+# "CommonTransforms",
+# "DICOMParser",
+# "FiltersCore",
+# "FiltersExtraction",
+# "FiltersGeneral",
+# "FiltersGeometry",
+# "FiltersHybrid",
+# "FiltersModeling",
+# "FiltersSources",
+# "FiltersStatistics",
+# "FiltersTexture",
+# "GUISupportQt",
+# "ImagingColor",
+# "ImagingCore",
+# "ImagingGeneral",
+# "ImagingHybrid",
+# "ImagingSources",
+# "InteractionStyle",
+# "InteractionWidgets",
+# "IOCore",
+# "IOImage",
+# "IOLegacy",
+# "IOXML",
+# "IOXMLParser",
+# "metaio",
+# "ParallelCore",
+# "ParallelDIY",
+# "RenderingAnnotation",
+# "RenderingContext2D",
+# "RenderingCore",
+# "RenderingFreeType",
+# "RenderingOpenGL2",
+# "RenderingUI",
+# "RenderingVolume",
+
 
         # remove duplicates in components list
         components = list(set(components))
