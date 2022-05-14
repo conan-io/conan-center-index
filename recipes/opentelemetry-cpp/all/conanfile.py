@@ -10,11 +10,11 @@ required_conan_version = ">=1.33.0"
 
 class OpenTelemetryCppConan(ConanFile):
     name = "opentelemetry-cpp"
+    description = "The C++ OpenTelemetry API and SDK"
+    topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/open-telemetry/opentelemetry-cpp"
-    description = "The C++ OpenTelemetry API and SDK"
-    topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,23 +28,12 @@ class OpenTelemetryCppConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     short_paths = True
 
-    def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Architecture not supported")
-
-        if (self.settings.compiler == "Visual Studio" and
-           tools.Version(self.settings.compiler.version) < "16"):
-            raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
-
-        if self.settings.os != "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration("Building shared libraries is only supported on Linux")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def config_options(self):
-        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def requirements(self):
@@ -56,6 +45,19 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("opentelemetry-proto/0.17.0")
         self.requires("protobuf/3.20.0")
         self.requires("thrift/0.15.0")
+        if tools.Version(self.version) >= "1.3.0":
+            self.requires("boost/1.79.0")
+
+    def validate(self):
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Architecture not supported")
+
+        if (self.settings.compiler == "Visual Studio" and
+           tools.Version(self.settings.compiler.version) < "16"):
+            raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
+
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration("Building shared libraries is only supported on Linux")
 
     @staticmethod
     def _create_cmake_module_variables(module_file):
