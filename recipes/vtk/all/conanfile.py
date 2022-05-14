@@ -1,4 +1,5 @@
 # TODO LIST
+# - Make cmake a build requirement for conan-CI to work
 # - Why are cmake_wrapper cmake files being deployed?
 # - How can I utilise VTK's built-in cmake module dependency system, rather than recreate it here?
 # - 3rd party deps are required for different enabled module configurations, how to take that info out of VTK's module system?
@@ -271,6 +272,11 @@ class VtkConan(ConanFile):
 
 
     def build_requirements(self):
+        # Check the CMake/patches folder, and use the most recent cmake
+        # that matches the largest major version in the list.
+        # That should be the last cmake that was tested by VTK.
+        self.build_requires("cmake/3.22.4")
+
         if self.options.rendering:
             Apt(self).install([
                 "build-essential",
