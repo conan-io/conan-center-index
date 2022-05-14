@@ -14,16 +14,6 @@ class OpenTelemetryCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/open-telemetry/opentelemetry-cpp"
     description = "The C++ OpenTelemetry API and SDK"
-    requires = [
-        "abseil/20211102.0",
-        "grpc/1.45.2",
-        "libcurl/7.80.0",
-        "nlohmann_json/3.10.5",
-        "openssl/1.1.1n",
-        "opentelemetry-proto/0.16.0",
-        "protobuf/3.20.0",
-        "thrift/0.15.0",
-    ]
     topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
@@ -56,6 +46,16 @@ class OpenTelemetryCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("abseil/20211102.0")
+        self.requires("grpc/1.45.2")
+        self.requires("libcurl/7.83.0")
+        self.requires("nlohmann_json/3.10.5")
+        self.requires("openssl/1.1.1o")
+        self.requires("opentelemetry-proto/0.17.0")
+        self.requires("protobuf/3.20.0")
+        self.requires("thrift/0.15.0")
 
     @staticmethod
     def _create_cmake_module_variables(module_file):
