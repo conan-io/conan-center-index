@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
 import functools
 import os
@@ -77,8 +78,7 @@ class OpenjpegConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-           tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
