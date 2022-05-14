@@ -1,0 +1,9 @@
+sources:
+  "0.1.8":
+    url: "https://github.com/lemire/FastPFor/archive/refs/tags/v0.1.8.tar.gz"
+    sha256: "8c54f1e183e250c25be143ba16489dd6c4ddf91c2464eddc3590b1c401d55c44"
+
+patches:
+  "0.1.8":
+    - patch_file: "patches/0.1.8-0001-fix-cmake.patch"
+      base_path: "source_subfolder"

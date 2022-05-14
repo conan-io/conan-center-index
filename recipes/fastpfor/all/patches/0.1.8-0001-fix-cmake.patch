@@ -1,0 +1,54 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 3ed271d..f515e3d 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -4,6 +4,8 @@
+ # Copyright (c) 2012 Louis Dionne
+ #
+ cmake_minimum_required(VERSION 2.8.7)
++set (CMAKE_CXX_STANDARD 11) # for constexpr specifier and other goodies
++
+ if (NOT CMAKE_BUILD_TYPE)
+ 		message(STATUS "No build type selected, default to Release")
+ 		set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+@@ -14,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
+ include(AppendCompilerFlags)
+ 
+ 
+-project(FastPFor CXX C)
++project(FastPFOR CXX C)
+ set(PROJECT_URL "https://github.com/lemire/FastPFOR")
+ set(PROJECT_DESCRIPTION "The FastPFOR C++ library: Fast integer compression")
+ include(DetectCPUFeatures)
+@@ -102,7 +104,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
+ 
+ # library target
+ include_directories(headers)
+-add_library(FastPFor STATIC src/bitpacking.cpp
++add_library(FastPFOR src/bitpacking.cpp
+                                 src/bitpacking.cpp
+                                 src/bitpackingaligned.cpp
+                                 src/bitpackingunaligned.cpp
+@@ -114,7 +116,7 @@ add_library(FastPFor STATIC src/bitpacking.cpp
+ 								${HEADERS}
+ 								)
+ 
+-
++if(0)
+ # other executables
+ add_executable(gapstats src/gapstats.cpp)
+ add_executable(partitionbylength src/partitionbylength.cpp)
+@@ -157,3 +159,13 @@ target_link_libraries(inmemorybenchmark FastPFor)
+ add_executable(unit src/unit.cpp)
+ target_link_libraries(unit FastPFor)
+ add_custom_target(check unit DEPENDS unit)
++endif()
++
++include(GNUInstallDirs)
++install(TARGETS FastPFOR
++    EXPORT FastPFORExport
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++install(DIRECTORY "headers/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/fastpfor")
