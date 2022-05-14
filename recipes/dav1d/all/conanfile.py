@@ -1,10 +1,10 @@
 import os
 from conan import ConanFile
-from conan.tools.files import rename, get, replace_in_file
+from conan.tools.files import rename, get
 from conans import Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.33.0"
 
 
 class Dav1dConan(ConanFile):
@@ -75,8 +75,8 @@ class Dav1dConan(ConanFile):
             destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
-                        "subdir('doc')", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "subdir('doc')", "")
 
     def _configure_meson(self):
         if self._meson:
