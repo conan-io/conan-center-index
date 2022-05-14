@@ -36,6 +36,7 @@ class CPythonConan(ConanFile):
         "with_bsddb": [True, False],
         # Python 3 options
         "with_lzma": [True, False],
+        "deprecated_win7_support": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -59,6 +60,7 @@ class CPythonConan(ConanFile):
         "with_bsddb": False,  # True,  # FIXME: libdb package missing (#5309/#5392)
         # Python 3 options
         "with_lzma": True,
+        "deprecated_win7_support": False,
 
         # options that don't change package id
         "env_vars": True,
@@ -111,10 +113,13 @@ class CPythonConan(ConanFile):
         if self._is_py2:
             # Python 2.xx does not support following options
             del self.options.with_lzma
+            del self.options.deprecated_win7_support
         elif self._is_py3:
             # Python 3.xx does not support following options
             del self.options.with_bsddb
             del self.options.unicode
+            if self.version < "3.10.0":
+                del self.options.deprecated_win7_support
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -178,7 +183,7 @@ class CPythonConan(ConanFile):
             self.requires("openssl/1.1.1l")
             self.requires("expat/2.4.1")
             if self._with_libffi:
-                self.requires("libffi/3.2.1")
+                self.requires("libffi/3.4.2")
             if tools.Version(self._version_number_only) < "3.8":
                 self.requires("mpdecimal/2.4.2")
             elif tools.Version(self._version_number_only) < "3.10":
@@ -263,8 +268,12 @@ class CPythonConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches",{}).get(self.version, []):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            if "restore-support-for-windows-7" in patch["patch_file"] \
+                    and not self.options.get_safe("deprecated_win7_support", False):
+                continue
             tools.patch(**patch)
+
         if self._is_py3 and tools.Version(self._version_number_only) < "3.10":
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")
@@ -290,6 +299,17 @@ class CPythonConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   "curses_libs = ",
                                   "curses_libs = {} #".format(repr(self.deps_cpp_info["ncurses"].libs + self.deps_cpp_info["ncurses"].system_libs)))
+        else:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "setup.py"),
+                "curses_library.startswith('ncurses')",
+                "False"
+            )
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "setup.py"),
+                "curses_library == 'curses' and not MACOS",
+                "False"
+            )
 
         # Enable static MSVC cpython
         if not self.options.shared:
@@ -402,7 +422,8 @@ class CPythonConan(ConanFile):
             for project_i, project in enumerate(projects, 1):
                 self.output.info("[{}/{}] Building project '{}'...".format(project_i, len(projects), project))
                 project_file = os.path.join(self._source_subfolder, "PCbuild", project + ".vcxproj")
-                self._upgrade_single_project_file(project_file)
+                if not tools.get_env("CONAN_SKIP_VS_PROJECTS_UPGRADE", False):
+                    self._upgrade_single_project_file(project_file)
                 msbuild.build(project_file, upgrade_project=False, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                               platforms=self._msvc_archs, properties=msbuild_properties)
 
@@ -415,10 +436,6 @@ class CPythonConan(ConanFile):
             elif tools.Version(self._version_number_only) >= "3.9.0":
                 if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
-
-        if self._with_libffi:
-            if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
