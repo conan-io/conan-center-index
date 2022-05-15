@@ -1,8 +1,19 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5520747..ca099fd 100644
+index 5520747..8cdf1d7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -108,7 +108,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
+@@ -94,6 +94,10 @@ elseif(WIN32)
+     if(NOT MSVC12)
+          message(STATUS "On Windows, only MSVC version 12 is supported!")
+     endif()
++    set (CMAKE_CXX_FLAGS_RELEASE "-msse4.1")
++    set (CMAKE_CXX_FLAGS_DEBUG   "-msse4.1")
++    set (CMAKE_C_FLAGS_RELEASE "-msse4.1")
++    set (CMAKE_C_FLAGS_DEBUG   "-msse4.1")
+ else ()
+     message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
+ endif()
+@@ -108,7 +112,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
  
  # library target
  include_directories(headers)
@@ -11,7 +22,7 @@ index 5520747..ca099fd 100644
      src/bitpacking.cpp
      src/bitpackingaligned.cpp
      src/bitpackingunaligned.cpp
-@@ -119,7 +119,7 @@ add_library(FastPFOR STATIC
+@@ -119,7 +123,7 @@ add_library(FastPFOR STATIC
      src/streamvbyte.c)
  set_target_properties(FastPFOR PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
  
@@ -20,7 +31,7 @@ index 5520747..ca099fd 100644
  # other executables
  add_executable(gapstats src/gapstats.cpp)
  add_executable(partitionbylength src/partitionbylength.cpp)
-@@ -127,6 +127,7 @@ add_executable(csv2maropu src/csv2maropu.cpp)
+@@ -127,6 +131,7 @@ add_executable(csv2maropu src/csv2maropu.cpp)
  
  add_executable(entropy src/entropy.cpp)
  target_link_libraries(entropy FastPFOR)
@@ -28,7 +39,7 @@ index 5520747..ca099fd 100644
  
  if( SUPPORT_SSE42 )
      add_executable(benchbitpacking src/benchbitpacking.cpp)
-@@ -150,6 +151,7 @@ else()
+@@ -150,6 +155,7 @@ else()
      target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
  endif()
  
@@ -36,7 +47,7 @@ index 5520747..ca099fd 100644
  # Download and unpack googletest at configure time
  configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-@@ -207,7 +209,7 @@ target_link_libraries(FastPFOR_unittest gtest FastPFOR)
+@@ -207,7 +213,7 @@ target_link_libraries(FastPFOR_unittest gtest FastPFOR)
  enable_testing()
  add_test("unit" unit)
  add_test("FastPFOR_unittest" FastPFOR_unittest)
