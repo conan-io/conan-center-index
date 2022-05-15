@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
+# Ensure this cmake minimum matches what is in conanfile.py
+cmake_minimum_required(VERSION 3.22.4 FATAL_ERROR)
 project(cmake_wrapper)
 
 # set (CMAKE_FIND_DEBUG_MODE TRUE)

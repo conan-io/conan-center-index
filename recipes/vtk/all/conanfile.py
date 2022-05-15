@@ -15,8 +15,9 @@
 # SpaceIm: CMakeDeps creates a config version file for each dependency, so if find_package(<package>) is resolved, it will define <package>_VERSION
 
 # RECIPE MAINTAINER NOTES:
-# Read vtk's Documentation/release/9.1.md for important notes about versions and forks
-# Also read vtk's Documentation/build.md for information about build settings and flags
+# - Read vtk's Documentation/release/9.1.md for important notes about versions and forks
+# - Also read vtk's Documentation/build.md for information about build settings and flags
+# - Modify build_requirements() to match the version of CMake that VTK tested with that release.
 
 import os
 import textwrap
@@ -240,7 +241,7 @@ class VtkConan(ConanFile):
                 , "eigen":             "eigen/3.4.0"
                 , "exprtk":            "exprtk/0.0.1"
                 , "fmt":               "fmt/8.1.1"       # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                , "freetype":          "freetype/2.11.1" # ... what? ... WORKED with 2022-05-06-freetype
+                , "freetype":          "freetype/2.11.1"
                 , "glew":              "glew/2.2.0"
                 , "jsoncpp":           "jsoncpp/1.9.5"
                 # , "libharu": "libharu/2.3.0" -- use VTK's bundled version - heavily patched
@@ -267,38 +268,22 @@ class VtkConan(ConanFile):
 
 
     def requirements(self):
+        if self.options.rendering:
+            self.requires("xorg/system")
+            self.requires("opengl/system")
+
         for pack in self._third_party().values():
             self.requires(pack)
 
 
     def build_requirements(self):
+        # Recipe Maintainers:
         # Check the CMake/patches folder, and use the most recent cmake
         # that matches the largest major version in the list.
         # That should be the last cmake that was tested by VTK.
+        # Also adjust our CMakeLists.txt to match this number.
+        # TODO automate this?  Put this version number in conandata.yml?
         self.build_requires("cmake/3.22.4")
-
-        if self.options.rendering:
-            Apt(self).install([
-                "build-essential",
-                "mesa-common-dev",
-                "mesa-utils",
-                "freeglut3-dev"
-
-                # These were listed by the previous recipe author,
-                # but they are not listed in vtk Documentation/dev/build.md
-                # so I'm not sure if they are really needed ... TODO
-                #
-                # "mesa-utils-extra",
-                # "libgl1-mesa-dev",
-                # "libglapi-mesa",
-                # "libsm-dev",
-                # "libx11-dev",
-                # "libxext-dev",
-                # "libxt-dev",
-                # "libglu1-mesa-dev"
-                ])
-            # TODO people on other platforms please
-            # contribute what packages are required
 
 
     def validate(self):
@@ -323,38 +308,38 @@ class VtkConan(ConanFile):
             tc.variables["VTK_USE_64BIT_IDS"] = self.options.use_64bit_ids
 
         # Be sure to set this, otherwise vtkCompilerChecks.cmake will downgrade our CXX standard to 11
-        tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = "ON"
+        tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
 
 
         # no need for versions on installed names?
-        tc.variables["VTK_VERSIONED_INSTALL"] = "OFF"
+        tc.variables["VTK_VERSIONED_INSTALL"] = False
 
         # Needed or not? Nothing gets installed without this ON at the moment.
-        # tc.variables["VTK_INSTALL_SDK"] = "OFF"
+        # tc.variables["VTK_INSTALL_SDK"] = False
 
         # TODO future-proofing
-        # tc.variables["VTK_LEGACY_REMOVE"] = "ON" # disable legacy APIs
-        # tc.variables["VTK_USE_FUTURE_CONST"] = "ON" # use the newer const-correct APIs
+        # tc.variables["VTK_LEGACY_REMOVE"] = True # disable legacy APIs
+        # tc.variables["VTK_USE_FUTURE_CONST"] = True # use the newer const-correct APIs
 
         # TODO development debugging
-        # tc.variables["VTK_DEBUG_LEAKS"] = "ON" # use the newer const-correct APIs
+        # tc.variables["VTK_DEBUG_LEAKS"] = True # use the newer const-correct APIs
 
 
         # ON or OFF
-        tc.variables["BUILD_TESTING"] = "OFF"
-        tc.variables["BUILD_EXAMPLES"] = "OFF"
-        tc.variables["BUILD_DOCUMENTATION"] = "OFF"
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_DOCUMENTATION"] = False
 
         # Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
         # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
-        tc.variables["VTK_ENABLE_KITS"] = "ON" if self.options.enable_kits else "OFF"
+        tc.variables["VTK_ENABLE_KITS"] = self.options.enable_kits
 
 
         #### CUDA / MPI / MEMKIND ####
         # ON or OFF
-        tc.variables["VTK_USE_CUDA"]    = "OFF"
-        tc.variables["VTK_USE_MEMKIND"] = "OFF"
-        tc.variables["VTK_USE_MPI"]     = "OFF"
+        tc.variables["VTK_USE_CUDA"]    = False
+        tc.variables["VTK_USE_MEMKIND"] = False
+        tc.variables["VTK_USE_MPI"]     = False
 
 
         # There are LOTS of these modules now ...
@@ -396,20 +381,20 @@ class VtkConan(ConanFile):
         # Note that STDThread seems to be available by default
         tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = "Sequential"
         # Change change the mode during runtime, if you enable the backends like so:
-        # tc.variables["VTK_SMP_ENABLE_<backend_name>"] = "ON"
+        # tc.variables["VTK_SMP_ENABLE_<backend_name>"] = True
 
         # TODO OLD STUFF that was here before, I don't use or know much about
         # if self.options.minimal:
-        #     tc.variables["VTK_Group_StandAlone"] = "OFF"
-        #     tc.variables["VTK_Group_Rendering"] = "OFF"
+        #     tc.variables["VTK_Group_StandAlone"] = False
+        #     tc.variables["VTK_Group_Rendering"] = False
         # if self.options.ioxml:
-        #     tc.variables["Module_vtkIOXML"] = "ON"
+        #     tc.variables["Module_vtkIOXML"] = True
         # if self.options.mpi:
-        #     tc.variables["VTK_Group_MPI"] = "ON"
-        #     tc.variables["Module_vtkIOParallelXML"] = "ON"
+        #     tc.variables["VTK_Group_MPI"] = True
+        #     tc.variables["Module_vtkIOParallelXML"] = True
         # if self.options.mpi_minimal:
-        #     tc.variables["Module_vtkIOParallelXML"] = "ON"
-        #     tc.variables["Module_vtkParallelMPI"] = "ON"
+        #     tc.variables["Module_vtkIOParallelXML"] = True
+        #     tc.variables["Module_vtkParallelMPI"] = True
         #
         # if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
         #     tc.variables["CMAKE_DEBUG_POSTFIX"] = "_d"
@@ -419,10 +404,10 @@ class VtkConan(ConanFile):
         # Ask VTK to use their bundled versions for these:
         #
         # VTK uses a heavily-forked version they call 2.4.0.  Upstream libharu is currently unmaintained.
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_libharu"] = "OFF"
+        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_libharu"] = False
         #
         # CCI does not have gl2ps yet.  Note that cern-root is also waiting for gl2ps.
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_gl2ps"] = "OFF"
+        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_gl2ps"] = False
         #
         ###
 
@@ -432,7 +417,7 @@ class VtkConan(ConanFile):
         # and change it to conan or add as a build_requirement for the system to install.
         # SOME of VTK's bundled Third Party libs are heavily forked and patched, so system versions may
         # not be appropriate to use externally (like libharu).
-        tc.variables["VTK_USE_EXTERNAL"] = "ON"
+        tc.variables["VTK_USE_EXTERNAL"] = True
 
         tc.generate()
 
@@ -462,7 +447,7 @@ class VtkConan(ConanFile):
         content = textwrap.dedent("""\
                 set (VTK_ENABLE_KITS {})
                 """
-                .format("ON" if self.options.enable_kits else "OFF")
+                .format(self.options.enable_kits)
                 )
         save(os.path.join(self.package_folder, self._module_file_rel_path),
                 content
@@ -759,6 +744,12 @@ class VtkConan(ConanFile):
                             "ViewsInfovis",
                             "WrappingTools",
                             ]
+
+        if self.options.rendering:
+            components += [
+                    "xorg",
+                    "opengl",
+                    ]
 
 
 # all components, from a list somewhere, for reference
