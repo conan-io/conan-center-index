@@ -41,7 +41,7 @@ class FastPFORConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.arch != "x86" and self.settings.arch != "x86_64":
+        if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("{} architecture is not supported".format(self.settings.arch))
 
         if self.settings.compiler.get_safe("cppstd"):
