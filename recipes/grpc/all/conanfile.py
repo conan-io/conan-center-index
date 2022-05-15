@@ -29,7 +29,8 @@ class grpcConan(ConanFile):
         "php_plugin": [True, False],
         "python_plugin": [True, False],
         "ruby_plugin": [True, False],
-        "secure": [True, False]
+        "secure": [True, False],
+        "build_tests": [True, False]
     }
     default_options = {
         "shared": False,
@@ -44,6 +45,7 @@ class grpcConan(ConanFile):
         "python_plugin": True,
         "ruby_plugin": True,
         "secure": False,
+        "build_tests": True
     }
 
     short_paths = True
@@ -131,7 +133,7 @@ class grpcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.codegen
         self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.csharp_ext
-        self._cmake.definitions["gRPC_BUILD_TESTS"] = False
+        self._cmake.definitions["gRPC_BUILD_TESTS"] = self.options.build_tests
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         self._cmake.definitions["gRPC_INSTALL"] = True
