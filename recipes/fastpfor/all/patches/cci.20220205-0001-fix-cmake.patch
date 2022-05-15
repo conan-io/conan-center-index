@@ -1,15 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5520747..0d40687 100644
+index 5520747..c696c74 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -94,6 +94,10 @@ elseif(WIN32)
      if(NOT MSVC12)
           message(STATUS "On Windows, only MSVC version 12 is supported!")
      endif()
-+    set (CMAKE_CXX_FLAGS_RELEASE "/arch:AVX")
-+    set (CMAKE_CXX_FLAGS_DEBUG   "/arch:AVX")
-+    set (CMAKE_C_FLAGS_RELEASE "/arch:AVX")
-+    set (CMAKE_C_FLAGS_DEBUG   "/arch:AVX")
++    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:AVX")
++    set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /arch:AVX")
++    set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /arch:AVX")
++    set (CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} /arch:AVX")
  else ()
      message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
  endif()
@@ -31,14 +31,14 @@ index 5520747..0d40687 100644
  # other executables
  add_executable(gapstats src/gapstats.cpp)
  add_executable(partitionbylength src/partitionbylength.cpp)
-@@ -127,6 +131,7 @@ add_executable(csv2maropu src/csv2maropu.cpp)
- 
- add_executable(entropy src/entropy.cpp)
- target_link_libraries(entropy FastPFOR)
+@@ -132,6 +136,7 @@ if( SUPPORT_SSE42 )
+     add_executable(benchbitpacking src/benchbitpacking.cpp)
+     target_link_libraries(benchbitpacking FastPFOR)
+ endif()
 +endif()
  
- if( SUPPORT_SSE42 )
-     add_executable(benchbitpacking src/benchbitpacking.cpp)
+ find_package(snappy)
+ if(NOT ${snappy_FOUND})
 @@ -150,6 +155,7 @@ else()
      target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
  endif()
