@@ -1,11 +1,11 @@
 --- setup.py
 +++ setup.py
-@@ -2106,6 +2106,8 @@
+@@ -2105,7 +2105,7 @@
+         # and _TCLTK_LIBS environment variables.
          if self.detect_tkinter_fromenv():
              return True
- 
+-
 +        return False
-+
          # Rather than complicate the code below, detecting and building
          # AquaTk is a separate method. Only one Tkinter will be built on
          # Darwin - either AquaTk, if it is found, or X11 based Tk.
