@@ -83,6 +83,8 @@ class FastPFORConan(ConanFile):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig",))
+        tools.rmdir(os.path.join(self.package_folder, "share",))
 
     def package(self):
         cmake = self._configure_cmake()
