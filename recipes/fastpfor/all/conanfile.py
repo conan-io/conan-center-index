@@ -83,14 +83,14 @@ class FastPFORConan(ConanFile):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig",))
-        tools.rmdir(os.path.join(self.package_folder, "share",))
 
     def package(self):
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["FastPFOR"]
