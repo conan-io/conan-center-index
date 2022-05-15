@@ -152,9 +152,13 @@ class OpenTelemetryCppConan(ConanFile):
         return [self._otel_cmake_variables_path]
 
     @property
+    def _http_client_name(self):
+        return "http_client_curl" if tools.Version(self.version) < "1.3.0" else "opentelemetry_http_client_curl"
+
+    @property
     def _otel_libraries(self):
         libraries = [
-            "http_client_curl" if tools.Version(self.version) < "1.3.0" else "opentelemetry_http_client_curl",
+            self._http_client_name,
             "opentelemetry_common",
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_jaeger_trace",
@@ -181,7 +185,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._otel_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._otel_build_modules
 
-        self.cpp_info.components["http_client_curl"].requires.extend(["libcurl::libcurl"])
+        self.cpp_info.components[self._http_client_name].requires.extend(["libcurl::libcurl"])
 
         self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_ABSEIL")
         self.cpp_info.components["opentelemetry_common"].requires.extend([
@@ -197,12 +201,15 @@ class OpenTelemetryCppConan(ConanFile):
         self.cpp_info.components["opentelemetry_exporter_in_memory"].libs = []
 
         self.cpp_info.components["opentelemetry_exporter_jaeger_trace"].requires.extend([
-            "http_client_curl" if tools.Version(self.version) < "1.3.0" else "opentelemetry_http_client_curl",
+            self._http_client_name,
             "openssl::openssl",
             "opentelemetry_resources",
             "thrift::thrift",
-            "boost::locale",
         ])
+        if tools.Version(self.version) >= "1.3.0":
+            self.cpp_info.components["opentelemetry_exporter_jaeger_trace"].requires.extend([
+                "boost::locale",
+            ])
 
         self.cpp_info.components["opentelemetry_exporter_ostream_span"].requires.extend([
             "opentelemetry_trace",
@@ -215,13 +222,13 @@ class OpenTelemetryCppConan(ConanFile):
         ])
 
         self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
-            "http_client_curl" if tools.Version(self.version) < "1.3.0" else "opentelemetry_http_client_curl",
+            self._http_client_name,
             "nlohmann_json::nlohmann_json",
             "opentelemetry_otlp_recordable",
         ])
 
         self.cpp_info.components["opentelemetry_exporter_zipkin_trace"].requires.extend([
-            "http_client_curl" if tools.Version(self.version) < "1.3.0" else "opentelemetry_http_client_curl",
+            self._http_client_name,
             "nlohmann_json::nlohmann_json",
             "opentelemetry_trace",
         ])
