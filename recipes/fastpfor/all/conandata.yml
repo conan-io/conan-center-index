@@ -1,9 +1,9 @@
 sources:
-  "0.1.8":
-    url: "https://github.com/lemire/FastPFor/archive/refs/tags/v0.1.8.tar.gz"
-    sha256: "8c54f1e183e250c25be143ba16489dd6c4ddf91c2464eddc3590b1c401d55c44"
+  "cci.20220205":
+    url: "https://github.com/lemire/FastPFor/archive/773283d4a11fa2440a1b3b28fd77f775e86d7898.tar.gz"
+    sha256: "d4419512420f3bcc65862c5c367021f201b5ba3e8cb0dad895cdf444e0867b30"
 
 patches:
-  "0.1.8":
-    - patch_file: "patches/0.1.8-0001-fix-cmake.patch"
+  "cci.20220205":
+    - patch_file: "patches/cci.20220205-0001-fix-cmake.patch"
       base_path: "source_subfolder"

@@ -50,6 +50,9 @@ class FastPFORConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        if self.settings.arch != "x86" and self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("{} architecture not supported".format(self.settings.arch))
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
@@ -90,6 +93,10 @@ class FastPFORConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["FastPFOR"]
 
+        self.cpp_info.set_property("cmake_file_name", "FastPFOR")
         self.cpp_info.set_property("cmake_target_name", "FastPFOR::FastPFOR")
+
+        self.cpp_info.filenames["cmake_find_package"] = "FastPFOR"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "FastPFOR"
         self.cpp_info.names["cmake_find_package"] = "FastPFOR"
         self.cpp_info.names["cmake_find_package_multi"] = "FastPFOR"

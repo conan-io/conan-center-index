@@ -1,0 +1,47 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5520747..ca099fd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -108,7 +108,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
+ 
+ # library target
+ include_directories(headers)
+-add_library(FastPFOR STATIC
++add_library(FastPFOR
+     src/bitpacking.cpp
+     src/bitpackingaligned.cpp
+     src/bitpackingunaligned.cpp
+@@ -119,7 +119,7 @@ add_library(FastPFOR STATIC
+     src/streamvbyte.c)
+ set_target_properties(FastPFOR PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+ 
+-
++if(0)
+ # other executables
+ add_executable(gapstats src/gapstats.cpp)
+ add_executable(partitionbylength src/partitionbylength.cpp)
+@@ -127,6 +127,7 @@ add_executable(csv2maropu src/csv2maropu.cpp)
+ 
+ add_executable(entropy src/entropy.cpp)
+ target_link_libraries(entropy FastPFOR)
++endif()
+ 
+ if( SUPPORT_SSE42 )
+     add_executable(benchbitpacking src/benchbitpacking.cpp)
+@@ -150,6 +151,7 @@ else()
+     target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
+ endif()
+ 
++if(0)
+ # Download and unpack googletest at configure time
+ configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+ execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+@@ -207,7 +209,7 @@ target_link_libraries(FastPFOR_unittest gtest FastPFOR)
+ enable_testing()
+ add_test("unit" unit)
+ add_test("FastPFOR_unittest" FastPFOR_unittest)
+-
++endif()
+ 
+ include(GNUInstallDirs)
+ install(TARGETS FastPFOR
