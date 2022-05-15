@@ -36,7 +36,7 @@ class CPythonConan(ConanFile):
         "with_bsddb": [True, False],
         # Python 3 options
         "with_lzma": [True, False],
-        "deprecated_win7_support": [True, False],
+        "win7_support": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -60,7 +60,7 @@ class CPythonConan(ConanFile):
         "with_bsddb": False,  # True,  # FIXME: libdb package missing (#5309/#5392)
         # Python 3 options
         "with_lzma": True,
-        "deprecated_win7_support": False,
+        "win7_support": False,
 
         # options that don't change package id
         "env_vars": True,
@@ -113,13 +113,13 @@ class CPythonConan(ConanFile):
         if self._is_py2:
             # Python 2.xx does not support following options
             del self.options.with_lzma
-            del self.options.deprecated_win7_support
+            del self.options.win7_support
         elif self._is_py3:
             # Python 3.xx does not support following options
             del self.options.with_bsddb
             del self.options.unicode
             if self.version < "3.10.0":
-                del self.options.deprecated_win7_support
+                del self.options.win7_support
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -270,7 +270,7 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             if "restore-support-for-windows-7" in patch["patch_file"] \
-                    and not self.options.get_safe("deprecated_win7_support", False):
+                    and not self.options.get_safe("win7_support", False):
                 continue
             tools.patch(**patch)
 
