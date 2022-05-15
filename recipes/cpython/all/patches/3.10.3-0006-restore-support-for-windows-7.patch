@@ -78,7 +78,7 @@ index 53da3a6..3d58bbf 100644
  
  #include <windows.h>
 -#include <pathcch.h>
-+#include <Shlwapi.h>
++#include <shlwapi.h>
  
  #ifdef HAVE_SYS_TYPES_H
  #include <sys/types.h>
