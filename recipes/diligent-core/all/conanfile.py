@@ -195,7 +195,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
         if self.settings.os == "Android":
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
-        elif self.settings.os == "Macos" or self.settings.os == "iOS":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
         elif self.settings.os == "Emscripten":
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))
