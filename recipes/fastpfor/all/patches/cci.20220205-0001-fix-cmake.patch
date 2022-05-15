@@ -1,15 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5520747..8cdf1d7 100644
+index 5520747..0d40687 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -94,6 +94,10 @@ elseif(WIN32)
      if(NOT MSVC12)
           message(STATUS "On Windows, only MSVC version 12 is supported!")
      endif()
-+    set (CMAKE_CXX_FLAGS_RELEASE "-msse4.1")
-+    set (CMAKE_CXX_FLAGS_DEBUG   "-msse4.1")
-+    set (CMAKE_C_FLAGS_RELEASE "-msse4.1")
-+    set (CMAKE_C_FLAGS_DEBUG   "-msse4.1")
++    set (CMAKE_CXX_FLAGS_RELEASE "/arch:AVX")
++    set (CMAKE_CXX_FLAGS_DEBUG   "/arch:AVX")
++    set (CMAKE_C_FLAGS_RELEASE "/arch:AVX")
++    set (CMAKE_C_FLAGS_DEBUG   "/arch:AVX")
  else ()
      message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
  endif()
