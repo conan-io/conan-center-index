@@ -8,7 +8,7 @@ required_conan_version = ">=1.43.0"
 class FastPFORConan(ConanFile):
     name = "fastpfor"
     description = "Fast integer compression"
-    topics = ("compression", "sorted-lists", "simd",)
+    topics = ("compression", "sorted-lists", "simd", "x86", "x86-64")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/FastPFor"
     license = "Apache-2.0"
@@ -27,15 +27,6 @@ class FastPFORConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "4.7",
-            "Visual Studio": "12",
-            "clang": "4.2",
-            "apple-clang": "9",
-        }
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -51,22 +42,10 @@ class FastPFORConan(ConanFile):
 
     def validate(self):
         if self.settings.arch != "x86" and self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("{} architecture not supported".format(self.settings.arch))
+            raise ConanInvalidConfiguration("{} architecture is not supported".format(self.settings.arch))
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
-
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++11, which your compiler does not fully support.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
