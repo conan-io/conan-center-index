@@ -62,7 +62,7 @@
    echo "hdf4 support disabled."
  
 +elif test x"$with_hdf4" = x"yes" ; then
-+  PKG_CHECK_MODULES([HDF4], [hdf], [HAVE_HDF4=yes], [HAVE_HDF4=no])
++  PKG_CHECK_MODULES([HDF4], [hdf], [HAVE_HDF4=yes], [AC_MSG_ERROR([hdf4 not found...])])
 +  PKG_CHECK_MODULES([HDF4], [hdf >= 4.2.5], [HDF4_HAS_MAXOPENFILES=yes], [HDF4_HAS_MAXOPENFILES=no])
 +  HDF4_INCLUDE="$HDF4_CFLAGS"
  else
@@ -134,7 +134,7 @@
 +HAVE_EXPAT=no
 +AC_ARG_WITH([expat], AS_HELP_STRING([--with-expat[=ARG]], [use Expat library (ARG=yes or no)]),,)
 +if test x"$with_expat" = x"yes" ; then
-+PKG_CHECK_MODULES([EXPAT], [expat >= 1.95.0], [HAVE_EXPAT=yes], [HAVE_EXPAT=no])
++PKG_CHECK_MODULES([EXPAT], [expat >= 1.95.0], [HAVE_EXPAT=yes], [AC_MSG_ERROR([expat not found...])])
  
  if test "$HAVE_EXPAT" = "yes"; then
      LIBS="$EXPAT_LDFLAGS $LIBS"
@@ -168,7 +168,7 @@
 -  AC_CHECK_LIB(curl,curl_global_init,CURL_SETTING=yes,CURL_SETTING=no,`$LIBCURL_CONFIG --libs`)
  
 +if test "$with_curl" = "yes" ; then
-+  PKG_CHECK_MODULES([CURL], [libcurl], [CURL_SETTING=yes], [CURL_SETTING=no])
++  PKG_CHECK_MODULES([CURL], [libcurl], [CURL_SETTING=yes], [AC_MSG_ERROR([libcurl not found...])])
 +else
 +  CURL_SETTING=no
  fi
@@ -200,7 +200,7 @@
 -    SQLITE3_REQ_VERSION="3.0.0"
 -    AX_LIB_SQLITE3($SQLITE3_REQ_VERSION)
 +    if test x"$with_sqlite3" = x"yes" ; then
-+        PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.0.0], [HAVE_SQLITE3=yes], [HAVE_SQLITE3=no])
++        PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.0.0], [HAVE_SQLITE3=yes], [AC_MSG_ERROR([sqlite3 not found...])])
 +    fi
  
      if test "$HAVE_SQLITE3" = "yes"; then
@@ -216,7 +216,7 @@
 +if test x"$with_geos" = x"no" ; then
 +  AC_MSG_RESULT([GEOS support disabled])
 +else
-+  PKG_CHECK_MODULES([GEOS], [geos >= 3.1.0], [HAVE_GEOS=yes], [HAVE_GEOS=no])
++  PKG_CHECK_MODULES([GEOS], [geos >= 3.1.0], [HAVE_GEOS=yes], [AC_MSG_ERROR([geos not found...])])
  if test "${HAVE_GEOS}" = "yes" ; then
  
    AC_MSG_NOTICE([Using C API from GEOS $GEOS_VERSION])
@@ -258,7 +258,7 @@
  
 -if test "$with_freexl" = "" -o "$with_freexl" = "yes" ; then
 +if test "$with_freexl" = "yes"; then
-+  PKG_CHECK_MODULES([FREEXL], [freexl >= 1.0.0], [HAVE_FREEXL=yes], [HAVE_FREEXL=no])
++  PKG_CHECK_MODULES([FREEXL], [freexl >= 1.0.0], [HAVE_FREEXL=yes], [AC_MSG_ERROR([freexl not found...])])
 +elif test "$with_freexl" = ""; then
    AC_CHECK_HEADERS(freexl.h)
    AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
