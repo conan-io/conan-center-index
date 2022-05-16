@@ -121,8 +121,22 @@ class NvclothConan(ConanFile):
                             os.path.join(self._source_subfolder, subfolder))
     
     def _patch_sources(self):
+        shutil.copy(
+            os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h"),
+            os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin")
+        )
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        
+        if self.settings.build_type == "Debug":
+            shutil.copy(
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h"),
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.patched")
+            )
+            shutil.copy(
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin"),
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h")
+            )
 
     def build(self):
         os.environ['GW_DEPS_ROOT'] = os.path.abspath(self._source_subfolder)
@@ -150,6 +164,11 @@ class NvclothConan(ConanFile):
         }.get(str(self.settings.os))
 
     def package(self):
+        if self.settings.build_type == "Debug":
+            shutil.copy(
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.patched"),
+                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h")
+            )
         nvcloth_source_subfolder = os.path.join(self.build_folder, self._source_subfolder)
         nvcloth_build_subfolder = os.path.join(self.build_folder, self._build_subfolder)
 
