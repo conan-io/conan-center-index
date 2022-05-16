@@ -603,7 +603,7 @@ class QtConan(ConanFile):
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
                               ("with_brotli", "brotli"),
-                              ("with_gssapi", "gssapi"]:
+                              ("with_gssapi", "gssapi")]:
             cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
