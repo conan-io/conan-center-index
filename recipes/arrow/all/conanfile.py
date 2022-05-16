@@ -146,6 +146,8 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
         if self.options.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
+        if self.options.with_s3 and not self.options["aws-sdk-cpp"].config:
+            raise ConanInvalidConfiguration("arrow:with_s3 requires aws-sdk-cpp:config is True.")
 
         if self.options.shared and self._with_jemalloc():
             if self.options["jemalloc"].enable_cxx:
@@ -253,7 +255,11 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             self.requires("llvm-core/13.0.0")
         if self._with_openssl():
-            self.requires("openssl/3.0.3")
+            # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
+            if self.options.with_s3:
+                self.requires("openssl/1.1.1o")
+            else:
+                self.requires("openssl/3.0.3")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
