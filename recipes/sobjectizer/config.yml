@@ -11,3 +11,5 @@ versions:
     folder: all
   "5.7.3":
     folder: all
+  "5.7.4":
+    folder: all
