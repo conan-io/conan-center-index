@@ -6,14 +6,14 @@ add_definitions(-D_HAS_AUTO_PTR_ETC)
 
 # Flags
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWINDOWS -DNOMINMAX")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWINDOWS -DNOMINMAX")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated -Wno-deprecated-declarations")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated -Wno-deprecated-declarations")
 endif()
 
 # Conan
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 # Macros
 set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
@@ -65,7 +65,8 @@ install(FILES
 	${OFX_SUPPORT_HEADER_FILES}
 	${OFX_PLUGINS_HEADER_FILES}
 	${OFX_HOSTSUPPORT_HEADER_FILES}
-    DESTINATION "include")
+	DESTINATION "include")
+
 install(TARGETS OfxSupport OfxHost
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
