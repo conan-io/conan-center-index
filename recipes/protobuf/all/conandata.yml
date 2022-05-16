@@ -18,7 +18,7 @@ sources:
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.16.0.tar.gz"
     sha256: "7892a35d979304a404400a101c46ce90e85ec9e2a766a86041bb361f626247f5"
   "3.15.8":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.15.8.tar.gz",
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.15.8.tar.gz"
     sha256: "0cbdc9adda01f6d2facc65a22a2be5cecefbefe5a09e5382ee8879b522c04441"
   "3.15.5":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.15.5.tar.gz"
