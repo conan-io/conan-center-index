@@ -62,6 +62,7 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": [True, False],
         "with_programs": [True, False],
         "disable_everything": [True, False],
+        "enable_encoders": "ANY",
     }
     default_options = {
         "shared": False,
@@ -104,6 +105,7 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": True,
         "with_programs": True,
         "disable_everything": False,
+        "enable_encoders": "",
     }
 
     generators = "pkg_config"
@@ -379,6 +381,11 @@ class FFMpegConan(ConanFile):
             opt_enable_disable(
                 "gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
+
+        # Individual Component Options
+        args.extend(self._split_and_format_options_string("enable-encoder",
+                                                          self.options.enable_encoders))
+
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
                 "vulkan", self.options.get_safe("with_vulkan")))
@@ -435,6 +442,16 @@ class FFMpegConan(ConanFile):
         self._autotools.configure(
             args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
         return self._autotools
+
+    def _split_and_format_options_string(self, flag_name, options_list):
+        def _format_options_list_item(flag_name, options_item):
+            return "--{}={}".format(flag_name, options_item)
+
+        def _split_options_string(options_string):
+            return list(filter(None, "".join(options_string.split()).split(",")))
+
+        options_string = str(options_list)
+        return [_format_options_list_item(flag_name, item) for item in _split_options_string(options_string)]
 
     def build(self):
         self._patch_sources()
