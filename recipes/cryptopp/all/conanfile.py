@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import textwrap
@@ -18,14 +19,21 @@ class CryptoPPConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_pem_pack": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_pem_pack": False,
     }
 
     generators = "cmake"
     _cmake = None
+    
+    def validate(self):
+        if self.options.with_pem_pack:
+            if not "pem-pack" in self.conan_data["sources"][self.version]:
+                raise ConanInvalidConfiguration("This version has no pem-pack")
 
     @property
     def _source_subfolder(self):
@@ -63,6 +71,13 @@ class CryptoPPConan(ConanFile):
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         tools.rmdir(src_folder)
 
+        # Get PEM Pack
+        if self.options.with_pem_pack:
+            tools.get(**self.conan_data["sources"][self.version]["pem-pack"],
+                      strip_root=True, destination=self._source_subfolder)
+                      
+        self._patch_sources()
+
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
             shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
@@ -90,7 +105,6 @@ class CryptoPPConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
