@@ -201,6 +201,12 @@ class ProtobufConan(ConanFile):
             "endif()",
         )
 
+        # https://github.com/protocolbuffers/protobuf/issues/9916
+        if tools.Version(self.version) == "3.20.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
+                "#elif PROTOBUF_GNUC_MIN(12, 0)",
+                "#elif PROTOBUF_GNUC_MIN(12, 2)")
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
