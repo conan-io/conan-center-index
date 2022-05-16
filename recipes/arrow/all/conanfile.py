@@ -267,7 +267,7 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) >= "6.0.0" and \
             self.options.get_safe("simd_level") != None or \
             self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/8.0.5")
+            self.requires("xsimd/8.1.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_zstd:
@@ -514,7 +514,7 @@ class ArrowConan(ConanFile):
         if self.options.with_json:
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
-            self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::filesystem")
+            self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::s3")
         if self.options.with_orc:
             self.cpp_info.components["libarrow"].requires.append("orc::orc")
         if self.options.with_brotli:
