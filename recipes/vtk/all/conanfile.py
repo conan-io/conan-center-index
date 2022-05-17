@@ -22,7 +22,7 @@
 import os
 import textwrap
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
 from conans.tools import get, remove_files_by_mask, save
@@ -269,8 +269,8 @@ class VtkConan(ConanFile):
 
     def requirements(self):
         if self.options.rendering:
-            self.requires("xorg/system")
             self.requires("opengl/system")
+            self.requires("xorg/system")
 
         for pack in self._third_party().values():
             self.requires(pack)
@@ -298,6 +298,10 @@ class VtkConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+
+    def layout(self):
+        cmake_layout(self)
 
 
     def generate(self):
@@ -481,8 +485,8 @@ class VtkConan(ConanFile):
 
         # needed? self.cpp_info.set_property("cmake_module_file_name", "vtk")
 
-        self.cpp_info.names["cmake_find_package"] = "VTK"
-        self.cpp_info.names["cmake_find_package_multi"] = "VTK"
+        # self.cpp_info.names["cmake_find_package"] = "VTK"
+        # self.cpp_info.names["cmake_find_package_multi"] = "VTK"
 
         components = []
 
@@ -745,12 +749,6 @@ class VtkConan(ConanFile):
                             "WrappingTools",
                             ]
 
-        if self.options.rendering:
-            components += [
-                    "xorg",
-                    "opengl",
-                    ]
-
 
 # all components, from a list somewhere, for reference
 # "CommonColor",
@@ -805,7 +803,13 @@ class VtkConan(ConanFile):
         # Consumers just have to figure out what they have to link.
 
         # get keys as a list and make a list of target::target
-        all_targets = [k + "::" + k for k in self._third_party().keys()]
+        all_requires = [k + "::" + k for k in self._third_party().keys()]
+
+        if self.options.rendering:
+            all_requires += [
+                    "opengl::opengl",
+                    "xorg::xorg",
+                    ]
 
         # all modules use the same include dir,
         # and note we aren't using include/vtk-9
@@ -821,6 +825,6 @@ class VtkConan(ConanFile):
             self.cpp_info.components[comp].includedirs   = vtk_include_dirs
             self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
             self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
-            self.cpp_info.components[comp].requires      = all_targets
+            self.cpp_info.components[comp].requires      = all_requires
             self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
 
