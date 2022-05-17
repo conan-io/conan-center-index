@@ -53,8 +53,7 @@ class VtkConan(ConanFile):
 
     generators = "CMakeDeps"
 
-    exports = ["CMakeLists.txt"]
-    exports_sources = "patches/**"
+    exports = "CMakeLists.txt"
 
     # Alternative method: can use git directly - helpful when hacking VTK
     # TODO allow user to set the git_url from the command line, during conan install
@@ -72,7 +71,7 @@ class VtkConan(ConanFile):
     # doubleconversion: conan (double-conversion)
     # eigen:            conan (eigen)
     # exodusII:         TODO
-    # expat:            TODO
+    # expat:            conan (expat)
     # exprtk:           conan (exprtk)
     # fides:            TODO
     # fmt:              conan (fmt)
@@ -202,14 +201,14 @@ class VtkConan(ConanFile):
         #####
 
         # DELETE any of the third party finders, before we build - see note above
-        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
+# ALLOW FINDERS #        remove_files_by_mask(os.path.join(self._source_subfolder,"CMake"), "Find*.cmake")
 
         # Delete VTK's cmake patches (these support older cmake programs).
         # We do not have to support old cmake: we require an updated cmake instead.
-        if _support_old_ci_20220514:
-            rmdir(os.path.join(self._source_subfolder,"CMake","patches"))
-        else:
-            rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
+# ALLOW FINDERS #        if _support_old_ci_20220514:
+# ALLOW FINDERS #            rmdir(os.path.join(self._source_subfolder,"CMake","patches"))
+# ALLOW FINDERS #        else:
+# ALLOW FINDERS #            rmdir(self, os.path.join(self._source_subfolder,"CMake","patches"))
 
         # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
         apply_conandata_patches(self)
@@ -237,20 +236,21 @@ class VtkConan(ConanFile):
         parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: package/version to require
-                  "double-conversion": "double-conversion/3.2.0"
-                , "eigen":             "eigen/3.4.0"
-                , "exprtk":            "exprtk/0.0.1"
-                , "fmt":               "fmt/8.1.1"       # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                , "freetype":          "freetype/2.11.1"
-                , "glew":              "glew/2.2.0"
-                , "jsoncpp":           "jsoncpp/1.9.5"
-                # , "libharu": "libharu/2.3.0" -- use VTK's bundled version - heavily patched
-                , "lz4":               "lz4/1.9.3"
-                , "proj":              "proj/9.0.0" # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
-                , "pugixml":           "pugixml/1.12.1"
-                , "sqlite3":           "sqlite3/3.38.1"
-                , "utfcpp":            "utfcpp/3.2.1"
-                , "xz_utils":          "xz_utils/5.2.5" # VTK calls this lzma
+                "double-conversion": "double-conversion/3.2.0",
+                "eigen":             "eigen/3.4.0",
+                "expat":             "expat/2.4.8",
+                "exprtk":            "exprtk/0.0.1",
+                "fmt":               "fmt/8.1.1",      # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
+                "freetype":          "freetype/2.11.1",
+                "glew":              "glew/2.2.0",
+                "jsoncpp":           "jsoncpp/1.9.5",
+                # "libharu": "libharu/2.3.0", -- use VTK's bundled version - heavily patched
+                "lz4":               "lz4/1.9.3",
+                "proj":              "proj/9.0.0", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
+                "pugixml":           "pugixml/1.12.1",
+                "sqlite3":           "sqlite3/3.38.1",
+                "utfcpp":            "utfcpp/3.2.1",
+                "xz_utils":          "xz_utils/5.2.5", # VTK calls this lzma
                 }
 
         # TODO figure out how we want to support modules...
@@ -289,6 +289,10 @@ class VtkConan(ConanFile):
     def validate(self):
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -827,4 +831,6 @@ class VtkConan(ConanFile):
             self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
             self.cpp_info.components[comp].requires      = all_requires
             self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
+            if self.settings.os == "Linux":
+                self.cpp_info.components[comp].system_libs = ["m"]
 

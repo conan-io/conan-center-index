@@ -2,7 +2,16 @@
 cmake_minimum_required(VERSION 3.22.4 FATAL_ERROR)
 project(cmake_wrapper)
 
-# set (CMAKE_FIND_DEBUG_MODE TRUE)
+set (CMAKE_FIND_DEBUG_MODE TRUE)
+
+if (NOT CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+   message (FATAL_ERROR "PAUL prefer-config should be ON, as this will prioritise conan finders over VTK's module finders, which come first in the list")
+endif ()
+
+# Make SURE this is disabled, otherwise chaos reins
+# if (CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+# message (FATAL_ERROR "You must add to profile: [conf] tools.cmake.cmaketoolchain:find_package_prefer_config=False, otherwise bug: https://github.com/conan-io/conan/issues/10387")
+# endif ()
 
 
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
