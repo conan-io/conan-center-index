@@ -75,8 +75,6 @@ class CryptoPPConan(ConanFile):
         if self.options.with_pem_pack:
             tools.get(**self.conan_data["sources"][self.version]["pem-pack"],
                       strip_root=True, destination=self._source_subfolder)
-                      
-        self._patch_sources()
 
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
@@ -104,7 +102,8 @@ class CryptoPPConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
+    def build(self):                      
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
