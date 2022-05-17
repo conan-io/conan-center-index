@@ -1,10 +1,9 @@
-from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.43.0"
 
 
 class TrantorConan(ConanFile):
@@ -71,7 +70,7 @@ class TrantorConan(ConanFile):
             self.output.warn("trantor requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio 16 MDd
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) == "16" and \
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == "16" and \
            self.options.shared == True and self.settings.compiler.runtime == "MDd":
             raise ConanInvalidConfiguration("trantor does not support the MDd runtime on Visual Studio 16.")
 
