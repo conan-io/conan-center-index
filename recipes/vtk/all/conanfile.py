@@ -464,35 +464,6 @@ class VtkConan(ConanFile):
 
 
     def package_info(self):
-###         self.cpp_info.libs = tools.collect_libs(self)
-#        if self.settings.os == "Linux":
-#            self.cpp_info.system_libs += ["dl","pthread"]
-
-        # this is still required as vtk files include themselves as <vtkCommand.h>,
-        # and it can't seem to find itself in the same dir when included with <>
-###         self.cpp_info.includedirs = [ "include/vtk" ] # no short_version as we disabled versioning
-
-#            "include/vtk-%s" % self.short_version,
-#            # dont know why these were in here ... "include/vtk-%s/vtknetcdf/include" % self.short_version,
-#            # dont know why these were in here ... "include/vtk-%s/vtknetcdfcpp" % self.short_version
-#        ]
-
-        # self.cpp_info.names["cmake_find_package"] = "VTK"
-        # self.cpp_info.names["cmake_find_package_multi"] = "VTK"
-
-        # needed?
-        # self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
-        # self.cpp_info.set_property("cmake_module_target_name", "VTK::VTK")
-
-
-        # TRY WITHOUT ... self.cpp_info.set_property("cmake_find_mode", "both")
-        # self.cpp_info.set_property("cmake_file_name", "VTK")
-
-        # needed? self.cpp_info.set_property("cmake_module_file_name", "vtk")
-
-        # self.cpp_info.names["cmake_find_package"] = "VTK"
-        # self.cpp_info.names["cmake_find_package_multi"] = "VTK"
-
         components = []
 
         # these component lists are cheating by me,
@@ -824,14 +795,41 @@ class VtkConan(ConanFile):
         # all modules use the same cmake dir too
         vtk_cmake_dirs = [os.path.join("lib","cmake","vtk")]
 
+
+
+###         self.cpp_info.libs = tools.collect_libs(self)
+#        if self.settings.os == "Linux":
+#            self.cpp_info.system_libs += ["dl","pthread"]
+
+        # this is still required as vtk files include themselves as <vtkCommand.h>,
+        # and it can't seem to find itself in the same dir when included with <>
+###         self.cpp_info.includedirs = [ "include/vtk" ] # no short_version as we disabled versioning
+
+#            "include/vtk-%s" % self.short_version,
+#            # dont know why these were in here ... "include/vtk-%s/vtknetcdf/include" % self.short_version,
+#            # dont know why these were in here ... "include/vtk-%s/vtknetcdfcpp" % self.short_version
+#        ]
+
+        # self.cpp_info.names["cmake_find_package"] = "VTK"
+        # self.cpp_info.names["cmake_find_package_multi"] = "VTK"
+
+        self.cpp_info.set_property("cmake_file_name", "vtk")
+        self.cpp_info.set_property("cmake_target_name", "vtk")
+
+        # needed? just generate 'config' version - modern conan?
+        # self.cpp_info.set_property("cmake_find_mode", "both")
+        # self.cpp_info.set_property("cmake_module_target_name", "VTK::VTK")
+        # self.cpp_info.set_property("cmake_module_file_name", "VTK")
+
         for comp in components:
             self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
             self.cpp_info.components[comp].libs          = ["vtk" + comp]
+            self.cpp_info.components[comp].libdirs       = ["lib"]
             self.cpp_info.components[comp].includedirs   = vtk_include_dirs
             # self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
             # self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
             self.cpp_info.components[comp].requires      = all_requires
-            self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
+            # self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
             if self.settings.os == "Linux":
                 self.cpp_info.components[comp].system_libs = ["m"]
 
