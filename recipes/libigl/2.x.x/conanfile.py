@@ -52,7 +52,7 @@ class LibiglConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
-        if "arm" in self.settings.arch or "x86" is self.settings.arch:
+        if "arm" in self.settings.arch or "x86" == self.settings.arch:
             raise ConanInvalidConfiguration("Not available for arm. Requested arch: {}".format(self.settings.arch))
 
     def config_options(self):
