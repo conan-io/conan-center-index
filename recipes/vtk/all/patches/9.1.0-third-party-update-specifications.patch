@@ -69,10 +69,10 @@ index a9581f862c..c7eaa21927 100644
    set(vtkjsoncpp_is_shared "${BUILD_SHARED_LIBS}")
  endif ()
 diff --git a/ThirdParty/libproj/CMakeLists.txt b/ThirdParty/libproj/CMakeLists.txt
-index 39e1859bb8..36b0c459df 100644
+index 39e1859bb8..a8847b47ca 100644
 --- a/ThirdParty/libproj/CMakeLists.txt
 +++ b/ThirdParty/libproj/CMakeLists.txt
-@@ -4,15 +4,21 @@ vtk_module_third_party(
+@@ -4,13 +4,15 @@ vtk_module_third_party(
      VERSION       "4.9.3"
      STANDARD_INCLUDE_DIRS
    EXTERNAL
@@ -81,22 +81,16 @@ index 39e1859bb8..36b0c459df 100644
 -    USE_VARIABLES LibPROJ_MAJOR_VERSION
 +    PACKAGE proj
 +    TARGETS PROJ::proj
-+    # not available with conan package
-+    # USE_VARIABLES LibPROJ_MAJOR_VERSION
++    USE_VARIABLES proj_VERSION_MAJOR
      STANDARD_INCLUDE_DIRS)
  
  if (NOT VTK_MODULE_USE_EXTERNAL_VTK_libproj)
    set(LibPROJ_MAJOR_VERSION "4")
++else ()
++  set(LibPROJ_MAJOR_VERSION "${proj_VERSION_MAJOR}")
  endif ()
  
-+if(NOT DEFINED LibPROJ_MAJOR_VERSION )
-+  # change this if conan versions change
-+  set(LibPROJ_MAJOR_VERSION "9")
-+endif ()
-+
  configure_file(
-   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_libproj.h.in"
-   "${CMAKE_CURRENT_BINARY_DIR}/vtk_libproj.h")
 diff --git a/ThirdParty/lz4/CMakeLists.txt b/ThirdParty/lz4/CMakeLists.txt
 index 90ab696000..f768ea9a2e 100644
 --- a/ThirdParty/lz4/CMakeLists.txt
