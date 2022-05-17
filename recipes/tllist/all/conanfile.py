@@ -1,4 +1,5 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.36.0"
@@ -20,8 +21,8 @@ class TllistConan(ConanFile):
 
     def validate(self):
         # FIXME: Fails in test_pacakge with the Windows configuration
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
