@@ -29,11 +29,6 @@ class CryptoPPConan(ConanFile):
 
     generators = "cmake"
     _cmake = None
-    
-    def validate(self):
-        if self.options.with_pem_pack:
-            if not "pem-pack" in self.conan_data["sources"][self.version]:
-                raise ConanInvalidConfiguration("This version has no pem-pack")
 
     @property
     def _source_subfolder(self):
@@ -55,6 +50,11 @@ class CryptoPPConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+    
+    def validate(self):
+        if self.options.with_pem_pack:
+            if not "pem-pack" in self.conan_data["sources"][self.version]:
+                raise ConanInvalidConfiguration("This version has no pem-pack")
 
     def source(self):
         suffix = "CRYPTOPP_{}".format(self.version.replace(".", "_"))
