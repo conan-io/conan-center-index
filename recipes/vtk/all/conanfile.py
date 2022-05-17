@@ -53,7 +53,7 @@ class VtkConan(ConanFile):
 
     generators = "CMakeDeps"
 
-    exports = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt"
 
     # Alternative method: can use git directly - helpful when hacking VTK
     # TODO allow user to set the git_url from the command line, during conan install
@@ -223,6 +223,7 @@ class VtkConan(ConanFile):
             git_hash = "v" + self.version
             self.run("cd " + self._source_subfolder + " && git checkout -b branch-" + git_hash + " " + git_hash)
         else:
+            raise ConanInvalidConfiguration("Should be using source from git")
             get(**self.conan_data["sources"][self.version],
                     strip_root=True,
                     destination=self._source_subfolder,
@@ -485,7 +486,7 @@ class VtkConan(ConanFile):
 
 
         # TRY WITHOUT ... self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "VTK")
+        # self.cpp_info.set_property("cmake_file_name", "VTK")
 
         # needed? self.cpp_info.set_property("cmake_module_file_name", "vtk")
 
@@ -502,7 +503,7 @@ class VtkConan(ConanFile):
         if self.options.shared and self.options.enable_kits:
 
             if not self.options.rendering:
-                # base components
+                # Kits, base components
                 components += [
                         "kissfft",
                         "loguru",
@@ -512,7 +513,7 @@ class VtkConan(ConanFile):
                         "Common",
                         ]
 
-            else:   # with Rendering
+            else:   # with Kits, Rendering
                 if not self.options.qt:
                     components += [
                             "ChartsCore",
@@ -548,7 +549,7 @@ class VtkConan(ConanFile):
                             "ViewsInfovis",
                             "WrappingTools",
                             ]
-                else:   # with QT
+                else:   # with Kits, Rendering, QT
                     components += [
                             "ChartsCore",
                             "Common",
@@ -827,8 +828,8 @@ class VtkConan(ConanFile):
             self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
             self.cpp_info.components[comp].libs          = ["vtk" + comp]
             self.cpp_info.components[comp].includedirs   = vtk_include_dirs
-            self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
-            self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
+            # self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
+            # self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
             self.cpp_info.components[comp].requires      = all_requires
             self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
             if self.settings.os == "Linux":

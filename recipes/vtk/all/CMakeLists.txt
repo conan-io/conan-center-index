@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.22.4 FATAL_ERROR)
 project(cmake_wrapper)
 
-set (CMAKE_FIND_DEBUG_MODE TRUE)
+# set (CMAKE_FIND_DEBUG_MODE TRUE)
 
 if (NOT CMAKE_FIND_PACKAGE_PREFER_CONFIG)
    message (FATAL_ERROR "PAUL prefer-config should be ON, as this will prioritise conan finders over VTK's module finders, which come first in the list")
