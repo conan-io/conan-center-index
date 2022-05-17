@@ -84,7 +84,7 @@ class VtkConan(ConanFile):
     # jpeg:             TODO
     # jsoncpp:          conan (jsoncpp)
     # kissfft:          TODO
-    # libharu:          TODO
+    # libharu:          VTK (heavily patched)
     # libproj:          conan (proj)
     # libxml2:          TODO
     # loguru:           TODO
@@ -773,6 +773,7 @@ class VtkConan(ConanFile):
 
         # remove duplicates in components list
         components = list(set(components))
+        components.sort()
 
         # Note: I don't currently import the explicit dependency list for each component from VTK,
         # so every module will depend on "everything" external, and there are no internal dependencies.
@@ -786,40 +787,35 @@ class VtkConan(ConanFile):
                     "opengl::opengl",
                     "xorg::xorg",
                     ]
+        all_requires.sort()
 
-        # all modules use the same include dir,
-        # and note we aren't using include/vtk-9
-        # no short_version in path, as we disabled versioning
+        # All modules use the same include dir.
+        #
+        # Cannot just be vtk_include_dirs = "include",
+        # as vtk files include themselves with #include <vtkCommand.h>
+        # and the files can't find each other in the same dir when included with <>
+        #
+        # Plus, it is standard to include vtk files with #include <vtkWhatever.h>
+        #
+        # Note also we aren't using "-9" in include/vtk-9: VTK_VERSIONED_INSTALL=False
+        # With versioned_install, we would do: "include/vtk-%s" % self.short_version,
+        #
         vtk_include_dirs   = [os.path.join("include", "vtk")]
 
         # all modules use the same cmake dir too
         vtk_cmake_dirs = [os.path.join("lib","cmake","vtk")]
 
 
+        # self.cpp_info.libs = tools.collect_libs(self)
+        # Needed?
+        # if self.settings.os == "Linux":
+        #     self.cpp_info.system_libs += ["dl","pthread"]
 
-###         self.cpp_info.libs = tools.collect_libs(self)
-#        if self.settings.os == "Linux":
-#            self.cpp_info.system_libs += ["dl","pthread"]
+        # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
+        # https://cmake.org/cmake/help/latest/module/FindVTK.html
 
-        # this is still required as vtk files include themselves as <vtkCommand.h>,
-        # and it can't seem to find itself in the same dir when included with <>
-###         self.cpp_info.includedirs = [ "include/vtk" ] # no short_version as we disabled versioning
-
-#            "include/vtk-%s" % self.short_version,
-#            # dont know why these were in here ... "include/vtk-%s/vtknetcdf/include" % self.short_version,
-#            # dont know why these were in here ... "include/vtk-%s/vtknetcdfcpp" % self.short_version
-#        ]
-
-        # self.cpp_info.names["cmake_find_package"] = "VTK"
-        # self.cpp_info.names["cmake_find_package_multi"] = "VTK"
-
-        self.cpp_info.set_property("cmake_file_name", "vtk")
-        self.cpp_info.set_property("cmake_target_name", "vtk")
-
-        # needed? just generate 'config' version - modern conan?
-        # self.cpp_info.set_property("cmake_find_mode", "both")
-        # self.cpp_info.set_property("cmake_module_target_name", "VTK::VTK")
-        # self.cpp_info.set_property("cmake_module_file_name", "VTK")
+        self.cpp_info.set_property("cmake_file_name", "VTK")
+        self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
 
         for comp in components:
             self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
@@ -829,7 +825,7 @@ class VtkConan(ConanFile):
             # self.cpp_info.components[comp].builddirs     = vtk_cmake_dirs
             # self.cpp_info.components[comp].build_modules = vtk_cmake_dirs
             self.cpp_info.components[comp].requires      = all_requires
-            # self.cpp_info.components[comp].set_property("cmake_build_modules", [self._module_file_rel_path])
+            # self.cpp_info.components[comp].set_property("cmake_build_modules", [PATHS of cmake files to include])
             if self.settings.os == "Linux":
                 self.cpp_info.components[comp].system_libs = ["m"]
 
