@@ -20,7 +20,7 @@ class TllistConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        # FIXME: Fails in test_pacakge with the Windows configuration
+        # FIXME: Fails in test_pacakge with the Visual Studio compiler
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
