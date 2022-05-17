@@ -164,4 +164,24 @@ index af875da128..14bd5b4a65 100644
 +vtk_detect_library_shared(vtkfreetype freetype)
  
  set(VTK_FREETYPE_SHARED "${vtkfreetype_is_shared}")
+
+diff --git a/ThirdParty/expat/CMakeLists.txt b/ThirdParty/expat/CMakeLists.txt
+index 9de83911d1..ab7e0b2f91 100644
+--- a/ThirdParty/expat/CMakeLists.txt
++++ b/ThirdParty/expat/CMakeLists.txt
+@@ -4,12 +4,12 @@ vtk_module_third_party(
+     VERSION       "2.4.1"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE EXPAT
+-    TARGETS EXPAT::EXPAT
++    PACKAGE expat
++    TARGETS expat::expat
+     STANDARD_INCLUDE_DIRS)
+
+ include(vtkDetectLibraryType)
+-vtk_detect_library_shared(vtkexpat EXPAT::EXPAT)
++vtk_detect_library_shared(vtkexpat expat::expat)
  
+ if (vtkexpat_is_shared)
+   set(XML_STATIC 0)
