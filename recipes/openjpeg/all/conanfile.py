@@ -1,4 +1,6 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
+import functools
 import os
 import textwrap
 
@@ -26,7 +28,6 @@ class OpenjpegConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -54,31 +55,30 @@ class OpenjpegConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
-        self._cmake.definitions["BUILD_DOC"] = False
-        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["BUILD_LUTS_GENERATOR"] = False
-        self._cmake.definitions["BUILD_CODEC"] = False
-        self._cmake.definitions["BUILD_MJ2"] = False
-        self._cmake.definitions["BUILD_JPWL"] = False
-        self._cmake.definitions["BUILD_JPIP"] = False
-        self._cmake.definitions["BUILD_VIEWER"] = False
-        self._cmake.definitions["BUILD_JAVA"] = False
-        self._cmake.definitions["BUILD_JP3D"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_PKGCONFIG_FILES"] = False
-        self._cmake.definitions["OPJ_DISABLE_TPSOT_FIX"] = False
-        self._cmake.definitions["OPJ_USE_THREAD"] = True
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        cmake.definitions["BUILD_DOC"] = False
+        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        cmake.definitions["BUILD_LUTS_GENERATOR"] = False
+        cmake.definitions["BUILD_CODEC"] = False
+        if tools.Version(self.version) < "2.5.0":
+            cmake.definitions["BUILD_MJ2"] = False
+            cmake.definitions["BUILD_JPWL"] = False
+            cmake.definitions["BUILD_JP3D"] = False
+        cmake.definitions["BUILD_JPIP"] = False
+        cmake.definitions["BUILD_VIEWER"] = False
+        cmake.definitions["BUILD_JAVA"] = False
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["BUILD_PKGCONFIG_FILES"] = False
+        cmake.definitions["OPJ_DISABLE_TPSOT_FIX"] = False
+        cmake.definitions["OPJ_USE_THREAD"] = True
+        cmake.configure()
+        return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-           tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 

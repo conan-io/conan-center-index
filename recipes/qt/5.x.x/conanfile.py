@@ -653,6 +653,8 @@ class QtConan(ConanFile):
             args.append("-psql_config \"%s\"" % os.path.join(self.deps_cpp_info["libpq"].rootpath, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
+            if self.settings.arch == "armv8":
+                args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
         elif self.settings.os == "Android":
             args += ["-android-ndk-platform android-%s" % self.settings.os.api_level]
             args += ["-android-abis %s" % {"armv7": "armeabi-v7a",
