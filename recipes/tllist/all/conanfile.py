@@ -17,6 +17,10 @@ class TllistConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    def validate(self):
+        # FIXME: Fails in test_pacakge with the Windows configuration
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
