@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import functools
-from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
+
 
 class TrantorConan(ConanFile):
     name = "trantor"
@@ -13,8 +13,7 @@ class TrantorConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://github.com/an-tao/trantor"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -26,6 +25,9 @@ class TrantorConan(ConanFile):
         "shared": False,
         "with_c_ares": True,
     }
+
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -52,6 +54,11 @@ class TrantorConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("openssl/1.1.1o")
+        if self.options.with_c_ares:
+            self.requires("c-ares/1.18.1")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
@@ -64,17 +71,20 @@ class TrantorConan(ConanFile):
             self.output.warn("trantor requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio 16 MDd
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) == "16" and \
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == "16" and \
            self.options.shared == True and self.settings.compiler.runtime == "MDd":
             raise ConanInvalidConfiguration("trantor does not support the MDd runtime on Visual Studio 16.")
-
-    def requirements(self):
-        if self.options.with_c_ares:
-            self.requires("c-ares/1.18.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # fix c-ares imported target
+        tools.replace_in_file(cmakelists, "c-ares_lib", "c-ares::cares")
+        # Cleanup rpath in shared lib
+        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -86,10 +96,7 @@ class TrantorConan(ConanFile):
         return cmake
 
     def build(self):
-        if self.options.with_c_ares:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), 
-                "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares_lib)", 
-                "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares::cares)")
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -97,13 +104,18 @@ class TrantorConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Trantor")
+        self.cpp_info.set_property("cmake_target_name", "Trantor::Trantor")
         self.cpp_info.libs = ["trantor"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+
+        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Trantor"
+        self.cpp_info.names["cmake_find_package_multi"] = "Trantor"
