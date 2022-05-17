@@ -18,7 +18,7 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_external_glfw": [True, False],
-        "opengl_version":[None, "3.3","2.1","1.1","ES 2.0"]
+        "opengl_version":[None, "3.3","2.1","1.1","ES-2.0"]
     }
     default_options = {
         "shared": False,
