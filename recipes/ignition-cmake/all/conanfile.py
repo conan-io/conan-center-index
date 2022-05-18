@@ -1,8 +1,6 @@
-import glob
-import os
-
 from conans import CMake, ConanFile, tools
 import conan.tools.files
+import os
 import textwrap
 
 
@@ -47,8 +45,6 @@ class IgnitionCmakeConan(ConanFile):
              self._source_subfolder
             )
 
-
-
     def build(self):
         version_major = tools.Version(self.version).major
         ignition_cmake_dir = os.path.join(self.package_folder, "lib", "cmake", f"ignition-cmake{version_major}", "cmake2")
@@ -71,7 +67,7 @@ class IgnitionCmakeConan(ConanFile):
         # removing it from the list
         files.remove(f"ignition-cmake{version_major}-utilities-targets.cmake")
 
-        # remvoe all other xxx.cmake files from the list
+        # remove all other xxx.cmake files from the list
         for file in files:
             if file.endswith(".cmake"):
                 os.remove(os.path.join(cmake_config_files_dir, file))
