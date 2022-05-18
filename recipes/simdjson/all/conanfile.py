@@ -1,8 +1,9 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import is_msvc
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class SimdjsonConan(ConanFile):
@@ -115,5 +116,5 @@ class SimdjsonConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
             self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
-            if tools.Version(self.version) >= "0.9.0" and self.settings.compiler == "Visual Studio":
+            if tools.Version(self.version) >= "0.9.0" and is_msvc(self):
                 self.cpp_info.defines.append("SIMDJSON_USING_WINDOWS_DYNAMIC_LIBRARY=1")
