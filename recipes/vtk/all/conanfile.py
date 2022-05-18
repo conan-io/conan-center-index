@@ -306,6 +306,9 @@ class VtkConan(ConanFile):
         for pack in self._third_party().values():
             self.requires(pack)
 
+        # hack for cmake-libcurl conflict
+        self.requires("openssl/1.1.1o", override=True)
+
 
     def build_requirements(self):
         # Recipe Maintainers:
