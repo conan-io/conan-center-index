@@ -25,6 +25,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
+from conans.errors import ConanInvalidConfiguration
 
 # TODO upgrade to new conan.* imports
 from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version
@@ -401,10 +402,7 @@ class VtkConan(ConanFile):
         tc = CMakeToolchain(self)
 
         # for debugging the conan recipe
-        tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
-
-        # TODO hack, need HDF5 to export this
-        tc.variables["HDF5_ENABLE_PARALLEL"] = False
+        # tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
 
         # 64 / 32 bit IDs
         if self.options.use_64bit_ids != "Auto":
