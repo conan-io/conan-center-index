@@ -179,3 +179,22 @@ index 9de83911d1..ab7e0b2f91 100644
  
  if (vtkexpat_is_shared)
    set(XML_STATIC 0)
+diff --git a/ThirdParty/theora/CMakeLists.txt b/ThirdParty/theora/CMakeLists.txt
+index 4820607e54..43f86fbbe5 100644
+--- a/ThirdParty/theora/CMakeLists.txt
++++ b/ThirdParty/theora/CMakeLists.txt
+@@ -4,10 +4,10 @@ vtk_module_third_party(
+     VERSION       "1.1.1"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE THEORA
+-    TARGETS THEORA::THEORA
+-            THEORA::DEC
+-            THEORA::ENC
++    PACKAGE theora
++    TARGETS theora::theora
++            theora::theoradec
++            theora::theoraenc
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
