@@ -104,13 +104,6 @@ class EdlibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        if tools.Version(self.version) >= "1.2.7":
-            self._create_cmake_module_alias_targets(
-                os.path.join(self.package_folder, self._module_file_rel_path),
-                {"edlib": "edlib::edlib"}
-            )
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "edlib")
         self.cpp_info.set_property("cmake_target_name", "edlib::edlib")
