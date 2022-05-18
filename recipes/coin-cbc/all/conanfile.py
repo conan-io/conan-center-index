@@ -43,7 +43,6 @@ class CoinCbcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.parallel
 
     def configure(self):
         if self.options.shared:
@@ -54,7 +53,9 @@ class CoinCbcConan(ConanFile):
         self.requires("coin-osi/0.108.6")
         self.requires("coin-clp/1.17.6")
         self.requires("coin-cgl/0.60.3")
-        
+        if self.settings.compiler == "Visual Studio" and self.options.parallel:
+            self.requires("pthreads4w/3.0.0")    
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -105,18 +106,18 @@ class CoinCbcConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-cbc-parallel={}".format(yes_no(self.options.parallel)),
             "--without-blas",
             "--without-lapack",
         ]
-        if self.settings.os != "Windows":
-            configure_args += [
-                "--enable-cbc-parallel={}".format(yes_no(self.options.parallel))
-            ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
             if tools.Version(self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
+            if self.options.parallel:
+                configure_args.append("--with-pthreadsw32-lib={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["pthreads4w"].lib_paths[0], self.deps_cpp_info["pthreads4w"].libs[0] + ".lib"))))
+                configure_args.append("--with-pthreadsw32-incdir={}".format(tools.unix_path(self.deps_cpp_info["pthreads4w"].include_paths[0])))
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
         return self._autotools
 
@@ -155,6 +156,8 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["libcbc"].names["pkg_config"] = "cbc"
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
             self.cpp_info.components["libcbc"].system_libs.append("pthread")
+        if self.settings.os in ["Windows"] and self.options.parallel:
+            self.cpp_info.components["libcbc"].requires.append("pthreads4w::pthreads4w")
 
         self.cpp_info.components["osi-cbc"].libs = ["OsiCbc"]
         self.cpp_info.components["osi-cbc"].requires = ["libcbc"]
