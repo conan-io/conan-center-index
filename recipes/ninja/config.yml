@@ -7,3 +7,5 @@ versions:
     folder: 1.10.x
   "1.10.2":
     folder: 1.10.x
+  "1.11.0":
+    folder: 1.11.x
