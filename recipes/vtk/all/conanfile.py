@@ -319,7 +319,8 @@ class VtkConan(ConanFile):
         # TODO automate this?  Put this version number in conandata.yml?
 
         # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
-        self.tool_requires("cmake/3.22.4")
+        # self.tool_requires("cmake/3.22.4")
+        self.build_requires("cmake/3.22.4")
 
 
     def validate(self):
