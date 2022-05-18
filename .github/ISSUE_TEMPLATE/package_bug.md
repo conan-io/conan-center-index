@@ -5,9 +5,11 @@ title: '[package] <LIBRARY-NAME>/<LIBRARY-VERSION>: SHORT DESCRIPTION'
 labels: bug
 ---
 
-<!-- 
+<!--
   Please don't forget to update the issue title.
   Include all applicable information to help us reproduce your problem.
+
+  Eventually ping the [code owners](.github/CODEOWNERS) of the recipe.
 -->
 
 ### Package and Environment Details (include every applicable attribute)
