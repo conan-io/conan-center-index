@@ -25,7 +25,7 @@ jobs:
                   url: url,
                 });
               } catch(err) {
-                core.warning(`error ${err.status} for url ${url}`)
+                core.warning(`error ${err.status} for url ${err.request.url}`)
                 continue
               }
               for (const job of result.data)
@@ -38,7 +38,7 @@ jobs:
                     url: job.build,
                   });
                 } catch(err) {
-                  core.warning(`error ${err.status} for url https://c3i.jfrog.io/c3i/misc/${job.build}`)
+                  core.warning(`error ${err.status} for url ${err.request.url}`)
                   continue
                 }
                 prefix = "[HOOK - conan-center.py] "
