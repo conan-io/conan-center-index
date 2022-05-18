@@ -9,7 +9,7 @@
 > considered as an estimation, there are still some unknowns to provide
 > certain steps and dates.
 
-Canan v2 is under heavy development and it will be released in the
+Conan v2 is under heavy development and it will be released in the
 following months. It comes with many improvements that will benefit
 recipes and users, and we are willing to adopt it.
 
