@@ -17,7 +17,34 @@
 # Full reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
 
-.github @ericLemanissier 
+.github @ericLemanissier
 recipes/aaf @MartinDelille
-recipes/gtk @ericLemanissier 
-recipes/qt @ericLemanissier 
+recipes/aws-c-auth @MartinDelille
+recipes/aws-c-cal @MartinDelille
+recipes/aws-c-common @MartinDelille
+recipes/aws-c-compression @MartinDelille
+recipes/aws-c-event-stream @MartinDelille
+recipes/aws-c-http @MartinDelille
+recipes/aws-c-io @MartinDelille
+recipes/aws-c-mqtt @MartinDelille
+recipes/aws-c-s3 @MartinDelille
+recipes/aws-c-sdkutils @MartinDelille
+recipes/aws-checksums @MartinDelille
+recipes/aws-crt-cpp @MartinDelille
+recipes/aws-sdk-cpp @MartinDelille
+recipes/cppcheck @MartinDelille
+recipes/create-dmg @MartinDelille
+recipes/ffmpeg @MartinDelille
+recipes/gtk @ericLemanissier
+recipes/gtk @ericLemanissier
+recipes/libltc @MartinDelille
+recipes/libsndfile @MartinDelille
+recipes/qt @ericLemanissier
+recipes/qt @MartinDelille
+recipes/quazip @MartinDelille
+recipes/qxlsx @MartinDelille
+recipes/sentry-breakpad @MartinDelille
+recipes/sentry-crashpad @MartinDelille
+recipes/sentry-native @MartinDelille
+recipes/uncrustify @MartinDelille
+recipes/yaml-cpp @MartinDelille
