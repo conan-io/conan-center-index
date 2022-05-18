@@ -5,4 +5,6 @@ sources:
 patches:
   "1.7.5":
     - base_path: "source_subfolder"
-      patch_file: "patches/1.7.5-disable_tron.patch"
+      patch_file: "patches/1.7.5-0001-disable_trantor.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.7.5-0002-remove-boost-components.patch"
