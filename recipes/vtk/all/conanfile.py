@@ -25,21 +25,12 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
-from conans.tools import get, remove_files_by_mask, save
+
+# TODO upgrade to new conan.* imports
+from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
-
-_support_old_ci_20220514 = False
-
-if _support_old_ci_20220514:
-    # not yet supported by current CI (2022-05-14)
-    from conans.tools import rmdir
-    # unknown ... from conans.tools import rename
-else:
-    # new stuff!
-    from conan.tools.files import rmdir
-    from conan.tools.files import rename
 
 
 class VtkConan(ConanFile):
@@ -114,67 +105,105 @@ class VtkConan(ConanFile):
     ############
 
     options = {
-              "shared": [True, False]
-            , "fPIC": [True, False]
+            "shared": [True, False],
+            "fPIC": [True, False],
 
-            , "enable_kits": [True, False]     # VTK_ENABLE_KITS - smaller set of libraries - ONLY for shared mode
+            "use_source_from_git": [True, False],
 
-            , "use_source_from_git": [True, False]
+            # VTK_ENABLE_KITS - smaller set of libraries - ONLY for shared mode
+            "enable_kits": [True, False],
 
-            , "use_64bit_ids": ["Auto", True, False]
+            "enable_logging": [True, False],
 
-            , "qt_version": ["Auto", "5", "6"]
-            , "qt":      [True, False]
-            , "qtquick": [True, False]
-            , "qtsql":   [True, False]
+            # future proofing
+            "legacy_remove":    [True, False],
+            "legacy_silent":    [True, False],
+            "use_future_const": [True, False],
+            "debug_leaks":      [True, False],
 
-            # TODO , "imaging":    [True, False]
-            # TODO , "mpi":        [True, False]
-            , "rendering":  [True, False]
-            # TODO , "standAlone": [True, False]
-            # TODO , "views":      [True, False]
-            # TODO , "web":        [True, False]
+            # Wrapping support
+            "enable_wrapping": [True, False],
+            "wrap_java":       [True, False],
+            "wrap_python":     [True, False],
+            "use_tk":          [True, False],   # requires wrap_python
 
-            # I don't use these so I can't make these ones below
-            # , "mpi": [True, False]
-            # , "minimal": [True, False]
-            # , "ioxml": [True, False]
-            # , "mpi_minimal": [True, False]
+            # default: 32 bit on 32 bit platforms.  64 on 64 bit platforms.
+            "use_64bit_ids": ["Auto", True, False],
+
+            "use_cuda":    [True, False],
+            "use_memkind": [True, False],
+            "use_mpi":     [True, False],
+
+            "qt_version": ["Auto", "5", "6"],
+            "group_enable_Qt":                 [True, False],   # use modules for enabling parts of Qt support
+            "module_enable_GUISupportQt":      [True, False],
+            "module_enable_GUISupportQtQuick": [True, False],
+            "module_enable_GUISupportQtSQL":   [True, False],
+
+            "group_enable_Imaging":    [True, False],
+            "group_enable_MPI":        [True, False],
+            "group_enable_Rendering":  [True, False],
+            "group_enable_StandAlone": [True, False],
+            "group_enable_Views":      [True, False],
+            "group_enable_Web":        [True, False],
+
+            "smp_implementation_type": ["Sequential", "STDThread", "OpenMP", "TBB"],
+            "smp_enable_Sequential":   [True, False],
+            "smp_enable_STDThread":    [True, False],
+            "smp_enable_OpenMP":       [True, False],
+            "smp_enable_TBB":          [True, False],
             }
 
     default_options = {
-              "shared": False
-            , "fPIC": True
+            "shared": False,
+            "fPIC": True,
 
-            , "use_source_from_git": False # use the tarball
+            "use_source_from_git": False, # False = use the tarball
 
-            , "use_64bit_ids": "Auto" # TODO normally 32 bit on 32 bit platforms
+            "use_64bit_ids":   "Auto",
+            "enable_kits":     False,
+            "enable_logging":  False,
 
-            , "enable_kits": False
+            "legacy_remove":    False,
+            "legacy_silent":    False,
+            "use_future_const": False,
+            "debug_leaks":      False,
 
-            , "qt_version": "Auto"
-            , "qt": False
-            , "qtquick": False
-            , "qtsql": False
+            # wrapping support
+            "enable_wrapping": False,
+            "wrap_java":       False,
+            "wrap_python":     False,
+            "use_tk":          False,
 
-            # TODO , "imaging":    False
-            # TODO , "mpi":        False
-            , "rendering":  False
-            # TODO , "standAlone": False
-            # TODO , "views":      False
-            # TODO , "web":        False
+            "use_cuda":    False,
+            "use_memkind": False,
+            "use_mpi":     False,
 
-            # TODO try supporting more modules, I chose hdf5 randomly...
-            # HDF5 requires 'parallel' to be enabled, which also brings in the MPI requirements.
+            "group_enable_Imaging":    False,
+            "group_enable_MPI":        False,
+            "group_enable_Rendering":  False,
+            "group_enable_StandAlone": False,
+            "group_enable_Views":      False,
+            "group_enable_Web":        False,
+
+            "qt_version":                      "Auto",
+            "group_enable_Qt":                 False,   # can keep this false, enable specific QT modules
+            "module_enable_GUISupportQt":      False,
+            "module_enable_GUISupportQtQuick": False,
+            "module_enable_GUISupportQtSQL":   False,
+
+            "smp_implementation_type": "Sequential",
+            "smp_enable_Sequential":   False,
+            "smp_enable_STDThread":    False,
+            "smp_enable_OpenMP":       False,
+            "smp_enable_TBB":          False,
+
+            # TODO try supporting more modules
+            # I chose hdf5 randomly...
+            # HDF5 requires 'parallel' to be enabledwhich also brings in the MPI requirements.
             # HDF5 is expected to have "parallel" enabled
-            # , "hdf5:parallel":   True
-            # , "hdf5:enable_cxx": False  # can't be enabled with parallel
-
-            # I don't use these so I can't make these ones below
-            # , "mpi": False
-            # , "minimal": False
-            # , "ioxml": False
-            # , "mpi_minimal": False
+            # "hdf5:parallel":   True,
+            # "hdf5:enable_cxx": False,  # can't be enabled with parallel
             }
 
 
@@ -228,8 +257,7 @@ class VtkConan(ConanFile):
         else:
             get(**self.conan_data["sources"][self.version],
                     strip_root=True,
-                    destination=self._source_subfolder,
-                    )
+                    destination=self._source_subfolder)
 
         if self.no_copy_source:
             self._patch_source()
@@ -253,7 +281,7 @@ class VtkConan(ConanFile):
                 "pugixml":           "pugixml/1.12.1",
                 "sqlite3":           "sqlite3/3.38.1",
                 "utfcpp":            "utfcpp/3.2.1",
-                "xz_utils":          "xz_utils/5.2.5", # VTK calls this lzma
+                "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 }
 
         # TODO figure out how we want to support modules...
@@ -261,7 +289,7 @@ class VtkConan(ConanFile):
         # if self.options.module_hdf5:
         # parties["hdf5"] = "hdf5/1.12.1"
 
-        if self.options.qt:
+        if self.options.group_enable_Qt or self.options.module_enable_GUISupportQt or self.options.module_enable_GUISupportQtQuick or self.options.module_enable_GUISupportQtSQL:
             parties["qt"] = "qt/6.2.4"
 
             # NOTE: could also try QT's offical QT
@@ -271,7 +299,7 @@ class VtkConan(ConanFile):
 
 
     def requirements(self):
-        if self.options.rendering:
+        if self.options.group_enable_Rendering:
             self.requires("opengl/system")
             self.requires("xorg/system")
 
@@ -328,12 +356,15 @@ class VtkConan(ConanFile):
         # Needed or not? Nothing gets installed without this ON at the moment.
         # tc.variables["VTK_INSTALL_SDK"] = False
 
-        # TODO future-proofing
-        # tc.variables["VTK_LEGACY_REMOVE"] = True # disable legacy APIs
-        # tc.variables["VTK_USE_FUTURE_CONST"] = True # use the newer const-correct APIs
+        # future-proofing for your code
+        tc.variables["VTK_LEGACY_REMOVE"] = self.options.legacy_remove # disable legacy APIs
+        tc.variables["VTK_LEGACY_SILENT"] = self.options.legacy_silent # requires legacy_remove to be off. deprecated APIs will not cause warnings
+        tc.variables["VTK_USE_FUTURE_CONST"] = self.options.use_future_const # use the newer const-correct APIs
+
+        tc.variables["VTK_USE_TK"] = self.options.use_tk
 
         # TODO development debugging
-        # tc.variables["VTK_DEBUG_LEAKS"] = True # use the newer const-correct APIs
+        tc.variables["VTK_DEBUG_LEAKS"] = self.options.debug_leaks
 
 
         # ON or OFF
@@ -345,20 +376,26 @@ class VtkConan(ConanFile):
         # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
         tc.variables["VTK_ENABLE_KITS"] = self.options.enable_kits
 
+        tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
+
+        tc.variables["VTK_ENABLE_WRAPPING"] = self.options.enable_wrapping
+        tc.variables["VTK_WRAP_JAVA"] = self.options.wrap_java
+        tc.variables["VTK_WRAP_PYTHON"] = self.options.wrap_python
+
 
         #### CUDA / MPI / MEMKIND ####
         # ON or OFF
-        tc.variables["VTK_USE_CUDA"]    = False
-        tc.variables["VTK_USE_MEMKIND"] = False
-        tc.variables["VTK_USE_MPI"]     = False
+        tc.variables["VTK_USE_CUDA"]    = self.options.use_cuda
+        tc.variables["VTK_USE_MEMKIND"] = self.options.use_memkind
+        tc.variables["VTK_USE_MPI"]     = self.options.use_mpi
 
 
         # There are LOTS of these modules now ...
         # for vtkModule in self.required_modules:
-            # tc.variables["VTK_MODULE_ENABLE_VTK_" + vtkModule] = "YES" or NO or WANT or DONT_WANT
+            # tc.variables["VTK_MODULE_ENABLE_VTK_" + vtkModule] = _yesno(True)
 
         # TODO support more modules - see notes above re hdf5
-        # tc.variables["VTK_MODULE_ENABLE_VTK_hdf5"] = "YES" # or NO or WANT or DONT_WANT
+        # tc.variables["VTK_MODULE_ENABLE_VTK_hdf5"] = _yesno(True)
 
         # https://gitlab.kitware.com/vtk/vtk/-/blob/master/Documentation/dev/build.md
         # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
@@ -366,33 +403,42 @@ class VtkConan(ConanFile):
         # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
 
 
+        # if flag is false, then sets to "DEFAULT" ie WILL build if wanted by some other YES
+        # could also: "YES" "NO" "WANT" "DONT_WANT"
+        # where yes/no is enforced, and want/dont_want are hints
+        def _yesno(flag):
+            return "YES" if flag else "DEFAULT"
+
         # groups can be:  DEFAULT   DONT_WANT   WANT   YES   NO
         # Note that YES is like WANT, but will show errors if can't make everything
         # NO is also more forceful than DONT_WANT
         # Default is DONT_WANT, let it auto-enable when required
-        tc.variables["VTK_GROUP_ENABLE_Imaging"]    = "DONT_WANT"   # TODO add option
-        tc.variables["VTK_GROUP_ENABLE_MPI"]        = "DONT_WANT"   # TODO add option
-        tc.variables["VTK_GROUP_ENABLE_Rendering"]  = "YES" if self.options.rendering else "DONT_WANT"
-        tc.variables["VTK_GROUP_ENABLE_StandAlone"] = "DONT_WANT"   # TODO add option
-        tc.variables["VTK_GROUP_ENABLE_Views"]      = "DONT_WANT"   # TODO add option
-        tc.variables["VTK_GROUP_ENABLE_Web"]        = "DONT_WANT"   # TODO add option
+        tc.variables["VTK_GROUP_ENABLE_Imaging"]    = _yesno(self.options.group_enable_Imaging)    # TODO test
+        tc.variables["VTK_GROUP_ENABLE_MPI"]        = _yesno(self.options.group_enable_MPI)        # TODO test
+        tc.variables["VTK_GROUP_ENABLE_Rendering"]  = _yesno(self.options.group_enable_Rendering)
+        tc.variables["VTK_GROUP_ENABLE_StandAlone"] = _yesno(self.options.group_enable_StandAlone)  # TODO test
+        tc.variables["VTK_GROUP_ENABLE_Views"]      = _yesno(self.options.group_enable_Views)       # TODO test
+        tc.variables["VTK_GROUP_ENABLE_Web"]        = _yesno(self.options.group_enable_Web)         # TODO test
 
-        # for QT, use the more specific MODULE options below
-        tc.variables["VTK_GROUP_ENABLE_Qt"] = "DONT_WANT"
+        # for Qt, can also use the more specific MODULE options below
+        tc.variables["VTK_GROUP_ENABLE_Qt"] = _yesno(self.options.group_enable_Qt)
 
 
         ##### QT ######
         # QT has a few modules, we'll be specific
         tc.variables["VTK_QT_VERSION"] = self.options.qt_version
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQt"]      = "YES" if self.options.qt else "DONT_WANT"
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtQuick"] = "YES" if self.options.qtquick else "DONT_WANT"
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtSQL"]   = "YES" if self.options.qtsql else "DONT_WANT"
+        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQt"]      = _yesno(self.options.module_enable_GUISupportQt)
+        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtQuick"] = _yesno(self.options.module_enable_GUISupportQtQuick)
+        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtSQL"]   = _yesno(self.options.module_enable_GUISupportQtSQL)
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
-        tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = "Sequential"
+        tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation_type
         # Change change the mode during runtime, if you enable the backends like so:
-        # tc.variables["VTK_SMP_ENABLE_<backend_name>"] = True
+        tc.variables["VTK_SMP_ENABLE_Sequential"]   = self.options.smp_enable_Sequential
+        tc.variables["VTK_SMP_ENABLE_STDThread"]    = self.options.smp_enable_STDThread
+        tc.variables["VTK_SMP_ENABLE_OpenMP"]       = self.options.smp_enable_OpenMP
+        tc.variables["VTK_SMP_ENABLE_TBB"]          = self.options.smp_enable_TBB
 
         # TODO OLD STUFF that was here before, I don't use or know much about
         # if self.options.minimal:
@@ -451,23 +497,16 @@ class VtkConan(ConanFile):
         cmake.install()
 
         # VTK installs the licenses under the res/licenses/VTK directory, move it
-        rename(self, 
-                os.path.join(self.package_folder,"res","licenses","VTK"),
-                os.path.join(self.package_folder,"licenses")
-                )
+        rename( os.path.join(self.package_folder,"res","licenses","VTK"),
+                os.path.join(self.package_folder,"licenses"))
 
         # keep copy of generated VTK cmake files, for inspection
         if _debug_packaging:
-            rename(self,
-                    os.path.join(self.package_folder,"lib","cmake"),
-                    os.path.join(self.package_folder,"vtk-cmake-backup")
-                    )
+            rename( os.path.join(self.package_folder,"lib","cmake"),
+                    os.path.join(self.package_folder,"vtk-cmake-backup"))
         else:
             # delete VTK-installed cmake files
-            if _support_old_ci_20220514:
-                rmdir(os.path.join(self.package_folder,"lib","cmake"))
-            else:
-                rmdir(self, os.path.join(self.package_folder,"lib","cmake"))
+            rmdir(os.path.join(self.package_folder,"lib","cmake"))
 
         # create a cmake file with our special variables
         content = textwrap.dedent("""\
@@ -481,317 +520,6 @@ class VtkConan(ConanFile):
 
 
     def package_info(self):
-        components = []
-
-        # these component lists are cheating by me,
-        # just copy-paste all the .so files in here, chop off the start and end of filenames
-        # TODO use modules.json
-
-        # for shared AND KITs (can't be unshared and kits)
-        if self.options.shared and self.options.enable_kits:
-
-            if not self.options.rendering:
-                # Kits, base components
-                components += [
-                        "kissfft",
-                        "loguru",
-                        "sys",
-                        "WrappingTools",
-
-                        "Common",
-                        ]
-
-            else:   # with Kits, Rendering
-                if not self.options.qt:
-                    components += [
-                            "ChartsCore",
-                            "Common",
-                            "DICOMParser",
-                            "DomainsChemistry",
-                            "DomainsChemistryOpenGL2",
-                            "Filters",
-                            "FiltersHybrid",
-                            "GeovisCore",
-                            "gl2ps",
-                            "Imaging",
-                            "ImagingHybrid",
-                            "InfovisCore",
-                            "InfovisLayout",
-                            "Interaction",
-                            "IO",
-                            "IOExportGL2PS",
-                            "IOExportPDF",
-                            "kissfft",
-                            "libharu",
-                            "loguru",
-                            "metaio",
-                            "OpenGL",
-                            "Parallel",
-                            "Rendering",
-                            "RenderingGL2PSOpenGL2",
-                            "RenderingUI",
-                            "RenderingVtkJS",
-                            "sys",
-                            "TestingRendering",
-                            "Views",
-                            "ViewsInfovis",
-                            "WrappingTools",
-                            ]
-                else:   # with Kits, Rendering, QT
-                    components += [
-                            "ChartsCore",
-                            "Common",
-                            "DICOMParser",
-                            "DomainsChemistryOpenGL2",
-                            "DomainsChemistry",
-                            "FiltersHybrid",
-                            "Filters",
-                            "GeovisCore",
-                            "gl2ps",
-                            "GUISupportQt",
-                            "ImagingHybrid",
-                            "Imaging",
-                            "InfovisCore",
-                            "InfovisLayout",
-                            "Interaction",
-                            "IOExportGL2PS",
-                            "IOExportPDF",
-                            "IO",
-                            "kissfft",
-                            "libharu",
-                            "loguru",
-                            "metaio",
-                            "OpenGL",
-                            "Parallel",
-                            "RenderingGL2PSOpenGL2",
-                            "Rendering",
-                            "RenderingUI",
-                            "RenderingVtkJS",
-                            "sys",
-                            "TestingRendering",
-                            "ViewsInfovis",
-                            "Views",
-                            "WrappingTools",
-                            ]
-
-        else: # not kits, many more libraries
-
-            if not self.options.rendering:
-                components += [
-                        "kissfft",
-                        "loguru",
-                        "sys",
-                        "WrappingTools",
-
-                        "CommonCore",
-                        "CommonDataModel",
-                        "CommonMath",
-                        "CommonMisc",
-                        "CommonSystem",
-                        "CommonTransforms",
-                        ]
-            else:   # with Rendering
-                # just copy-paste all the .so files in here, chop off the start and end of filenames
-                if not self.options.qt:
-                    components += [
-                            "ChartsCore",
-                            "CommonColor",
-                            "CommonComputationalGeometry",
-                            "CommonCore",
-                            "CommonDataModel",
-                            "CommonExecutionModel",
-                            "CommonMath",
-                            "CommonMisc",
-                            "CommonSystem",
-                            "CommonTransforms",
-                            "DICOMParser",
-                            "DomainsChemistryOpenGL2",
-                            "DomainsChemistry",
-                            "FiltersCore",
-                            "FiltersExtraction",
-                            "FiltersGeneral",
-                            "FiltersGeometry",
-                            "FiltersHybrid",
-                            "FiltersImaging",
-                            "FiltersModeling",
-                            "FiltersSources",
-                            "FiltersStatistics",
-                            "FiltersTexture",
-                            "GeovisCore",
-                            "gl2ps",
-                            "ImagingColor",
-                            "ImagingCore",
-                            "ImagingGeneral",
-                            "ImagingHybrid",
-                            "ImagingMath",
-                            "ImagingSources",
-                            "InfovisCore",
-                            "InfovisLayout",
-                            "InteractionImage",
-                            "InteractionStyle",
-                            "InteractionWidgets",
-                            "IOCore",
-                            "IOExportGL2PS",
-                            "IOExportPDF",
-                            "IOExport",
-                            "IOGeometry",
-                            "IOImage",
-                            "IOLegacy",
-                            "IOXMLParser",
-                            "IOXML",
-                            "kissfft",
-                            "libharu",
-                            "loguru",
-                            "metaio",
-                            "ParallelCore",
-                            "ParallelDIY",
-                            "RenderingAnnotation",
-                            "RenderingContext2D",
-                            "RenderingContextOpenGL2",
-                            "RenderingCore",
-                            "RenderingFreeType",
-                            "RenderingGL2PSOpenGL2",
-                            "RenderingImage",
-                            "RenderingLabel",
-                            "RenderingLOD",
-                            "RenderingOpenGL2",
-                            "RenderingSceneGraph",
-                            "RenderingUI",
-                            "RenderingVolumeOpenGL2",
-                            "RenderingVolume",
-                            "RenderingVtkJS",
-                            "sys",
-                            "TestingRendering",
-                            "ViewsCore",
-                            "ViewsInfovis",
-                            "WrappingTools",
-                            ]
-                else:   # with QT
-                    components += [
-                            "ChartsCore",
-                            "CommonColor",
-                            "CommonComputationalGeometry",
-                            "CommonCore",
-                            "CommonDataModel",
-                            "CommonExecutionModel",
-                            "CommonMath",
-                            "CommonMisc",
-                            "CommonSystem",
-                            "CommonTransforms",
-                            "DICOMParser",
-                            "DomainsChemistryOpenGL2",
-                            "DomainsChemistry",
-                            "FiltersCore",
-                            "FiltersExtraction",
-                            "FiltersGeneral",
-                            "FiltersGeometry",
-                            "FiltersHybrid",
-                            "FiltersImaging",
-                            "FiltersModeling",
-                            "FiltersSources",
-                            "FiltersStatistics",
-                            "FiltersTexture",
-                            "GeovisCore",
-                            "gl2ps",
-                            "GUISupportQt",
-                            "ImagingColor",
-                            "ImagingCore",
-                            "ImagingGeneral",
-                            "ImagingHybrid",
-                            "ImagingMath",
-                            "ImagingSources",
-                            "InfovisCore",
-                            "InfovisLayout",
-                            "InteractionImage",
-                            "InteractionStyle",
-                            "InteractionWidgets",
-                            "IOCore",
-                            "IOExportGL2PS",
-                            "IOExportPDF",
-                            "IOExport",
-                            "IOGeometry",
-                            "IOImage",
-                            "IOLegacy",
-                            "IOXMLParser",
-                            "IOXML",
-                            "kissfft",
-                            "libharu",
-                            "loguru",
-                            "metaio",
-                            "ParallelCore",
-                            "ParallelDIY",
-                            "RenderingAnnotation",
-                            "RenderingContext2D",
-                            "RenderingContextOpenGL2",
-                            "RenderingCore",
-                            "RenderingFreeType",
-                            "RenderingGL2PSOpenGL2",
-                            "RenderingImage",
-                            "RenderingLabel",
-                            "RenderingLOD",
-                            "RenderingOpenGL2",
-                            "RenderingSceneGraph",
-                            "RenderingUI",
-                            "RenderingVolumeOpenGL2",
-                            "RenderingVolume",
-                            "RenderingVtkJS",
-                            "sys",
-                            "TestingRendering",
-                            "ViewsCore",
-                            "ViewsInfovis",
-                            "WrappingTools",
-                            ]
-
-
-# all components, from a list somewhere, for reference
-# "CommonColor",
-# "CommonComputationalGeometry",
-# "CommonCore",
-# "CommonDataModel",
-# "CommonExecutionModel",
-# "CommonMath",
-# "CommonMisc",
-# "CommonSystem",
-# "CommonTransforms",
-# "DICOMParser",
-# "FiltersCore",
-# "FiltersExtraction",
-# "FiltersGeneral",
-# "FiltersGeometry",
-# "FiltersHybrid",
-# "FiltersModeling",
-# "FiltersSources",
-# "FiltersStatistics",
-# "FiltersTexture",
-# "GUISupportQt",
-# "ImagingColor",
-# "ImagingCore",
-# "ImagingGeneral",
-# "ImagingHybrid",
-# "ImagingSources",
-# "InteractionStyle",
-# "InteractionWidgets",
-# "IOCore",
-# "IOImage",
-# "IOLegacy",
-# "IOXML",
-# "IOXMLParser",
-# "metaio",
-# "ParallelCore",
-# "ParallelDIY",
-# "RenderingAnnotation",
-# "RenderingContext2D",
-# "RenderingCore",
-# "RenderingFreeType",
-# "RenderingOpenGL2",
-# "RenderingUI",
-# "RenderingVolume",
-
-
-        # remove duplicates in components list
-        components = list(set(components))
-        components.sort()
-
         # Note: I don't currently import the explicit dependency list for each component from VTK,
         # so every module will depend on "everything" external, and there are no internal dependencies.
         # Consumers just have to figure out what they have to link.
@@ -799,7 +527,7 @@ class VtkConan(ConanFile):
         # get keys as a list and make a list of target::target
         all_requires = [k + "::" + k for k in self._third_party().keys()]
 
-        if self.options.rendering:
+        if self.options.group_enable_Rendering:
             all_requires += [
                     "opengl::opengl",
                     "xorg::xorg",
@@ -830,9 +558,14 @@ class VtkConan(ConanFile):
         # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
         # https://cmake.org/cmake/help/latest/module/FindVTK.html
 
+        components = list(l[3:] for l in collect_libs(self, folder = ["lib"]))
+
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
         self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
+
+        # Should not be added to the VTK::VTK target... right?
+        # self.cpp_info.libdirs   = ["lib"]
 
         for comp in components:
             self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
