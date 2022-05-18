@@ -7,6 +7,11 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeToolchain", "CMakeDeps"
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
+        tc.generate()
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
