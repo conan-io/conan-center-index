@@ -2,3 +2,7 @@ sources:
   "cci.20211217":
     url: "https://github.com/kimkulling/openddl-parser/archive/debfa7108de3390e3ff89061822f269dc79b2e20.tar.gz"
     sha256: "514c992c28348a47acce84521258447858b2dea5ca73b1563aa3113fae629606"
+patches:
+  "cci.20211217":
+    - patch_file: "patches/001-fix-mingw-builds.patch"
+      base_path: "source_subfolder"
