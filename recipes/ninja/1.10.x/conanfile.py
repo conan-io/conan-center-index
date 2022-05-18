@@ -1,6 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+from conans import ConanFile, CMake, tools
+
 
 class NinjaConan(ConanFile):
     name = "ninja"
