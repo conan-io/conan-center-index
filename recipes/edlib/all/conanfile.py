@@ -112,6 +112,9 @@ class EdlibConan(ConanFile):
             )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "edlib")
+        self.cpp_info.set_property("cmake_target_name", "edlib::edlib")
+        self.cpp_info.set_property("pkg_config_name", "edlib-{}".format(tools.Version(self.version).major))
         self.cpp_info.names["pkg_config"] = "edlib-{}".format(tools.Version(self.version).major)
         self.cpp_info.libs = ["edlib"]
         if self.options.shared:
