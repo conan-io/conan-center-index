@@ -646,8 +646,7 @@ class QtConan(ConanFile):
         cmake.definitions["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
-
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" and os.environ.get('HOST_PERL') is None:
             cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
 
         try:
