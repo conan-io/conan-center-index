@@ -374,6 +374,10 @@ class VtkConan(ConanFile):
                 "apple-clang": "11",
             }
 
+        # TODO for debugging weird behaviour on mac on CCI
+        if (str(self.settings.compiler) != "apple-clang":
+            raise ConanInvalidConfiguration("Not building, just want to focus on apple-clang for now")
+
         # VTK needs C++17 to compile
         # This code was copied from p-ranav-glob
         if self.settings.compiler.cppstd:
