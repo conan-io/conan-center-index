@@ -4,6 +4,8 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
+add_link_options("LINKER:-z,defs")
+
 if (MSVC)
 	add_compile_options("$<$<CONFIG:DEBUG>:/Z7>")
 	add_link_options("$<$<CONFIG:DEBUG>:/DEBUG:NONE>")

@@ -39,7 +39,7 @@ class Hdf5Conan(ConanFile):
         "parallel": False,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
@@ -92,13 +92,23 @@ class Hdf5Conan(ConanFile):
            not self.options["szip"].enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
 
+    # TODO hack, shortcut to the problem platform on CI
+    # def validate(self):
+        # if (self.settings.os == "Linux"
+                # and self.options.shared
+                # and self.settings.compiler == "gcc"
+                # and Version(self.settings.compiler.version) == "11.0")
+        # raise ConanInvalidConfiguration("I cannot get CI to work on this platform")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.run_environment(self):
+            with tools.environment_append({"VERBOSE":"1"}):
+                cmake = self._configure_cmake()
+                cmake.build()
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -130,11 +140,15 @@ class Hdf5Conan(ConanFile):
         if self.settings.build_type == "Debug":
             cmake.definitions["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         cmake.definitions["HDF5_ENABLE_PARALLEL"] = self.options.parallel
+
+        # See comments in hdf5's CMakeLists.txt:101
         cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+
         cmake.definitions["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         if bool(self.options.szip_support):
             cmake.definitions["CONAN_SZIP_LIBNAME"] = self._get_szip_lib() # this variable is added by conanize-link-szip*.patch
         cmake.definitions["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
+
         cmake.definitions["HDF5_PACKAGE_EXTLIBS"] = False
         cmake.definitions["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe", False)
         cmake.definitions["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
@@ -176,7 +190,7 @@ class Hdf5Conan(ConanFile):
         }
 
     @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets, is_parallel):
+    def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -193,13 +207,22 @@ class Hdf5Conan(ConanFile):
                     set_property(TARGET hdf5::hdf5_hl_cpp PROPERTY INTERFACE_LINK_LIBRARIES HDF5::HL_CXX)
                 endif()
             """)
-        content += textwrap.dedent("set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF"))
+        tools.save(module_file, content)
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file, is_parallel):
+        content = "set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF")
         tools.save(module_file, content)
 
     @property
-    def _module_file_rel_path(self):
+    def _module_file_targets_rel_path(self):
         return os.path.join("lib", "cmake",
                             "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _module_file_variables_rel_path(self):
+        return os.path.join("lib", "cmake",
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -211,8 +234,11 @@ class Hdf5Conan(ConanFile):
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
         components = self._components()
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"hdf5::{}".format(component["alias_target"]): "HDF5::{}".format(component["component"]) for component in components.values()},
+            os.path.join(self.package_folder, self._module_file_targets_rel_path),
+            {"hdf5::{}".format(component["alias_target"]): "HDF5::{}".format(component["component"]) for component in components.values()}
+        )
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_variables_rel_path),
             self.options.get_safe("parallel", False)
         )
 
@@ -229,14 +255,15 @@ class Hdf5Conan(ConanFile):
 
             self.cpp_info.components[component_name].set_property("cmake_target_name", f"hdf5::{alias_target}")
             self.cpp_info.components[component_name].set_property("pkg_config_name", alias_target)
+            self.cpp_info.components[component_name].set_property("cmake_build_modules", [self._module_file_variables_rel_path, self._module_file_variables_rel_path])
             self.cpp_info.components[component_name].libs = [_config_libname(alias_target)]
             self.cpp_info.components[component_name].requires = requirements
 
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component_name].names["cmake_find_package"] = component
             self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_file_targets_rel_path, self._module_file_variables_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_file_targets_rel_path, self._module_file_variables_rel_path]
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
