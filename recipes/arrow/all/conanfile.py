@@ -146,6 +146,8 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("CCI has no hiveserver2 recipe (yet)")
         if self.options.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
+        if self.options.with_s3 and not self.options["aws-sdk-cpp"].config:
+            raise ConanInvalidConfiguration("arrow:with_s3 requires aws-sdk-cpp:config is True.")
 
         if self.options.shared and self._with_jemalloc():
             if self.options["jemalloc"].enable_cxx:
@@ -253,7 +255,11 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             self.requires("llvm-core/13.0.0")
         if self._with_openssl():
-            self.requires("openssl/3.0.3")
+            # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
+            if self.options.with_s3:
+                self.requires("openssl/1.1.1o")
+            else:
+                self.requires("openssl/3.0.3")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
@@ -267,7 +273,7 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) >= "6.0.0" and \
             self.options.get_safe("simd_level") != None or \
             self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/8.0.5")
+            self.requires("xsimd/8.1.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_zstd:
@@ -514,7 +520,7 @@ class ArrowConan(ConanFile):
         if self.options.with_json:
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
-            self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::filesystem")
+            self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::s3")
         if self.options.with_orc:
             self.cpp_info.components["libarrow"].requires.append("orc::orc")
         if self.options.with_brotli:
