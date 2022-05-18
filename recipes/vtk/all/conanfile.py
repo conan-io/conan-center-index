@@ -308,6 +308,7 @@ class VtkConan(ConanFile):
 
         # hack for cmake-libcurl conflict
         self.requires("openssl/1.1.1o", override=True)
+        self.requires("cmake/3.22.4")
 
 
     def build_requirements(self):
@@ -320,7 +321,7 @@ class VtkConan(ConanFile):
 
         # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
         # self.tool_requires("cmake/3.22.4")
-        self.build_requires("cmake/3.22.4")
+        # self.build_requires("cmake/3.22.4")
 
 
     def validate(self):
