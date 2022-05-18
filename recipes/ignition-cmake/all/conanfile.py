@@ -20,6 +20,10 @@ class IgnitionCmakeConan(ConanFile):
     _cmake = None
 
     @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -62,9 +66,17 @@ class IgnitionCmakeConan(ConanFile):
         version_major = tools.Version(self.version).major
         cmake_config_files_dir = os.path.join(self.package_folder, "lib", "cmake",f"ignition-cmake{version_major}")
         files = os.listdir(cmake_config_files_dir)
+
+        # retain the special config file for utilities target provided by ignition-cmake
+        # removing it from the list
+        files.remove(f"ignition-cmake{version_major}-utilities-targets.cmake")
+
+        # remvoe all other xxx.cmake files from the list
         for file in files:
             if file.endswith(".cmake"):
                 os.remove(os.path.join(cmake_config_files_dir, file))
+        
+        # add version information for downstream dependencies consuming ign-cmake through cmake_find_package generators 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
             tools.Version(self.version)
@@ -93,8 +105,10 @@ class IgnitionCmakeConan(ConanFile):
         self.cpp_info.components[ign_cmake_component].names["cmake_find_package"] = ign_cmake_component
         self.cpp_info.components[ign_cmake_component].names["cmake_find_package_multi"] = ign_cmake_component
         self.cpp_info.components[ign_cmake_component].names["cmake_paths"] = ign_cmake_component
-        self.cpp_info.components[ign_cmake_component].libs = []
         self.cpp_info.components[ign_cmake_component].builddirs.append(os.path.join(base_module_path, f"cmake{version_major}"))
+        self.cpp_info.components[ign_cmake_component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components[ign_cmake_component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components[ign_cmake_component].build_modules["cmake_paths"] = [self._module_file_rel_path]
 
         self.cpp_info.components["utilities"].names["cmake_find_package"] = "utilities"
         self.cpp_info.components["utilities"].names["cmake_find_package_multi"] = "utilities"
@@ -105,7 +119,9 @@ class IgnitionCmakeConan(ConanFile):
         self.cpp_info.components["utilities"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["utilities"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["utilities"].build_modules["cmake_paths"] = [self._module_file_rel_path]
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        
+        ## cpp_info for the ignition-cmake-utilities-targets.cmake file
+        utils_targets_file_path = os.path.join(base_module_path, f"{ign_cmake_component}-utilities-targets.cmake")
+        self.cpp_info.components["utilities"].build_modules["cmake_find_package"].append(utils_targets_file_path)
+        self.cpp_info.components["utilities"].build_modules["cmake_find_package_multi"].append(utils_targets_file_path)
+        self.cpp_info.components["utilities"].build_modules["cmake_paths"].append(utils_targets_file_path)
