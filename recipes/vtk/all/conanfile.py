@@ -110,38 +110,40 @@ class VtkConan(ConanFile):
 
             "use_source_from_git": [True, False],
 
-            # VTK_ENABLE_KITS - smaller set of libraries - ONLY for shared mode
-            "enable_kits": [True, False],
-
-            "enable_logging": [True, False],
-
-            # future proofing
+            ### Debugging / future proofing ###
             "legacy_remove":    [True, False],
             "legacy_silent":    [True, False],
             "use_future_const": [True, False],
             "debug_leaks":      [True, False],
 
-            # Wrapping support
+            ### Compile options ###
+            "use_64bit_ids": ["Auto", True, False], # default: 32 bit on 32 bit platforms.  64 on 64 bit platforms.
+            "enable_kits":   [True, False],         # VTK_ENABLE_KITS - smaller set of libraries - ONLY for shared mode
+            "enable_logging": [True, False],
+
+            ### Wrapping support ###
             "enable_wrapping": [True, False],
             "wrap_java":       [True, False],
             "wrap_python":     [True, False],
             "use_tk":          [True, False],   # requires wrap_python
 
-            # default: 32 bit on 32 bit platforms.  64 on 64 bit platforms.
-            "use_64bit_ids": ["Auto", True, False],
-
+            ### Advanced tech ###
             "use_cuda":    [True, False],
             "use_memkind": [True, False],
             "use_mpi":     [True, False],
 
-            "qt_version": ["Auto", "5", "6"],
-            "group_enable_Qt":                 [True, False],   # use modules for enabling parts of Qt support
-            "module_enable_GUISupportQt":      [True, False],
-            "module_enable_GUISupportQtQuick": [True, False],
-            "module_enable_GUISupportQtSQL":   [True, False],
-            "module_enable_RenderingQt":       [True, False],
-            "module_enable_ViewsQt":           [True, False],
+            ### SMP ###
+            "smp_implementation_type": ["Sequential", "STDThread", "OpenMP", "TBB"],
+            "smp_enable_Sequential":   [True, False],
+            "smp_enable_STDThread":    [True, False],
+            "smp_enable_OpenMP":       [True, False],
+            "smp_enable_TBB":          [True, False],
 
+            ### Modules ###
+            "build_all_modules": [True, False],     # The big one, build everything - good for pre-built CCI
+
+            # Groups of modules
+            "group_enable_Qt":         [True, False],   # can set to False, and use modules for enabling parts of Qt support
             "group_enable_Imaging":    [True, False],
             "group_enable_MPI":        [True, False],
             "group_enable_Rendering":  [True, False],
@@ -149,11 +151,13 @@ class VtkConan(ConanFile):
             "group_enable_Views":      [True, False],
             "group_enable_Web":        [True, False],
 
-            "smp_implementation_type": ["Sequential", "STDThread", "OpenMP", "TBB"],
-            "smp_enable_Sequential":   [True, False],
-            "smp_enable_STDThread":    [True, False],
-            "smp_enable_OpenMP":       [True, False],
-            "smp_enable_TBB":          [True, False],
+            # Qt-specific modules
+            "qt_version": ["Auto", "5", "6"],
+            "module_enable_GUISupportQt":      [True, False],
+            "module_enable_GUISupportQtQuick": [True, False],
+            "module_enable_GUISupportQtSQL":   [True, False],
+            "module_enable_RenderingQt":       [True, False],
+            "module_enable_ViewsQt":           [True, False],
             }
 
     default_options = {
@@ -162,25 +166,39 @@ class VtkConan(ConanFile):
 
             "use_source_from_git": False, # False = use the tarball
 
-            "use_64bit_ids":   "Auto",
-            "enable_kits":     False,
-            "enable_logging":  False,
-
+            ### Debugging / future proofing ###
             "legacy_remove":    False,
             "legacy_silent":    False,
             "use_future_const": False,
             "debug_leaks":      False,
 
-            # wrapping support
+            ### Compile options ###
+            "use_64bit_ids":   "Auto",
+            "enable_kits":     False,
+            "enable_logging":  False,
+
+            ### Wrapping support ###
             "enable_wrapping": False,
             "wrap_java":       False,
             "wrap_python":     False,
             "use_tk":          False,
 
+            ### Advanced tech ###
             "use_cuda":    False,
             "use_memkind": False,
             "use_mpi":     False,
 
+            ### SMP ###
+            "smp_implementation_type": "Sequential",
+            "smp_enable_Sequential":   False,
+            "smp_enable_STDThread":    False,
+            "smp_enable_OpenMP":       False,
+            "smp_enable_TBB":          False,
+
+            ### Modules ###
+            "build_all_modules":       False, # TODO - not read yet... True, # disable to pick+choose modules
+
+            # Groups of modules
             "group_enable_Imaging":    False,
             "group_enable_MPI":        False,
             "group_enable_Rendering":  False,
@@ -188,6 +206,7 @@ class VtkConan(ConanFile):
             "group_enable_Views":      False,
             "group_enable_Web":        False,
 
+            # Qt-specific modules
             "qt_version":                      "Auto",
             "group_enable_Qt":                 False,   # can keep this false, enable specific QT modules
             "module_enable_GUISupportQt":      False,
@@ -195,12 +214,6 @@ class VtkConan(ConanFile):
             "module_enable_GUISupportQtSQL":   False,
             "module_enable_RenderingQt":       False,
             "module_enable_ViewsQt":           False,
-
-            "smp_implementation_type": "Sequential",
-            "smp_enable_Sequential":   False,
-            "smp_enable_STDThread":    False,
-            "smp_enable_OpenMP":       False,
-            "smp_enable_TBB":          False,
 
             # TODO try supporting more modules
             # I chose hdf5 randomly...
@@ -288,6 +301,10 @@ class VtkConan(ConanFile):
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 }
 
+        if self.options.group_enable_StandAlone:
+            parties["hdf5"] = "hdf5/1.12.1"
+            parties["theora"] = "theora/1.1.1"
+
         # TODO figure out how we want to support modules...
         # VTK already has an extensive module system, we would want to mirror or use it
         # if self.options.module_hdf5:
@@ -315,12 +332,12 @@ class VtkConan(ConanFile):
         for pack in self._third_party().values():
             self.requires(pack)
 
-        # hack for cmake-libcurl conflict
+        # cmake requires an older openssl than libcurl, so override here
         self.requires("openssl/1.1.1o", override=True)
-        self.requires("cmake/3.23.1")
+        # self.requires("cmake/3.22.4")
 
 
-    # def build_requirements(self):
+    def build_requirements(self):
         # Recipe Maintainers:
         # Check the CMake/patches folder, and use the most recent cmake
         # that matches the largest major version in the list.
@@ -329,8 +346,8 @@ class VtkConan(ConanFile):
         # TODO automate this?  Put this version number in conandata.yml?
 
         # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
-        # self.tool_requires("cmake/3.22.4")
-        # self.build_requires("cmake/3.22.4")
+        # TODO SHOULD BE HERE, but doesn't work
+        self.tool_requires("cmake/3.22.4")
 
 
     def validate(self):
@@ -358,6 +375,12 @@ class VtkConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # for debugging the conan recipe
+        tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
+
+        # TODO hack, need HDF5 to export this
+        tc.variables["HDF5_ENABLE_PARALLEL"] = False
+
         # 64 / 32 bit IDs
         if self.options.use_64bit_ids != "Auto":
             tc.variables["VTK_USE_64BIT_IDS"] = self.options.use_64bit_ids
@@ -369,41 +392,47 @@ class VtkConan(ConanFile):
         # no need for versions on installed names?
         tc.variables["VTK_VERSIONED_INSTALL"] = False
 
+        # Turn these off for CCI
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_DOCUMENTATION"] = False
+
+
         # Needed or not? Nothing gets installed without this ON at the moment.
         # tc.variables["VTK_INSTALL_SDK"] = False
+
 
         # future-proofing for your code
         tc.variables["VTK_LEGACY_REMOVE"] = self.options.legacy_remove # disable legacy APIs
         tc.variables["VTK_LEGACY_SILENT"] = self.options.legacy_silent # requires legacy_remove to be off. deprecated APIs will not cause warnings
         tc.variables["VTK_USE_FUTURE_CONST"] = self.options.use_future_const # use the newer const-correct APIs
+        tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
 
-        tc.variables["VTK_USE_TK"] = self.options.use_tk
 
-        # TODO development debugging
+        # development debugging
         tc.variables["VTK_DEBUG_LEAKS"] = self.options.debug_leaks
 
 
-        # ON or OFF
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_DOCUMENTATION"] = False
 
         # Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
         # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
         tc.variables["VTK_ENABLE_KITS"] = self.options.enable_kits
 
-        tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
 
         tc.variables["VTK_ENABLE_WRAPPING"] = self.options.enable_wrapping
         tc.variables["VTK_WRAP_JAVA"] = self.options.wrap_java
         tc.variables["VTK_WRAP_PYTHON"] = self.options.wrap_python
+        tc.variables["VTK_USE_TK"] = self.options.use_tk    # requires wrap_python
 
 
         #### CUDA / MPI / MEMKIND ####
-        # ON or OFF
         tc.variables["VTK_USE_CUDA"]    = self.options.use_cuda
         tc.variables["VTK_USE_MEMKIND"] = self.options.use_memkind
         tc.variables["VTK_USE_MPI"]     = self.options.use_mpi
+
+
+        ### Modules ###
+        tc.variables["VTK_BUILD_ALL_MODULES"] = self.options.build_all_modules
 
 
         # There are LOTS of these modules now ...
@@ -424,6 +453,7 @@ class VtkConan(ConanFile):
         # where yes/no is enforced, and want/dont_want are hints
         def _yesno(flag):
             return "YES" if flag else "DEFAULT"
+
 
         # groups can be:  DEFAULT   DONT_WANT   WANT   YES   NO
         # Note that YES is like WANT, but will show errors if can't make everything
@@ -449,6 +479,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]   = _yesno(self.options.module_enable_RenderingQt)
         tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]   = _yesno(self.options.module_enable_ViewsQt)
 
+
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
         tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation_type
@@ -457,22 +488,6 @@ class VtkConan(ConanFile):
         tc.variables["VTK_SMP_ENABLE_STDThread"]    = self.options.smp_enable_STDThread
         tc.variables["VTK_SMP_ENABLE_OpenMP"]       = self.options.smp_enable_OpenMP
         tc.variables["VTK_SMP_ENABLE_TBB"]          = self.options.smp_enable_TBB
-
-        # TODO OLD STUFF that was here before, I don't use or know much about
-        # if self.options.minimal:
-        #     tc.variables["VTK_Group_StandAlone"] = False
-        #     tc.variables["VTK_Group_Rendering"] = False
-        # if self.options.ioxml:
-        #     tc.variables["Module_vtkIOXML"] = True
-        # if self.options.mpi:
-        #     tc.variables["VTK_Group_MPI"] = True
-        #     tc.variables["Module_vtkIOParallelXML"] = True
-        # if self.options.mpi_minimal:
-        #     tc.variables["Module_vtkIOParallelXML"] = True
-        #     tc.variables["Module_vtkParallelMPI"] = True
-        #
-        # if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
-        #     tc.variables["CMAKE_DEBUG_POSTFIX"] = "_d"
 
 
         #### Use the Internal VTK bundled libraries for these Third Party dependencies ...
@@ -484,6 +499,7 @@ class VtkConan(ConanFile):
         # CCI does not have gl2ps yet.  Note that cern-root is also waiting for gl2ps.
         tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_gl2ps"] = False
         #
+
         ###
 
 
