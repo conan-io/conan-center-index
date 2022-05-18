@@ -311,7 +311,7 @@ class VtkConan(ConanFile):
         self.requires("cmake/3.22.4")
 
 
-    def build_requirements(self):
+    # def build_requirements(self):
         # Recipe Maintainers:
         # Check the CMake/patches folder, and use the most recent cmake
         # that matches the largest major version in the list.
