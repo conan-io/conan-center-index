@@ -61,6 +61,7 @@ zlib/1.2.11
 protobuf/3.19.2
 abseil/20211102.0
 re2/20211101
+grpc/1.44.0
 
 [options]
 atl:shared=False
