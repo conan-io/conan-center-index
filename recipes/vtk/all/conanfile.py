@@ -314,7 +314,9 @@ class VtkConan(ConanFile):
         # That should be the last cmake that was tested by VTK.
         # Also adjust our CMakeLists.txt to match this number.
         # TODO automate this?  Put this version number in conandata.yml?
-        self.build_requires("cmake/3.22.4")
+
+        # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
+        self.tool_requires("cmake/3.22.4")
 
 
     def validate(self):
@@ -558,7 +560,7 @@ class VtkConan(ConanFile):
         # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
         # https://cmake.org/cmake/help/latest/module/FindVTK.html
 
-        components = list(l[3:] for l in collect_libs(self, folder = ["lib"]))
+        components = list(l[3:] for l in collect_libs(self, folder="lib"))
 
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
