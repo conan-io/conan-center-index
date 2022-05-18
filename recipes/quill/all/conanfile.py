@@ -8,21 +8,23 @@ required_conan_version = ">=1.33.0"
 class QuillConan(ConanFile):
     name = "quill"
     description = "C++14 Asynchronous Low Latency Logging Library"
-    homepage = "https://github.com/odygrd/quill/"
     topics = ("quill", "logging", "log")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    homepage = "https://github.com/odygrd/quill/"
+    url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
-    settings = "os", "compiler", "build_type", "arch"
-
-    options = {"fPIC": [True, False],
-               "with_bounded_queue": [True, False],
-               "with_no_exceptions": [True, False]}
-
-    default_options = {"fPIC": True,
-                       "with_bounded_queue": False,
-                       "with_no_exceptions": False}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "with_bounded_queue": [True, False],
+        "with_no_exceptions": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "with_bounded_queue": False,
+        "with_no_exceptions": False,
+    }
 
     @property
     def _source_subfolder(self):
@@ -70,9 +72,7 @@ class QuillConan(ConanFile):
             self.requires("fmt/6.2.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
