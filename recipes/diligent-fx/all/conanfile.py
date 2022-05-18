@@ -19,7 +19,7 @@ class DiligentFxConan(ConanFile):
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
-    exports_sources = ["CMakeLists.txt", "BuildUtils.cmake", "patches/**"]
+    exports_sources = ["CMakeLists.txt", "BuildUtils.cmake", "script.py", "patches/**"]
     short_paths = True
 
     @property
