@@ -68,6 +68,7 @@ class DrogonConan(ConanFile):
 
     def requirements(self):
         self.requires("trantor/1.5.5")
+        self.requires("boost/1.79.0")
         self.requires("jsoncpp/1.9.5")
         self.requires("openssl/1.1.1o")
         self.requires("zlib/1.2.12")
