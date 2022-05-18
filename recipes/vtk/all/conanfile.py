@@ -45,7 +45,7 @@ class VtkConan(ConanFile):
     topics = ("vtk", "scientific", "image", "processing", "visualization")
 
     short_paths = True
-    no_copy_source = True
+    no_copy_source = False
 
     generators = "CMakeDeps"
 
@@ -139,6 +139,8 @@ class VtkConan(ConanFile):
             "module_enable_GUISupportQt":      [True, False],
             "module_enable_GUISupportQtQuick": [True, False],
             "module_enable_GUISupportQtSQL":   [True, False],
+            "module_enable_RenderingQt":       [True, False],
+            "module_enable_ViewsQt":           [True, False],
 
             "group_enable_Imaging":    [True, False],
             "group_enable_MPI":        [True, False],
@@ -191,6 +193,8 @@ class VtkConan(ConanFile):
             "module_enable_GUISupportQt":      False,
             "module_enable_GUISupportQtQuick": False,
             "module_enable_GUISupportQtSQL":   False,
+            "module_enable_RenderingQt":       False,
+            "module_enable_ViewsQt":           False,
 
             "smp_implementation_type": "Sequential",
             "smp_enable_Sequential":   False,
@@ -289,7 +293,12 @@ class VtkConan(ConanFile):
         # if self.options.module_hdf5:
         # parties["hdf5"] = "hdf5/1.12.1"
 
-        if self.options.group_enable_Qt or self.options.module_enable_GUISupportQt or self.options.module_enable_GUISupportQtQuick or self.options.module_enable_GUISupportQtSQL:
+        if (self.options.group_enable_Qt
+                or self.options.module_enable_GUISupportQt
+                or self.options.module_enable_GUISupportQtQuick
+                or self.options.module_enable_GUISupportQtSQL
+                or self.options.module_enable_RenderingQt
+                or self.options.module_enable_ViewsQt):
             parties["qt"] = "qt/6.2.4"
 
             # NOTE: could also try QT's offical QT
@@ -308,7 +317,7 @@ class VtkConan(ConanFile):
 
         # hack for cmake-libcurl conflict
         self.requires("openssl/1.1.1o", override=True)
-        self.requires("cmake/3.22.4")
+        self.requires("cmake/3.23.1")
 
 
     # def build_requirements(self):
@@ -437,6 +446,8 @@ class VtkConan(ConanFile):
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQt"]      = _yesno(self.options.module_enable_GUISupportQt)
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtQuick"] = _yesno(self.options.module_enable_GUISupportQtQuick)
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtSQL"]   = _yesno(self.options.module_enable_GUISupportQtSQL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]   = _yesno(self.options.module_enable_RenderingQt)
+        tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]   = _yesno(self.options.module_enable_ViewsQt)
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
