@@ -27,7 +27,7 @@ from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
 
 # TODO upgrade to new conan.* imports
-from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs
+from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
@@ -91,7 +91,7 @@ class VtkConan(ConanFile):
     # png:              TODO
     # pugixml:          conan (pugixml)
     # sqlite:           conan (sqlite3)
-    # theora:           TODO
+    # theora:           conan (theora)
     # tiff:             TODO
     # utf8:             conan (utfcpp)
     # verdict:          TODO
@@ -334,7 +334,9 @@ class VtkConan(ConanFile):
 
         # cmake requires an older openssl than libcurl, so override here
         self.requires("openssl/1.1.1o", override=True)
-        # self.requires("cmake/3.22.4")
+
+        # HACK TODO working around a dependency bug in conan
+        self.requires("cmake/3.22.4")
 
 
     def build_requirements(self):
@@ -347,8 +349,8 @@ class VtkConan(ConanFile):
 
         # Note that 3.22.4 may have been the last version that Kitware tested, so we'll use that.
         # TODO SHOULD BE HERE, but doesn't work
-        self.tool_requires("cmake/3.22.4")
-
+        # self.tool_requires("cmake/3.22.4")
+        pass
 
     def validate(self):
         if not self.options.shared and self.options.enable_kits:
@@ -363,7 +365,30 @@ class VtkConan(ConanFile):
             del self.options.fPIC
 
 
+    def _ensure_cpp17(self):
+        compilers_minimum_version = {
+                "gcc": "9",
+                "Visual Studio": "15.7",
+                "clang": "7",
+                "apple-clang": "11",
+            }
+
+        # VTK needs C++17 to compile
+        # This code was copied from p-ranav-glob
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 17)
+        minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+        else:
+            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+
+
+
+
     def configure(self):
+        self._ensure_cpp17()
         if self.options.shared:
             del self.options.fPIC
 
