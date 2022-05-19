@@ -834,7 +834,7 @@ Examples = bin/datadir/examples""")
         filecontents += textwrap.dedent("""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
                 set(QT_DEFAULT_MAJOR_VERSION %s)
-            endif()""" % ver.major)
+            endif()""" % v.major)
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")'
         tools.save(os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
