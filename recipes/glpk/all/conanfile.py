@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
 
@@ -64,7 +65,7 @@ class GlpkConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        if is_msvc(self):
             with tools.vcvars(self):
                 env = {
                     "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
@@ -99,7 +100,7 @@ class GlpkConan(ConanFile):
             "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
         ]
 
-        if self._is_msvc:
+        if is_msvc(self):
             self._autotools.defines.append("__WOE__")
             if self.settings.compiler == "Visual Studio" and \
                tools.Version(self.settings.compiler.version) >= "12":
@@ -120,7 +121,7 @@ class GlpkConan(ConanFile):
             autotools.install()
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             pjoin = lambda p: os.path.join(self.package_folder, "lib", p)
             rename(self, pjoin("glpk.dll.lib"), pjoin("glpk.lib"))
 
