@@ -223,7 +223,7 @@ class VtkConan(ConanFile):
             "smp_enable_TBB":          False,
 
             ### Modules ###
-            "build_all_modules":       False, # TODO - not read yet... True, # disable to pick+choose modules
+            "build_all_modules":       True,    # disable to pick+choose modules
 
             # Groups of modules
             "group_enable_Imaging":    "DEFAULT",
