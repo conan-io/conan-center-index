@@ -35,3 +35,5 @@ versions:
     folder: portable
   "4.9.0":
     folder: portable
+  "4.9.1":
+    folder: portable
