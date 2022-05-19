@@ -30,9 +30,6 @@ class GlpkConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _settings_build(self):
