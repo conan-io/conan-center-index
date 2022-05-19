@@ -75,9 +75,9 @@ class DbusConan(ConanFile):
             args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
 
-            if str(self.options.system_socket) is not "":
+            if str(self.options.system_socket) != "":
                 args.append("--with-system-socket=%s" % self.options.system_socket)
-            if str(self.options.system_pid_file) is not "":
+            if str(self.options.system_pid_file) != "":
                 args.append("--with-system-pid-file=%s" % self.options.system_pid_file)
 
             args.append("--disable-launchd")
