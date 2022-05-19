@@ -60,48 +60,61 @@ class VtkConan(ConanFile):
     # list of all possible 3rd parties (as of 9.1.0)
     # with each one marked as where they should come from.
     #
-    # cgns:             TODO
-    # cli11:            TODO
-    # diy2:             TODO
+    # Procedure for this list:
+    #  - for each item, check if there is a recipe in CCI (clone it for easy search)
+    #  - check VTK/ThirdParty/PACKAGE/CMakeLists.txt for minimum version
+    #  - check VTK/ThirdParty/PACKAGE/vtkPACK/README.kitware.md
+    #       for any notes on special changes to the library,
+    #       apart from integration with the build system.
+    #  - try adding to the "parties" list
+    #  - ensure VTK_MODULE_USE_EXTERNAL_VTK_pack is NOT set to False
+    #  - 'conan create' with the group/module enabled that requires this pack
+    #  - build with CMAKE_FIND_DEBUG_MODE=True (option below to uncomment)
+    #       and carefully ensure it isn't picking up any system libs
+    #       (search the output for "The item was")
+    #
+    # cgns:             conan (cgns)
+    # cli11:            conan (cli11)
+    # diy2:             internal (not available in CCI - TODO)
     # doubleconversion: conan (double-conversion)
     # eigen:            conan (eigen)
-    # exodusII:         TODO
+    # exodusII:         internal (not available in CCI - TODO)
     # expat:            conan (expat)
     # exprtk:           conan (exprtk)
-    # fides:            TODO
+    # fides:            internal (not available in CCI - TODO)
     # fmt:              conan (fmt)
     # freetype:         conan (freetype)
     # gl2ps:            internal (not available in CCI - TODO)
     # glew:             conan (glew)
-    # h5part:           TODO
+    # h5part:           internal (not available in CCI - TODO)
     # hdf5:             conan (hdf5)
     # ioss:             internal (not available in CCI - TODO)
-    # jpeg:             TODO
+    # jpeg:             conan (I'm trying libjpeg-turbo)
     # jsoncpp:          conan (jsoncpp)
-    # kissfft:          TODO
+    # kissfft:          conan (kissfft)
     # libharu:          VTK (heavily patched)
     # libproj:          conan (proj)
     # libxml2:          conan (libxml2)
-    # loguru:           TODO
+    # loguru:           internal (not available in CCI - TODO)
     # lz4:              conan (lz4)
     # lzma:             conan (xz_utils)
-    # mpi4py:           TODO
+    # mpi4py:           internal (not available in CCI - TODO)
     # netcdf:           conan (netcdf)
-    # ogg:              TODO
-    # pegtl:            TODO
-    # png:              TODO
+    # ogg:              conan (ogg)
+    # pegtl:            internal (not available in CCI - TODO)
+    # png:              conan (libpng)
     # pugixml:          conan (pugixml)
     # sqlite:           conan (sqlite3)
     # theora:           conan (theora)
-    # tiff:             TODO
+    # tiff:             conan (libtiff)
     # utf8:             conan (utfcpp)
-    # verdict:          TODO
-    # vpic:             TODO
-    # vtkm:             TODO
-    # xdmf2:            TODO
-    # xdmf3:            TODO
-    # zfp:              TODO
-    # zlib:             conan
+    # verdict:          internal (not available in CCI TODO)
+    # vpic:             internal (not available in CCI TODO)
+    # vtkm:             internal (not available in CCI TODO)
+    # xdmf2:            internal (not available in CCI TODO)
+    # xdmf3:            internal (not available in CCI TODO)
+    # zfp:              conan (zfp) - but not actually used in VTK?
+    # zlib:             conan (zlib)
     #
     ############
 
@@ -144,26 +157,39 @@ class VtkConan(ConanFile):
             "build_all_modules": [True, False],     # The big one, build everything - good for pre-built CCI
 
             # Groups of modules
-            "group_enable_Qt":         [True, False],   # can set to False, and use modules for enabling parts of Qt support
-            "group_enable_Imaging":    [True, False],
-            "group_enable_MPI":        [True, False],
-            "group_enable_Rendering":  [True, False],
-            "group_enable_StandAlone": [True, False],
-            "group_enable_Views":      [True, False],
-            "group_enable_Web":        [True, False],
+            "group_enable_Qt":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],   # can set to False, and use modules for enabling parts of Qt support
+            "group_enable_Imaging":    ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_MPI":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_Rendering":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_StandAlone": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_Views":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_Web":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
             # Qt-specific modules
             "qt_version": ["Auto", "5", "6"],
-            "module_enable_GUISupportQt":      [True, False],
-            "module_enable_GUISupportQtQuick": [True, False],
-            "module_enable_GUISupportQtSQL":   [True, False],
-            "module_enable_RenderingQt":       [True, False],
-            "module_enable_ViewsQt":           [True, False],
+            "module_enable_GUISupportQt":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_GUISupportQtQuick": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_GUISupportQtSQL":   ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_RenderingQt":       ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_ViewsQt":           ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+
+            # TODO modules that require extra stuff to be installed
+            "module_IOPDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_IOPostgreSQL":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_IOOpenVDB":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_IOLAS":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_IOADIOS2":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_fides":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_GeovisGDAL":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_IOGDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_FiltersOpenTURNS":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_DomainsMicroscopy": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_CommonArchive":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             }
 
     default_options = {
             "shared": False,
-            "fPIC": True,
+            "fPIC":   True,
 
             "use_source_from_git": False, # False = use the tarball
 
@@ -200,28 +226,40 @@ class VtkConan(ConanFile):
             "build_all_modules":       False, # TODO - not read yet... True, # disable to pick+choose modules
 
             # Groups of modules
-            "group_enable_Imaging":    False,
-            "group_enable_MPI":        False,
-            "group_enable_Rendering":  False,
-            "group_enable_StandAlone": False,
-            "group_enable_Views":      False,
-            "group_enable_Web":        False,
+            "group_enable_Imaging":    "DEFAULT",
+            "group_enable_MPI":        "DEFAULT",
+            "group_enable_Rendering":  "DEFAULT",
+            "group_enable_StandAlone": "DEFAULT",
+            "group_enable_Views":      "DEFAULT",
+            "group_enable_Web":        "DEFAULT",
 
             # Qt-specific modules
             "qt_version":                      "Auto",
-            "group_enable_Qt":                 False,   # can keep this false, enable specific QT modules
-            "module_enable_GUISupportQt":      False,
-            "module_enable_GUISupportQtQuick": False,
-            "module_enable_GUISupportQtSQL":   False,
-            "module_enable_RenderingQt":       False,
-            "module_enable_ViewsQt":           False,
+            "group_enable_Qt":                 "DEFAULT",   # can keep this false/default, enable specific QT modules
+            "module_enable_GUISupportQt":      "DEFAULT",
+            "module_enable_GUISupportQtQuick": "DEFAULT",
+            "module_enable_GUISupportQtSQL":   "DEFAULT",
+            "module_enable_RenderingQt":       "DEFAULT",
+            "module_enable_ViewsQt":           "DEFAULT",
 
-            # TODO try supporting more modules
-            # I chose hdf5 randomly...
-            # HDF5 requires 'parallel' to be enabledwhich also brings in the MPI requirements.
+            # Note: parallel MPI support should be also applied to hdf5 and cgns
+
             # HDF5 is expected to have "parallel" enabled
             # "hdf5:parallel":   True,
             # "hdf5:enable_cxx": False,  # can't be enabled with parallel
+
+            # these aren't supported yet, need to system-install packages
+            "module_IOPDAL":            "NO",
+            "module_IOPostgreSQL":      "NO",
+            "module_IOOpenVDB":         "NO",
+            "module_IOLAS":             "NO",
+            "module_IOADIOS2":          "NO",
+            "module_fides":             "NO",
+            "module_GeovisGDAL":        "NO",
+            "module_IOGDAL":            "NO",
+            "module_FiltersOpenTURNS":  "NO",
+            "module_DomainsMicroscopy": "NO",
+            "module_CommonArchive":     "NO",
             }
 
 
@@ -285,6 +323,7 @@ class VtkConan(ConanFile):
         parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: package/version to require
+                "cli11":             "cli11/2.2.0",
                 "double-conversion": "double-conversion/3.2.0",
                 "eigen":             "eigen/3.4.0",
                 "expat":             "expat/2.4.8",
@@ -294,7 +333,9 @@ class VtkConan(ConanFile):
                 "glew":              "glew/2.2.0",
                 "jsoncpp":           "jsoncpp/1.9.5",
                 # "libharu": "libharu/2.3.0", -- use VTK's bundled version - heavily patched
+                "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.3",
+                "libpng":            "libpng/1.6.37",
                 "proj":              "proj/9.0.0", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
                 "pugixml":           "pugixml/1.12.1",
                 "sqlite3":           "sqlite3/3.38.1",
@@ -302,19 +343,26 @@ class VtkConan(ConanFile):
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 }
 
-        if self.options.group_enable_StandAlone:
+        if (self.options.build_all_modules
+                or self.options.group_enable_StandAlone):
             parties["hdf5"]    = "hdf5/1.12.1"
             parties["theora"]  = "theora/1.1.1"
+            parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
             parties["libxml2"] = "libxml2/2.9.14"
             parties["cgns"]    = "cgns/4.3.0"
 
-        # TODO figure out how we want to support modules...
-        # VTK already has an extensive module system, we would want to mirror or use it
-        # if self.options.module_hdf5:
-        # parties["hdf5"] = "hdf5/1.12.1"
+        # unused
+        if False:
+            parties["zfp"]     = "zfp/0.5.5"
 
-        if (self.options.group_enable_Qt
+        if self.options.build_all_modules:
+            parties["boost"]  = "boost/1.78.0"
+            parties["openvr"] = "openvr/1.16.8"
+            parties["odbc"]   = "odbc/2.3.9"
+
+        if (self.options.build_all_modules
+                or self.options.group_enable_Qt
                 or self.options.module_enable_GUISupportQt
                 or self.options.module_enable_GUISupportQtQuick
                 or self.options.module_enable_GUISupportQtSQL
@@ -359,6 +407,21 @@ class VtkConan(ConanFile):
     def validate(self):
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
+
+        if ((self.options.group_enable_Web == "WANT"
+            or self.options.group_enable_Web == "YES")
+            and not self.options.wrap_python):
+            raise ConanInvalidConfiguration("group_enable_Web can only be enabled with wrap_python")
+
+        if self.options.wrap_python and not self.options.enable_wrapping:
+            raise ConanInvalidConfiguration("wrap_python can only be enabled with enable_wrapping")
+
+        if self.options.wrap_java and not self.options.enable_wrapping:
+            raise ConanInvalidConfiguration("wrap_java can only be enabled with enable_wrapping")
+
+        if self.options.use_tk and not self.options.wrap_python:
+            raise ConanInvalidConfiguration("use_tk can only be enabled with wrap_python")
+
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -478,11 +541,10 @@ class VtkConan(ConanFile):
         # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
 
 
-        # if flag is false, then sets to "DEFAULT" ie WILL build if wanted by some other YES
-        # could also: "YES" "NO" "WANT" "DONT_WANT"
-        # where yes/no is enforced, and want/dont_want are hints
+        # this little function only to help mark out the special
+        # default/yes/no/want/dont_want options
         def _yesno(flag):
-            return "YES" if flag else "DEFAULT"
+            return flag
 
 
         # groups can be:  DEFAULT   DONT_WANT   WANT   YES   NO
@@ -502,12 +564,26 @@ class VtkConan(ConanFile):
 
         ##### QT ######
         # QT has a few modules, we'll be specific
-        tc.variables["VTK_QT_VERSION"] = self.options.qt_version
+        tc.variables["VTK_QT_VERSION"]                          = self.options.qt_version
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQt"]      = _yesno(self.options.module_enable_GUISupportQt)
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtQuick"] = _yesno(self.options.module_enable_GUISupportQtQuick)
         tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtSQL"]   = _yesno(self.options.module_enable_GUISupportQtSQL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]   = _yesno(self.options.module_enable_RenderingQt)
-        tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]   = _yesno(self.options.module_enable_ViewsQt)
+        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]       = _yesno(self.options.module_enable_RenderingQt)
+        tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]           = _yesno(self.options.module_enable_ViewsQt)
+
+
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOPDAL"]            = _yesno(self.options.module_IOPDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOPostgreSQL"]      = _yesno(self.options.module_IOPostgreSQL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOOpenVDB"]         = _yesno(self.options.module_IOOpenVDB)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOLAS"]             = _yesno(self.options.module_IOLAS)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOADIOS2"]          = _yesno(self.options.module_IOADIOS2)
+        tc.variables["VTK_MODULE_ENABLE_VTK_fides"]             = _yesno(self.options.module_fides)
+        tc.variables["VTK_MODULE_ENABLE_VTK_GeovisGDAL"]        = _yesno(self.options.module_GeovisGDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOGDAL"]            = _yesno(self.options.module_IOGDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_FiltersOpenTURNS"]  = _yesno(self.options.module_FiltersOpenTURNS)
+        tc.variables["VTK_MODULE_ENABLE_VTK_DomainsMicroscopy"] = _yesno(self.options.module_DomainsMicroscopy)
+        tc.variables["VTK_MODULE_ENABLE_VTK_CommonArchive"]     = _yesno(self.options.module_CommonArchive)
+        # TODO if true (or all) then system has to install postgres dev package
 
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
@@ -525,18 +601,27 @@ class VtkConan(ConanFile):
         #
         # VTK uses a heavily-forked version they call 2.4.0.  Upstream libharu is currently unmaintained.
         tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_libharu"] = False
-        #
-        # CCI does not have gl2ps yet.  Note that cern-root is also waiting for gl2ps.
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_gl2ps"] = False
-        #
-        # CCI does not have pegtl, from what I could tell
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_pegtl"] = False
-        #
-        # CCI does not have ioss, from what I could tell
-        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_ioss"] = False
-        #
 
-        ###
+
+        # these are missing in CCI, could probably use if they become available
+        missing_from_cci = [
+                "diy2",
+                "exodusII",
+                "fides",
+                "gl2ps",
+                "h5part",
+                "ioss",
+                "mpi4py",
+                "pegtl",
+                "verdict",
+                "vpic",
+                "vtkm",
+                "xdmf2",
+                "xdmf3",
+                ]
+
+        for lib in missing_from_cci:
+            tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_" + lib] = False
 
 
         # Everything else should come from conan.
@@ -545,6 +630,12 @@ class VtkConan(ConanFile):
         # SOME of VTK's bundled Third Party libs are heavily forked and patched, so system versions may
         # not be appropriate to use externally (like libharu).
         tc.variables["VTK_USE_EXTERNAL"] = True
+
+
+        # TODO these dependencies modules aren't available in CCI or internally
+        # this one was used for RenderingRayTracing
+        tc.variables["VTK_ENABLE_OSPRAY"] = False
+
 
         tc.generate()
 
