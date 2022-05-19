@@ -4,7 +4,7 @@ from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class GlpkConan(ConanFile):
