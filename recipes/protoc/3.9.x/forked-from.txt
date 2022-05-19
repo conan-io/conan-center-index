@@ -1,1 +1,0 @@
-https://github.com/bincrafters/conan-protobuf/commit/0da7d51a0ec18148a79b485a154411c292fcbfb6
