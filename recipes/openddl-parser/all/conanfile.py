@@ -12,7 +12,7 @@ class OpenDDLParserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kimkulling/openddl-parser"
     description = "A simple and fast OpenDDL Parser"
-    topics = ("conan", "openddl", "parser")
+    topics = ("openddl", "parser")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -24,7 +24,6 @@ class OpenDDLParserConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     @property
@@ -35,21 +34,26 @@ class OpenDDLParserConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -73,7 +77,6 @@ class OpenDDLParserConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*.dll", dst="bin", src="bin", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
@@ -82,7 +85,7 @@ class OpenDDLParserConan(ConanFile):
         self.cpp_info.libs = ["openddlparser"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        if self._is_msvc and not self.options.shared:
+        if not self.options.shared:
             self.cpp_info.defines.append("OPENDDL_STATIC_LIBARY")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
