@@ -198,3 +198,20 @@ index 4820607e54..43f86fbbe5 100644
      STANDARD_INCLUDE_DIRS)
  
  configure_file(
+diff --git a/ThirdParty/cgns/CMakeLists.txt b/ThirdParty/cgns/CMakeLists.txt
+index 610e0d3c25..ef3f224957 100644
+--- a/ThirdParty/cgns/CMakeLists.txt
++++ b/ThirdParty/cgns/CMakeLists.txt
+@@ -4,9 +4,9 @@ vtk_module_third_party(
+     VERSION       "4.1.2"
+     STANDARD_INCLUDE_DIRS
+   EXTERNAL
+-    PACKAGE CGNS
+-    VERSION       "4.1.1"
+-    TARGETS CGNS::CGNS
++    PACKAGE cgns
++    VERSION       "4.3.0"
++    TARGETS cgns::cgns
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
