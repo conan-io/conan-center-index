@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan.tools.files import rename
 from contextlib import contextmanager
 import os
 
@@ -123,7 +124,7 @@ class GlpkConan(ConanFile):
 
         if self._is_msvc and self.options.shared:
             pjoin = lambda p: os.path.join(self.package_folder, "lib", p)
-            conan.tools.files.rename(self, pjoin("glpk.dll.lib"), pjoin("glpk.lib"))
+            rename(self, pjoin("glpk.dll.lib"), pjoin("glpk.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
