@@ -96,6 +96,7 @@ class GlpkConan(ConanFile):
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
         ]
 
         if self._is_msvc:
