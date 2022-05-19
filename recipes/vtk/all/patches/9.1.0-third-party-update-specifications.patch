@@ -215,3 +215,22 @@ index 610e0d3c25..ef3f224957 100644
      STANDARD_INCLUDE_DIRS)
  
  configure_file(
+diff --git a/Rendering/OpenVR/CMakeLists.txt b/Rendering/OpenVR/CMakeLists.txt
+index de0f21e0fa..7f8d28c975 100644
+--- a/Rendering/OpenVR/CMakeLists.txt
++++ b/Rendering/OpenVR/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-vtk_module_find_package(PACKAGE OpenVR)
++vtk_module_find_package(PACKAGE openvr)
+ 
+ set(classes
+   vtkOpenVRCamera
+@@ -23,7 +23,7 @@ vtk_module_add_module(VTK::RenderingOpenVR
+   PRIVATE_HEADERS "${dashboard_header}" ${vtk_object_factory_header} ${geometry_headers})
+ vtk_module_link(VTK::RenderingOpenVR
+   PUBLIC
+-    OpenVR::OpenVR)
++    openvr::openvr)
+ 
+ set(openvr_input_files
+   vtk_openvr_actions.json
