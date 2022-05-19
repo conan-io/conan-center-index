@@ -74,19 +74,19 @@ class VtkConan(ConanFile):
     # gl2ps:            internal (not available in CCI - TODO)
     # glew:             conan (glew)
     # h5part:           TODO
-    # hdf5:             conan (hdf5) - TODO requires MPI and other things
-    # ioss:             TODO
+    # hdf5:             conan (hdf5)
+    # ioss:             internal (not available in CCI - TODO)
     # jpeg:             TODO
     # jsoncpp:          conan (jsoncpp)
     # kissfft:          TODO
     # libharu:          VTK (heavily patched)
     # libproj:          conan (proj)
-    # libxml2:          TODO
+    # libxml2:          conan (libxml2)
     # loguru:           TODO
     # lz4:              conan (lz4)
     # lzma:             conan (xz_utils)
     # mpi4py:           TODO
-    # netcdf:           TODO
+    # netcdf:           conan (netcdf)
     # ogg:              TODO
     # pegtl:            TODO
     # png:              TODO
@@ -303,8 +303,11 @@ class VtkConan(ConanFile):
                 }
 
         if self.options.group_enable_StandAlone:
-            parties["hdf5"] = "hdf5/1.12.1"
-            parties["theora"] = "theora/1.1.1"
+            parties["hdf5"]    = "hdf5/1.12.1"
+            parties["theora"]  = "theora/1.1.1"
+            parties["netcdf"]  = "netcdf/4.8.1"
+            parties["libxml2"] = "libxml2/2.9.14"
+            parties["cgns"]    = "cgns/4.3.0"
 
         # TODO figure out how we want to support modules...
         # VTK already has an extensive module system, we would want to mirror or use it
@@ -525,6 +528,12 @@ class VtkConan(ConanFile):
         #
         # CCI does not have gl2ps yet.  Note that cern-root is also waiting for gl2ps.
         tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_gl2ps"] = False
+        #
+        # CCI does not have pegtl, from what I could tell
+        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_pegtl"] = False
+        #
+        # CCI does not have ioss, from what I could tell
+        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_ioss"] = False
         #
 
         ###
