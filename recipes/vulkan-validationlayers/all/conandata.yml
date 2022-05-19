@@ -1,4 +1,10 @@
 sources:
+  "1.3.211.0":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.211.0.tar.gz"
+    sha256: "927c1cb98c81fe8a1a529cf2d977d701dcda49c495a19583dc00e178b6757203"
+  "1.3.204.1":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.204.1.tar.gz"
+    sha256: "a5e658a4c1f504ae38488acdbe2ab2799e2ae4b626104d76776f1c24b079f341"
   "1.2.198.0":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.2.198.0.tar.gz"
     sha256: "4a70cc5da26baf873fcf69b081eeeda545515dd66e5904f18fee32b4d275593a"
@@ -13,20 +19,20 @@ sources:
     sha256: "8898ab05d0d8dec04fbba03d0ed2e79a1eb5c0382e5c89d4c737b45a6648f7f9"
 patches:
   "1.2.198.0":
-    - patch_file: "patches/fix-cmake-1.2.198.0.patch"
+    - patch_file: "patches/0005-fix-cmake-1.2.198.0.patch"
       base_path: "source_subfolder"
   "1.2.189.2":
-    - patch_file: "patches/fix-cmake-1.2.189.2.patch"
+    - patch_file: "patches/0005-fix-cmake-1.2.189.2.patch"
       base_path: "source_subfolder"
   "1.2.182":
-    - patch_file: "patches/fix-cmake-1.2.182.patch"
+    - patch_file: "patches/0005-fix-cmake-1.2.182.patch"
       base_path: "source_subfolder"
   "1.2.154.0":
-    - patch_file: "patches/duplicated-declaration.patch"
+    - patch_file: "patches/0001-duplicated-declaration.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-mingw.patch"
+    - patch_file: "patches/0002-fix-mingw.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/disable-nortti-and-warnings-as-errors.patch"
+    - patch_file: "patches/0003-disable-nortti-and-warnings-as-errors.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-installation.patch"
+    - patch_file: "patches/0004-fix-installation.patch"
       base_path: "source_subfolder"

@@ -18,19 +18,19 @@ class ElfutilsConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "debuginfod": [True, False],
+        "libdebuginfod": [True, False],
         "with_bzlib": [True, False],
         "with_lzma": [True, False],
         "with_sqlite3": [True, False],
-        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "debuginfod": False,
+        "libdebuginfod": False,
         "with_bzlib": True,
         "with_lzma": True,
         "with_sqlite3": False,
-        "with_zlib": True,
     }
 
     generators = "pkg_config"
@@ -45,6 +45,8 @@ class ElfutilsConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if tools.Version(self.version) < "0.186":
+            del self.options.libdebuginfod
 
     def configure(self):
         if self.options.shared:
@@ -53,21 +55,27 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
-            raise ConanInvalidConfiguration("Compiler %s not supported. "
-                          "elfutils only supports gcc" % self.settings.compiler)
+        if tools.Version(self.version) >= "0.186":
+            if self.settings.compiler in ["Visual Studio", "apple-clang", "msvc"]:
+                raise ConanInvalidConfiguration("Compiler %s not supported. "
+                            "elfutils only supports gcc and clang" % self.settings.compiler)
+        else:
+            if self.settings.compiler in ["Visual Studio", "clang", "apple-clang", "msvc"]:
+                raise ConanInvalidConfiguration("Compiler %s not supported. "
+                            "elfutils only supports gcc" % self.settings.compiler)
         if self.settings.compiler != "gcc":
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
     def requirements(self):
+        self.requires("zlib/1.2.12")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.37.0")
+            self.requires("sqlite3/3.38.5")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
+        if self.options.get_safe("libdebuginfod"):
+            self.requires("libcurl/7.83.0")
         if self.options.debuginfod:
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
@@ -96,12 +104,15 @@ class ElfutilsConan(ConanFile):
                 "--enable-static={}".format("no" if self.options.shared else "yes"),
                 "--enable-deterministic-archives",
                 "--enable-silent-rules",
-                "--with-zlib" if self.options.with_zlib else "--without-zlib",
+                "--with-zlib",
                 "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
-                'BUILD_STATIC={}'.format("0" if self.options.shared else "1"),
             ]
+            if tools.Version(self.version) >= "0.186":
+                args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
+            args.append('BUILD_STATIC={}'.format("0" if self.options.shared else "1"))
+
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
@@ -118,6 +129,7 @@ class ElfutilsConan(ConanFile):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
@@ -132,11 +144,19 @@ class ElfutilsConan(ConanFile):
         self.cpp_info.components["libelf"].requires = ["zlib::zlib"]
 
         self.cpp_info.components["libdw"].libs = ["dw"]
-        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils"]
+        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib"]
+        if self.options.with_bzlib:
+            self.cpp_info.components["libdw"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["libdw"].requires.append("xz_utils::xz_utils")
 
         self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
         self.cpp_info.components["libasm"].libs = ["asm"]
         self.cpp_info.components["libasm"].requires = ["libelf", "libdw"]
+
+        if self.options.get_safe("libdebuginfod"):
+            self.cpp_info.components["libdebuginfod"].libs = ["debuginfod"]
+            self.cpp_info.components["libdebuginfod"].requires = ["libcurl::curl"]
 
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")

@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ed6e249..19ff2fd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,13 @@ set(SDL_TTF_VERSION "${SDL_TTF_MAJOR_VERSION}.${SDL_TTF_MINOR_VERSION}.${SDL_TTF
+ 
+ ##### library generation #####
+ add_library(SDL2_ttf SDL_ttf.c SDL_ttf.h)
+-target_link_libraries(SDL2_ttf SDL2::SDL2 Freetype::Freetype)
++
++if(TARGET SDL2::SDL2)
++  target_link_libraries(SDL2_ttf SDL2::SDL2 Freetype::Freetype)
++else ()
++  target_link_libraries(SDL2_ttf SDL2::SDL2-static Freetype::Freetype)
++endif ()
++
+ target_include_directories(SDL2_ttf PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/SDL2>)
+ 
+ install(

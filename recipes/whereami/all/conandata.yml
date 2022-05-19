@@ -1,0 +1,4 @@
+sources:
+  "cci.20220112":
+    url: "https://github.com/gpakosz/whereami/archive/f15606a65908bb097e1887a08a40ae083e9a5c53.tar.gz"
+    sha256: "005d51ed0a99845b27ed9df4834b609abfc1811b187aeee1a85929004704dd6d"

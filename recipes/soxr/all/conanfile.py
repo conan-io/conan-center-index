@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
+import functools
 import os
-import re
+from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.45.0"
 
 
 class SoxrConan(ConanFile):
@@ -14,21 +16,18 @@ class SoxrConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False], 
-        "fPIC": [True, False], 
+        "shared": [True, False],
+        "fPIC": [True, False],
         "with_openmp": [True, False],
         "with_lsr_bindings": [True, False]
     }
     default_options = {
-        "shared": False, 
-        "fPIC": True, 
+        "shared": False,
+        "fPIC": True,
         "with_openmp": False,
         "with_lsr_bindings": True
     }
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -37,6 +36,11 @@ class SoxrConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,19 +56,16 @@ class SoxrConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake        
-        self._cmake = CMake(self)
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["BUILD_SHARED_RUNTIME"] = "MD" in self.settings.compiler.runtime
-        elif self.settings.compiler == "msvc":
-            self._cmake.definitions["BUILD_SHARED_RUNTIME"] = self.settings.compiler.runtime == "dynamic"
-        self._cmake.definitions["BUILD_TESTS"] = False   
-        self._cmake.definitions["WITH_OPENMP"] = self.options.with_openmp
-        self._cmake.definitions["WITH_LSR_BINDINGS"] = self.options.with_lsr_bindings
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        if is_msvc(self):
+            cmake.definitions["BUILD_SHARED_RUNTIME"] = msvc_runtime_flag(self) == "MD"
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.definitions["WITH_OPENMP"] = self.options.with_openmp
+        cmake.definitions["WITH_LSR_BINDINGS"] = self.options.with_lsr_bindings
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -73,11 +74,9 @@ class SoxrConan(ConanFile):
         cmake.build()
 
     def _extract_pffft_license(self):
-        # extract license header from pffft.c and store it in the package folder
         pffft_c = tools.load(os.path.join(self._source_subfolder, "src", "pffft.c"))
-        license_header = re.search(r"/\* (Copyright.*?)\*/", pffft_c, re.DOTALL).group(1)
-        license_header = "\n".join(line.lstrip() for line in license_header.splitlines())
-        tools.save(os.path.join(self.package_folder, "licenses", "pffft"), license_header)
+        license_contents = pffft_c[pffft_c.find("/* Copyright")+3:pffft_c.find("modern CPUs.")+13]
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self.copy("LICENCE", dst="licenses", src=self._source_subfolder)

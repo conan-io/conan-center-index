@@ -1,0 +1,41 @@
+see https://github.com/icculus/physfs/pull/15
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -171,6 +171,7 @@ endif()
+ option(PHYSFS_BUILD_SHARED "Build shared library" TRUE)
+ if(PHYSFS_BUILD_SHARED)
+     add_library(physfs SHARED ${PHYSFS_SRCS})
++    target_compile_definitions(physfs PRIVATE PHYSFS_BUILD_SHARED PUBLIC PHYSFS_SHARED)
+     set_target_properties(physfs PROPERTIES MACOSX_RPATH 1)
+     set_target_properties(physfs PROPERTIES VERSION ${PHYSFS_VERSION})
+     set_target_properties(physfs PROPERTIES SOVERSION ${PHYSFS_SOVERSION})
+--- a/src/physfs.h
++++ b/src/physfs.h
+@@ -223,10 +223,13 @@
+ extern "C" {
+ #endif
+ 
+-#if defined(PHYSFS_DECL)
+-/* do nothing. */
+-#elif defined(_MSC_VER)
++#ifdef PHYSFS_SHARED
++#ifdef _MSC_VER
++#ifdef PHYSFS_BUILD_SHARED
+ #define PHYSFS_DECL __declspec(dllexport)
++#else
++#define PHYSFS_DECL __declspec(dllimport)
++#endif
+ #elif defined(__SUNPRO_C)
+ #define PHYSFS_DECL __global
+ #elif ((__GNUC__ >= 3) && (!defined(__EMX__)) && (!defined(sun)))
+@@ -234,6 +237,9 @@ extern "C" {
+ #else
+ #define PHYSFS_DECL
+ #endif
++#else
++#define PHYSFS_DECL
++#endif
+ 
+ #if defined(PHYSFS_DEPRECATED)
+ /* do nothing. */

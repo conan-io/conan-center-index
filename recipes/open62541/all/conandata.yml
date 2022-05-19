@@ -17,6 +17,9 @@ sources:
   "1.2.2":
     url: "https://github.com/open62541/open62541/archive/v1.2.2.tar.gz"
     sha256: "9b5bfd811ee523be601f11abc514a93c67fe5c6e957cd6c36fe6ea4f28e009bb"
+  "1.2.4":
+    url: "https://github.com/open62541/open62541/archive/v1.2.4.tar.gz"
+    sha256: "b2d00b91e8315b61efaef6398f0902a0c9a8f357aa6d02f7f000a429048c97ae"
 patches:
   "1.0.3":
     - patch_file: "patches/1_0_x.patch"
@@ -40,6 +43,13 @@ patches:
     - patch_file: "patches/0003-disable-sanitizers-1_1_6.patch"
       base_path: "source_subfolder"
   "1.2.2":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
+      base_path: "source_subfolder"
+  "1.2.4":
     - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"

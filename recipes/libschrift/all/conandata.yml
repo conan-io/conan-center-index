@@ -1,0 +1,4 @@
+sources:
+  "0.10.1":
+    url: "https://github.com/tomolt/libschrift/archive/refs/tags/v0.10.1.tar.gz"
+    sha256: "3590c1f9d9cf752edbe51908584aa3dc4d8b466c93bdd3771e830880e143f94c"

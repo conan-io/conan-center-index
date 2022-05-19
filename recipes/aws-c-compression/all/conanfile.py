@@ -41,7 +41,7 @@ class AwsCCompression(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.15")
+        self.requires("aws-c-common/0.6.19")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

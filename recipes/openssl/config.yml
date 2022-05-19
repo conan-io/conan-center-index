@@ -1,10 +1,18 @@
 versions:
   # 3.0.x releases
+  3.0.3:
+    folder: "3.x.x"
+  3.0.2:
+    folder: "3.x.x"
   3.0.1:
     folder: "3.x.x"
   3.0.0:
     folder: "3.x.x"
   # 1.1.1x releases
+  1.1.1o:
+    folder: "1.x.x"
+  1.1.1n:
+    folder: "1.x.x"
   1.1.1m:
     folder: "1.x.x"
   1.1.1l:

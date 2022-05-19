@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TlfunctionrefConan(ConanFile):
@@ -11,7 +11,7 @@ class TlfunctionrefConan(ConanFile):
     topics = ("function_ref", "callable")
     homepage = "https://github.com/TartanLlama/function_ref"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -34,9 +34,14 @@ class TlfunctionrefConan(ConanFile):
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "tl-function-ref")
+        self.cpp_info.set_property("cmake_target_name", "tl::function-ref")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tl-function-ref"
         self.cpp_info.filenames["cmake_find_package_multi"] = "tl-function-ref"
         self.cpp_info.names["cmake_find_package"] = "tl"
         self.cpp_info.names["cmake_find_package_multi"] = "tl"
         self.cpp_info.components["function-ref"].names["cmake_find_package"] = "function-ref"
         self.cpp_info.components["function-ref"].names["cmake_find_package_multi"] = "function-ref"
+        self.cpp_info.components["function-ref"].set_property("cmake_target_name", "tl::function-ref")

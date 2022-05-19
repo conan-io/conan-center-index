@@ -24,7 +24,7 @@ class LibgeotiffConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -52,7 +52,7 @@ class LibgeotiffConan(ConanFile):
 
     def requirements(self):
         self.requires("libtiff/4.3.0")
-        self.requires("proj/8.2.1")
+        self.requires("proj/9.0.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -121,18 +121,15 @@ class LibgeotiffConan(ConanFile):
 
     @property
     def _module_vars_file(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     @property
     def _module_target_file(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "GeoTIFF")
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
         self.cpp_info.set_property("cmake_file_name", "geotiff")
         self.cpp_info.set_property("cmake_target_name", "geotiff_library")

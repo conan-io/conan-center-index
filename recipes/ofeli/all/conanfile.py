@@ -8,8 +8,8 @@ required_conan_version = ">=1.40.0"
 class OfeliConan(ConanFile):
     name = "ofeli"
     description = "An Object Finite Element Library"
-    topics = ("ofeli", "finite element", "finite element library",
-              "finite element analysis", "finite element solver")
+    topics = ("finite-element", "finite-element-library",
+              "finite-element-analysis", "finite-element-solver")
     license = "LGPL-3.0-or-later"
     homepage = "http://ofeli.org/index.html"
     url = "https://github.com/conan-io/conan-center-index"
@@ -68,8 +68,6 @@ class OfeliConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._doc_folder)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Ofeli"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ofeli"
         self.cpp_info.libs = ["ofeli"]
         self.env_info.OFELI_PATH_MATERIAL.append(
             os.path.join(self.package_folder, "res"))

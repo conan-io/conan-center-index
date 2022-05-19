@@ -1,27 +1,39 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibcdsConan(ConanFile):
     name = "libcds"
     description = "C++11 library of Concurrent Data Structures."
     license = "BSL-1.0"
-    topics = ("conan", "libcds", "concurrent", "lock-free", "containers", "hazard-pointer", "rcu")
+    topics = ("libcds", "concurrent", "lock-free", "containers", "hazard-pointer", "rcu")
     homepage = "https://github.com/khizmax/libcds"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,11 +42,15 @@ class LibcdsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.78.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Macos M1 not supported (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -67,16 +83,22 @@ class LibcdsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "LibCDS"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
         cmake_target = "cds" if self.options.shared else "cds-s"
-        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.set_property("cmake_file_name", "LibCDS")
+        self.cpp_info.set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_libcds"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["_libcds"].defines = ["CDS_BUILD_STATIC_LIB"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_libcds"].system_libs = ["pthread"]
         if self.settings.compiler in ["gcc", "clang", "apple-clang"] and self.settings.arch == "x86_64":
             self.cpp_info.components["_libcds"].cxxflags = ["-mcx16"]
         self.cpp_info.components["_libcds"].requires = ["boost::boost"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LibCDS"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
+        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libcds"].set_property("cmake_target_name", "LibCDS::{}".format(cmake_target))

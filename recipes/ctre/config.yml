@@ -19,3 +19,7 @@ versions:
     folder: all
   "3.4.1":
     folder: all
+  "3.5":
+    folder: all
+  "3.6":
+    folder: all

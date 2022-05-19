@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["ZSTD_SHARED"] = self.options["zstd"].shared
         cmake.configure()
         cmake.build()
 

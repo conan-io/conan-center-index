@@ -51,7 +51,9 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.9.0":
+        if tools.Version(self.version) >= "1.10.0":
+            self.requires("fmt/8.1.1")
+        elif tools.Version(self.version) >= "1.9.0":
             self.requires("fmt/8.0.1")
         elif tools.Version(self.version) >= "1.7.0":
             self.requires("fmt/7.1.3")
@@ -150,3 +152,5 @@ class SpdlogConan(ConanFile):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_EXCEPTIONS")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libspdlog"].system_libs = ["pthread"]
+        if self.options.header_only and self.settings.os in ("iOS", "tvOS", "watchOS"):
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_TLS")

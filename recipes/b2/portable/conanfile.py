@@ -2,12 +2,14 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class B2Conan(ConanFile):
     name = "b2"
     homepage = "https://www.bfgroup.xyz/b2/"
     description = "B2 makes it easy to build C++ projects, everywhere."
-    topics = ("conan", "installer", "builder")
+    topics = ("b2", "installer", "builder", "build", "build-system")
     license = "BSL-1.0"
     settings = "os", "arch"
     url = "https://github.com/conan-io/conan-center-index"
@@ -23,7 +25,7 @@ class B2Conan(ConanFile):
     'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
     'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
     'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142'
+    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143'
 
     Specifies the toolset to use for building. The default of 'auto' detects
     a usable compiler for building and should be preferred. The 'cxx' toolset
@@ -39,7 +41,7 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142']
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143']
     }
     default_options = {
         'use_cxx_env': False,
@@ -74,6 +76,8 @@ class B2Conan(ConanFile):
         os.chdir(build_dir)
         command = os.path.join(
             engine_dir, "b2.exe" if use_windows_commands else "b2")
+        if self.options.toolset != 'auto':
+            command += " toolset=" + str(self.options.toolset)
         full_command = \
             "{0} --ignore-site-config --prefix=../output --abbreviate-paths install b2-install-layout=portable".format(
                 command)

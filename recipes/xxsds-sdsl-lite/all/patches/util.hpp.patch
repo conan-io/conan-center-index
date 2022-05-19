@@ -1,0 +1,13 @@
+diff --git a/include/sdsl/util.hpp b/include/sdsl/util.hpp
+index 9ce5726..f2b65a5 100644
+--- a/include/sdsl/util.hpp
++++ b/include/sdsl/util.hpp
+@@ -266,7 +266,7 @@ inline std::string dirname(std::string file)
+  */
+ inline std::string demangle(const std::string & name)
+ {
+-#if 1
++#ifndef _WIN32
+     char buf[4096];
+     size_t size = 4096;
+     int status = 0;

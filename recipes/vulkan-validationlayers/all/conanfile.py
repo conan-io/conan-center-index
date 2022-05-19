@@ -1,8 +1,10 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException, ConanInvalidConfiguration
+import functools
 import glob
 import os
 import shutil
+import yaml
 
 required_conan_version = ">=1.35.0"
 
@@ -28,13 +30,27 @@ class VulkanValidationLayersConan(ConanFile):
     }
 
     short_paths = True
-
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _dependencies_filename(self):
+        return f"dependencies-{self.version}.yml"
+
+    @property
+    @functools.lru_cache(1)
+    def _dependencies_versions(self):
+        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
+        if not os.path.isfile(dependencies_filepath):
+            raise ConanException(f"Cannot find {dependencies_filepath}")
+        cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return cached_dependencies
+
+    def export(self):
+        self.copy(self._dependencies_filename, src="dependencies", dst="dependencies")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -42,28 +58,10 @@ class VulkanValidationLayersConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
-
-    @property
-    def _get_compatible_spirv_tools_version(self):
-        return {
-            "1.2.198.0": "2021.4",
-            "1.2.189.2": "2021.3",
-            "1.2.182": "2021.2",
-            "1.2.154.0": "2020.5",
-        }.get(str(self.version), False)
-
-    @property
-    def _get_compatible_vulkan_headers_version(self):
-        return {
-            "1.2.198.0": "1.2.198.0",
-            "1.2.189.2": "1.2.189",
-            "1.2.182": "1.2.182",
-            "1.2.154.0": "1.2.154.0",
-        }.get(str(self.version), False)
 
     @staticmethod
     def _greater_equal_semver(v1, v2):
@@ -78,15 +76,20 @@ class VulkanValidationLayersConan(ConanFile):
 
     def requirements(self):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not hasattr(self, "settings_build"))
-        self.requires("vulkan-headers/{}".format(self._get_compatible_vulkan_headers_version))
+        self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
+        self.requires(self._require("vulkan-headers"))
         # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
         if self._greater_equal_semver(self.version, "1.2.173"):
-            self.requires("robin-hood-hashing/3.11.3")
+            self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.19.0")
+            self.requires("wayland/1.20.0")
+
+    def _require(self, recipe_name):
+        if recipe_name not in self._dependencies_versions:
+            raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
+        return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -112,24 +115,27 @@ class VulkanValidationLayersConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
+        # but it can't be modeled right now in spirv-tools recipe
+        if not os.path.exists("SPIRV-Tools-optConfig.cmake"):
+            shutil.copy("SPIRV-ToolsConfig.cmake", "SPIRV-Tools-optConfig.cmake")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
-        self._cmake.definitions["USE_CCACHE"] = False
-        if self.settings.os == "Linux":
-            self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
-            self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
-            self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
-        self._cmake.definitions["BUILD_WERROR"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["INSTALL_TESTS"] = False
-        self._cmake.definitions["BUILD_LAYERS"] = True
-        self._cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = True
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
+        cmake.definitions["USE_CCACHE"] = False
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
+            cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
+            cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+        cmake.definitions["BUILD_WERROR"] = False
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.definitions["INSTALL_TESTS"] = False
+        cmake.definitions["BUILD_LAYERS"] = True
+        cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = True
+        cmake.configure()
+        return cmake
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)

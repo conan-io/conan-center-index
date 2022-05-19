@@ -2,16 +2,17 @@ from conans import CMake, ConanFile, tools
 import os
 import textwrap
 
+required_conan_version = ">=1.43.0"
+
 
 class Z3Conan(ConanFile):
     name = "z3"
     description = "The Z3 Theorem Prover"
-    topics = ("conan", "z3", "theorem", "SMT", "satisfiability", "prover", "solver")
+    topics = ("z3", "theorem", "SMT", "satisfiability", "prover", "solver")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Z3Prover/z3"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
     license = "MIT"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,6 +25,7 @@ class Z3Conan(ConanFile):
         "multithreaded": True,
     }
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -33,6 +35,11 @@ class Z3Conan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,8 +53,8 @@ class Z3Conan(ConanFile):
         self.requires("mpir/3.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{0}-{1}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -81,18 +88,21 @@ class Z3Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # z3 generates a Z3Config.cmake file
-        self.cpp_info.names["cmake_find_package"] = "z3"
-        self.cpp_info.names["cmake_find_package_multi"] = "z3"
+        self.cpp_info.set_property("cmake_file_name", "Z3")
+        self.cpp_info.set_property("cmake_target_name", "z3::libz3")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["libz3"].libs = ["libz3" if self.settings.os == "Windows" else "z3"]
+        if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libz3"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Z3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Z3"
-
-        self.cpp_info.components["libz3"].libs = ["libz3" if self.settings.os == "Windows" else "z3"]
-        self.cpp_info.components["libz3"].requires = ["mpir::mpir"]
-        # Z3COnfig.cmake generates a z3::libz3 target
+        self.cpp_info.names["cmake_find_package"] = "z3"
+        self.cpp_info.names["cmake_find_package_multi"] = "z3"
         self.cpp_info.components["libz3"].names["cmake_find_package"] = "libz3"
         self.cpp_info.components["libz3"].names["cmake_find_package_multi"] = "libz3"
-        if not self.options.shared:
-            if self.settings.os  =="Linux":
-                self.cpp_info.components["libz3"].system_libs.append("pthread")
-        # FIXME: this generates a Z3::libz3 target instead of z3::libz3.
+        self.cpp_info.components["libz3"].set_property("cmake_target_name", "z3::libz3")
+        self.cpp_info.components["libz3"].requires = ["mpir::mpir"]

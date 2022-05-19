@@ -1,19 +1,22 @@
 sources:
-  "18.3.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v18.3.0.tar.gz"
-    sha256: "f51317e2a8cd743e6ff9dfd215569824eaca489c24f7d8fd94eaca44443a9728"
-  "19.1.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.1.0.tar.gz"
-    sha256: "65afa329b0c768a7443ea2621f3f371bc5ce0e1c3518d59bb11b9a2c7adb65dd"
-  "19.2.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.2.0.tar.gz"
-    sha256: "2956075293090754bc2431c53634f93a1e74739c61392be6040cb3ed29430ec2"
-  "19.3.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.3.0.tar.gz"
-    sha256: "6f709b4e5fe053a94a952da93c07c919b36bcb8c838c69067560ae85f97c5621"
-  "20.8.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.8.0.tar.gz"
-    sha256: "6ab4bc0207f44eacbb9c82fd0dc59a49ef84e13698ccdbfb44b92c6a0eaa951a"
+  "20.14.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.14.0.tar.gz"
+    sha256: "15cf995844a930c9a36747e8d714b94ff886b6814b5d4e3b3ee176f05681cccc"
   "20.9.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v20.9.0.tar.gz"
     sha256: "91897568291a2081ffc1ae27c354446cc130c168a25892b2289f25e185af8676"
+  "20.8.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.8.0.tar.gz"
+    sha256: "6ab4bc0207f44eacbb9c82fd0dc59a49ef84e13698ccdbfb44b92c6a0eaa951a"
+  "19.3.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v19.3.0.tar.gz"
+    sha256: "6f709b4e5fe053a94a952da93c07c919b36bcb8c838c69067560ae85f97c5621"
+  "19.2.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v19.2.0.tar.gz"
+    sha256: "2956075293090754bc2431c53634f93a1e74739c61392be6040cb3ed29430ec2"
+  "19.1.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v19.1.0.tar.gz"
+    sha256: "65afa329b0c768a7443ea2621f3f371bc5ce0e1c3518d59bb11b9a2c7adb65dd"
+  "18.3.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v18.3.0.tar.gz"
+    sha256: "f51317e2a8cd743e6ff9dfd215569824eaca489c24f7d8fd94eaca44443a9728"

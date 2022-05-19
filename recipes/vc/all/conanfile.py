@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class VcConan(ConanFile):
@@ -13,8 +13,12 @@ class VcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -64,6 +68,10 @@ class VcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Vc")
+        self.cpp_info.set_property("cmake_target_name", "Vc::Vc")
+        self.cpp_info.libs = ["Vc"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Vc"
         self.cpp_info.names["cmake_find_package_multi"] = "Vc"
-        self.cpp_info.libs = ["Vc"]

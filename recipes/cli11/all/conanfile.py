@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.43.0"
 
 class CLI11Conan(ConanFile):
     name = "cli11"
@@ -36,6 +37,9 @@ class CLI11Conan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_target_name", "CLI11::CLI11")
+        self.cpp_info.set_property("cmake_file_name", "CLI11")
+        self.cpp_info.set_property("pkg_config_name", "CLI11")
         self.cpp_info.names["cmake_find_package"] = "CLI11"
         self.cpp_info.names["cmake_find_package_multi"] = "CLI11"
         self.cpp_info.names["pkg_config"] = "CLI11"

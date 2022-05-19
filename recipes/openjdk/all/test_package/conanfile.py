@@ -6,7 +6,10 @@ required_conan_version = ">=1.36.0"
 
 
 class TestPackage(ConanFile):
-    test_type = "build_requires"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def build(self):
         pass  # nothing to build, but tests should not warn

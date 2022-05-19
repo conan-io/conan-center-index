@@ -24,8 +24,8 @@ class PerfettoConan(ConanFile):
             "disable_logging": False,
     }
 
+    short_paths = True
     generators = "cmake"
-
     _cmake = None
 
     @property

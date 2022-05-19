@@ -1,0 +1,15 @@
+--- cmake/install_macros.cmake
++++ cmake/install_macros.cmake
+@@ -359,10 +359,10 @@
+       INSTALL(FILES ${_target_location}
+         DESTINATION ${_destination}
+         ${_rename_param}
+         CONFIGURATIONS Release RelWithDebInfo
+         COMPONENT ${ARG_COMPONENT}
+         OPTIONAL)
+-    ENDIF()
+-  ENDFOREACH()
++    ENDFOREACH()
++  ENDIF()
+ 
+ ENDFUNCTION()

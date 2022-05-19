@@ -2,6 +2,7 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class AtSPI2AtkConan(ConanFile):
     name = "at-spi2-atk"
@@ -42,19 +43,18 @@ class AtSPI2AtkConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires('meson/0.57.1')
-        self.build_requires('pkgconf/1.7.3')
+        self.build_requires('meson/0.60.2')
+        self.build_requires('pkgconf/1.7.4')
 
     def requirements(self):
-        self.requires('at-spi2-core/2.39.1')
+        self.requires('at-spi2-core/2.42.0')
         self.requires('atk/2.36.0')
-        self.requires('glib/2.67.6')
-        self.requires('libxml2/2.9.10')
+        self.requires('glib/2.70.1')
+        self.requires('libxml2/2.9.12')
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         if self._meson:

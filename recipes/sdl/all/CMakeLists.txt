@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 project(cmake_wrapper)
 
 include(${CONAN_INSTALL_FOLDER}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 if(UNIX AND NOT APPLE)
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

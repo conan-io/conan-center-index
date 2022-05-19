@@ -1,4 +1,19 @@
 sources:
+  "2.50.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.50.0.tar.gz"
+    sha256: "c0e0b3c0b10f8894bf61f4fb01eeb9b2093301faa0f96740e519ecb951de9acd"
+  "2.46.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.46.0.tar.gz"
+    sha256: "fa3069a038c347a623af0e35a853aa561dc8616051baf708cd0ac17eb1032741"
+  "2.33.2":
+    url: "https://github.com/beached/header_libraries/archive/v2.33.2.tar.gz"
+    sha256: "daa31640001af84b19349472ca40d07b84137ad92c46af314ac3b10bbbc6c559"
+  "2.23.0":
+    url: "https://github.com/beached/header_libraries/archive/v2.23.0.tar.gz"
+    sha256: "5619830ff745319615736036bfd3437577d6a8438ea9f34023208599fdf2cdda"
+  "2.15.1":
+    url: "https://github.com/beached/header_libraries/archive/v2.15.1.tar.gz"
+    sha256: "3ddfc484448a762fcf13c6143b0fcff643cbd98dabc639e043bcf493235fc54d"
   "2.5.3":
     url: "https://github.com/beached/header_libraries/archive/refs/tags/v2.5.3.tar.gz"
     sha256: "0fd08b31947e5f0da45c875bbb44d178d4250225e2623fb845cd458605390233"

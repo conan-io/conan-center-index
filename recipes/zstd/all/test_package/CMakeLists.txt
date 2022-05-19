@@ -10,7 +10,7 @@ conan_basic_setup(TARGETS)
 find_package(zstd REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-if(ZSTD_SHARED)
+if (TARGET zstd::libzstd_shared)
   target_link_libraries(${PROJECT_NAME} zstd::libzstd_shared)
 else()
   target_link_libraries(${PROJECT_NAME} zstd::libzstd_static)

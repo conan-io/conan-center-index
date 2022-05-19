@@ -2,16 +2,17 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibCpuidConan(ConanFile):
     name = "libcpuid"
     description = "libcpuid  is a small C library for x86 CPU detection and feature extraction"
-    topics = ("conan", "libcpuid", "detec", "cpu", "intel", "amd", "x86_64")
+    topics = ("libcpuid", "detec", "cpu", "intel", "amd", "x86_64")
     license = "https://github.com/anrieff/libcpuid"
     homepage = "https://github.com/anrieff/libcpuid"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,9 +22,8 @@ class LibCpuidConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/**"
 
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -33,6 +33,11 @@ class LibCpuidConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,11 +79,15 @@ class LibCpuidConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cpuid")
+        self.cpp_info.set_property("cmake_target_name", "cpuid::cpuid")
+        self.cpp_info.set_property("pkg_config_name", "libcpuid")
         self.cpp_info.libs = ["cpuid"]
-        self.cpp_info.names["cmake_find_package"] = "cpuid"
-        self.cpp_info.names["cmake_find_package_multi"] = "cpuid"
-        self.cpp_info.names["pkg_config"] = "libcpuid"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "cpuid"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpuid"

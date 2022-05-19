@@ -1,16 +1,18 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
+
 
 class CpppeglibConan(ConanFile):
     name = "cpp-peglib"
     description = "A single file C++11 header-only PEG (Parsing Expression Grammars) library."
     license = "MIT"
-    topics = ("conan", "cpp-peglib", "peg", "parser", "header-only")
+    topics = ("cpp-peglib", "peg", "parser", "header-only")
     homepage = "https://github.com/yhirose/cpp-peglib"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _source_subfolder(self):
@@ -24,6 +26,13 @@ class CpppeglibConan(ConanFile):
             "clang": "6",
             "apple-clang": "10"
         }
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -45,13 +54,6 @@ class CpppeglibConan(ConanFile):
            tools.stdcpp_library(self) == "stdc++":
             raise ConanInvalidConfiguration("{} {} does not support clang 7 with libstdc++.".format(self.name, self.version))
 
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -64,10 +66,14 @@ class CpppeglibConan(ConanFile):
         self.copy("peglib.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
             self.cpp_info.cxxflags.append("-pthread")
             self.cpp_info.exelinkflags.append("-pthread")
             self.cpp_info.sharedlinkflags.append("-pthread")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")

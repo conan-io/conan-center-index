@@ -9,7 +9,7 @@ class ArgsParserConan(ConanFile):
     homepage = "https://github.com/igormironchik/args-parser"
     license = "MIT"
     description = "Small C++ header-only library for parsing command line arguments."
-    topics = ("conan", "args-parser", "argument", "parsing")
+    topics = ("args-parser", "argument", "parsing")
     settings = "compiler"
     no_copy_source = True
 

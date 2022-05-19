@@ -14,12 +14,16 @@ class DiligentCoreConan(ConanFile):
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "fPIC": [True, False],
+        "shared": [True, False],
+        "fPIC":   [True, False],
+        "with_glslang": [True, False],
     }
     default_options = {
+        "shared": False	,
         "fPIC": True,
+        "with_glslang": True
     }
-    generators = "cmake_find_package", "cmake"
+    generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
@@ -69,35 +73,36 @@ class DiligentCoreConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.22.0")
 
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("libjpeg/9d")
-        self.requires("libtiff/4.3.0")
-        self.requires("zlib/1.2.11")
-        self.requires("libpng/1.6.37")
-
-        self.requires("spirv-cross/cci.20210930")
-        self.requires("spirv-headers/1.2.198.0")
-        self.requires("spirv-tools/2021.4")
-        self.requires("vulkan-headers/1.2.198")
-        self.requires("volk/1.2.198")
-        self.requires("glslang/11.7.0")
-        if self.settings.compiler == "apple-clang":
-            self.options["glslang"].shared = True
+        self.requires("spirv-cross/1.3.204.0")
+        self.requires("spirv-tools/1.3.204.0")
+        if self.options.with_glslang:
+            self.requires("glslang/1.3.204.0")
+        self.requires("vulkan-headers/1.3.204.1")
+        self.requires("volk/1.3.204")
+        self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.0")        
+                self.requires("xkbcommon/1.3.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
@@ -123,7 +128,9 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_DXC"] = True
+        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = False
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
@@ -141,21 +148,63 @@ class DiligentCoreConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
-                     dst=os.path.join(self.package_folder, "include", "DiligentCore"))
+        dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_info(self):
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
-        if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
+        if self.options.shared:
+            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+            self.copy(pattern="*.so", dst="lib", keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            if self.settings.os is not "Windows":
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.lib")
+        else:
+            self.copy(pattern="*.a", dst="lib", keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll")
 
+        self.copy(pattern="*.fxh", dst="res", keep_path=False)
+
+        self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+
+    def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "dummy1", "dummy2"))
+
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
-        # fake target. Needed for DiligentFx to handle paths like ../../../DiligentCore
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngine", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineVulkan", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineOpenGL", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
+
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
+        if self.settings.os == "Android":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
+        elif self.settings.os == "Emscripten":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))
+        elif self.settings.os == "Linux":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Linux", "interface"))
+        elif self.settings.os == "Windows":
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Win32", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D11", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D12", "interface"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))

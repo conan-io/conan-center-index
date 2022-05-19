@@ -135,8 +135,13 @@ class GiflibConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         with tools.chdir(self._source_subfolder):
-            if self.settings.os == "Macos":
-                tools.replace_in_file("configure", r"-install_name \$rpath/\$soname", r"-install_name \$soname")
+            if tools.is_apple_os(self.settings.os):
+                # relocatable shared lib on macOS
+                tools.replace_in_file(
+                    "configure",
+                    "-install_name \\$rpath/\\$soname",
+                    "-install_name \\@rpath/\\$soname"
+                )
 
             self.run("chmod +x configure")
             env_build.configure(args=args)

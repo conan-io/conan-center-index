@@ -29,7 +29,10 @@ class WasmtimeCppConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires(f"wasmtime/{self.version}")
+        version = str(self.version)
+        if version == "0.35.0":
+            version = "0.35.1"
+        self.requires(f"wasmtime/{version}")
 
     def validate(self):
         compiler = self.settings.compiler

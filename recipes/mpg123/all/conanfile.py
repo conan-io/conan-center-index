@@ -116,6 +116,7 @@ class Mpg123Conan(ConanFile):
             "--enable-layer2={}".format(yes_no(self.options.layer2)),
             "--enable-layer3={}".format(yes_no(self.options.layer3)),
             "--with-audio={}".format(self._audio_module),
+            "--with-default-audio={}".format(self._audio_module),
             "--with-seektable={}".format(self.options.seektable),
             "--enable-modules=no",
             "--enable-shared={}".format(yes_no(self.options.shared)),

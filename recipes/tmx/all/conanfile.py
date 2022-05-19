@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 import textwrap
 
@@ -29,7 +30,6 @@ class TmxConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -46,11 +46,11 @@ class TmxConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.12")
+        self.requires("libxml2/2.9.13")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -60,16 +60,15 @@ class TmxConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "${CMAKE_BINARY_DIR}", "${CMAKE_CURRENT_BINARY_DIR}")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WANT_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["WANT_ZSTD"] = self.options.with_zstd
+        cmake = CMake(self)
+        cmake.definitions["WANT_ZLIB"] = self.options.with_zlib
+        cmake.definitions["WANT_ZSTD"] = self.options.with_zstd
         if self.options.with_zstd:
-            self._cmake.definitions["ZSTD_PREFER_STATIC"] = not self.options["zstd"].shared
-        self._cmake.configure()
-        return self._cmake
+            cmake.definitions["ZSTD_PREFER_STATIC"] = not self.options["zstd"].shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()

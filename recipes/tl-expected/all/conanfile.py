@@ -1,8 +1,7 @@
-from conans import ConanFile, CMake, tools
-from fnmatch import fnmatch
+from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
 
 
 class TlExpectedConan(ConanFile):
@@ -12,25 +11,23 @@ class TlExpectedConan(ConanFile):
     description = "C++11/14/17 std::expected with functional-style extensions"
     topics = ("cpp11", "cpp14", "cpp17", "expected")
     license = "CC0-1.0"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _archive_dir(self):
-        # the archive expands to a directory named expected-[COMMIT SHA1];
-        # we'd like to put this under a stable name
-        expected_dirs = [
-            de for de in os.scandir(self.source_folder)
-            if de.is_dir() and fnmatch(de.name, "expected-*")
-        ]
-        return expected_dirs[0].name
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self._archive_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*",
@@ -38,12 +35,15 @@ class TlExpectedConan(ConanFile):
                   dst="include")
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "tl-expected")
+        self.cpp_info.set_property("cmake_target_name", "tl::expected")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tl-expected"
         self.cpp_info.filenames["cmake_find_package_multi"] = "tl-expected"
         self.cpp_info.names["cmake_find_package"] = "tl"
         self.cpp_info.names["cmake_find_package_multi"] = "tl"
-        self.cpp_info.components["expected"].name = "expected"
+        self.cpp_info.components["expected"].names["cmake_find_package"] = "expected"
+        self.cpp_info.components["expected"].names["cmake_find_package_multi"] = "expected"
+        self.cpp_info.components["expected"].set_property("cmake_target_name", "tl::expected")

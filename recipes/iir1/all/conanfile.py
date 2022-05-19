@@ -21,10 +21,12 @@ class Iir1Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "noexceptions": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "noexceptions": False,
     }
 
     generators = "cmake"
@@ -50,6 +52,8 @@ class Iir1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "1.9.1":
+            del self.options.noexceptions
 
     def configure(self):
         if self.options.shared:
@@ -72,6 +76,7 @@ class Iir1Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions['IIR1_NO_EXCEPTIONS'] = self.options.get_safe("noexceptions", False)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -108,3 +113,7 @@ class Iir1Conan(ConanFile):
         self.cpp_info.components["iir"].set_property("cmake_target_name", "iir::{}".format(name))
 
         self.cpp_info.components["iir"].libs = [name]
+
+        if self.options.get_safe("noexceptions", False):
+            self.cpp_info.components["iir"].defines.append("IIR1_NO_EXCEPTIONS")
+

@@ -1,7 +1,10 @@
 sources:
+  "1.12.1":
+    url: "https://github.com/zeux/pugixml/archive/v1.12.1.tar.gz"
+    sha256: "1e28ab24b6e04e013d96f45d25e9f2d04c921dc68c613fd010ecaaad3892c14d"
   "1.11":
     url: "https://github.com/zeux/pugixml/archive/v1.11.tar.gz"
     sha256: "79b5e3a50dca0c150ab5fd282e23dd1da00760073a7040ca8dde4e031330add2"
   "1.10":
-    sha256: 55f399fbb470942410d348584dc953bcaec926415d3462f471ef350f29b5870a
-    url: https://github.com/zeux/pugixml/releases/download/v1.10/pugixml-1.10.tar.gz
+    url: "https://github.com/zeux/pugixml/releases/download/v1.10/pugixml-1.10.tar.gz"
+    sha256: "55f399fbb470942410d348584dc953bcaec926415d3462f471ef350f29b5870a"

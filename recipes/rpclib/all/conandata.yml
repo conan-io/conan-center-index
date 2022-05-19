@@ -1,0 +1,4 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/rpclib/rpclib/archive/refs/tags/v2.3.0.tar.gz"
+    sha256: "eb9e6fa65e1a79b37097397f60599b93cb443d304fbc0447c50851bc3452fdef"

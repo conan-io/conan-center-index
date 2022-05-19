@@ -39,6 +39,28 @@ class SpirvtoolsConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @staticmethod
+    def _greater_equal_semver(v1, v2):
+        lv1 = [int(v) for v in v1.split(".")]
+        lv2 = [int(v) for v in v2.split(".")]
+        diff_len = len(lv2) - len(lv1)
+        if diff_len > 0:
+            lv1.extend([0] * diff_len)
+        elif diff_len < 0:
+            lv2.extend([0] * -diff_len)
+        return lv1 >= lv2
+
+    @property
+    def _has_spirv_tools_lint(self):
+        return (tools.Version(self.version) < "2016.6" or # spirv-tools with vulkan versioning
+                tools.Version(self.version) >= "2021.3")
+
+    @property
+    def _has_spirv_tools_diff(self):
+        # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
+        return ((self._greater_equal_semver(self.version, "1.3.211") and tools.Version(self.version) < "2016.6") or # spirv-tools with vulkan versioning
+                tools.Version(self.version) >= "2022.2")
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -53,8 +75,6 @@ class SpirvtoolsConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if not self._get_compatible_spirv_headers_version:
-            raise ConanInvalidConfiguration("unknown spirv-headers version")
         self.requires("spirv-headers/{}".format(self._get_compatible_spirv_headers_version))
 
     @property
@@ -66,7 +86,7 @@ class SpirvtoolsConan(ConanFile):
             "2020.5": "1.5.4",
             "2020.3": "1.5.3",
             "2019.2": "1.5.1",
-        }.get(str(self.version), False)
+        }.get(str(self.version), self.version)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -101,11 +121,11 @@ class SpirvtoolsConan(ConanFile):
         # - Before 2020.5, the shared lib is always built, but static libs might be built as shared
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
         # - From 2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
-        if tools.Version(self.version) < "2020.5":
+        if tools.Version(self.version) >= "2016.6" and tools.Version(self.version) < "2020.5":
             cmake.definitions["BUILD_SHARED_LIBS"] = False
         # From 2020.6, same behavior than above but through a weird combination
         # of SPIRV_TOOLS_BUILD_STATIC and BUILD_SHARED_LIBS.
-        if tools.Version(self.version) >= "2020.6":
+        if tools.Version(self.version) < "2016.6" or tools.Version(self.version) >= "2020.6":
             cmake.definitions["SPIRV_TOOLS_BUILD_STATIC"] = True
         #============
 
@@ -122,6 +142,8 @@ class SpirvtoolsConan(ConanFile):
         cmake.definitions["SPIRV_CHECK_CONTEXT"] = False
         cmake.definitions["SPIRV_BUILD_FUZZER"] = False
         cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = not self.options.build_executables
+        # To install relocatable shared libs on Macos
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         cmake.configure(build_folder=self._build_subfolder)
         self._cmake = cmake
@@ -153,8 +175,12 @@ class SpirvtoolsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-opt"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-lint"))
+        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-diff"))
         if self.options.shared:
-            for file_name in ["*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link", "*SPIRV-Tools-reduce"]:
+            for file_name in [
+                "*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link",
+                "*SPIRV-Tools-reduce", "*SPIRV-Tools-lint",
+            ]:
                 for ext in [".a", ".lib"]:
                     tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), file_name + ext)
         else:
@@ -172,8 +198,10 @@ class SpirvtoolsConan(ConanFile):
                 "SPIRV-Tools-link": "spirv-tools::SPIRV-Tools-link",
                 "SPIRV-Tools-reduce": "spirv-tools::SPIRV-Tools-reduce",
             }
-            if tools.Version(self.version) >= "2021.3":
+            if self._has_spirv_tools_lint:
                 targets.update({"SPIRV-Tools-lint": "spirv-tools::SPIRV-Tools-lint"})
+            if self._has_spirv_tools_diff:
+                targets.update({"SPIRV-Tools-diff": "spirv-tools::SPIRV-Tools-diff"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             targets,
@@ -234,10 +262,16 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-reduce"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
             # SPIRV-Tools-lint
-            if tools.Version(self.version) >= "2021.3":
+            if self._has_spirv_tools_lint:
                 self.cpp_info.components["spirv-tools-lint"].set_property("cmake_target_name", "SPIRV-Tools-lint")
                 self.cpp_info.components["spirv-tools-lint"].libs = ["SPIRV-Tools-lint"]
                 self.cpp_info.components["spirv-tools-lint"].requires = ["spirv-tools-core", "spirv-tools-opt"]
+
+            # SPIRV-Tools-diff
+            if self._has_spirv_tools_diff:
+                self.cpp_info.components["spirv-tools-diff"].set_property("cmake_target_name", "SPIRV-Tools-diff")
+                self.cpp_info.components["spirv-tools-diff"].libs = ["SPIRV-Tools-diff"]
+                self.cpp_info.components["spirv-tools-diff"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
         if self.options.build_executables:
             bin_path = os.path.join(self.package_folder, "bin")
@@ -265,8 +299,13 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-reduce"].names["cmake_find_package_multi"] = "SPIRV-Tools-reduce"
             self.cpp_info.components["spirv-tools-reduce"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-reduce"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-            if tools.Version(self.version) >= "2021.3":
+            if self._has_spirv_tools_lint:
                 self.cpp_info.components["spirv-tools-lint"].names["cmake_find_package"] = "SPIRV-Tools-lint"
                 self.cpp_info.components["spirv-tools-lint"].names["cmake_find_package_multi"] = "SPIRV-Tools-lint"
                 self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            if self._has_spirv_tools_diff:
+                self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package"] = "SPIRV-Tools-diff"
+                self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package_multi"] = "SPIRV-Tools-diff"
+                self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

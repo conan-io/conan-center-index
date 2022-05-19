@@ -1,14 +1,14 @@
 from conans import ConanFile, CMake, tools
-import glob
 import os
 
+required_conan_version = ">=1.43.0"
 
 class AsmjitConan(ConanFile):
     name = "asmjit"
     description = "AsmJit is a lightweight library for machine code " \
                   "generation written in C++ language."
     license = "Zlib"
-    topics = ("conan", "asmjit", "compiler", "assembler", "jit")
+    topics = ("asmjit", "compiler", "assembler", "jit")
     homepage = "https://asmjit.com"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -21,9 +21,9 @@ class AsmjitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
+
     _cmake = None
 
     @property
@@ -37,13 +37,14 @@ class AsmjitConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("asmjit-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -51,7 +52,8 @@ class AsmjitConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ASMJIT_EMBED"] = False
         self._cmake.definitions["ASMJIT_STATIC"] = not self.options.shared
-        self._cmake.definitions["ASMJIT_BUILD_X86"] = False
+        if self.version == "cci.20210306":
+            self._cmake.definitions["ASMJIT_BUILD_X86"] = (str(self.settings.os) in ["x86", "x86_64"])
         self._cmake.definitions["ASMJIT_TEST"] = False
         self._cmake.definitions["ASMJIT_NO_NATVIS"] = True
         self._cmake.configure()
@@ -68,8 +70,12 @@ class AsmjitConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "asmjit")
+        self.cpp_info.set_property("cmake_target_name", "asmjit::asmjit")
+
         self.cpp_info.names["cmake_find_package"] = "asmjit"
         self.cpp_info.names["cmake_find_package_multi"] = "asmjit"
+
         self.cpp_info.libs = ["asmjit"]
         if not self.options.shared:
             self.cpp_info.defines = ["ASMJIT_STATIC"]

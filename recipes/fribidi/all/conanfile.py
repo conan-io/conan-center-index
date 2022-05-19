@@ -1,4 +1,5 @@
 from conans import tools, ConanFile, Meson
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -44,6 +45,10 @@ class FriBiDiCOnan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def build_requirements(self):
         self.build_requires("meson/0.59.0")

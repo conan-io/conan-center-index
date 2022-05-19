@@ -25,17 +25,16 @@ class WineditlineConan(ConanFile):
     default_options = {
         "shared": False,
     }
-
-    exports_sources = ("CMakeLists.txt",)
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = ("patches/*", "CMakeLists.txt")
 
     def validate(self):
         if self.settings.os != "Windows":
             message = "wineditline is supported only on Windows."
             raise ConanInvalidConfiguration(message)
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         root = self._source_subfolder
@@ -53,24 +52,13 @@ class WineditlineConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        self._configure_cmake().build()
 
     def package(self):
         self.copy("COPYING", "licenses", self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        self._configure_cmake().install()
 
     def package_info(self):
-        name = self.name
-        info = self.cpp_info
-
-        info.set_property("cmake_file_name", name)
-        info.set_property("cmake_target_name", f"{name}::{name}")
-
-        info.names.update({
-            "cmake_find_package": name,
-            "cmake_find_package_multi": name,
-        })
-
-        info.libs = ["edit"]
+        self.cpp_info.libs = ["edit"]

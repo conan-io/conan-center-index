@@ -1,0 +1,13 @@
+--- third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
++++ third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
+@@ -437,8 +437,8 @@ toolchain("gcc_like_toolchain") {
+      ld = cxx
+      ar = ndk_bin_dir + tool_prefix + "-ar"
+   } else {
+-    cc = "clang"
+-    cxx = "clang++"
++    cc = getenv("CC")
++    cxx = getenv("CXX")
+     asm = cxx
+     ld = cxx
+ 

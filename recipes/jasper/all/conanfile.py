@@ -73,9 +73,21 @@ class JasperConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Clean rpath in installed shared lib
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        cmds_to_remove = [
+            "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
+            "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
+            "set(CMAKE_INSTALL_RPATH\n		  \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")",
+        ]
+        for cmd_to_remove in cmds_to_remove:
+            tools.replace_in_file(cmakelists, cmd_to_remove, "")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -112,19 +124,13 @@ class JasperConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Jasper")
         self.cpp_info.set_property("cmake_target_name", "Jasper::Jasper")
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "jasper")
 

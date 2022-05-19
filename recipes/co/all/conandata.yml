@@ -1,7 +1,7 @@
 sources:
   "2.0.2":
     url: "https://github.com/idealvin/co/archive/refs/tags/v2.0.2.tar.gz"
-    sha256: "b5fecc4e0556e33ae11ac2b7c80e37add6cc9d32942e48ce65593f09aa3ef35b"
+    sha256: "5dbb90e18627ebe563a6a437e8e28329a6bfc07f266718318bd3adf26027d156"
 patches:
   "2.0.2":
     - patch_file: "patches/001-install-dll.patch"

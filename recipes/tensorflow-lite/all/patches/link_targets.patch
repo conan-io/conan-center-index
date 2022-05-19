@@ -30,7 +30,7 @@ index c83d8903621..e135b08a0b8 100644
 -    ruy
 +    farmhash::farmhash
 +    fft::fft
-+    flatbuffers::flatbuffers
++    $<IF:$<TARGET_EXISTS:flatbuffers::flatbuffers>,flatbuffers::flatbuffers,flatbuffers::flatbuffers_shared>
 +    gemmlowp::eight_bit_int_gemm
 +    ruy::ruy
      ${CMAKE_DL_LIBS}

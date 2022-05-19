@@ -3,6 +3,8 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.43.0"
+
 
 class ConanRecipe(ConanFile):
     name = "catch2"
@@ -108,16 +110,20 @@ class ConanRecipe(ConanFile):
             self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Catch2")
+        self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2{}".format("WithMain" if self.options.with_main else ""))
         self.cpp_info.names["cmake_find_package"] = "Catch2"
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
         if self.options.with_main:
+            self.cpp_info.components["Catch2"].set_property("cmake_target_name", "Catch2::Catch2")
             self.cpp_info.components["Catch2"].names["cmake_find_package"] = "Catch2"
             self.cpp_info.components["Catch2"].names["cmake_find_package_multi"] = "Catch2"
 
             self.cpp_info.components["Catch2WithMain"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
             self.cpp_info.components["Catch2WithMain"].libs = ["Catch2WithMain"]
             self.cpp_info.components["Catch2WithMain"].system_libs = ["log"] if self.settings.os == "Android" else []
+            self.cpp_info.components["Catch2WithMain"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
             defines = self.cpp_info.components["Catch2WithMain"].defines
