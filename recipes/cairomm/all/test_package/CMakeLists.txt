@@ -4,8 +4,6 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGET)
 
-find_package(PkgConfig REQUIRED)
-
 add_executable(${PROJECT_NAME} test_package.cpp)
 
 find_package(cairomm REQUIRED CONFIG)
