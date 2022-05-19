@@ -21,7 +21,7 @@ class TllistConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        # FIXME: Fails in test_pacakge with the Visual Studio compiler
+        # tllist relies on __typeof__, not implemented in Visual Studio
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
