@@ -33,7 +33,7 @@ class OpenFstConan(ConanFile):
         "enable_special": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "enable_bin": True,
         "enable_compact_fsts": False,
