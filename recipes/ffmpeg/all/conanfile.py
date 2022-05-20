@@ -74,6 +74,9 @@ class FFMpegConan(ConanFile):
         "disable_all_muxers": [True, False],
         "disable_muxers": "ANY",
         "enable_muxers": "ANY",
+        "disable_all_demuxers": [True, False],
+        "disable_demuxers": "ANY",
+        "enable_demuxers": "ANY",
     }
     default_options = {
         "shared": False,
@@ -128,6 +131,9 @@ class FFMpegConan(ConanFile):
         "disable_all_muxers": False,
         "disable_muxers": "",
         "enable_muxers": "",
+        "disable_all_demuxers": False,
+        "disable_demuxers": "",
+        "enable_demuxers": "",
     }
 
     generators = "pkg_config"
@@ -362,6 +368,8 @@ class FFMpegConan(ConanFile):
                 "hwaccels", self.options.disable_all_hardware_accelerators),
             opt_disable_if_set(
                 "muxers", self.options.disable_all_muxers),
+            opt_disable_if_set(
+                "demuxers", self.options.disable_all_demuxers),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -429,6 +437,10 @@ class FFMpegConan(ConanFile):
             "enable-muxer", self.options.enable_muxers))
         args.extend(self._split_and_format_options_string(
             "disable-muxer", self.options.disable_muxers))
+        args.extend(self._split_and_format_options_string(
+            "enable-demuxer", self.options.enable_demuxers))
+        args.extend(self._split_and_format_options_string(
+            "disable-demuxer", self.options.disable_demuxers))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
