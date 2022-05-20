@@ -10,7 +10,7 @@ required_conan_version = ">=1.33.0"
 class CoinCglConan(ConanFile):
     name = "coin-cgl"
     description = "COIN-OR Cut Generator Library"
-    topics = ("clp", "simplex", "solver", "linear", "programming")
+    topics = ("cgl", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Cgl"
     license = ("EPL-2.0",)
@@ -73,7 +73,7 @@ class CoinCglConan(ConanFile):
             raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-clp shared not supported yet when cross-building")
+            raise ConanInvalidConfiguration("coin-cgl shared not supported yet when cross-building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -102,8 +102,8 @@ class CoinCglConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--without-blas"
-            "--without-lapack"
+            "--without-blas",
+            "--without-lapack",
         ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
