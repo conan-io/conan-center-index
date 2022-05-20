@@ -62,7 +62,10 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": [True, False],
         "with_programs": [True, False],
         "disable_everything": [True, False],
+        "disable_all_encoders": [True, False],
+        "disable_encoders": "ANY",
         "enable_encoders": "ANY",
+
     }
     default_options = {
         "shared": False,
@@ -105,6 +108,8 @@ class FFMpegConan(ConanFile):
         "with_videotoolbox": True,
         "with_programs": True,
         "disable_everything": False,
+        "disable_all_encoders": False,
+        "disable_encoders": "",
         "enable_encoders": "",
     }
 
@@ -332,6 +337,8 @@ class FFMpegConan(ConanFile):
             # Individual Component Options
             opt_disable_if_set(
                 "everything", self.options.disable_everything),
+            opt_disable_if_set(
+                "encoders", self.options.disable_all_encoders),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -383,8 +390,10 @@ class FFMpegConan(ConanFile):
         ]
 
         # Individual Component Options
-        args.extend(self._split_and_format_options_string("enable-encoder",
-                                                          self.options.enable_encoders))
+        args.extend(self._split_and_format_options_string(
+            "enable-encoder", self.options.enable_encoders))
+        args.extend(self._split_and_format_options_string(
+            "disable-encoder", self.options.disable_encoders))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
