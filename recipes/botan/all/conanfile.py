@@ -2,6 +2,8 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.36.0"
+
 
 class BotanConan(ConanFile):
     name = 'botan'
@@ -177,7 +179,10 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        self.cpp_info.libs = ['botan' if self.settings.compiler == 'Visual Studio' else 'botan-2']
+        major_version = tools.Version(self.version).major
+        self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
+        self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
+        self.cpp_info.libs = ["botan" if self.settings.compiler == "Visual Studio" else f"botan-{major_version}"]
         if self.settings.os == 'Linux':
             self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
         if self.settings.os == 'Macos':
@@ -185,7 +190,7 @@ class BotanConan(ConanFile):
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs.extend(['ws2_32', 'crypt32'])
 
-        self.cpp_info.includedirs = [os.path.join('include', 'botan-2')]
+        self.cpp_info.includedirs = [os.path.join("include", f"botan-{major_version}")]
 
     @property
     def _is_mingw_windows(self):
