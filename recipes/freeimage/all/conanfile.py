@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -83,7 +82,7 @@ class FreeImageConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
-        if self.options.with_openexr:
+        if self.options.with_tiff or self.options.with_openexr:
             # can't upgrade to openexr/3.x.x because plugin tiff requires openexr/2.x.x header files
             self.requires("openexr/2.5.7")
         if self.options.with_raw:
@@ -96,9 +95,6 @@ class FreeImageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
-        # tiff uses openexr's header file.
-        if self.options.with_tiff and not self.options.with_openexr:
-            raise ConanInvalidConfiguration("{} requires with_openexr=True when with_tiff=True.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -151,7 +147,7 @@ class FreeImageConan(ConanFile):
                 components.append("libpng::libpng")
             if self.options.with_webp:
                 components.append("libwebp::libwebp")
-            if self.options.with_openexr:
+            if self.options.with_openexr or self.options.with_tiff:
                 components.append("openexr::openexr")
             if self.options.with_raw:
                 components.append("libraw::libraw")
