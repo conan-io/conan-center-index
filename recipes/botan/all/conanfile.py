@@ -124,9 +124,6 @@ class BotanConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.options.get_safe('single_amalgamation'):
-            self.options.amalgamation = True
-
     def requirements(self):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
@@ -172,6 +169,9 @@ class BotanConan(ConanFile):
                (compiler == 'clang' and version < '7'):
                 raise ConanInvalidConfiguration(
                     'botan amalgamation is not supported for {}/{}'.format(compiler, version))
+
+        if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
+            raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
