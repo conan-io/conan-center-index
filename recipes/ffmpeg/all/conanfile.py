@@ -80,6 +80,9 @@ class FFMpegConan(ConanFile):
         "disable_all_parsers": [True, False],
         "disable_parsers": "ANY",
         "enable_parsers": "ANY",
+        "disable_all_bitstream_filters": [True, False],
+        "disable_bitstream_filters": "ANY",
+        "enable_bitstream_filters": "ANY",
     }
     default_options = {
         "shared": False,
@@ -140,6 +143,9 @@ class FFMpegConan(ConanFile):
         "disable_all_parsers": False,
         "disable_parsers": "",
         "enable_parsers": "",
+        "disable_all_bitstream_filters": False,
+        "disable_bitstream_filters": "",
+        "enable_bitstream_filters": "",
     }
 
     generators = "pkg_config"
@@ -378,6 +384,8 @@ class FFMpegConan(ConanFile):
                 "demuxers", self.options.disable_all_demuxers),
             opt_disable_if_set(
                 "parsers", self.options.disable_all_parsers),
+            opt_disable_if_set(
+                "bsfs", self.options.disable_all_bitstream_filters),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -453,6 +461,10 @@ class FFMpegConan(ConanFile):
             "enable-parser", self.options.enable_parsers))
         args.extend(self._split_and_format_options_string(
             "disable-parser", self.options.disable_parsers))
+        args.extend(self._split_and_format_options_string(
+            "enable-bsf", self.options.enable_bitstream_filters))
+        args.extend(self._split_and_format_options_string(
+            "disable-bsf", self.options.disable_bitstream_filters))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
