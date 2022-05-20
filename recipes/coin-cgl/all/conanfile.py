@@ -142,5 +142,5 @@ class CoinCglConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Cgl"]
-        self.cpp_info.includedirs = [os.path.join("include", "coin")]
+        self.cpp_info.includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.names["pkg_config"] = "cgl"
