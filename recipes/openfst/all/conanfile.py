@@ -72,8 +72,8 @@ class OpenFstConan(ConanFile):
                 "OpenFst is supported only on linux")
 
         compilers = {
-            "gcc": "7",
-            "clang": "6",
+            "gcc": "8",
+            "clang": "7",
         }
 
         if self.settings.compiler.cppstd:
@@ -128,7 +128,7 @@ class OpenFstConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
 
@@ -199,4 +199,4 @@ class OpenFstConan(ConanFile):
             self.output.info("Appending PATH environment var: {}".format(bindir))
             self.env_info.PATH.append(bindir)
 
-        self.cpp_info.system_libs = ["pthread"]
+        self.cpp_info.system_libs = ["pthread", "dl", "m"]
