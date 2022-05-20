@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cassert>
+#include <cerrno>
 
 #ifndef _WIN32
 
