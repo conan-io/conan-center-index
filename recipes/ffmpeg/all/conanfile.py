@@ -71,6 +71,9 @@ class FFMpegConan(ConanFile):
         "disable_all_hardware_accelerators": [True, False],
         "disable_hardware_accelerators": "ANY",
         "enable_hardware_accelerators": "ANY",
+        "disable_all_muxers": [True, False],
+        "disable_muxers": "ANY",
+        "enable_muxers": "ANY",
     }
     default_options = {
         "shared": False,
@@ -122,6 +125,9 @@ class FFMpegConan(ConanFile):
         "disable_all_hardware_accelerators": False,
         "disable_hardware_accelerators": "",
         "enable_hardware_accelerators": "",
+        "disable_all_muxers": False,
+        "disable_muxers": "",
+        "enable_muxers": "",
     }
 
     generators = "pkg_config"
@@ -354,6 +360,8 @@ class FFMpegConan(ConanFile):
                 "decoders", self.options.disable_all_decoders),
             opt_disable_if_set(
                 "hwaccels", self.options.disable_all_hardware_accelerators),
+            opt_disable_if_set(
+                "muxers", self.options.disable_all_muxers),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -417,6 +425,10 @@ class FFMpegConan(ConanFile):
             "enable-hwaccel", self.options.enable_hardware_accelerators))
         args.extend(self._split_and_format_options_string(
             "disable-hwaccel", self.options.disable_hardware_accelerators))
+        args.extend(self._split_and_format_options_string(
+            "enable-muxer", self.options.enable_muxers))
+        args.extend(self._split_and_format_options_string(
+            "disable-muxer", self.options.disable_muxers))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
