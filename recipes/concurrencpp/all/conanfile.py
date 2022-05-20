@@ -101,4 +101,4 @@ class ConcurrencppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "concurrencpp::concurrencpp")
         self.cpp_info.libs = ["concurrencpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["rt"]
+            self.cpp_info.system_libs = ["pthread", "rt"]
