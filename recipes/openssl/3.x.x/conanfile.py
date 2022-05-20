@@ -1,13 +1,14 @@
 from conan.tools.files import rename
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import contextlib
 import fnmatch
 import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -131,10 +132,6 @@ class OpenSSLConan(ConanFile):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["msvc", "Visual Studio"]
-
-    @property
     def _is_clangcl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -144,7 +141,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or self._is_msvc
+        return self._is_clangcl or is_msvc(self)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

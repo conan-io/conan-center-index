@@ -1,5 +1,5 @@
 from conan.tools.files import rename
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
@@ -8,7 +8,7 @@ import fnmatch
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 @total_ordering
@@ -147,10 +147,6 @@ class OpenSSLConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _is_clangcl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -160,7 +156,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or self._is_msvc
+        return self._is_clangcl or is_msvc(self)
 
     @property
     def _settings_build(self):
