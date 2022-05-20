@@ -7,68 +7,70 @@ required_conan_version = ">=1.45.0"
 
 
 class BotanConan(ConanFile):
-    name = 'botan'
+    name = "botan"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
-    settings = 'os', 'arch', 'compiler', 'build_type'
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        'amalgamation': [True, False],
-        'with_bzip2': [True, False],
-        'with_openssl': [True, False],
-        'shared': [True, False],
-        'fPIC': [True, False],
-        'single_amalgamation': [True, False],
-        'with_sqlite3': [True, False],
-        'with_zlib': [True, False],
-        'with_boost': [True, False],
-        'with_sse2': [True, False],
-        'with_ssse3': [True, False],
-        'with_sse4_1': [True, False],
-        'with_sse4_2': [True, False],
-        'with_avx2': [True, False],
-        'with_bmi2': [True, False],
-        'with_rdrand': [True, False],
-        'with_rdseed': [True, False],
-        'with_aes_ni': [True, False],
-        'with_sha_ni': [True, False],
-        'with_altivec': [True, False],
-        'with_neon': [True, False],
-        'with_armv8crypto': [True, False],
-        'with_powercrypto': [True, False],
-        'enable_modules': 'ANY',
-        'system_cert_bundle': 'ANY',
-        'module_policy': [None, 'bsi', 'modern', 'nist']
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "amalgamation": [True, False],
+        "with_bzip2": [True, False],
+        "with_openssl": [True, False],
+        "single_amalgamation": [True, False],
+        "with_sqlite3": [True, False],
+        "with_zlib": [True, False],
+        "with_boost": [True, False],
+        "with_sse2": [True, False],
+        "with_ssse3": [True, False],
+        "with_sse4_1": [True, False],
+        "with_sse4_2": [True, False],
+        "with_avx2": [True, False],
+        "with_bmi2": [True, False],
+        "with_rdrand": [True, False],
+        "with_rdseed": [True, False],
+        "with_aes_ni": [True, False],
+        "with_sha_ni": [True, False],
+        "with_altivec": [True, False],
+        "with_neon": [True, False],
+        "with_armv8crypto": [True, False],
+        "with_powercrypto": [True, False],
+        "enable_modules": "ANY",
+        "system_cert_bundle": "ANY",
+        "module_policy": [None, "bsi", "modern", "nist"],
     }
-    default_options = {'amalgamation': True,
-                       'with_bzip2': False,
-                       'with_openssl': False,
-                       'shared': False,
-                       'fPIC': True,
-                       'single_amalgamation': False,
-                       'with_sqlite3': False,
-                       'with_zlib': False,
-                       'with_boost': False,
-                       'with_sse2': True,
-                       'with_ssse3': True,
-                       'with_sse4_1': True,
-                       'with_sse4_2': True,
-                       'with_avx2': True,
-                       'with_bmi2': True,
-                       'with_rdrand': True,
-                       'with_rdseed': True,
-                       'with_aes_ni': True,
-                       'with_sha_ni': True,
-                       'with_altivec': True,
-                       'with_neon': True,
-                       'with_armv8crypto': True,
-                       'with_powercrypto': True,
-                       'enable_modules': None,
-                       'system_cert_bundle': None,
-                       'module_policy': None}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "amalgamation": True,
+        "with_bzip2": False,
+        "with_openssl": False,
+        "single_amalgamation": False,
+        "with_sqlite3": False,
+        "with_zlib": False,
+        "with_boost": False,
+        "with_sse2": True,
+        "with_ssse3": True,
+        "with_sse4_1": True,
+        "with_sse4_2": True,
+        "with_avx2": True,
+        "with_bmi2": True,
+        "with_rdrand": True,
+        "with_rdseed": True,
+        "with_aes_ni": True,
+        "with_sha_ni": True,
+        "with_altivec": True,
+        "with_neon": True,
+        "with_armv8crypto": True,
+        "with_powercrypto": True,
+        "enable_modules": None,
+        "system_cert_bundle": None,
+        "module_policy": None,
+    }
 
     @property
     def _is_x86(self):
@@ -82,7 +84,14 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    _source_subfolder = 'sources' # Required to build at least 2.12.1
+    @property
+    def _source_subfolder(self):
+        # Required to build at least 2.12.1
+        return "sources"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
