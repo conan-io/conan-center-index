@@ -1,3 +1,5 @@
+name: hooks warnings
+
 on:
   issue_comment:
     types: [created]
@@ -18,17 +20,27 @@ jobs:
               if(!match.groups.url.startsWith(prefix))
                  continue;
               url = match.groups.url.slice(prefix.length)
-              const result = await github.request({
-                url: url,
-              });
+              try {
+                result = await github.request({
+                  url: url,
+                });
+              } catch(err) {
+                core.warning(`error ${err.status} for url ${err.request.url}`)
+                continue
+              }
               for (const job of result.data)
               {
                 if (job.build == null)
                   continue;
-                const log = await github.request({
-                  baseUrl: "https://c3i.jfrog.io/c3i/misc/",
-                  url: job.build,
-                });
+                try {
+                  log = await github.request({
+                    baseUrl: "https://c3i.jfrog.io/c3i/misc/",
+                    url: job.build,
+                  });
+                } catch(err) {
+                  core.warning(`error ${err.status} for url ${err.request.url}`)
+                  continue
+                }
                 prefix = "[HOOK - conan-center.py] "
                 warnings = log.data.split("\n").filter(line => line.startsWith(prefix) && line.includes(" WARN: "))
                 if(warnings.length == 0)
