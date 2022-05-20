@@ -25,10 +25,11 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches
 from conan.tools.system.package_manager import Apt
-from conans.errors import ConanInvalidConfiguration
 
 # TODO upgrade to new conan.* imports
-from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version
+from conans import RunEnvironment
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version, environment_append
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
@@ -643,9 +644,13 @@ class VtkConan(ConanFile):
     def build(self):
         if not self.no_copy_source:
             self._patch_source()
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=self._source_subfolder)
-        cmake.build()
+
+        # RunEnvironment needed to build shared version with ALL modules
+        env_build = RunEnvironment(self)
+        with environment_append(env_build.vars):
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=self._source_subfolder)
+            cmake.build()
 
 
     @property
