@@ -1,8 +1,9 @@
-import os
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.45.0"
 
 
 class BotanConan(ConanFile):
@@ -182,7 +183,7 @@ class BotanConan(ConanFile):
         major_version = tools.Version(self.version).major
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
         self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
-        self.cpp_info.libs = ["botan" if self.settings.compiler == "Visual Studio" else f"botan-{major_version}"]
+        self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]
         if self.settings.os == 'Linux':
             self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
         if self.settings.os == 'Macos':
@@ -362,8 +363,8 @@ class BotanConan(ConanFile):
         if self._is_mingw_windows:
             build_flags.append('--without-stack-protector')
 
-        if self.settings.compiler == 'Visual Studio':
-            build_flags.append('--msvc-runtime=%s' % str(self.settings.compiler.runtime))
+        if is_msvc(self):
+            build_flags.append(f"--msvc-runtime={msvc_runtime_flag(self)}")
 
         build_flags.append('--without-pkg-config')
 
@@ -399,7 +400,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_cmd(self):
-        return self._nmake_cmd if self.settings.compiler == 'Visual Studio' else self._gnumake_cmd
+        return self._nmake_cmd if is_msvc(self) else self._gnumake_cmd
 
     @property
     def _make_program(self):
@@ -421,7 +422,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_install_cmd(self):
-        if self.settings.compiler == 'Visual Studio':
+        if is_msvc(self):
             vcvars = tools.vcvars_command(self.settings)
             make_install_cmd = vcvars + ' && nmake install'
         else:
