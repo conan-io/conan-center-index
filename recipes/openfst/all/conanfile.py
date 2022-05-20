@@ -66,9 +66,9 @@ class OpenFstConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                "OpenFst is supported only on linux")
+                "OpenFst is not supported on windows")
 
         compilers = {
             "gcc": "8",
