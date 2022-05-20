@@ -84,6 +84,13 @@ class OpenFstConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.name} requires c++17, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+           
+        # Check stdlib ABI compatibility
+        if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
+        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"' % self.name)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
