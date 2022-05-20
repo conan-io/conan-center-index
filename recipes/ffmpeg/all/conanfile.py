@@ -86,6 +86,9 @@ class FFMpegConan(ConanFile):
         "disable_all_protocols": [True, False],
         "disable_protocols": "ANY",
         "enable_protocols": "ANY",
+        "disable_all_input_devices": [True, False],
+        "disable_input_devices": "ANY",
+        "enable_input_devices": "ANY",
     }
     default_options = {
         "shared": False,
@@ -152,6 +155,9 @@ class FFMpegConan(ConanFile):
         "disable_all_protocols": False,
         "disable_protocols": "",
         "enable_protocols": "",
+        "disable_all_input_devices": False,
+        "disable_input_devices": "",
+        "enable_input_devices": "",
     }
 
     generators = "pkg_config"
@@ -394,6 +400,8 @@ class FFMpegConan(ConanFile):
                 "bsfs", self.options.disable_all_bitstream_filters),
             opt_disable_if_set(
                 "protocols", self.options.disable_all_protocols),
+            opt_disable_if_set(
+                "indevs", self.options.disable_all_input_devices),
 
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
@@ -478,6 +486,10 @@ class FFMpegConan(ConanFile):
             "enable-protocol", self.options.enable_protocols))
         args.extend(self._split_and_format_options_string(
             "disable-protocol", self.options.disable_protocols))
+        args.extend(self._split_and_format_options_string(
+            "enable-indev", self.options.enable_input_devices))
+        args.extend(self._split_and_format_options_string(
+            "disable-indev", self.options.disable_input_devices))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
