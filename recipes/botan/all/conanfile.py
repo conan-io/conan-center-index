@@ -117,6 +117,18 @@ class BotanConan(ConanFile):
         if self.options.get_safe('single_amalgamation'):
             self.options.amalgamation = True
 
+    def requirements(self):
+        if self.options.with_bzip2:
+            self.requires("bzip2/1.0.8")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1o")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.12")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.38.5")
+        if self.options.with_boost:
+            self.requires("boost/1.79.0")
+
     @property
     def _required_boost_components(self):
         return ['coroutine', 'system']
@@ -150,18 +162,6 @@ class BotanConan(ConanFile):
                (compiler == 'clang' and version < '7'):
                 raise ConanInvalidConfiguration(
                     'botan amalgamation is not supported for {}/{}'.format(compiler, version))
-
-    def requirements(self):
-        if self.options.with_bzip2:
-            self.requires('bzip2/1.0.8')
-        if self.options.with_openssl:
-            self.requires('openssl/1.1.1k')
-        if self.options.with_zlib:
-            self.requires('zlib/1.2.11')
-        if self.options.with_sqlite3:
-            self.requires('sqlite3/3.35.5')
-        if self.options.with_boost:
-            self.requires('boost/1.76.0')
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
