@@ -68,6 +68,9 @@ class FFMpegConan(ConanFile):
         "disable_all_decoders": [True, False],
         "disable_decoders": "ANY",
         "enable_decoders": "ANY",
+        "disable_all_hardware_accelerators": [True, False],
+        "disable_hardware_accelerators": "ANY",
+        "enable_hardware_accelerators": "ANY",
     }
     default_options = {
         "shared": False,
@@ -116,6 +119,9 @@ class FFMpegConan(ConanFile):
         "disable_all_decoders": False,
         "disable_decoders": "",
         "enable_decoders": "",
+        "disable_all_hardware_accelerators": False,
+        "disable_hardware_accelerators": "",
+        "enable_hardware_accelerators": "",
     }
 
     generators = "pkg_config"
@@ -346,6 +352,8 @@ class FFMpegConan(ConanFile):
                 "encoders", self.options.disable_all_encoders),
             opt_disable_if_set(
                 "decoders", self.options.disable_all_decoders),
+            opt_disable_if_set(
+                "hwaccels", self.options.disable_all_hardware_accelerators),
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
@@ -405,6 +413,10 @@ class FFMpegConan(ConanFile):
             "enable-decoder", self.options.enable_decoders))
         args.extend(self._split_and_format_options_string(
             "disable-decoder", self.options.disable_decoders))
+        args.extend(self._split_and_format_options_string(
+            "enable-hwaccel", self.options.enable_hardware_accelerators))
+        args.extend(self._split_and_format_options_string(
+            "disable-hwaccel", self.options.disable_hardware_accelerators))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
