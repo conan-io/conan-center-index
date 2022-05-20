@@ -80,7 +80,7 @@ class QuillConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cxx_std))
         else:
-            self.output.warn("{} requires C++{}. Your compiler is unknown. Assuming it supports C++{}.".format(self.name, cxx_std, cxx_Std))
+            self.output.warn("{} requires C++{}. Your compiler is unknown. Assuming it supports C++{}.".format(self.name, cxx_std, cxx_std))
 
     def requirements(self):
         if tools.Version(self.version) >= "1.6.3":
