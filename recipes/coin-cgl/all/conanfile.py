@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename
 from contextlib import contextmanager
 import os
 import shutil
@@ -132,8 +133,9 @@ class CoinCglConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libCgl.la"))
 
         if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libCgl.a"),
-                      os.path.join(self.package_folder, "lib", "Cgl.lib"))
+            rename(self,
+                   os.path.join(self.package_folder, "lib", "libCgl.a"),
+                   os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
