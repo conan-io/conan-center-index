@@ -86,6 +86,7 @@ class FFMpegConan(ConanFile):
         "disable_all_protocols": [True, False],
         "disable_protocols": "ANY",
         "enable_protocols": "ANY",
+        "disable_all_devices": [True, False],
         "disable_all_input_devices": [True, False],
         "disable_input_devices": "ANY",
         "enable_input_devices": "ANY",
@@ -158,6 +159,7 @@ class FFMpegConan(ConanFile):
         "disable_all_protocols": False,
         "disable_protocols": "",
         "enable_protocols": "",
+        "disable_all_devices": False,
         "disable_all_input_devices": False,
         "disable_input_devices": "",
         "enable_input_devices": "",
@@ -406,6 +408,8 @@ class FFMpegConan(ConanFile):
                 "bsfs", self.options.disable_all_bitstream_filters),
             opt_disable_if_set(
                 "protocols", self.options.disable_all_protocols),
+            opt_disable_if_set(
+                "devices", self.options.disable_all_devices),
             opt_disable_if_set(
                 "indevs", self.options.disable_all_input_devices),
             opt_disable_if_set(
