@@ -93,6 +93,9 @@ class FFMpegConan(ConanFile):
         "disable_all_output_devices": [True, False],
         "disable_output_devices": "ANY",
         "enable_output_devices": "ANY",
+        "disable_all_filters": [True, False],
+        "disable_filters": "ANY",
+        "enable_filters": "ANY",
     }
     default_options = {
         "shared": False,
@@ -166,6 +169,9 @@ class FFMpegConan(ConanFile):
         "disable_all_output_devices": False,
         "disable_output_devices": "",
         "enable_output_devices": "",
+        "disable_all_filters": False,
+        "disable_filters": "",
+        "enable_filters": "",
     }
 
     generators = "pkg_config"
@@ -414,6 +420,8 @@ class FFMpegConan(ConanFile):
                 "indevs", self.options.disable_all_input_devices),
             opt_disable_if_set(
                 "outdevs", self.options.disable_all_output_devices),
+            opt_disable_if_set(
+                "filters", self.options.disable_all_filters),
 
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
@@ -506,6 +514,10 @@ class FFMpegConan(ConanFile):
             "enable-outdev", self.options.enable_output_devices))
         args.extend(self._split_and_format_options_string(
             "disable-outdev", self.options.disable_output_devices))
+        args.extend(self._split_and_format_options_string(
+            "enable-filter", self.options.enable_filters))
+        args.extend(self._split_and_format_options_string(
+            "disable-filter", self.options.disable_filters))
 
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
