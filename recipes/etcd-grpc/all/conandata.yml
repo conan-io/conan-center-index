@@ -1,15 +1,4 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/trassir/etcd-grpc/archive/v1.0.0.tar.gz"
-    sha256: "304a330736372d48e9eb4e41ce93c31c922553aae37c81da2dc3c3dd6d568bda"
-  "2.0.0":
-    url: "https://github.com/trassir/etcd-grpc/archive/v2.0.0.tar.gz"
-    sha256: "29d45c69e31a6f3cbf132d2fdb5c84a5d43423346c8c87fb953f45817c3098ea"
-  "3.0.0":
-    url: "https://github.com/trassir/etcd-grpc/archive/v3.0.0.tar.gz"
-    sha256: "f6ac7970d1ac8acac9bf10035a6097095be1b76bf2e8eb97aba33169c9599c4b"
   "4.0.0":
     url: "https://github.com/trassir/etcd-grpc/archive/v4.0.0.tar.gz"
     sha256: "1ccd5aa046eb83ec95002e197187b32a274c61435a74422b63d96aa2ffd0a894"
-
-
