@@ -84,7 +84,7 @@ class OpenDDLParserConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "openddlparser::openddlparser")
         self.cpp_info.libs = ["openddlparser"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("m")
         if not self.options.shared:
             self.cpp_info.defines.append("OPENDDL_STATIC_LIBARY")
 
