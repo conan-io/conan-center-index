@@ -1,5 +1,15 @@
 # Changelog
 
+### 19-May-2022 - 15:52 CEST
+
+- [feature] Add Conan v2 export extra step in pull-request job.
+- [feature] Tag pull-requests as "under maintenance" when the build service is not available.
+- [config] Update Conan version to 1.47.0.
+- [feature] Check right WinSDK in ValidateInfrastructure job.
+- [fix] Fix access request job for authorized users.
+- [feature] New Conan v2 commands: info and recipe revision.
+- [feature] Store package ID cache at job level.
+
 ### 10-May-2022 - 17:05 CEST
 
 - [fix] Exclude `shared=True` and runtime `MT/MTd` profile configuration from builds.
