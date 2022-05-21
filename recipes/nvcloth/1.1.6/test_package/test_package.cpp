@@ -1,6 +1,7 @@
 #include <iostream>
-#include <PxPhysicsAPI.h>
 #include <NvCloth/Factory.h>
+#include <foundation/PxAllocatorCallback.h>
+#include <foundation/PxErrorCallback.h>
 class ProfilerCallback final : public physx::PxProfilerCallback
 {
 public:
@@ -22,10 +23,49 @@ public:
     }
 };
 
+class AllocatorCallback : public physx::PxAllocatorCallback
+{
+public:
+    AllocatorCallback()
+    {
+    }
+
+    ~AllocatorCallback()
+    {
+    }
+
+    virtual void* allocate(size_t size, const char* typeName, const char* filename, int line)
+    {
+        return malloc(size);
+    }
+
+    virtual void deallocate(void* ptr)
+    {
+        free(ptr);
+    }
+};
+
+class ErrorCallback : public physx::PxErrorCallback
+{
+public:
+    ErrorCallback()
+    {
+    }
+
+    ~ErrorCallback()
+    {
+    }
+
+    virtual void reportError(physx::PxErrorCode::Enum code, const char* message, const char* file, int line)
+    {
+        std::cout << "Error: " << message << " in " << file << ":" << line << std::endl;
+    }
+};
+
 int main()
 {
-    physx::PxDefaultAllocator defaultAllocatorCallback = physx::PxDefaultAllocator();
-    physx::PxDefaultErrorCallback defaultErrorCallback = physx::PxDefaultErrorCallback();
+    AllocatorCallback defaultAllocatorCallback = AllocatorCallback();
+    ErrorCallback defaultErrorCallback = ErrorCallback();
     ProfilerCallback defaultProfilerCallback = ProfilerCallback();
     nv::cloth::InitializeNvCloth(&defaultAllocatorCallback, &defaultErrorCallback, nv::cloth::GetNvClothAssertHandler(), &defaultProfilerCallback);
     nv::cloth::Factory* factory = NvClothCreateFactoryCPU();
