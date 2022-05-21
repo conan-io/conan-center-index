@@ -15,13 +15,11 @@ class QuillConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "with_bounded_queue": [True, False],
         "with_no_exceptions": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "with_bounded_queue": False,
         "with_no_exceptions": False,
@@ -57,10 +55,6 @@ class QuillConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
     def validate(self):
