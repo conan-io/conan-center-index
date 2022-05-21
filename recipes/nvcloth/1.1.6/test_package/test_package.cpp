@@ -28,7 +28,6 @@ int main()
     physx::PxDefaultErrorCallback defaultErrorCallback = physx::PxDefaultErrorCallback();
     ProfilerCallback defaultProfilerCallback = ProfilerCallback();
     nv::cloth::InitializeNvCloth(&defaultAllocatorCallback, &defaultErrorCallback, nv::cloth::GetNvClothAssertHandler(), &defaultProfilerCallback);
-    std::cout << "Hello, NvCloth!" << std::endl;
     nv::cloth::Factory* factory = NvClothCreateFactoryCPU();
     if (factory == 0)
     {
@@ -36,6 +35,7 @@ int main()
         return -1;
     }
 
+    std::cout << "Hello, NvCloth!" << std::endl;
     NvClothDestroyFactory(factory);
     return 0;
 }

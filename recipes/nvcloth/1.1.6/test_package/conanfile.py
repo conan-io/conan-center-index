@@ -14,3 +14,6 @@ class NvClothTestConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
+
+    def requirements(self):
+        self.requires("physx/4.1.1")

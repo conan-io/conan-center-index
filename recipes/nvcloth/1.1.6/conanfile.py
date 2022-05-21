@@ -189,6 +189,3 @@ class NvclothConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-    
-    def requirements(self):
-        self.requires("physx/4.1.1")
