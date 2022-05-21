@@ -26,7 +26,6 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
-        "with_boost": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,8 +39,6 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
-        # with_boost=False is accepted when compiler is C++17 with filesystem or C++20 above.
-        "with_boost": True,
     }
 
     @property
@@ -70,10 +67,6 @@ class DrogonConan(ConanFile):
             del self.options.fPIC
             self.options["trantor"].shared = True
 
-        if self.options.with_boost:
-            self.options["boost"].without_filesystem = False
-            self.options["boost"].without_system = False
-
     @property
     def _compilers_minimum_version(self):
         return {
@@ -96,8 +89,7 @@ class DrogonConan(ConanFile):
 
     def requirements(self):
         self.requires("trantor/1.5.5")
-        if self.options.with_boost:
-            self.requires("boost/1.79.0")
+        self.requires("boost/1.79.0")
         self.requires("jsoncpp/1.9.5")
         self.requires("openssl/1.1.1o")
         self.requires("zlib/1.2.12")
