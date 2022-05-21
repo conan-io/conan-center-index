@@ -121,6 +121,11 @@ class NvclothConan(ConanFile):
                             os.path.join(self._source_subfolder, subfolder))
     
     def _patch_sources(self):
+        # There is no reason to force consumer of PhysX public headers to use one of
+        # NDEBUG or _DEBUG, since none of them relies on NDEBUG or _DEBUG
+        tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "PxShared", "include", "foundation", "PxPreprocessor.h"),
+                              "#error Exactly one of NDEBUG and _DEBUG needs to be defined!",
+                              "// #error Exactly one of NDEBUG and _DEBUG needs to be defined!")
         shutil.copy(
             os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h"),
             os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin")
