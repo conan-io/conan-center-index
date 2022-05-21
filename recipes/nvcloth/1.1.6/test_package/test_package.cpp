@@ -14,7 +14,7 @@ public:
 
     virtual void* zoneStart(const char* eventName, bool detached, uint64_t contextId)
     {
-        return nullptr;
+        return 0;
     }
 
     virtual void zoneEnd(void* profilerData, const char* eventName, bool detached, uint64_t contextId)
@@ -30,7 +30,7 @@ int main()
     nv::cloth::InitializeNvCloth(&defaultAllocatorCallback, &defaultErrorCallback, nv::cloth::GetNvClothAssertHandler(), &defaultProfilerCallback);
     std::cout << "Hello, NvCloth!" << std::endl;
     nv::cloth::Factory* factory = NvClothCreateFactoryCPU();
-    if (factory == nullptr)
+    if (factory == 0)
     {
         std::cout << "Failed to create factory" << std::endl;
         return -1;
