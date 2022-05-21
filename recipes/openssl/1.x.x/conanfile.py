@@ -896,7 +896,7 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].requires = ["zlib::zlib"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32"])
+            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["crypto"].system_libs.extend(["dl", "rt"])
             self.cpp_info.components["ssl"].system_libs.append("dl")
