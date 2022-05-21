@@ -1,0 +1,13 @@
+diff --git a/sq/CMakeLists.txt b/sq/CMakeLists.txt
+index bdea07d..f7629a3 100644
+--- a/sq/CMakeLists.txt
++++ b/sq/CMakeLists.txt
+@@ -15,7 +15,7 @@ endif()
+ 
+ if(NOT DISABLE_STATIC)
+   add_executable(sq_static sq.c)
+-  add_executable(squirrel::interpreter_static ALIAS sq)
++  add_executable(squirrel::interpreter_static ALIAS sq_static)
+   set_target_properties(sq_static PROPERTIES LINKER_LANGUAGE C EXPORT_NAME interpreter_static)
+   target_link_libraries(sq_static squirrel_static sqstdlib_static)
+   if(NOT SQ_DISABLE_INSTALLER)
