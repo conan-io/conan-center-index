@@ -84,6 +84,8 @@ class OsgearthConan(ConanFile):
             del self.options.fPIC
 
     def config_options(self):
+        self.options["openscenegraph"].shared = self.options.shared
+
         if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
 
@@ -104,6 +106,8 @@ class OsgearthConan(ConanFile):
         self.requires("gdal/3.3.1")
         self.requires("openscenegraph/3.6.5")
         self.requires("libcurl/7.79.1")
+        self.requires("lerc/2.2")
+        self.requires("rapidjson/1.1.0", private=True)
 
         self.requires("libtiff/4.3.0", override=True)
         self.requires("openssl/1.1.1l", override=True)
@@ -284,7 +288,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_webp:
             setup_plugin("webp").requires.append("libwebp::libwebp")
 
-        setup_plugin("lerc")
+        setup_plugin("lerc").requires.append("lerc::lerc")
         setup_plugin("osgearth_vdatum_egm2008")
         setup_plugin("osgearth_vdatum_egm84")
         setup_plugin("osgearth_vdatum_egm96")

@@ -74,4 +74,6 @@ set(LEVELDB_FOUND ${leveldb_FOUND})
 set(LEVELDB_LIBRARY ${leveldb_LIBRARIES})
 set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR})
 
+find_package(RapidJSON)
+
 add_subdirectory(source_subfolder)
