@@ -24,9 +24,9 @@ public:
 
 int main()
 {
-    auto defaultAllocatorCallback = physx::PxDefaultAllocator();
-    auto defaultErrorCallback = physx::PxDefaultErrorCallback();
-    auto defaultProfilerCallback = ProfilerCallback();
+    physx::PxDefaultAllocator defaultAllocatorCallback = physx::PxDefaultAllocator();
+    physx::PxDefaultErrorCallback defaultErrorCallback = physx::PxDefaultErrorCallback();
+    ProfilerCallback defaultProfilerCallback = ProfilerCallback();
     nv::cloth::InitializeNvCloth(&defaultAllocatorCallback, &defaultErrorCallback, nv::cloth::GetNvClothAssertHandler(), &defaultProfilerCallback);
     std::cout << "Hello, NvCloth!" << std::endl;
     nv::cloth::Factory* factory = NvClothCreateFactoryCPU();
