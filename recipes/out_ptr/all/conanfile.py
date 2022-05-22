@@ -1,9 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conans import tools
+from conan.tools.files import get
 
+required_conan_version = ">=1.45.0"
 
 class OutPtrConan(ConanFile):
     name = "out_ptr"
@@ -25,7 +25,7 @@ class OutPtrConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
