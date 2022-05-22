@@ -143,7 +143,7 @@ class DrogonConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["drogon"]
-        if self.options.shared and self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
