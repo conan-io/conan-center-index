@@ -70,7 +70,6 @@ class SysConfigOpenGLConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "opengl_system"
 
         self.cpp_info.set_property("cmake_file_name", "opengl_system")
-        self.cpp_info.set_property("cmake_target_name", "opengl_system::opengl_system")
 
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
