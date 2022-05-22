@@ -1,5 +1,7 @@
+import functools
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 
 required_conan_version = ">=1.33.0"
 
@@ -21,7 +23,6 @@ class JsonnetConan(ConanFile):
         "fPIC": True,
     }
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -52,10 +53,8 @@ class JsonnetConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
-        if self.options.shared and \
-           ((str(self.settings.compiler) == "Visual Studio" and self.settings.compiler.runtime in ["MTd", "MDd"]) or \
-            (str(self.settings.compiler) == "msvc" and self.settings.compiler.runtime in ["MT", "MD"] and self.settings.compiler.runtime_type == "Debug")):
-            raise ConanInvalidConfiguration("shared jsonnet is not supported with MTd runtime")
+        if self.options.shared and is_msvc(self) and "d" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration("shared {} is not supported with MTd/MDd runtime".format(self.name))
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -66,18 +65,17 @@ class JsonnetConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["BUILD_SHARED_BINARIES"] = False
-        self._cmake.definitions["BUILD_JSONNET"] = False
-        self._cmake.definitions["BUILD_JSONNETFMT"] = False
-        self._cmake.definitions["USE_SYSTEM_JSON"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        cmake.definitions["BUILD_SHARED_BINARIES"] = False
+        cmake.definitions["BUILD_JSONNET"] = False
+        cmake.definitions["BUILD_JSONNETFMT"] = False
+        cmake.definitions["USE_SYSTEM_JSON"] = True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
