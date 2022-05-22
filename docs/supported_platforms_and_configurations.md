@@ -38,6 +38,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 - Python: 3.7.9
 - CMake: 3.15.6
+- WinSDK: 10.0.20348
 - Compilers: Visual Studio:
   
   - 2017 (19.16.27045)
