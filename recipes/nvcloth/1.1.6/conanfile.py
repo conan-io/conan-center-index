@@ -61,7 +61,8 @@ class NvclothConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["PX_STATIC_LIBRARIES"] = not self.options.shared
+        if not self.options.shared:
+            cmake.definitions["PX_STATIC_LIBRARIES"] = 1
         cmake.definitions["STATIC_WINCRT"] = is_msvc_static_runtime(self)
 
         cmake.definitions["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
