@@ -1,3 +1,4 @@
+import os
 from conans import ConanFile, tools
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
@@ -38,10 +39,12 @@ class BeautyConan(ConanFile):
         cmake.build(target="beauty")
 
     def package(self):
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=self._source_subfolder)
-        cmake.build(target="beauty")
-        cmake.install()
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("version.hpp", dst=os.path.join("include", "beauty"), src=os.path.join(self.build_folder, "src", "beauty"))
+        self.copy("*.lib", src="lib", dst="lib", keep_path=False)
+        self.copy("*.so*", src="lib", dst="lib", keep_path=False, symlinks=True)
+        self.copy("*.a", src="lib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
