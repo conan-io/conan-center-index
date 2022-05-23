@@ -38,6 +38,8 @@ class libxftConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
