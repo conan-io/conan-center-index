@@ -83,7 +83,7 @@ class OpenFstConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.name} requires c++17, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
-           
+
         # Check stdlib ABI compatibility
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
@@ -123,6 +123,10 @@ class OpenFstConan(ConanFile):
             args.append("CXX={}".format(tools.get_env("CXX")))
         autotools.configure(args=args, configure_dir=self._source_subfolder)
         return autotools
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
