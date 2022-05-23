@@ -14,7 +14,7 @@ int main()
             "aru76CD9kVUdThnKVOaeeqZysM1Bz6iJF5piSUzVKZdEk6rIUZjrwpNaYdBBq4a/\n"
             "cNETdvolooljIRB8ywIDAQAB\n"
             "-----END PUBLIC KEY-----";
-        CryptoPP::StringSource source_str{key, true};
+        CryptoPP::StringSource source_str(key, true);
         CryptoPP::PEM_Load(source_str, publicKey);
 
         return 0;
