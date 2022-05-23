@@ -77,6 +77,7 @@ class QtConan(ConanFile):
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_dbus": [True, False],
+        "with_gssapi": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -115,6 +116,7 @@ class QtConan(ConanFile):
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_dbus": False,
+        "with_gssapi": False,
 
         "gui": True,
         "widgets": True,
@@ -214,6 +216,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_mysql = False
             self.options.opengl = "dynamic"
+            del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
@@ -324,11 +327,14 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", default=False) and not self.options["pulseaudio"].with_glib:
             # https://bugreports.qt.io/browse/QTBUG-95952
             raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
+        
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.with_pcre2:
             self.requires("pcre2/10.39")
         if self.options.get_safe("with_vulkan"):
@@ -392,6 +398,8 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
         if self.options.qtwayland:
             self.requires("wayland/1.20.0")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -596,6 +604,8 @@ class QtConan(ConanFile):
             args.append("-dbus-linked")
         else:
             args.append("-no-dbus")
+            
+        args.append("-feature-gssapi" if self.options.get_safe("with_gssapi", False) else "-no-feature-gssapi")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -831,6 +841,12 @@ Examples = bin/datadir/examples""")
                 endif()
                 """)
 
+        filecontents += textwrap.dedent("""\
+            if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
+                set(QT_DEFAULT_MAJOR_VERSION %s)
+            endif()
+            """ % v.major)
+        filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         tools.save(os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
@@ -899,7 +915,7 @@ Examples = bin/datadir/examples""")
                 reqs.append(r if "::" in r else "qt%s" % r)
             return reqs
 
-        def _create_module(module, requires=[]):
+        def _create_module(module, requires=[], has_include_dir=True):
             componentname = "qt%s" % module
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
             self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt5::{}".format(module))
@@ -910,7 +926,8 @@ Examples = bin/datadir/examples""")
             else:
                 libname = module
             self.cpp_info.components[componentname].libs = ["Qt5%s%s" % (libname, libsuffix)]
-            self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
+            if has_include_dir:
+                self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
             self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
@@ -1059,7 +1076,7 @@ Examples = bin/datadir/examples""")
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
-                _create_module("XcbQpa", xcb_qpa_reqs)
+                _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
         if self.options.with_sqlite3:
@@ -1074,6 +1091,8 @@ Examples = bin/datadir/examples""")
         networkReqs = []
         if self.options.openssl:
             networkReqs.append("openssl::openssl")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            networkReqs.append("krb5::krb5-gssapi")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
@@ -1338,7 +1357,8 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
-                self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
+                if self.options.with_gssapi:
+                    self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
         build_modules.append(self._cmake_core_extras_file)
