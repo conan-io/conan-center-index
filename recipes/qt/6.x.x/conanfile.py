@@ -86,6 +86,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
+        "with_gssapi": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -126,6 +127,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
+        "with_gssapi": False,
 
         "gui": True,
         "widgets": True,
@@ -187,6 +189,7 @@ class QtConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
+            del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
@@ -316,10 +319,13 @@ class QtConan(ConanFile):
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
+
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.with_pcre2:
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
@@ -383,6 +389,8 @@ class QtConan(ConanFile):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
 
     def build_requirements(self):
         self.build_requires("cmake/3.23.1")
@@ -594,7 +602,8 @@ class QtConan(ConanFile):
                               ("widgets", "widgets"),
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
-                              ("with_brotli", "brotli")]:
+                              ("with_brotli", "brotli"),
+                              ("with_gssapi", "gssapi")]:
             cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -783,6 +792,13 @@ class QtConan(ConanFile):
                     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{1})
                 endif()
                 """.format(target, exe_path))
+        
+        filecontents += textwrap.dedent("""\
+            if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
+                set(QT_DEFAULT_MAJOR_VERSION %s)
+            endif()
+            """ % ver.major)
+        filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
@@ -993,6 +1009,8 @@ class QtConan(ConanFile):
             networkReqs.append("openssl::openssl")
         if self.options.with_brotli:
             networkReqs.append("brotli::brotli")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            networkReqs.append("krb5::krb5-gssapi")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
@@ -1260,7 +1278,8 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
-                self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
+                if self.options.with_gssapi:
+                    self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
                 if self.options.gui and self.options.widgets:
                     self.cpp_info.components["qtPrintSupport"].system_libs.append("cups")
 
