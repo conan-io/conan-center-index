@@ -59,8 +59,8 @@ class LibPciAccessConan(ConanFile):
         self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
                  win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
-        autotools = Autotools(self)
-        autotools.configure(build_script_folder=self._source_subfolder)
+        autotools = Autotools(self, build_script_folder=self._source_subfolder)
+        autotools.configure()
         autotools.make()
 
     def package(self):
