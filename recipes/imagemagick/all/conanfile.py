@@ -327,18 +327,6 @@ class ImageMagicConan(ConanFile):
             self, win_bash=tools.os_info.is_windows
         )
 
-        # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
-        # xft_path = os.path.join(self.build_folder, "xft.pc")
-        # if os.path.exists(xft_path):
-            # os.remove(xft_path)
-        # if "/usr/include/uuid" in self._autotools.include_paths:
-            # self._autotools.include_paths.remove("/usr/include/uuid")
-        # if "/usr/include/freetype2" in self._autotools.include_paths:
-            # self._autotools.include_paths.remove("/usr/include/freetype2")
-        # for include in self._autotools.include_paths:
-            # if include.startswith("/usr/include/libpng"):
-                # self._autotools.include_paths.remove(include)
-
         def yes_no(o):
             return "yes" if o else "no"
 
