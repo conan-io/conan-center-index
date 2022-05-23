@@ -376,8 +376,10 @@ class FFMpegConan(ConanFile):
 
         def opt_enable_disable(
             what, v): return "--{}-{}".format("enable" if v else "disable", what)
-        def opt_disable_if_set(
-            what, v): return "--disable-{}".format(what) if v else ""
+
+        def opt_append_disable_if_set(args, what, v):
+            if v:
+                args.append("--disable-{}".format(what))
 
         args = [
             "--pkg-config-flags=--static",
@@ -395,33 +397,6 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("swscale", self.options.swscale),
             opt_enable_disable("postproc", self.options.postproc),
             opt_enable_disable("avfilter", self.options.avfilter),
-            # Individual Component Options
-            opt_disable_if_set(
-                "everything", self.options.disable_everything),
-            opt_disable_if_set(
-                "encoders", self.options.disable_all_encoders),
-            opt_disable_if_set(
-                "decoders", self.options.disable_all_decoders),
-            opt_disable_if_set(
-                "hwaccels", self.options.disable_all_hardware_accelerators),
-            opt_disable_if_set(
-                "muxers", self.options.disable_all_muxers),
-            opt_disable_if_set(
-                "demuxers", self.options.disable_all_demuxers),
-            opt_disable_if_set(
-                "parsers", self.options.disable_all_parsers),
-            opt_disable_if_set(
-                "bsfs", self.options.disable_all_bitstream_filters),
-            opt_disable_if_set(
-                "protocols", self.options.disable_all_protocols),
-            opt_disable_if_set(
-                "devices", self.options.disable_all_devices),
-            opt_disable_if_set(
-                "indevs", self.options.disable_all_input_devices),
-            opt_disable_if_set(
-                "outdevs", self.options.disable_all_output_devices),
-            opt_disable_if_set(
-                "filters", self.options.disable_all_filters),
 
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
@@ -474,6 +449,20 @@ class FFMpegConan(ConanFile):
         ]
 
         # Individual Component Options
+        opt_append_disable_if_set(args, "everything", self.options.disable_everything)
+        opt_append_disable_if_set(args, "encoders", self.options.disable_all_encoders)
+        opt_append_disable_if_set(args, "decoders", self.options.disable_all_decoders)
+        opt_append_disable_if_set(args, "hwaccels", self.options.disable_all_hardware_accelerators)
+        opt_append_disable_if_set(args, "muxers", self.options.disable_all_muxers)
+        opt_append_disable_if_set(args, "demuxers", self.options.disable_all_demuxers)
+        opt_append_disable_if_set(args, "parsers", self.options.disable_all_parsers)
+        opt_append_disable_if_set(args, "bsfs", self.options.disable_all_bitstream_filters)
+        opt_append_disable_if_set(args, "protocols", self.options.disable_all_protocols)
+        opt_append_disable_if_set(args, "devices", self.options.disable_all_devices)
+        opt_append_disable_if_set(args, "indevs", self.options.disable_all_input_devices)
+        opt_append_disable_if_set(args, "outdevs", self.options.disable_all_output_devices)
+        opt_append_disable_if_set(args, "filters", self.options.disable_all_filters)
+
         args.extend(self._split_and_format_options_string(
             "enable-encoder", self.options.enable_encoders))
         args.extend(self._split_and_format_options_string(
