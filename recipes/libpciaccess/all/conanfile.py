@@ -4,7 +4,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.48.0"
 
 
 class LibPciAccessConan(ConanFile):
