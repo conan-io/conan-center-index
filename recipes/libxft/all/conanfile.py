@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import functools
 
-required_conan_version >= "1.33.0"
+required_conan_version = ">=1.33.0"
 
 class libxftConan(ConanFile):
     name = "libxft"
