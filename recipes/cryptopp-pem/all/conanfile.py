@@ -11,7 +11,7 @@ class CryptoPPPEMConan(ConanFile):
     name = "cryptopp-pem"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cryptopp.com/wiki/PEM_Pack"
-    license = "BSL-1.0"
+    license = "Unlicense"
     description = "The PEM Pack is a partial implementation of message encryption which allows you to read and write PEM encoded keys and parameters, including encrypted private keys."
     topics = ("cryptopp", "crypto", "cryptographic", "security", "PEM")
 
@@ -105,7 +105,8 @@ class CryptoPPPEMConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="License.txt", dst="licenses", src=self._source_subfolder)
+        tools.download("https://unlicense.org/UNLICENSE", "UNLICENSE")
+        self.copy(pattern="UNLICENSE", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
