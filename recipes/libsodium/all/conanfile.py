@@ -87,17 +87,19 @@ class LibsodiumConan(ConanFile):
                 "14": "vs2015",
                 "15": "vs2017",
                 "16": "vs2019",
+                "17": "vs2022",
             }
         else:
             folder = {
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
+                "193": "vs2022",
             }
         return folder.get(str(self.settings.compiler.version))
 
     def _build_msvc(self):
-        msvc_sln_folder = self._msvc_sln_folder or "vs2019"
+        msvc_sln_folder = self._msvc_sln_folder or "vs2022"
         upgrade_project = self._msvc_sln_folder is None
         sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", msvc_sln_folder, "libsodium.sln")
         build_type = "{}{}".format(
