@@ -78,6 +78,8 @@ class CryptoPPPEMConan(ConanFile):
                               "cryptopp-static", "cryptopp-pem-static")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "cryptopp-shared", "cryptopp-pem-shared")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "OUTPUT_NAME cryptopp", "OUTPUT_NAME cryptopp-pem")
 
     def _configure_cmake(self):
         if self._cmake:
