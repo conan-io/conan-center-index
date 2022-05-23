@@ -97,7 +97,7 @@ class LibspatialiteConan(ConanFile):
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         if self.options.with_minizip:
             self.requires("minizip/1.2.12")
 

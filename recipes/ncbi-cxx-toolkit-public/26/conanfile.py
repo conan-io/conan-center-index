@@ -41,7 +41,7 @@ class NcbiCxxToolkit(ConanFile):
         "PNG":          "libpng/1.6.37",
         "SQLITE3":      "sqlite3/3.37.2",
         "TIFF":         "libtiff/4.3.0",
-        "XML":          "libxml2/2.9.12",
+        "XML":          "libxml2/2.9.14",
         "XSLT":         "libxslt/1.1.34",
         "UV":           "libuv/1.42.0",
         "Z":            "zlib/1.2.11",

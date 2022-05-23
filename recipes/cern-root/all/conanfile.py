@@ -85,7 +85,7 @@ class CernRootConan(ConanFile):
         self.requires("libcurl/7.78.0")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
-        self.requires("libxml2/2.9.12")
+        self.requires("libxml2/2.9.14")
         self.requires("lz4/1.9.3")
         self.requires("opengl/system")
         self.requires("openssl/1.1.1l")

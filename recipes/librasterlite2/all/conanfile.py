@@ -75,7 +75,7 @@ class Librasterlite2Conan(ConanFile):
         self.requires("libpng/1.6.37")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.3.0")
-        self.requires("libxml2/2.9.13")
+        self.requires("libxml2/2.9.14")
         self.requires("sqlite3/3.38.1")
         self.requires("zlib/1.2.12")
         if self.options.with_openjpeg:

@@ -67,7 +67,7 @@ class Nghttp2Conan(ConanFile):
             self.requires("c-ares/1.18.1")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
             self.requires("zlib/1.2.12")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.2.1")

@@ -46,7 +46,7 @@ class TmxConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.13")
+        self.requires("libxml2/2.9.14")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_zstd:

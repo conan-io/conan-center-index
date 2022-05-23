@@ -76,7 +76,7 @@ class PdalConan(ConanFile):
         self.requires("libgeotiff/1.7.1")
         self.requires("nanoflann/1.4.2")
         if self.options.with_xml:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_laszip:
