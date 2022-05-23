@@ -2,10 +2,12 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import functools
 
+required_conan_version >= "1.33.0"
+
 class libxftConan(ConanFile):
     name = "libxft"
     description = 'X FreeType library'
-    tags = ("libxft", "x11", "xorg")
+    topics = ("libxft", "x11", "xorg")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.x.org/wiki/"
     license = "X11"
