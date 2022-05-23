@@ -163,9 +163,9 @@ class NvclothConan(ConanFile):
             debug_suffix = "DEBUG"
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["NvCloth{debug_suffix}_{arch_suffix}".format(debug_suffix, arch_suffix)]
+            self.cpp_info.libs = ["NvCloth{}_{}".format(debug_suffix, arch_suffix)]
         else:
-            self.cpp_info.libs = ["NvCloth{debug_suffix}".format(debug_suffix)]
+            self.cpp_info.libs = ["NvCloth{}".format(debug_suffix)]
 
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
