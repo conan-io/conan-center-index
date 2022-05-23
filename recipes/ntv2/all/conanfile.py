@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake
 from conans import tools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.48.0"
 
 
 class Ntv2Conan(ConanFile):
@@ -36,8 +36,8 @@ class Ntv2Conan(ConanFile):
         return "source_subfolder"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=self._source_subfolder)
+        cmake = CMake(self, build_script_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
