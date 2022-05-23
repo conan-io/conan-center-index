@@ -15,12 +15,20 @@ patches:
   "1.10.0":
     - patch_file: "patches/0001-threads.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-openssl.patch"
+      base_path: "source_subfolder"
   "1.9.0":
     - patch_file: "patches/0001-threads.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-openssl.patch"
       base_path: "source_subfolder"
   "1.8.2":
     - patch_file: "patches/0001-threads.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-openssl.patch"
+      base_path: "source_subfolder"
   "1.8.0":
     - patch_file: "patches/0001-threads.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-openssl.patch"
       base_path: "source_subfolder"
