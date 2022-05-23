@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import re
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.48.0"
 
 
 class OneTBBConan(ConanFile):
@@ -86,8 +86,8 @@ class OneTBBConan(ConanFile):
         toolchain.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure(build_script_folder="src")
+        cmake = CMake(self, build_script_folder="src")
+        cmake.configure()
         cmake.build()
 
     def package(self):
