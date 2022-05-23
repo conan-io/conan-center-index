@@ -53,6 +53,11 @@ class DrogonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+            self.options["trantor"].shared = True
         if not self.options.with_orm:
             del self.options.with_postgres
             del self.options.with_postgres_batch
@@ -61,11 +66,6 @@ class DrogonConan(ConanFile):
             del self.options.with_redis
         elif not self.options.with_postgres:
             del self.options.with_postgres_batch
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-            self.options["trantor"].shared = True
 
     @property
     def _compilers_minimum_version(self):
@@ -99,13 +99,13 @@ class DrogonConan(ConanFile):
             self.requires("coz/cci.20210322")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
-        if self.options.with_postgres:
+        if self.options.get_safe("with_postgres"):
             self.requires("libpq/14.2")
-        if self.options.with_mysql:
+        if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.25")
-        if self.options.with_sqlite:
+        if self.options.get_safe("with_sqlite"):
             self.requires("sqlite3/3.38.5")
-        if self.options.with_redis:
+        if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.0.2")
 
     def source(self):
