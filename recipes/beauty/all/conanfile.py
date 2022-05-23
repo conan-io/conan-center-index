@@ -14,7 +14,7 @@ class BeautyConan(ConanFile):
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
-    default_options = "shared=False"
+    default_options = {"shared": False}
 
     requires = ("boost/[>1.70.0]@",
                 "openssl/1.1.1o@")
