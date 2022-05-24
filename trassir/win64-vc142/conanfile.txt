@@ -13,6 +13,7 @@ caffe/1.0.windows.dssl4
 cpython-distro/2.7.18.dssl1
 dlib/19.4
 dojo-toolkit/1.11.4@trassir/sdk142
+face_recognition/1.0.0@trassir_ml/cpu
 ffmpeg/3.3.1.dssl1
 freetype/2.10.1
 gflags/2.2.2
@@ -74,6 +75,7 @@ caffe:with_leveldb=True
 caffe:with_lmdb=True
 caffe:with_opencv=True
 dlib:shared=header_only
+face_recognition:gpu_type=cpu
 ffmpeg:shared=True
 freetype:shared=True
 freetype:with_bzip2=True
