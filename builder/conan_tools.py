@@ -8,7 +8,7 @@ from pathlib import Path
 
 from conans.client.profile_loader import read_profile
 
-_dssl_req_patterns = ['trassir/', 'bintray/']
+_dssl_req_patterns = ['trassir/', 'trassir_ml/', 'bintray/']
 
 
 def dssl_req_filter(line):
