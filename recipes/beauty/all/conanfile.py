@@ -44,6 +44,9 @@ class BeautyConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration("Only libc++ is supported for clang")
 
+        if self.settings.compiler == "apple-clang" and self.options.shared:
+            raise ConanInvalidConfiguration("shared is not supported on apple-clang")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
