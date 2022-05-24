@@ -4,7 +4,7 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(xft REQUIRED CONFIG)
+find_package(libxft REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} xft::xft)
+target_link_libraries(${PROJECT_NAME} libxft::libxft)
