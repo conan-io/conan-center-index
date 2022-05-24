@@ -9,8 +9,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def configure(self):
-        v = Version(str(self.settings.compiler.version))
-        if self.settings.compiler == "gcc" and v < "10":
+        v = int(str(self.settings.compiler.version).split(",")[0])
+        if self.settings.compiler == "gcc" and v < 10:
             raise ConanInvalidConfiguration("Requires GCC > 10")
         elif not self.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("Currently only GCC supported")
