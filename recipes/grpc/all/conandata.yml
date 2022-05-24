@@ -1,4 +1,7 @@
 sources:
+  "1.46.3":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.46.3.tar.gz"
+    sha256: "d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964"
   "1.45.2":
     url: "https://github.com/grpc/grpc/archive/refs/tags/v1.45.2.tar.gz"
     sha256: "e18b16f7976aab9a36c14c38180f042bb0fd196b75c9fd6a20a2b5f934876ad6"
@@ -30,27 +33,45 @@ patches:
   "1.45.2":
     - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
+      base_path: "source_subfolder"
   "1.44.0":
     - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
       base_path: "source_subfolder"
   "1.43.2":
     - patch_file: "patches/v1.43.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
+      base_path: "source_subfolder"
   "1.42.0":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
       base_path: "source_subfolder"
   "1.41.1":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
+      base_path: "source_subfolder"
   "1.40.0":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
       base_path: "source_subfolder"
   "1.39.1":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
+      base_path: "source_subfolder"
   "1.38.1":
     - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
+      base_path: "source_subfolder"
   "1.37.1":
     - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/v1.37.x/0002-fix-gcc-abseil-link.patch"
       base_path: "source_subfolder"
