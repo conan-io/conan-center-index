@@ -28,26 +28,22 @@ class BeautyConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15.7",
+            "clang": "11",
+            "Visual Studio": "16",
         }
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
 
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+        if minimum_version and str(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                "{} requires C++17, which your compiler does not support.".format(self.name)
-            )
+                f"Compiler {self.name} must be at least {minimum_version}")
+        
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration("Only libc++ is supported for clang")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
