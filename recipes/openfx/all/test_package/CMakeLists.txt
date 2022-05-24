@@ -6,7 +6,8 @@ add_definitions(-D_HAS_AUTO_PTR_ETC)
 
 # Conan
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+find_package(openfx REQUIRED CONFIG)
 
 # Flags
 if(MSVC)
@@ -17,4 +18,4 @@ endif()
 
 # Build
 add_executable(test_package invert.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
+target_link_libraries(test_package openfx::openfx)

@@ -22,7 +22,7 @@ class openfx(ConanFile):
     requires = ("opengl/system", "expat/2.4.8")
     exports_sources = "CMakeLists.txt", "cmake/*", "symbols/*"
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     def source(self):
@@ -53,12 +53,7 @@ class openfx(ConanFile):
 
     @property
     def _build_modules(self):
-        return [
-            os.path.join(
-                "lib", "cmake", "conan-official-{}-variables.cmake".format(self.name)
-            ),
-            os.path.join("lib", "cmake", "OpenFX.cmake"),
-        ]
+        return [os.path.join("lib", "cmake", "OpenFX.cmake")]
 
     def package(self):
         cmake = self._configure_cmake()

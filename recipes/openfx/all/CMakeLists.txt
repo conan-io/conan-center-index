@@ -14,6 +14,7 @@ endif()
 # Conan
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS)
+find_package(EXPAT REQUIRED)
 
 # Macros
 set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
@@ -49,7 +50,7 @@ add_library(OfxHost
 	${OFX_HOSTSUPPORT_HEADER_FILES}
 	${OFX_HOSTSUPPORT_LIBRARY_FILES})
 
-target_link_libraries(OfxHost PUBLIC ${CONAN_LIBS})
+target_link_libraries(OfxHost PUBLIC EXPAT::EXPAT)
 
 target_include_directories(OfxHost PUBLIC
 	${OFX_HEADER_DIR}
