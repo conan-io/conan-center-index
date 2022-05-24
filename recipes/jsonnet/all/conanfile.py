@@ -8,12 +8,12 @@ required_conan_version = ">=1.33.0"
 
 class JsonnetConan(ConanFile):
     name = "jsonnet"
+    description = "Jsonnet - The data templating language"
+    topics = ("config", "json", "functional", "configuration")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/jsonnet"
-    description = "Jsonnet - The data templating language"
-    topics = ("config", "json", "functional", "configuration")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -39,7 +39,8 @@ class JsonnetConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            self.options["rapidyaml"].shared = True
+            # if tools.Version(self.version) >= "0.18.0":
+            #     self.options["rapidyaml"].shared = True
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5")
