@@ -339,7 +339,7 @@ class VtkConan(ConanFile):
                 "libpng":            "libpng/1.6.37",
                 "proj":              "proj/9.0.0", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
                 "pugixml":           "pugixml/1.12.1",
-                "sqlite3":           "sqlite3/3.38.1",
+                "sqlite3":           "sqlite3/3.38.5",
                 "utfcpp":            "utfcpp/3.2.1",
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 }
@@ -358,7 +358,7 @@ class VtkConan(ConanFile):
             parties["zfp"]     = "zfp/0.5.5"
 
         if self.options.build_all_modules:
-            parties["boost"]  = "boost/1.78.0"
+            parties["boost"]  = "boost/1.79.0"
             parties["openvr"] = "openvr/1.16.8"
             parties["odbc"]   = "odbc/2.3.9"
 
@@ -389,7 +389,7 @@ class VtkConan(ConanFile):
         self.requires("openssl/1.1.1o", override=True)
 
         # HACK TODO working around a dependency bug in conan
-        self.requires("cmake/3.22.4")
+        self.requires("cmake/3.23.1")
 
 
     def build_requirements(self):
