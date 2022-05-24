@@ -63,6 +63,9 @@ class CryptoPPPEMConan(ConanFile):
         shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         tools.rmdir(src_folder)
+        
+        # Get license
+        tools.download("https://unlicense.org/UNLICENSE", "UNLICENSE")
 
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
@@ -100,7 +103,6 @@ class CryptoPPPEMConan(ConanFile):
         cmake.build()
 
     def package(self):
-        tools.download("https://unlicense.org/UNLICENSE", "UNLICENSE")
         self.copy(pattern="UNLICENSE", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
