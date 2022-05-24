@@ -135,11 +135,13 @@ class OpenSSLConan(ConanFile):
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
         "openssldir": "ANY",
+        "debug_suffix": [True, False],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
+    default_options["debug_suffix"] = True
 
     _env_build = None
 
@@ -199,6 +201,9 @@ class OpenSSLConan(ConanFile):
             del self.options.no_srp
             del self.options.no_ts
             del self.options.no_whirlpool
+            del self.options.debug_suffix
+        elif not self._use_nmake:
+            del self.options.debug_suffix
 
         if self._full_version < "1.1.1":
             del self.options.no_aria
@@ -551,7 +556,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng", "no_md2"]:
+            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng", "no_md2", "debug_suffix"]:
                 self.output.info("activated option: %s" % option_name)
                 args.append(option_name.replace("_", "-"))
         return args
@@ -794,7 +799,7 @@ class OpenSSLConan(ConanFile):
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
         if self._use_nmake:
-            if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0":
+            if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0" and self.options.debug_suffix:
                 with tools.chdir(os.path.join(self.package_folder, 'lib')):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
@@ -866,11 +871,11 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
         if self._use_nmake:
-            libsuffix = "d" if self.settings.build_type == "Debug" else ""
             if self._full_version < "1.1.0":
                 self.cpp_info.components["ssl"].libs = ["ssleay32"]
                 self.cpp_info.components["crypto"].libs = ["libeay32"]
             else:
+                libsuffix = "d" if self.options.debug_suffix and self.settings.build_type == "Debug" else ""
                 self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
                 self.cpp_info.components["crypto"].libs = ["libcrypto" + libsuffix]
         else:
