@@ -7,7 +7,6 @@ required_conan_version = ">=1.45.0"
 
 class OutPtrConan(ConanFile):
     name = "out_ptr"
-    version = "ea379b2"
 
     # Optional metadata
     license = "Apache-2.0"
@@ -15,7 +14,7 @@ class OutPtrConan(ConanFile):
     homepage = "https://github.com/soasis/out_ptr"
     description = "a C++11 implementation of std::out_ptr (p1132), as a standalone library"
     topics = ("utility", "backport")
-    generators = "CMakeToolchain"
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
