@@ -56,6 +56,8 @@ class LibcurlConan(ConanFile):
         "with_verbose_debug": [True, False],
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
+        "with_ca_bundle": "ANY",
+        "with_ca_path": "ANY",
     }
     default_options = {
         "shared": False,
@@ -96,6 +98,8 @@ class LibcurlConan(ConanFile):
         "with_verbose_debug": True,
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
+        "with_ca_bundle": None,
+        "with_ca_path": None,
     }
 
     generators = "cmake", "cmake_find_package_multi", "pkg_config", "cmake_find_package"
@@ -420,6 +424,16 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ntlm_wb:
             params.append("--disable-ntlm-wb")
 
+        if self.options.with_ca_bundle == False:
+            params.append("--without-ca-bundle")
+        elif self.options.with_ca_bundle:
+            params.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
+
+        if self.options.with_ca_path == False:
+            params.append('--without-ca-path')
+        elif self.options.with_ca_path:
+            params.append("--with-ca-path=" + str(self.options.with_ca_path))
+
         # Cross building flags
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -560,6 +574,16 @@ class LibcurlConan(ConanFile):
             else:
                 self._cmake.definitions["CURL_DISABLE_NTLM"] = True
         self._cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
+
+        if self.options.with_ca_bundle == False:
+            cmake.definitions['CURL_CA_BUNDLE'] = 'none'
+        elif self.options.with_ca_bundle:
+            cmake.definitions['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
+
+        if self.options.with_ca_path == False:
+            cmake.definitions['CURL_CA_PATH'] = 'none'
+        elif self.options.with_ca_path:
+            cmake.definitions['CURL_CA_PATH'] = self.options.with_ca_path
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
