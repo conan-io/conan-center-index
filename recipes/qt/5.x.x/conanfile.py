@@ -221,6 +221,7 @@ class QtConan(ConanFile):
             del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
+            self.options.with_atspi = False
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -235,7 +236,7 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
         
-        if self.settings.os != "Linux":
+        if not self.options.with_dbus:
             del self.options.with_atspi
 
         if not self.options.qtmultimedia:
