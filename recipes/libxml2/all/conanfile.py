@@ -94,7 +94,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/70.1")
+            self.requires("icu/71.1")
 
     def build_requirements(self):
         if not (self._is_msvc or self._is_mingw_windows):
@@ -270,11 +270,12 @@ class Libxml2Conan(ConanFile):
         elif self._is_mingw_windows:
             self._build_mingw()
         else:
-            autotools = self._configure_autotools()
-            autotools.make(["libxml2.la"])
+            with tools.run_environment(self):   # required for ICU build
+                autotools = self._configure_autotools()
+                autotools.make(["libxml2.la"])
 
-            if self.options.include_utils:
-                autotools.make(["xmllint", "xmlcatalog", "xml2-config"])
+                if self.options.include_utils:
+                    autotools.make(["xmllint", "xmlcatalog", "xml2-config"])
 
     def package(self):
         # copy package license
