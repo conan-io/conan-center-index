@@ -25,7 +25,7 @@ class CryptoPPPEMConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -73,13 +73,6 @@ class CryptoPPPEMConan(ConanFile):
         # Honor fPIC option
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
-        
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "cryptopp-static", "cryptopp-pem-static")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "cryptopp-shared", "cryptopp-pem-shared")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "OUTPUT_NAME cryptopp", "OUTPUT_NAME cryptopp-pem")
 
     def _configure_cmake(self):
         if self._cmake:
