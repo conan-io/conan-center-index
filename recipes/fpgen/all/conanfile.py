@@ -25,7 +25,10 @@ class FpgenConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version + "/inc/", self._source_subfolder)
+        print(os.listdir(self.name + "-" + self.version))
+        bpth = self.name + "-" + self.version
+        os.rename(bpth + "/LICENSE", bpth + "/inc/LICENSE")
+        os.rename(bpth + "/inc/", self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
