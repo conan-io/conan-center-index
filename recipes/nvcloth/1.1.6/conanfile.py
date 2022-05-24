@@ -156,14 +156,16 @@ class NvclothConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "nvcloth"
         self.cpp_info.names["cmake_find_package_multi"] = "nvcloth"
 
-        arch_suffix = ""
-        if self.settings.arch == "x86_64":
-            arch_suffix = "x64"
-        debug_suffix = ""
         if self.settings.build_type == "Debug":
             debug_suffix = "DEBUG"
+        else:
+            debug_suffix = ""
 
         if self.settings.os == "Windows":
+            if self.settings.arch == "x86_64":
+                arch_suffix = "x64"
+            else:
+                arch_suffix = ""
             self.cpp_info.libs = ["NvCloth{}_{}".format(debug_suffix, arch_suffix)]
         else:
             self.cpp_info.libs = ["NvCloth{}".format(debug_suffix)]
