@@ -117,10 +117,6 @@ class OpenFstConan(ConanFile):
             "--enable-special={}".format(yes_no(self.options.enable_special)),
             "LIBS=-lpthread",
         ]
-        if tools.get_env("CC"):
-            args.append("CC={}".format(tools.get_env("CC")))
-        if tools.get_env("CXX"):
-            args.append("CXX={}".format(tools.get_env("CXX")))
         autotools.configure(args=args, configure_dir=self._source_subfolder)
         return autotools
 
