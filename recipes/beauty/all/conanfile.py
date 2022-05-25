@@ -38,7 +38,7 @@ class BeautyConan(ConanFile):
             tools.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and str(self.settings.compiler.version) < minimum_version:
+        if minimum_version and tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"Compiler {self.name} must be at least {minimum_version}")
         
