@@ -61,7 +61,7 @@ class LibPciAccessConan(ConanFile):
 
         if conan_version < tools.Version("1.48.0"):
             autotools = Autotools(self)
-            autotools.configure(, build_script_folder=self._source_subfolder)
+            autotools.configure(build_script_folder=self._source_subfolder)
         else:
             autotools = Autotools(self, build_script_folder=self._source_subfolder)
             autotools.configure()
