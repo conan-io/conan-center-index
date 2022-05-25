@@ -1,10 +1,10 @@
 import os
 
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conans import ConanFile, tools
+from conans import ConanFile, tools, __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.48.0"
+required_conan_version = ">=1.33.0"
 
 
 class LibPciAccessConan(ConanFile):
@@ -59,8 +59,12 @@ class LibPciAccessConan(ConanFile):
         self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
                  win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
-        autotools = Autotools(self, build_script_folder=self._source_subfolder)
-        autotools.configure()
+        if conan_version < tools.Version("1.48.0"):
+            autotools = Autotools(self)
+            autotools.configure(, build_script_folder=self._source_subfolder)
+        else:
+            autotools = Autotools(self, build_script_folder=self._source_subfolder)
+            autotools.configure()
         autotools.make()
 
     def package(self):
