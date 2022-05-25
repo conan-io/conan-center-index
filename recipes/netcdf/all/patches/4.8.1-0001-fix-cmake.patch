@@ -39,10 +39,18 @@ index 6b39f0e4..76f69653 100644
    INSTALL(FILES ${COPY_FILES}
    DESTINATION ${CMAKE_INSTALL_LIBDIR}
 diff --git a/liblib/CMakeLists.txt b/liblib/CMakeLists.txt
-index be72612c..6187beb8 100644
+index be72612c..e0edb4ca 100644
 --- a/liblib/CMakeLists.txt
 +++ b/liblib/CMakeLists.txt
-@@ -97,7 +97,7 @@ IF(USE_HDF5)
+@@ -90,14 +90,14 @@ IF(USE_HDF5)
+     # builds:
+     # Make sure that HDF5_C_LIBRARY appears *after*
+     # HDF5_HL_LIBRARY.
+-    SET(TLL_LIBS ${HDF5_HL_LIBRARIES} ${HDF5_C_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
++    SET(TLL_LIBS ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
+   ELSE() # Windows CMake defines HDF5_LIBRARIES.
+     SET(TLL_LIBS ${HDF5_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
+   ENDIF()
  ENDIF()
  
  IF(FOUND_CURL)
