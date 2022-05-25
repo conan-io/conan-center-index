@@ -146,7 +146,10 @@ class RubyConan(ConanFile):
         for file in ["COPYING", "BSDL"]:
             self.copy(file, dst="licenses", src=self._source_subfolder)
 
-        at = Autotools(self)
+        if conan_version < tools.Version("1.48.0"):
+            at = Autotools(self)
+        else:
+            at = Autotools(self, build_script_folder=build_script_folder)
         with tools.vcvars(self):
             if cross_building(self):
                 at.make(target="install-local")
