@@ -103,7 +103,10 @@ class KModConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = Autotools(self)
+        if conan_version < tools.Version("1.48.0"):
+            autotools = Autotools(self)
+        else:
+            autotools = Autotools(self, build_script_folder=self._source_subfolder)
         autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
