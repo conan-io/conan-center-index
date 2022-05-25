@@ -121,7 +121,7 @@ class RubyConan(ConanFile):
         tc.generate()
 
     @property
-    def _build_script_folder(self)
+    def _build_script_folder(self):
         build_script_folder = self._source_subfolder
         if self._is_msvc:
             build_script_folder = os.path.join(build_script_folder, "win32")
