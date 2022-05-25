@@ -1,9 +1,9 @@
-from conans import ConanFile, tools
+from conans import ConanFile, tools, __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 import os
 
-required_conan_version = ">=1.48"
+required_conan_version = ">=1.44"
 
 class KModConan(ConanFile):
     name = "kmod"
@@ -93,8 +93,12 @@ class KModConan(ConanFile):
     def build(self):
         tools.save(os.path.join(self._source_subfolder, "libkmod", "docs", "gtk-doc.make"), "")
         self.run("autoreconf -fiv", cwd=self._source_subfolder)
-        autotools = Autotools(self, build_script_folder=self._source_subfolder)
-        autotools.configure()
+        if conan_version < tools.Version("1.48.0"):
+            autotools = Autotools(self)
+            autotools.configure(build_script_folder=self._source_subfolder)
+        else:
+            autotools = Autotools(self, build_script_folder=self._source_subfolder)
+            autotools.configure()
         autotools.make()
 
     def package(self):
