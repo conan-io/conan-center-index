@@ -6,7 +6,7 @@
 
 // main() provided in 000-CatchMain.cpp
 
-#include <catch2/catch.hpp>
+#include CONAN_CATCH_INCLUDE_PATH
 
 TEST_CASE( "vectors can be sized and resized", "[vector]" ) {
 

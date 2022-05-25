@@ -2,7 +2,7 @@
 
 // main() provided by target Catch2::Catch2WithMain
 
-#include <catch2/catch.hpp>
+#include CONAN_CATCH_INCLUDE_PATH
 
 TEST_CASE( "compiles and runs" ) {
     REQUIRE( true == !false );

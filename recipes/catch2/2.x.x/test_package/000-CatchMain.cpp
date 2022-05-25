@@ -6,7 +6,7 @@
 // Let Catch provide main():
 #define CATCH_CONFIG_MAIN
 
-#include <catch2/catch.hpp>
+#include CONAN_CATCH_INCLUDE_PATH
 
 // That's it
 
