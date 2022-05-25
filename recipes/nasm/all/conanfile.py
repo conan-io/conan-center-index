@@ -52,7 +52,7 @@ class NASMConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=(self._settings_build.os == "Windows"))
         if self.settings.arch == "x86":
             self._autotools.flags.append("-m32")
         elif self.settings.arch == "x86_64":
