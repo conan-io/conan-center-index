@@ -120,14 +120,18 @@ class RubyConan(ConanFile):
             tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
         tc.generate()
 
+    @property
+    def _build_script_folder(self)
+        build_script_folder = self._source_subfolder
+        if self._is_msvc:
+            build_script_folder = os.path.join(build_script_folder, "win32")
+        return build_script_folder
+
     def build(self):
         apply_conandata_patches(self)
 
-
-        build_script_folder = self._source_subfolder
         if self._is_msvc:
             self.conf["tools.gnu:make_program"] = "nmake"
-            build_script_folder = os.path.join(build_script_folder, "win32")
 
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
@@ -135,9 +139,9 @@ class RubyConan(ConanFile):
         with tools.vcvars(self):
             if conan_version < tools.Version("1.48.0"):
                 at = Autotools(self)
-                at.configure(build_script_folder=build_script_folder)   
+                at.configure(build_script_folder=self._build_script_folder)   
             else:             
-                at = Autotools(self, build_script_folder=build_script_folder)
+                at = Autotools(self, build_script_folder=self._build_script_folder)
                 at.configure()
             at.make()
 
@@ -148,7 +152,7 @@ class RubyConan(ConanFile):
         if conan_version < tools.Version("1.48.0"):
             at = Autotools(self)
         else:
-            at = Autotools(self, build_script_folder=build_script_folder)
+            at = Autotools(self, build_script_folder=self._build_script_folder)
         with tools.vcvars(self):
             if cross_building(self):
                 at.make(target="install-local")
