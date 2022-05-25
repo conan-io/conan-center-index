@@ -2,7 +2,8 @@ import glob
 import os
 import re
 
-from conan import ConanFile, tools, __version__ as conan_version
+from conan import ConanFile
+from conans import tools, __version__ as conan_version
 from conan.tools.apple.apple import is_apple_os, to_apple_arch
 
 try:
