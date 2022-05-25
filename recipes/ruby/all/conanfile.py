@@ -2,7 +2,7 @@ import glob
 import os
 import re
 
-from conan import ConanFile
+from conan import ConanFile, tools, __version__ as conan_version
 from conan.tools.apple.apple import is_apple_os, to_apple_arch
 
 try:
@@ -16,7 +16,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conans import tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.48.0"
+required_conan_version = ">=1.43.0"
 
 
 class RubyConan(ConanFile):
@@ -132,9 +132,13 @@ class RubyConan(ConanFile):
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
 
-        at = Autotools(self, build_script_folder=build_script_folder)
         with tools.vcvars(self):
-            at.configure()
+            if conan_version < tools.Version("1.48.0"):
+                at = Autotools(self)
+                at.configure(build_script_folder=build_script_folder)   
+            else:             
+                at = Autotools(self, build_script_folder=build_script_folder)
+                at.configure()
             at.make()
 
     def package(self):
