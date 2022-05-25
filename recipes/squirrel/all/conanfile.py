@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -27,7 +28,6 @@ class SquirrelConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -57,14 +57,13 @@ class SquirrelConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DISABLE_DYNAMIC"] = not self.options.shared
-        self._cmake.definitions["DISABLE_STATIC"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["DISABLE_DYNAMIC"] = not self.options.shared
+        cmake.definitions["DISABLE_STATIC"] = self.options.shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
