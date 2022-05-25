@@ -3,7 +3,6 @@ import os
 import re
 
 from conan import ConanFile
-from conans import tools, __version__ as conan_version
 from conan.tools.apple.apple import is_apple_os, to_apple_arch
 
 try:
@@ -14,7 +13,7 @@ except ImportError:
 from conan.tools.files import apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import tools
+from conans import tools, __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
