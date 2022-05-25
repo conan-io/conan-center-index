@@ -3,6 +3,7 @@ from conans import ConanFile, tools
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conans.errors import ConanInvalidConfiguration
 
+
 required_conan_version = ">=1.43.0"
 
 
