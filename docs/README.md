@@ -1,5 +1,7 @@
 <img src="../assets/JFrogConanCenter.png" width="600"/>
 
+Not to be merged
+
 # Documentation
 
 * [Code of conduct](code_of_conduct.md)
