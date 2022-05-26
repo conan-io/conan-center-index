@@ -1,6 +1,7 @@
 pipeline {
     agent none 
     environment {
+        DOCKER_REGISTRY_URL = "https://registry.hub.docker.com/"
         JENKINS_LDAP_CREDS = credentials('jenkins-ldap')
         LDAP_USERNAME = "${JENKINS_LDAP_CREDS_USR}"
         LDAP_PASSWORD = "${JENKINS_LDAP_CREDS_PSW}"
@@ -13,13 +14,11 @@ pipeline {
             parallel {
                 stage('gcc') {
                     agent {
-                        docker { image 'devops/cci:gcc_ubuntu'
+                        docker { image 'trassiross/conan-gcc8'
                                  args '-u root'
                         }
                     }
                     environment {
-                    CONAN_USER_HOME = "${WORKSPACE}"
-                    CONAN_USER_HOME_SHORT = "${WORKSPACE}/.conan_short"
                     CONAN_TXT = "trassir/lnvr-gcc8/conanfile.txt"
                     CONAN_PROFILE = "trassir/lnvr-gcc8/conanprofile.release"
                     }
