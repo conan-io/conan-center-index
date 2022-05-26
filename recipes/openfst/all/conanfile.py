@@ -154,8 +154,7 @@ class OpenFstConan(ConanFile):
 
     @property
     def _get_compact_fsts_libs(self):
-        return ["compact{}_{}-fst".format(n, fst) 
-                for n, fst in product([8, 16, 64], ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"]]
+        return ["compact{}_{}-fst".format(n, fst) for n, fst in product([8, 16, 64], ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"]]
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenFst")
