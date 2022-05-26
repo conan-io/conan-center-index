@@ -58,11 +58,35 @@ class ConanRecipe(ConanFile):
             del self.options.fPIC
             del self.options.with_benchmark
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
     def validate(self):
         if tools.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARMv8 is supported by 2.13.1+ only! give up!")
         if self.options.get_safe("with_main") and tools.Version(self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported with versions < 2.13.4")
+
+        if tools.Version(self.version) < "3.0.0":
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, "11")
+        else:
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, "14")
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version:
+                if tools.Version(self.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
+                                                    "(https://github.com/p-ranav/structopt#compiler-compatibility)."
+                                                    .format(self.settings.compiler, self.settings.compiler.version))
+            else:
+                self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -79,6 +103,10 @@ class ConanRecipe(ConanFile):
         cmake.definitions["CATCH_CONFIG_PREFIX_ALL"] = self.options.with_prefix
         if self.options.default_reporter:
             cmake.definitions["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+        if tools.Version(self.version) < "3.0.0":
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+        else:
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 14
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake

@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(test_package)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
@@ -11,9 +8,13 @@ find_package(Catch2 REQUIRED CONFIG)
 
 if(Catch2_VERSION VERSION_GREATER_EQUAL 3.0.0)
   set(CONAN_CATCH_INCLUDE_PATH "CONAN_CATCH_INCLUDE_PATH=<catch2/catch_all.hpp>")
-else()
+  set(CMAKE_CXX_STANDARD 14)
+  else()
   set(CONAN_CATCH_INCLUDE_PATH "CONAN_CATCH_INCLUDE_PATH=<catch2/catch.hpp>")
+  set(CMAKE_CXX_STANDARD 11)
 endif()
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT WITH_PREFIX)
   if(Catch2_VERSION VERSION_LESS 3.0.0)
