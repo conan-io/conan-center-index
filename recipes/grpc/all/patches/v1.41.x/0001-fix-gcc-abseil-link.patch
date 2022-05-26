@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2cad8964e4..cfac85060d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3992,6 +3992,7 @@ target_link_libraries(check_epollexclusive
+   grpc
+   gpr
+ )
++set_target_properties(check_epollexclusive PROPERTIES LINKER_LANGUAGE CXX)
+ 
+ 
+ 
