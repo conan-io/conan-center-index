@@ -152,15 +152,16 @@ class ConanRecipe(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
         if self.options.get_safe("with_main") or tools.Version(self.version) >= "3.0.0":
+            lib_suffix = "d" if tools.Version(self.version) >= "3.0.0" and self.settings.build_type == "Debug" else ""
             self.cpp_info.components["Catch2"].set_property("cmake_target_name", "Catch2::Catch2")
             self.cpp_info.components["Catch2"].names["cmake_find_package"] = "Catch2"
             self.cpp_info.components["Catch2"].names["cmake_find_package_multi"] = "Catch2"
             if tools.Version(self.version) >= "3.0.0":
-                self.cpp_info.components["Catch2"].libs = ["Catch2"]
+                self.cpp_info.components["Catch2"].libs = ["Catch2" + lib_suffix]
 
             self.cpp_info.components["Catch2WithMain"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
             if tools.Version(self.version) >= "3.0.0":
-                self.cpp_info.components["Catch2WithMain"].libs = ["Catch2Main"]
+                self.cpp_info.components["Catch2WithMain"].libs = ["Catch2Main" + lib_suffix]
                 self.cpp_info.components["Catch2WithMain"].requires = ["Catch2"]
             else:
                 self.cpp_info.components["Catch2WithMain"].libs = ["Catch2WithMain"]
