@@ -17,6 +17,7 @@ class BeautyConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
+    generators = "CMakeDeps", "CMakeToolchain"
 
     requires = ("boost/[>1.70.0]@",
                 "openssl/1.1.1o@")
@@ -41,7 +42,7 @@ class BeautyConan(ConanFile):
         if minimum_version and tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"Compiler {self.name} must be at least {minimum_version}")
-        
+
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration("Only libc++ is supported for clang")
 
@@ -51,16 +52,9 @@ class BeautyConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported on Visual Studio")
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -69,14 +63,10 @@ class BeautyConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("version.hpp", dst=os.path.join("include", "beauty"), src=os.path.join(self.build_folder, "src", "beauty"))
-        self.copy("*.dll", src="bin", dst="bin", keep_path=False)
-        self.copy("*.lib", src="lib", dst="lib", keep_path=False)
-        self.copy("*.so*", src="lib", dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.a", src="lib", dst="lib", keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include"]
         self.cpp_info.libs = ["beauty"]
         self.cpp_info.requires = ["boost::headers", "openssl::openssl"]
