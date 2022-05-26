@@ -72,6 +72,12 @@ class SimdjsonConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not fully support.".format(self.name))
 
+        if tools.Version(self.version) >= "2.0.0" and \
+            self.settings.compiler == "gcc" and \
+            tools.Version(self.settings.compiler.version).major == "9" and \
+            self.settings.compiler.stdlib == "libstdc++11":
+            raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with libstdc++11.".format(self.name, self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
