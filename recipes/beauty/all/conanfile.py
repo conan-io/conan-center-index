@@ -70,3 +70,5 @@ class BeautyConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["beauty"]
         self.cpp_info.requires = ["boost::headers", "openssl::openssl"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
