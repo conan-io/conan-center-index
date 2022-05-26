@@ -33,22 +33,6 @@ class StructoptConan(ConanFile):
         self.info.header_only()
 
     @property
-    def _supported_compiler(self):
-        compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-        if compiler == "Visual Studio" and version >= "15":
-            return True
-        elif compiler == "gcc" and version >= "9":
-            return True
-        elif compiler == "clang" and version >= "5":
-            return True
-        elif compiler == "apple-clang" and version >= "10":
-            return True
-        else:
-            self.output.warn("{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
-        return False    
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
