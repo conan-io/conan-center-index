@@ -41,7 +41,8 @@ class SimdjsonConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            # several AVX-512 instructions are not support by GCC < 9.0
+            "gcc": "8" if tools.Version(self.version) < "2.0.0" else "9",
             "Visual Studio": "16",
             "clang": "6",
             "apple-clang": "9.4",
