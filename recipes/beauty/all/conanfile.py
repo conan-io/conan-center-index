@@ -71,6 +71,7 @@ class BeautyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("version.hpp", dst=os.path.join("include", "beauty"), src=os.path.join(self.build_folder, "src", "beauty"))
+        self.copy("*.dll", src="bin", dst="bin", keep_path=False)
         self.copy("*.lib", src="lib", dst="lib", keep_path=False)
         self.copy("*.so*", src="lib", dst="lib", keep_path=False, symlinks=True)
         self.copy("*.a", src="lib", dst="lib", keep_path=False)
