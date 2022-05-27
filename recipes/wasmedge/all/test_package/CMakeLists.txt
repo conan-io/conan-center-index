@@ -8,4 +8,4 @@ find_package(wasmedge REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE wasmedge::wasmedge)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_11)
