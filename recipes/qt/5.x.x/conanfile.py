@@ -78,6 +78,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": [True, False],
         "with_dbus": [True, False],
         "with_gssapi": [True, False],
+        "with_atspi": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -117,6 +118,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": False,
         "with_dbus": False,
         "with_gssapi": False,
+        "with_atspi": False,
 
         "gui": True,
         "widgets": True,
@@ -219,6 +221,7 @@ class QtConan(ConanFile):
             del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
+            self.options.with_atspi = False
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -232,6 +235,9 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+        
+        if not self.options.with_dbus:
+            del self.options.with_atspi
 
         if not self.options.qtmultimedia:
             del self.options.with_libalsa
@@ -400,6 +406,8 @@ class QtConan(ConanFile):
             self.requires("wayland/1.20.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+        if self.options.get_safe("with_atspi"):
+            self.requires("at-spi2-core/2.44.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -1071,8 +1079,8 @@ Examples = bin/datadir/examples""")
                 _create_module("EdidSupport")
                 _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
                 xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
-                if self.options.with_dbus:
-                    _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport"])
+                if self.options.with_dbus and self.options.with_atspi:
+                    _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport", "at-spi2-core::at-spi2-core"])
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
