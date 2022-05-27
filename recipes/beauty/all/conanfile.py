@@ -19,8 +19,8 @@ class BeautyConan(ConanFile):
     default_options = {"shared": False}
     generators = "CMakeDeps", "CMakeToolchain"
 
-    requires = ("boost/[>1.70.0]@",
-                "openssl/1.1.1o@")
+    requires = ("boost/1.79.0",
+                "openssl/1.1.1o")
 
     @property
     def _source_subfolder(self):
@@ -36,7 +36,7 @@ class BeautyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, "20")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and tools.Version(self.settings.compiler.version) < minimum_version:
