@@ -74,9 +74,11 @@ class SimdjsonConan(ConanFile):
 
         if tools.Version(self.version) >= "2.0.0" and \
             self.settings.compiler == "gcc" and \
-            tools.Version(self.settings.compiler.version).major == "9" and \
-            self.settings.compiler.get_safe("libcxx") == "libstdc++11":
-            raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with libstdc++11.".format(self.name, self.version))
+            tools.Version(self.settings.compiler.version).major == "9":
+            if self.settings.compiler.get_safe("libcxx") == "libstdc++11":
+                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with libstdc++11.".format(self.name, self.version))
+            if self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with Debug build type.".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
