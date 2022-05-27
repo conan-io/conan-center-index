@@ -13,7 +13,6 @@ class ArgparseConan(ConanFile):
     license = "MIT"
     description = "Argument Parser for Modern C++"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _compiler_required_cpp17(self):
@@ -27,6 +26,17 @@ class ArgparseConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+    def build(self):
+        self._patch_sources()
 
     def package_id(self):
         self.info.header_only()
