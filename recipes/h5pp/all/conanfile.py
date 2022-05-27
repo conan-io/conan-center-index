@@ -38,28 +38,23 @@ class H5ppConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def requirements(self):
-        self.requires("hdf5/1.12.1")
-        if tools.Version(self.version) >= "1.10.0":
-            if self.options.with_eigen:
-                self.requires("eigen/3.4.0")
-            if self.options.with_spdlog:
-                self.requires("spdlog/1.10.0")
-        else:
+    def config_options(self):
+        if tools.Version(self.version) < "1.10.0":
             # These dependencies are always required before h5pp 1.10.0:
             #   * h5pp < 1.10.0 includes any version of headers indiscriminately (e.g. system headers),
             #     and can't tell if the the corresponding library will be linked. This makes the,
             #     build and /link steps non-deterministic.
             #   * h5pp >= 1.10.0 fixes the issue with H5PP_USE_<LIB> preprocessor flags, to make sure
             #     that including the headers is intentional.
-            self.requires("eigen/3.4.0")
-            self.requires("spdlog/1.10.0")
-            if not self.options.with_eigen:
-                raise ConanInvalidConfiguration("Option h5pp:with_eigen={} requires h5pp version >= 1.10.0".format(self.options.with_eigen))
-            if not self.options.with_spdlog:
-                raise ConanInvalidConfiguration("Option h5pp:with_spdlog={} requires h5pp version >= 1.10.0".format(self.options.with_spdlog))
             del self.options.with_eigen
             del self.options.with_spdlog
+
+    def requirements(self):
+        self.requires("hdf5/1.12.1")
+        if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
+            self.requires("eigen/3.4.0")
+        if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
+            self.requires("spdlog/1.10.0")
 
     def package_id(self):
         self.info.header_only()
