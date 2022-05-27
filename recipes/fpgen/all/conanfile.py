@@ -50,9 +50,9 @@ class FpgenConan(ConanFile):
             self.output.warn("Could not check availability of C++20.")
 
         if not str(self.settings.compiler) == 'gcc':
-            raise ConanInvalidConfiguration("{} is currently only available for GCC 10+. We're working on support for other compilers...".format(self.name))
-        elif tools.Version(self.settings.compiler.version) < "10":
-            raise ConanInvalidConfiguration("{} requires C++20 coroutines. Please use GCC 10 or newer.".format(self.name))
+            raise ConanInvalidConfiguration("{} is currently only available for GCC 11+. We're working on support for other compilers...".format(self.name))
+        elif tools.Version(self.settings.compiler.version) < "11":
+            raise ConanInvalidConfiguration("{} requires C++20 coroutines. Please use GCC 11 or newer.".format(self.name))
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "fpgen"))
