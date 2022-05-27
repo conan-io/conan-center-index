@@ -7,11 +7,13 @@ import os
 
 
 class LibXMLPlusPlus(ConanFile):
-    name = "libxml++"
+    # FIXME: naming the library "libxml++" causes conan not to add it to the
+    # environment path on windows
+    name = "libxmlpp"
     homepage = "https://github.com/libxmlplusplus/libxmlplusplus"
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "libxml++ (a.k.a. libxmlplusplus) provides a C++ interface to XML files"
+    description = "libxmlpp (a.k.a. libxmlplusplus) provides a C++ interface to XML files"
     topics = ["xml", "parser", "wrapper"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -120,6 +122,10 @@ class LibXMLPlusPlus(ConanFile):
                     os.path.join(self.package_folder, "lib", "xml++-2.6.lib"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "libxml++"
+        self.cpp_info.names["cmake_find_package_multi"] = "libxml++"
+        self.cpp_info.names["pkg_config"] = "libxml++"
+
         self.cpp_info.components["libxml++-2.6"].names[
             "pkg_config"] = "libxml++-2.6"
         self.cpp_info.components["libxml++-2.6"].libs = ["xml++-2.6"]
