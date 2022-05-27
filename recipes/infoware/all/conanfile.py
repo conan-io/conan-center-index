@@ -15,7 +15,7 @@ class InfowareConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False]
     }
-    default_options = {"fPIC": True, "shared": True}
+    default_options = {"fPIC": True, "shared": False}
     exports_sources = ["CMakeLists.txt"]
     generators = ["cmake", "cmake_find_package", "cmake_find_package_multi"]
 
