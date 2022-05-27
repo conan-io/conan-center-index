@@ -49,6 +49,7 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
+        self.requires("libselinux/3.3")
         self.requires("expat/2.4.8")
         if self.options.with_glib:
             self.requires("glib/2.72.0")
