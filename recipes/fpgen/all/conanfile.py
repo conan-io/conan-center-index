@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class FpgenConan(ConanFile):
@@ -17,6 +18,7 @@ class FpgenConan(ConanFile):
     )
     homepage = "https://github.com/jay-tux/fpgen/"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "compiler"
     no_copy_source = True
 
     @property
@@ -40,6 +42,17 @@ class FpgenConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 20)
+        else:
+            self.output.warn("Could not check availability of C++20.")
+
+        if not str(self.settings.compiler) == 'gcc':
+            raise ConanInvalidConfiguration("{} is currently only available for GCC 10+. We're working on support for other compilers...".format(self.name))
+        elif tools.Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration("{} requires C++20 coroutines. Please use GCC 10 or newer.".format(self.name))
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "fpgen"))
