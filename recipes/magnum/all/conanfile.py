@@ -448,6 +448,7 @@ class MagnumConan(ConanFile):
         lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
 
         build_modules = []
+        all_build_modules = []
 
         # The FindMagnum.cmake file provided by the library populates some extra stuff
         build_modules.append(os.path.join("lib", "cmake", "conan-magnum-vars.cmake"))
