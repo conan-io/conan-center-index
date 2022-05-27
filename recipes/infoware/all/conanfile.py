@@ -1,10 +1,13 @@
 from conans import ConanFile, CMake, tools
 
+required_conan_version >= "1.33.0"
+
 
 class InfowareConan(ConanFile):
     name = "infoware"
     license = "CC0 1.0 Universal"
-    url = "https://github.com/ThePhD/infoware"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("infoware", "hardware")
     homepage = "https://github.com/ThePhD/infoware"
     description = "C++ Library for pulling system and hardware information, without hitting the command line."
     settings = "os", "compiler", "build_type", "arch"
