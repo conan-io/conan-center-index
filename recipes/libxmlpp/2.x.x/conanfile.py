@@ -13,7 +13,7 @@ class LibXMLPlusPlus(ConanFile):
     homepage = "https://github.com/libxmlplusplus/libxmlplusplus"
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "libxmlpp (a.k.a. libxmlplusplus) provides a C++ interface to XML files"
+    description = "libxml++ (a.k.a. libxmlplusplus) provides a C++ interface to XML files"
     topics = ["xml", "parser", "wrapper"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
