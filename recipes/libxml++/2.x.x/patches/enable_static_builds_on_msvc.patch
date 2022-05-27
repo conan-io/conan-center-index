@@ -1,8 +1,8 @@
 diff --git a/libxml++config.h.meson b/libxml++config.h.meson
-index fdae143..99a6ad4 100755
+index fdae143..5d853c2 100755
 --- a/libxml++config.h.meson
 +++ b/libxml++config.h.meson
-@@ -21,7 +21,10 @@
+@@ -21,9 +21,16 @@
  /* Micro version number of libxml++. */
  #mesondefine LIBXMLXX_MICRO_VERSION
  
@@ -12,8 +12,15 @@ index fdae143..99a6ad4 100755
 +
 +#if !defined (LIBXMLXX_STATIC)
    #ifdef LIBXMLPP_BUILD
-     #define LIBXMLPP_API __declspec(dllexport)
+-    #define LIBXMLPP_API __declspec(dllexport)
++    #ifdef __GNUC__
++      #define LIBXMLPP_API __attribute__((visibility("default")))
++    #else
++      #define LIBXMLPP_API __declspec(dllexport)
++    #endif
    #elif !defined (__GNUC__)
+     #define LIBXMLPP_API __declspec(dllimport)
+   #else /* don't dllimport classes/methods on GCC/MinGW */
 diff --git a/meson.build b/meson.build
 index e89f2c6..20d66ed 100644
 --- a/meson.build
