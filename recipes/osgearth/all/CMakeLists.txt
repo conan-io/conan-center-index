@@ -76,4 +76,6 @@ set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR})
 
 find_package(RapidJSON)
 
+find_package(lerc)
+
 add_subdirectory(source_subfolder)
