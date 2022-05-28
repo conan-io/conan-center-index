@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
+import shutil
 import os
 
 required_conan_version = ">=1.33.0"
@@ -200,6 +201,10 @@ class OsgearthConan(ConanFile):
 
         if os_info.is_linux:
             rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
+
+        cmake_folder = os.path.join(self.package_folder, "cmake")
+        if os.path.exists(cmake_folder):
+            shutil.rmtree(cmake_folder)
 
     def package_info(self):
         if self.settings.build_type == "Debug":
