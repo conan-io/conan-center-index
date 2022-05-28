@@ -4,6 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
 
+required_conan_version = ">=1.33.0"
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
@@ -103,12 +104,13 @@ class OsgearthConan(ConanFile):
     def requirements(self):
 
         self.requires("opengl/system")
-        self.requires("gdal/3.3.1")
+        self.requires("gdal/3.4.3")
         self.requires("openscenegraph/3.6.5")
-        self.requires("libcurl/7.79.1")
+        self.requires("libcurl/7.83.1")
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0", private=True)
 
+        self.requires("zlib/1.2.12", override=True)
         self.requires("libtiff/4.3.0", override=True)
         self.requires("openssl/1.1.1l", override=True)
 
@@ -121,12 +123,11 @@ class OsgearthConan(ConanFile):
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.20.3")
         if self.options.build_zip_plugin:
-            self.requires("libzip/1.7.3")
             self.requires("zstd/1.4.9")  # override
         if self.options.with_geos:
-            self.requires("geos/3.9.1")
+            self.requires("geos/3.10.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.38.5")
         if self.options.with_draco:
             self.requires("draco/1.4.3")
         # if self.options.with_basisu:
@@ -232,7 +233,6 @@ class OsgearthConan(ConanFile):
         if not self.options.shared and self.settings.compiler == "Visual Studio":
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
         if self.options.build_zip_plugin:
-            osgearth.requires += ["libzip::libzip"]
             osgearth.requires += ["zstd::zstd"]
         if self.options.with_geos:
             osgearth.requires += ["geos::geos"]
