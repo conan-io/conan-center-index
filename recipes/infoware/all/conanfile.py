@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+import os.path
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -50,6 +52,7 @@ class InfowareConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        shutil.rmtree(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs.append(self.name + ("d" if self.settings.build_type == "Debug" else ""))
