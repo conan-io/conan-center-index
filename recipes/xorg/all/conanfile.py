@@ -58,21 +58,19 @@ class ConanXOrg(ConanFile):
                     packages.append( "libxcb-util0-dev" )
                 else:
                     packages.append( "libxcb-util-dev" )
-            elif tools.os_info.with_yum or tools.os_info.with_dnf:
+            elif tools.os_info.with_yum or tools.os_info.with_dnf or tools.os_info.with_zypper:
                 packages = ["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                             "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                             "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                            "xkeyboard-config-devel", "xcb-util-devel", "libuuid-devel"]
+                            "xcb-util-devel", "libuuid-devel"]
+                packages.append("xkeyboard-config" if tools.os_info.with_zypper else "xkeyboard-config-devel")
             elif tools.os_info.with_pacman:
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                             "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                             "libxss", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image","xcb-util-keysyms", "xcb-util-renderutil",
                             "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "util-linux-libs"]
-            elif tools.os_info.with_zypper:
-                packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "libuuid-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
         
