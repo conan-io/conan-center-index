@@ -10,7 +10,7 @@ sources:
     sha256: "38854b8359eaf42cc27352f4b7321f509f6775445a3e2746cc8cd1e468a52aa9"
 patches:
   "0.4.1":
-    - patch_file: "patches/0.4.0-001-remove-internal-c4core.patch"
+    - patch_file: "patches/0.4.1-001-remove-internal-c4core.patch"
       base_path: "source_subfolder"
   "0.4.0":
     - patch_file: "patches/0.4.0-001-remove-internal-c4core.patch"
