@@ -9,9 +9,9 @@ class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
     topics = ("yaml", "parser", "emitter")
+    license = "MIT",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
-    license = "MIT",
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
