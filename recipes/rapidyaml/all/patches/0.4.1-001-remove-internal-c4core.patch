@@ -6,8 +6,8 @@ index 3b2444f..38e5229 100644
      LANGUAGES CXX)
  include(./compat.cmake)
  
--c4_project(VERSION 0.4.0 STANDALONE
-+c4_project(VERSION 0.4.0
+-c4_project(VERSION 0.4.1 STANDALONE
++c4_project(VERSION 0.4.1
      AUTHOR "Joao Paulo Magalhaes <dev@jpmag.me>")
  
  
