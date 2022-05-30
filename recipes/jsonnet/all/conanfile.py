@@ -45,7 +45,7 @@ class JsonnetConan(ConanFile):
     def requirements(self):
         self.requires("nlohmann_json/3.10.5")
         if tools.Version(self.version) >= "0.18.0":
-            self.requires("rapidyaml/0.4.0")
+            self.requires("rapidyaml/0.4.1")
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
