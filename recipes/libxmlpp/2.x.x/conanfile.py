@@ -21,7 +21,6 @@ class LibXMLPlusPlus(ConanFile):
 
     generators = "pkg_config"
     exports_sources = "patches/**"
-    short_paths = True
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self):
