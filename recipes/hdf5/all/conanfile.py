@@ -92,23 +92,13 @@ class Hdf5Conan(ConanFile):
            not self.options["szip"].enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
 
-    # TODO hack, shortcut to the problem platform on CI
-    # def validate(self):
-        # if (self.settings.os == "Linux"
-                # and self.options.shared
-                # and self.settings.compiler == "gcc"
-                # and Version(self.settings.compiler.version) == "11.0")
-        # raise ConanInvalidConfiguration("I cannot get CI to work on this platform")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
-        with tools.run_environment(self):
-            with tools.environment_append({"VERBOSE":"1"}):
-                cmake = self._configure_cmake()
-                cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -140,15 +130,11 @@ class Hdf5Conan(ConanFile):
         if self.settings.build_type == "Debug":
             cmake.definitions["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         cmake.definitions["HDF5_ENABLE_PARALLEL"] = self.options.parallel
-
-        # See comments in hdf5's CMakeLists.txt:101
         cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
-
         cmake.definitions["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         if bool(self.options.szip_support):
             cmake.definitions["CONAN_SZIP_LIBNAME"] = self._get_szip_lib() # this variable is added by conanize-link-szip*.patch
         cmake.definitions["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
-
         cmake.definitions["HDF5_PACKAGE_EXTLIBS"] = False
         cmake.definitions["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe", False)
         cmake.definitions["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
