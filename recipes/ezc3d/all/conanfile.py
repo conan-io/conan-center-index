@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 import textwrap
 
@@ -24,7 +25,6 @@ class Ezc3dConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -44,7 +44,7 @@ class Ezc3dConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
@@ -68,19 +68,18 @@ class Ezc3dConan(ConanFile):
                               "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME}",
                               "set(${PROJECT_NAME}_BIN_FOLDER bin")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_MATRIX_FAST_ACCESSOR"] = True
-        self._cmake.definitions["BINDER_PYTHON3"] = False
-        self._cmake.definitions["BINDER_MATLAB"] = False
-        self._cmake.definitions["BUILD_EXAMPLE"] = False
-        self._cmake.definitions["BUILD_DOC"] = False
-        self._cmake.definitions["GET_OFFICIAL_DOCUMENTATION"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["USE_MATRIX_FAST_ACCESSOR"] = True
+        cmake.definitions["BINDER_PYTHON3"] = False
+        cmake.definitions["BINDER_MATLAB"] = False
+        cmake.definitions["BUILD_EXAMPLE"] = False
+        cmake.definitions["BUILD_DOC"] = False
+        cmake.definitions["GET_OFFICIAL_DOCUMENTATION"] = False
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -111,13 +110,8 @@ class Ezc3dConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ezc3d")
@@ -125,7 +119,6 @@ class Ezc3dConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "ezc3d"
         self.cpp_info.names["cmake_find_package_multi"] = "ezc3d"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 

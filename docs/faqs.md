@@ -45,7 +45,7 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
-The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+The policy is that in the general case [recipes should build packages from sources](packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
 
 Check the link for further details.
 
@@ -206,7 +206,7 @@ Older versions can be removed from packages given the considerations below. When
 that is specific to them: logic from the recipe and references in `config.yml` and `conandata.yml`. In any case, packages
 are never removed from ConanCenter remote.
 
-When removing older versions, please take into account [these considerations](docs/reviewing.md#supported-versions).
+When removing older versions, please take into account [these considerations](reviewing.md#supported-versions).
 
 ## Can I install packages from the system package manager?
 
@@ -217,7 +217,7 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 
 There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
-in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#system-packages) for more.
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](how_to_add_packages.md#system-packages) for more.
 
 ## Why ConanCenter does **not** build and execute tests in recipes
 
@@ -325,7 +325,7 @@ The minimum solution involves small changes to your Conan client configuration b
 
 * **Pin the version of every reference you consume in your project** using either:
   * [recipe revision (RREV)](https://docs.conan.io/en/latest/versioning/revisions.html): `foo/1.0@#RREV` instead of `foo/1.0` in your conanfile.
-  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html).
+  * [lockfiles](https://docs.conan.io/en/latest/versioning/lockfiles/introduction.html) (please, be aware there are some [knowns bugs](https://github.com/conan-io/conan/issues?q=is%3Aissue+lockfile) related to lockfiles that are not being fixed in Conan v1.x).
 
 For larger projects and teams it is recommended to add some infrastructure to ensure stability by
 

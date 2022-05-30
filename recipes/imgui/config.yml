@@ -1,26 +1,4 @@
 versions:
-  "1.74":
-    folder: all
-  "1.75":
-    folder: all
-  "1.76":
-    folder: all
-  "1.77":
-    folder: all
-  "1.78":
-    folder: all
-  "1.79":
-    folder: all
-  "1.80":
-    folder: all
-  "1.81":
-    folder: all
-  "1.82":
-    folder: all
-  "1.83":
-    folder: all
-  "1.84.2":
-    folder: all
   "1.85":
     folder: all
   "1.86":

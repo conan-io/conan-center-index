@@ -68,3 +68,6 @@ sources:
   "3.38.4":
     sha256: "63525b0e9df9c1df31a12d203dd8dc4c2c306f31834bb740fbf7e7ad5342bc1a"
     url: "https://sqlite.org/2022/sqlite-amalgamation-3380400.zip"
+  "3.38.5":
+    sha256: "bebb039b748441e3d25d71d11f7a4a33f5df11f318ec18fa7f343d2083755e2c"
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3380500.zip"

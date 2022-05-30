@@ -1,5 +1,28 @@
 # Changelog
 
+### 19-May-2022 - 15:52 CEST
+
+- [feature] Add Conan v2 export extra step in pull-request job.
+- [feature] Tag pull-requests as "under maintenance" when the build service is not available.
+- [config] Update Conan version to 1.47.0.
+- [feature] Check right WinSDK in ValidateInfrastructure job.
+- [fix] Fix access request job for authorized users.
+- [feature] New Conan v2 commands: info and recipe revision.
+- [feature] Store package ID cache at job level.
+
+### 10-May-2022 - 17:05 CEST
+
+- [fix] Exclude `shared=True` and runtime `MT/MTd` profile configuration from builds.
+- [job] RelaunchUnexpectedError: a new job to automatically retrigger failed jobs.
+- [feature] Ability to load the configuration file from an external source.
+- [feature] Allow changes to files in the `.c3i` folder.
+- [config] Move reviewers and approved users to configuration files.
+- [config] Move automatic merge parameters to the configuration file.
+- [config] Move GitHub activation to configuration file.
+- [config] Remove default configuration.
+- [feature] Added compatibility for more Conan 2 commands.
+- [fix] Avoid regeneration of folder and multibranch jobs by the DSL cron job.
+
 ### 28-April-2022 - 9:56 CEST
 
 - [config] Update Conan client to 1.46.2
