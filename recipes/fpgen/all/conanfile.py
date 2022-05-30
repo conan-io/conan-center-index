@@ -92,5 +92,3 @@ class FpgenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "fpgen"))
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
