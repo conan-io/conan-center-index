@@ -9,4 +9,5 @@ int main() {
     for(auto &&val : gen) {
       std::cout << val << std::endl;
     }
+    return 0;
 }
