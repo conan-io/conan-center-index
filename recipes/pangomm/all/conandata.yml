@@ -5,7 +5,6 @@ sources:
   "2.46.2":
     url: "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.2.tar.xz"
     sha256: "57442ab4dc043877bfe3839915731ab2d693fc6634a71614422fb530c9eaa6f4"
-
 patches:
   "2.50.0":
     - patch_file: "patches/enable_static_libs_2_50_0.patch"
@@ -17,4 +16,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix_exporting_pango_init.patch"
       base_path: "source_subfolder"
-

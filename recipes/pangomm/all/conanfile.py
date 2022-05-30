@@ -167,40 +167,23 @@ class PangommConan(ConanFile):
 
 
     def package_info(self):
-        if self._is_2_48_api:
-            self.cpp_info.components["pangomm-2.48"].names[
-                "pkg_config"] = "pangomm-2.48"
-            self.cpp_info.components["pangomm-2.48"].libs = ["pangomm-2.48"]
-            self.cpp_info.components["pangomm-2.48"].includedirs = [
-                os.path.join("include", "pangomm-2.48")
-            ]
-            self.cpp_info.components["pangomm-2.48"].requires = [
-                "pango::pangocairo", "glibmm::glibmm-2.68",
-                "glibmm::giomm-2.68", "cairomm::cairomm-1.16"
-            ]
-            self.cpp_info.components["pangomm-2.48"].set_property(
-                "pkg_config_custom_content",
-                "gmmprocm4dir=${libdir}/pangomm-2.48/proc/m4")
+        pangomm_lib = f"pangomm-{self._api_version}"
+        glibmm_lib = "glibmm::glibmm-2.68" if self._is_2_48_api else "glibmm::glibmm-2.4"
+        giomm_lib = "glibmm::giomm-2.68" if self._is_2_48_api else "glibmm::giomm-2.4"
+        cairomm_lib = "cairomm::cairomm-1.16" if self._is_2_48_api else "cairomm::cairomm-1.0"
 
-            # FIXME: remove once dependency mismatch issues are solved
-            self.cpp_info.components["pangomm-2.48"].requires.extend(
-                ["expat::expat", "zlib::zlib", "glib::glib-2.0"])
+        self.cpp_info.components[pangomm_lib].names["pkg_config"] = pangomm_lib
+        self.cpp_info.components[pangomm_lib].libs = [pangomm_lib]
+        self.cpp_info.components[pangomm_lib].includedirs = [
+            os.path.join("include", pangomm_lib)
+        ]
+        self.cpp_info.components[pangomm_lib].requires = [
+            "pango::pangocairo", glibmm_lib, giomm_lib, cairomm_lib
+        ]
+        self.cpp_info.components[pangomm_lib].set_property(
+            "pkg_config_custom_content",
+            f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
 
-        elif self._is_1_4_api:
-            self.cpp_info.components["pangomm-1.4"].names[
-                "pkg_config"] = "pangomm-1.4"
-            self.cpp_info.components["pangomm-1.4"].libs = ["pangomm-1.4"]
-            self.cpp_info.components["pangomm-1.4"].includedirs = [
-                os.path.join("include", "pangomm-1.4")
-            ]
-            self.cpp_info.components["pangomm-1.4"].requires = [
-                "pango::pangocairo", "glibmm::glibmm-2.4",
-                "glibmm::giomm-2.4", "cairomm::cairomm-1.0"
-            ]
-            self.cpp_info.components["pangomm-1.4"].set_property(
-                "pkg_config_custom_content",
-                "gmmprocm4dir=${libdir}/pangomm-1.4/proc/m4")
-
-            # FIXME: remove once dependency mismatch issues are solved
-            self.cpp_info.components["pangomm-1.4"].requires.extend(
-                ["expat::expat", "zlib::zlib", "glib::glib-2.0"])
+        # FIXME: remove once dependency mismatch issues are solved
+        self.cpp_info.components[pangomm_lib].requires.extend(
+            ["expat::expat", "zlib::zlib", "glib::glib-2.0"])
