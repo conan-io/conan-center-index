@@ -15,8 +15,8 @@ class BeautyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "CMakeDeps", "CMakeToolchain"
 
     requires = ("boost/1.79.0",
