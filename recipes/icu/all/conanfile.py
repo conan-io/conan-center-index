@@ -92,7 +92,7 @@ class ICUBase(ConanFile):
             ("AIX", "xlc"): "AIX",
             ("Android", "clang"): "Linux",
             ("SunOS", "gcc"): "Solaris/GCC",
-            ("Linux", "gcc"): "Linux/gcc",
+            ("Linux", "gcc"): "Linux",
             ("Linux", "clang"): "Linux",
             ("Macos", "gcc"): "MacOSX",
             ("Macos", "clang"): "MacOSX",
