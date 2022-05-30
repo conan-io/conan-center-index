@@ -9,7 +9,7 @@ required_conan_version = ">=1.43.0"
 
 class Hdf5Conan(ConanFile):
     name = "hdf5"
-    description = "HDF5 is a data model, library, and file format for storing and managing data."
+    description = "HDF5 is a data model, library, and file format for storing and managing data.  Test it again."
     license = "BSD-3-Clause"
     topics = ("hdf5", "hdf", "data")
     homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
