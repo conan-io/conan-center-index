@@ -82,10 +82,11 @@ class ConanXOrg(ConanFile):
         if packages:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             package_tool.install_packages(update=True, packages=packages)
+    
+    def package(self):
+        tools.mkdir(os.path.join(self.package_folder, "include")) # to satisfy KB-H071
 
     def package_info(self):
-        self.cpp_info.includedirs = []
-        self.cpp_info.libdirs = []
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
