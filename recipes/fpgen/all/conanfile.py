@@ -40,13 +40,28 @@ class FpgenConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True,
+        )
 
     def validate(self):
-        if ("clang" not in self.version and self.settings.compiler == "clang") or \
-           ("clang" in self.version and self.settings.compiler != "clang"):
-            raise ConanInvalidConfiguration(f"Use the version '{self.version}-clang' to be built with Clang only.")
+        # if ("clang" not in self.version and self.settings.compiler == "clang") or \
+        #    ("clang" in self.version and self.settings.compiler != "clang"):
+        #     raise ConanInvalidConfiguration(f"Use the version '{self.version}-clang' to be built with Clang only.")
+        if self.settings.compiler == "clang" and "clang" not in self.version:
+            raise ConanInvalidConfiguration(
+                f"Use '{self.version}-clang' for Clang support."
+            )
+
+        if (
+            self.settings.compiler == "clang"
+            and not self.settings.compiler.libcxx == "libc++"
+        ):
+            raise ConanInvalidConfiguration(
+                f"Use 'compiler.libcxx=libc++' for {self.name} on Clang."
+            )
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
@@ -57,15 +72,26 @@ class FpgenConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
         if not minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} is currently not available for your compiler.")
+            raise ConanInvalidConfiguration(
+                f"{self.name} is currently not available for your compiler."
+            )
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.name} {self.version} requires C++20, which your compiler does not support.")
+            raise ConanInvalidConfiguration(
+                f"{self.name} {self.version} requires C++20, which your compiler does not support."
+            )
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", dst=os.path.join("include", "fpgen"), src=self._source_subfolder, keep_path=False)
+        self.copy(
+            pattern="*.hpp",
+            dst=os.path.join("include", "fpgen"),
+            src=self._source_subfolder,
+            keep_path=False,
+        )
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "fpgen"))
