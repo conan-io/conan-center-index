@@ -882,8 +882,10 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vaapi"):
             self.cpp_info.components["avutil"].requires.extend(
                 ["vaapi::vaapi", "xorg::x11"])
+
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
+
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
