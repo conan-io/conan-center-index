@@ -84,7 +84,7 @@ class ConanXOrg(ConanFile):
             package_tool.install_packages(update=True, packages=packages)
     
     def package(self):
-        tools.mkdir(os.path.join(self.package_folder, "include")) # to satisfy KB-H071
+        tools.mkdir(tools.os.path.join(self.package_folder, "include")) # to satisfy KB-H071
 
     def package_info(self):
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
