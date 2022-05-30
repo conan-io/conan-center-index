@@ -84,6 +84,8 @@ class ConanXOrg(ConanFile):
             package_tool.install_packages(update=True, packages=packages)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
