@@ -37,6 +37,8 @@ class Sqlite3Conan(ConanFile):
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
         "disable_gethostuuid": [True, False],
+        "max_column": "ANY",
+        "max_variable_number": "ANY",
         "max_blob_size": "ANY",
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
@@ -64,6 +66,8 @@ class Sqlite3Conan(ConanFile):
         "enable_unlock_notify": True,
         "enable_default_secure_delete": False,
         "disable_gethostuuid": False,
+        "max_column": None,             # Uses default value from source
+        "max_variable_number": None,    # Uses default value from source
         "max_blob_size": 1000000000,
         "build_executable": True,
         "enable_default_vfs": True,
@@ -134,6 +138,10 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["HAVE_STRERROR_R"] = True
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
+        if self.options.max_column:
+            self._cmake.definitions["MAX_COLUMN"] = self.options.max_column
+        if self.options.max_variable_number:
+            self._cmake.definitions["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
         self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
