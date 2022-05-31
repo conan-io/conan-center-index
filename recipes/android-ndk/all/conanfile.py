@@ -26,7 +26,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _is_universal2(self):
-        return self.version in ["r23b", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+        return self.version in ["r23b", "r23c", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
@@ -45,7 +45,7 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r24']:
+        if self.version in ['r23', 'r23b', 'r23c', 'r24']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
@@ -317,7 +317,7 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-        
+
         # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
@@ -351,7 +351,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     import zipfile
     with zipfile.ZipFile(filename, "r") as z:
         zip_info = z.infolist()
-        
+
         names = [n.replace("\\", "/") for n in z.namelist()]
         common_folder = os.path.commonprefix(names).split("/", 1)[0]
 
