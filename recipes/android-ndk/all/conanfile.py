@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import mkdir
 import os
 import re
 import shutil
@@ -66,6 +67,7 @@ class AndroidNDKConan(ConanFile):
         self.copy("cmake-wrapper")
         self._fix_broken_links()
         self._fix_permissions()
+        mkdir(self, os.path.join(self.package_folder, "include"))
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 
