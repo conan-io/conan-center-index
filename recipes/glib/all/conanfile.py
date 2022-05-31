@@ -189,7 +189,10 @@ class GLibConan(ConanFile):
                     shutil.move(filename_old, filename_new)
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        if tools.Version(self.version) < "2.73.0":
+            self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        else:
+            self.copy(pattern="LGPL-2.1-or-later.txt", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         with tools.environment_append(
             VisualStudioBuildEnvironment(self).vars
         ) if is_msvc(self) else tools.no_op():
