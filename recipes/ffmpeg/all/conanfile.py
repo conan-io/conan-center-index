@@ -211,7 +211,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.2")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -268,6 +268,8 @@ class FFMpegConan(ConanFile):
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             ).split("-")
+            if target_os == "gnueabihf":
+                target_os = "linux" # could also be "gnu"
             return target_os
 
     def _patch_sources(self):
