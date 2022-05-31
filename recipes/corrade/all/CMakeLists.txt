@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
-if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-  include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-else()
-  include("conanbuildinfo.cmake")
-endif()
-conan_basic_setup()
+include(conanbuildinfo.cmake)
+conan_basic_setup(KEEP_RPATHS)
 
 add_subdirectory("source_subfolder")

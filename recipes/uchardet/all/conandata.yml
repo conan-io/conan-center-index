@@ -1,4 +1,4 @@
 sources:
   "0.0.7":
-    sha1: de19b7e614f11572582a0d47f7d5d6f8ec649199
     url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.7.tar.xz
+    sha256: "3fc79408ae1d84b406922fa9319ce005631c95ca0f34b205fad867e8b30e45b1"

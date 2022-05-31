@@ -100,6 +100,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": [True, False],
         "buildid": "ANY",
         "python_buildid": "ANY",
+        "system_use_utf8": [True, False],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -136,6 +137,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": True,
         "buildid": None,
         "python_buildid": None,
+        "system_use_utf8": False,
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -314,6 +316,28 @@ class BoostConan(ConanFile):
                 elif tools.Version(self.settings.compiler.version) < min_compiler_version:
                     disable_math()
 
+        if tools.Version(self.version) >= "1.79.0":
+            # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_wave():
+                super_modules = self._all_super_modules("wave")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, "without_{}".format(smod), True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.cppstd:
+                if not tools.valid_min_cppstd(self, 11):
+                    disable_wave()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx11
+                if min_compiler_version is None:
+                    self.output.warn("Assuming the compiler supports c++11 by default")
+                elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_wave()
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -445,6 +469,17 @@ class BoostConan(ConanFile):
                     if min_compiler_version is not None:
                         if tools.Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Math requires (boost:)cppstd>=11 (current one is lower)")
+
+        if tools.Version(self.version) >= "1.79.0":
+            # Starting from 1.79.0, Boost.Wave requires a compiler with c++ standard 11 or higher
+            if not self.options.without_wave:
+                if self.settings.compiler.cppstd:
+                    tools.check_min_cppstd(self, 11)
+                else:
+                    min_compiler_version = self._min_compiler_version_default_cxx11
+                    if min_compiler_version is not None:
+                        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                            raise ConanInvalidConfiguration("Boost.Wave requires (boost:)cppstd>=11 (current one is lower)")
 
     def _with_dependency(self, dependency):
         """
@@ -1041,6 +1076,8 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.system_use_utf8:
+            flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
             flags.extend(["segmented-stacks=on",
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
@@ -1398,6 +1435,9 @@ class BoostConan(ConanFile):
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            
+        if self.options.system_use_utf8:
+            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_USE_UTF8")
 
         if self.options.buildid:
             # If you built Boost using the --buildid option then set this macro to the same value

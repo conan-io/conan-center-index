@@ -16,10 +16,14 @@ class DbusConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "system_socket": "ANY",
+        "system_pid_file": "ANY",
         "with_x11": [True, False],
         "with_glib": [True, False],
     }
     default_options = {
+        "system_socket": "",
+        "system_pid_file": "",
         "with_x11": False,
         "with_glib": False,
     }
@@ -45,9 +49,9 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.6")
+        self.requires("expat/2.4.8")
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.72.0")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
@@ -70,6 +74,11 @@ class DbusConan(ConanFile):
 
             args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
+
+            if str(self.options.system_socket) != "":
+                args.append("--with-system-socket=%s" % self.options.system_socket)
+            if str(self.options.system_pid_file) != "":
+                args.append("--with-system-pid-file=%s" % self.options.system_pid_file)
 
             args.append("--disable-launchd")
             args.append("--disable-systemd")

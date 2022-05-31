@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE example PUBLIC "" "example.dtd">
+
+<example toto="1">
+  <examplechild id="1">
+    <child_of_child/>
+  </examplechild>
+  <examplechild id="2" toto="3">
+    <child_of_child>Some content :-)</child_of_child>
+  </examplechild>
+</example>

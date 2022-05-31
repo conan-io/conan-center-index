@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 if (MSVC)
 	add_compile_options("$<$<CONFIG:DEBUG>:/Z7>")

@@ -24,6 +24,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": [True, False],
         "with_rtti": [True, False],
         "lite": [True, False],
+        "debug_suffix": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": True,
         "with_rtti": True,
         "lite": False,
+        "debug_suffix": True,
     }
 
     short_paths = True
@@ -112,6 +114,8 @@ class ProtobufConan(ConanFile):
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+        if not self.options.debug_suffix:
+            cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
         if tools.Version(self.version) >= "3.14.0":
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
@@ -197,6 +201,13 @@ class ProtobufConan(ConanFile):
             "endif()",
         )
 
+        # https://github.com/protocolbuffers/protobuf/issues/9916
+        # it will be solved in protobuf 3.21.0
+        if tools.Version(self.version) == "3.20.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
+                "#elif PROTOBUF_GNUC_MIN(12, 0)",
+                "#elif PROTOBUF_GNUC_MIN(12, 2)")
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -231,7 +242,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         lib_prefix = "lib" if (self._is_msvc or self._is_clang_cl) else ""
-        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")

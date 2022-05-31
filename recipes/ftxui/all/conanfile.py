@@ -1,6 +1,7 @@
 import os
+import functools
 
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 import conan.tools.files
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -25,17 +26,11 @@ class FTXUIConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -57,21 +52,20 @@ class FTXUIConan(ConanFile):
             raise ConanInvalidConfiguration("gcc 8 required")
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        if self._is_msvc and self.options.shared and "MT" in msvc_runtime_flag(self):
+        if is_msvc(self) and self.options.shared and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("shared with static runtime not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FTXUI_BUILD_DOCS"] = False
-        self._cmake.definitions["FTXUI_BUILD_EXAMPLES"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["FTXUI_BUILD_DOCS"] = False
+        cmake.definitions["FTXUI_BUILD_EXAMPLES"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
