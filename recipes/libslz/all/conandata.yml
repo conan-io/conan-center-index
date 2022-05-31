@@ -1,5 +1,4 @@
 sources:
   "1.2.0":
-    url: "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=ff537154e7f5f2fffdbef1cd8c52b564c1b00067;sf=tbz2"
-    filename: "libslz-1.2.0.tar.bz2"
-    sha256: "66c420b1269ca91d365fb10b1734bab58005be75e234c2ebbb5597921dd4b2ed"
+    url: "https://github.com/wtarreau/libslz/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "723a8ef648ac5b30e5074c013ff61a5e5f54a5aafc9496f7dab9f6b02030bf24"
