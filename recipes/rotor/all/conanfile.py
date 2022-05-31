@@ -113,6 +113,9 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
 
+        if not self.options.multithreading:
+            self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE")
+
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]
             self.cpp_info.components["asio"].requires = ["core"]
