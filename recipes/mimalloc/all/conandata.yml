@@ -1,10 +1,19 @@
 sources:
+  "2.0.6":
+    url: "https://github.com/microsoft/mimalloc/archive/v2.0.6.tar.gz"
+    sha256: "9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5"
+  "2.0.5":
+    url: "https://github.com/microsoft/mimalloc/archive/v2.0.5.tar.gz"
+    sha256: "fb000a017c289ddc0df749f16fef854e033e496276d8426bdd066b59c476f6cf"
   "2.0.3":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.3.tar.gz"
     sha256: "5af497f360879bf9d07a5146961d275a25f4177fbe21ee6c437db604422acd60"
   "2.0.2":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.2.tar.gz"
     sha256: "c81a5f443f72373e3105172d6a935e29b0dabd13ba387c080bc444586cbe3021"
+  "1.7.6":
+    url: "https://github.com/microsoft/mimalloc/archive/v1.7.6.tar.gz"
+    sha256: "d74f86ada2329016068bc5a243268f1f555edd620b6a7d6ce89295e7d6cf18da"
   "1.7.5":
     url: "https://github.com/microsoft/mimalloc/archive/v1.7.5.tar.gz"
     sha256: "4f9ed087fc1804a8a77c4225ffc3337468f18d6c4f060c4d44f3a3eff85bc5b6"
@@ -12,6 +21,12 @@ sources:
     url: "https://github.com/microsoft/mimalloc/archive/v1.6.7.tar.gz"
     sha256: "111b718b496f297f128d842880e72e90e33953cf00b45ba0ccd2167e7340ed17"
 patches:
+  "2.0.6":
+    - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
+      base_path: "source_subfolder"
+  "2.0.5":
+    - patch_file: "patches/2.0.6-0001-change-install-paths.patch"
+      base_path: "source_subfolder"
   "2.0.3":
     - patch_file: "patches/2.0.3-0001-change-install-paths-avoid-symlink.patch"
       base_path: "source_subfolder"
@@ -20,10 +35,11 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/2.0.2-0002-include-cstddef-to-get-std-size-t.patch"
       base_path: "source_subfolder"
+  "1.7.6":
+    - patch_file: "patches/1.7.6-0001-change-install-paths-avoid-symlink.patch"
+      base_path: "source_subfolder"
   "1.7.5":
     - patch_file: "patches/1.7.5-0001-change-install-paths-avoid-symlink.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.7.5-0002-include-cstddef-to-get-std-size-t.patch"
       base_path: "source_subfolder"
   "1.6.7":
     - patch_file: "patches/1.6.7-0001-change-install-paths-avoid-symlink.patch"

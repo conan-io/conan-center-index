@@ -1,10 +1,10 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 
-class TensorflowLiteTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -13,6 +13,6 @@ class TensorflowLiteTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            model_path = os.path.join("bin", "model.tflite")
-            command = os.path.join("bin", "example")
+            model_path = os.path.join(self.source_folder, "model.tflite")
+            command = os.path.join("bin", "test_package")
             self.run(" ".join([command, model_path]), run_environment=True)

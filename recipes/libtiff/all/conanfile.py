@@ -120,15 +120,13 @@ class LibtiffConan(ConanFile):
             tools.patch(**patch)
 
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
-        if self.options.jbig:
-            rename(self, os.path.join(self.build_folder, "Findjbig.cmake"),
-                         os.path.join(self.build_folder, "ConanFindjbig.cmake"))
-        else:
-            os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
-        if self._has_zstd_option:
+        if tools.Version(self.version) >= "4.3.0":
+            if self.options.jbig:
+                rename(self, "Findjbig.cmake", "ConanFindjbig.cmake")
+            else:
+                os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
             if self.options.zstd:
-                rename(self, os.path.join(self.build_folder, "Findzstd.cmake"),
-                             os.path.join(self.build_folder, "ConanFindzstd.cmake"))
+                rename(self, "Findzstd.cmake", "ConanFindzstd.cmake")
             else:
                 os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
 
@@ -201,7 +199,7 @@ class LibtiffConan(ConanFile):
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
         if self.options.shared and self.settings.os == "Windows" and not self._is_msvc:
             self.cpp_info.libs = [lib + ".dll" for lib in self.cpp_info.libs]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed

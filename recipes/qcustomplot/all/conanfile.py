@@ -47,7 +47,10 @@ class QcustomplotConan(ConanFile):
         self.options["qt"].shared = True
 
     def requirements(self):
-        self.requires("qt/6.2.3")
+        if int(tools.Version(self.version).major) >= 2:
+            self.requires("qt/6.3.0")
+        else:
+            self.requires("qt/5.15.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -63,10 +66,11 @@ class QcustomplotConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # allow static qcustomplot with shared qt, and vice versa
-        tools.replace_in_file(os.path.join(self._source_subfolder, "qcustomplot.h"),
-                              "#if defined(QT_STATIC_BUILD)",
-                              "#if 0" if self.options.shared else "#if 1")
+        if int(tools.Version(self.version).major) >= 2:
+            # allow static qcustomplot with shared qt, and vice versa
+            tools.replace_in_file(os.path.join(self._source_subfolder, "qcustomplot.h"),
+                                  "#if defined(QT_STATIC_BUILD)",
+                                  "#if 0" if self.options.shared else "#if 1")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

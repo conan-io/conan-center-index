@@ -1,0 +1,172 @@
+--- a/pem.h
++++ b/pem.h
+@@ -15,13 +15,13 @@
+ #ifndef CRYPTOPP_PEM_H
+ #define CRYPTOPP_PEM_H
+ 
+-#include "pubkey.h"
+-#include "eccrypto.h"
+-#include "gfpcrypt.h"
+-#include "integer.h"
+-#include "rsa.h"
+-#include "dsa.h"
+-#include "elgamal.h"
++#include <cryptopp/pubkey.h>
++#include <cryptopp/eccrypto.h>
++#include <cryptopp/gfpcrypt.h>
++#include <cryptopp/integer.h>
++#include <cryptopp/rsa.h>
++#include <cryptopp/dsa.h>
++#include <cryptopp/elgamal.h>
+ 
+ NAMESPACE_BEGIN(CryptoPP)
+ 
+--- a/pem_common.cpp
++++ b/pem_common.cpp
+@@ -6,10 +6,10 @@
+ //   http://www.cryptopp.com/wiki/PEM_Pack
+ ///////////////////////////////////////////////////////////////////////////
+ 
+-#include "cryptlib.h"
+-#include "secblock.h"
+-#include "base64.h"
+-#include "osrng.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/secblock.h>
++#include <cryptopp/base64.h>
++#include <cryptopp/osrng.h>
+ 
+ #include <algorithm>
+ #include <cctype>
+--- a/pem_common.h
++++ b/pem_common.h
+@@ -10,9 +10,10 @@
+ #ifndef CRYPTOPP_PEM_COMMON_H
+ #define CRYPTOPP_PEM_COMMON_H
+ 
+-#include "cryptlib.h"
+-#include "secblock.h"
+-#include "osrng.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/secblock.h>
++#include <cryptopp/osrng.h>
++
+ #include "pem.h"
+ 
+ #include <string>
+--- a/pem_read.cpp
++++ b/pem_read.cpp
+@@ -10,27 +10,27 @@
+ #include <algorithm>
+ #include <cctype>
+ 
+-#include "cryptlib.h"
+-#include "secblock.h"
+-#include "nbtheory.h"
+-#include "gfpcrypt.h"
+-#include "camellia.h"
+-#include "smartptr.h"
+-#include "filters.h"
+-#include "base64.h"
+-#include "queue.h"
+-#include "modes.h"
+-#include "asn.h"
+-#include "aes.h"
+-#include "idea.h"
+-#include "hex.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/secblock.h>
++#include <cryptopp/nbtheory.h>
++#include <cryptopp/gfpcrypt.h>
++#include <cryptopp/camellia.h>
++#include <cryptopp/smartptr.h>
++#include <cryptopp/filters.h>
++#include <cryptopp/base64.h>
++#include <cryptopp/queue.h>
++#include <cryptopp/modes.h>
++#include <cryptopp/asn.h>
++#include <cryptopp/aes.h>
++#include <cryptopp/idea.h>
++#include <cryptopp/hex.h>
+ 
+ #include "pem.h"
+ #include "pem_common.h"
+ 
+ #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+-#include "des.h"
+-#include "md5.h"
++#include <cryptopp/des.h>
++#include <cryptopp/md5.h>
+ 
+ //////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////
+--- a/pem_test.cxx
++++ b/pem_test.cxx
+@@ -4,13 +4,14 @@
+ #include <string>
+ #include <iostream>
+ 
+-#include "cryptlib.h"
+-#include "integer.h"
+-#include "eccrypto.h"
+-#include "osrng.h"
+-#include "files.h"
+-#include "rsa.h"
+-#include "dsa.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/integer.h>
++#include <cryptopp/eccrypto.h>
++#include <cryptopp/osrng.h>
++#include <cryptopp/files.h>
++#include <cryptopp/rsa.h>
++#include <cryptopp/dsa.h>
++
+ #include "pem.h"
+ 
+ int main(int argc, char* argv[])
+--- a/pem_write.cpp
++++ b/pem_write.cpp
+@@ -10,27 +10,27 @@
+ #include <algorithm>
+ #include <cctype>
+ 
+-#include "cryptlib.h"
+-#include "secblock.h"
+-#include "camellia.h"
+-#include "smartptr.h"
+-#include "filters.h"
+-#include "base64.h"
+-#include "files.h"
+-#include "queue.h"
+-#include "modes.h"
+-#include "osrng.h"
+-#include "asn.h"
+-#include "aes.h"
+-#include "idea.h"
+-#include "hex.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/secblock.h>
++#include <cryptopp/camellia.h>
++#include <cryptopp/smartptr.h>
++#include <cryptopp/filters.h>
++#include <cryptopp/base64.h>
++#include <cryptopp/files.h>
++#include <cryptopp/queue.h>
++#include <cryptopp/modes.h>
++#include <cryptopp/osrng.h>
++#include <cryptopp/asn.h>
++#include <cryptopp/aes.h>
++#include <cryptopp/idea.h>
++#include <cryptopp/hex.h>
+ 
+ #include "pem.h"
+ #include "pem_common.h"
+ 
+ #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+-#include "des.h"
+-#include "md5.h"
++#include <cryptopp/des.h>
++#include <cryptopp/md5.h>
+ 
+ //////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////

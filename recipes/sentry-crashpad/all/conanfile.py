@@ -30,6 +30,10 @@ class SentryCrashpadConan(ConanFile):
     _cmake = None
 
     @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
     def _build_subfolder(self):
         return "build_subfolder"
 
@@ -40,8 +44,8 @@ class SentryCrashpadConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
-            "gcc": "5",
+            "Visual Studio": "15" if tools.Version(self.version) < "0.4.16" else "16",
+            "gcc": "6",
             "clang": "3.4",
             "apple-clang": "5.1",
         }
@@ -56,6 +60,10 @@ class SentryCrashpadConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ("Linux", "Android") or tools.Version(self.version) < "0.4":
             del self.options.with_tls
+
+    def build_requirements(self):
+        if self._is_mingw:
+            self.build_requires("jwasm/2.13")
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -87,6 +95,7 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL"] = True
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL_DEV"] = True
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
