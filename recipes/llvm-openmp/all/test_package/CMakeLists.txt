@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(OpenMP CONFIG REQUIRED)
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package OpenMP::OpenMP)
+target_link_libraries(test_package OpenMP::OpenMP_CXX)
