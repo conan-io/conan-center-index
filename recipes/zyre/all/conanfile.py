@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import is_msvc
 import os
 import functools
 
@@ -60,6 +61,9 @@ class ZyreConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
+        if tools.Version(self.version) >= "2.0.1":
+            cmake.definitions["ZYRE_BUILD_SHARED"] = self.options.shared
+            cmake.definitions["ZYRE_BUILD_STATIC"] = not self.options.shared
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
@@ -80,7 +84,9 @@ class ZyreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libzyre"
-        self.cpp_info.libs = ["zyre"]
+        
+        libname = "libzyre" if tools.Version(self.version) >= "2.0.1" and is_msvc(self) and not self.options.shared else "zyre"
+        self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]
         if not self.options.shared:
