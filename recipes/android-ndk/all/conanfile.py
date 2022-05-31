@@ -152,7 +152,7 @@ class AndroidNDKConan(ConanFile):
     def _fix_broken_links(self):
         # https://github.com/android/ndk/issues/1671
         # https://github.com/android/ndk/issues/1569
-        if self.version == "r23b" and self.settings.os in ["Linux", "Macos"]:
+        if self.version in ["r23b", "r23c"] and self.settings.os in ["Linux", "Macos"]:
             platform = "darwin" if self.settings.os == "Macos" else "linux"
             links = {f"toolchains/llvm/prebuilt/{platform}-x86_64/aarch64-linux-android/bin/as": "../../bin/aarch64-linux-android-as",
                      f"toolchains/llvm/prebuilt/{platform}-x86_64/arm-linux-androideabi/bin/as": "../../bin/arm-linux-androideabi-as",
