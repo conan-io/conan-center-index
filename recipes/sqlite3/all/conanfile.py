@@ -32,6 +32,7 @@ class Sqlite3Conan(ConanFile):
         "enable_rtree": [True, False],
         "use_alloca": [True, False],
         "omit_load_extension": [True, False],
+        "omit_deprecated": [True, False],
         "enable_math_functions": [True, False],
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
@@ -58,6 +59,7 @@ class Sqlite3Conan(ConanFile):
         "enable_rtree": True,
         "use_alloca": False,
         "omit_load_extension": False,
+        "omit_deprecated": False,
         "enable_math_functions": True,
         "enable_unlock_notify": True,
         "enable_default_secure_delete": False,
@@ -122,6 +124,7 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
         self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        self._cmake.definitions["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:
             self._cmake.definitions["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
         self._cmake.definitions["HAVE_FDATASYNC"] = True
@@ -134,7 +137,7 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
-        
+
         self._cmake.configure()
         return self._cmake
 
