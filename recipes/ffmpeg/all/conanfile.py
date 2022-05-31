@@ -139,39 +139,39 @@ class FFMpegConan(ConanFile):
         "with_programs": True,
         "disable_everything": False,
         "disable_all_encoders": False,
-        "disable_encoders": "",
-        "enable_encoders": "",
+        "disable_encoders": None,
+        "enable_encoders": None,
         "disable_all_decoders": False,
-        "disable_decoders": "",
-        "enable_decoders": "",
+        "disable_decoders": None,
+        "enable_decoders": None,
         "disable_all_hardware_accelerators": False,
-        "disable_hardware_accelerators": "",
-        "enable_hardware_accelerators": "",
+        "disable_hardware_accelerators": None,
+        "enable_hardware_accelerators": None,
         "disable_all_muxers": False,
-        "disable_muxers": "",
-        "enable_muxers": "",
+        "disable_muxers": None,
+        "enable_muxers": None,
         "disable_all_demuxers": False,
-        "disable_demuxers": "",
-        "enable_demuxers": "",
+        "disable_demuxers": None,
+        "enable_demuxers": None,
         "disable_all_parsers": False,
-        "disable_parsers": "",
-        "enable_parsers": "",
+        "disable_parsers": None,
+        "enable_parsers": None,
         "disable_all_bitstream_filters": False,
-        "disable_bitstream_filters": "",
-        "enable_bitstream_filters": "",
+        "disable_bitstream_filters": None,
+        "enable_bitstream_filters": None,
         "disable_all_protocols": False,
-        "disable_protocols": "",
-        "enable_protocols": "",
+        "disable_protocols": None,
+        "enable_protocols": None,
         "disable_all_devices": False,
         "disable_all_input_devices": False,
-        "disable_input_devices": "",
-        "enable_input_devices": "",
+        "disable_input_devices": None,
+        "enable_input_devices": None,
         "disable_all_output_devices": False,
-        "disable_output_devices": "",
-        "enable_output_devices": "",
+        "disable_output_devices": None,
+        "enable_output_devices": None,
         "disable_all_filters": False,
-        "disable_filters": "",
-        "enable_filters": "",
+        "disable_filters": None,
+        "enable_filters": None,
     }
 
     generators = "pkg_config"
@@ -566,6 +566,9 @@ class FFMpegConan(ConanFile):
         return self._autotools
 
     def _split_and_format_options_string(self, flag_name, options_list):
+        if not options_list:
+            return []
+
         def _format_options_list_item(flag_name, options_item):
             return "--{}={}".format(flag_name, options_item)
 
