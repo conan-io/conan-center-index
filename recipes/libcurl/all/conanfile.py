@@ -562,6 +562,8 @@ class LibcurlConan(ConanFile):
         else:
             self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+        if !self.options.with_c_ares:
+            self._cmake.definitions["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         self._cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         self._cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp
         if tools.Version(self.version) >= "7.75.0":
