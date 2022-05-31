@@ -68,7 +68,7 @@ class Sqlite3Conan(ConanFile):
         "disable_gethostuuid": False,
         "max_column": None,             # Uses default value from source
         "max_variable_number": None,    # Uses default value from source
-        "max_blob_size": 1000000000,
+        "max_blob_size": None,          # Uses default value from source
         "build_executable": True,
         "enable_default_vfs": True,
         "enable_dbpage_vtab": False,
@@ -142,7 +142,8 @@ class Sqlite3Conan(ConanFile):
             self._cmake.definitions["MAX_COLUMN"] = self.options.max_column
         if self.options.max_variable_number:
             self._cmake.definitions["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
-        self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        if self.options.max_blob_size:
+            self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
 
