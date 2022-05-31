@@ -336,6 +336,7 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_LIBRARY = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_INCLUDE = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
+        self.cpp_info.includedirs = []
 
 
 def unzip_fix_symlinks(url, target_folder, sha256):
