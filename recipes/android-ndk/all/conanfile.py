@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import mkdir
 import os
 import re
 import shutil
@@ -67,7 +66,6 @@ class AndroidNDKConan(ConanFile):
         self.copy("cmake-wrapper")
         self._fix_broken_links()
         self._fix_permissions()
-        mkdir(self, os.path.join(self.package_folder, "include"))
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 
@@ -244,6 +242,7 @@ class AndroidNDKConan(ConanFile):
 
         self.output.info(f"Creating ANDROID_NDK_HOME environment variable: {self.package_folder}")
         self.env_info.ANDROID_NDK_HOME = self.package_folder
+        self.cpp_info.includedirs = []
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, "settings_target"):
@@ -338,7 +337,6 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_LIBRARY = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_INCLUDE = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
-        self.cpp_info.includedirs = []
 
 
 def unzip_fix_symlinks(url, target_folder, sha256):
