@@ -11,7 +11,8 @@ include_directories(source_subfolder/src)
 set_target_properties(slz PROPERTIES
     PUBLIC_HEADER source_subfolder/src/slz.h
     WINDOWS_EXPORT_ALL_SYMBOLS ON
-    C_EXTENSIONS OFF
+    C_STANDARD 11
+    C_EXTENSIONS ON
 )
 
 install(
