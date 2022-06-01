@@ -1,0 +1,7 @@
+versions:
+  "5.64":
+    folder: all
+  "4.101":
+    folder: all
+  "4.80":
+    folder: all
