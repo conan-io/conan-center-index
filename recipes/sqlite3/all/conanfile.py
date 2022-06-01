@@ -99,9 +99,12 @@ class Sqlite3Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if not self.options.enable_default_vfs and self.options.build_executable:
-            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-            raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+        if self.options.build_executable:
+            if not self.options.enable_default_vfs:
+                # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+                raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+            if self.options.omit_load_extension:
+                raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
