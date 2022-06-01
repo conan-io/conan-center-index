@@ -38,10 +38,6 @@ class CroncppConan(ConanFile):
         cmake.configure()
         return cmake
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
         self.copy("LICENSE*", "licenses", self._source_subfolder)
         cmake = self._configure_cmake()
