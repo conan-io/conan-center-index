@@ -8,7 +8,7 @@ from conan.tools.files import chdir
 from conan.errors import ConanException
 
 class BlueZConan(ConanFile):
-    name = "hello"
+    name = "bluez"
 
     # Optional metadata
     license = ""
