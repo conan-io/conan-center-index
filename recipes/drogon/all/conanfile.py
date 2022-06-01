@@ -31,7 +31,7 @@ class DrogonConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_boost": False,
+        "with_boost": True,
         "with_ctl": False,
         "with_orm": True,
         "with_profile": False,
