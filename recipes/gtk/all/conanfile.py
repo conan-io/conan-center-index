@@ -109,12 +109,16 @@ class GtkConan(ConanFile):
     def build_requirements(self):
         self.build_requires("meson/0.61.2")
         if self._gtk4:
-            self.build_requires("libxml2/2.9.13") # for xmllint
+            self.build_requires("libxml2/2.9.14") # for xmllint
         self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
+        # FIXME: remove this once dependency mismatch is resolved
+        self.requires("zlib/1.2.12")
+        self.requires("expat/2.4.8")
+
         self.requires("gdk-pixbuf/2.42.6")
         self.requires("glib/2.72.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
