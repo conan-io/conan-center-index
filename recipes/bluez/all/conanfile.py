@@ -7,12 +7,13 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import chdir
 from conan.errors import ConanException
 
+required_conan_version >= "1.33.0"
+
 class BlueZConan(ConanFile):
     name = "bluez"
     generators = "pkg_config"
     
     license = "GPLv2"
-    author = "Bluez project"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bluez.org/"
     description = "Official Linux Bluetooth protocol stack"
