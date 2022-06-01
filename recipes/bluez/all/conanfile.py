@@ -1,18 +1,14 @@
-
-import os
-
-from conan import ConanFile, tools
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan import ConanFile
+from conans import tools
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout
-from conan.tools.files import chdir
 from conan.errors import ConanException
 
 required_conan_version = ">=1.33.0"
 
 class BlueZConan(ConanFile):
     name = "bluez"
-    generators = "pkg_config"
-    
+
     license = "GPLv2"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bluez.org/"
@@ -21,6 +17,7 @@ class BlueZConan(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/*"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,6 +28,12 @@ class BlueZConan(ConanFile):
         "fPIC": True,
         "with_usb": False
     }
+
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "."
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,7 +50,6 @@ class BlueZConan(ConanFile):
         if tools.Version(self.version) >= "5.0":
             self.requires("readline/8.1.2")
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -55,22 +57,30 @@ class BlueZConan(ConanFile):
         basic_layout(self)
 
     def generate(self):
-        at_toolchain = AutotoolsToolchain(self)
-        at_toolchain.configure_args = [
+        tc = AutotoolsToolchain(self)
+        tc.configure_args = [
             "--disable-service"
         ]
         if self.options.with_usb:
-            at_toolchain.configure_args.append("--enable-usb")
-        at_toolchain.generate()
+            tc.configure_args.append("--enable-usb")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+    def _config_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = Autotools(self)
+        self._autotools.autoreconf()
+        self._autotools.configure()
+        return self._autotools
 
     def build(self):
-        autotools = Autotools(self)
-        autotools.autoreconf()
-        autotools.configure()
+        autotools = self._config_autotools()
         autotools.make()
 
     def package(self):
-        autotools = Autotools(self)
+        autotools = self._config_autotools()
         autotools.install()
 
     def package_info(self):
