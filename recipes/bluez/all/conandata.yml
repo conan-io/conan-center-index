@@ -1,9 +1,6 @@
 sources:
   "5.64":
     url: "http://www.kernel.org/pub/linux/bluetooth/bluez-5.64.tar.xz"
-    sha256: ""
-  "4.101":
-    url: "http://www.kernel.org/pub/linux/bluetooth/bluez-4.101.tar.xz"
-    sha256: "41f9578bef39b8c94a2d6ddeaa556afd22d136936d0f03100e422fe970a45a7d"
+    sha256: "ae437e65b6b3070c198bc5b0109fe9cdeb9eaa387380e2072f9de65fe8a1de34"
 
 

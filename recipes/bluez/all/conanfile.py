@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conans import tools
-from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.layout import basic_layout
 from conan.errors import ConanException
 
@@ -21,32 +21,31 @@ class BlueZConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_usb": [True, False]
+        "with_usb": [True, False],
+        "with_udev": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_usb": False
+        "with_usb": False,
+        "with_udev": False
     }
 
     _autotools = None
 
     @property
     def _source_subfolder(self):
-        return "."
+        return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            ConanException("Unable to build BlueZ on Windows")
+        if not self.settings.os == "Linux":
+            ConanException(f"Unable to build BlueZ on {self.settings.os}")
 
     def requirements(self):
         self.requires("dbus/1.12.20")
         self.requires("glib/2.73.0")
-        if self.options.with_usb:
-            self.requires("libusb/1.0.26")
-        if tools.Version(self.version) < "5.0":
-            self.requires("flex/2.6.4")
-            self.requires("bison/3.7.6")
+        if self.options.with_udev:
+            self.requires("libudev/system")
         if tools.Version(self.version) >= "5.0":
             self.requires("readline/8.1.2")
 
@@ -57,21 +56,26 @@ class BlueZConan(ConanFile):
         basic_layout(self)
 
     def generate(self):
-        tc = AutotoolsToolchain(self)
-        tc.configure_args = [
-            "--disable-service"
+        at_toolchain = AutotoolsToolchain(self)
+        at_toolchain.configure_args = [
+            "--disable-tools",
+            "--disable-client",
+            "--disable-systemd",
+            "--disable-monitor",
+            "--disable-service",
+            "--disable-manpages",
+            "--disable-datafiles"
         ]
         if self.options.with_usb:
-            tc.configure_args.append("--enable-usb")
-        tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
+            at_toolchain.configure_args.append("--enable-usb")
+        at_toolchain.generate()
+        pc_deps = PkgConfigDeps(self)
+        pc_deps.generate()
 
     def _config_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = Autotools(self)
-        self._autotools.autoreconf()
+        self._autotools = Autotools(self, build_script_folder=self._source_subfolder)
         self._autotools.configure()
         return self._autotools
 
