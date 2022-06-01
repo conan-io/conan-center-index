@@ -34,7 +34,7 @@ class BeautyConan(ConanFile):
             "Visual Studio": "16",
         }
 
-    def config_options_self):
+    def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
