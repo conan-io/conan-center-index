@@ -17,6 +17,7 @@ class DrogonConan(ConanFile):
     options = {
         "shared": [False, True],
         "fPIC": [True, False],
+        "with_boost": [True, False],
         "with_ctl": [True, False],
         "with_orm": [True, False],
         "with_profile": [True, False],
@@ -30,6 +31,7 @@ class DrogonConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_boost": False,
         "with_ctl": False,
         "with_orm": True,
         "with_profile": False,
@@ -89,7 +91,6 @@ class DrogonConan(ConanFile):
 
     def requirements(self):
         self.requires("trantor/1.5.5")
-        self.requires("boost/1.79.0")
         self.requires("jsoncpp/1.9.5")
         self.requires("openssl/1.1.1o")
         self.requires("zlib/1.2.12")
@@ -97,6 +98,8 @@ class DrogonConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
+        if self.options.with_boost:
+            self.requires("boost/1.79.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_postgres"):
