@@ -1,6 +1,7 @@
-from conans import ConanFile, CMake, tools
-import os
 import functools
+from conans import ConanFile, CMake, tools
+from conans.tools import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.43.0"
 
@@ -28,8 +29,6 @@ class LibslzConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,6 +39,10 @@ class LibslzConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("{}/{} does not support Visual Studio.".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -52,8 +55,6 @@ class LibslzConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
