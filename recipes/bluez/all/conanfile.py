@@ -9,12 +9,13 @@ from conan.errors import ConanException
 
 class BlueZConan(ConanFile):
     name = "bluez"
-
-    # Optional metadata
-    license = ""
+    generators = "pkg_config"
+    
+    license = "GPLv2"
     author = "Bluez project"
-    url = ""
-    description = ""
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.bluez.org/"
+    description = "Official Linux Bluetooth protocol stack"
     topics = ("bluetooth", "linux")
 
     # Binary configuration
@@ -55,7 +56,7 @@ class BlueZConan(ConanFile):
     def generate(self):
         at_toolchain = AutotoolsToolchain(self)
         at_toolchain.configure_args = [
-            '--disable-service'
+            "--disable-service"
         ]
         at_toolchain.generate()
 
