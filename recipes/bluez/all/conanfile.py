@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import chdir
 from conan.errors import ConanException
 
-required_conan_version >= "1.33.0"
+required_conan_version = ">=1.33.0"
 
 class BlueZConan(ConanFile):
     name = "bluez"
