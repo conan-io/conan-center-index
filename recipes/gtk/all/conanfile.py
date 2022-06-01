@@ -1,7 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 import fileinput
 import shlex
 
