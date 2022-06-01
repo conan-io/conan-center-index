@@ -59,6 +59,8 @@ class BlueZConan(ConanFile):
         at_toolchain.configure_args = [
             "--disable-service"
         ]
+        if self.options.with_usb:
+            at_toolchain.configure_args.append("--enable-usb")
         at_toolchain.generate()
 
     def build(self):
@@ -72,4 +74,7 @@ class BlueZConan(ConanFile):
         autotools.install()
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "bluez"
+        self.cpp_info.names["cmake_find_package_multi"] = "bluez"
+        self.cpp_info.names["pkg_config"] = "bluetooth"
         self.cpp_info.libs = ["bluetooth"]
