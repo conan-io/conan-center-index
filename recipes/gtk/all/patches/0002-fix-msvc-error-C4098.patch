@@ -1,0 +1,54 @@
+From 35fee660ffc13565d1c304a2438125d3ccddfaaa Mon Sep 17 00:00:00 2001
+From: Chun-wei Fan <fanchunwei@src.gnome.org>
+Date: Fri, 16 Apr 2021 15:28:28 +0800
+Subject: [PATCH] gtkcsscustomgadget.c: Fix build with latest stable GLib with
+ MSVC
+
+This eliminates the C4098 warnings ('void' function returning a value),
+which is considered by GLib-2.68.x or later to be an error.
+---
+ gtk/gtkcsscustomgadget.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/gtk/gtkcsscustomgadget.c b/gtk/gtkcsscustomgadget.c
+index 60a1881ba9..05d053d17f 100644
+--- a/gtk/gtkcsscustomgadget.c
++++ b/gtk/gtkcsscustomgadget.c
+@@ -121,14 +121,14 @@ gtk_css_custom_gadget_get_preferred_size (GtkCssGadget   *gadget,
+   GtkCssCustomGadgetPrivate *priv = gtk_css_custom_gadget_get_instance_private (GTK_CSS_CUSTOM_GADGET (gadget));
+ 
+   if (priv->preferred_size_func)
+-    return priv->preferred_size_func (gadget, orientation, for_size, 
+-                                      minimum, natural,
+-                                      minimum_baseline, natural_baseline,
+-                                      priv->data);
++    priv->preferred_size_func (gadget, orientation, for_size,
++                               minimum, natural,
++                               minimum_baseline, natural_baseline,
++                               priv->data);
+   else
+-    return GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->get_preferred_size (gadget, orientation, for_size, 
+-                                                                                          minimum, natural,
+-                                                                                          minimum_baseline, natural_baseline);
++    GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->get_preferred_size (gadget, orientation, for_size,
++                                                                                   minimum, natural,
++                                                                                   minimum_baseline, natural_baseline);
+ }
+ 
+ static void
+@@ -140,9 +140,9 @@ gtk_css_custom_gadget_allocate (GtkCssGadget        *gadget,
+   GtkCssCustomGadgetPrivate *priv = gtk_css_custom_gadget_get_instance_private (GTK_CSS_CUSTOM_GADGET (gadget));
+ 
+   if (priv->allocate_func)
+-    return priv->allocate_func (gadget, allocation, baseline, out_clip, priv->data);
++    priv->allocate_func (gadget, allocation, baseline, out_clip, priv->data);
+   else
+-    return GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->allocate (gadget, allocation, baseline, out_clip);
++    GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->allocate (gadget, allocation, baseline, out_clip);
+ }
+ 
+ static gboolean
+-- 
+GitLab
+
+

@@ -1,0 +1,108 @@
+From 416e6b9cdd196a0b60a61d3e8f37a57c5520abfc Mon Sep 17 00:00:00 2001
+From: Chun-wei Fan <fanchunwei@src.gnome.org>
+Date: Fri, 16 Apr 2021 12:28:46 +0800
+Subject: [PATCH] gdkglcontext-win32.c: Avoid C4715 warning
+
+We can just group the code for the desktop GL codepath and the EGL
+codepath a bit so that we can just have a single location where we
+return TRUE upon a successful setup of our WGL/EGL context, and avoid
+the C4715 warning that is considered an error when building with
+GLib-2.68.x or later using Visual Studio, when we are building without
+EGL support.
+---
+ gdk/win32/gdkglcontext-win32.c | 58 +++++++++++++++++-----------------
+ 1 file changed, 29 insertions(+), 29 deletions(-)
+
+diff --git a/gdk/win32/gdkglcontext-win32.c b/gdk/win32/gdkglcontext-win32.c
+index e873fa8899..539d096715 100644
+--- a/gdk/win32/gdkglcontext-win32.c
++++ b/gdk/win32/gdkglcontext-win32.c
+@@ -576,8 +576,6 @@ _gdk_win32_display_init_gl (GdkDisplay *display,
+   gboolean disable_wgl = FALSE;
+ 
+ #ifdef GDK_WIN32_ENABLE_EGL
+-  EGLDisplay egl_disp;
+-
+   disable_wgl = ((_gdk_gl_flags & GDK_GL_GLES) != 0) ||
+                 display_win32->running_on_arm64;
+ #endif
+@@ -638,46 +638,48 @@ _gdk_win32_display_init_gl (GdkDisplay *display,
+       wglMakeCurrent (NULL, NULL);
+ 
+       _destroy_dummy_gl_context (dummy);
+-      return TRUE;
+     }
+ 
+ #ifdef GDK_WIN32_ENABLE_EGL
+-  egl_disp = _gdk_win32_get_egl_display (display_win32);
+-
+-  if (egl_disp == EGL_NO_DISPLAY ||
+-      !eglInitialize (egl_disp, NULL, NULL))
++  else
+     {
+-      if (egl_disp != EGL_NO_DISPLAY)
++      EGLDisplay egl_disp = _gdk_win32_get_egl_display (display_win32);
++
++      if (egl_disp == EGL_NO_DISPLAY ||
++          !eglInitialize (egl_disp, NULL, NULL))
+         {
+-          eglTerminate (egl_disp);
+-          egl_disp = EGL_NO_DISPLAY;
+-        }
++          if (egl_disp != EGL_NO_DISPLAY)
++            {
++              eglTerminate (egl_disp);
++              egl_disp = EGL_NO_DISPLAY;
++            }
+ 
+-      return FALSE;
+-    }
++          return FALSE;
++        }
+ 
+-  display_win32->egl_disp = egl_disp;
+-  display_win32->have_egl = TRUE;
+-  display_win32->egl_version = epoxy_egl_version (egl_disp);
++      display_win32->egl_disp = egl_disp;
++      display_win32->have_egl = TRUE;
++      display_win32->egl_version = epoxy_egl_version (egl_disp);
+ 
+-  eglBindAPI(EGL_OPENGL_ES_API);
++      eglBindAPI(EGL_OPENGL_ES_API);
+ 
+-  display_win32->hasEglSurfacelessContext =
+-    epoxy_has_egl_extension (egl_disp, "EGL_KHR_surfaceless_context");
++      display_win32->hasEglSurfacelessContext =
++        epoxy_has_egl_extension (egl_disp, "EGL_KHR_surfaceless_context");
+ 
+ 
+-  GDK_NOTE (OPENGL,
+-            g_print ("EGL API version %d.%d found\n"
+-                     " - Vendor: %s\n"
+-                     " - Checked extensions:\n"
+-                     "\t* EGL_KHR_surfaceless_context: %s\n",
+-                     display_win32->egl_version / 10,
+-                     display_win32->egl_version % 10,
+-                     eglQueryString (display_win32->egl_disp, EGL_VENDOR),
+-                     display_win32->hasEglSurfacelessContext ? "yes" : "no"));
++      GDK_NOTE (OPENGL,
++                g_print ("EGL API version %d.%d found\n"
++                         " - Vendor: %s\n"
++                         " - Checked extensions:\n"
++                         "\t* EGL_KHR_surfaceless_context: %s\n",
++                         display_win32->egl_version / 10,
++                         display_win32->egl_version % 10,
++                         eglQueryString (display_win32->egl_disp, EGL_VENDOR),
++                         display_win32->hasEglSurfacelessContext ? "yes" : "no"));
++    }
++#endif
+ 
+   return TRUE;
+-#endif
+ }
+ 
+ /* Setup the legacy context after creating it */
+-- 
+GitLab
+
+

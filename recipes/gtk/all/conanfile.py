@@ -1,6 +1,9 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
+import fileinput
+import shlex
 
 required_conan_version = ">=1.33.0"
 
@@ -67,6 +70,12 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
+            if self._gtk3:
+                self.options["pango"].shared = True
+                self.options["glib"].shared = True
+                # Fix duplicate definitions of DllMain
+                self.options["atk"].shared = True
+                self.options.shared = True
         if tools.Version(self.version) >= "4.1.0":
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
@@ -79,8 +88,6 @@ class GtkConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.2":
-                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             if not self.options["gdk-pixbuf"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
@@ -185,14 +192,27 @@ class GtkConan(ConanFile):
                                   "dependency(false ? ")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
+
+            # the command response file for linking gtk exceeds msvc linker limit
+            # this hack fixes this by removing duplicates in the link arguments
+            # inside the build.ninja file
+            for line in fileinput.input(os.path.join(self._build_subfolder, "build.ninja"), inplace=True):
+                idx = line.find("LINK_ARGS =")
+                if idx >= 0:
+                    parts = shlex.split(line[idx + len("LINK_ARGS ="):])
+                    print("{} {}".format(
+                        line[: idx + len("LINK_ARGS =")],
+                        " ".join((f'"{v}"' for v in set(parts))), end=''))
+                else:
+                    print(line, end='')
+
             meson.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
-        with tools.environment_append({
-            "PKG_CONFIG_PATH": self.install_folder,
-            "PATH": [os.path.join(self.package_folder, "bin")]}):
+        with tools.environment_append({**tools.RunEnvironment(self).vars,
+                                       "PKG_CONFIG_PATH": self.install_folder}):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
