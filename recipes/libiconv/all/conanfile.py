@@ -38,6 +38,10 @@ class LibiconvConan(ConanFile):
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
@@ -66,22 +70,25 @@ class LibiconvConan(ConanFile):
     @contextmanager
     def _build_context(self):
         env_vars = {}
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
+            cc = "cl" if self._is_msvc else os.environ.get("CC", "clang-cl")
+            cxx = "cl" if self._is_msvc else os.environ.get("CXX", "clang-cl")
+            lib = "lib" if self._is_msvc else os.environ.get("AR", "llvm-lib")
             build_aux_path = os.path.join(self.build_folder, self._source_subfolder, "build-aux")
             lt_compile = tools.unix_path(os.path.join(build_aux_path, "compile"))
             lt_ar = tools.unix_path(os.path.join(build_aux_path, "ar-lib"))
             env_vars.update({
-                "CC": "{} cl -nologo".format(lt_compile),
-                "CXX": "{} cl -nologo".format(lt_compile),
+                "CC": "{} {} -nologo".format(lt_compile, cc),
+                "CXX": "{} {} -nologo".format(lt_compile, cxx),
                 "LD": "link",
                 "STRIP": ":",
-                "AR": "{} lib".format(lt_ar),
+                "AR": "{} {}".format(lt_ar, lib),
                 "RANLIB": ":",
                 "NM": "dumpbin -symbols"
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self) or self._is_msvc:
+        if not tools.cross_building(self) or self._is_msvc or self._is_clang_cl:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
@@ -93,7 +100,7 @@ class LibiconvConan(ConanFile):
         if self._use_winbash:
             env_vars["RANLIB"] = ":"
 
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self.settings) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 with tools.environment_append(env_vars):
                     yield
@@ -103,7 +110,7 @@ class LibiconvConan(ConanFile):
             return self._autotools
         host = None
         build = None
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
             build = False
             if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
@@ -148,7 +155,7 @@ class LibiconvConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self._is_msvc and self.options.shared:
+        if (self._is_msvc or self._is_clang_cl) and self.options.shared:
             for import_lib in ["iconv", "charset"]:
                 rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))

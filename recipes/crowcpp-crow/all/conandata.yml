@@ -1,4 +1,10 @@
 sources:
+  "1.0+3":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+3.tar.gz"
+    sha256: "509248e7bd30dad725cfb66c383405a8bdc59d1fe7f8f2b464d459444047855e"
+  "1.0+1":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+1.tar.gz"
+    sha256: "0763342f1d6bfc8a58c99647bd2a5ac9fcb278523a662a20b560e42e5c6c8474"
   "0.3+4":
     url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+4.tar.gz"
     sha256: "539622451c1c9be4329d1c260d4014db14ef399b6bc170c7dd0d72b33cba88b0"

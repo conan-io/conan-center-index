@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(SDL2_image C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 find_package(SDL2 REQUIRED CONFIG)
 
@@ -79,17 +79,17 @@ else()
 endif()
 
 if(TIF)
-    find_package(TIFF REQUIRED CONFIG)
+    find_package(TIFF REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE TIFF::TIFF)
 endif()
 
 if(JPG)
-    find_package(JPEG REQUIRED CONFIG)
+    find_package(JPEG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
 endif()
 
 if(PNG)
-    find_package(PNG REQUIRED CONFIG)
+    find_package(PNG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE PNG::PNG)
 endif()
 

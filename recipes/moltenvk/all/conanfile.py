@@ -52,6 +52,10 @@ class MoltenVKConan(ConanFile):
         cached_dependencies = yaml.safe_load(open(dependencies_filepath))
         return cached_dependencies
 
+    @property
+    def _min_cppstd(self):
+        return 11 if tools.Version(self.version) < "1.1.9" else 17
+
     def export(self):
         self.copy(self._dependencies_filename, src="dependencies", dst="dependencies")
 
@@ -88,7 +92,7 @@ class MoltenVKConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, self._min_cppstd)
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
         if self.settings.compiler != "apple-clang":

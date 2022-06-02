@@ -39,6 +39,7 @@ class AbseilConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        self.copy("abi.h.in")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
@@ -77,7 +78,17 @@ class AbseilConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
+        abi_file = _ABIFile("abi.h")
+        abi_file.replace_in_options_file(os.path.join(self._source_subfolder, "absl", "base", "options.h"))
         cmake.build()
+
+    @property
+    def _module_path(self):
+        return os.path.join("lib", "cmake", "conan_trick")
+
+    @property
+    def _cxx_std_build_module(self):
+        return "cxx_std.cmake"
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -85,13 +96,23 @@ class AbseilConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         cmake_folder = os.path.join(self.package_folder, "lib", "cmake")
-        self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "absl", "abslTargets.cmake"))
+        components = self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "absl", "abslTargets.cmake"))
         tools.rmdir(cmake_folder)
+
+        # Create a build-module that will propagate the required cxx_std to consumers of this recipe's targets
+        # TODO: Revisit with feedback from https://github.com/conan-io/conan/issues/10281
+        os.makedirs(os.path.join(self.package_folder, self._module_path))
+        with open(os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module), 'w', encoding='utf-8') as f:
+            f.write("cmake_minimum_required(VERSION 3.1)\n\n")
+            cxx_std_required = _ABIFile("abi.h").cxx_std()
+            for _, values in components.items():
+                cmake_target = values["cmake_target"]
+                f.write(f"target_compile_features(absl::{cmake_target} INTERFACE cxx_std_{cxx_std_required})\n")
 
     def _create_components_file_from_cmake_target_file(self, absl_target_file_path):
         components = {}
 
-        abs_target_file = open(absl_target_file_path, "r")
+        abs_target_file = open(absl_target_file_path, "r", encoding="utf-8")
         abs_target_content = abs_target_file.read()
         abs_target_file.close()
 
@@ -140,8 +161,10 @@ class AbseilConan(ConanFile):
                             components[potential_lib_name].setdefault("defines", []).append(definition)
 
         # Save components informations in json file
-        with open(self._components_helper_filepath, "w") as json_file:
+        with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
+
+        return components
 
     @property
     def _components_helper_filepath(self):
@@ -163,9 +186,35 @@ class AbseilConan(ConanFile):
             self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
             if self._is_msvc and self.settings.compiler.get_safe("cppstd") == "20":
                 self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
-
+            
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
 
         self.cpp_info.names["cmake_find_package"] = "absl"
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
+
+        cxx_std_build_module = os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module)
+        self.cpp_info.set_property("cmake_build_modules", [cxx_std_build_module, ])
+        self.cpp_info.components["absl_config"].build_modules["cmake_find_package"] = [cxx_std_build_module, ]
+        self.cpp_info.components["absl_config"].build_modules["cmake_find_package_multi"] = [cxx_std_build_module, ]
+
+
+class _ABIFile:
+    abi = {}
+
+    def __init__(self, filepath):
+        abi_h = tools.load(filepath)
+        for line in abi_h.splitlines():
+            if line.startswith("#define"):
+                tokens = line.split()
+                if len(tokens) == 3:
+                    self.abi[tokens[1]] = tokens[2]
+
+    def replace_in_options_file(self, options_filepath):
+        for name, value in self.abi.items():
+            tools.replace_in_file(options_filepath,
+                    "#define ABSL_OPTION_{} 2".format(name),
+                    "#define ABSL_OPTION_{} {}".format(name, value))
+    
+    def cxx_std(self):
+        return 17 if any([v == "1" for k, v in self.abi.items()]) else 11

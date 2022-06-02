@@ -5,8 +5,8 @@ sources:
 patches:
   "2.6.0":
     - patch_file: "patches/local_find_packages.patch"
-      base_path: "source_subfolder"
+      base_path: "src"
     - patch_file: "patches/link_targets.patch"
-      base_path: "source_subfolder"
+      base_path: "src"
     - patch_file: "patches/non_x86_support.patch"
-      base_path: "source_subfolder"
+      base_path: "src"

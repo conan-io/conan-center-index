@@ -1,7 +1,8 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibnopConan(ConanFile):
@@ -10,17 +11,20 @@ class LibnopConan(ConanFile):
                   "deserializing C++ data types without external code " \
                   "generators or runtime support libraries."
     license = "Apache-2.0"
-    topics = ("conan", "libnop", "header-only", "serializer")
+    topics = ("libnop", "header-only", "serializer")
     homepage = "https://github.com/google/libnop"
     url = "https://github.com/conan-io/conan-center-index"
-
-    settings = "compiler"
+    no_copy_source = True
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def package_id(self):
+        self.info.header_only()
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
         compiler = self.settings.compiler
@@ -29,13 +33,9 @@ class LibnopConan(ConanFile):
            (compiler == "Visual Studio" and compiler_version < "15"):
             raise ConanInvalidConfiguration("libnop doesn't support {} {}".format(str(compiler), compiler.version))
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("libnop-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

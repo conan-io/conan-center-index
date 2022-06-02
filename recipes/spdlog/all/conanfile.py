@@ -51,7 +51,9 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.9.0":
+        if tools.Version(self.version) >= "1.10.0":
+            self.requires("fmt/8.1.1")
+        elif tools.Version(self.version) >= "1.9.0":
             self.requires("fmt/8.0.1")
         elif tools.Version(self.version) >= "1.7.0":
             self.requires("fmt/7.1.3")

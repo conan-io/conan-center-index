@@ -1,22 +1,29 @@
-import glob
-import os
-
 from conans import ConanFile, CMake, tools
+import functools
+
+required_conan_version = ">=1.33.0"
+
 
 class Poly2triConan(ConanFile):
     name = "poly2tri"
     description = "Poly2Tri is a sweepline constrained Delaunay Polygon Triangulation Library."
     license = "BSD-3-Clause"
-    topics = ("conan", "poly2tri", "triangulation", "delaunay", "polygon")
+    topics = ("poly2tri", "triangulation", "delaunay", "polygon")
     homepage = "https://github.com/greenm01/poly2tri"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -31,16 +38,14 @@ class Poly2triConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()

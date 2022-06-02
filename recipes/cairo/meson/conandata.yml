@@ -12,3 +12,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/cairo-1.17.4-symbol-lookup-backport.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/cairo-1.17.4-encoding-backport.patch"
+      base_path: "source_subfolder"

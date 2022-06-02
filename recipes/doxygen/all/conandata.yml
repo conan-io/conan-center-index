@@ -1,4 +1,7 @@
 sources:
+  "1.9.4":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
+    sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
   "1.9.2":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.2.src.tar.gz"
     sha256: "060f254bcef48673cc7ccf542736b7455b67c110b30fdaa33512a5b09bbecee5"

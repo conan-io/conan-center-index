@@ -19,9 +19,7 @@ class StrawberryperlConan(ConanFile):
 
     def build(self):
         arch = str(self.settings.arch)
-        url = self.conan_data["sources"][self.version]["url"][arch]
-        sha256 = self.conan_data["sources"][self.version]["sha256"][arch]
-        tools.get(url, sha256=sha256)
+        tools.get(**self.conan_data["sources"][self.version][arch])
 
     def package(self):
         self.copy(pattern="License.rtf*", dst="licenses", src="licenses")

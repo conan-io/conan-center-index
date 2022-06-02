@@ -46,7 +46,7 @@ class OpenEXRConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.cross_building(self):

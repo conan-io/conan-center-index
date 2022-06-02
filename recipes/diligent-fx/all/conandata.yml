@@ -1,4 +1,7 @@
 sources:
+  "2.5.2":
+    url: "https://github.com/DiligentGraphics/DiligentFX/archive/refs/tags/v2.5.2.tar.gz"
+    sha256: "2875e7d1e449c32c3c10a7f563cc5b3ad56b3465374dec2a9ed598411ab3b65f"
   "cci.20211112":
     url: "https://github.com/DiligentGraphics/DiligentFX/archive/d2f70a5107f51800e84b08072ec72dfbc0144529.tar.gz"
     sha256: "0ce506bc1d509551468cc7e109f76fb7beeecf90238e93cc30c129b5ebc9f28d"
@@ -6,9 +9,13 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentFX/archive/3757c8c99141400e0d215e0bb8865eef404a5488.tar.gz"
     sha256: "09f347dc00b968f3ccc383bb3e9af0e9197641f1ba7a5d22652a1cee5552786a"
 patches:
+  "2.5.2":
+    - patch_file: "patches/0001-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
   "cci.20211112":
     - patch_file: "patches/0001-use-conan-dependencies.diff"
       base_path: "source_subfolder"
   "cci.20220219":
     - patch_file: "patches/0001-use-conan-dependencies.diff"
       base_path: "source_subfolder"
+

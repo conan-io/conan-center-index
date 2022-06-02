@@ -71,18 +71,19 @@ class FreeImageConan(ConanFile):
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.2")
         if self.options.with_jpeg2000:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
-        if self.options.with_openexr:
+        if self.options.with_tiff or self.options.with_openexr:
+            # can't upgrade to openexr/3.x.x because plugin tiff requires openexr/2.x.x header files
             self.requires("openexr/2.5.7")
         if self.options.with_raw:
             self.requires("libraw/0.20.2")
@@ -146,7 +147,7 @@ class FreeImageConan(ConanFile):
                 components.append("libpng::libpng")
             if self.options.with_webp:
                 components.append("libwebp::libwebp")
-            if self.options.with_openexr:
+            if self.options.with_openexr or self.options.with_tiff:
                 components.append("openexr::openexr")
             if self.options.with_raw:
                 components.append("libraw::libraw")

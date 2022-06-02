@@ -1,4 +1,6 @@
 versions:
+  "3.1.5":
+    folder: "3.x"
   "3.1.4":
     folder: "3.x"
   "2.5.7":
@@ -13,5 +15,3 @@ versions:
     folder: "2.x"
   "2.4.0":
     folder: "2.x"
-  "2.3.0":
-    folder: "2.3.0"

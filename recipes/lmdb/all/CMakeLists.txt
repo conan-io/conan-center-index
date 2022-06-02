@@ -27,6 +27,12 @@ install(TARGETS lmdb
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+if (LMDB_ENABLE_ROBUST_MUTEX)
+    target_compile_definitions(lmdb PUBLIC MDB_USE_ROBUST=1)
+else (LMDB_ENABLE_ROBUST_MUTEX)
+    target_compile_definitions(lmdb PUBLIC MDB_USE_ROBUST=0)
+endif (LMDB_ENABLE_ROBUST_MUTEX)
+
 # LMDB utilities:
 
 if(NOT WIN32)

@@ -49,7 +49,7 @@ class MinizipConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.bzip2:
             self.requires("bzip2/1.0.8")
 

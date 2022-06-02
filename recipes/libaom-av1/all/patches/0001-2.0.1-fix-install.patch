@@ -1,0 +1,34 @@
+--- a/build/cmake/aom_install.cmake
++++ b/build/cmake/aom_install.cmake
+@@ -27,7 +27,7 @@ endif()
+ # Note: aom.pc generation uses GNUInstallDirs:
+ # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+ macro(setup_aom_install_targets)
+-  if(NOT (MSVC OR XCODE))
++  if(1)
+     include("GNUInstallDirs")
+     set(AOM_PKG_CONFIG_FILE "${AOM_CONFIG_DIR}/aom.pc")
+ 
+@@ -73,7 +73,8 @@ macro(setup_aom_install_targets)
+     endif()
+ 
+     if(BUILD_SHARED_LIBS)
+-      set(AOM_INSTALL_LIBS aom aom_static)
++      set_target_properties(aom_static PROPERTIES OUTPUT_NAME aom_static)
++      set(AOM_INSTALL_LIBS aom)
+     else()
+       set(AOM_INSTALL_LIBS aom)
+     endif()
+@@ -85,8 +86,10 @@ macro(setup_aom_install_targets)
+     install(
+       FILES "${AOM_PKG_CONFIG_FILE}"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-    install(TARGETS ${AOM_INSTALL_LIBS} DESTINATION
+-                    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
++    install(TARGETS ${AOM_INSTALL_LIBS}
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+     if(ENABLE_EXAMPLES)
+       install(TARGETS ${AOM_INSTALL_BINS} DESTINATION

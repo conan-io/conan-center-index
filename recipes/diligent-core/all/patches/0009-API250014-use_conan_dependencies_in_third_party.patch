@@ -71,7 +71,7 @@ index d7eea08a..e457b9b6 100644
 -        endforeach()
 -    endif()
 -
-+    list(APPEND THIRD_PARTY_LIBS spirv-tools::SPIRV-Tools-opt CONAN_PKG::spirv-cross glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL xxhash::xxhash)
++    list(APPEND THIRD_PARTY_LIBS SPIRV-Tools-opt spirv-cross-msl spirv-cross-glsl glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL xxHash::xxhash)
      # Make sure that symbols do not leak out when third-party
      # libs are linked into shared libraries
 -    set_target_properties(${THIRD_PARTY_LIBS} PROPERTIES

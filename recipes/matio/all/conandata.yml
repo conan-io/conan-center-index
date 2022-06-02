@@ -8,6 +8,9 @@ sources:
   "1.5.21":
     url: "https://downloads.sourceforge.net/project/matio/matio/1.5.21/matio-1.5.21.tar.gz"
     sha256: "21809177e55839e7c94dada744ee55c1dea7d757ddaab89605776d50122fb065"
+  "1.5.23":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.23/matio-1.5.23.tar.gz"
+    sha256: "9f91eae661df46ea53c311a1b2dcff72051095b023c612d7cbfc09406c9f4d6e"
 patches:
   "1.5.18":
     - patch_file: "patches/require-cmake-3.10.patch"
@@ -29,6 +32,11 @@ patches:
     - patch_file: "patches/require-cmake-3.10.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/patch-apple-no-undefined.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cmake-install-bundle.patch"
+      base_path: "source_subfolder"
+  "1.5.23":
+    - patch_file: "patches/require-cmake-3.10.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
       base_path: "source_subfolder"

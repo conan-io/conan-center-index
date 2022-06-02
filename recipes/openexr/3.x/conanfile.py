@@ -47,10 +47,10 @@ class OpenEXRConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
         # Note: OpenEXR and Imath are versioned independently.
-        self.requires("imath/3.1.4")
+        self.requires("imath/3.1.5")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

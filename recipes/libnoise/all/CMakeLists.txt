@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(noise)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 set(NOISE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/noise/src)
 

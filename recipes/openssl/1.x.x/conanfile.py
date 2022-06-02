@@ -1,5 +1,5 @@
 from conan.tools.files import rename
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
@@ -8,7 +8,7 @@ import fnmatch
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 @total_ordering
@@ -147,10 +147,6 @@ class OpenSSLConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _is_clangcl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -160,7 +156,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or self._is_msvc
+        return self._is_clangcl or is_msvc(self)
 
     @property
     def _settings_build(self):
@@ -174,16 +170,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-               (self._is_mingw or self._cross_building)
-
-    @property
-    def _cross_building(self):
-        if tools.cross_building(self):
-            if self.settings.os == tools.detected_os():
-                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
-                    return False
-            return True
-        return False
+               (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -239,7 +226,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -440,18 +427,14 @@ class OpenSSLConan(ConanFile):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
         compiler = "Visual Studio" if self.settings.compiler == "msvc" else self.settings.compiler
-        query = "%s-%s-%s" % (self.settings.os, self.settings.arch, compiler)
+        query = f"{self.settings.os}-{self.settings.arch}-{compiler}"
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
-            raise ConanInvalidConfiguration("unsupported configuration: %s %s %s, "
-                                            "please open an issue: "
-                                            "https://github.com/conan-io/conan-center-index/issues. "
-                                            "alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable "
-                                            "into your conan profile "
-                                            "(list of configurations can be found by running './Configure --help')." %
-                                            (self.settings.os,
-                                            self.settings.arch,
-                                            self.settings.compiler))
+            raise ConanInvalidConfiguration(
+                f"Unsupported configuration ({self.settings.os}/{self.settings.arch}/{self.settings.compiler}).\n"
+                f"Please open an issue at {self.url}.\n"
+                f"Alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable into your conan profile."
+            )
         return ancestor
 
     def _tool(self, env_name, apple_name):
@@ -536,6 +519,9 @@ class OpenSSLConan(ConanFile):
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
+        if self._is_clangcl:
+            # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
+            args.append("-D__STDC_NO_ATOMICS__")
         if self._full_version < "1.1.0":
             if self.options.get_safe("no_zlib"):
                 args.append("no-zlib")
@@ -790,9 +776,10 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(makefile, old_str, new_str, strict=self.in_local_cache)
 
     def _replace_runtime_in_file(self, filename):
+        runtime = msvc_runtime_flag(self)
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % msvc_runtime_flag(self), strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % msvc_runtime_flag(self), strict=False)
+            tools.replace_in_file(filename, "/{} ".format(e), "/{} ".format(runtime), strict=False)
+            tools.replace_in_file(filename, "/{}\"".format(e), "/{}\"".format(runtime), strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
@@ -892,7 +879,7 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].requires = ["zlib::zlib"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32"])
+            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["crypto"].system_libs.extend(["dl", "rt"])
             self.cpp_info.components["ssl"].system_libs.append("dl")

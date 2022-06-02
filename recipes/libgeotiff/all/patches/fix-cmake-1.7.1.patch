@@ -1,0 +1,62 @@
+--- a/libgeotiff/CMakeLists.txt
++++ b/libgeotiff/CMakeLists.txt
+@@ -88,7 +88,7 @@ IF(WIN32)
+ ENDIF()
+ 
+ IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+-    SET(COMPILE_FLAGS "-fPIC -Wall -Wno-long-long")
++    SET(COMPILE_FLAGS "-Wall -Wno-long-long")
+     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS} -std=c99")
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILE_FLAGS} -std=c++98")
+     IF(GEOTIFF_BUILD_PEDANTIC)
+@@ -115,15 +115,14 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libxtiff)
+ # TIFF support - required, default=ON
+ SET(WITH_TIFF TRUE CACHE BOOL "Choose if TIFF support should be built")
+ 
+-FIND_PACKAGE(PROJ NO_MODULE QUIET)
+-if (NOT PROJ_FOUND)
++FIND_PACKAGE(proj NO_MODULE QUIET)
++if (0)
+     FIND_PACKAGE(PROJ)
+ endif ()
+ 
+ IF(PROJ_FOUND)
+     INCLUDE_DIRECTORIES(${PROJ_INCLUDE_DIR})
+ ELSE()
+-    MESSAGE(FATAL_ERROR "Failed to detect PROJ >= 6")
+ ENDIF()
+ 
+ # Zlib support - optional, default=OFF
+@@ -164,6 +163,7 @@ IF(WITH_TIFF)
+       FIND_PACKAGE(TIFF REQUIRED)
+     endif ()
+ 
++    if(0)
+     IF(TIFF_FOUND)
+         # Confirm required API is available
+         INCLUDE(CheckFunctionExists)
+@@ -184,6 +184,7 @@ IF(WITH_TIFF)
+         INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
+         ADD_DEFINITIONS(-DHAVE_TIFF=1)
+     ENDIF(TIFF_FOUND)
++    endif()
+ ENDIF(WITH_TIFF)
+ 
+ # Turn off TOWGS84 support
+@@ -275,7 +276,6 @@ INSTALL(FILES ${GEOTIFF_LIB_HEADERS} DESTINATION ${GEOTIFF_INCLUDE_DIR})
+ ###############################################################################
+ # Build libxtiff library
+ 
+-ADD_SUBDIRECTORY(libxtiff)
+ 
+ ###############################################################################
+ # Build libgeotiff library
+@@ -319,7 +319,7 @@ if(UNIX)
+       VERSION ${LINK_VERSION}
+       SOVERSION ${LINK_SOVERSION}
+       CLEAN_DIRECT_OUTPUT 1 )
+-   if (APPLE)
++   if (0) # no custom install_name, we want @rpath
+       set_target_properties(
+         ${GEOTIFF_LIBRARY_TARGET}
+         PROPERTIES

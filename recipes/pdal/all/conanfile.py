@@ -73,20 +73,20 @@ class PdalConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("gdal/3.4.1")
         self.requires("libcurl/7.80.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
-        self.requires("libgeotiff/1.7.0")
+        self.requires("libgeotiff/1.7.1")
         self.requires("nanoflann/1.4.2")
         if self.options.with_xml:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.9.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.5.0")
+            self.requires("libunwind/1.6.2")
 
     @property
     def _required_boost_components(self):

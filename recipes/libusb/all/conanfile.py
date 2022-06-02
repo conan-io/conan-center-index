@@ -1,5 +1,4 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 import re
 
@@ -153,6 +152,6 @@ class LibUSBConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]
-            self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
+            self.cpp_info.frameworks = ["IOKit", "CoreFoundation", "Security"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["advapi32"]

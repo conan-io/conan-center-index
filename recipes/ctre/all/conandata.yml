@@ -32,3 +32,6 @@ sources:
   "3.5":
     url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.5.tar.gz"
     sha256: "94b5cbf90057b252119e9a0ce459e3b488decb98e57163b00a6c7c494cd0761e"
+  "3.6":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.6.tar.gz"
+    sha256: "82633af08edff556f1401e1cf247e44eeef50f0588202731fddab183e9fda6d0"
