@@ -53,10 +53,6 @@ versions:
   #   folder: all
   "0.59.3":
     folder: all
-  "0.60.0":
-    folder: all
-  "0.60.1":
-    folder: all
   "0.60.2":
     folder: all
   "0.61.2":
@@ -64,4 +60,6 @@ versions:
   "0.62.0":
     folder: all
   "0.62.1":
+    folder: all
+  "0.62.2":
     folder: all
