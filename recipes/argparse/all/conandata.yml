@@ -27,4 +27,3 @@ patches:
   "2.1":
     - patch_file: "patches/0001-v2.1-add-missing-include.patch"
       base_path: "source_subfolder"
-
