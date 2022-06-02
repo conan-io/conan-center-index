@@ -11,10 +11,19 @@ class H5ppConan(ConanFile):
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage")
+    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "cpp17")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    short_paths = True
+    options = {
+        "with_eigen": [True, False],
+        "with_spdlog": [True, False],
+    }
+    default_options = {
+        "with_eigen": True,
+        "with_spdlog": True,
+    }
 
     @property
     def _source_subfolder(self):
@@ -29,10 +38,23 @@ class H5ppConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def config_options(self):
+        if tools.Version(self.version) < "1.10.0":
+            # These dependencies are always required before h5pp 1.10.0:
+            #   * h5pp < 1.10.0 includes any version of headers indiscriminately (e.g. system headers),
+            #     and can't tell if the the corresponding library will be linked. This makes the,
+            #     build and /link steps non-deterministic.
+            #   * h5pp >= 1.10.0 fixes the issue with H5PP_USE_<LIB> preprocessor flags, to make sure
+            #     that including the headers is intentional.
+            del self.options.with_eigen
+            del self.options.with_spdlog
+
     def requirements(self):
-        self.requires("eigen/3.4.0")
         self.requires("hdf5/1.12.1")
-        self.requires("spdlog/1.10.0")
+        if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
+            self.requires("eigen/3.4.0")
+        if tools.Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
+            self.requires("spdlog/1.10.0")
 
     def package_id(self):
         self.info.header_only()
@@ -64,13 +86,26 @@ class H5ppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
-        self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
+
+        if tools.Version(self.version) >= "1.10.0":
+            if self.options.with_eigen:
+                self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
+            if self.options.with_spdlog:
+                self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+        else:
+            self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
+            self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
+
         if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
             self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
         if is_msvc(self):
-            self.cpp_info.components["h5pp_flags"].defines = ["NOMINMAX"]
+            self.cpp_info.components["h5pp_flags"].defines.append("NOMINMAX")
             self.cpp_info.components["h5pp_flags"].cxxflags = ["/permissive-"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
