@@ -6,10 +6,9 @@ required_conan_version = ">=1.33.0"
 
 class DiceTemplateLibrary(ConanFile):
     name = "dice-template-library"
-    author = "DICE Group <info@dice-research.org>"
     description = "This template library is a collection of handy template-oriented code that we, the Data Science Group at UPB, found pretty handy."
     homepage = "https://dice-research.org/"
-    url = "https://github.com/dice-group/DiceTemplateLibrary.git"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     topics = ("template", "template library", "compile-time", "switch", "integral tuple")
     settings = "build_type", "compiler", "os", "arch"
