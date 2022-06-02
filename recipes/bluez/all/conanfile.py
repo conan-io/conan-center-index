@@ -77,7 +77,7 @@ class BlueZConan(ConanFile):
     def _config_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = Autotools(self, build_script_folder=self._source_subfolder)
+        self._autotools = Autotools(self)
         self._autotools.configure()
         return self._autotools
 
