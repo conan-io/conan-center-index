@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake
 from conans.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class BeautyConan(ConanFile):
