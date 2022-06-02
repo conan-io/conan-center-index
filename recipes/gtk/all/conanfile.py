@@ -92,7 +92,7 @@ class GtkConan(ConanFile):
         if tools.Version(self.version) >= "4.1.0":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
-        if self.options.with_wayland or self.options.with_x11:
+        if self.settings.os == "Linux" and (self.options.with_wayland or self.options.with_x11):
             if not self.options["pango"].with_xft:
                 raise ConanInvalidConfiguration("gtk requires pango with freetype when built with wayland/x11 support")
 
@@ -160,9 +160,9 @@ class GtkConan(ConanFile):
         defs["datadir"] = os.path.join(self.package_folder, "res", "share")
         defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
         defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
-        
+
         if self._gtk4:
-            enabled_disabled = lambda opt : "enabled" if opt else "disabled" 
+            enabled_disabled = lambda opt : "enabled" if opt else "disabled"
             defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             defs["print-cups"] = enabled_disabled(self.options.with_cups)
@@ -239,15 +239,16 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
-            self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
-            if self.options.with_wayland or self.options.with_x11 or self.options["pango"].with_xft:
-                self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
-            if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
+                if self.options.with_wayland:
+                    self.cpp_info.components["gtk+-3.0"].requires.append("xkbcommon::libxkbcommon")
+            if (self.settings.os == "Linux" and
+                (self.options.with_wayland
+                 or self.options.with_x11)) or self.options["pango"].with_xft:
+                self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
+            self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
             self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
-            if self.options.with_wayland:
-                self.cpp_info.components["gtk+-3.0"].requires.append("xkbcommon::libxkbcommon")
 
             self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
             self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
@@ -266,15 +267,16 @@ class GtkConan(ConanFile):
                 "libepoxy::libepoxy", "graphene::graphene-gobject-1.0",
                 "fribidi::fribidi"
             ])
-            if self.options.with_x11:
-                self.cpp_info.requires.append("xorg::xorg")
+            if self.settings.os == "Linux":
+                if self.options.with_x11:
+                    self.cpp_info.requires.append("xorg::xorg")
+                if self.options.with_wayland:
+                    self.cpp_info.requires.append("xkbcommon::libxkbcommon")
 
-            if self.options.with_wayland:
-                self.cpp_info.requires.append("xkbcommon::libxkbcommon")
-
-            if self.options.with_wayland or self.options.with_x11 or self.options["pango"].with_xft:
+            if (self.settings.os == "Linux" and
+                (self.options.with_wayland
+                 or self.options.with_x11)) or self.options["pango"].with_xft:
                 self.cpp_info.requires.append("pango::pangoft2")
 
             # FIXME: remove once dependency mismatch is solved
             self.cpp_info.requires.extend(["zlib::zlib", "expat::expat"])
-
