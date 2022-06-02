@@ -176,6 +176,8 @@ class GtkConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(
+            self._source_subfolder, "build-aux", "meson", "post-install.py"), "pkg-config", "pkgconf")
         if self._gtk3:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         if "4.2.0" <= tools.Version(self.version) < "4.6.1":
