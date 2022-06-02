@@ -57,7 +57,7 @@ class BeautyConan(ConanFile):
         if self.settings.compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported on apple-clang")
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported on Visual Studio")
 
     def source(self):
