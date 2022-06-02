@@ -1,35 +1,80 @@
-name: run linters
+name: v2 migration linter
 
 on:
   pull_request:
 
-jobs:
-  lint:
-    env:
-      CONAN_YAMLLINT_WERR: 1
-      CONAN_PYLINT_WERR: 1
-    strategy:
-      fail-fast: false
-      matrix:
-        hook: ["yaml_linter", "recipe_linter"]
-    runs-on: ubuntu-latest
+env:
+  PYTHONPATH: ${{github.workspace}}
+  PYVER: "3.8"
+  SCORE_THRESHOLD: "9.0"
 
+jobs:
+  test_linter:
+    name: Test linter changes
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
-      - uses: actions/setup-python@v3
+      - name: Get changed files
+        uses: tj-actions/changed-files@v20
+        id: changed_files
         with:
-          python-version: "3.8"
-
-      - run: "pip3 install conan==1.45.0 yamllint packaging pylint astroid"
-
-      - name: install hook
+          files: |
+            linter/**
+      - uses: actions/setup-python@v3
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+          cache: 'pip'
+      - name: Install requirements
+        if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          conan config install https://github.com/conan-io/hooks.git
-          conan config set hooks.${{ matrix.hook }}
+          pip install -r linter/requirements.txt
+      - name: Execute linter over all recipes in the repository
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: |
+          pylint --rcfile=linter/.pylintrc recipes/*/*/conanfile.py --output-format=json --output=out.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
+      - name: Archive production artifacts
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: linter-output
+          path: |
+            out.json
+      - name: Create report
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: |
+          echo '## Linter summary' >> $GITHUB_STEP_SUMMARY
+          jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' out.json > out2.json
+          jq -r '" * \(.message): \(.length)"' out2.json >> $GITHUB_STEP_SUMMARY
+          echo '> Note.- Check uploaded artifact for a full report.' >> $GITHUB_STEP_SUMMARY
 
-      - name: run lint
-        run:  |
-          echo "::add-matcher::.github/${{ matrix.hook }}.json"
-          python3 .github/runlint.py
+  conanfile_recipe:
+    name: Lint changed conanfile.py
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            **/conanfile.py
+      - uses: actions/setup-python@v3
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+          cache: 'pip'
+      - name: Install dependencies
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: pip install -r linter/requirements.txt
+      - name: Run linter
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::add-matcher::linter/recipe_linter.json"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            pylint --rcfile=linter/.pylintrc --output-format=parseable ${file}
+          done
