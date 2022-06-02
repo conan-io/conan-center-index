@@ -1,0 +1,26 @@
+---
+Language: Cpp
+AlignEscapedNewlines: Left
+AlignConsecutiveAssignments: 'true'
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'true'
+# AlwaysBreakTemplateDeclarations: 'Yes'
+# AlwaysBreakAfterReturnType: 'All'
+BinPackParameters: 'false'
+BinPackArguments: 'true'
+BreakBeforeBraces: Allman
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+ColumnLimit: '100'
+# Cpp11BracedListStyle: 'false'
+IndentWidth: '4'
+MaxEmptyLinesToKeep: '2'
+SortIncludes: 'true'
+SpaceBeforeParens: 'ControlStatements'
+PointerAlignment: 'Left'
+
+...

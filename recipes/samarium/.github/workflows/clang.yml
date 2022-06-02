@@ -1,0 +1,59 @@
+name: Clang
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * *" # run everyday to keep fresh
+
+env:
+  # Path to the CMake build directory.
+  build: "${{ github.workspace }}/build"
+  CONAN_SYSREQUIRES_MODE: "enabled"
+
+jobs:
+  clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install Clang
+        uses: egor-tensin/setup-clang@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: "3.22.x"
+
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Install TBB
+        run: sudo apt-get update && sudo apt-get install libtbb-dev
+
+      - name: Check Tool Versions
+        run: |
+          conan    --version
+          cmake    --version
+          clang++  --version
+
+      - name: Configure Conan
+        run: |
+          conan profile new default --detect
+
+      - name: CMake Configure
+        run: cmake --preset=clang
+
+      - name: CMake Build
+        run: cmake --build --preset=default
+
+      - name: CTest
+        run: ctest --preset=default
