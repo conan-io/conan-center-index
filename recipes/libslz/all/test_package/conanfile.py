@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
 import os
-import re
-import subprocess
 
 
 class TestPackageConan(ConanFile):
