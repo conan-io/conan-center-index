@@ -1,0 +1,7 @@
+{
+    "format": {
+        "tab_size": 4,
+        "line_width": 90,
+        "dangle_parens": true
+    }
+}

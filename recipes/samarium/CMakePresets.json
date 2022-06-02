@@ -1,0 +1,134 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default build",
+            "binaryDir": "${sourceDir}/build/",
+            "installDir": "${sourceDir}/build/install/",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
+            }
+        },
+        {
+            "name": "ninja",
+            "inherits": "default",
+            "generator": "Ninja"
+        },
+        {
+            "name": "gcc",
+            "inherits": "ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "clang",
+            "inherits": "ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
+        {
+            "name": "coverage",
+            "displayName": "Build for Coverage Analysis",
+            "description": "use GCC's coverage feature",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "GENERATE_COVERAGE": "ON"
+            }
+        },
+        {
+            "name": "dev",
+            "description": "Use gcc, Ninja, and skip extra tests",
+            "inherits": "gcc",
+            "cacheVariables": {
+                "USE_UBSAN": "ON",
+                "SAMARIUM_BUILD_EXTRA_TESTS": "OFF",
+                "SAMARIUM_BUILD_EXAMPLES": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "description": "Debug version of dev",
+            "inherits": "dev",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "ubsan",
+            "description": "Use clang, address sanitizer, Ninja, and skip extra tests",
+            "inherits": "clang",
+            "cacheVariables": {
+                "USE_UBSAN": "ON",
+                "SAMARIUM_BUILD_EXTRA_TESTS": "OFF",
+                "SAMARIUM_BUILD_EXAMPLES": "OFF"
+            }
+        },
+        {
+            "name": "iwyu",
+            "description": "Run Include What You Use",
+            "inherits": "clang",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "USE_IWYU": "TRUE"
+            }
+        },
+        {
+            "name": "docs",
+            "description": "Build Documentation",
+            "inherits": "default",
+            "cacheVariables": {
+                "SAMARIUM_BUILD_DOCS": "TRUE"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "configuration": "Release",
+            "jobs": 6
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage",
+            "configuration": "Debug",
+            "targets": "coverage",
+            "cleanFirst": true
+        },
+        {
+            "name": "iwyu",
+            "configurePreset": "iwyu",
+            "configuration": "Debug",
+            "jobs": 1
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "configuration": "Release",
+            "output": { "outputOnFailure": true, "verbosity": "extra" },
+            "execution": { "noTestsAction": "error", "stopOnFailure": true }
+        },
+        {
+            "name": "dev",
+            "inherits": "default"
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage"
+        }
+    ]
+}

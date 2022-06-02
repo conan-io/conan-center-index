@@ -1,0 +1,68 @@
+name: MSVC
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * *" # run everyday to keep fresh
+
+env:
+  # Path to the CMake build directory.
+  build: "${{ github.workspace }}/build"
+  CONAN_SYSREQUIRES_MODE: "enabled"
+
+jobs:
+  windows-test:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Configure Conan
+        run: |
+          conan profile new default --detect
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: CMake Configure
+        run: cmake --preset=default
+
+      - name: CMake Build
+        run: cmake --build --preset=default
+
+      - name: CTest
+        run: ctest --preset=default
+
+  windows-install:
+    runs-on: windows-2022
+    steps:
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Configure Conan
+        run: |
+          conan profile new default --detect
+
+      - name: Git Clone
+        run: git clone https://github.com/strangeQuark1041/samarium.git
+
+      - name: Conan Create
+        run: conan create samarium -b missing
+
+      - name: Run Example
+        run: |
+          mkdir -p example
+          cd example
+          git clone --depth 1 https://github.com/strangeQuark1041/samarium_example.git .
+          cmake --preset=default
+          cmake --build --preset=default
+          .\build\bin\example
