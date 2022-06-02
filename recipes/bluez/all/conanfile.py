@@ -33,19 +33,15 @@ class BlueZConan(ConanFile):
 
     _autotools = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if not self.settings.os == "Linux":
             ConanException(f"Unable to build BlueZ on {self.settings.os}")
  
-     def configure(self):
-         if self.options.shared:
-             del self.options.fPIC
-         del self.settings.compiler.libcxx
-         del self.settings.compiler.cppstd
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("dbus/1.12.20")
@@ -56,7 +52,7 @@ class BlueZConan(ConanFile):
             self.requires("readline/8.1.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
         basic_layout(self)
