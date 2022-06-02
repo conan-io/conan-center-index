@@ -61,7 +61,8 @@ class PocoConan(ConanFile):
         "Util": _PocoComponent("enable_util", True, ["Foundation", "XML", "JSON"], [], True),
         "XML": _PocoComponent("enable_xml", True, ["Foundation"], ["expat::expat"], True),
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
-        "ActiveRecord": _PocoComponent("enable_active_record", True, ["Foundation", "Data"], [], True),
+        "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
+        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", True, ["Foundation", "Data"], [], True),
     }
 
     for comp in _poco_component_tree.values():
@@ -102,7 +103,8 @@ class PocoConan(ConanFile):
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
         if tools.Version(self.version) < "1.11":
-            del self.options.enable_active_record
+            del self.options.enable_activerecord
+            del self.options.enable_activerecord_compiler
 
     def configure(self):
         if self.options.shared:
