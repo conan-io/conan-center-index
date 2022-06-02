@@ -1,4 +1,7 @@
 sources:
+  "cci.20220602":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/58f8158d8f2b00a9c62ec00a7fd6bfa7e92b5e65.tar.gz"
+    sha256: "3d7ef46a9b7c80317a2ea529486b244e91325b62e27f7786c9b48bde50f551be"
   "2.5.2":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "6767a6b4f5750c3801ccdba8f7793ac79fa429c8d4518d79717f68ef9dd0ed2a"
@@ -9,6 +12,16 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API250014.tar.gz"
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
+  "cci.20220602":
+    - patch_file: "patches/0019-253-exclude-tests.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0020-253-dont-install-3d-party-license.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0021-253-fix-glslang-usage.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0022-253-fix-glslang-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0023-253-fix-warning-as-error.patch"
   "2.5.2":
     - patch_file: "patches/0014-252-exclude-tests.patch"
       base_path: "source_subfolder"
