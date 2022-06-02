@@ -1,9 +1,8 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
+import shutil
+from conans import AutoToolsBuildEnvironment, ConanFile, tools, MSBuild
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.40.0"
 
 class CppunitConan(ConanFile):
     name = "cppunit"
@@ -21,8 +20,6 @@ class CppunitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    generators = "pkg_config"
 
     _autotools = None
 
@@ -42,43 +39,13 @@ class CppunitConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.os == "Windows" and self.options.shared:
-            self._autotools.defines.append("CPPUNIT_BUILD_DLL")
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-            self._autotools.cxx_flags.append("-EHsc")
+        self._autotools = AutoToolsBuildEnvironment(self)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -93,26 +60,38 @@ class CppunitConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with self._build_context():
+        if self.settings.compiler == "Visual Studio":
+            project = "cppunit_dll.vcxproj" if self.options.shared else "cppunit.vcxproj"
+            msvc_arch = {
+                'x86': 'x86',
+                'x86_64': 'x64',
+                'armv7': 'ARM',
+                'armv8': 'ARM64'
+            }
+            msbuild = MSBuild(self)
+            msbuild.build(os.path.join(self._source_subfolder, "src", "cppunit", project), use_env=False)
+        else:
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
+        if self.settings.compiler == "Visual Studio":
+            shutil.copytree(src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+            shutil.copytree(src=os.path.join(self._source_subfolder, "include"), dst=os.path.join(self.package_folder, "include"))
+        else:
             autotools = self._configure_autotools()
             autotools.install()
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "cppunit.lib"))
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["cppunit"]
+        libsuffix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            self.cpp_info.libs = ["cppunit_dll" + libsuffix]
+        else:
+            self.cpp_info.libs = ["cppunit" + libsuffix]
         if not self.options.shared:
             stdlib = tools.stdcpp_library(self)
             if stdlib:
