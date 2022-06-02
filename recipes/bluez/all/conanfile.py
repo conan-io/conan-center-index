@@ -22,13 +22,18 @@ class BlueZConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_usb": [True, False],
-        "with_udev": [True, False]
+        "with_udev": [True, False],
+        # FIXME: The current glib recipe in conan center doesn't support cross compiling
+        # this options is the allow the user to use the glib bundled with their toolchain
+        # (or provide it some other way) if they so choose
+        "with_system_glib": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_usb": False,
-        "with_udev": False
+        "with_udev": False,
+        "with_system_glib": False
     }
 
     _autotools = None
@@ -45,7 +50,8 @@ class BlueZConan(ConanFile):
 
     def requirements(self):
         self.requires("dbus/1.12.20")
-        self.requires("glib/2.73.0")
+        if not self.options.with_system_glib:
+            self.requires("glib/2.73.0")
         if self.options.with_udev:
             self.requires("libudev/system")
         if tools.Version(self.version) >= "5.0":
@@ -64,7 +70,6 @@ class BlueZConan(ConanFile):
             "--disable-client",
             "--disable-systemd",
             "--disable-monitor",
-            "--disable-service",
             "--disable-manpages",
             "--disable-datafiles"
         ]
