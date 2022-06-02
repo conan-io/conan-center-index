@@ -94,6 +94,10 @@ class BlueZConan(ConanFile):
         autotools.install()
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "bluetooth")
+        self.cpp_info.set_property("cmake_file_name", "bluez")
+        self.cpp_info.set_property("cmake_target_name", "bluez::bluez")
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "bluez"
         self.cpp_info.names["cmake_find_package_multi"] = "bluez"
         self.cpp_info.names["pkg_config"] = "bluetooth"
