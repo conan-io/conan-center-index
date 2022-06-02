@@ -25,6 +25,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0024-253-dont-install-3d-party-license.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0025-253-fix-warning-as-error-win.patch"
+      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0014-252-exclude-tests.patch"
       base_path: "source_subfolder"
