@@ -22,7 +22,6 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
-        "with_pango": [True, False],
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
@@ -33,7 +32,6 @@ class GtkConan(ConanFile):
         "fPIC": True,
         "with_wayland": False,
         "with_x11": True,
-        "with_pango": True,
         "with_ffmpeg": False,
         "with_gstreamer": False,
         "with_cups": False,
@@ -94,16 +92,15 @@ class GtkConan(ConanFile):
         if tools.Version(self.version) >= "4.1.0":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
+        if self.options.with_wayland or self.options.with_x11:
+            if not self.options["pango"].with_xft:
+                raise ConanInvalidConfiguration("gtk requires pango with freetype when built with wayland/x11 support")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Linux":
-            if self.options.with_wayland or self.options.with_x11:
-                if not self.options.with_pango:
-                    raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
         self.build_requires("meson/0.61.2")
@@ -129,21 +126,17 @@ class GtkConan(ConanFile):
             self.requires("libtiff/4.3.0")
             self.requires("libjpeg/9d")
         if self.settings.os == "Linux":
-            if self._gtk4:
+            if self.options.with_wayland:
+                self.requires("wayland/1.20.0")
                 self.requires("xkbcommon/1.4.0")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
-            if self.options.with_wayland:
-                if self._gtk3:
-                    self.requires("xkbcommon/1.4.0")
-                self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.38.0")
         self.requires("libepoxy/1.5.10")
-        if self.options.with_pango:
-            self.requires("pango/1.50.7")
+        self.requires("pango/1.50.7")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
         if self.options.with_gstreamer:
@@ -205,7 +198,7 @@ class GtkConan(ConanFile):
                     parts = shlex.split(line[idx + len("LINK_ARGS ="):])
                     print("{} {}".format(
                         line[: idx + len("LINK_ARGS =")],
-                        " ".join((f'"{v}"' for v in set(parts))), end=''))
+                        " ".join((f'"{v}"' for v in dict.fromkeys(parts))), end=''))
                 else:
                     print(line, end='')
 
@@ -228,8 +221,7 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
             self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gdk-3.0"].requires = []
-            if self.options.with_pango:
-                self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
+            self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
             self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
             if self.settings.compiler != "Visual Studio":
                 self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
@@ -248,18 +240,41 @@ class GtkConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
             self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
-            if self.options.with_pango:
+            if self.options.with_wayland or self.options.with_x11 or self.options["pango"].with_xft:
                 self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
             self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
+            if self.options.with_wayland:
+                self.cpp_info.components["gtk+-3.0"].requires.append("xkbcommon::libxkbcommon")
 
             self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
             self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
             self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
             self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
+            # FIXME: remove once dependency mismatch is solved
+            self.cpp_info.components["gtk+-3.0"].requires.extend(["zlib::zlib", "expat::expat"])
         elif self._gtk4:
             self.cpp_info.names["pkg_config"] = "gtk4"
             self.cpp_info.libs = ["gtk-4"]
             self.cpp_info.includedirs.append(os.path.join("include", "gtk-4.0"))
+            self.cpp_info.requires.extend([
+                "gdk-pixbuf::gdk-pixbuf", "glib::gobject-2.0", "glib::gmodule-2.0",
+                "cairo::cairo", "cairo:::cairo-gobjec", "pango::pangocairo",
+                "libpng::libpng", "libtiff::libtiff", "libjpeg::libjpeg",
+                "libepoxy::libepoxy", "graphene::graphene-gobject-1.0",
+                "fribidi::fribidi"
+            ])
+            if self.options.with_x11:
+                self.cpp_info.requires.append("xorg::xorg")
+
+            if self.options.with_wayland:
+                self.cpp_info.requires.append("xkbcommon::libxkbcommon")
+
+            if self.options.with_wayland or self.options.with_x11 or self.options["pango"].with_xft:
+                self.cpp_info.requires.append("pango::pangoft2")
+
+            # FIXME: remove once dependency mismatch is solved
+            self.cpp_info.requires.extend(["zlib::zlib", "expat::expat"])
+
