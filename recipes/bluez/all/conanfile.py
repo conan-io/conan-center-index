@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class BlueZConan(ConanFile):
     name = "bluez"
 
-    license = "GPLv2"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bluez.org/"
     description = "Official Linux Bluetooth protocol stack"
