@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -76,13 +75,8 @@ class ZyreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libzyre"
-<<<<<<< Updated upstream
         self.cpp_info.libs = ["zyre"]
         if self.settings.os == "Linux":
-=======
-        self.cpp_info.libs = ["libzyre" if is_msvc(self) else "zyre"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
->>>>>>> Stashed changes
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]
         if not self.options.shared:
             self.cpp_info.defines = ["ZYRE_STATIC"]

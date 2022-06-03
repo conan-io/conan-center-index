@@ -39,13 +39,8 @@ class JsonnetConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            # This is a workround.
-            # If jsonnet is shared, rapidyaml must be built as shared,
-            # or the c4core functions that rapidyaml depends on will not be able to be found.
-            # This seems to be a issue of rapidyaml.
-            # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
-            if tools.Version(self.version) >= "0.18.0":
-                self.options["rapidyaml"].shared = True
+            # if tools.Version(self.version) >= "0.18.0":
+            #     self.options["rapidyaml"].shared = True
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5")
