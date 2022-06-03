@@ -1,10 +1,12 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conans import CMake, tools
+from conan import ConanFile
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+
+required_conan_version = ">=1.45.0"
 
 
 class PCRE2Conan(ConanFile):
@@ -12,7 +14,7 @@ class PCRE2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org/"
     description = "Perl Compatible Regular Expressions"
-    topics = ("regex", "regexp", "PCRE")
+    topics = ("regex", "regexp", "perl")
     license = "BSD-3-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -49,10 +51,6 @@ class PCRE2Conan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -105,7 +103,7 @@ class PCRE2Conan(ConanFile):
         cmake.definitions["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
         cmake.definitions["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
         cmake.definitions["PCRE2_BUILD_TESTS"] = False
-        if self._is_msvc:
+        if is_msvc(self):
             cmake.definitions["PCRE2_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
         cmake.definitions["PCRE2_DEBUG"] = self.settings.build_type == "Debug"
         cmake.definitions["PCRE2_BUILD_PCRE2_8"] = self.options.build_pcre2_8
@@ -191,7 +189,7 @@ class PCRE2Conan(ConanFile):
 
     def _lib_name(self, name):
         libname = name
-        if tools.Version(self.version) >= "10.38" and self._is_msvc and not self.options.shared:
+        if tools.Version(self.version) >= "10.38" and is_msvc(self) and not self.options.shared:
             libname += "-static"
         if self.settings.os == "Windows":
             if self.settings.build_type == "Debug":
