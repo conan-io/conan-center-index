@@ -8,7 +8,7 @@ required_conan_version = ">=1.45.0"
 class LibnfsConan(ConanFile):
     name = "libnfs"
     description = "LIBNFS is a client library for accessing NFS shares over a network."
-    topics = ("async", "NFSv4", "nfs")
+    topics = ("async", "nfsv4", "nfs")
     license = "LGPL 2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sahlberg/libnfs"
