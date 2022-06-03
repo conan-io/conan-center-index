@@ -91,18 +91,18 @@ class DiligentCoreConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("spirv-cross/1.3.204.0")
-        self.requires("spirv-tools/1.3.204.0")
+        self.requires("spirv-cross/1.3.211.0")
+        self.requires("spirv-tools/1.3.211.0")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.204.0")
-        self.requires("vulkan-headers/1.3.204.1")
+            self.requires("glslang/1.3.211.0")
+        self.requires("vulkan-headers/1.3.211.0")
         self.requires("volk/1.3.204")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.1")
+                self.requires("xkbcommon/1.4.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
