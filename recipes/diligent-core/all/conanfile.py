@@ -191,7 +191,9 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
+        archiver_path = os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface")
+        if os.path.isdir(archiver_path):
+            self.cpp_info.includedirs.append(archiver_path)
 
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
