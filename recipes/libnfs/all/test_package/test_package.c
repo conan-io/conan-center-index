@@ -1,4 +1,9 @@
+#ifdef _MSC_VER
+#include <winsock2.h>
+#else
 #include <sys/types.h>
+#endif
+
 #include "nfsc/libnfs.h"
 
 int main() {
