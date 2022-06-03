@@ -216,4 +216,6 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
         if self.settings.os == 'Macos':
-            self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa']
+            self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa', 'AppKit']
+        if self.settings.os == 'Windows':
+            self.cpp_info.system_libs = ["dxgi", "shlwapi"]
