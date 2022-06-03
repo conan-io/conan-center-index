@@ -12,10 +12,10 @@ class AndroidNDKConan(ConanFile):
     description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
-    topics = ("android", "NDK", "toolchain", "compiler")
+    topics = ("android", "ndk", "toolchain", "compiler")
     license = "Apache-2.0"
 
-    settings = "os", "arch"
+    settings = "os", "arch", "build_type", "compiler"
 
     short_paths = True
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
@@ -55,6 +55,8 @@ class AndroidNDKConan(ConanFile):
     def package_id(self):
         if self._is_universal2:
             self.info.settings.arch = "universal:armv8/x86_64"
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
@@ -165,7 +167,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _host(self):
-        return f"{self._platform}-{self.settings.arch}"
+        return f"{self._platform}-{self._arch}"
 
     @property
     def _ndk_root(self):
@@ -240,6 +242,7 @@ class AndroidNDKConan(ConanFile):
 
         self.output.info(f"Creating ANDROID_NDK_HOME environment variable: {self.package_folder}")
         self.env_info.ANDROID_NDK_HOME = self.package_folder
+        self.cpp_info.includedirs = []
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, "settings_target"):
@@ -317,7 +320,7 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-        
+
         # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
@@ -351,7 +354,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     import zipfile
     with zipfile.ZipFile(filename, "r") as z:
         zip_info = z.infolist()
-        
+
         names = [n.replace("\\", "/") for n in z.namelist()]
         common_folder = os.path.commonprefix(names).split("/", 1)[0]
 
