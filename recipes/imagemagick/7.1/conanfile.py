@@ -144,7 +144,7 @@ class ImageMagicConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_zstd:
@@ -152,7 +152,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_lcms:
-            self.requires("lcms/2.12")
+            self.requires("lcms/2.13.1")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
         if self.options.with_heic:
@@ -166,7 +166,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_jxl:
             self.requires("libjxl/0.6.1")
         if self.options.with_openjp2:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_pango:
             self.requires("pango/1.48.5")
         if self.options.with_png:
