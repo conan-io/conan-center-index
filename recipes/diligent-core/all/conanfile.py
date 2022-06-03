@@ -180,7 +180,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "dummy1", "dummy2"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "DiligentCore", "Common"))
 
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
