@@ -173,6 +173,8 @@ class DiligentCoreConan(ConanFile):
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        # MinGw creates many invalid files, called objects.a, remove them here:
+        tools.remove_files_by_mask(self.package_folder, "objects.a")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
