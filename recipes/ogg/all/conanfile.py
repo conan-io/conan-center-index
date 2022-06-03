@@ -16,10 +16,12 @@ class OggConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "testing": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "testing": True,
     }
 
     generators = "cmake"
@@ -58,6 +60,8 @@ class OggConan(ConanFile):
         self._cmake = CMake(self)
         # Generate a relocatable shared lib on Macos
         self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if not self.options.testing:
+            self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
