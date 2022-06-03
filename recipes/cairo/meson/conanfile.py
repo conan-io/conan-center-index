@@ -115,7 +115,7 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.62.1")
         self.build_requires("pkgconf/1.7.4")
 
     def validate(self):
