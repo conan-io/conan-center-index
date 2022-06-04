@@ -83,6 +83,7 @@ class HighwayConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["HWY_ENABLE_EXAMPLES"] = False
         cmake.configure()
         return cmake
 
