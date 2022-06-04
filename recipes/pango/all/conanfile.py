@@ -62,11 +62,11 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.62.1")
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
 
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
@@ -76,9 +76,9 @@ class PangoConan(ConanFile):
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/4.2.0")
-        self.requires("glib/2.72.0")
-        self.requires("fribidi/1.0.10")
+        self.requires("harfbuzz/4.3.0")
+        self.requires("glib/2.73.0")
+        self.requires("fribidi/1.0.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
