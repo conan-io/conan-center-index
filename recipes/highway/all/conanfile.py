@@ -104,5 +104,10 @@ class HighwayConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libhwy"
-        self.cpp_info.libs = ["hwy", "hwy_contrib", "hwy_test"]
+
+        self.cpp_info.libs = ["hwy"]
+        if tools.Version(self.version) >= "0.12.1":
+            self.cpp_info.libs.append("hwy_contrib")
+        if tools.Version(self.version) >= "0.15.0":
+            self.cpp_info.libs.append("hwy_test")
         self.cpp_info.defines.append("HWY_SHARED_DEFINE" if self.options.shared else "HWY_STATIC_DEFINE")
