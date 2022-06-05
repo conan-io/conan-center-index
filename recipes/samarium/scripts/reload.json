@@ -1,5 +1,0 @@
-{
-    "commands": {
-        "all": ["scripts/run.sh"]
-    }
-}
