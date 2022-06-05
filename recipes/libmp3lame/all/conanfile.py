@@ -61,7 +61,7 @@ class LibMP3LameConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not (self._is_msvc and self._is_clang_cl):
+        if not self._is_msvc and not self._is_clang_cl:
             self.build_requires("gnu-config/cci.20201022")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
