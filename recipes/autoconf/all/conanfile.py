@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan.tools.microsoft import unix_path
 import contextlib
 import os
 
@@ -15,6 +16,7 @@ class AutoconfConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
+    win_bash = True
 
     _autotools = None
 
@@ -57,8 +59,8 @@ class AutoconfConan(ConanFile):
         datarootdir = self._datarootdir
         prefix = self.package_folder
         if self.settings.os == "Windows":
-            datarootdir = tools.unix_path(datarootdir, path_flavor=tools.MSYS2)
-            prefix = tools.unix_path(prefix, path_flavor=tools.MSYS2)
+            datarootdir = unix_path(self, datarootdir)
+            prefix = unix_path(self, prefix)
         conf_args = [
             "--datarootdir={}".format(datarootdir),
             "--prefix={}".format(prefix),
@@ -90,6 +92,9 @@ class AutoconfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
     def package_info(self):
+        print(self.conf_info)
+        print(self.conf)
+
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
@@ -97,28 +102,28 @@ class AutoconfConan(ConanFile):
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        ac_macrodir = tools.unix_path(
-            self._autoconf_datarootdir, path_flavor=tools.MSYS2)
+        ac_macrodir = unix_path(self, 
+            self._autoconf_datarootdir)
         self.output.info("Setting AC_MACRODIR to {}".format(ac_macrodir))
         self.env_info.AC_MACRODIR = ac_macrodir
 
-        autoconf = tools.unix_path(os.path.join(
-            self.package_folder, "bin", "autoconf"), path_flavor=tools.MSYS2)
+        autoconf = unix_path(self, os.path.join(
+            self.package_folder, "bin", "autoconf"))
         self.output.info("Setting AUTOCONF to {}".format(autoconf))
         self.env_info.AUTOCONF = autoconf
 
-        autoreconf = tools.unix_path(os.path.join(
-            self.package_folder, "bin", "autoreconf"), path_flavor=tools.MSYS2)
+        autoreconf = unix_path(self, os.path.join(
+            self.package_folder, "bin", "autoreconf"))
         self.output.info("Setting AUTORECONF to {}".format(autoreconf))
         self.env_info.AUTORECONF = autoreconf
 
-        autoheader = tools.unix_path(os.path.join(
-            self.package_folder, "bin", "autoheader"), path_flavor=tools.MSYS2)
+        autoheader = unix_path(self, os.path.join(
+            self.package_folder, "bin", "autoheader"))
         self.output.info("Setting AUTOHEADER to {}".format(autoheader))
         self.env_info.AUTOHEADER = autoheader
 
-        autom4te = tools.unix_path(os.path.join(
-            self.package_folder, "bin", "autom4te"), path_flavor=tools.MSYS2)
+        autom4te = unix_path(self, os.path.join(
+            self.package_folder, "bin", "autom4te"))
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
 
