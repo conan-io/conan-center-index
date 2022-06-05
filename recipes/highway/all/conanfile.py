@@ -35,7 +35,7 @@ class HighwayConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "8",
             "clang": "7",
         }
