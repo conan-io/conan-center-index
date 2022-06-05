@@ -57,6 +57,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_debug": [True, False],
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
+        "with_verbose_strings": [True, False],
         "with_ca_bundle": "ANY",
         "with_ca_path": "ANY",
     }
@@ -100,6 +101,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_debug": True,
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
+        "with_verbose_strings": True,
         "with_ca_bundle": None,
         "with_ca_path": None,
     }
@@ -568,6 +570,7 @@ class LibcurlConan(ConanFile):
             self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
         self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
+        self._cmake.definitions["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
