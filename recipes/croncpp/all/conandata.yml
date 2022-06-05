@@ -1,0 +1,4 @@
+sources:
+    "cci.20220503":
+        url: "https://github.com/mariusbancila/croncpp/archive/5c28f410db1af9507ef8469c9796a7070e5e8e2e.tar.gz"
+        sha256: "cabc480c78ebf12b11bd9fcd705a7ecb1c85ac88a8c9debe8de67f30abd808a8"
