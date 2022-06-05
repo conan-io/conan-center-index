@@ -48,6 +48,8 @@ class HighwayConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "0.16.0":
+            del self.options.shared
 
     def configure(self):
         if self.options.shared:
@@ -110,4 +112,5 @@ class HighwayConan(ConanFile):
             self.cpp_info.libs.append("hwy_contrib")
         if tools.Version(self.version) >= "0.15.0":
             self.cpp_info.libs.append("hwy_test")
-        self.cpp_info.defines.append("HWY_SHARED_DEFINE" if self.options.shared else "HWY_STATIC_DEFINE")
+        if tools.Version(self.version) >= "0.16.0":
+            self.cpp_info.defines.append("HWY_SHARED_DEFINE" if self.options.shared else "HWY_STATIC_DEFINE")
