@@ -1,6 +1,0 @@
-*
-!*/
-!*.cpp
-!*.hpp
-build/*
-.history/*
