@@ -49,6 +49,8 @@ class LibSixelConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
         if is_msvc(self):
             raise ConanInvalidConfiguration("{}/{} does not support Visual Studio".format(self.name, self.version))
 
