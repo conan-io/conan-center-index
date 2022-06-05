@@ -48,11 +48,11 @@ class HighwayConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "0.16.0":
-            del self.options.shared
 
     def configure(self):
-        if self.options.shared:
+        if tools.Version(self.version) < "0.16.0":
+            del self.options.shared
+        elif self.options.shared:
             del self.options.fPIC
 
     def validate(self):
