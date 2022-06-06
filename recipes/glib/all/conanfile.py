@@ -208,7 +208,9 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "glib-2.0")
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
+        self.cpp_info.components["glib-2.0"].names["pkg_config"] = "glib-2.0"
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
         if self.settings.os == "Windows":
