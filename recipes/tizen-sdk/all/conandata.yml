@@ -1,0 +1,14 @@
+sources:
+  "6.2_0.1.4":
+    "Windows":
+      "x86_64":
+        url: "https://download.tizen.org/sdk/tizenstudio/official/binary/cross-aarch64-gcc-6.2_0.1.4_windows-64.zip"
+        sha256: "bf54dc03bac42ed1be7ce72a65123d15466b9dcdc271422d67d10d142cc96cff"
+    "Linux":
+      "x86_64":
+        url: "https://download.tizen.org/sdk/tizenstudio/official/binary/cross-aarch64-gcc-6.2_0.1.4_ubuntu-64.zip"
+        sha256: "b53318b0a5b1715e1c27058d4c687da5588c83a080e51f7686c54860868b11b0"
+    "Macos":
+      "x86_64":
+        url: "https://download.tizen.org/sdk/tizenstudio/official/binary/cross-aarch64-gcc-6.2_0.1.4_macos-64.zip"
+        sha256: "bd16e8db9eb427c33cf4314b2112f71116507cff7cff2588742283f639a55995"
