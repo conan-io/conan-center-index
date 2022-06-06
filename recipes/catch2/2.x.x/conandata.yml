@@ -1,7 +1,4 @@
 sources:
-  "2.9.2":
-    url: "https://github.com/catchorg/Catch2/archive/v2.9.2.tar.gz"
-    sha256: "54BEA6D80A388A80F895CD0E2343FCA72B0D9093A776AF40904AEFCE49C13BDA"
   "2.11.3":
     url: "https://github.com/catchorg/Catch2/archive/v2.11.3.tar.gz"
     sha256: "9a6967138062688f04374698fce4ce65908f907d8c0fe5dfe8dc33126bd46543"
@@ -17,7 +14,3 @@ sources:
   "2.13.9":
     url: "https://github.com/catchorg/Catch2/archive/v2.13.9.tar.gz"
     sha256: "06dbc7620e3b96c2b69d57bf337028bf245a211b3cddb843835bfe258f427a52"
-patches:
-  "2.13.4":
-    - patch_file: "patches/abs-static-cast.patch"
-      base_path: "source_subfolder"

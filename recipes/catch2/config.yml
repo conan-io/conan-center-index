@@ -1,6 +1,4 @@
 versions:
-  "2.9.2":
-    folder: 2.x.x
   "2.11.3":
     folder: 2.x.x
   "2.12.4":
