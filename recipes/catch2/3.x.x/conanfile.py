@@ -61,11 +61,11 @@ class ConanRecipe(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
+                raise ConanInvalidConfiguration("{}/{}: Unsupported compiler: {}-{} "
                                                 "(https://github.com/p-ranav/structopt#compiler-compatibility)."
-                                                .format(self.settings.compiler, self.settings.compiler.version))
+                                                .format(self.name, self.version, self.settings.compiler, self.settings.compiler.version))
         else:
-            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
+            self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
