@@ -176,7 +176,7 @@ class ProtobufConan(ConanFile):
             tools.replace_in_file(
                 protobuf_config_cmake,
                 "add_custom_command(",
-                ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
+                ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${protobuf_LIB_DIRS} ${protobuf_LIB_DIRS_RELEASE} ${protobuf_LIB_DIRS_DEBUG} ${protobuf_LIB_DIRS_RELWITHDEBINFO} ${protobuf_LIB_DIRS_MINSIZEREL})\n"
                  "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
