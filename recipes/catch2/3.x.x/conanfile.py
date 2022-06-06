@@ -8,7 +8,7 @@ required_conan_version = ">=1.43.0"
 class ConanRecipe(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("conan", "catch2", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("catch2", "unit-test", "tdd", "bdd")
     license = "BSL-1.0"
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
@@ -97,12 +97,6 @@ class ConanRecipe(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
-            self.copy(
-                cmake_file,
-                src=os.path.join(self._source_subfolder, "contrib"),
-                dst=os.path.join("lib", "cmake", "Catch2"),
-            )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
