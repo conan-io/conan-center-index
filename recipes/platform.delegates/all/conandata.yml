@@ -2,3 +2,6 @@ sources:
   "0.1.3":
     url: https://github.com/linksplatform/Delegates/archive/refs/tags/0.1.3.zip
     sha256: e30b2e3c8aff6ffaa366b1c66a7af79f6bc828822f428a4427a7a89e14412fec
+  "0.2.0":
+    url: https://github.com/linksplatform/Delegates/releases/download/cpp_0.2.0/Platform.Delegates.zip
+    sha256: 5b4242b188958d60e4b382757d1ad23d78d234396b17a53fbe383697beaf0e37
