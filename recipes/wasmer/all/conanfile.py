@@ -76,5 +76,7 @@ class WasmerConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread", "dl", "m"]
+                if tools.Version(self.version) >= "2.3.0":
+                    self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]
