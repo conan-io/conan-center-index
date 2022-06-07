@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
@@ -25,6 +26,10 @@ class PyBind11Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def validate(self):
+        if tools.is_apple_os(self):
+            raise ConanInvalidConfiguration("OSX support is bugged. Check https://github.com/pybind/pybind11/issues/3081")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
