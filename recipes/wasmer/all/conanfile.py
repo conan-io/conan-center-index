@@ -5,16 +5,14 @@ import shutil
 
 required_conan_version = ">=1.33.0"
 
-
 class WasmerConan(ConanFile):
     name = "wasmer"
-    homepage = "https://github.com/wasmerio/wasmer/"
     license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "The leading WebAssembly Runtime supporting WASI and Emscripten"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/wasmerio/wasmer/"
     topics = ("webassembly", "wasm", "wasi", "emscripten")
     settings = "os", "arch", "compiler"
-
     options = {
         "shared": [True, False],
     }
@@ -52,7 +50,7 @@ class WasmerConan(ConanFile):
         del self.info.settings.compiler.version
         self.info.settings.compiler = self._compiler_alias
 
-    def build(self):
+    def source(self):
         tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias],
                   destination=self.source_folder)
 
