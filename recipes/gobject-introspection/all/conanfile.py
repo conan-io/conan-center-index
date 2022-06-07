@@ -41,7 +41,7 @@ class GobjectIntrospectionConan(ConanFile):
             self.build_requires("meson/0.62.2")
         else:
             # https://gitlab.gnome.org/GNOME/gobject-introspection/-/issues/414
-            self.build_requires("meson/0.58.0")
+            self.build_requires("meson/0.59.3")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
