@@ -333,7 +333,7 @@ class QtConan(ConanFile):
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.9")
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.72.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -343,7 +343,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/4.2.1")
+            self.requires("harfbuzz/4.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -352,7 +352,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.38.1")
+            self.requires("sqlite3/3.38.5")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
@@ -367,7 +367,7 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            self.requires("xkbcommon/1.4.0")
+            self.requires("xkbcommon/1.4.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:

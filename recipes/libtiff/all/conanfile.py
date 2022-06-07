@@ -199,7 +199,7 @@ class LibtiffConan(ConanFile):
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
         if self.options.shared and self.settings.os == "Windows" and not self._is_msvc:
             self.cpp_info.libs = [lib + ".dll" for lib in self.cpp_info.libs]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
