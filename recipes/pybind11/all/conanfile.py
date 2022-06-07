@@ -28,7 +28,7 @@ class PyBind11Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
-        if tools.is_apple_os(self):
+        if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("OSX support is bugged. Check https://github.com/pybind/pybind11/issues/3081")
 
     @functools.lru_cache(1)
