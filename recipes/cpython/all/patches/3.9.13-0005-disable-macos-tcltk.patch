@@ -1,0 +1,15 @@
+diff --git a/setup.py b/setup.py
+index 0bec170..c8d9ac1 100644
+--- a/setup.py
++++ b/setup.py
+@@ -1984,8 +1984,8 @@ class PyBuildExt(build_ext):
+         # configured or passed into the make target.  If so, use these values
+         # to build tkinter and bypass the searches for Tcl and TK in standard
+         # locations.
+-        if self.detect_tkinter_explicitly():
+-            return True
++        #if self.detect_tkinter_explicitly():
++        #    return True
+ 
+         # Rather than complicate the code below, detecting and building
+         # AquaTk is a separate method. Only one Tkinter will be built on

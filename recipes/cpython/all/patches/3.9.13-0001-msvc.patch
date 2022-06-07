@@ -237,8 +237,10 @@
 +    <!--<ClCompile Include="$(zlibDir)\adler32.c" />
      <ClCompile Include="$(zlibDir)\compress.c" />
      <ClCompile Include="$(zlibDir)\crc32.c" />
-     <ClCompile Include="$(zlibDir)\deflate.c" />
+     <ClCompile Include="$(zlibDir)\deflate.c">
 @@ -507,7 +507,7 @@
+     <ClCompile Include="$(zlibDir)\inffast.c" />
+     <ClCompile Include="$(zlibDir)\inflate.c" />
      <ClCompile Include="$(zlibDir)\inftrees.c" />
      <ClCompile Include="$(zlibDir)\trees.c" />
      <ClCompile Include="$(zlibDir)\uncompr.c" />
