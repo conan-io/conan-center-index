@@ -5,3 +5,6 @@ sources:
   "0.2.0":
     url: https://github.com/linksplatform/Delegates/releases/download/cpp_0.2.0/Platform.Delegates.zip
     sha256: 5b4242b188958d60e4b382757d1ad23d78d234396b17a53fbe383697beaf0e37
+  "0.2.7":
+    url: https://github.com/linksplatform/Delegates/releases/download/cpp_0.2.7/Platform.Delegates.zip
+    sha256: 440e628dba541497a4d4075b0fd97e42279c5ed73a4156fbcb06556f09109435
