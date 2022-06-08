@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class OpenGrmConan(ConanFile):
     name = "opengrm"
     description = "The OpenGrm Thrax tools compile grammars expressed as regular expressions and context-dependent rewrite rules into weighted finite-state transducers."
-    topics = ("fst", "wfst", "opengrm", "thrax")
+    topics = ("wfst", "opengrm", "thrax")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengrm.org/twiki/bin/view/GRM/Thrax"
     license = "Apache-2.0"
