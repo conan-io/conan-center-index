@@ -9,11 +9,11 @@ required_conan_version = ">=1.43.0"
 class ConanRecipe(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("conan", "catch2", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("catch2", "header-only", "unit-test", "tdd", "bdd")
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -78,12 +78,7 @@ class ConanRecipe(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
         # Catch2 does skip install if included as subproject:
         # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
         main_cml = os.path.join(self._source_subfolder, "CMakeLists.txt")
