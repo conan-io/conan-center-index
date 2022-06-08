@@ -51,7 +51,7 @@ class RotorConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.69.0")
+        self.requires("boost/1.79.0")
 
 
     def validate(self):
