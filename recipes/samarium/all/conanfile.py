@@ -17,12 +17,21 @@ class SamariumConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     requires = "fmt/8.1.1", "sfml/2.5.1"
 
     @property
     def _min_cppstd(self):
         return "20"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11.0",
+            "Visual Studio": "16.9",
+            "clang": "13",
+            "apple-clang": "13",
+        }
 
     @property
     def _source_subfolder(self):
@@ -43,6 +52,22 @@ class SamariumConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
+
+        # from https://github.com/conan-io/conan-center-index/blob/eb92a57e0ea55c9d23b401797fa7d9544a343a4d/recipes/jfalcou-eve/all/conanfile.py#L38
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn(
+                "{} {} requires C++20. Your compiler is unknown. Assuming it supports C++20.".format(self.name, self.version))
+        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                "{} {} requires C++20, which your compiler does not support.".format(self.name, self.version))
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
