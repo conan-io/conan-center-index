@@ -46,7 +46,7 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("libcurl/7.83.1")
         self.requires("nlohmann_json/3.10.5")
         self.requires("openssl/1.1.1o")
-        self.requires("opentelemetry-proto/0.17.0")
+        self.requires("opentelemetry-proto/0.18.0")
         self.requires("protobuf/3.21.1")
         self.requires("thrift/0.15.0")
         if tools.Version(self.version) >= "1.3.0":
@@ -105,7 +105,7 @@ class OpenTelemetryCppConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
+        protos_path = self.deps_user_info["opentelemetry-proto"].proto_root.replace("\\", "/")
         protos_cmake_path = os.path.join(
             self._source_subfolder,
             "cmake",
