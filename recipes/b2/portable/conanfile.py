@@ -92,6 +92,7 @@ class B2Conan(ConanFile):
         self.copy(pattern="*.jam", dst="bin", src="output")
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.bindirs = ["bin"]
         self.env_info.path = [os.path.join(
             self.package_folder, "bin")]
