@@ -37,9 +37,6 @@ class SamariumConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options['sfml'].audio = False
-        self.options['sfml'].network = False
-
         if self.options.shared:
             del self.options.fPIC
 
