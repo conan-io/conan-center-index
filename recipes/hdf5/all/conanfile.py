@@ -250,6 +250,7 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
             self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_file_targets_rel_path, self._module_file_variables_rel_path]
             self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_file_targets_rel_path, self._module_file_variables_rel_path]
+            self.cpp_info.components[component_name].builddirs = [os.path.join("lib", "cmake")]
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
