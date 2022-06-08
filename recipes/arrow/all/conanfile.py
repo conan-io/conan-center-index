@@ -367,8 +367,8 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_THRIFT"] = self._with_thrift()
         self._cmake.definitions["Thrift_SOURCE"] = "SYSTEM"
-        self._cmake.definitions["THRIFT_VERSION"] = "1.0"  # a recent thrift does not require boost
         if self._with_thrift():
+            self._cmake.definitions["THRIFT_VERSION"] = self.deps_cpp_info["thrift"].version # a recent thrift does not require boost
             self._cmake.definitions["ARROW_THRIFT_USE_SHARED"] = self.options["thrift"].shared
         self._cmake.definitions["ARROW_USE_OPENSSL"] = self._with_openssl()
         if self._with_openssl():
