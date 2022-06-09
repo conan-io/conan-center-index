@@ -1,4 +1,4 @@
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -10,11 +10,11 @@ required_conan_version = ">=1.36.0"
 
 class LibMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "A MySQL client library for C development."
+    license = "GPL-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("mysql", "sql", "connector", "database")
     homepage = "https://dev.mysql.com/downloads/mysql/"
-    license = "GPL-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -36,10 +36,6 @@ class LibMysqlClientCConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _with_zstd(self):
@@ -72,7 +68,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self._with_zstd:
@@ -105,6 +101,11 @@ class LibMysqlClientCConan(ConanFile):
         if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) >= "12.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
+
+        # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
+        # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
+        if self.settings.compiler.get_safe("cppstd") == "20" and tools.Version(self.version) < "8.0.29":
+            raise ConanInvalidConfiguration("{}/{} doesn't support C++20".format(self.name, self.version))
 
     def build_requirements(self):
         if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
@@ -196,7 +197,7 @@ class LibMysqlClientCConan(ConanFile):
             cmake.definitions["WITH_ZSTD"] = "system"
             cmake.definitions["ZSTD_INCLUDE_DIR"] = self.deps_cpp_info["zstd"].include_paths[0]
 
-        if self._is_msvc:
+        if is_msvc(self):
             cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
 
         if self.options.with_ssl:
