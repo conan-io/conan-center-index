@@ -185,6 +185,8 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].libs = ["thrift" + libsuffix]
         if self.settings.os == "Windows":
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
+            if tools.Version(self.version) >= "0.15.0":
+                self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["libthrift"].requires.append("boost::headers")
