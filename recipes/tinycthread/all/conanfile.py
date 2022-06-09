@@ -64,3 +64,5 @@ class TinycthreadConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinycthread"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
