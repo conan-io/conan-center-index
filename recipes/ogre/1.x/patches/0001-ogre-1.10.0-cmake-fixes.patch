@@ -1,0 +1,436 @@
+diff --git a/CMake/CMakeLists.txt b/CMake/CMakeLists.txt
+index 2198fb576..20ac0bdcb 100755
+--- a/CMake/CMakeLists.txt
++++ b/CMake/CMakeLists.txt
+@@ -31,23 +31,23 @@ set(INST_FILES
+   Utils/OgreFindFrameworks.cmake
+ ) 
+ 
+-if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "poco")
+-  set(INST_FILES ${INST_FILES} Packages/FindPOCO.cmake)
+-endif ()
++#if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "poco")
++#  set(INST_FILES ${INST_FILES} Packages/FindPOCO.cmake)
++#endif ()
+ 
+-if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "tbb")
+-  set(INST_FILES ${INST_FILES} Packages/FindTBB.cmake)
+-endif ()
++#if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "tbb")
++#  set(INST_FILES ${INST_FILES} Packages/FindTBB.cmake)
++#endif ()
+ 
+ set(STATIC_INST_FILES
+   Packages/FindCg.cmake
+   Packages/FindDirectX.cmake
+   Packages/FindDirectX11.cmake
+-  Packages/FindFreeImage.cmake
+-  Packages/FindFreetype.cmake
++  #Packages/FindFreeImage.cmake
++  #Packages/FindFreetype.cmake
+   Packages/FindOpenGLES.cmake
+   Packages/FindOpenGLES2.cmake
+-  Packages/FindZZip.cmake
++  #Packages/FindZZip.cmake
+   Packages/FindSoftimage.cmake
+   Packages/FindGLSLOptimizer.cmake
+   Packages/FindHLSL2GLSL.cmake
+diff --git a/CMake/ConfigureBuild.cmake b/CMake/ConfigureBuild.cmake
+index a71ec41cd..3052a9445 100644
+--- a/CMake/ConfigureBuild.cmake
++++ b/CMake/ConfigureBuild.cmake
+@@ -53,8 +53,8 @@ if (OGRE_CONFIG_THREADS)
+ 
+ 	if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "poco")
+ 		set(OGRE_THREAD_PROVIDER 2)
+-		include_directories(${POCO_INCLUDE_DIRS})
+-		set(OGRE_THREAD_LIBRARIES ${POCO_LIBRARIES})
++		include_directories(${Poco_INCLUDE_DIRS})
++		set(OGRE_THREAD_LIBRARIES ${Poco_LIBRARIES})
+ 	endif ()
+ 
+ 	if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "tbb")
+diff --git a/CMake/Dependencies.cmake b/CMake/Dependencies.cmake
+index 0438afa23..959009559 100755
+--- a/CMake/Dependencies.cmake
++++ b/CMake/Dependencies.cmake
+@@ -13,11 +13,11 @@
+ 
+ # OGRE_DEPENDENCIES_DIR can be used to specify a single base
+ # folder where the required dependencies may be found.
+-set(OGRE_DEPENDENCIES_DIR "" CACHE PATH "Path to prebuilt OGRE dependencies")
+-option(OGRE_BUILD_DEPENDENCIES "automaitcally build Ogre Dependencies (freetype, zzip)" TRUE)
++#set(OGRE_DEPENDENCIES_DIR "" CACHE PATH "Path to prebuilt OGRE dependencies")
++#option(OGRE_BUILD_DEPENDENCIES "automaitcally build Ogre Dependencies (freetype, zzip)" TRUE)
+ 
+ include(FindPkgMacros)
+-getenv_path(OGRE_DEPENDENCIES_DIR)
++#getenv_path(OGRE_DEPENDENCIES_DIR)
+ if(OGRE_BUILD_PLATFORM_EMSCRIPTEN)
+   set(OGRE_DEP_SEARCH_PATH
+     ${OGRE_DEPENDENCIES_DIR}
+@@ -37,28 +37,31 @@ elseif(APPLE_IOS)
+     "${OGRE_SOURCE_DIR}/iOSDependencies"
+     "${OGRE_BINARY_DIR}/../iOSDependencies"
+     "${OGRE_SOURCE_DIR}/../iOSDependencies"
++    "${OGRE_BINARY_DIR}"
+   )
+ elseif(OGRE_BUILD_PLATFORM_ANDROID)
+   set(OGRE_DEP_SEARCH_PATH 
+     ${OGRE_DEPENDENCIES_DIR}
+     ${ENV_OGRE_DEPENDENCIES_DIR}
+-    "${OGRE_BINARY_DIR}/AndroidDependencies"
+-    "${OGRE_SOURCE_DIR}/AndroidDependencies"
+-    "${OGRE_BINARY_DIR}/../AndroidDependencies"
+-    "${OGRE_SOURCE_DIR}/../AndroidDependencies"
++    #"${OGRE_BINARY_DIR}/AndroidDependencies"
++    #"${OGRE_SOURCE_DIR}/AndroidDependencies"
++    #"${OGRE_BINARY_DIR}/../AndroidDependencies"
++    #"${OGRE_SOURCE_DIR}/../AndroidDependencies"
++    "${OGRE_BINARY_DIR}"
+   )
+ else()
+   set(OGRE_DEP_SEARCH_PATH 
+     ${OGRE_DEPENDENCIES_DIR}
+     ${ENV_OGRE_DEPENDENCIES_DIR}
+-    "${OGRE_BINARY_DIR}/Dependencies"
+-    "${OGRE_SOURCE_DIR}/Dependencies"
+-    "${OGRE_BINARY_DIR}/../Dependencies"
+-    "${OGRE_SOURCE_DIR}/../Dependencies"
++    #"${OGRE_BINARY_DIR}/Dependencies"
++    #"${OGRE_SOURCE_DIR}/Dependencies"
++    #"${OGRE_BINARY_DIR}/../Dependencies"
++    #"${OGRE_SOURCE_DIR}/../Dependencies"
++    "${OGRE_BINARY_DIR}"
+   )
+ endif()
+ 
+-message(STATUS "Search path: ${OGRE_DEP_SEARCH_PATH}")
++message(STATUS "OGRE Deps Search path: ${OGRE_DEP_SEARCH_PATH}")
+ list(GET OGRE_DEP_SEARCH_PATH 0 OGREDEPS_PATH)
+ 
+ if(CMAKE_CROSSCOMPILING)
+@@ -77,79 +80,89 @@ if(CMAKE_CROSSCOMPILING)
+     endif()
+ endif()
+ 
+-# Set hardcoded path guesses for various platforms
+-if (UNIX AND NOT EMSCRIPTEN)
+-  set(OGRE_DEP_SEARCH_PATH ${OGRE_DEP_SEARCH_PATH} /usr/local)
+-  # Ubuntu 11.10 has an inconvenient path to OpenGL libraries
+-  set(OGRE_DEP_SEARCH_PATH ${OGRE_DEP_SEARCH_PATH} /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
+-endif ()
++##########################################################################################
+ 
+-# give guesses as hints to the find_package calls
+-set(CMAKE_PREFIX_PATH ${OGRE_DEP_SEARCH_PATH} ${CMAKE_PREFIX_PATH})
+-set(CMAKE_FRAMEWORK_PATH ${OGRE_DEP_SEARCH_PATH} ${CMAKE_FRAMEWORK_PATH})
+-
+-if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
+-    set(OGREDEPS_SHARED TRUE)
+-    if(OGRE_STATIC OR MSVC)
+-        # freetype does not like shared build on MSVC and it generally eases distribution there
+-        set(OGREDEPS_SHARED FALSE)
+-    endif()
++### We should and not rely on system paths  
++### and instead rely on conan to resolve the dependecies' path correctly
+ 
+-    if(MSVC OR EMSCRIPTEN) # other platforms ship zlib
+-        message(STATUS "Building zlib")
+-        file(DOWNLOAD
+-            http://zlib.net/zlib-1.2.8.tar.gz
+-            ./zlib-1.2.8.tar.gz)
+-        execute_process(COMMAND cmake -E tar xf zlib-1.2.8.tar.gz)
+-        execute_process(COMMAND cmake
+-            -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
+-            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-            -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
+-            -G ${CMAKE_GENERATOR}
+-            ${CROSS}
+-            .
+-            WORKING_DIRECTORY zlib-1.2.8)
+-        execute_process(COMMAND cmake --build zlib-1.2.8 --target install)
+-    endif()
++# Set hardcoded path guesses for various platforms
++# if (UNIX AND NOT EMSCRIPTEN)
++#   set(OGRE_DEP_SEARCH_PATH ${OGRE_DEP_SEARCH_PATH} /usr/local)
++#   # Ubuntu 11.10 has an inconvenient path to OpenGL libraries
++#   set(OGRE_DEP_SEARCH_PATH ${OGRE_DEP_SEARCH_PATH} /usr/lib/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
++# endif ()
+ 
+-    message(STATUS "Building ZZIPlib")
+-    file(DOWNLOAD
+-        https://github.com/paroj/ZZIPlib/archive/master.tar.gz
+-        ./ZZIPlib-master.tar.gz)
+-    execute_process(COMMAND cmake -E tar xf ZZIPlib-master.tar.gz)
+-    execute_process(COMMAND cmake
+-        -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
+-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-        -DZLIB_ROOT=${OGREDEPS_PATH}
+-        -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
+-        -G ${CMAKE_GENERATOR}
+-        ${CROSS}
+-        .
+-        WORKING_DIRECTORY ZZIPlib-master)
+-    execute_process(COMMAND cmake --build ZZIPlib-master --target install)
+-    
+-    message(STATUS "Building freetype")
+-    file(DOWNLOAD
+-        http://download.savannah.gnu.org/releases/freetype/freetype-2.6.5.tar.gz
+-        ./freetype-2.6.5.tar.gz)
+-    execute_process(COMMAND cmake -E tar xf freetype-2.6.5.tar.gz)
+-    # patch toolchain for iOS
+-    execute_process(COMMAND cmake -E copy
+-        ${CMAKE_SOURCE_DIR}/CMake/toolchain/ios.toolchain.xcode.cmake
+-        freetype-2.6.5/builds/cmake/iOS.cmake)
+-    execute_process(COMMAND cmake
+-        -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
+-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-        -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
+-        -DWITH_BZip2=OFF # tries to use it on iOS otherwise
+-        # workaround for broken iOS toolchain in freetype
+-        -DPROJECT_SOURCE_DIR=${CMAKE_BINARY_DIR}/freetype-2.6.5
+-        ${CROSS}
+-        -G ${CMAKE_GENERATOR}
+-        ..
+-        WORKING_DIRECTORY freetype-2.6.5/objs)
+-    execute_process(COMMAND cmake --build freetype-2.6.5/objs --target install)
+-endif()
++# give guesses as hints to the find_package calls
++# set(CMAKE_PREFIX_PATH ${OGRE_DEP_SEARCH_PATH} ${CMAKE_PREFIX_PATH})
++# set(CMAKE_FRAMEWORK_PATH ${OGRE_DEP_SEARCH_PATH} ${CMAKE_FRAMEWORK_PATH})
++##########################################################################################
++
++
++##########################################################################################
++### conan already provides the built in binaries, no need to install and build them
++# if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
++#     set(OGREDEPS_SHARED TRUE)
++#     if(OGRE_STATIC OR MSVC)
++#         # freetype does not like shared build on MSVC and it generally eases distribution there
++#         set(OGREDEPS_SHARED FALSE)
++#     endif()
++# 
++#     if(MSVC OR EMSCRIPTEN) # other platforms ship zlib
++#         message(STATUS "Building zlib")
++#         file(DOWNLOAD
++#             http://zlib.net/zlib-1.2.8.tar.gz
++#             ./zlib-1.2.8.tar.gz)
++#         execute_process(COMMAND cmake -E tar xf zlib-1.2.8.tar.gz)
++#         execute_process(COMMAND cmake
++#             -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
++#             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
++#             -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
++#             -G ${CMAKE_GENERATOR}
++#             ${CROSS}
++#             .
++#             WORKING_DIRECTORY zlib-1.2.8)
++#         execute_process(COMMAND cmake --build zlib-1.2.8 --target install)
++#     endif()
++# 
++#     message(STATUS "Building ZZIPlib")
++#     file(DOWNLOAD
++#         https://github.com/paroj/ZZIPlib/archive/master.tar.gz
++#         ./ZZIPlib-master.tar.gz)
++#     execute_process(COMMAND cmake -E tar xf ZZIPlib-master.tar.gz)
++#     execute_process(COMMAND cmake
++#         -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
++#         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
++#         -DZLIB_ROOT=${OGREDEPS_PATH}
++#         -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
++#         -G ${CMAKE_GENERATOR}
++#         ${CROSS}
++#         .
++#         WORKING_DIRECTORY ZZIPlib-master)
++#     execute_process(COMMAND cmake --build ZZIPlib-master --target install)
++#     
++#     message(STATUS "Building freetype")
++#     file(DOWNLOAD
++#         http://download.savannah.gnu.org/releases/freetype/freetype-2.6.5.tar.gz
++#         ./freetype-2.6.5.tar.gz)
++#     execute_process(COMMAND cmake -E tar xf freetype-2.6.5.tar.gz)
++#     # patch toolchain for iOS
++#     execute_process(COMMAND cmake -E copy
++#         ${CMAKE_SOURCE_DIR}/CMake/toolchain/ios.toolchain.xcode.cmake
++#         freetype-2.6.5/builds/cmake/iOS.cmake)
++#     execute_process(COMMAND cmake
++#         -DCMAKE_INSTALL_PREFIX=${OGREDEPS_PATH}
++#         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
++#         -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
++#         -DWITH_BZip2=OFF # tries to use it on iOS otherwise
++#         # workaround for broken iOS toolchain in freetype
++#         -DPROJECT_SOURCE_DIR=${CMAKE_BINARY_DIR}/freetype-2.6.5
++#         ${CROSS}
++#         -G ${CMAKE_GENERATOR}
++#         ..
++#         WORKING_DIRECTORY freetype-2.6.5/objs)
++#     execute_process(COMMAND cmake --build freetype-2.6.5/objs --target install)
++# endif()
++##########################################################################################
+ 
+ #######################################################################
+ # Core dependencies
+@@ -161,15 +174,20 @@ macro_log_feature(ZLIB_FOUND "zlib" "Simple data compression library" "http://ww
+ 
+ if (ZLIB_FOUND)
+   # Find zziplib
+-  find_package(ZZip)
+-  macro_log_feature(ZZip_FOUND "zziplib" "Extract data from zip archives" "http://zziplib.sourceforge.net" FALSE "" "")
++  find_package(zziplib)
++##########################################################################################
++# make ${ZZip_<VARIABLE>} cmake variables refer to conan ${zziplib_<VARIABLE>}
++  set(ZZip_FOUND ${zziplib_FOUND})
++  set(ZZip_LIBRARIES ${zziplib_LIBRARIES})
++##########################################################################################
++  macro_log_feature(zziplib_FOUND "zziplib" "Extract data from zip archives" "http://zziplib.sourceforge.net" FALSE "" "")
+ endif ()
+ 
+-# Find FreeImage
+-find_package(FreeImage)
+-macro_log_feature(FreeImage_FOUND "freeimage" "Support for commonly used graphics image formats" "http://freeimage.sourceforge.net" FALSE "" "")
++# Find freeimage
++find_package(freeimage)
++macro_log_feature(freeimage_FOUND "freeimage" "Support for commonly used graphics image formats" "http://freeimage.sourceforge.net" FALSE "" "")
+ 
+-# Find FreeType
++# Find Freetype
+ find_package(Freetype)
+ macro_log_feature(FREETYPE_FOUND "freetype" "Portable font engine" "http://www.freetype.org" FALSE "" "")
+ 
+@@ -279,10 +297,18 @@ if(Boost_FOUND AND Boost_VERSION GREATER 104900)
+     find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
+ endif()
+ 
++#message(FATAL_ERROR "Boost_DATE_TIME_FOUND : ${Boost_DATE_TIME_FOUND}")
+ if(Boost_FOUND AND NOT WIN32)
+   list(REMOVE_DUPLICATES Boost_LIBRARIES)
+ endif()
+ 
++###################################################################################
++## conan recipe for boost doesn't provide the variables Boost_<Component>_FOUND
++## see https://cmake.org/cmake/help/latest/module/FindBoost.html#result-variables
++## and https://github.com/conan-io/conan-center-index/issues/11085
++set(Boost_DATE_TIME_FOUND True)
++set(Boost_THREAD_FOUND True)
++###################################################################################
+ # Optional Boost libs (Boost_${COMPONENT}_FOUND
+ macro_log_feature(Boost_FOUND "boost" "Boost (general)" "http://boost.org" FALSE "" "")
+ if(NOT Boost_DATE_TIME_FOUND)
+@@ -296,9 +322,9 @@ if(Boost_VERSION GREATER 105300 AND NOT Boost_ATOMIC_FOUND)
+ endif()
+ macro_log_feature(Boost_THREAD_FOUND "boost-thread" "Used for threading support" "http://boost.org" FALSE "" "")
+ 
+-# POCO
+-find_package(POCO)
+-macro_log_feature(POCO_FOUND "POCO" "POCO framework" "http://pocoproject.org/" FALSE "" "")
++# poco
++find_package(Poco)
++macro_log_feature(Poco_FOUND "POCO" "POCO framework" "http://pocoproject.org/" FALSE "" "")
+ 
+ # ThreadingBuildingBlocks
+ find_package(TBB)
+@@ -314,7 +340,7 @@ macro_log_feature(HLSL2GLSL_FOUND "HLSL2GLSL" "HLSL2GLSL" "http://hlsl2glslfork.
+ 
+ # OpenEXR
+ find_package(OpenEXR)
+-macro_log_feature(OPENEXR_FOUND "OpenEXR" "Load High dynamic range images" "http://www.openexr.com/" FALSE "" "")
++macro_log_feature(OpenEXR_FOUND "OpenEXR" "Load High dynamic range images" "http://www.openexr.com/" FALSE "" "")
+ 
+ # Python
+ find_package(PythonLibs)
+@@ -368,7 +394,7 @@ MACRO_DISPLAY_FEATURE_LOG()
+ # Add library and include paths from the dependencies
+ include_directories(
+   ${ZLIB_INCLUDE_DIRS}
+-  ${ZZip_INCLUDE_DIRS}
++  ${zziplib_INCLUDE_DIRS}
+   ${FreeImage_INCLUDE_DIRS}
+   ${FREETYPE_INCLUDE_DIRS}
+   ${OPENGL_INCLUDE_DIRS}
+diff --git a/CMake/Packages/FindOGRE.cmake b/CMake/Packages/FindOGRE.cmake
+index f7c1727f9..9336d2f30 100644
+--- a/CMake/Packages/FindOGRE.cmake
++++ b/CMake/Packages/FindOGRE.cmake
+@@ -265,13 +265,13 @@ if (OGRE_STATIC)
+   find_package(Cg QUIET)
+   find_package(DirectX QUIET)
+   find_package(DirectX11 QUIET)
+-  find_package(FreeImage QUIET)
++  find_package(freeimage QUIET)
+   find_package(Freetype QUIET)
+   find_package(OpenGL QUIET)
+   find_package(OpenGLES QUIET)
+   find_package(OpenGLES2 QUIET)
+   find_package(ZLIB QUIET)
+-  find_package(ZZip QUIET)
++  find_package(zziplib QUIET)
+   find_package(SDL2 QUIET)
+   if (UNIX AND NOT APPLE AND NOT ANDROID)
+     find_package(X11 QUIET)
+@@ -281,6 +281,9 @@ if (OGRE_STATIC)
+     endif ()
+   endif ()
+ 
++  set(ZZip_FOUND ${zziplib_FOUND})
++  set(ZZip_LIBRARIES ${zziplib_LIBRARIES})
++
+   set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL2_LIBRARY})
+ 
+   if (APPLE AND NOT APPLE_IOS AND NOT ANDROID)
+@@ -290,7 +293,7 @@ if (OGRE_STATIC)
+   if (NOT ZLIB_FOUND OR NOT ZZip_FOUND)
+     set(OGRE_DEPS_FOUND FALSE)
+   endif ()
+-  if (NOT FreeImage_FOUND AND NOT OGRE_CONFIG_FREEIMAGE)
++  if (NOT freeimage_FOUND AND NOT OGRE_CONFIG_FREEIMAGE)
+     set(OGRE_DEPS_FOUND FALSE)
+   endif ()
+   if (NOT FREETYPE_FOUND)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d3438256a..8c5e9708f 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,7 +57,10 @@ project(OGRE)
+ set(CMAKE_MODULE_PATH
+   "${OGRE_SOURCE_DIR}/CMake"
+   "${OGRE_SOURCE_DIR}/CMake/Utils"
+-  "${OGRE_SOURCE_DIR}/CMake/Packages"
++  ## conan ogre should look for the Find<Pkg-Name>.cmake in the conan binary directory
++  ## and skip looking for its custom defined Find<PKG-Name>.cmake in ${OGRE_SOURCE_DIR}/CMake/Packages
++  #"${OGRE_SOURCE_DIR}/CMake/Packages"
++  "${CMAKE_BINARY_DIR}"
+ )
+ 
+ if(CMAKE_CROSSCOMPILING)
+@@ -71,7 +74,7 @@ include(OgreAddTargets)
+ include(OgreConfigTargets)
+ include(PreprocessorUtils)
+ set(OGRE_TEMPLATES_DIR "${OGRE_SOURCE_DIR}/CMake/Templates")
+-set(OGRE_WORK_DIR ${OGRE_BINARY_DIR})
++set(OGRE_WORK_DIR ${CMAKE_BINARY_DIR})
+ 
+ 
+ #####################################################################
+@@ -363,7 +366,7 @@ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GL "Build OpenGL RenderSystem" TR
+ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES "Build OpenGL ES 1.x RenderSystem" FALSE "OPENGLES_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
+ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES2 "Build OpenGL ES 2.x RenderSystem" FALSE "OPENGLES2_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
+ option(OGRE_BUILD_PLUGIN_BSP "Build BSP SceneManager plugin" TRUE)
+-cmake_dependent_option(OGRE_BUILD_PLUGIN_EXRCODEC "Build EXR Codec plugin" TRUE "OPENEXR_FOUND" FALSE)
++cmake_dependent_option(OGRE_BUILD_PLUGIN_EXRCODEC "Build EXR Codec plugin" TRUE "OpenEXR_FOUND" FALSE)
+ option(OGRE_BUILD_PLUGIN_OCTREE "Build Octree SceneManager plugin" TRUE)
+ option(OGRE_BUILD_PLUGIN_PFX "Build ParticleFX plugin" TRUE)
+ cmake_dependent_option(OGRE_BUILD_PLUGIN_PCZ "Build PCZ SceneManager plugin" TRUE "" FALSE)
+diff --git a/PlugIns/EXRCodec/CMakeLists.txt b/PlugIns/EXRCodec/CMakeLists.txt
+index 20bcf2972..871c99b21 100644
+--- a/PlugIns/EXRCodec/CMakeLists.txt
++++ b/PlugIns/EXRCodec/CMakeLists.txt
+@@ -11,7 +11,8 @@ file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
+ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+ 
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+-include_directories(SYSTEM ${OPENEXR_INCLUDE_DIR}/OpenEXR)
++# include the conan OpenEXR_INCLUDE_DIR instead of system OpenEXR_INCLUDE_DIR
++include_directories(${OpenEXR_INCLUDE_DIR})
+ 
+ ogre_add_library_to_folder(Plugins Plugin_EXRCodec ${OGRE_LIB_TYPE} ${HEADER_FILES} ${SOURCE_FILES})
+ target_link_libraries(Plugin_EXRCodec OgreMain ${Cg_LIBRARIES})
