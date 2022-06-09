@@ -28,7 +28,7 @@ class PyBind11Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) in ["11.0", "12.0"]:
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "11.0":
             raise ConanInvalidConfiguration("OSX support is bugged. Check https://github.com/pybind/pybind11/issues/3081")
 
     @functools.lru_cache(1)
