@@ -102,6 +102,12 @@ class LibMysqlClientCConan(ConanFile):
            tools.Version(self.settings.compiler.version) >= "12.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
 
+        # mysql>=8.0.17 doesn't support shared library on MacOS.
+        # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
+        if tools.Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
+           self.options.shared:
+            raise ConanInvalidConfiguration("{}/{} doesn't support shared library".format( self.name, self.version))
+
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
         if self.settings.compiler.get_safe("cppstd") == "20" and tools.Version(self.version) < "8.0.29":
