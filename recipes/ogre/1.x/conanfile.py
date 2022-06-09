@@ -161,9 +161,9 @@ class OgreCmakeConan(ConanFile):
          OGRE 1.x is very old and will not work with latest gcc, clang and msvc compielrs
          TODO: determine incompatible msvc compilers
         """
-        if self.settings.compiler == "gcc" and self.settings.compiler.version == 11:
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc 11")
-        if self.settings.compiler == "clang" and self.settings.compiler.version == 13:
+        if self.settings.compiler == "clang" and self.Version(self.settings.compiler.version) >= 13:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with clang 13")
 
     @property
@@ -185,15 +185,12 @@ class OgreCmakeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = False
         self._cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        conan.tools.files.rename(
-                self,f"ogre-{self.version}", self._source_subfolder
-            )
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, keep_root=True)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
