@@ -189,6 +189,7 @@ class LibMysqlClientCConan(ConanFile):
         cmake.definitions["WITHOUT_SERVER"] = True
         cmake.definitions["WITH_UNIT_TESTS"] = False
         cmake.definitions["ENABLED_PROFILING"] = False
+        cmake.definitions["MYSQL_MAINTAINER_MODE"] = False
         cmake.definitions["WIX_DIR"] = False
         if self._with_lz4:
             cmake.definitions["WITH_LZ4"] = "system"
