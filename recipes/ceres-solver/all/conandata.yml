@@ -17,7 +17,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/2.0.1-0002-find-glags-conan.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/2.0.0-0003-fix-mingw-build.patch"
+    - patch_file: "patches/2.0.1-0003-fix-mingw-build.patch"
       base_path: "source_subfolder"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
