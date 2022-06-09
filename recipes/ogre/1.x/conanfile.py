@@ -161,7 +161,7 @@ class OgreCmakeConan(ConanFile):
         """
         if self.settings.compiler == "gcc" and self.settings.compiler.version == 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc 11")
-        if self.settings.compiler == "clang" and self.settings.compiler.version == 13:
+        if self.settings.compiler == "clang" and self.Version(self.settings.compiler.version) >= 13:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with clang 13")
 
     @property
