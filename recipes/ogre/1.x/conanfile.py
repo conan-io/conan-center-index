@@ -154,6 +154,7 @@ class OgreCmakeConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("zziplib/0.13.71")
         self.requires("openssl/1.1.1o", override=True)
+        self.requires("xorg/system")
 
 
     def validate(self):
@@ -243,7 +244,7 @@ class OgreCmakeConan(ConanFile):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         components = {
-            "OgreMain":  {"requires" : ["boost::boost", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "zlib::zlib", "zziplib::zziplib", "poco::poco"], 
+            "OgreMain":  {"requires" : ["boost::boost", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
