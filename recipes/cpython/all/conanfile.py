@@ -273,6 +273,11 @@ class CPythonConan(ConanFile):
                     and not self.options.get_safe("win7_support", False):
                 continue
             tools.patch(**patch)
+        if self.settings.compiler == "apple-clang":
+            # https://bugs.python.org/issue45405
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                                  "MULTIARCH=$($CC --print-multiarch 2>/dev/null)",
+                                  "MULTIARCH=")
 
         if self._is_py3 and tools.Version(self._version_number_only) < "3.10":
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
