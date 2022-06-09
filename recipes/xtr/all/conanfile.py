@@ -41,6 +41,8 @@ class XtrConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported compiler={self.settings.compiler}")
         if self.settings.arch not in ("x86_64", ):
             raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
+        if tools.Version(self.version) < "2.0.0" and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
 
         minimal_cpp_standard = 20
         if self.settings.compiler.cppstd:
