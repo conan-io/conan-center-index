@@ -159,7 +159,7 @@ class OgreCmakeConan(ConanFile):
          OGRE 1.x is very old and will not work with latest gcc, clang and msvc compielrs
          TODO: determine incompatible msvc compilers
         """
-        if self.settings.compiler == "gcc" and self.settings.compiler.version == 11:
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc 11")
         if self.settings.compiler == "clang" and self.Version(self.settings.compiler.version) >= 13:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with clang 13")
