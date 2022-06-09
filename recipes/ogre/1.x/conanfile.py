@@ -183,7 +183,7 @@ class OgreCmakeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = False
         self._cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
 
