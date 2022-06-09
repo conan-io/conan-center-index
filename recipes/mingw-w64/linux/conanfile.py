@@ -81,12 +81,9 @@ class MingwConan(ConanFile):
 
         with tools.environment_append(env):
             with_gmp_mpfc_mpc = [
-               "--with-gmp=system",
-               "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
-               "--with-mpfr=system",
-               "--with-mpfr-prefix={}".format(self.deps_cpp_info["mpfr"].rootpath.replace("\\", "/")),
-               "--with-mpc=system",
-               "--with-mpc-prefix={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
+                "--with-gmp={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
+                "--with-mpfr={}".format(self.deps_cpp_info["mpfr"].rootpath.replace("\\", "/")),
+                "--with-mpc={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
             ]
 
             self.output.info("Building binutils ...")
