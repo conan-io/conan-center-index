@@ -153,6 +153,8 @@ class OgreCmakeConan(ConanFile):
         self.requires("tbb/2020.3")
         self.requires("zlib/1.2.12")
         self.requires("zziplib/0.13.71")
+        self.requires("openssl/1.1.1o", override=True)
+
 
     def validate(self):
         """
