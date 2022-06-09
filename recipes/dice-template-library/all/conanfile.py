@@ -17,6 +17,14 @@ class DiceTemplateLibrary(ConanFile):
     no_copy_source = True
 
     @property
+    def _min_cppstd(self):
+        return "20"
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd)
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
