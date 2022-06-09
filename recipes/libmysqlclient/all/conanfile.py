@@ -49,7 +49,7 @@ class LibMysqlClientCConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16" if tools.Version(self.version) > "8.0.17" else "15",
-            "gcc": "5.3",
+            "gcc": "7" if tools.Version(self.version) >= "8.0.27" else "5.3",
             "clang": "6",
         }
 
