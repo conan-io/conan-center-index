@@ -25,7 +25,6 @@ class DiceTemplateLibrary(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "10.2",
-            "Visual Studio": "16.9",
             "clang": "12",
         }
 
@@ -34,6 +33,8 @@ class DiceTemplateLibrary(ConanFile):
             tools.check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang is not supported because a full concept implementation is needed")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("MSVC is not supported because a full concept implementation is needed")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
