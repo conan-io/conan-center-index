@@ -108,8 +108,11 @@ class ICUBase(ConanFile):
         env_build = self._configure_autotools()
         build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
         os.mkdir(build_dir)
+        build_env = env_build.vars
+        if self._is_msvc:
+            build_env.update({'CC': 'cl', 'CXX': 'cl'})
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(env_build.vars):
+            with tools.environment_append(build_env):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
