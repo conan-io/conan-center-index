@@ -268,13 +268,12 @@ class OgreCmakeConan(ConanFile):
         self.cpp_info.names["cmake_paths"] = "OGRE"
 
         for comp, values in self._components.items():
-            self.cpp_info.set_property("cmake_target_name", f"OGRE::{comp}")
             self.cpp_info.components[comp].names["cmake_find_package"] = comp
             self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
             self.cpp_info.components[comp].names["cmake_paths"] = comp
             self.cpp_info.components[comp].libs = values.get("libs")
             self.cpp_info.components[comp].requires = values.get("requires")
-            #import pdb; pdb.set_trace()
+            self.cpp_info.components[comp].set_property("cmake_target_name", f"OGRE::{comp}")
             self.cpp_info.components[comp].includedirs = values.get("include")
             self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
