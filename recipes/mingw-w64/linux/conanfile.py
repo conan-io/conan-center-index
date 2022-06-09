@@ -169,6 +169,7 @@ class MingwConan(ConanFile):
                         # Not 100% sure why, but the following options are required, otherwise
                         # gcc fails to build with posix threads
                     ])
+                autotools_gcc.libs = []
                 autotools_gcc.configure(configure_dir=os.path.join(self.build_folder, "sources", "gcc"),
                                         args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")
