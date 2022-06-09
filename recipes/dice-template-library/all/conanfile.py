@@ -39,5 +39,5 @@ class DiceTemplateLibrary(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "DiceTemplateLibrary"
-        self.cpp_info.names["cmake_find_package_multi"] = "DiceTemplateLibrary"
+        self.cpp_info.names["cmake_find_package"] = "dice-template-library"
+        self.cpp_info.names["cmake_find_package_multi"] = "dice-template-library"
