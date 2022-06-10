@@ -51,7 +51,7 @@ index a71ec41cd..3052a9445 100644
  
  	if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "tbb")
 diff --git a/CMake/Dependencies.cmake b/CMake/Dependencies.cmake
-index 0438afa23..959009559 100755
+index 0438afa23..c046e3a70 100755
 --- a/CMake/Dependencies.cmake
 +++ b/CMake/Dependencies.cmake
 @@ -13,11 +13,11 @@
@@ -338,6 +338,17 @@ index 0438afa23..959009559 100755
  
  # Python
  find_package(PythonLibs)
+@@ -347,8 +373,8 @@ macro_log_feature(Softimage_FOUND "Softimage" "Softimage SDK needed for building
+ # Tests
+ #######################################################################
+ 
+-find_package(CppUnit)
+-macro_log_feature(CppUnit_FOUND "CppUnit" "Library for performing unit tests" "http://cppunit.sourceforge.net" FALSE "" "")
++find_package(cppunit)
++macro_log_feature(cppunit_FOUND "CppUnit" "Library for performing unit tests" "http://cppunit.sourceforge.net" FALSE "" "")
+ 
+ # now see if we have a buildable Dependencies package in
+ # the source tree. If so, include that, and it will take care of
 @@ -368,7 +394,7 @@ MACRO_DISPLAY_FEATURE_LOG()
  # Add library and include paths from the dependencies
  include_directories(
@@ -347,6 +358,15 @@ index 0438afa23..959009559 100755
    ${FreeImage_INCLUDE_DIRS}
    ${FREETYPE_INCLUDE_DIRS}
    ${OPENGL_INCLUDE_DIRS}
+@@ -378,7 +404,7 @@ include_directories(
+   ${Cg_INCLUDE_DIRS}
+   ${X11_INCLUDE_DIR}
+   ${DirectX_INCLUDE_DIRS}
+-  ${CppUnit_INCLUDE_DIRS}
++  ${cppunit_INCLUDE_DIRS}
+   ${GLSL_Optimizer_INCLUDE_DIRS}
+   ${HLSL2GLSL_INCLUDE_DIRS}
+ )
 diff --git a/CMake/Packages/FindOGRE.cmake b/CMake/Packages/FindOGRE.cmake
 index f7c1727f9..9336d2f30 100644
 --- a/CMake/Packages/FindOGRE.cmake
@@ -420,6 +440,32 @@ index d3438256a..8c5e9708f 100755
  option(OGRE_BUILD_PLUGIN_OCTREE "Build Octree SceneManager plugin" TRUE)
  option(OGRE_BUILD_PLUGIN_PFX "Build ParticleFX plugin" TRUE)
  cmake_dependent_option(OGRE_BUILD_PLUGIN_PCZ "Build PCZ SceneManager plugin" TRUE "" FALSE)
+diff --git a/OgreMain/CMakeLists.txt b/OgreMain/CMakeLists.txt
+index 76cb60db4..42bcf83e2 100644
+--- a/OgreMain/CMakeLists.txt
++++ b/OgreMain/CMakeLists.txt
+@@ -16,7 +16,8 @@ PROJECT(OgreMain)
+ include(PrecompiledHeader)
+ 
+ # define header and source files for the library
+-file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/Hash/*.h")
++file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
++
+ list(APPEND HEADER_FILES ${OGRE_BINARY_DIR}/include/OgreBuildSettings.h
+     src/OgreImageResampler.h
+     src/OgrePixelConversions.h
+@@ -424,3 +425,10 @@ install(FILES ${PLATFORM_HEADERS}
+ install(FILES ${THREAD_HEADER_FILES}
+ 	DESTINATION include/OGRE/Threading
+ )
++
++######################################################################################################
++# ogre conan patch:  The MurmurHash3.h file is referenced from include/OGRE/Hash/ directory
++#  but is originally installed in include/OGRE/ directory. Therefore we have to create the Hash dir
++#  and move the file there related discussion: https://forums.ogre3d.org/viewtopic.php?t=92112
++install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/Hash/MurmurHash3.h" DESTINATION include/OGRE/Hash)
++######################################################################################################
+\ No newline at end of file
 diff --git a/PlugIns/EXRCodec/CMakeLists.txt b/PlugIns/EXRCodec/CMakeLists.txt
 index 20bcf2972..871c99b21 100644
 --- a/PlugIns/EXRCodec/CMakeLists.txt
@@ -434,3 +480,59 @@ index 20bcf2972..871c99b21 100644
  
  ogre_add_library_to_folder(Plugins Plugin_EXRCodec ${OGRE_LIB_TYPE} ${HEADER_FILES} ${SOURCE_FILES})
  target_link_libraries(Plugin_EXRCodec OgreMain ${Cg_LIBRARIES})
+diff --git a/Samples/CMakeLists.txt b/Samples/CMakeLists.txt
+index e87bca34a..15a36b682 100644
+--- a/Samples/CMakeLists.txt
++++ b/Samples/CMakeLists.txt
+@@ -194,7 +194,8 @@ if (OGRE_BUILD_COMPONENT_HLMS)
+ endif ()
+ 
+ # Add browser last
+-add_subdirectory(Browser)
++## TODO: fix linking SDL2 library functions
++#add_subdirectory(Browser)
+ 
+ endif ()
+ 
+diff --git a/Tests/CMakeLists.txt b/Tests/CMakeLists.txt
+index d305d6edb..d9bcee4cd 100644
+--- a/Tests/CMakeLists.txt
++++ b/Tests/CMakeLists.txt
+@@ -86,7 +86,7 @@ if (OGRE_BUILD_TESTS)
+   endif (OGRE_STATIC)
+ 
+ 
+-  if (CppUnit_FOUND)
++  if (cppunit_FOUND)
+     # unit tests are go!
+     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/OgreMain/include)
+ 
+@@ -141,7 +141,7 @@ if (OGRE_BUILD_TESTS)
+ 
+     add_executable(Test_Ogre WIN32 ${HEADER_FILES} ${SOURCE_FILES} ${RESOURCE_FILES} )
+     ogre_install_target(Test_Ogre "" FALSE)
+-    target_link_libraries(Test_Ogre ${OGRE_LIBRARIES} ${CppUnit_LIBRARIES})
++    target_link_libraries(Test_Ogre ${OGRE_LIBRARIES} ${cppunit_LIBRARIES})
+ 
+     if(APPLE AND NOT APPLE_IOS)
+       set(OGRE_BUILT_FRAMEWORK "$(PLATFORM_NAME)/$(CONFIGURATION)")
+@@ -282,8 +282,8 @@ if (OGRE_BUILD_TESTS)
+ 		
+ 		file(COPY ${OGRE_SOURCE_DIR}/Tests/Media/CustomCapabilities DESTINATION ${OGRE_BINARY_DIR}/Tests/Media)
+     endif()
+-  else (CppUnit_FOUND)
+-    # Necessary for tests to link when CppUnit is unavailable.
++  else (cppunit_FOUND)
++    # Necessary for tests to link when cppunit is unavailable.
+     if (OGRE_BUILD_COMPONENT_MESHLODGENERATOR)
+       include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Components/MeshLodGenerator/include)
+       ogre_add_component_include_dir(MeshLodGenerator)
+@@ -292,7 +292,7 @@ if (OGRE_BUILD_TESTS)
+       list(APPEND HEADER_FILES Components/MeshLodGenerator/include/MeshLodTests.h)
+       list(APPEND SOURCE_FILES Components/MeshLodGenerator/src/MeshLodTests.cpp)
+     endif ()
+-  endif (CppUnit_FOUND)
++  endif (cppunit_FOUND)
+ 
+   add_subdirectory(VisualTests)
+ endif (OGRE_BUILD_TESTS)
