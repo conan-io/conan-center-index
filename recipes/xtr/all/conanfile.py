@@ -18,20 +18,37 @@ class XtrConan(ConanFile):
         "enable_exceptions": [True, False],
         "enable_lto": [True, False],
         "enable_io_uring": [True, False],
+        "enable_io_uring_sqpoll": [True, False],
+        "sink_capacity_kb": ["default"] + list(map(lambda x : 2**x, range(2, 15))) # 4k to 16MB
     }
     default_options = {
         "fPIC": True,
         "enable_exceptions": True,
         "enable_lto": False,
         "enable_io_uring": True,
+        "enable_io_uring_sqpoll": False,
+        "sink_capacity_kb": "default"
     }
+
     generators = "make"
+
+    def config_options(self):
+        if tools.Version(self.version) < "1.0.1":
+            del self.options.sink_capacity_kb
+        if tools.Version(self.version) < "2.0.0":
+            del self.options.enable_io_uring
+            del self.options.enable_io_uring_sqpoll
+
+    def get_option(self, name):
+        if not name in self.options:
+            return None
+        return getattr(self.options, name)
 
     def requirements(self):
         self.requires("fmt/7.1.3")
         # Require liburing on any Linux system as a run-time check will be
         # done to detect if the host kernel supports io_uring.
-        if tools.Version(self.version) >= "2.0.0" and self.settings.os == "Linux" and self.options.enable_io_uring:
+        if tools.Version(self.version) >= "2.0.0" and self.settings.os == "Linux" and self.get_option("enable_io_uring"):
             self.requires("liburing/2.1")
 
     def validate(self):
@@ -43,6 +60,8 @@ class XtrConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
         if tools.Version(self.version) < "2.0.0" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
+        if self.get_option("enable_io_uring_sqpoll") and not self.get_option("enable_io_uring"):
+            raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
 
         minimal_cpp_standard = 20
         if self.settings.compiler.cppstd:
@@ -76,6 +95,13 @@ class XtrConan(ConanFile):
         env_build_vars["EXCEPTIONS"] = \
             str(int(bool(self.options.enable_exceptions)))
         env_build_vars["LTO"] = str(int(bool(self.options.enable_lto)))
+        if not self.get_option("enable_io_uring"): # io_uring is enabled by default
+            env_build_vars["CXXFLAGS"] += " -DXTR_USE_IO_URING=0"
+        if self.get_option("enable_io_uring_sqpoll"):
+            env_build_vars["CXXFLAGS"] += " -DXTR_IO_URING_POLL=1"
+        capacity = self.get_option("sink_capacity_kb")
+        if capacity != "default":
+            env_build_vars["CXXFLAGS"] += " -DXTR_SINK_CAPACITY={}".format(int(capacity) * 1024)
         autotools.make(vars=env_build_vars)
         autotools.make(vars=env_build_vars, target="xtrctl")
 
