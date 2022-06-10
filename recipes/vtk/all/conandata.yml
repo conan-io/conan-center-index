@@ -11,3 +11,7 @@ patches:
       base_path:  "source_subfolder"
     # - patch_file: "patches/9.1.0-third-party-remove-bundled-cmake-finders.patch"
       # base_path:  "source_subfolder"
+    - patch_file: "patches/9.1.0-fix-cxx20.patch"
+      base_path:  "source_subfolder"
+    - patch_file: "patches/9.1.0-fix-cxx20-3rdparty-diy.patch"
+      base_path:  "source_subfolder"
