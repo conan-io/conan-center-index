@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile, tools
+from conans import CMake, ConanFile, tools, RunEnvironment
 import conan.tools.files
 import os
 import textwrap
@@ -47,8 +47,7 @@ class IgnitionCmakeConan(ConanFile):
 
     def build(self):
         version_major = tools.Version(self.version).major
-        ignition_cmake_dir = os.path.join(self.package_folder, "lib", "cmake", f"ignition-cmake{version_major}", "cmake2")
-        os. environ['IGNITION_CMAKE_DIR'] = f"{ignition_cmake_dir}"
+        env_build = RunEnvironment(self)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
