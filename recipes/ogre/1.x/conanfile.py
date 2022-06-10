@@ -145,6 +145,7 @@ class OgreCmakeConan(ConanFile):
     _cmake = None
 
     def requirements(self):
+        self.requires("cppunit/1.15.1")
         self.requires("freeimage/3.18.0")
         self.requires("boost/1.75.0")
         self.requires("freetype/2.11.1")
@@ -244,7 +245,7 @@ class OgreCmakeConan(ConanFile):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         components = {
-            "OgreMain":  {"requires" : ["boost::boost", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco"], 
+            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},

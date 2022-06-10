@@ -33,7 +33,3 @@ class TestPackageConan(ConanFile):
             
         ogre_main_bin_path = os.path.join("bin", "ogre_main")
         self.run(ogre_main_bin_path, run_environment=True)
-
-        #if self.options["OGRE"].OGRE_BUILD_COMPONENT_BITES:
-        #    bites_bin_path = os.path.join("bin", "bites_exe")
-        #    self.run(bites_bin_path, run_environment=True)
