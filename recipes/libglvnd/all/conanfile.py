@@ -2,13 +2,14 @@ from conans import Meson, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
+import textwrap
 
 required_conan_version = ">=1.45.0"
 
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
     description = "The GL Vendor-Neutral Dispatch library"
-    license = "" # public domain ?!
+    license = "custom"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/glvnd/libglvnde"
     topics = ("gl", "vendor-neutral", "dispatch")
@@ -108,6 +109,31 @@ class LibGlvndConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), textwrap.dedent('''\
+            Copyright (c) 2013, NVIDIA CORPORATION.
+
+            Permission is hereby granted, free of charge, to any person obtaining a
+            copy of this software and/or associated documentation files (the
+            "Materials"), to deal in the Materials without restriction, including
+            without limitation the rights to use, copy, modify, merge, publish,
+            distribute, sublicense, and/or sell copies of the Materials, and to
+            permit persons to whom the Materials are furnished to do so, subject to
+            the following conditions:
+
+            The above copyright notice and this permission notice shall be included
+            unaltered in all copies or substantial portions of the Materials.
+            Any additions, deletions, or changes to the original source files
+            must be clearly indicated in accompanying documentation.
+
+            THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+            IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+            CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+            TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+            MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+            '''))
 
     def package_info(self):
         self.cpp_info.components['gldispatch'].libs = ["GLdispatch"]
