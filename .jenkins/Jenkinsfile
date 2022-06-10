@@ -10,7 +10,7 @@ pipeline {
         BUILD_ALL = "NO"
     }
     stages {
-        stage('build windows') {
+        stage('build') {
             parallel {
                 stage('gcc') {
                     when { 
