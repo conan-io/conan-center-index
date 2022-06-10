@@ -3,17 +3,17 @@ sources:
     posix:
       seh:
         url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-posix-seh-rt_v10-rev3.7z"
-        sha256: "2c943b1a9231ce09f227b0c8fc6cabc61da3581f4ef2f7682f9393f5a1d70ae8"
+        sha256: "6b605b990ed868a2b0fd92cf1df2d1964b06155a40a64afe52ca3bc1a7ffa3c6"
       sjlj:
         url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-posix-sjlj-rt_v10-rev3.7z"
-        sha256: "b943ae149c727d0dc91c4671d4e83585c087dca60b19752c9abd4b6ff7917b74"
+        sha256: "fd744f5f09cd76dc98ae6abce88cd83c044191c2e6f2769936b901bd20171bc9"
     win32:
       seh:
         url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-win32-seh-rt_v10-rev3.7z"
-        sha256: "becaf3c2d036ae1cdfb50b1b807ecc4ae8c70a78f411cf3e1ccc3b7d4f6bb9d8"
+        sha256: "f82c6c881074deb4da4da4197ed7c8a58f0ef8866552519d90a24c8022334300"
       sjlj:
         url: "https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-win32-sjlj-rt_v10-rev3.7z"
-        sha256: "25a2ef169342219717e0fab794170ee58eb62879cd05f3bd8eb466bb9be59ed1"
+        sha256: "2cd98e9fe93b3fcb1613a9dd20c6ca71acc78817bc38de12159db0552c872e82"
   "11.2.0":
     posix:
       seh:
