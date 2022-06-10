@@ -62,7 +62,7 @@ class PocoConan(ConanFile):
         "XML": _PocoComponent("enable_xml", True, ["Foundation"], ["expat::expat"], True),
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
         "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
-        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", True, ["Foundation", "Util"], [], False),
+        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", True, ["Foundation", "Util", "XML"], [], False),
     }
 
     for comp in _poco_component_tree.values():
