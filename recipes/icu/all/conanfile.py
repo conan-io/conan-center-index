@@ -154,6 +154,8 @@ class ICUBase(ConanFile):
         if self._env_build:
             return self._env_build
         self._env_build = AutoToolsBuildEnvironment(self)
+        if self._is_msvc:
+            self._env_build.flags.append("-FS")
         if not self.options.shared:
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
         if tools.is_apple_os(self.settings.os):
