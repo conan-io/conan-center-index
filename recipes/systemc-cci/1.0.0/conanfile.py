@@ -32,6 +32,8 @@ class SystemccciConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Windows shared library build not supported")
         tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
