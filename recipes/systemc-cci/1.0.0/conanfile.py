@@ -47,7 +47,6 @@ class SystemccciConan(ConanFile):
 
         cmake = CMake(self, parallel=True)
         cmake.verbose = True
-        cmake.definitions["SYSTEMC_ROOT"] = self.deps_cpp_info["systemc"].rootpath
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
         cmake.install()

@@ -19,11 +19,13 @@ index 0000000..ae346cc
 +
 +set(POSITION_INDEPENDENT_CODE ON)
 +
-+if(DEFINED ENV{SYSTEMC_HOME})
++if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
++    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
++    set(SYSTEMC_ROOT ${CONAN_SYSTEMC_ROOT})
++elseif(DEFINED ENV{SYSTEMC_HOME})
 +    set(SYSTEMC_ROOT $ENV{SYSTEMC_HOME})
-+else()
-+    message("Using SYSTEMC_ROOT = ${SYSTEMC_ROOT}")
 +endif()
++message("Using SYSTEMC_ROOT = ${SYSTEMC_ROOT}")
 +
 +if(DEFINED ENV{RAPIDJSON_HOME})
 +    set(RAPIDJSON $ENV{RAPIDJSON_HOME})
