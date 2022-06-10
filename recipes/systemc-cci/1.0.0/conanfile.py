@@ -48,7 +48,6 @@ class SystemccciConan(ConanFile):
             tools.patch(**patch)
 
         cmake = CMake(self, parallel=True)
-        cmake.verbose = True
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
         cmake.install()
