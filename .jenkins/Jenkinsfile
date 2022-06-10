@@ -15,7 +15,6 @@ pipeline {
                 stage('gcc') {
                     when { 
                         anyOf {
-                            branch 'master'
                             changeset '.jenkins/**'
                             changeset 'recipes/**'
                             changeset 'builder/**'
@@ -44,7 +43,6 @@ pipeline {
                 stage('win64-vc142-debug') {
                     when { 
                         anyOf {
-                            branch 'master'
                             changeset '.jenkins/**'
                             changeset 'recipes/**'
                             changeset 'builder/**'
@@ -70,7 +68,6 @@ pipeline {
                 stage('win64-vc142-release') {
                     when { 
                         anyOf {
-                            branch 'master'
                             changeset '.jenkins/**'
                             changeset 'recipes/**'
                             changeset 'builder/**'
@@ -96,7 +93,6 @@ pipeline {
                 stage('win32-vc142-debug') {
                     when { 
                         anyOf {
-                            branch 'master'
                             changeset '.jenkins/**'
                             changeset 'recipes/**'
                             changeset 'builder/**'
@@ -122,7 +118,6 @@ pipeline {
                 stage('win32-vc142-release') {
                     when { 
                         anyOf {
-                            branch 'master'
                             changeset '.jenkins/**'
                             changeset 'recipes/**'
                             changeset 'builder/**'
