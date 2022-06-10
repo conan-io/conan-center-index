@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -26,7 +27,6 @@ class LibaomAv1Conan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -82,27 +82,27 @@ class LibaomAv1Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder)
+                  destination=self._source_subfolder,
+                  strip_root=tools.Version(self.version) >= "3.3.0")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_EXAMPLES"] = False
-        self._cmake.definitions["ENABLE_TESTS"] = False
-        self._cmake.definitions["ENABLE_DOCS"] = False
-        self._cmake.definitions["ENABLE_TOOLS"] = False
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_EXAMPLES"] = False
+        cmake.definitions["ENABLE_TESTS"] = False
+        cmake.definitions["ENABLE_DOCS"] = False
+        cmake.definitions["ENABLE_TOOLS"] = False
         if not self.options.get_safe("assembly", False):
             # make non-assembly build
-            self._cmake.definitions["AOM_TARGET_CPU"] = "generic"
+            cmake.definitions["AOM_TARGET_CPU"] = "generic"
         # libyuv is used for examples, tests and non-essential 'dump_obu' tool so it is disabled
         # required to be 1/0 instead of False
-        self._cmake.definitions["CONFIG_LIBYUV"] = 0
+        cmake.definitions["CONFIG_LIBYUV"] = 0
         # webm is not yet packaged
-        self._cmake.definitions["CONFIG_WEBM_IO"] = 0
+        cmake.definitions["CONFIG_WEBM_IO"] = 0
         # required out-of-source build
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -115,8 +115,6 @@ class LibaomAv1Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aom")

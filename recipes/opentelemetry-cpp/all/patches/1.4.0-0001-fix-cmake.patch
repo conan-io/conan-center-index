@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6d2b274..4611a6b 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -208,7 +208,6 @@ if(WITH_JAEGER)
+   find_package(Thrift QUIET)
+   if(Thrift_FOUND)
+     find_package(Boost REQUIRED)
+-    include_directories(${Boost_INCLUDE_DIR})
+   else()
+     # Install Thrift and propagate via vcpkg toolchain file
+     if(WIN32 AND (NOT DEFINED CMAKE_TOOLCHAIN_FILE))

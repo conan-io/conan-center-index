@@ -27,6 +27,8 @@ class AtkConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    exports_sources = "patches/**"
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -36,7 +38,7 @@ class AtkConan(ConanFile):
         self.build_requires('pkgconf/1.7.4')
 
     def requirements(self):
-        self.requires('glib/2.70.1')
+        self.requires('glib/2.73.0')
 
     def configure(self):
         if self.options.shared:
@@ -60,7 +62,12 @@ class AtkConan(ConanFile):
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
         return meson
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
             "subdir('tests')",
             "#subdir('tests')")

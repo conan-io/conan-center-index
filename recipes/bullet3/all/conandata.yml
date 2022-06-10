@@ -1,4 +1,7 @@
 sources:
+  "3.24":
+    url: "https://github.com/bulletphysics/bullet3/archive/refs/tags/3.24.tar.gz"
+    sha256: "6b1e987d6f8156fa8a6468652f4eaad17b3e11252c9870359e5bca693e35780b"
   "3.22a":
     url: "https://github.com/bulletphysics/bullet3/archive/refs/tags/3.22a.tar.gz"
     sha256: "c40a0e832751c1590474cf21679972d2938e0705a45c29fed846ddb523d82b03"

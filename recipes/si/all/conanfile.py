@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 
 import os
 
+required_conan_version = ">=1.43.0"
 
 class SiConan(ConanFile):
     name = "si"
@@ -35,7 +36,7 @@ class SiConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
 
@@ -53,13 +54,8 @@ class SiConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "SI-{}".format(self.version)
-        tools.rename(extracted_folder, self._source_subfolder)
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "SI"
-        self.cpp_info.names["cmake_find_package_multi"] = "SI"
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -70,3 +66,9 @@ class SiConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_target_name", "SI::SI")
+
+        self.cpp_info.names["cmake_find_package"] = "SI"
+        self.cpp_info.names["cmake_find_package_multi"] = "SI"

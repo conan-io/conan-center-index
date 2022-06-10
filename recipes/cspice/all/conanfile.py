@@ -48,7 +48,7 @@ class CspiceConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
+        sources_url_per_triplet = self.conan_data["sources"][self.version]
         the_os = self._get_os_or_subsystem()
         if the_os not in sources_url_per_triplet:
             raise ConanInvalidConfiguration(
@@ -86,16 +86,16 @@ class CspiceConan(ConanFile):
         the_os = self._get_os_or_subsystem()
         compiler = str(self.settings.compiler)
         arch = str(self.settings.arch)
-        url = self.conan_data["sources"][self.version]["url"][the_os][compiler][arch]
-        sha256 = self.conan_data["sources"][self.version]["sha256"][the_os][compiler][arch]
+        data = self.conan_data["sources"][self.version][the_os][compiler][arch]
+        url = data["url"]
         if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
             filename = os.path.basename(url)
-            tools.download(url, filename, sha256=sha256)
+            tools.download(url, filename, sha256=data["sha256"])
             command = "zcat {} | tar -xf -".format(filename)
             self.run(command=command)
             os.remove(filename)
         else:
-            tools.get(url, sha256=sha256)
+            tools.get(**data)
         tools.rename(self.name, self._source_subfolder)
 
     def _configure_cmake(self):

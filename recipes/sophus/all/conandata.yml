@@ -1,4 +1,7 @@
 sources:
+  "22.04.1":
+    url: "https://github.com/strasdat/Sophus/archive/refs/tags/v22.04.1.tar.gz"
+    sha256: "635dc536e7768c91e89d537608226b344eef901b51fbc51c9f220c95feaa0b54"
   "1.0.0":
     url: "https://github.com/strasdat/Sophus/archive/v1.0.0.tar.gz"
     sha256: "b4c8808344fe429ec026eca7eb921cef27fe9ff8326a48b72c53c4bf0804ad53"

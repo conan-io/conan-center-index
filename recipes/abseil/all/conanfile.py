@@ -194,9 +194,9 @@ class AbseilConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
 
         cxx_std_build_module = os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module)
-        self.cpp_info.set_property("cmake_build_modules", cxx_std_build_module)
-        self.cpp_info.components["absl_config"].build_modules["cmake_find_package"] = [cxx_std_build_module]
-        self.cpp_info.components["absl_config"].build_modules["cmake_find_package_multi"] = [cxx_std_build_module]
+        self.cpp_info.set_property("cmake_build_modules", [cxx_std_build_module, ])
+        self.cpp_info.components["absl_config"].build_modules["cmake_find_package"] = [cxx_std_build_module, ]
+        self.cpp_info.components["absl_config"].build_modules["cmake_find_package_multi"] = [cxx_std_build_module, ]
 
 
 class _ABIFile:
