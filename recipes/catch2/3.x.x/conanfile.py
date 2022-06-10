@@ -97,6 +97,12 @@ class ConanRecipe(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
+            self.copy(
+                cmake_file,
+                src=os.path.join(self._source_subfolder, "extras"),
+                dst=os.path.join("lib", "cmake", "Catch2"),
+            )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
