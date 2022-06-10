@@ -728,7 +728,9 @@ class VtkConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
+
+        # Dont set this, the hook is wrong... already set the build_modules...
+        # self.cpp_info.builddirs = [os.path.join("lib", "cmake", "vtk")]
 
         # Should not be added to the VTK::VTK target... right?
         # self.cpp_info.libdirs   = ["lib"]
