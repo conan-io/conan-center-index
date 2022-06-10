@@ -95,12 +95,12 @@ class XtrConan(ConanFile):
         env_build_vars["EXCEPTIONS"] = \
             str(int(bool(self.options.enable_exceptions)))
         env_build_vars["LTO"] = str(int(bool(self.options.enable_lto)))
-        if not self.get_option("enable_io_uring"): # io_uring is enabled by default
+        if self.get_option("enable_io_uring") == False: # io_uring is enabled by default
             env_build_vars["CXXFLAGS"] += " -DXTR_USE_IO_URING=0"
-        if self.get_option("enable_io_uring_sqpoll"):
+        if self.get_option("enable_io_uring_sqpoll") == True:
             env_build_vars["CXXFLAGS"] += " -DXTR_IO_URING_POLL=1"
         capacity = self.get_option("sink_capacity_kb")
-        if capacity != "default":
+        if capacity != "default" and capacity != None:
             env_build_vars["CXXFLAGS"] += " -DXTR_SINK_CAPACITY={}".format(int(capacity) * 1024)
         autotools.make(vars=env_build_vars)
         autotools.make(vars=env_build_vars, target="xtrctl")
