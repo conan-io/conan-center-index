@@ -79,14 +79,14 @@ class CairoConan(ConanFile):
             del self.options.with_symbol_lookup
         if self.settings.os in ["Macos", "Windows"]:
             del self.options.with_opengl
-        if self.options.with_glib and self.options.shared:
-            self.options["glib"].shared = True
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.with_glib and self.options.shared:
+            self.options["glib"].shared = True
 
     def requirements(self):
         self.requires("pixman/0.40.0")
