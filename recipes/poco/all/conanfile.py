@@ -62,7 +62,7 @@ class PocoConan(ConanFile):
         "XML": _PocoComponent("enable_xml", True, ["Foundation"], ["expat::expat"], True),
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
         "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
-        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", True, ["Foundation", "Data"], [], True),
+        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", True, ["Foundation", "Util"], [], False),
     }
 
     for comp in _poco_component_tree.values():
@@ -128,7 +128,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql"):
