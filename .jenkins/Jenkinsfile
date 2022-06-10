@@ -10,9 +10,18 @@ pipeline {
         BUILD_ALL = "NO"
     }
     stages {
-        stage('build windows') {
+        stage('build') {
             parallel {
                 stage('gcc') {
+                    when { 
+                        anyOf {
+                            changeset '.jenkins/**'
+                            changeset 'recipes/**'
+                            changeset 'builder/**'
+                            changeset "trassir/lnvr-gcc8/conanfile.txt"
+                            changeset "trassir/lnvr-gcc8/conanprofile.release"
+                        }
+                    }
                     agent {
                         docker { image 'trassiross/conan-gcc8'
                                  args '-u root'
@@ -30,13 +39,15 @@ pipeline {
                         sh("python3 sources/builder/build.py")
                     }
                 }
+                // delete this copy paste after closing T22531
                 stage('win64-vc142-debug') {
                     when { 
                         anyOf {
-                            changeset '.jenkins*'
+                            changeset '.jenkins/**'
+                            changeset 'recipes/**'
+                            changeset 'builder/**'
                             changeset "trassir/win64-vc142/conanfile.txt"
                             changeset "trassir/win64-vc142/conanprofile.debug"
-                            environment name: 'BUILD_ALL', value: 'YES'
                         }
                     }
                     agent { label 'conan-builder' } 
@@ -57,10 +68,11 @@ pipeline {
                 stage('win64-vc142-release') {
                     when { 
                         anyOf {
-                            changeset '.jenkins*'
+                            changeset '.jenkins/**'
+                            changeset 'recipes/**'
+                            changeset 'builder/**'
                             changeset "trassir/win64-vc142/conanfile.txt"
                             changeset "trassir/win64-vc142/conanprofile.release"
-                            environment name: 'BUILD_ALL', value: 'YES'
                         }
                     }
                     agent { label 'conan-builder' } 
@@ -81,10 +93,11 @@ pipeline {
                 stage('win32-vc142-debug') {
                     when { 
                         anyOf {
-                            changeset '.jenkins*'
+                            changeset '.jenkins/**'
+                            changeset 'recipes/**'
+                            changeset 'builder/**'
                             changeset "trassir/win64-vc142/conanfile.txt"
                             changeset "trassir/win64-vc142/conanprofile.debug"
-                            environment name: 'BUILD_ALL', value: 'YES'
                         }
                     }
                     agent { label 'conan-builder' } 
@@ -105,10 +118,11 @@ pipeline {
                 stage('win32-vc142-release') {
                     when { 
                         anyOf {
-                            changeset '.jenkins*'
+                            changeset '.jenkins/**'
+                            changeset 'recipes/**'
+                            changeset 'builder/**'
                             changeset "trassir/win32-vc142/conanfile.txt"
                             changeset "trassir/win32-vc142/conanprofile.release"
-                            environment name: 'BUILD_ALL', value: 'YES'
                         }
                     }
                     agent { label 'conan-builder' } 
