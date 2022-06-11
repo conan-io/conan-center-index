@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+import os
 import functools
 
 required_conan_version = ">=1.43.0"
@@ -66,6 +67,8 @@ class MpppConan(ConanFile):
             raise ConanInvalidConfiguration("{}/{} doesn't supported arb (yet)".format(self.name, self.version))
         if self.options.with_quadmath:
             raise ConanInvalidConfiguration("{}/{} doesn't supported libquadmath (yet)".format(self.name, self.version))
+        if self.options.with_boost and self.options["boost"].without_serialization:
+            raise ConanInvalidConfiguration("{}:with_boost=True requires boost::without_serialization=False".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -93,9 +96,10 @@ class MpppConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["mp++"]
