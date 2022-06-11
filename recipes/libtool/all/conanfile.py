@@ -44,7 +44,7 @@ class LibtoolConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("automake/1.16.4")
+        self.requires("automake/1.16.5")
 
     @property
     def _settings_build(self):
@@ -52,8 +52,8 @@ class LibtoolConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("automake/1.16.4")
-        self.build_requires("gnu-config/cci.20201022")
+            self.build_requires("automake/1.16.5")
+        self.build_requires("gnu-config/cci.20210814")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
