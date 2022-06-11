@@ -30,19 +30,12 @@ class SystemccciConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
 
     def configure(self):
         tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
-
-    def validate(self):
-        # SystemC package is not available for MacOS
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos build not supported")
-
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Building SystemCCCI as a shared library on Windows is currently not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
