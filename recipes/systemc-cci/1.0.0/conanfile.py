@@ -30,7 +30,7 @@ class SystemccciConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
+            self.options.shared=False
 
     def configure(self):
         tools.check_min_cppstd(self, "11")
