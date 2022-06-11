@@ -6,5 +6,5 @@ sources:
 patches:
   "0.26":
     # FIXME: can't find Boost serialization COMPONENT.
-    - patch_file: "patches/0.22-0001-remove-boost-components.patch"
+    - patch_file: "patches/0.26-0001-remove-boost-components.patch"
       base_path: "source_subfolder"
