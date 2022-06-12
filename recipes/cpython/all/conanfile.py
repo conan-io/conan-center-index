@@ -446,8 +446,12 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._msvc_build()
         else:
-            autotools = self._configure_autotools()
-            autotools.make()
+            env = {}
+            if self.version == "2.7.18":
+                env["MACOSX_DEPLOYMENT_TARGET"] = "10.0"  # FIXME : clang: error: invalid version number in 'MACOSX_DEPLOYMENT_TARGET=11.6'
+            with tools.environment_append(env):
+                autotools = self._configure_autotools()
+                autotools.make()
 
     @property
     def _msvc_artifacts_path(self):
