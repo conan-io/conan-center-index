@@ -87,6 +87,8 @@ class MpppConan(ConanFile):
         cmake.definitions["MPPP_WITH_MPC"] = self.options.with_mpc
         cmake.definitions["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
         cmake.definitions["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
+        if not self.options.shared:
+            cmake.definitions["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = self.settings.compiler.get_safe("runtime") in ["MD", "MDd"]
         cmake.configure()
         return cmake
 
