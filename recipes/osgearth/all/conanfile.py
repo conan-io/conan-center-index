@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
-import shutil
 import os
 
 required_conan_version = ">=1.33.0"
@@ -86,8 +85,6 @@ class OsgearthConan(ConanFile):
             del self.options.fPIC
 
     def config_options(self):
-        self.options["openscenegraph"].shared = self.options.shared
-
         if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
 
@@ -109,7 +106,7 @@ class OsgearthConan(ConanFile):
         self.requires("openscenegraph/3.6.5")
         self.requires("libcurl/7.83.1")
         self.requires("lerc/2.2")
-        self.requires("rapidjson/1.1.0", private=True)
+        self.requires("rapidjson/1.1.0")
 
         self.requires("zlib/1.2.12", override=True)
         self.requires("libtiff/4.3.0", override=True)
@@ -202,9 +199,7 @@ class OsgearthConan(ConanFile):
         if os_info.is_linux:
             rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
-        cmake_folder = os.path.join(self.package_folder, "cmake")
-        if os.path.exists(cmake_folder):
-            shutil.rmtree(cmake_folder)
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         if self.settings.build_type == "Debug":
@@ -280,7 +275,7 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_engine_rex")
         setup_plugin("osgearth_featurefilter_intersect")
         setup_plugin("osgearth_featurefilter_join")
-        setup_plugin("gltf")
+        setup_plugin("gltf").requires.append("rapidjson::rapidjson")
         setup_plugin("kml")
         setup_plugin("osgearth_mapinspector")
         setup_plugin("osgearth_monitor")
