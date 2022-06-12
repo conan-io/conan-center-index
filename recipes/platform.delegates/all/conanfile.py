@@ -30,8 +30,8 @@ class PlatformDelegatesConan(ConanFile):
         return {
             "gcc": "8",
             "Visual Studio": "16",
-            "clang": "10",
-            "apple-clang": "10"
+            "clang": "10"#,
+            #"apple-clang": "10"
         }
 
     @property
