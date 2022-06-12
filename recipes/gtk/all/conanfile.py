@@ -73,6 +73,8 @@ class GtkConan(ConanFile):
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
+        if self._gtk3:
+            del self.options.with_libjpeg
         if self.settings.os != "Linux":
             del self.options.with_wayland
             del self.options.with_x11
