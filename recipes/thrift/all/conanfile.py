@@ -192,6 +192,7 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libthrift"].requires.append("openssl::openssl")
+        self.cpp_info.components["libthrift"].builddirs = [os.path.join("lib", "cmake")]
 
         if self.options.with_zlib:
             self.cpp_info.components["libthrift_z"].set_property("cmake_target_name", "thriftz::thriftz")
