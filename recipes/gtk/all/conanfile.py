@@ -21,6 +21,7 @@ class GtkConan(ConanFile):
         "with_wayland": [True, False],
         "with_x11": [True, False],
         "with_pango": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
@@ -32,6 +33,7 @@ class GtkConan(ConanFile):
         "with_wayland": False,
         "with_x11": True,
         "with_pango": True,
+        "with_libjpeg": "libjpeg",
         "with_ffmpeg": False,
         "with_gstreamer": False,
         "with_cups": False,
@@ -117,7 +119,10 @@ class GtkConan(ConanFile):
             self.requires("fribidi/1.0.12")
             self.requires("libpng/1.6.37")
             self.requires("libtiff/4.3.0")
-            self.requires("libjpeg/9d")
+            if self.options.with_libjpeg == "libjpeg":
+                self.requires("libjpeg/9d")
+            elif self.options.with_libjpeg == "libjpeg-turbo":
+                self.requires("libjpeg-turbo/2.1.2")
         if self.settings.os == "Linux":
             if self._gtk4:
                 self.requires("xkbcommon/1.4.1")
