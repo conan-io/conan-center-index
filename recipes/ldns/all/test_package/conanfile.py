@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class LdnsTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "pkg_config"
 
