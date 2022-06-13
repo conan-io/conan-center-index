@@ -70,4 +70,5 @@ class SystemccciConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["cciapi"]
-        self.cpp_info.system_libs = ["m"]
+        if self.settings.os != "Windows":
+            self.cpp_info.system_libs = ["m"]
