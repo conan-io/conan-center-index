@@ -10,7 +10,7 @@ class LdnsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nlnetlabs.nl/projects/ldns"
     description = "LDNS is a DNS library that facilitates DNS tool programming"
-    topics = ("DNS")
+    topics = ("dns")
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
