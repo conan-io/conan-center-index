@@ -12,6 +12,7 @@ def transform_conanfile(node):
     """Transform definition of ConanFile class so dynamic fields are visible to pylint"""
 
     str_class = astroid.builtin_lookup("str")
+    dict_class = astroid.builtin_lookup("dict")
     info_class = astroid.MANAGER.ast_from_module_name("conans.model.info").lookup(
         "ConanInfo")
     build_requires_class = astroid.MANAGER.ast_from_module_name(
@@ -26,12 +27,17 @@ def transform_conanfile(node):
     dynamic_fields = {
         "conan_data": str_class,
         "build_requires": build_requires_class,
+        "tool_requires": build_requires_class,
         "info_build": info_class,
+        "user_info_build": info_class,
         "info": info_class,
         "copy": file_copier_class,
         "copy_deps": file_importer_class,
         "python_requires": [str_class, python_requires_class],
         "recipe_folder": str_class,
+        "settings_build": dict_class,
+        "settings_target": dict_class,
+        "conf": dict_class,
     }
 
     for f, t in dynamic_fields.items():
