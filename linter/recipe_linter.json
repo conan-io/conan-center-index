@@ -5,11 +5,11 @@
             "severity": "error",
             "pattern": [
                 {
-                    "regexp": "Error: (\\S+):(\\d+): \\[(E\\d+\\(\\S+\\)),\\s(.+?)\\](.+)",
-                    "file": 1,
-                    "line": 2,
-                    "message": 5,
-                    "code": 3
+                    "regexp": "(Error: )?(\\S+):(\\d+): \\[(E\\d+\\(\\S+\\)),\\s(.+?)\\](.+)",
+                    "file": 2,
+                    "line": 3,
+                    "message": 6,
+                    "code": 4
                 }
             ]
         },
