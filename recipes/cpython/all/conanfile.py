@@ -448,7 +448,7 @@ class CPythonConan(ConanFile):
         else:
             env = {}
             if self.settings.compiler == "apple-clang":  # how to compute the right value?
-                env["MACOSX_DEPLOYMENT_TARGET"] = "10.0"  # FIXME : clang: error: invalid version number in 'MACOSX_DEPLOYMENT_TARGET=11.6'
+                env["MACOSX_DEPLOYMENT_TARGET"] = "10.3"  # FIXME : clang: error: invalid version number in 'MACOSX_DEPLOYMENT_TARGET=11.6'
             with tools.environment_append(env):
                 try:
                     autotools = self._configure_autotools()
