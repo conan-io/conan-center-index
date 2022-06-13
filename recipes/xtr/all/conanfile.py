@@ -57,6 +57,8 @@ class XtrConan(ConanFile):
             raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
         if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
             raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
+        if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).is_digit():
+            raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer.")
 
         minimal_cpp_standard = 20
         if self.settings.compiler.cppstd:
