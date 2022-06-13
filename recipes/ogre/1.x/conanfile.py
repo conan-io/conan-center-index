@@ -3,6 +3,7 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import conan.tools.files
 import textwrap, shutil
+import functools
 
 class OgreCmakeConan(ConanFile):
     name = "ogre"
@@ -144,7 +145,6 @@ class OgreCmakeConan(ConanFile):
         "pugixml_DIR": "${ogre-build-dir}/Dependencies/lib/cmake/pugixml"
     }
     exports_sources = "CMakeLists.txt", "patches/**"
-    _cmake = None
 
     def requirements(self):
         self.requires("cppunit/1.15.1")
@@ -186,6 +186,7 @@ class OgreCmakeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         if self._cmake is not None:
             return self._cmake
