@@ -63,8 +63,9 @@ class OgreCmakeConan(ConanFile):
         "OGRE_NODELESS_POSITIONING": [True, False],
         "OGRE_PROFILING_REMOTERY_PATH": "ANY",
         "OGRE_RESOURCEMANAGER_STRICT": "ANY",
-        "OGRE_STATIC": [True, False],
-        "OGRE_SET_DOUBLE": [True, False],
+        "ogre_static": [True, False],
+        "ogre_set_double": [True, False],
+        "ogre_glsupport_use_egl": [True, False],
         "OpenEXR_Half_LIBRARY": "ANY",
         "OpenEXR_Half_LIBRARY_DEBUG": "ANY",
         "OpenEXR_INCLUDE_DIR": "ANY",
@@ -126,8 +127,9 @@ class OgreCmakeConan(ConanFile):
         "OGRE_NODELESS_POSITIONING": True,
         "OGRE_PROFILING_REMOTERY_PATH": "",
         "OGRE_RESOURCEMANAGER_STRICT": 2,
-        "OGRE_STATIC": True,
-        "OGRE_SET_DOUBLE": False,
+        "ogre_static": True,
+        "ogre_set_double": False,
+        "ogre_glsupport_use_egl": True,
         "OpenEXR_Half_LIBRARY": "OpenEXR_Half_LIBRARY-NOTFOUND",
         "OpenEXR_Half_LIBRARY_DEBUG": "OpenEXR_Half_LIBRARY_DEBUG-NOTFOUND",
         "OpenEXR_INCLUDE_DIR": "OpenEXR_INCLUDE_DIR-NOTFOUND",
@@ -179,14 +181,16 @@ class OgreCmakeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.options.OGRE_STATIC = not self.options.shared
+        self.options.ogre_static = not self.options.shared
 
     def _configure_cmake(self):
         if self._cmake is not None:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = False
+        self._cmake.definitions["OGRE_STATIC"] = self.options.ogre_static
+        self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = self.options.ogre_set_double
         self._cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
+        self._cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
         self._cmake.configure()
         return self._cmake
 
