@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
-import os
 from conans.errors import ConanInvalidConfiguration
+import os
 
 class SystemccciConan(ConanFile):
     name = "systemc-cci"
@@ -70,3 +70,4 @@ class SystemccciConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["cciapi"]
+        self.cpp_info.system_libs = ["m"]
