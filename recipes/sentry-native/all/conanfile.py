@@ -72,16 +72,19 @@ class SentryNativeConan(ConanFile):
         else:
             self.options.transport = "none"
 
+        default_backend = "none"
         # Configure default backend
         if self.settings.os == "Windows" or self.settings.os == "Macos":  # Don't use tools.is_apple_os(os) here
             # FIXME: for self.version < 0.4: default backend is "breakpad" when building with MSVC for Windows xp; else: backend=none
-            self.options.backend = "crashpad"
+            default_backend = "crashpad"
         elif self.settings.os in ("FreeBSD", "Linux"):
-            self.options.backend = "breakpad"
+            default_backend = "breakpad"
         elif self.settings.os == "Android":
-            self.options.backend = "inproc"
+            default_backend = "inproc"
         else:
-            self.options.backend = "inproc"
+            default_backend = "inproc"
+
+        self.default_options['backend'] = default_backend
 
     def configure(self):
         if self.options.shared:
