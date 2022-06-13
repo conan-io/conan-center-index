@@ -7,7 +7,8 @@ unsafe-load-any-extension=no
 
 [MESSAGES CONTROL]
 disable=all
-enable=conan-bad-name,
+enable=no-member,
+       conan-bad-name,
        conan-missing-name
 
 [REPORTS]
