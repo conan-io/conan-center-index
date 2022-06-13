@@ -1,30 +1,32 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 conan_minimum_required = ">=1.43.0"
 
 
 class BehaviorTreeCPPConan(ConanFile):
     name = "behaviortree.cpp"
+    description = "This C++ library provides a framework to create BehaviorTrees"
     license = "MIT"
     homepage = "https://github.com/BehaviorTree/BehaviorTree.CPP"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("ai", "robotics", "games", "coordination")
-    description = "This C++ library provides a framework to create BehaviorTrees"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_tools": [True, False],
+        "with_coroutines": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_tools": False,
+        "with_coroutines": False,
     }
-
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -61,10 +63,11 @@ class BehaviorTreeCPPConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("cppzmq/4.8.1")
+        if self.options.with_coroutines:
+            self.requires("boost/1.79.0")
         self.requires("ncurses/6.3")
         self.requires("zeromq/4.3.4")
+        self.requires("cppzmq/4.8.1")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -83,14 +86,15 @@ class BehaviorTreeCPPConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_UNIT_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_UNIT_TESTS"] = False
+        cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
+        cmake.definitions["ENABLE_COROUTINES"] = self.options.with_coroutines
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -110,7 +114,9 @@ class BehaviorTreeCPPConan(ConanFile):
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["behaviortree_cpp_v3"].libs = ["behaviortree_cpp_v3" + postfix]
-        self.cpp_info.components["behaviortree_cpp_v3"].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "boost::coroutine", "ncurses::ncurses"]
+        self.cpp_info.components["behaviortree_cpp_v3"].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "ncurses::ncurses"]
+        if self.options.with_coroutines:
+            self.cpp_info.components["behaviortree_cpp_v3"].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["behaviortree_cpp_v3"].system_libs.append("pthread")
 
