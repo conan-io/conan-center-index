@@ -1,9 +1,8 @@
-import os.path
-
 from conans import ConanFile, CMake, tools
+import os
 
 
-class ldnsTestConan(ConanFile):
+class LdnsTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "pkg_config"
 

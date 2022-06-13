@@ -2,7 +2,10 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import glob
 import os
 
-class ldnsConan(ConanFile):
+required_conan_version = ">=1.33.0"
+
+
+class LdnsConan(ConanFile):
     name = "ldns"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -46,16 +49,15 @@ class ldnsConan(ConanFile):
         if self._autotools:
             return self._autotools
 
-        yes_no = lambda v: "yes" if v else "no"
-
+        def yes_no(v): return "yes" if v else "no"
         args = [
             # libraries
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-pic={}".format(yes_no(self.settings.os != "Windows" and (self.options.shared or self.options.fPIC))),
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
+            f"--with-pic={yes_no(self.settings.os != 'Windows' and (self.options.shared or self.options.fPIC))}",
             "--disable-rpath",
             # dependencies
-            "--with-ssl={}".format(self.deps_cpp_info["openssl"].rootpath),
+            f"--with-ssl={self.deps_cpp_info['openssl'].rootpath}",
             # DNSSEC algorithm support
             "--enable-ecdsa",
             "--enable-ed25519",
@@ -71,9 +73,8 @@ class ldnsConan(ConanFile):
             "--without-pyldns",
             "--without-p5-dns-ldns",
         ]
-
         if self.settings.compiler == "apple-clang":
-            args.append("--with-xcode-sdk={}".format(tools.XCRun(self.settings).sdk_version))
+            args.append(f"--with-xcode-sdk={tools.XCRun(self.settings).sdk_version}")
 
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
