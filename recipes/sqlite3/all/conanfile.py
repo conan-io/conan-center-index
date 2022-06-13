@@ -32,10 +32,13 @@ class Sqlite3Conan(ConanFile):
         "enable_rtree": [True, False],
         "use_alloca": [True, False],
         "omit_load_extension": [True, False],
+        "omit_deprecated": [True, False],
         "enable_math_functions": [True, False],
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
         "disable_gethostuuid": [True, False],
+        "max_column": "ANY",
+        "max_variable_number": "ANY",
         "max_blob_size": "ANY",
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
@@ -58,11 +61,14 @@ class Sqlite3Conan(ConanFile):
         "enable_rtree": True,
         "use_alloca": False,
         "omit_load_extension": False,
+        "omit_deprecated": False,
         "enable_math_functions": True,
         "enable_unlock_notify": True,
         "enable_default_secure_delete": False,
         "disable_gethostuuid": False,
-        "max_blob_size": 1000000000,
+        "max_column": None,             # Uses default value from source
+        "max_variable_number": None,    # Uses default value from source
+        "max_blob_size": None,          # Uses default value from source
         "build_executable": True,
         "enable_default_vfs": True,
         "enable_dbpage_vtab": False,
@@ -93,9 +99,12 @@ class Sqlite3Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if not self.options.enable_default_vfs and self.options.build_executable:
-            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-            raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+        if self.options.build_executable:
+            if not self.options.enable_default_vfs:
+                # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+                raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+            if self.options.omit_load_extension:
+                raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -122,6 +131,7 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
         self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        self._cmake.definitions["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:
             self._cmake.definitions["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
         self._cmake.definitions["HAVE_FDATASYNC"] = True
@@ -131,10 +141,15 @@ class Sqlite3Conan(ConanFile):
         self._cmake.definitions["HAVE_STRERROR_R"] = True
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
-        self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        if self.options.max_column:
+            self._cmake.definitions["MAX_COLUMN"] = self.options.max_column
+        if self.options.max_variable_number:
+            self._cmake.definitions["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
+        if self.options.max_blob_size:
+            self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
-        
+
         self._cmake.configure()
         return self._cmake
 
