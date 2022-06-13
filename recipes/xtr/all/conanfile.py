@@ -55,7 +55,7 @@ class XtrConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
         if tools.Version(self.version) < "2.0.0" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
-        if self.get_option("enable_io_uring_sqpoll") and not self.get_option("enable_io_uring"):
+        if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
             raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
 
         minimal_cpp_standard = 20
