@@ -2,6 +2,7 @@ from conans import ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
+    # Add comment
     settings = "os", "arch", "compiler", "build_type"
 
     def test(self):
