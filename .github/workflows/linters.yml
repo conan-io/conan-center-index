@@ -7,7 +7,7 @@ env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
   SCORE_THRESHOLD: "9.0"
-  REQUIREMENTS: "pylint==2.14 astroid==2.11"
+  REQUIREMENTS: "pylint==2.14"
 
 jobs:
   test_linter:
