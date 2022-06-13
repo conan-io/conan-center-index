@@ -145,7 +145,8 @@ class OgreCmakeConan(ConanFile):
         "pugixml_DIR": "${ogre-build-dir}/Dependencies/lib/cmake/pugixml"
     }
     exports_sources = "CMakeLists.txt", "patches/**"
-
+    short_paths = True
+    
     def requirements(self):
         self.requires("cppunit/1.15.1")
         self.requires("freeimage/3.18.0")
@@ -162,7 +163,6 @@ class OgreCmakeConan(ConanFile):
             self.requires("egl/system")
         else:
             self.requires("libglvnd/1.4.0")
-
 
     def validate(self):
         """
