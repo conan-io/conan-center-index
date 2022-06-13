@@ -70,7 +70,7 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: pip install -r linter/requirements.txt
+        run: pip install pylint>=2.13.9<3.0.0 astroid>=2.11.5<3.0.0
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
