@@ -40,12 +40,14 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
           for file in $(find recipes -type f -name "config.yml"); do
+            echo " - ${file}"
             pykwalify -d ${file} -s linter/schemas/config_schema.yml
           done
       - name: Run schema ( conandata.yml)
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
           for file in $(find recipes -type f -name "conandata.yml"); do
+            echo " - ${file}"
             pykwalify -d ${file} -s linter/schemas/conandata_schema.yml
           done
 
@@ -77,6 +79,7 @@ jobs:
         if: steps.changed_files_config.outputs.any_changed == 'true' && always()
         run: |
           for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
+            echo " - ${file}"
             pykwalify -d ${file} -s linter/schemas/config_schema.yml
           done
 
@@ -92,5 +95,6 @@ jobs:
         if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
         run: |
           for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
+            echo " - ${file}"
             pykwalify -d ${file} -s linter/schemas/conandata_schema.yml
           done
