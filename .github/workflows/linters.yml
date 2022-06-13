@@ -1,4 +1,4 @@
-name: Conan v2 migration linter
+name: "[linter] Conan v2 migration"
 
 on:
   pull_request:
