@@ -447,7 +447,7 @@ class CPythonConan(ConanFile):
             self._msvc_build()
         else:
             env = {}
-            if self.version == "2.7.18":
+            if self.settings.compiler == "apple-clang":  # how to compute the right value?
                 env["MACOSX_DEPLOYMENT_TARGET"] = "10.0"  # FIXME : clang: error: invalid version number in 'MACOSX_DEPLOYMENT_TARGET=11.6'
             with tools.environment_append(env):
                 try:
