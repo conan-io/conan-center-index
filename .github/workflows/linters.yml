@@ -71,7 +71,8 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: pip install ${{ env.REQUIREMENTS }}
+        run: |
+          pip install ${{ env.REQUIREMENTS }}
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
