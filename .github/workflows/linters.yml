@@ -27,7 +27,6 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
-          cache: 'pip'
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
@@ -68,7 +67,6 @@ jobs:
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
-          cache: 'pip'
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
