@@ -31,10 +31,24 @@ class PangoConan(ConanFile):
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-    
+
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
+        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
+
+        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
+            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+
+        if self.options.shared and (not self.options["glib"].shared
+                                    or not self.options["harfbuzz"].shared or
+                                    (self.options.with_cairo
+                                     and not self.options["cairo"].shared)):
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,12 +67,11 @@ class PangoConan(ConanFile):
             self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
         if self.options.with_fontconfig == "auto":
             self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
-
-        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
-
-        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
-            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+        if self.options.shared:
+            self.options["glib"].shared = True
+            self.options["harfbuzz"].shared = True
+            if self.options.with_cairo:
+                self.options["cairo"].shared = True
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
@@ -185,3 +198,6 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pangocairo'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()
