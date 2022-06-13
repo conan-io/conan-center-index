@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
-
+from conans.errors import ConanInvalidConfiguration
 
 class SystemccciConan(ConanFile):
     name = "systemc-cci"
@@ -30,12 +30,18 @@ class SystemccciConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.shared=False
 
     def configure(self):
         tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos build not supported")
+
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Building SystemC-CCI as a shared library on Windows is currently not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
