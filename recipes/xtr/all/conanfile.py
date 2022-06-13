@@ -27,7 +27,7 @@ class XtrConan(ConanFile):
         "enable_lto": False,
         "enable_io_uring": True,
         "enable_io_uring_sqpoll": False,
-        "sink_capacity_kb": "default"
+        "sink_capacity_kb": None
     }
 
     generators = "make"
