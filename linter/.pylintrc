@@ -7,7 +7,9 @@ unsafe-load-any-extension=no
 
 [MESSAGES CONTROL]
 disable=all
-enable=conan-bad-name,
+enable=F, # fatal, if an error occurred which prevented pylint from doing further processing. 
+       E, # errors, for probable bugs in the code
+       conan-bad-name,
        conan-missing-name
 
 [REPORTS]
