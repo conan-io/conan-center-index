@@ -76,7 +76,19 @@ class LdnsConan(ConanFile):
             args.append(f"--with-xcode-sdk={tools.XCRun(self.settings).sdk_version}")
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+
+        # This fixes the issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
+        # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
+        # OpenSSL adds -lpthread to link POSIX thread library explicitly. That is not correct because using the library
+        # may require setting various on compilation as well. The compiler has a dedicated -pthread option for that.
+        if self.settings.os == "Linux":
+            self._autotools.libs.remove("pthread")
+            env = self._autotools.vars
+            env["CFLAGS"] += " -pthread"
+        else:
+            env = None
+
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args, vars=env)
         return self._autotools
 
     def build(self):
