@@ -35,11 +35,9 @@ def transform_conanfile(node):
         "copy_deps": file_importer_class,
         "python_requires": [str_class, python_requires_class],
         "recipe_folder": str_class,
-        "settings_build": dict_class,
-        "settings_target": dict_class,
         "conf": dict_class,
     }
-
+    
     for f, t in dynamic_fields.items():
         node.locals[f] = [i for i in t]
 
