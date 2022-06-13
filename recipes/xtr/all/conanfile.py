@@ -19,7 +19,7 @@ class XtrConan(ConanFile):
         "enable_lto": [True, False],
         "enable_io_uring": [True, False],
         "enable_io_uring_sqpoll": [True, False],
-        "sink_capacity_kb": ["default"] + list(map(lambda x : 2**x, range(2, 15))) # 4k to 16MB
+        "sink_capacity_kb": "ANY"
     }
     default_options = {
         "fPIC": True,
