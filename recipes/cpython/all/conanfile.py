@@ -450,8 +450,14 @@ class CPythonConan(ConanFile):
             if self.version == "2.7.18":
                 env["MACOSX_DEPLOYMENT_TARGET"] = "10.0"  # FIXME : clang: error: invalid version number in 'MACOSX_DEPLOYMENT_TARGET=11.6'
             with tools.environment_append(env):
-                autotools = self._configure_autotools()
-                autotools.make()
+                try:
+                    autotools = self._configure_autotools()
+                    autotools.make()
+                except Exception as e:
+                    config_log = os.path.join(self.build_folder, "config.log")
+                    if os.path.isfile:
+                        self.run('cat %s' % config_log)
+                    raise e
 
     @property
     def _msvc_artifacts_path(self):
