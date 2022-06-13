@@ -107,6 +107,7 @@ class BehaviorTreeCPPConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "BehaviorTreeV3"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "BehaviorTreeV3")
@@ -120,9 +121,10 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["behaviortree_cpp_v3"].system_libs.append("pthread")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.with_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "BehaviorTreeV3"
