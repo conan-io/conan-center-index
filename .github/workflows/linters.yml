@@ -1,4 +1,4 @@
-name: v2 migration linter
+name: Conan v2 migration linter
 
 on:
   pull_request:
@@ -78,3 +78,5 @@ jobs:
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             pylint --rcfile=linter/.pylintrc --output-format=parseable ${file}
           done
+
+  # TODO: Add linting of test_package/conanfile.py files. The rules might be different from recipe files
