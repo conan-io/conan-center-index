@@ -39,11 +39,6 @@ class XtrConan(ConanFile):
             del self.options.enable_io_uring
             del self.options.enable_io_uring_sqpoll
 
-    def get_option(self, name):
-        if not name in self.options:
-            return None
-        return getattr(self.options, name)
-
     def requirements(self):
         self.requires("fmt/7.1.3")
         # Require liburing on any Linux system as a run-time check will be
