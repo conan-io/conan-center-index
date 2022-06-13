@@ -158,6 +158,10 @@ class OgreCmakeConan(ConanFile):
         self.requires("zziplib/0.13.71")
         self.requires("openssl/1.1.1o", override=True)
         self.requires("xorg/system")
+        if self.options.ogre_glsupport_use_egl:
+            self.requires("egl/system")
+        else:
+            self.requires("libglvnd/1.4.0")
 
 
     def validate(self):
