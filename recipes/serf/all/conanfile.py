@@ -44,7 +44,7 @@ class SerfConan(ConanFile):
         self.requires("openssl/1.1.1g")
 
     def build_requirements(self):
-        self.build_requires("scons/3.1.2")
+        self.build_requires("scons/4.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
