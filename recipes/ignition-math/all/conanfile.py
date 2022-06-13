@@ -2,6 +2,7 @@ import os
 import conan.tools.files
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import textwrap
 
 required_conan_version = ">=1.29.1"
 
@@ -10,7 +11,7 @@ class IgnitionMathConan(ConanFile):
     name = "ignition-math"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://ignitionrobotics.org/libs/math"
+    homepage = "https://gazebosim.org/libs/math"
     description = " Math classes and functions for robot applications"
     topics = ("ignition", "math", "robotics", "gazebo")
     settings = "os", "compiler", "build_type", "arch"
@@ -77,11 +78,11 @@ class IgnitionMathConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
-        conan.tools.files.rename(self, 
-            "ign-math-ignition-math{}_{}".format(version_major, self.version),
-            self._source_subfolder,
-        )
+        version_major = tools.Version(self.version).major
+        conan.tools.files.rename(
+             self, f"gz-math-ignition-math{version_major}_{self.version}",
+             self._source_subfolder
+            )
 
     def _configure_cmake(self):
         if self._cmake:
@@ -107,6 +108,10 @@ class IgnitionMathConan(ConanFile):
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
             tools.Version(self.version))
+        
+        # Remove MS runtime files
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
 
     @staticmethod
     def _create_cmake_module_variables(module_file, version):
@@ -119,9 +124,6 @@ class IgnitionMathConan(ConanFile):
         """.format(major=version.major, minor=version.minor, patch=version.patch))
         tools.save(module_file, content)
 
-        # Remove MS runtime files
-        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
 
     def package_info(self):
         version_major = tools.Version(self.version).major
@@ -135,7 +137,7 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components[lib_name].names["cmake_paths"] = lib_name
         self.cpp_info.components[lib_name].libs = [lib_name]
         self.cpp_info.components[lib_name].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
-        self.cpp_info.components[lib_name].requires = ["eigen::eigen", "ignition-cmake::ignition-cmake"]
+        self.cpp_info.components[lib_name].requires = ["swig::swig", "eigen::eigen", "doxygen::doxygen"]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_paths"] = [self._module_file_rel_path]
