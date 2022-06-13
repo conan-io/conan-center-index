@@ -5,12 +5,11 @@
             "severity": "error",
             "pattern": [
                 {
-                    "regexp": "(\\S+):(\\d+):(\\d+):\\s(E\\d+):\\s(.+)\\s\\((\\S+)\\)",
+                    "regexp": "(\\S+):(\\d+): \\[(E\\d+\\(\\S+\\)),\\s(.+?)\\](.+)",
                     "file": 1,
                     "line": 2,
-                    "column": 3,
                     "message": 5,
-                    "code": 4
+                    "code": 3
                 }
             ]
         },
@@ -19,12 +18,11 @@
             "severity": "warning",
             "pattern": [
                 {
-                    "regexp": "(\\S+):(\\d+):(\\d+):\\s(W(?!0511)\\d+):\\s(.+)\\s\\((\\S+)\\)",
+                    "regexp": "(\\S+):(\\d+): \\[(W\\d+\\(\\S+\\)),\\s(.+?)\\](.+)",
                     "file": 1,
                     "line": 2,
-                    "column": 3,
                     "message": 5,
-                    "code": 4
+                    "code": 3
                 }
             ]
         }
