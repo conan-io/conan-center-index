@@ -518,7 +518,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight"].names["pkg_config"] = "flight_rpc"
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
 
-        if self.options.with_flight_sql:
+        if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].libs = [self._lib_name("arrow_flight_sql")]
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package"] = "flight_sql"
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package_multi"] = "flight_sql"
