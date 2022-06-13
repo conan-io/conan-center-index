@@ -2,7 +2,24 @@
 # Class ConanFile doesn't declare all the valid members and functions,
 #   some are injected by Conan dynamically to the class.
 
+import textwrap
 import astroid
+from astroid.builder import extract_node, parse
+from astroid.builder import AstroidBuilder
+from astroid.manager import AstroidManager
+
+
+def _settings_transform():
+    module = AstroidBuilder(AstroidManager()).string_build(
+        textwrap.dedent("""
+            class Settings(object):
+                os = None
+                arch = None
+                compiler = None
+                build_type = None
+            """)
+    )
+    return module['Settings']
 
 
 def register(_):
@@ -23,22 +40,20 @@ def transform_conanfile(node):
         "conans.client.importer").lookup("_FileImporter")
     python_requires_class = astroid.MANAGER.ast_from_module_name(
         "conans.client.graph.python_requires").lookup("PyRequires")
-    settings_class = astroid.MANAGER.ast_from_module_name(
-        "conans.model.settings").lookup("Settings")
 
     dynamic_fields = {
         "conan_data": str_class,
         "build_requires": build_requires_class,
         "tool_requires": build_requires_class,
         "info_build": info_class,
-        #"user_info_build": info_class,
+        "user_info_build": info_class,
         "info": info_class,
         "copy": file_copier_class,
         "copy_deps": file_importer_class,
         "python_requires": [str_class, python_requires_class],
         "recipe_folder": str_class,
-        #"settings_build": settings_class,
-        #"settings_target": settings_class,
+        "settings_build": [_settings_transform()],
+        "settings_target": [_settings_transform()],
         "conf": dict_class,
     }
     
