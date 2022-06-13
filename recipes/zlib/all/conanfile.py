@@ -113,5 +113,9 @@ class ZlibConan(ConanFile):
             libname = "z"
         self.cpp_info.libs = [libname]
 
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
