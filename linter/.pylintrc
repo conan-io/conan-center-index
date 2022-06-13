@@ -1,14 +1,22 @@
 [MASTER]
-load-plugins=linter.conanv2_transition
+load-plugins=linter.conanv2_transition,
+             linter.conanfile_transform
 py-version=3.6
 recursive=no
 suggestion-mode=yes
 unsafe-load-any-extension=no
 
 [MESSAGES CONTROL]
-disable=all
-enable=no-member,
-       conan-bad-name,
+disable=fixme,
+        line-too-long,
+        missing-module-docstring,
+        missing-function-docstring,
+        missing-class-docstring,
+        invalid-name,
+        wrong-import-order,  # TODO: Remove
+        import-outside-toplevel  # TODO: Remove
+
+enable=conan-bad-name,
        conan-missing-name
 
 [REPORTS]
