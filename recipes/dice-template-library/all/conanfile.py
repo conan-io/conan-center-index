@@ -11,7 +11,7 @@ class DiceTemplateLibrary(ConanFile):
     homepage = "https://dice-research.org/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    topics = ("template", "template library", "compile-time", "switch", "integral tuple")
+    topics = ("template", "template-library", "compile-time", "switch", "integral-tuple")
     settings = "build_type", "compiler", "os", "arch"
     generators = "cmake", "cmake_find_package", "cmake_paths"
     exports_sources = "include/*", "CMakeLists.txt", "cmake/*"
