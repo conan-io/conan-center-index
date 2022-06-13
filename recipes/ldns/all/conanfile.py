@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import glob
 import os
 
 required_conan_version = ">=1.33.0"
@@ -88,8 +87,7 @@ class LdnsConan(ConanFile):
         autotools = self._configure_autotools()
         for target in ["install-h", "install-lib"]:
             autotools.make(target=target)
-        for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-            os.remove(la_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
