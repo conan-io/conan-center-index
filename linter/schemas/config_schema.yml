@@ -1,0 +1,10 @@
+type: map
+mapping:
+  versions:
+    type: map
+    mapping:
+      regex;(.*):
+        type: map
+        mapping:
+          folder:
+            type: str

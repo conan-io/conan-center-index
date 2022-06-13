@@ -1,0 +1,96 @@
+name: "[schema] Validate config and conandata"
+
+# TODO: Improve reporting of this action (might require contributing to the application pykwalify)
+
+on:
+  pull_request:
+
+env:
+  PYTHONPATH: ${{github.workspace}}
+  PYVER: "3.8"
+  CONFIG_FILES_PATH: "recipes/**/config.yml"
+  CONANDATA_FILES_PATH: "recipes/**/**/conandata.yml"
+
+jobs:
+  test_schema_validator:
+    # A job to run when the linter/schema changes. We want to know in advance how many files will be broken
+    name: Test schema changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Get changed files
+        uses: tj-actions/changed-files@v20
+        id: changed_files
+        with:
+          files: |
+            linter/**
+      - uses: actions/setup-python@v3
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+
+      - name: Install dependencies
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: pip install pykwalify
+
+      - name: Run schema (config.yml)
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: |
+          for file in $(find recipes -type f -name "config.yml"); do
+            pykwalify -d ${file} -s linter/schemas/config_schema.yml
+          done
+      - name: Run schema ( conandata.yml)
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: |
+          for file in $(find recipes -type f -name "conandata.yml"); do
+            pykwalify -d ${file} -s linter/schemas/conandata_schema.yml
+          done
+
+  validate_pr_files:
+    # Lint/schema files modified in the pull_request
+    name: Validate schema for config.yml files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYVER }}
+
+      - name: Install dependencies
+        run: pip install pykwalify
+
+      ## Work on config.yml files
+      - name: Get changed files (config.yml)
+        id: changed_files_config
+        if: always()
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            ${{ env.CONFIG_FILES_PATH }}
+      - name: Run linter (config.yml)
+        if: steps.changed_files_config.outputs.any_changed == 'true' && always()
+        run: |
+          for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
+            pykwalify -d ${file} -s linter/schemas/config_schema.yml
+          done
+
+      ## Work on config.yml files
+      - name: Get changed files (conandata.yml)
+        id: changed_files_conandata
+        if: always()
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            ${{ env.CONANDATA_FILES_PATH }}
+      - name: Run linter (conandata.yml)
+        if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
+        run: |
+          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
+            pykwalify -d ${file} -s linter/schemas/conandata_schema.yml
+          done

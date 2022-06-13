@@ -1,0 +1,25 @@
+type: map
+mapping:
+  sources:
+    type: map
+    mapping:
+      regex;(.*):
+        type: map
+        mapping:
+          url:
+            type: any
+          sha256:
+            type: str
+
+  patches:
+    type: map
+    mapping:
+      regex;(.*):
+        type: seq
+        sequence:
+          - type: map
+            mapping:
+              patch_file:
+                type: str
+              base_path:
+                type: str
