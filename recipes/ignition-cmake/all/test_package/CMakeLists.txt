@@ -12,6 +12,5 @@ endif()
 
 find_package(ignition-cmake${IGN_CMAKE_VER} REQUIRED COMPONENTS utilities)
 
-include(IgnCMake)
 ign_configure_project()
 ign_configure_build()
