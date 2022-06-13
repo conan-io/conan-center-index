@@ -143,8 +143,7 @@ class MongoCxxConan(ConanFile):
         self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
-        if not tools.valid_min_cppstd(self, self._minimal_std_version):
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimal_std_version
+        self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimal_std_version
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
