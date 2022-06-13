@@ -186,7 +186,7 @@ class OgreCmakeConan(ConanFile):
         if self._cmake is not None:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["OGRE_STATIC"] = self.options.ogre_static
+        self._cmake.definitions["OGRE_STATIC"] = not self.options.shared
         self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = self.options.ogre_set_double
         self._cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
         self._cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
