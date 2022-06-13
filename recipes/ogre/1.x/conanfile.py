@@ -188,15 +188,15 @@ class OgreCmakeConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake is not None:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OGRE_STATIC"] = not self.options.shared
-        self._cmake.definitions["OGRE_CONFIG_DOUBLE"] = self.options.ogre_set_double
-        self._cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
-        self._cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["OGRE_STATIC"] = not self.options.shared
+        cmake.definitions["OGRE_CONFIG_DOUBLE"] = self.options.ogre_set_double
+        cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
+        cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
+        if not tools.valid_min_cppstd(self, 11):
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11 # for OpenEXR
+        cmake.configure()
+        return cmake
 
 
     def source(self):
