@@ -181,7 +181,6 @@ class OgreCmakeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        self.options.ogre_static = not self.options.shared
 
     def _configure_cmake(self):
         if self._cmake is not None:
