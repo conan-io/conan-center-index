@@ -7,6 +7,7 @@ env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
   SCORE_THRESHOLD: "9.0"
+  REQUIREMENTS: "pylint>=2.13.9<3.0.0 astroid>=2.11.5<3.0.0"
 
 jobs:
   test_linter:
@@ -30,7 +31,7 @@ jobs:
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pip install -r linter/requirements.txt
+          pip install ${{ env.REQUIREMENTS }}
       - name: Execute linter over all recipes in the repository
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
@@ -70,7 +71,7 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: pip install pylint>=2.13.9<3.0.0 astroid>=2.11.5<3.0.0
+        run: pip install ${{ env.REQUIREMENTS }}
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
