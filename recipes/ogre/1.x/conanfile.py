@@ -5,7 +5,7 @@ import conan.tools.files
 import textwrap, shutil
 import functools
 
-class OgreCmakeConan(ConanFile):
+class ogrecmakeconan(ConanFile):
     name = "ogre"
     license = "MIT"
     homepage = "https://github.com/OGRECave/ogre"
