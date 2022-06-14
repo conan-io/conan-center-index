@@ -159,10 +159,12 @@ class ogrecmakeconan(ConanFile):
         self.requires("zziplib/0.13.71")
         self.requires("openssl/1.1.1o", override=True)
         self.requires("xorg/system")
-        if self.options.ogre_glsupport_use_egl:
+        self.requires("glu/system")
+        if self.options.ogre_glsupport_use_egl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
         else:
             self.requires("libglvnd/1.4.0")
+        
 
     def validate(self):
         """
@@ -253,7 +255,7 @@ class ogrecmakeconan(ConanFile):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         components = {
-            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco"], 
+            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
