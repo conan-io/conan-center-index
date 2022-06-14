@@ -51,7 +51,7 @@ index 0a30ca92a..eeafbcd90 100644
  
  	if (OGRE_CONFIG_THREAD_PROVIDER STREQUAL "tbb")
 diff --git a/CMake/Dependencies.cmake b/CMake/Dependencies.cmake
-index 91ceb98e6..93789a268 100755
+index 91ceb98e6..e350e86a2 100755
 --- a/CMake/Dependencies.cmake
 +++ b/CMake/Dependencies.cmake
 @@ -13,11 +13,11 @@
@@ -341,6 +341,15 @@ index 91ceb98e6..93789a268 100755
  
  # Python
  find_package(PythonLibs)
+@@ -366,7 +398,7 @@ MACRO_DISPLAY_FEATURE_LOG()
+ # Add library and include paths from the dependencies
+ include_directories(
+   ${ZLIB_INCLUDE_DIRS}
+-  ${ZZip_INCLUDE_DIRS}
++  ${zziplib_INCLUDE_DIRS}
+   ${FreeImage_INCLUDE_DIRS}
+   ${FREETYPE_INCLUDE_DIRS}
+   ${OPENGL_INCLUDE_DIRS}
 diff --git a/CMake/Packages/FindOGRE.cmake b/CMake/Packages/FindOGRE.cmake
 index f7c1727f9..d719d853e 100644
 --- a/CMake/Packages/FindOGRE.cmake
