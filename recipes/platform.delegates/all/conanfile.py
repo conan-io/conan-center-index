@@ -30,8 +30,8 @@ class PlatformDelegatesConan(ConanFile):
         return {
             "gcc": "8",
             "Visual Studio": "16",
-            "clang": "10",
-            "apple-clang": "10"
+            "clang": "14",
+            "apple-clang": "14"
         }
 
     @property
@@ -56,11 +56,11 @@ class PlatformDelegatesConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
             
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("Temporarily skip apple-clang")
+        #if self.settings.compiler == "apple-clang":
+            #raise ConanInvalidConfiguration("Temporarily skip apple-clang")
             
-        if self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration("Temporarily skip clang")
+        #if self.settings.compiler == "clang":
+            #raise ConanInvalidConfiguration("Temporarily skip clang")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
