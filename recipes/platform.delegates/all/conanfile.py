@@ -55,6 +55,9 @@ class PlatformDelegatesConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("Temporarily skip apple-clang")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
