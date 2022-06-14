@@ -75,7 +75,7 @@ class LdnsConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             args.append(f"--with-xcode-sdk={tools.XCRun(self.settings).sdk_version}")
 
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         # This fixes the issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
         # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
