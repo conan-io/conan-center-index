@@ -4,7 +4,6 @@
 
 import textwrap
 import astroid
-from astroid.builder import extract_node, parse
 from astroid.builder import AstroidBuilder
 from astroid.manager import AstroidManager
 
@@ -20,6 +19,15 @@ def _settings_transform():
             """)
     )
     return module['Settings']
+
+def _user_info_build_transform():
+    module = AstroidBuilder(AstroidManager()).string_build(
+        textwrap.dedent("""
+            class UserInfoBuild(defaultdict):
+                pass
+            """)
+    )
+    return module['UserInfoBuild']
 
 
 def register(_):
@@ -46,7 +54,7 @@ def transform_conanfile(node):
         "build_requires": build_requires_class,
         "tool_requires": build_requires_class,
         "info_build": info_class,
-        "user_info_build": info_class,
+        "user_info_build": [_user_info_build_transform()],
         "info": info_class,
         "copy": file_copier_class,
         "copy_deps": file_importer_class,
