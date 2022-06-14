@@ -161,7 +161,7 @@ class OpenSceneGraphConanFile(ConanFile):
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
     @functools.lru_cache(1)
-    def _configure_cmake(self):
+    def _configured_cmake(self):
         cmake = CMake(self)
 
         cmake.definitions["USE_3RDPARTY_BIN"] = False
