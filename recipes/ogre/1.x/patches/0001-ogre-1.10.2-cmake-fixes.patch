@@ -384,7 +384,7 @@ index bdaef8884..74b937a38 100644
  	set(OGRE_THREAD_DEFAULT_PROVIDER "poco")
  	set(OGRE_THREAD_TYPE "2")
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 18f295f53..0f80d5510 100755
+index 18f295f53..c624ea101 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -52,6 +52,8 @@ set(CMAKE_MODULE_PATH
@@ -396,7 +396,15 @@ index 18f295f53..0f80d5510 100755
  )
  
  if(CMAKE_CROSSCOMPILING)
-@@ -363,7 +365,7 @@ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GL "Build OpenGL RenderSystem" TR
+@@ -212,6 +214,7 @@ endif()
+ 
+ # Add OgreMain include path
+ include_directories("${OGRE_SOURCE_DIR}/OgreMain/include")
++set(OGRE_BINARY_DIR ${CMAKE_BINARY_DIR})
+ include_directories("${OGRE_BINARY_DIR}/include")
+ if (APPLE)
+   if (APPLE_IOS)
+@@ -363,7 +366,7 @@ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GL "Build OpenGL RenderSystem" TR
  cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES "Build OpenGL ES 1.x RenderSystem" FALSE "OPENGLES_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
  cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES2 "Build OpenGL ES 2.x RenderSystem" FALSE "OPENGLES2_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
  option(OGRE_BUILD_PLUGIN_BSP "Build BSP SceneManager plugin" TRUE)
@@ -405,7 +413,7 @@ index 18f295f53..0f80d5510 100755
  option(OGRE_BUILD_PLUGIN_OCTREE "Build Octree SceneManager plugin" TRUE)
  option(OGRE_BUILD_PLUGIN_PFX "Build ParticleFX plugin" TRUE)
  cmake_dependent_option(OGRE_BUILD_PLUGIN_PCZ "Build PCZ SceneManager plugin" TRUE "" FALSE)
-@@ -407,7 +409,7 @@ option(OGRE_CONFIG_MEMTRACK_DEBUG "Enable Ogre's memory tracker in debug mode" F
+@@ -407,7 +410,7 @@ option(OGRE_CONFIG_MEMTRACK_DEBUG "Enable Ogre's memory tracker in debug mode" F
  option(OGRE_CONFIG_MEMTRACK_RELEASE "Enable Ogre's memory tracker in release mode" FALSE)
  # determine threading options
  include(PrepareThreadingOptions)
