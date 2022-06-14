@@ -65,6 +65,5 @@ class DiceTemplateLibrary(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", self.name)
         self.cpp_info.set_property("cmake_target_aliases", ["{0}::{0}".format(self.name)])
-        self.cpp_info.set_property("cmake_target_name", )
         self.cpp_info.names["cmake_find_package"] = self.name
         self.cpp_info.names["cmake_find_package_multi"] = self.name
