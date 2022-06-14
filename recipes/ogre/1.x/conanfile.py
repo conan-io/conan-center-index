@@ -197,6 +197,10 @@ class ogrecmakeconan(ConanFile):
         cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
         if not tools.valid_min_cppstd(self, 11):
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11 # for OpenEXR
+        cmake.definitions["OGRE_BUILD_TESTS"] = self.options.OGRE_BUILD_TESTS
+        cmake.definitions["OGRE_BUILD_SAMPLES"] = self.options.OGRE_BUILD_SAMPLES
+        cmake.definitions["OGRE_INSTALL_SAMPLES"] = self.options.OGRE_INSTALL_SAMPLES
+        cmake.definitions["OGRE_INSTALL_PDB"] = self.options.OGRE_INSTALL_PDB
         cmake.configure()
         return cmake
 
