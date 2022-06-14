@@ -153,10 +153,7 @@ class IgnitionUitlsConan(ConanFile):
         if self.options.ign_utils_vendor_cli11:
             self.cpp_info.components[lib_name].requires.append("cli11::cli11")
 
-        self.cpp_info.components[lib_name].builddirs["cmake_find_package"] = [build_dirs]
-        self.cpp_info.components[lib_name].builddirs["cmake_find_package_multi"] = [build_dirs]
-        self.cpp_info.components[lib_name].builddirs["cmake_paths"] = [build_dirs]
-
+        self.cpp_info.components[lib_name].builddirs.append(build_dirs)
         self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_paths"] = [self._module_file_rel_path]
@@ -168,10 +165,7 @@ class IgnitionUitlsConan(ConanFile):
         if self.options.ign_utils_vendor_cli11:
             self.cpp_info.components["cli"].requires = ["cli11::cli11"]
 
-        self.cpp_info.components["cli"].builddirs["cmake_find_package"] = [build_dirs]
-        self.cpp_info.components["cli"].builddirs["cmake_find_package_multi"] = [build_dirs]
-        self.cpp_info.components["cli"].builddirs["cmake_paths"] = [build_dirs]
-
+        self.cpp_info.components["cli"].builddirs.append(build_dirs)
         self.cpp_info.components["cli"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["cli"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["cli"].build_modules["cmake_paths"] = [self._module_file_rel_path]
