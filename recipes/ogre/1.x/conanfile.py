@@ -121,7 +121,7 @@ class ogrecmakeconan(ConanFile):
         "OGRE_CONFIG_THREADS": 3,
         "OGRE_CONFIG_THREAD_PROVIDER": "std",
         "OGRE_ENABLE_PRECOMPILED_HEADERS": True,
-        "OGRE_INSTALL_PDB": True,
+        "OGRE_INSTALL_PDB": False,
         "OGRE_INSTALL_SAMPLES": True,
         "OGRE_INSTALL_TOOLS": True,
         "OGRE_INSTALL_VSPROPS": False,
