@@ -128,7 +128,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql"):
