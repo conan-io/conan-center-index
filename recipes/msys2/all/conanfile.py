@@ -168,6 +168,7 @@ class MSYS2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
         msys_root = self._msys_dir
         msys_bin = os.path.join(msys_root, "usr", "bin")
