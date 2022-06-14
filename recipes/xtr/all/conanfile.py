@@ -82,7 +82,7 @@ class XtrConan(ConanFile):
             defines += ["XTR_USE_IO_URING={}".format(int(bool(enable_io_uring)))]
         if self.options.get_safe("enable_io_uring_sqpoll"):
             defines += ["XTR_IO_URING_POLL=1"]
-        capacity = self.options.get_safe("sink_capacity_kb", default=None)
+        capacity = self.options.get_safe("sink_capacity_kb")
         if capacity:
             defines += ["XTR_SINK_CAPACITY={}".format(int(capacity) * 1024)]
         return defines
