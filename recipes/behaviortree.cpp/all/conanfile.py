@@ -30,11 +30,11 @@ class BehaviorTreeCPPConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return "src"
 
     @property
     def _build_subfolder(self):
-        return "build_subfolder"
+        return "bld"
 
     @property
     def _minimum_cppstd_required(self):
