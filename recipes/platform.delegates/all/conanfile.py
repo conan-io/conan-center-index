@@ -58,6 +58,9 @@ class PlatformDelegatesConan(ConanFile):
             
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("Temporarily skip apple-clang")
+            
+        if self.settings.compiler == "clang":
+            raise ConanInvalidConfiguration("Temporarily skip clang")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
