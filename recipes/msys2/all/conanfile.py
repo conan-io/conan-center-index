@@ -4,6 +4,7 @@ import fnmatch
 import os
 import shutil
 import subprocess
+import errno
 
 try:
     import ctypes
@@ -90,7 +91,7 @@ class MSYS2Conan(ConanFile):
                 out = subprocess.PIPE
                 err = subprocess.STDOUT
             else:
-                out = file(os.devnull, 'w')
+                out = open(os.devnull, 'w')
                 err = subprocess.PIPE
 
             if os.path.exists(taskkill_exe):
