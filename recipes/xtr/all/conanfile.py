@@ -17,7 +17,7 @@ class XtrConan(ConanFile):
         "fPIC": [True, False],
         "enable_exceptions": [True, False],
         "enable_lto": [True, False],
-        "enable_io_uring": [True, False],
+        "enable_io_uring": ["auto", True, False],
         "enable_io_uring_sqpoll": [True, False],
         "sink_capacity_kb": "ANY"
     }
@@ -25,7 +25,7 @@ class XtrConan(ConanFile):
         "fPIC": True,
         "enable_exceptions": True,
         "enable_lto": False,
-        "enable_io_uring": True,
+        "enable_io_uring": "auto",
         "enable_io_uring_sqpoll": False,
         "sink_capacity_kb": None
     }
@@ -57,10 +57,8 @@ class XtrConan(ConanFile):
             raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
         if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
             raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
-        if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).is_digit():
-            raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer.")
-        if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).is_digit():
-            raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer.")
+        if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).isdigit():
+            raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer")
 
         minimal_cpp_standard = 20
         if self.settings.compiler.cppstd:
@@ -76,6 +74,18 @@ class XtrConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+
+    def get_defines(self):
+        defines = []
+        enable_io_uring = self.options.get_safe("enable_io_uring")
+        if enable_io_uring in (True, False):
+            defines += ["XTR_USE_IO_URING={}".format(int(bool(enable_io_uring)))]
+        if self.options.get_safe("enable_io_uring_sqpoll"):
+            defines += ["XTR_IO_URING_POLL=1"]
+        capacity = self.options.get_safe("sink_capacity_kb", default=None)
+        if capacity:
+            defines += ["XTR_SINK_CAPACITY={}".format(int(capacity) * 1024)]
+        return defines
 
     def build(self):
         # FIXME: should be done in validate (but version is not yet available there)
@@ -94,13 +104,7 @@ class XtrConan(ConanFile):
         env_build_vars["EXCEPTIONS"] = \
             str(int(bool(self.options.enable_exceptions)))
         env_build_vars["LTO"] = str(int(bool(self.options.enable_lto)))
-        if self.get_option("enable_io_uring") == False: # io_uring is enabled by default
-            env_build_vars["CXXFLAGS"] += " -DXTR_USE_IO_URING=0"
-        if self.get_option("enable_io_uring_sqpoll") == True:
-            env_build_vars["CXXFLAGS"] += " -DXTR_IO_URING_POLL=1"
-        capacity = self.get_option("sink_capacity_kb")
-        if capacity != "default" and capacity != None:
-            env_build_vars["CXXFLAGS"] += " -DXTR_SINK_CAPACITY={}".format(int(capacity) * 1024)
+        env_build_vars["CXXFLAGS"] += "".join([" -D{}".format(d) for d in self.get_defines()])
         autotools.make(vars=env_build_vars)
         autotools.make(vars=env_build_vars, target="xtrctl")
 
@@ -115,6 +119,7 @@ class XtrConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["xtr"]
         self.cpp_info.system_libs = ["pthread"]
+        self.cpp_info.defines = self.get_defines()
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
