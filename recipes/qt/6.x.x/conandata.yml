@@ -38,7 +38,7 @@ sources:
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
       - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.3/6.3.1/single/qt-everywhere-src-6.3.1.tar.xz"
-    sha256: "cd2789cade3e865690f3c18df58ffbff8af74cc5f01faae50634c12eb52dd85b"
+    sha256: "51114e789485fdb6b35d112dfd7c7abb38326325ac51221b6341564a1c3cc726"
 patches:
   "6.0.4":
     - base_path: "qt6/qtbase/cmake"
