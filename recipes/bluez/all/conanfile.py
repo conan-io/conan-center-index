@@ -35,6 +35,7 @@ class BlueZConan(ConanFile):
         "with_udev": False,
         "with_system_glib": False
     }
+    generators = "PkgConfigDeps"
 
     _autotools = None
 
@@ -71,13 +72,14 @@ class BlueZConan(ConanFile):
             "--disable-systemd",
             "--disable-monitor",
             "--disable-manpages",
-            "--disable-datafiles"
+            "--disable-datafiles",
+            "--disable-obex",
+            # FIXME: The AutotoolsToolchain style puts all files in "/usr/local" by default
+            "--prefix=/"
         ]
         if self.options.with_usb:
             at_toolchain.configure_args.append("--enable-usb")
         at_toolchain.generate()
-        pc_deps = PkgConfigDeps(self)
-        pc_deps.generate()
 
     def _config_autotools(self):
         if self._autotools:
@@ -93,11 +95,16 @@ class BlueZConan(ConanFile):
     def package(self):
         autotools = self._config_autotools()
         autotools.install()
-
+        shutil.rmtree(os.path.join(self.package_folder, "libexec"))
+        shutil.rmtree(os.path.join(self.package_folder, "share"))
+        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "bluetooth")
-        self.cpp_info.set_property("cmake_file_name", "bluez")
-        self.cpp_info.set_property("cmake_target_name", "bluez::bluez")
+        self.cpp_info.set_property("cmake_file_name", self.name)
+        self.cpp_info.set_property("cmake_target_name", f"{self.name}::{self.name}")
+        self.cpp_info.set_property("component_version", self.version)
+
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "bluez"
         self.cpp_info.names["cmake_find_package_multi"] = "bluez"
