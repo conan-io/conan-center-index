@@ -128,6 +128,8 @@ class IgnitionMathConan(ConanFile):
     def package_info(self):
         version_major = tools.Version(self.version).major
         lib_name = f"ignition-math{version_major}"
+        build_dirs = os.path.join("lib", "cmake")
+
         self.cpp_info.names["cmake_find_package"] = lib_name
         self.cpp_info.names["cmake_find_package_multi"] = lib_name
         self.cpp_info.names["cmake_paths"] = lib_name
@@ -138,6 +140,10 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components[lib_name].libs = [lib_name]
         self.cpp_info.components[lib_name].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
         self.cpp_info.components[lib_name].requires = ["swig::swig", "eigen::eigen", "doxygen::doxygen"]
+
+        self.cpp_info.components[lib_name].builddirs = [build_dirs]
+        self.cpp_info.components[lib_name].builddirs = [build_dirs]
+        self.cpp_info.components[lib_name].builddirs = [build_dirs]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_paths"] = [self._module_file_rel_path]
@@ -158,3 +164,4 @@ class IgnitionMathConan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
