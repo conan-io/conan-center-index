@@ -13,8 +13,6 @@ class DiceTemplateLibrary(ConanFile):
     license = "MIT"
     topics = ("template", "template-library", "compile-time", "switch", "integral-tuple")
     settings = "build_type", "compiler", "os", "arch"
-    generators = "cmake", "cmake_find_package", "cmake_paths"
-    exports_sources = "include/*", "CMakeLists.txt", "cmake/*"
     no_copy_source = True
 
     @property
@@ -59,10 +57,7 @@ class DiceTemplateLibrary(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "dice-template-library"
-        self.cpp_info.names["cmake_find_package_multi"] = "dice-template-library"
