@@ -27,6 +27,9 @@ class SystemccciConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export(self):
+        self.copy("CMakeLists.txt", dst=self._source_subfolder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,8 +47,8 @@ class SystemccciConan(ConanFile):
             raise ConanInvalidConfiguration("Building SystemC-CCI as a shared library on Windows is currently not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("cci-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
