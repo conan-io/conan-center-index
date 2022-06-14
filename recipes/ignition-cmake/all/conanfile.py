@@ -38,12 +38,8 @@ class IgnitionCmakeConan(ConanFile):
         return self._cmake
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        version_major = tools.Version(self.version).major
-        conan.tools.files.rename(
-             self, f"gz-cmake-ignition-cmake{version_major}_{self.version}",
-             self._source_subfolder
-            )
+        tools.get(**self.conan_data["sources"][self.version],  
+                    destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         version_major = tools.Version(self.version).major
