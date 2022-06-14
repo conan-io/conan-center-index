@@ -1,0 +1,12 @@
+sources:
+  "0.26":
+    url: "https://github.com/bluescarni/mppp/archive/v0.26.tar.gz"
+    sha256: "4dbfa68802d9a1365eda884f085418afc147d01b7a928e8333e4dcc1c3b3ce9e"
+
+patches:
+  "0.26":
+    # FIXME: can't find Boost serialization COMPONENT.
+    - patch_file: "patches/0.26-0001-remove-boost-components.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.26-0002-disable-warning-error.patch"
+      base_path: "source_subfolder"

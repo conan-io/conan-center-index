@@ -1,8 +1,14 @@
 sources:
+  '3.3':
+    sha256: 4b4a8ba70e707c6aae7d2fe2904b8761e9827398ddeb60633938fe486f5fa622
+    url: https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.3.tar.gz
   '3.2':
     sha256: 7e1dd643b1f3b8d1ba9561b899c18176af988342b86c42d89a70be924cb747f6
     url: https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.2.tar.gz
 patches:
   '3.2':
     - patch_file: patches/3.2-osgearth.patch
+      base_path: source_subfolder
+  '3.3':
+    - patch_file: patches/3.3-osgearth.patch
       base_path: source_subfolder

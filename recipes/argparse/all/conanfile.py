@@ -19,7 +19,10 @@ class ArgparseConan(ConanFile):
         return {
             "gcc": "7" if tools.Version(self.version) <= "2.1" else "8",
             "clang": "5" if tools.Version(self.version) <= "2.1" else "7",
-            "Visual Studio": "15",
+            # trantor/2.5 uses [[maybe_unused]] in range-based for loop
+            # Visual Studio 15 doesn't support it:
+            # https://developercommunity.visualstudio.com/t/compiler-bug-on-parsing-maybe-unused-in-range-base/209488
+            "Visual Studio": "15" if tools.Version(self.version) < "2.5" else "16",
             "apple-clang": "10",
         }
 
