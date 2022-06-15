@@ -198,3 +198,6 @@ class PangoConan(ConanFile):
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
+        self.info.requires["harfbuzz"].full_package_mode()
+        if self.options.with_cairo:
+            self.info.requires["cairo"].full_package_mode()
