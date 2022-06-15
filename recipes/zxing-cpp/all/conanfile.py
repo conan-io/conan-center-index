@@ -5,15 +5,13 @@ import os
 
 required_conan_version = ">=1.43.0"
 
-
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
-    homepage = "https://github.com/nu-book/zxing-cpp"
     description = "c++14 port of ZXing, a barcode scanning library"
-    topics = ("zxing", "barcode", "scanner", "generator")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/nu-book/zxing-cpp"
+    topics = ("zxing", "barcode", "scanner", "generator")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,12 +64,7 @@ class ZXingCppConan(ConanFile):
         min_version = self._compiler_cpp14_support.get(str(self.settings.compiler))
         if min_version and tools.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
-                "This compiler is too old. This library needs a compiler with c++14 support"
-            )
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= "11":
-            raise ConanInvalidConfiguration(
-                "zxing-cpp doesn't support gcc >= 11. Contributions are "
-                "welcome if you want to fix the build."
+                "This compiler is too old. {} needs a compiler with c++14 support".format(self.name)
             )
 
     def source(self):
@@ -81,8 +74,14 @@ class ZXingCppConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
-        cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
+        if tools.Version(self.version) < "1.1":
+            cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
+            cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
+        else:
+            cmake.definitions["BUILD_WRITERS"] = self.options.enable_encoders
+            cmake.definitions["BUILD_READERS"] = self.options.enable_decoders
+            cmake.definitions["BUILD_EXAMPLES"] = False
+            cmake.definitions["BUILD_BLACKBOX_TESTS"] = False
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -103,7 +102,7 @@ class ZXingCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZXing")
         self.cpp_info.set_property("cmake_target_name", "ZXing::ZXing")
         self.cpp_info.set_property("pkg_config_name", "zxing")
-        self.cpp_info.libs = ["ZXingCore"]
+        self.cpp_info.libs = ["ZXingCore" if tools.Version(self.version) < "1.1" else "ZXing"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
 
