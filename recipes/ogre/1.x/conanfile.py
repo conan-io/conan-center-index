@@ -50,6 +50,7 @@ class ogrecmakeconan(ConanFile):
         "ogre_config_filesystem_unicode": [True, False],
         "ogre_config_threads": "ANY",
         "ogre_config_thread_provider": "ANY",
+        "ogre_config_enable_freeimage": [True, False],
         "ogre_install_pdb": [True, False],
         "ogre_install_samples": [True, False],
         "ogre_install_tools": [True, False],
@@ -57,19 +58,7 @@ class ogrecmakeconan(ConanFile):
         "ogre_resourcemanager_strict": "ANY",
         "ogre_static": [True, False],
         "ogre_set_double": [True, False],
-        "ogre_glsupport_use_egl": [True, False],
-        "OpenEXR_Half_LIBRARY": "ANY",
-        "OpenEXR_Half_LIBRARY_DEBUG": "ANY",
-        "OpenEXR_INCLUDE_DIR": "ANY",
-        "OpenEXR_Iex_LIBRARY": "ANY",
-        "OpenEXR_Iex_LIBRARY_DEBUG": "ANY",
-        "OpenEXR_IlmImf_LIBRARY": "ANY",
-        "OpenEXR_IlmImf_LIBRARY_DEBUG": "ANY",
-        "OpenEXR_IlmThread_LIBRARY": "ANY",
-        "OpenEXR_IlmThread_LIBRARY_DEBUG": "ANY",
-        "Qt5_DIR": "ANY",
-        "SDL2_DIR": "ANY",
-        "pugixml_DIR": "ANY"
+        "ogre_glsupport_use_egl": [True, False]
     }
 
     # default options copied from https://github.com/StatelessStudio/ogre-conan/blob/master/conanfile.py
@@ -105,6 +94,7 @@ class ogrecmakeconan(ConanFile):
         "ogre_config_filesystem_unicode": True,
         "ogre_config_threads": 3,
         "ogre_config_thread_provider": "std",
+        "ogre_config_enable_freeimage": True,
         "ogre_install_pdb": False,
         "ogre_install_samples": True,
         "ogre_install_tools": True,
@@ -112,7 +102,7 @@ class ogrecmakeconan(ConanFile):
         "ogre_resourcemanager_strict": 2,
         "ogre_static": True,
         "ogre_set_double": False,
-        "ogre_glsupport_use_egl": True,
+        "ogre_glsupport_use_egl": True
     }
     exports_sources = "CMakeLists.txt", "patches/**"
     short_paths = True
@@ -193,12 +183,13 @@ class ogrecmakeconan(ConanFile):
         cmake.definitions["OGRE_CONFIG_ENABLE_QUAD_BUFFER_STEREO"] = self.options.ogre_config_enable_quad_buffer_stereo
         cmake.definitions["OGRE_CONFIG_FILESYSTEM_UNICODE"] = self.options.ogre_config_filesystem_unicode
         cmake.definitions["OGRE_CONFIG_THREADS"] = self.options.ogre_config_threads
-        cmake.definitions["OGRE_CONFIG_THREAD_PROVIDER" = self.options.ogre_config_thread_provider
+        cmake.definitions["OGRE_CONFIG_THREAD_PROVIDER"] = self.options.ogre_config_thread_provider
+        cmake.definitions["OGRE_CONFIG_ENABLE_FREEIMAGE"] = self.options.ogre_config_enable_freeimage
         cmake.definitions["OGRE_INSTALL_PDB"] = self.options.ogre_install_pdb
         cmake.definitions["OGRE_INSTALL_SAMPLES"] = self.options.ogre_install_samples
         cmake.definitions["OGRE_INSTALL_TOOLS"] = self.options.ogre_install_tools
         cmake.definitions["OGRE_RESOURCEMANAGER_STRICT"] = self.options.ogre_resourcemanager_strict
-        if self.settings.os = "Windows":
+        if self.settings.os == "Windows":
             cmake.definitions["OGRE_INSTALL_VSPROPS"] = self.options.ogre_install_vsprops
         cmake.configure()
         return cmake
@@ -258,8 +249,8 @@ class ogrecmakeconan(ConanFile):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         components = {
-            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", 
-                                        "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
+            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", 
+                                        "sdl::sdl", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
