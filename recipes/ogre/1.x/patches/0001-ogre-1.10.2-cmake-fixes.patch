@@ -547,4 +547,4 @@ index ae2c5ac4f..585b7ae21 100644
 +  set(FreeImage_LIBRARIES ${freeimage_LIBRARIES})
    list(APPEND LIBRARIES    "${FreeImage_LIBRARIES}")
  endif()
- 
+
