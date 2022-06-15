@@ -133,9 +133,9 @@ class ogrecmakeconan(ConanFile):
          TODO: determine incompatible msvc compilers
         """
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 9:
-            raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc 11")
+            raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc version greater than 9")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 9:
-            raise ConanInvalidConfiguration("OGRE 1.x not supported with clang 13")
+            raise ConanInvalidConfiguration("OGRE 1.x not supported with clang version greater than 9")
 
     @property
     def _source_subfolder(self):
