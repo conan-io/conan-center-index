@@ -1,5 +1,4 @@
 sources:
   "1.0.0":
-    sha256: 1f6a227a7a6e370dc2d956d3fccdf404b5e19dd66e55dcec6a405c18c9df004c
+    sha256: cff955bacaa1d1dbf06b7768c2b240c57671dc18a1ad6473778d4501c5f4416e
     url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.0.tar.gz
-
