@@ -128,7 +128,6 @@ class IgnitionMathConan(ConanFile):
     def package_info(self):
         version_major = tools.Version(self.version).major
         lib_name = f"ignition-math{version_major}"
-        build_dirs = os.path.join("lib", "cmake")
 
         self.cpp_info.names["cmake_find_package"] = lib_name
         self.cpp_info.names["cmake_find_package_multi"] = lib_name
@@ -141,9 +140,7 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components[lib_name].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
         self.cpp_info.components[lib_name].requires = ["swig::swig", "eigen::eigen", "doxygen::doxygen"]
 
-        self.cpp_info.components[lib_name].builddirs = [build_dirs]
-        self.cpp_info.components[lib_name].builddirs = [build_dirs]
-        self.cpp_info.components[lib_name].builddirs = [build_dirs]
+        self.cpp_info.components[lib_name].builddirs = [self._module_file_rel_dir]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components[lib_name].build_modules["cmake_paths"] = [self._module_file_rel_path]
@@ -153,6 +150,8 @@ class IgnitionMathConan(ConanFile):
         self.cpp_info.components["eigen3"].names["cmake_paths"] = "eigen3"
         self.cpp_info.components["eigen3"].includedirs.append(os.path.join("include", "ignition", "math"+version_major))
         self.cpp_info.components["eigen3"].requires = ["eigen::eigen"]
+
+        self.cpp_info.components["eigen3"].builddirs = [self._module_file_rel_dir]
         self.cpp_info.components["eigen3"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["eigen3"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["eigen3"].build_modules["cmake_paths"] = [self._module_file_rel_path]
@@ -162,6 +161,10 @@ class IgnitionMathConan(ConanFile):
             raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
     
     @property
+    def _module_file_rel_dir(self):
+        return os.path.join("lib", "cmake")
+    
+    @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+        return os.path.join(self._module_file_rel_dir, f"conan-official-{self.name}-variables.cmake")
 
