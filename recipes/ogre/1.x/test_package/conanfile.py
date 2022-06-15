@@ -14,6 +14,6 @@ class TestPackageConan(ConanFile):
     def test(self):
         if tools.cross_building(self.settings):
             return
-            
+ 
         ogre_main_bin_path = os.path.join("bin", "ogre_main")
         self.run(ogre_main_bin_path, run_environment=True)
