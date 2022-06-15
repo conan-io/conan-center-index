@@ -3,6 +3,7 @@ from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -151,11 +152,9 @@ class OsgearthConan(ConanFile):
 
         self._patch_sources()
 
+    @functools.lru_cache(1)
     def _configured_cmake(self):
-        if hasattr(self, "_cmake"):
-            return self._cmake
-
-        self._cmake = cmake = CMake(self)
+        cmake = CMake(self)
         cmake.definitions["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["OSGEARTH_BUILD_TOOLS"] = False
         cmake.definitions["OSGEARTH_BUILD_EXAMPLES"] = False

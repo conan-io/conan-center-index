@@ -68,7 +68,7 @@ jobs:
         uses: tj-actions/changed-files@v20
         with:
           files: |
-            **/conanfile.py
+            recipes/*/*/conanfile.py
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed-files.outputs.any_changed == 'true'

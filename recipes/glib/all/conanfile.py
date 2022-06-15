@@ -209,6 +209,8 @@ class GLibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
+        self.cpp_info.components["glib-2.0"].names["pkg_config"] = "glib-2.0"
+        self.cpp_info.components["glib-2.0"].set_property("pkg_config_name", "glib-2.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
         if self.settings.os == "Windows":
@@ -236,6 +238,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append(
                 "pthread"
@@ -246,11 +249,13 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(
             ["gmodule-no-export-2.0", "glib-2.0"]
         )
+        self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append(
                 "-Wl,--export-dynamic"
             )
 
+        self.cpp_info.components["gmodule-2.0"].set_property("pkg_config_name", "gmodule-2.0")
         self.cpp_info.components["gmodule-2.0"].requires.extend(
             ["gmodule-no-export-2.0", "glib-2.0"]
         )
@@ -259,15 +264,18 @@ class GLibConan(ConanFile):
                 "-Wl,--export-dynamic"
             )
 
+        self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
         self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
         self.cpp_info.components["gobject-2.0"].requires.append("libffi::libffi")
 
+        self.cpp_info.components["gthread-2.0"].set_property("pkg_config_name", "gthread-2.0")
         self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
+        self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
@@ -306,6 +314,7 @@ class GLibConan(ConanFile):
             self.package_folder, "bin", "glib-compile-schemas"
         )
 
+        self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
         if self.options.get_safe("with_elf"):
             self.cpp_info.components["gresource"].requires.append(
