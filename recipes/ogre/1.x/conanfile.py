@@ -265,6 +265,11 @@ class ogrecmakeconan(ConanFile):
             
         }
 
+        if self.options.ogre_static:
+            for _, values in components.items():
+                libs = [lib + "Static" for lib in values.get("libs")]
+                values["libs"] = libs
+
         if self.options.ogre_build_tests:
             components["OgreMain"]["requires"].append("cppunit::cppunit")
 
@@ -275,6 +280,7 @@ class ogrecmakeconan(ConanFile):
             for _, values in components.items():
                 libs = [lib + "_d" for lib in values.get("libs")]
                 values["libs"] = libs
+
 
         return components
 
@@ -301,6 +307,9 @@ class ogrecmakeconan(ConanFile):
             self.cpp_info.components[comp].builddirs.append(self._module_file_rel_path)
             if self.settings.os == "Linux":
                 self.cpp_info.components[comp].system_libs.append("pthread")
+            
+            # TODO: bindir, plugindir, plugin_include_dirs plugin_lib_dirs
+            
 
     @property
     def _module_file_rel_dir(self):
