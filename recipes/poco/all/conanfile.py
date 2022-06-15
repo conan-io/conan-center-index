@@ -25,11 +25,13 @@ class PocoConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_fork": [True, False],
+        "enable_active_record": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
+        "enable_active_record": "deprecated",
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
@@ -107,6 +109,8 @@ class PocoConan(ConanFile):
             del self.options.enable_activerecord_compiler
 
     def configure(self):
+        if self.options.enable_active_record != "deprecated":
+            self.output.warn("enable_active_record option is deprecated, do not use anymore.")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.enable_xml:
@@ -207,6 +211,9 @@ class PocoConan(ConanFile):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def package_id(self):
+        del self.info.options.enable_active_record
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
