@@ -250,7 +250,7 @@ class ogrecmakeconan(ConanFile):
         include_prefix = os.path.join("include", "OGRE")
         components = {
             "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", 
-                                        "sdl::sdl", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
+                                        "sdl::sdl", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu", "egl::egl"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},

@@ -530,21 +530,3 @@ index ed4bc7df9..0a7a1a250 100644
  
  ogre_add_library_to_folder(Plugins Plugin_EXRCodec ${OGRE_LIB_TYPE} ${HEADER_FILES} ${SOURCE_FILES})
  target_link_libraries(Plugin_EXRCodec OgreMain ${OPENEXR_LIBRARIES})
-
-diff --git a/OgreMain/CMakeLists.txt b/OgreMain/CMakeLists.txt
-index ae2c5ac4f..585b7ae21 100644
---- a/OgreMain/CMakeLists.txt
-+++ b/OgreMain/CMakeLists.txt
-@@ -274,10 +274,12 @@ if (OGRE_CONFIG_THREADS)
-   list(APPEND LIBRARIES ${OGRE_THREAD_LIBRARIES})
- endif ()
- 
-+set(OGRE_CONFIG_ENABLE_FREEIMAGE True)
- if (OGRE_CONFIG_ENABLE_FREEIMAGE)
-   add_definitions(-DFREEIMAGE_LIB)
-   list(APPEND HEADER_FILES include/OgreFreeImageCodec.h)
-   list(APPEND SOURCE_FILES src/OgreFreeImageCodec.cpp)
-+  set(FreeImage_LIBRARIES ${freeimage_LIBRARIES})
-   list(APPEND LIBRARIES    "${FreeImage_LIBRARIES}")
- endif()
-
