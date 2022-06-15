@@ -17,7 +17,7 @@ class ogrecmakeconan(ConanFile):
 
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
-    #options copied from https://github.com/StatelessStudio/ogre-conan/blob/master/conanfile.py
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -61,7 +61,6 @@ class ogrecmakeconan(ConanFile):
         "ogre_glsupport_use_egl": [True, False]
     }
 
-    # default options copied from https://github.com/StatelessStudio/ogre-conan/blob/master/conanfile.py
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -75,7 +74,7 @@ class ogrecmakeconan(ConanFile):
         "ogre_build_component_overlay": True,
         "ogre_build_component_paging": True,
         "ogre_build_component_property": True,
-        "ogre_build_component_python": True,
+        "ogre_build_component_python": False,
         "ogre_build_component_rtshadersystem": True,
         "ogre_build_component_terrain": True,
         "ogre_build_component_volume": True,
@@ -255,7 +254,7 @@ class ogrecmakeconan(ConanFile):
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
-            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLoadGenerator"], "include": [include_prefix, f"{include_prefix}/MeshLoadGenerator"]},
+            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLodGenerator"], "include": [include_prefix, f"{include_prefix}/MeshLodGenerator"]},
             "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"], "include": [include_prefix, f"{include_prefix}/Overlay"]},
             "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], "include": [include_prefix, f"{include_prefix}/Paging"]},
             "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"], "include": [include_prefix, f"{include_prefix}/Property"]},
@@ -263,7 +262,19 @@ class ogrecmakeconan(ConanFile):
             "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"], "include": [include_prefix, f"{include_prefix}/RTShaderSystem"]},
             "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"], "include": [include_prefix, f"{include_prefix}/Terrain"]},
             "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"], "include": [include_prefix, f"{include_prefix}/Volume"]}
+            
         }
+
+        if self.options.ogre_build_tests:
+            components["OgreMain"]["requires"].append("cppunit::cppunit")
+
+        if self.options.ogre_build_component_python:
+            components["Python"] = {"requires" : ["OgreMain"], "libs": ["OgrePython"], "include": ["include", include_prefix, f"{include_prefix}/Python"]}
+
+        if self.settings.build_type == "Debug":
+            for _, values in components.items():
+                libs = [lib + "_d" for lib in values.get("libs")]
+                values["libs"] = libs
 
         return components
 
@@ -273,7 +284,7 @@ class ogrecmakeconan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OGRE"
         self.cpp_info.names["cmake_find_package_multi"] = "OGRE"
         self.cpp_info.names["cmake_paths"] = "OGRE"
-
+        self.cpp_info.
         for comp, values in self._components.items():
             self.cpp_info.components[comp].names["cmake_find_package"] = comp
             self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
@@ -282,6 +293,8 @@ class ogrecmakeconan(ConanFile):
             self.cpp_info.components[comp].requires = values.get("requires")
             self.cpp_info.components[comp].set_property("cmake_target_name", f"OGRE::{comp}")
             self.cpp_info.components[comp].includedirs = values.get("include")
+            
+            self.cpp_info.components[comp].builddirs.append(self._module_file_rel_dir)
             self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components[comp].build_modules["cmake_paths"] = [self._module_file_rel_path]
@@ -290,5 +303,9 @@ class ogrecmakeconan(ConanFile):
                 self.cpp_info.components[comp].system_libs.append("pthread")
 
     @property
+    def _module_file_rel_dir(self):
+        return os.path.join("lib", "cmake")
+
+    @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+        return os.path.join(self._module_file_rel_dir, f"conan-official-{self.name}-variables.cmake")
