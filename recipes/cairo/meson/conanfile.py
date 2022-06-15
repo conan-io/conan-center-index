@@ -85,6 +85,8 @@ class CairoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.with_glib and self.options.shared:
+            self.options["glib"].shared = True
 
     def requirements(self):
         self.requires("pixman/0.40.0")
@@ -121,6 +123,10 @@ class CairoConan(ConanFile):
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
             raise ConanInvalidConfiguration("'with_xlib_xrender' option requires 'with_xlib' option to be enabled as well!")
+        if self.options.with_glib and not self.options["glib"].shared and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     @property
     def _is_msvc(self):
@@ -378,3 +384,6 @@ class CairoConan(ConanFile):
         # binary tools
         if self.options.with_zlib and self.options.with_png:
             self.cpp_info.components["cairo_util_"].requires.append("expat::expat") # trace-to-xml.c, xml-to-trace.c
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

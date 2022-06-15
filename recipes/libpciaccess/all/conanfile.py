@@ -1,10 +1,10 @@
 import os
-
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conans import ConanFile, tools, __version__ as conan_version
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.44.0"
 
 
 class LibPciAccessConan(ConanFile):
@@ -19,8 +19,9 @@ class LibPciAccessConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def validate(self):
         def is_supported(settings):
@@ -55,26 +56,18 @@ class LibPciAccessConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        # autoreconf
         self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
                  win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
-        if conan_version < tools.Version("1.48.0"):
-            autotools = Autotools(self)
-            autotools.configure(build_script_folder=self._source_subfolder)
-        else:
-            autotools = Autotools(self, build_script_folder=self._source_subfolder)
-            autotools.configure()
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self._source_subfolder)
         autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses",
                   src=self._source_subfolder)
 
-        if conan_version < tools.Version("1.48.0"):
-            autotools = Autotools(self)
-        else:
-            autotools = Autotools(self, build_script_folder=self._source_subfolder)
+        autotools = Autotools(self)
         autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -82,5 +75,5 @@ class LibPciAccessConan(ConanFile):
             self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["pciaccess"]
         self.cpp_info.set_property("pkg_config_name", "pciaccess")

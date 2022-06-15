@@ -26,7 +26,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _is_universal2(self):
-        return self.version in ["r23b", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+        return self.version in ["r23b", "r23c", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
@@ -45,7 +45,7 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r24']:
+        if self.version in ['r23', 'r23b', 'r23c', 'r24']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
@@ -154,7 +154,7 @@ class AndroidNDKConan(ConanFile):
     def _fix_broken_links(self):
         # https://github.com/android/ndk/issues/1671
         # https://github.com/android/ndk/issues/1569
-        if self.version == "r23b" and self.settings.os in ["Linux", "Macos"]:
+        if self.version in ["r23b", "r23c"] and self.settings.os in ["Linux", "Macos"]:
             platform = "darwin" if self.settings.os == "Macos" else "linux"
             links = {f"toolchains/llvm/prebuilt/{platform}-x86_64/aarch64-linux-android/bin/as": "../../bin/aarch64-linux-android-as",
                      f"toolchains/llvm/prebuilt/{platform}-x86_64/arm-linux-androideabi/bin/as": "../../bin/arm-linux-androideabi-as",

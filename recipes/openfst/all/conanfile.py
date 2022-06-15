@@ -40,7 +40,7 @@ class OpenFstConan(ConanFile):
         "enable_compress": False,
         "enable_const_fsts": False,
         "enable_far": False,
-        "enable_grm": False,
+        "enable_grm": True,
         "enable_linear_fsts": False,
         "enable_lookahead_fsts": False,
         "enable_mpdt": False,

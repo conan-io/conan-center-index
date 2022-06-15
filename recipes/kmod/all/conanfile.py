@@ -1,6 +1,8 @@
-from conans import ConanFile, tools, __version__ as conan_version
-from conans.errors import ConanInvalidConfiguration
+from conans import tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.files import get, save, rmdir
 import os
 
 required_conan_version = ">=1.44"
@@ -37,10 +39,6 @@ class KModConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
@@ -75,9 +73,9 @@ class KModConan(ConanFile):
         if self.options.with_xz:
             self.requires('xz_utils/5.2.5')
         if self.options.with_zlib:
-            self.requires('zlib/1.2.11')
+            self.requires('zlib/1.2.12')
         if self.options.with_openssl:
-            self.requires('openssl/3.0.1')
+            self.requires('openssl/3.0.3')
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -88,29 +86,23 @@ class KModConan(ConanFile):
             raise ConanInvalidConfiguration("kmod is Linux-only!")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tools.save(os.path.join(self._source_subfolder, "libkmod", "docs", "gtk-doc.make"), "")
-        self.run("autoreconf -fiv", cwd=self._source_subfolder)
-        if conan_version < tools.Version("1.48.0"):
-            autotools = Autotools(self)
-            autotools.configure(build_script_folder=self._source_subfolder)
-        else:
-            autotools = Autotools(self, build_script_folder=self._source_subfolder)
-            autotools.configure()
+        save(self, os.path.join(self._source_subfolder, "libkmod", "docs", "gtk-doc.make"), "")
+        self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
+                 win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self._source_subfolder)
         autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        if conan_version < tools.Version("1.48.0"):
-            autotools = Autotools(self)
-        else:
-            autotools = Autotools(self, build_script_folder=self._source_subfolder)
+        autotools = Autotools(self)
         autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libkmod")
