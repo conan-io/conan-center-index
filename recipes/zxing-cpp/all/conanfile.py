@@ -39,7 +39,7 @@ class ZXingCppConan(ConanFile):
     @property
     def _compiler_cpp14_support(self):
         return {
-            "gcc": "5",
+            "gcc": "5" if tools.Version(self.version) < "1.2" else "6",
             "Visual Studio": "14",
             "clang": "3.4",
             "apple-clang": "3.4",
