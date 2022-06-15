@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -27,6 +28,10 @@ class LdnsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported by the ldns recipe. Contributions are welcome.")
 
     @property
     def _settings_build(self):
