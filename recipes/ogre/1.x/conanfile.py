@@ -24,46 +24,37 @@ class ogrecmakeconan(ConanFile):
         "cp_bin_dir": "ANY",
         "cp_media_dir": "ANY",
         "disable_plugins": [True, False],
-        "OGRE_ASSERT_MODE": "ANY",
-        "OGRE_BUILD_COMPONENT_BITES": [True, False],
-        "OGRE_BUILD_COMPONENT_CSHARP": [True, False],
-        "OGRE_BUILD_COMPONENT_HLMS": [True, False],
-        "OGRE_BUILD_COMPONENT_JAVA": [True, False],
-        "OGRE_BUILD_COMPONENT_MESHLODGENERATOR": [True, False],
-        "OGRE_BUILD_COMPONENT_OVERLAY": [True, False],
-        "OGRE_BUILD_COMPONENT_OVERLAY_IMGUI": [True, False],
-        "OGRE_BUILD_COMPONENT_PAGING": [True, False],
-        "OGRE_BUILD_COMPONENT_PROPERTY": [True, False],
-        "OGRE_BUILD_COMPONENT_PYTHON": [True, False],
-        "OGRE_BUILD_COMPONENT_RTSHADERSYSTEM": [True, False],
-        "OGRE_BUILD_COMPONENT_TERRAIN": [True, False],
-        "OGRE_BUILD_COMPONENT_VOLUME": [True, False],
-        "OGRE_BUILD_DEPENDENCIES": [True, False],
-        "OGRE_BUILD_PLUGIN_BSP": [True, False],
-        "OGRE_BUILD_PLUGIN_DOT_SCENE": [True, False],
-        "OGRE_BUILD_PLUGIN_OCTREE": [True, False],
-        "OGRE_BUILD_PLUGIN_PCZ": [True, False],
-        "OGRE_BUILD_PLUGIN_PFX": [True, False],
-        "OGRE_BUILD_PLUGIN_STBI": [True, False],
-        "OGRE_BUILD_RENDERSYSTEM_D3D11": [True, False],
-        "OGRE_BUILD_RENDERSYSTEM_GL": [True, False],
-        "OGRE_BUILD_RENDERSYSTEM_GL3PLUS": [True, False],
-        "OGRE_BUILD_RTSHADERSYSTEM_SHADERS": [True, False],
-        "OGRE_BUILD_SAMPLES": [True, False],
-        "OGRE_BUILD_TESTS": [True, False],
-        "OGRE_BUILD_TOOLS": [True, False],
-        "OGRE_CONFIG_ENABLE_QUAD_BUFFER_STEREO": [True, False],
-        "OGRE_CONFIG_FILESYSTEM_UNICODE": [True, False],
-        "OGRE_CONFIG_THREADS": "ANY",
-        "OGRE_CONFIG_THREAD_PROVIDER": "ANY",
-        "OGRE_ENABLE_PRECOMPILED_HEADERS": [True, False],
-        "OGRE_INSTALL_PDB": [True, False],
-        "OGRE_INSTALL_SAMPLES": [True, False],
-        "OGRE_INSTALL_TOOLS": [True, False],
-        "OGRE_INSTALL_VSPROPS": [True, False],
-        "OGRE_NODELESS_POSITIONING": [True, False],
-        "OGRE_PROFILING_REMOTERY_PATH": "ANY",
-        "OGRE_RESOURCEMANAGER_STRICT": "ANY",
+        "ogre_assert_mode": "ANY",
+        "ogre_build_component_bites": [True, False],
+        "ogre_build_component_hlms": [True, False],
+        "ogre_build_component_meshlodgenerator": [True, False],
+        "ogre_build_component_overlay": [True, False],
+        "ogre_build_component_paging": [True, False],
+        "ogre_build_component_property": [True, False],
+        "ogre_build_component_python": [True, False],
+        "ogre_build_component_rtshadersystem": [True, False],
+        "ogre_build_component_terrain": [True, False],
+        "ogre_build_component_volume": [True, False],
+        "ogre_build_dependencies": [True, False],
+        "ogre_build_plugin_bsp": [True, False],
+        "ogre_build_plugin_octree": [True, False],
+        "ogre_build_plugin_pcz": [True, False],
+        "ogre_build_plugin_pfx": [True, False],
+        "ogre_build_rendersystem_d3d11": [True, False],
+        "ogre_build_rendersystem_gl": [True, False],
+        "ogre_build_rendersystem_gl3plus": [True, False],
+        "ogre_build_samples": [True, False],
+        "ogre_build_tests": [True, False],
+        "ogre_build_tools": [True, False],
+        "ogre_config_enable_quad_buffer_stereo": [True, False],
+        "ogre_config_filesystem_unicode": [True, False],
+        "ogre_config_threads": "ANY",
+        "ogre_config_thread_provider": "ANY",
+        "ogre_install_pdb": [True, False],
+        "ogre_install_samples": [True, False],
+        "ogre_install_tools": [True, False],
+        "ogre_install_vsprops": [True, False],
+        "ogre_resourcemanager_strict": "ANY",
         "ogre_static": [True, False],
         "ogre_set_double": [True, False],
         "ogre_glsupport_use_egl": [True, False],
@@ -88,61 +79,40 @@ class ogrecmakeconan(ConanFile):
         "cp_bin_dir": "bin",
         "cp_media_dir": "Media",
         "disable_plugins": False,
-        "OGRE_ASSERT_MODE": 1,
-        "OGRE_BUILD_COMPONENT_BITES": True,
-        "OGRE_BUILD_COMPONENT_CSHARP": False,
-        "OGRE_BUILD_COMPONENT_HLMS": True,
-        "OGRE_BUILD_COMPONENT_JAVA": False,
-        "OGRE_BUILD_COMPONENT_MESHLODGENERATOR": True,
-        "OGRE_BUILD_COMPONENT_OVERLAY": True,
-        "OGRE_BUILD_COMPONENT_OVERLAY_IMGUI": True,
-        "OGRE_BUILD_COMPONENT_PAGING": True,
-        "OGRE_BUILD_COMPONENT_PROPERTY": True,
-        "OGRE_BUILD_COMPONENT_PYTHON": True,
-        "OGRE_BUILD_COMPONENT_RTSHADERSYSTEM": True,
-        "OGRE_BUILD_COMPONENT_TERRAIN": True,
-        "OGRE_BUILD_COMPONENT_VOLUME": True,
-        "OGRE_BUILD_DEPENDENCIES": False,
-        "OGRE_BUILD_PLUGIN_BSP": True,
-        "OGRE_BUILD_PLUGIN_DOT_SCENE": True,
-        "OGRE_BUILD_PLUGIN_OCTREE": True,
-        "OGRE_BUILD_PLUGIN_PCZ": True,
-        "OGRE_BUILD_PLUGIN_PFX": True,
-        "OGRE_BUILD_PLUGIN_STBI": True,
-        "OGRE_BUILD_RENDERSYSTEM_D3D11": True,
-        "OGRE_BUILD_RENDERSYSTEM_GL": True,
-        "OGRE_BUILD_RENDERSYSTEM_GL3PLUS": True,
-        "OGRE_BUILD_RTSHADERSYSTEM_SHADERS": True,
-        "OGRE_BUILD_SAMPLES": True,
-        "OGRE_BUILD_TESTS": False,
-        "OGRE_BUILD_TOOLS": True,
-        "OGRE_CONFIG_ENABLE_QUAD_BUFFER_STEREO": False,
-        "OGRE_CONFIG_FILESYSTEM_UNICODE": True,
-        "OGRE_CONFIG_THREADS": 3,
-        "OGRE_CONFIG_THREAD_PROVIDER": "std",
-        "OGRE_ENABLE_PRECOMPILED_HEADERS": True,
-        "OGRE_INSTALL_PDB": False,
-        "OGRE_INSTALL_SAMPLES": True,
-        "OGRE_INSTALL_TOOLS": True,
-        "OGRE_INSTALL_VSPROPS": False,
-        "OGRE_NODELESS_POSITIONING": True,
-        "OGRE_PROFILING_REMOTERY_PATH": "",
-        "OGRE_RESOURCEMANAGER_STRICT": 2,
+        "ogre_assert_mode": 1,
+        "ogre_build_component_bites": True,
+        "ogre_build_component_hlms": True,
+        "ogre_build_component_meshlodgenerator": True,
+        "ogre_build_component_overlay": True,
+        "ogre_build_component_paging": True,
+        "ogre_build_component_property": True,
+        "ogre_build_component_python": True,
+        "ogre_build_component_rtshadersystem": True,
+        "ogre_build_component_terrain": True,
+        "ogre_build_component_volume": True,
+        "ogre_build_dependencies": False,
+        "ogre_build_plugin_bsp": True,
+        "ogre_build_plugin_octree": True,
+        "ogre_build_plugin_pcz": True,
+        "ogre_build_plugin_pfx": True,
+        "ogre_build_rendersystem_d3d11": True,
+        "ogre_build_rendersystem_gl": True,
+        "ogre_build_rendersystem_gl3plus": True,
+        "ogre_build_samples": True,
+        "ogre_build_tests": False,
+        "ogre_build_tools": True,
+        "ogre_config_enable_quad_buffer_stereo": False,
+        "ogre_config_filesystem_unicode": True,
+        "ogre_config_threads": 3,
+        "ogre_config_thread_provider": "std",
+        "ogre_install_pdb": False,
+        "ogre_install_samples": True,
+        "ogre_install_tools": True,
+        "ogre_install_vsprops": False,
+        "ogre_resourcemanager_strict": 2,
         "ogre_static": True,
         "ogre_set_double": False,
         "ogre_glsupport_use_egl": True,
-        "OpenEXR_Half_LIBRARY": "OpenEXR_Half_LIBRARY-NOTFOUND",
-        "OpenEXR_Half_LIBRARY_DEBUG": "OpenEXR_Half_LIBRARY_DEBUG-NOTFOUND",
-        "OpenEXR_INCLUDE_DIR": "OpenEXR_INCLUDE_DIR-NOTFOUND",
-        "OpenEXR_Iex_LIBRARY": "OpenEXR_Iex_LIBRARY-NOTFOUND",
-        "OpenEXR_Iex_LIBRARY_DEBUG": "OpenEXR_Iex_LIBRARY_DEBUG-NOTFOUND",
-        "OpenEXR_IlmImf_LIBRARY": "OpenEXR_IlmImf_LIBRARY-NOTFOUND",
-        "OpenEXR_IlmImf_LIBRARY_DEBUG": "OpenEXR_IlmImf_LIBRARY_DEBUG-NOTFOUND",
-        "OpenEXR_IlmThread_LIBRARY": "OpenEXR_IlmThread_LIBRARY-NOTFOUND",
-        "OpenEXR_IlmThread_LIBRARY_DEBUG": "OpenEXR_IlmThread_LIBRARY_DEBUG-NOTFOUND",
-        "Qt5_DIR": "Qt5_DIR-NOTFOUND",
-        "SDL2_DIR": "${ogre-build-dir}/Dependencies/cmake",
-        "pugixml_DIR": "${ogre-build-dir}/Dependencies/lib/cmake/pugixml"
     }
     exports_sources = "CMakeLists.txt", "patches/**"
     short_paths = True
@@ -160,6 +130,7 @@ class ogrecmakeconan(ConanFile):
         self.requires("openssl/1.1.1o", override=True)
         self.requires("xorg/system")
         self.requires("glu/system")
+        self.requires("sdl/2.0.20")
         if self.options.ogre_glsupport_use_egl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
         else:
@@ -197,10 +168,38 @@ class ogrecmakeconan(ConanFile):
         cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
         if not tools.valid_min_cppstd(self, 11):
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11 # for OpenEXR
-        cmake.definitions["OGRE_BUILD_TESTS"] = self.options.OGRE_BUILD_TESTS
-        cmake.definitions["OGRE_BUILD_SAMPLES"] = self.options.OGRE_BUILD_SAMPLES
-        cmake.definitions["OGRE_INSTALL_SAMPLES"] = self.options.OGRE_INSTALL_SAMPLES
-        cmake.definitions["OGRE_INSTALL_PDB"] = self.options.OGRE_INSTALL_PDB
+        cmake.definitions["OGRE_BUILD_TESTS"] = self.options.ogre_build_tests
+        cmake.definitions["OGRE_ASSERT_MODE"] = self.options.ogre_assert_mode
+        cmake.definitions["OGRE_BUILD_COMPONENT_BITES"]  = self.options.ogre_build_component_bites
+        cmake.definitions["OGRE_BUILD_COMPONENT_HLMS"] = self.options.ogre_build_component_hlms
+        cmake.definitions["OGRE_BUILD_COMPONENT_MESHLODGENERATOR"] = self.options.ogre_build_component_meshlodgenerator
+        cmake.definitions["OGRE_BUILD_COMPONENT_OVERLAY"] = self.options.ogre_build_component_overlay
+        cmake.definitions["OGRE_BUILD_COMPONENT_PAGING"] = self.options.ogre_build_component_paging
+        cmake.definitions["OGRE_BUILD_COMPONENT_PROPERTY"] = self.options.ogre_build_component_property
+        cmake.definitions["OGRE_BUILD_COMPONENT_PYTHON"] = self.options.ogre_build_component_python
+        cmake.definitions["OGRE_BUILD_COMPONENT_RTSHADERSYSTEM"] = self.options.ogre_build_component_rtshadersystem
+        cmake.definitions["OGRE_BUILD_COMPONENT_TERRAIN"] = self.options.ogre_build_component_terrain
+        cmake.definitions["OGRE_BUILD_COMPONENT_VOLUME"] = self.options.ogre_build_component_volume
+        cmake.definitions["OGRE_BUILD_DEPENDENCIES"] = self.options.ogre_build_dependencies
+        cmake.definitions["OGRE_BUILD_PLUGIN_BSP"] = self.options.ogre_build_plugin_bsp
+        cmake.definitions["OGRE_BUILD_PLUGIN_OCTREE"] = self.options.ogre_build_plugin_octree
+        cmake.definitions["OGRE_BUILD_PLUGIN_PCZ"] = self.options.ogre_build_plugin_pcz
+        cmake.definitions["OGRE_BUILD_PLUGIN_PFX"] = self.options.ogre_build_plugin_pfx
+        cmake.definitions["OGRE_BUILD_RENDERSYSTEM_D3D11"] = self.options.ogre_build_rendersystem_d3d11
+        cmake.definitions["OGRE_BUILD_RENDERSYSTEM_GL"] = self.options.ogre_build_rendersystem_gl
+        cmake.definitions["OGRE_BUILD_RENDERSYSTEM_GL3PLUS"] = self.options.ogre_build_rendersystem_gl3plus
+        cmake.definitions["OGRE_BUILD_SAMPLES"] = self.options.ogre_build_samples
+        cmake.definitions["OGRE_BUILD_TOOLS"] = self.options.ogre_build_tools
+        cmake.definitions["OGRE_CONFIG_ENABLE_QUAD_BUFFER_STEREO"] = self.options.ogre_config_enable_quad_buffer_stereo
+        cmake.definitions["OGRE_CONFIG_FILESYSTEM_UNICODE"] = self.options.ogre_config_filesystem_unicode
+        cmake.definitions["OGRE_CONFIG_THREADS"] = self.options.ogre_config_threads
+        cmake.definitions["OGRE_CONFIG_THREAD_PROVIDER" = self.options.ogre_config_thread_provider
+        cmake.definitions["OGRE_INSTALL_PDB"] = self.options.ogre_install_pdb
+        cmake.definitions["OGRE_INSTALL_SAMPLES"] = self.options.ogre_install_samples
+        cmake.definitions["OGRE_INSTALL_TOOLS"] = self.options.ogre_install_tools
+        cmake.definitions["OGRE_RESOURCEMANAGER_STRICT"] = self.options.ogre_resourcemanager_strict
+        if self.settings.os = "Windows":
+            cmake.definitions["OGRE_INSTALL_VSPROPS"] = self.options.ogre_install_vsprops
         cmake.configure()
         return cmake
 
@@ -259,7 +258,8 @@ class ogrecmakeconan(ConanFile):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         components = {
-            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
+            "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", "tbb::tbb", 
+                                        "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
             "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
             "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
