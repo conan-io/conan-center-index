@@ -1,0 +1,4 @@
+sources:
+  "0.17.2":
+    url: "https://github.com/xtensor-stack/xtensor-blas/archive/0.17.2.tar.gz"
+    sha256: "2798c7e230d0c4b2d357bba20a0ef23a2b774d892be31ebbf702cb9935ea9f64"
