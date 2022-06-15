@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -61,6 +62,14 @@ class HarfbuzzConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared and self.options.with_glib:
+            self.options["glib"].shared = True
+
+    def validate(self):
+        if self.options.shared and self.options.with_glib and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     def requirements(self):
         if self.options.with_freetype:
@@ -138,3 +147,7 @@ class HarfbuzzConan(ConanFile):
             libcxx = tools.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
+
+    def package_id(self):
+        if self.options.with_glib:
+            self.info.requires["glib"].full_package_mode()
