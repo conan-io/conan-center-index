@@ -4,6 +4,7 @@ import glob
 
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.32.0"
 
@@ -27,10 +28,6 @@ class PangoConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
@@ -117,16 +114,16 @@ class PangoConan(ConanFile):
         tools.replace_in_file(meson_build, "subdir('tools')", "")
         tools.replace_in_file(meson_build, "subdir('utils')", "")
         tools.replace_in_file(meson_build, "subdir('examples')", "")
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
-        if self._is_msvc:
+        if is_msvc(self):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
