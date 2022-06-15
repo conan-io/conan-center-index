@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import functools
 import os
 
@@ -82,6 +83,8 @@ class ZXingCppConan(ConanFile):
             cmake.definitions["BUILD_READERS"] = self.options.enable_decoders
             cmake.definitions["BUILD_EXAMPLES"] = False
             cmake.definitions["BUILD_BLACKBOX_TESTS"] = False
+        if is_msvc(self):
+            cmake.definitions["LINK_CPP_STATICALLY"] = "MT" in str(self.settings.compiler.runtime)
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
