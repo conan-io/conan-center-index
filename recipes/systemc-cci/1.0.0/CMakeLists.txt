@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(cci)
+project(cci CXX C)
 
 set(LIBRARY_VERSION_MAJOR 1 CACHE STRING "major version" FORCE)
 set(LIBRARY_VERSION_MINOR 0 CACHE STRING "minor version" FORCE)
@@ -11,10 +11,8 @@ set(LIBRARY_NAME cciapi)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-set(POSITION_INDEPENDENT_CODE ON)
-
 include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 if(DEFINED ENV{RAPIDJSON_HOME})
     set(RAPIDJSON $ENV{RAPIDJSON_HOME})
@@ -42,12 +40,10 @@ set(SOURCES
 )
 
 add_library(${LIBRARY_NAME} ${SOURCES})	
-set_property(TARGET ${LIBRARY_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(${LIBRARY_NAME} PUBLIC ${RAPIDJSON}/include)
 
 install(TARGETS ${LIBRARY_NAME}
-  EXPORT ${PROJECT_NAME}Targets            # for downstream dependencies
   ARCHIVE DESTINATION lib COMPONENT libs   # static lib
   LIBRARY DESTINATION lib COMPONENT libs   # shared lib
   FRAMEWORK DESTINATION bin COMPONENT libs # for mac
