@@ -126,7 +126,7 @@ class PocoConan(ConanFile):
         if self.options.enable_xml:
             self.requires("expat/2.4.8")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.38.1")
+            self.requires("sqlite3/3.38.5")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
@@ -138,7 +138,7 @@ class PocoConan(ConanFile):
         if self.options.get_safe("enable_data_postgresql"):
             self.requires("libpq/14.2")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
 
     def validate(self):
         if self.options.enable_apacheconnector:
