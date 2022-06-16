@@ -6,7 +6,7 @@ on:
 env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
-  SCORE_THRESHOLD: "9.0"
+  SCORE_THRESHOLD: "9.5"
   REQUIREMENTS: "pylint==2.14"
 
 jobs:
