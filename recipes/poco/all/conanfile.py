@@ -110,7 +110,7 @@ class PocoConan(ConanFile):
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
-            self.output.warn("enable_active_record option is deprecated, do not use anymore.")
+            self.output.warn("enable_active_record option is deprecated, use 'enable_activerecord' instead")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.enable_xml:
