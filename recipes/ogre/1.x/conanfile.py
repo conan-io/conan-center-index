@@ -222,6 +222,7 @@ class ogrecmakeconan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "OGRE", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
             tools.Version(self.version)
@@ -258,7 +259,6 @@ class ogrecmakeconan(ConanFile):
             "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"], "include": [include_prefix, f"{include_prefix}/Overlay"]},
             "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], "include": [include_prefix, f"{include_prefix}/Paging"]},
             "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"], "include": [include_prefix, f"{include_prefix}/Property"]},
-            "Python" :  {"requires" : ["OgreMain"], "libs": ["OgrePython"], "include": [include_prefix, f"{include_prefix}/Python"]},
             "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"], "include": [include_prefix, f"{include_prefix}/RTShaderSystem"]},
             "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"], "include": [include_prefix, f"{include_prefix}/Terrain"]},
             "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"], "include": [include_prefix, f"{include_prefix}/Volume"]}
