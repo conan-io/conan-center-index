@@ -192,7 +192,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
