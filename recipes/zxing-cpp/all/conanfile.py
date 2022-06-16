@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import functools
 import os
 
@@ -67,6 +67,9 @@ class ZXingCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "This compiler is too old. {} needs a compiler with c++14 support".format(self.name)
             )
+        # FIXME: This is a workaround for "The system cannot execute the specified program."
+        if tools.Version(self.version) == "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
