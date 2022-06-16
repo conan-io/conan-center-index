@@ -1,11 +1,10 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
 
-
-class ItlibTestConan(ConanFile):
-    settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+class TestPackageConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi",
 
     def build(self):
         cmake = CMake(self)
