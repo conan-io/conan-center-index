@@ -3,7 +3,8 @@ project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
-# find_package(samarium CONFIG REQUIRED)
+find_package(SAMARIUM CONFIG REQUIRED)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::samarium)
+target_link_libraries(${PROJECT_NAME} samarium::samarium)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
