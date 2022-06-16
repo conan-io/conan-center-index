@@ -11,7 +11,7 @@ class SamariumConan(ConanFile):
     homepage = "https://strangequark1041.github.io/samarium/"
     url = "https://github.com/conan-io/conan-center-index/"
     license = "MIT"
-    topics = ("c++20", "physics", "2d", "simulation")
+    topics = ("cpp20", "physics", "2d", "simulation")
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
