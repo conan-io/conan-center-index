@@ -21,7 +21,10 @@ class XtensorBlasConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("xtensor/0.24.0")
+        if tools.Version(self.version) == "0.17.2":
+            self.requires("xtensor/0.21.4")
+        else:
+            self.requires("xtensor/0.24.0")
         self.requires("openblas/0.3.17")
 
     def validate(self):
