@@ -139,6 +139,10 @@ class CPythonConan(ConanFile):
             self.generators.append("MSBuildDeps")
 
     def validate(self):
+        # FIXME
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("XXX")
+
         if self.options.shared:
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
