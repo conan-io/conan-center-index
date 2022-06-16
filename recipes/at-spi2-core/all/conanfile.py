@@ -46,12 +46,6 @@ class AtSpi2CoreConan(ConanFile):
         if self.options.shared:
             self.options["glib"].shared = True
 
-    def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
-            raise ConanInvalidConfiguration(
-                "Linking a shared library against static glib can cause unexpected behaviour."
-            )
-
     def build_requirements(self):
         self.build_requires("meson/0.62.2")
         self.build_requires("pkgconf/1.7.4")
@@ -63,6 +57,10 @@ class AtSpi2CoreConan(ConanFile):
         self.requires("dbus/1.12.20")
 
     def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("only linux is supported by this recipe")
 
