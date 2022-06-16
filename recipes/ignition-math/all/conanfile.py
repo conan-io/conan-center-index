@@ -78,11 +78,6 @@ class IgnitionMathConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        version_major = tools.Version(self.version).major
-        conan.tools.files.rename(
-             self, f"gz-math-ignition-math{version_major}_{self.version}",
-             self._source_subfolder
-            )
 
     def _configure_cmake(self):
         if self._cmake:
