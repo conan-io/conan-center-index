@@ -695,16 +695,19 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["_python_copy"].names["pkg_config"] = "python{}".format(py_version.major)
         self.cpp_info.components["_python_copy"].requires = ["python"]
         self.cpp_info.components["_python_copy"].libdirs = []
+        self.cpp_info.components["_python_copy"].includedirs = []
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
         self.cpp_info.components["embed"].libdirs = [libdir]
+        self.cpp_info.components["embed"].includedirs = []
         self.cpp_info.components["embed"].names["pkg_config"] = "python-{}.{}-embed".format(py_version.major, py_version.minor)
         self.cpp_info.components["embed"].requires = ["python"]
 
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
         self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
         self.cpp_info.components["_embed_copy"].libdirs = []
+        self.cpp_info.components["_embed_copy"].includedirs = []
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
@@ -735,6 +738,7 @@ class CPythonConan(ConanFile):
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].libdirs = []
+            self.cpp_info.components["_hidden"].includedirs = []
 
         if self.options.env_vars:
             bindir = os.path.join(self.package_folder, "bin")
