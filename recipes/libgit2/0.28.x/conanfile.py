@@ -72,9 +72,9 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/3.1.0")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
 
