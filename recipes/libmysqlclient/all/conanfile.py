@@ -255,7 +255,7 @@ class LibMysqlClientCConan(ConanFile):
             if tools.Version(self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("resolv")
         if self.settings.os == "Windows":
-            if tools.Version(self.version) >= "8.0.25:
+            if tools.Version(self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("dnsapi")
             self.cpp_info.system_libs.extend("secur32")
 
