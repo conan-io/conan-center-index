@@ -6,7 +6,7 @@ on:
 env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
-  SCORE_THRESHOLD: "9.0"
+  SCORE_THRESHOLD: "9.5"
   REQUIREMENTS: "pylint==2.14"
 
 jobs:
@@ -23,6 +23,12 @@ jobs:
         with:
           files: |
             linter/**
+      - name: Get Conan v1 version
+        id: parse_conan_v1_version
+        if: steps.changed_files.outputs.any_changed == 'true'
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.conan.version' '.c3i/c3i.yml'
       - uses: actions/setup-python@v3
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
@@ -30,7 +36,7 @@ jobs:
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pip install ${{ env.REQUIREMENTS }}
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
       - name: Execute linter over all recipes in the repository
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
@@ -63,6 +69,12 @@ jobs:
         with:
           files: |
             recipes/*/*/conanfile.py
+      - name: Get Conan v1 version
+        id: parse_conan_v1_version
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.conan.version' '.c3i/c3i.yml'
       - uses: actions/setup-python@v3
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
@@ -70,7 +82,7 @@ jobs:
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          pip install ${{ env.REQUIREMENTS }}
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
