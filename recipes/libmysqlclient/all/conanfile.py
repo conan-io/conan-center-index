@@ -251,6 +251,10 @@ class LibMysqlClientCConan(ConanFile):
                 self.cpp_info.system_libs.append(stdcpp_library)
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("resolv")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["dnsapi", "secur32"])
 
         # TODO: There is no official FindMySQL.cmake, but it's a common Find files in many projects
         #       do we want to support it in CMakeDeps?
