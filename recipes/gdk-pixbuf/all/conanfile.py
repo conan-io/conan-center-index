@@ -56,12 +56,6 @@ class GdkPixbufConan(ConanFile):
         if self.options.shared:
             self.options["glib"].shared = True
 
-    def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
-            raise ConanInvalidConfiguration(
-                "Linking a shared library against static glib can cause unexpected behaviour."
-            )
-
     def requirements(self):
         if self.settings.compiler == "clang":
             # FIXME: cannot bump glib due to "undefined reference to `__muloti4'"
@@ -79,6 +73,10 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg/9d")
 
     def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
         if self.settings.os == "Macos":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
