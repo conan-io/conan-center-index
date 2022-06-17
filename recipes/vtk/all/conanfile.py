@@ -380,7 +380,8 @@ class VtkConan(ConanFile):
     def requirements(self):
         if self.options.group_enable_Rendering:
             self.requires("opengl/system")
-            self.requires("xorg/system")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.requires("xorg/system")
 
         for pack in self._third_party().values():
             self.requires(pack)
