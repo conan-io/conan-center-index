@@ -521,11 +521,11 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
 
         if self.options.get_safe("substrait", False):
-            self.cpp_info.components["libsubstrait"].libs = [self._lib_name("substrait")]
-            self.cpp_info.components["libsubstrait"].names["cmake_find_package"] = "substrait"
-            self.cpp_info.components["libsubstrait"].names["cmake_find_package_multi"] = "substrait"
-            self.cpp_info.components["libsubstrait"].names["pkg_config"] = "substrait"
-            self.cpp_info.components["libsubstrait"].requires = ["libarrow", "libparquet", "dataset"]
+            self.cpp_info.components["libarrow_substrait"].libs = [self._lib_name("arrow_substrait")]
+            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = "arrow_substrait"
+            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = "arrow_substrait"
+            self.cpp_info.components["libarrow_substrait"].names["pkg_config"] = "arrow_substrait"
+            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
 
         if self.options.plasma:
             self.cpp_info.components["libplasma"].libs = [self._lib_name("plasma")]
