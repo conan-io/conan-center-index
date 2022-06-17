@@ -253,15 +253,15 @@ class ogrecmakeconan(ConanFile):
             "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", 
                                         "sdl::sdl", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu", "egl::egl"], 
                             "libs": ["OgreMain"], "include": [include_prefix]},
-            "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": [include_prefix, f"{include_prefix}/Bites"]},
-            "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": [include_prefix, f"{include_prefix}/HLMS"]},
-            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLodGenerator"], "include": [include_prefix, f"{include_prefix}/MeshLodGenerator"]},
-            "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"], "include": [include_prefix, f"{include_prefix}/Overlay"]},
-            "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], "include": [include_prefix, f"{include_prefix}/Paging"]},
-            "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"], "include": [include_prefix, f"{include_prefix}/Property"]},
-            "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"], "include": [include_prefix, f"{include_prefix}/RTShaderSystem"]},
-            "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"], "include": [include_prefix, f"{include_prefix}/Terrain"]},
-            "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"], "include": [include_prefix, f"{include_prefix}/Volume"]}
+            "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": ["include", include_prefix, f"{include_prefix}/Bites"]},
+            "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": ["include", include_prefix, f"{include_prefix}/HLMS"]},
+            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLodGenerator"], "include": ["include", include_prefix, f"{include_prefix}/MeshLodGenerator"]},
+            "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"], "include": ["include", include_prefix, f"{include_prefix}/Overlay"]},
+            "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], "include": ["include", include_prefix, f"{include_prefix}/Paging"]},
+            "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"], "include": ["include", include_prefix, f"{include_prefix}/Property"]},
+            "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"], "include": ["include", include_prefix, f"{include_prefix}/RTShaderSystem"]},
+            "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"], "include": ["include", include_prefix, f"{include_prefix}/Terrain"]},
+            "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"], "include": ["include", include_prefix, f"{include_prefix}/Volume"]}
             
         }
 
