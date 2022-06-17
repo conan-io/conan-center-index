@@ -155,7 +155,11 @@ class VtkConan(ConanFile):
             "smp_enable_TBB":          [True, False],
 
             ### Modules ###
-            "build_all_modules": [True, False],     # The big one, build everything - good for pre-built CCI
+            "build_all_modules":       [True, False],     # The big one, build everything - good for pre-built CCI
+
+            "enable_remote_modules":   [True, False],   # Build modules that exist in Remote folder
+                                                        # Currently LookingGlass, DICOM and MomentInvariants filter
+                                                        # The default will be off, they should be built externally in the conan world (when available).
 
             # Groups of modules
             "group_enable_Qt":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],   # can set to False, and use modules for enabling parts of Qt support
@@ -225,6 +229,8 @@ class VtkConan(ConanFile):
 
             ### Modules ###
             "build_all_modules":       True,    # disable to pick+choose modules
+
+            "enable_remote_modules":   False,   # see notes above
 
             # Groups of modules
             "group_enable_Imaging":    "DEFAULT",
@@ -528,6 +534,8 @@ class VtkConan(ConanFile):
 
         ### Modules ###
         tc.variables["VTK_BUILD_ALL_MODULES"] = self.options.build_all_modules
+
+        tc.variables["VTK_ENABLE_REMOTE_MODULES"] = self.options.enable_remote_modules
 
 
         # There are LOTS of these modules now ...
