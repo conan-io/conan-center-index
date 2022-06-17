@@ -19,11 +19,13 @@ class ArrowConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "gandiva":  [True, False],
-        "parquet": [True, False],
+        "parquet": ["auto", True, False],
+        "substrait": [True, False],
+        "skyhook": [True, False],
         "plasma": [True, False],
         "cli": [True, False],
         "compute": ["auto", True, False],
-        "dataset_modules":  [True, False],
+        "dataset_modules":  ["auto", True, False],
         "deprecated": [True, False],
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
@@ -62,11 +64,13 @@ class ArrowConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "gandiva": False,
-        "parquet": False,
+        "parquet": "auto",
+        "skyhook": False,
+        "substrait": False,
         "plasma": False,
         "cli": False,
         "compute": "auto",
-        "dataset_modules": False,
+        "dataset_modules": "auto",
         "deprecated": True,
         "encryption": False,
         "filesystem_layer": False,
@@ -124,8 +128,11 @@ class ArrowConan(ConanFile):
         if tools.Version(self.version) < "6.0.0":
             del self.options.with_gcs
         if tools.Version(self.version) < "7.0.0":
+            del self.options.skyhook
             del self.options.with_flight_sql
             del self.options.with_opentelemetry
+        if tools.Version(self.version) < "8.0.0":
+            del self.options.substrait
 
     def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
@@ -135,6 +142,8 @@ class ArrowConan(ConanFile):
             del self.options.fPIC
         if self.options.compute == False and not self._compute(True):
             raise ConanInvalidConfiguration("compute options is required (or choose auto)")
+        if self.options.get_safe("skyhook", False):
+            raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
         if self.options.with_jemalloc == False and self._with_jemalloc(True):
             raise ConanInvalidConfiguration("with_jemalloc option is required (or choose auto)")
         if self.options.with_re2 == False and self._with_re2(True):
@@ -171,9 +180,21 @@ class ArrowConan(ConanFile):
 
     def _compute(self, required=False):
         if required or self.options.compute == "auto":
-            return bool(self.options.dataset_modules)
+            return bool(self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.compute)
+
+    def _parquet(self, required=False):
+        if required or self.options.parquet == "auto":
+            return bool(self.options.get_safe("substrait", False))
+        else:
+            return bool(self.options.parquet)
+
+    def _dataset_modules(self, required=False):
+        if required or self.options.dataset_modules == "auto":
+            return bool(self.options.get_safe("substrait", False))
+        else:
+            return bool(self.options.dataset_modules)
 
     def _with_jemalloc(self, required=False):
         if required or self.options.with_jemalloc == "auto":
@@ -189,7 +210,7 @@ class ArrowConan(ConanFile):
 
     def _with_protobuf(self, required=False):
         if required or self.options.with_protobuf == "auto":
-            return bool(self.options.gandiva or self._with_flight_rpc() or self.options.with_orc)
+            return bool(self.options.gandiva or self._with_flight_rpc() or self.options.with_orc or self.options.get_safe("substrait", False))
         else:
             return bool(self.options.with_protobuf)
 
@@ -223,7 +244,7 @@ class ArrowConan(ConanFile):
                 return True
             version = tools.Version(self.version)
             if version.major == "1":
-                if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
+                if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
                     return True
             elif version.major >= "2":
                 if self.settings.compiler == "Visual Studio":
@@ -234,7 +255,7 @@ class ArrowConan(ConanFile):
 
     def _with_thrift(self, required=False):
         # No self.options.with_thift exists
-        return bool(required or self.options.with_hiveserver2 or self.options.parquet)
+        return bool(required or self.options.with_hiveserver2 or self._parquet())
 
     def _with_utf8proc(self, required=False):
         if required or self.options.with_utf8proc == "auto":
@@ -256,7 +277,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self._with_thrift():
-            self.requires("thrift/0.15.0")
+            self.requires("thrift/0.16.0")
         if self._with_protobuf():
             self.requires("protobuf/3.20.0")
         if self._with_jemalloc():
@@ -326,9 +347,10 @@ class ArrowConan(ConanFile):
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_GANDIVA"] = self.options.gandiva
-        self._cmake.definitions["ARROW_PARQUET"] = self.options.parquet
+        self._cmake.definitions["ARROW_PARQUET"] = self._parquet()
+        self._cmake.definitions["ARROW_SUBSTRAIT"] = self.options.get_safe("substrait", False)
         self._cmake.definitions["ARROW_PLASMA"] = self.options.plasma
-        self._cmake.definitions["ARROW_DATASET"] = self.options.dataset_modules
+        self._cmake.definitions["ARROW_DATASET"] = self._dataset_modules()
         self._cmake.definitions["ARROW_FILESYSTEM"] = self.options.filesystem_layer
         self._cmake.definitions["PARQUET_REQUIRE_ENCRYPTION"] = self.options.encryption
         self._cmake.definitions["ARROW_HDFS"] = self.options.hdfs_bridgs
@@ -439,6 +461,7 @@ class ArrowConan(ConanFile):
                     "FindArrowFlightTesting.cmake",
                     "FindArrowPython.cmake",
                     "FindArrowPythonFlight.cmake",
+                    "FindArrowSubstrait.cmake",
                     "FindArrowTesting.cmake",
                     "FindGandiva.cmake",
                     "FindParquet.cmake",
@@ -490,12 +513,19 @@ class ArrowConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libarrow"].system_libs = ["pthread"]
 
-        if self.options.parquet:
+        if self._parquet():
             self.cpp_info.components["libparquet"].libs = [self._lib_name("parquet")]
             self.cpp_info.components["libparquet"].names["cmake_find_package"] = "parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
+
+        if self.options.get_safe("substrait", False):
+            self.cpp_info.components["libsubstrait"].libs = [self._lib_name("substrait")]
+            self.cpp_info.components["libsubstrait"].names["cmake_find_package"] = "substrait"
+            self.cpp_info.components["libsubstrait"].names["cmake_find_package_multi"] = "substrait"
+            self.cpp_info.components["libsubstrait"].names["pkg_config"] = "substrait"
+            self.cpp_info.components["libsubstrait"].requires = ["libarrow", "libparquet", "dataset"]
 
         if self.options.plasma:
             self.cpp_info.components["libplasma"].libs = [self._lib_name("plasma")]
@@ -525,10 +555,10 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight_sql"].names["pkg_config"] = "flight_sql"
             self.cpp_info.components["libarrow_flight_sql"].requires = ["libarrow", "libarrow_flight"]
 
-        if self.options.dataset_modules:
+        if self._dataset_modules():
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
 
-        if (self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self.options.parquet)) or self.options.plasma:
+        if (self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet())) or self.options.plasma:
             binpath = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var: {}".format(binpath))
             self.env_info.PATH.append(binpath)
@@ -537,7 +567,7 @@ class ArrowConan(ConanFile):
             if self.options.gandiva:
                 # FIXME: only filesystem component is used
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
-            if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
+            if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
             if tools.Version(self.version) >= "2.0":
                 # FIXME: only headers components is used
