@@ -1,0 +1,130 @@
+Don't inherit from std::iterator, different patch sent upstream
+
+diff --git a/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h b/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
+index 3a64fb7129..e63ab157f8 100644
+--- a/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
++++ b/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
+@@ -122,9 +122,15 @@ public:
+   }
+ 
+   //--------------------------------------------------------------------------------
+-  class iterator : public std::iterator<std::forward_iterator_tag, T> // for iterator_traits
++  class iterator
+   {
+   public:
++    using iterator_category = std::forward_iterator_tag;
++    using value_type = T;
++    using difference_type = std::ptrdiff_t;
++    using pointer = T*;
++    using reference = T&;
++
+     iterator() = default;
+ 
+     iterator(const iterator& other)
+diff --git a/Common/Core/vtkCollectionRange.h b/Common/Core/vtkCollectionRange.h
+index 221e7b9367..9ac161b03d 100644
+--- a/Common/Core/vtkCollectionRange.h
++++ b/Common/Core/vtkCollectionRange.h
+@@ -100,23 +100,18 @@
+ // vtkObjects consts makes them unusable.
+ template <typename CollectionType>
+ struct CollectionIterator
+-  : public std::iterator<std::forward_iterator_tag,
+-      typename GetCollectionItemType<CollectionType>::Type*, int,
+-      typename GetCollectionItemType<CollectionType>::Type*,
+-      typename GetCollectionItemType<CollectionType>::Type*>
+ {
+   static_assert(IsCollection<CollectionType>::value, "Invalid vtkCollection subclass.");
+ 
+ private:
+   using ItemType = typename GetCollectionItemType<CollectionType>::Type;
+-  using Superclass = std::iterator<std::forward_iterator_tag, ItemType*, int, ItemType*, ItemType*>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = typename GetCollectionItemType<CollectionType>::Type*;
++  using difference_type = int;
++  using pointer = typename GetCollectionItemType<CollectionType>::Type*;
++  using reference = typename GetCollectionItemType<CollectionType>::Type*;
+ 
+   CollectionIterator() noexcept
+     : Element(nullptr)
+diff --git a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
+index 35d9312187..8a83b1293d 100644
+--- a/Common/Core/vtkSMPTools.h
++++ b/Common/Core/vtkSMPTools.h
+@@ -37,7 +37,6 @@
+ #include "vtkSMPThreadLocal.h" // For Initialized
+ 
+ #include <functional>  // For std::function
+-#include <iterator>    // For std::iterator
+ #include <type_traits> // For std:::enable_if
+ 
+ #ifndef DOXYGEN_SHOULD_SKIP_THIS
+diff --git a/Common/DataModel/vtkCompositeDataSetRange.h b/Common/DataModel/vtkCompositeDataSetRange.h
+index 19c5981f6b..3c22876c7c 100644
+--- a/Common/DataModel/vtkCompositeDataSetRange.h
++++ b/Common/DataModel/vtkCompositeDataSetRange.h
+@@ -56,21 +56,17 @@
+ //------------------------------------------------------------------------------
+ // vtkCompositeDataSet iterator. Returns vtk::CompositeDataSetNodeReference.
+ struct CompositeDataSetIterator
+-  : public std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-      CompositeDataSetIteratorReference, CompositeDataSetIteratorReference>
+ {
+ private:
+-  using Superclass = std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-    CompositeDataSetIteratorReference, CompositeDataSetIteratorReference>;
+   using InternalIterator = vtkCompositeDataIterator;
+   using SmartIterator = vtkSmartPointer<InternalIterator>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = vtkDataObject*;
++  using difference_type = int;
++  using pointer = CompositeDataSetIteratorReference;
++  using reference = CompositeDataSetIteratorReference;
+ 
+   CompositeDataSetIterator(const CompositeDataSetIterator& o)
+     : Iterator(o.Iterator ? SmartIterator::Take(o.Iterator->NewInstance()) : nullptr)
+diff --git a/Common/DataModel/vtkDataObjectTreeRange.h b/Common/DataModel/vtkDataObjectTreeRange.h
+index 1a4c27729d..484a06c8d3 100644
+--- a/Common/DataModel/vtkDataObjectTreeRange.h
++++ b/Common/DataModel/vtkDataObjectTreeRange.h
+@@ -56,21 +56,17 @@
+   vtk::CompositeDataSetNodeReference<vtkDataObjectTreeIterator, DataObjectTreeIterator>;
+ 
+ struct DataObjectTreeIterator
+-  : public std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-      DataObjectTreeIteratorReference, DataObjectTreeIteratorReference>
+ {
+ private:
+-  using Superclass = std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-    DataObjectTreeIteratorReference, DataObjectTreeIteratorReference>;
+   using InternalIterator = vtkDataObjectTreeIterator;
+   using SmartIterator = vtkSmartPointer<InternalIterator>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = vtkDataObject*;
++  using difference_type = int;
++  using pointer = DataObjectTreeIteratorReference;
++  using reference = DataObjectTreeIteratorReference;
+ 
+   DataObjectTreeIterator(const DataObjectTreeIterator& o)
+     : Iterator(o.Iterator ? SmartIterator::Take(o.Iterator->NewInstance()) : nullptr)
