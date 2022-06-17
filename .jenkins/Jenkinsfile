@@ -5,9 +5,9 @@ pipeline {
         JENKINS_LDAP_CREDS = credentials('jenkins-ldap')
         LDAP_USERNAME = "${JENKINS_LDAP_CREDS_USR}"
         LDAP_PASSWORD = "${JENKINS_LDAP_CREDS_PSW}"
-        GITHUB_SERVER_URL = "https://github.com"
-        GITHUB_REPOSITORY = "trassir/conan-center-index.git"
-        BUILD_ALL = "NO"
+        GITHUB_SERVER_URL = "http://git.dssl.local"
+        GITHUB_REPOSITORY = "Conan/conan-center-index.git"
+        GITHUB_HEAD_REF = "${(BRANCH_NAME=='master') ? '' : BRANCH_NAME}"
     }
     stages {
         stage('build') {
