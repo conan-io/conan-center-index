@@ -85,6 +85,8 @@ class CairoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.with_glib and self.options.shared:
+            self.options["glib"].shared = True
 
     def requirements(self):
         self.requires("pixman/0.40.0")
@@ -95,13 +97,13 @@ class CairoConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.73.0")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
@@ -115,12 +117,16 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.62.1")
         self.build_requires("pkgconf/1.7.4")
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
             raise ConanInvalidConfiguration("'with_xlib_xrender' option requires 'with_xlib' option to be enabled as well!")
+        if self.options.with_glib and not self.options["glib"].shared and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     @property
     def _is_msvc(self):
@@ -378,3 +384,6 @@ class CairoConan(ConanFile):
         # binary tools
         if self.options.with_zlib and self.options.with_png:
             self.cpp_info.components["cairo_util_"].requires.append("expat::expat") # trace-to-xml.c, xml-to-trace.c
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

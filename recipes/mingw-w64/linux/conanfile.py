@@ -37,6 +37,9 @@ class MingwConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("m4/1.4.19")
+        self.build_requires("gmp/6.2.1")
+        self.build_requires("mpfr/4.1.0")
+        self.build_requires("mpc/1.2.0")
 
     def _download_source(self):
         arch_data = self.conan_data["sources"][self.version]
@@ -77,51 +80,10 @@ class MingwConan(ConanFile):
         env = {"PATH": os.environ["PATH"] + ":" + os.path.join(self.package_folder, "bin")}
 
         with tools.environment_append(env):
-            self.output.info("Building gmp ...")
-            os.mkdir(os.path.join(self.build_folder, "gmp"))
-            with tools.chdir(os.path.join(self.build_folder, "gmp")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--disable-shared"
-                ]
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "gmp"),
-                                    args=conf_args, target=False, host=False, build=False)
-                autotools.make()
-                autotools.install()
-
-            self.output.info("Building mpfr ...")
-            os.mkdir(os.path.join(self.build_folder, "mpfr"))
-            with tools.chdir(os.path.join(self.build_folder, "mpfr")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--disable-shared",
-                    "--with-gmp={}".format(self.package_folder)
-                ]
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mpfr"),
-                                    args=conf_args, target=False, host=False, build=False)
-                autotools.make()
-                autotools.install()
-
-            self.output.info("Building mpc ...")
-            os.mkdir(os.path.join(self.build_folder, "mpc"))
-            with tools.chdir(os.path.join(self.build_folder, "mpc")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--disable-shared",
-                    "--with-gmp={}".format(self.package_folder),
-                    "--with-mpfr={}".format(self.package_folder)
-                ]
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mpc"),
-                                    args=conf_args, target=False, host=False, build=False)
-                autotools.make()
-                autotools.install()
             with_gmp_mpfc_mpc = [
-                "--with-gmp={}".format(self.package_folder),
-                "--with-mpfr={}".format(self.package_folder),
-                "--with-mpc={}".format(self.package_folder)
+                "--with-gmp={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
+                "--with-mpfr={}".format(self.deps_cpp_info["mpfr"].rootpath.replace("\\", "/")),
+                "--with-mpc={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
             ]
 
             self.output.info("Building binutils ...")
@@ -207,6 +169,7 @@ class MingwConan(ConanFile):
                         # Not 100% sure why, but the following options are required, otherwise
                         # gcc fails to build with posix threads
                     ])
+                autotools_gcc.libs = []
                 autotools_gcc.configure(configure_dir=os.path.join(self.build_folder, "sources", "gcc"),
                                         args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")

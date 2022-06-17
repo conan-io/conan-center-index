@@ -1,0 +1,51 @@
+--- lib/relocatable.c
++++ lib/relocatable.c
+@@ -37,6 +37,10 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++#ifdef HAVE_DLADDR
++# include <dlfcn.h>
++#endif
++
+ #ifdef NO_XMALLOC
+ # define xmalloc malloc
+ #else
+@@ -389,6 +393,19 @@
+   return 1;
+ }
+ 
++#elif defined HAVE_DLADDR
++
++static Dl_info lib_info;
++
++static void
++find_shared_library_fullname (void)
++{
++  if (dladdr (&lib_info, &lib_info))
++    {
++      shared_library_fullname = strdup (lib_info.dli_fname);
++    }
++}
++
+ #else /* Unix */
+ 
+ static void
+@@ -444,7 +461,7 @@
+ #endif
+ }
+ 
+-#endif /* Native Windows / EMX / Unix */
++#endif /* Native Windows / EMX / BSD / Unix */
+ 
+ /* Return the full pathname of the current shared library.
+    Return NULL if unknown.
+@@ -452,7 +469,7 @@
+ static char *
+ get_shared_library_fullname ()
+ {
+-#if !(defined _WIN32 && !defined __CYGWIN__) && !defined __EMX__
++#if (!(defined _WIN32 && !defined __CYGWIN__) && !defined __EMX__) || defined HAVE_DLADDR
+   static bool tried_find_shared_library_fullname;
+   if (!tried_find_shared_library_fullname)
+     {

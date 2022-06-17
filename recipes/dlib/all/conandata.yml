@@ -1,10 +1,13 @@
 sources:
-  "19.19":
-    sha256: 7af455bb422d3ae5ef369c51ee64e98fa68c39435b0fa23be2e5d593a3d45b87
-    url: https://github.com/davisking/dlib/archive/v19.19.tar.gz
-  "19.21":
-    sha256: 116f52e58be04b47dab52057eaad4b5c4d5c3032d927fe23d55b0741fc4107a0
-    url: https://github.com/davisking/dlib/archive/v19.21.tar.gz
+  "19.24":
+    url: "https://github.com/davisking/dlib/archive/refs/tags/v19.24.tar.gz"
+    sha256: "3cc42e84c7b1bb926c6451a21ad1595f56c5b10be3a1d7aa2f3c716a25b7ae39"
   "19.23":
-    sha256: 0fc74a39d2046ad15819bab25a695333a63e740c91ed3c620c8594381c132e88
-    url: https://github.com/davisking/dlib/archive/v19.23.tar.gz
+    url: "https://github.com/davisking/dlib/archive/v19.23.tar.gz"
+    sha256: "0fc74a39d2046ad15819bab25a695333a63e740c91ed3c620c8594381c132e88"
+  "19.21":
+    url: "https://github.com/davisking/dlib/archive/v19.21.tar.gz"
+    sha256: "116f52e58be04b47dab52057eaad4b5c4d5c3032d927fe23d55b0741fc4107a0"
+  "19.19":
+    url: "https://github.com/davisking/dlib/archive/v19.19.tar.gz"
+    sha256: "7af455bb422d3ae5ef369c51ee64e98fa68c39435b0fa23be2e5d593a3d45b87"
