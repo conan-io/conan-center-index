@@ -9,12 +9,11 @@ required_conan_version = ">=1.33.0"
 class ArrowConan(ConanFile):
     name = "arrow"
     description = "Apache Arrow is a cross-language development platform for in-memory data"
-    topics = ("arrow", "memory")
+    license = ("Apache-2.0",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://arrow.apache.org/"
-    license = ("Apache-2.0",)
-    generators = "cmake", "cmake_find_package_multi"
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("memory", "gandiva", "parquet", "skyhook", "plasma", "hdfs", "csv", "cuda", "gcs", "json", "hive", "s3", "grpc")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -105,6 +104,8 @@ class ArrowConan(ConanFile):
         "with_zlib": False,
         "with_zstd": False,
     }
+    generators = "cmake", "cmake_find_package_multi"
+    short_paths = True
 
     _cmake = None
 
@@ -142,6 +143,10 @@ class ArrowConan(ConanFile):
             del self.options.fPIC
         if self.options.compute == False and not self._compute(True):
             raise ConanInvalidConfiguration("compute options is required (or choose auto)")
+        if self.options.parquet == False and self._parquet(True):
+            raise ConanInvalidConfiguration("parquet options is required (or choose auto)")
+        if self.options.dataset_modules == False and self._dataset_modules(True):
+            raise ConanInvalidConfiguration("dataset_modules options is required (or choose auto)")
         if self.options.get_safe("skyhook", False):
             raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
         if self.options.with_jemalloc == False and self._with_jemalloc(True):
@@ -186,6 +191,7 @@ class ArrowConan(ConanFile):
 
     def _parquet(self, required=False):
         if required or self.options.parquet == "auto":
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa {} vs {}".format(required, self.options.get_safe("substrait", False)))
             return bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.parquet)
@@ -279,7 +285,7 @@ class ArrowConan(ConanFile):
         if self._with_thrift():
             self.requires("thrift/0.16.0")
         if self._with_protobuf():
-            self.requires("protobuf/3.20.0")
+            self.requires("protobuf/3.21.1")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
