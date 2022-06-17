@@ -26,7 +26,7 @@ class VulkanMemoryAllocatorConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.211.0")
+        self.requires("vulkan-headers/1.3.216.0")
 
     def package_id(self):
         self.info.header_only()
