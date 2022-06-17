@@ -43,6 +43,7 @@ class ZlibConan(ConanFile):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
+        raise class_which_does_not_exist()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,6 +54,7 @@ class ZlibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        print(self.member_does_not_exist)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
