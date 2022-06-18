@@ -148,6 +148,8 @@ class Open62541Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) >= "1.3.1":
+            del self.options.embedded_profile
 
     def configure(self):
         if self.options.shared:
@@ -329,7 +331,8 @@ class Open62541Conan(ConanFile):
             self._cmake.definitions["UA_NAMESPACE_ZERO"] = "FULL"
         else:
             self._cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
-        self._cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
+        if tools.Version(self.version) < "1.3.1":
+            self._cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
         self._cmake.definitions["UA_ENABLE_TYPENAMES"] = self.options.typenames
         self._cmake.definitions["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
         self._cmake.definitions["UA_ENABLE_HARDENING"] = self.options.hardening
