@@ -227,7 +227,7 @@ class Open62541Conan(ConanFile):
         submodule_filename = os.path.join(
             self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
-            submodules_data = yaml.load(submodule_stream)
+            submodules_data = yaml.safe_load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
                 filename = os.path.basename(submodule["url"])
                 archive_name = submodule["archive_pattern"].format(
