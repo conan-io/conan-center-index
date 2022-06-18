@@ -29,14 +29,15 @@ class OpenblasConan(ConanFile):
         "dynamic_arch": False,
     }
     generators = "cmake"
+    short_paths = True
 
     @property
     def _source_subfolder(self):
-        return "src"
+        return "source_subfolder"
 
     @property
     def _build_subfolder(self):
-        return "bld"
+        return "build_subfolder"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")

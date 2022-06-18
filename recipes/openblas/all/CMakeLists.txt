@@ -8,4 +8,4 @@ else()
 endif()
 conan_basic_setup()
 
-add_subdirectory("src")
+add_subdirectory("source_subfolder")
