@@ -448,7 +448,7 @@ class LibwebsocketsConan(ConanFile):
             )
         if tools.Version(self.version) < "4.1.0":
             tools.replace_in_file(cmakelists, "-Werror", "")
-        if tools.Version(self.version) > "4.0.0":
+        if tools.Version(self.version) >= "4.1.4":
             tools.replace_in_file(cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
