@@ -191,7 +191,6 @@ class ArrowConan(ConanFile):
 
     def _parquet(self, required=False):
         if required or self.options.parquet == "auto":
-            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa {} vs {}".format(required, self.options.get_safe("substrait", False)))
             return bool(self.options.get_safe("substrait", False))
         else:
             return bool(self.options.parquet)
