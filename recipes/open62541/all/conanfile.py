@@ -325,9 +325,13 @@ class Open62541Conan(ConanFile):
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        os.unlink(os.path.join(self._source_subfolder, "tools", "cmake", "FindPython3.cmake"))
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
