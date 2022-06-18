@@ -75,6 +75,7 @@ class Open62541Conan(ConanFile):
         # False: UA_ENABLE_ENCRYPTION=Off
         # openssl: UA_ENABLE_ENCRYPTION=On and UA_ENABLE_ENCRYPTION_OPENSSL=On
         # mbedtls: UA_ENABLE_ENCRYPTION=On
+        # changed in 1.3.1 - UA_ENABLE_ENCRYPTION can be OFF, OPENSSL, MBEDTLS
         "encryption": [False, "openssl", "mbedtls"],
         # False: UA_ENABLE_JSON_ENCODING=Off
         # True: UA_ENABLE_JSON_ENCODING=On
@@ -298,10 +299,18 @@ class Open62541Conan(ConanFile):
             self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
                 self.options.discovery_semaphore or "semaphore" in str(self.options.discovery)
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
-        if self.options.encryption != False:
+        if tools.Version(self.version) >= "1.3.1":
             if self.options.encryption == "openssl":
-                self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "OPENSSL"
+            elif self.options.encryption == "mbedtls":
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "MBEDTLS"
+            else:
+                self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = "OFF"
+        else:
+            self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
+            if self.options.encryption != False:
+                if self.options.encryption == "openssl":
+                    self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         self._cmake.definitions["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
         if self.options.pub_sub != False:
