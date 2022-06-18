@@ -85,6 +85,9 @@ class Open62541Conan(ConanFile):
         # Ethernet: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP=On
         # Ethernet_XDP: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP_XDP=On
         "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
+        # False: UA_ENABLE_PUBSUB_ENCRYPTION=Off
+        # True: UA_ENABLE_PUBSUB_ENCRYPTION=On
+        "pub_sub_encryption": [True, False],
         # False: UA_ENABLE_DA=Off
         # True: UA_ENABLE_DA=On
         "data_access": [True, False],
@@ -122,6 +125,7 @@ class Open62541Conan(ConanFile):
         "encryption": False,
         "json_support": False,
         "pub_sub": False,
+        "pub_sub_encryption": False,
         "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namespace_zero": "FULL",
@@ -313,6 +317,7 @@ class Open62541Conan(ConanFile):
                     self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         self._cmake.definitions["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
+        self._cmake.definitions["UA_ENABLE_PUBSUB_ENCRYPTION"] = self.options.pub_sub_encryption != False
         if self.options.pub_sub != False:
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
