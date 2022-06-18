@@ -516,8 +516,8 @@ class ArrowConan(ConanFile):
         self.cpp_info.components["libarrow"].names["pkg_config"] = "arrow"
         if not self.options.shared:
             self.cpp_info.components["libarrow"].defines = ["ARROW_STATIC"]
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libarrow"].system_libs = ["pthread"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libarrow"].system_libs = ["pthread", "m", "dl", "rt"]
 
         if self._parquet():
             self.cpp_info.components["libparquet"].libs = [self._lib_name("parquet")]
