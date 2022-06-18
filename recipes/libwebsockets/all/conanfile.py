@@ -507,6 +507,7 @@ class LibwebsocketsConan(ConanFile):
         self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = self._cmake_target
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["_libwebsockets"].builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.components["_libwebsockets"].set_property("cmake_target_name", self._cmake_target)
         self.cpp_info.components["_libwebsockets"].set_property("pkg_config_name", pkgconfig_name)
         if self.options.with_libuv:
