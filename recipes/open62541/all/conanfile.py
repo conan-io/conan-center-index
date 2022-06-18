@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename, get
 import glob
 import os
 import yaml
@@ -220,8 +221,8 @@ class Open62541Conan(ConanFile):
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
         submodule_filename = os.path.join(
             self.recipe_folder, 'submoduledata.yml')
@@ -237,10 +238,10 @@ class Open62541Conan(ConanFile):
                     "sha256": submodule["sha256"]
                 }
 
-                tools.get(**submodule_data)
+                get(self, **submodule_data)
                 submodule_source = os.path.join(self._source_subfolder, path)
                 tools.rmdir(submodule_source)
-                tools.rename(archive_name, submodule_source)
+                rename(self, archive_name, submodule_source)
 
     def _get_log_level(self):
         return {
