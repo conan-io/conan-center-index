@@ -240,6 +240,8 @@ class LibwebsocketsConan(ConanFile):
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if tools.Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
             raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and tools.Version(self.version) >= "4.3.2":
+            raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
