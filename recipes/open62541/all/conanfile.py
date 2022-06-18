@@ -22,8 +22,8 @@ class Open62541Conan(ConanFile):
                   "All platform-specific functionality is implemented via exchangeable " \
                   "plugins. Plugin implementations are provided for the major operating systems."
     topics = (
-        "OPC UA", "open62541", "sdk", "server/client", "c", "iec-62541",
-        "industrial automation", "tsn", "time sensetive networks", "publish-subscirbe", "pubsub"
+        "opc ua", "open62541", "sdk", "server/client", "c", "iec-62541",
+        "industrial automation", "tsn", "time sensitive networks", "publish-subscirbe", "pubsub"
     )
 
     settings = "os", "compiler", "build_type", "arch"
