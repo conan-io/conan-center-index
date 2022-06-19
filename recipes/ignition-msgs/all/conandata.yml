@@ -13,9 +13,9 @@ patches:
   "5.3.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-ign-msg-5.3.0-cmake-fixes.patch"
-  "8.0.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
-  "8.2.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-ign-msg-8.2.0-cmake-fixes.patch"
+  #"8.0.0":
+  #  - base_path: "source_subfolder"
+  #    patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
+  #"8.2.0":
+  #  - base_path: "source_subfolder"
+  #    patch_file: "patches/0003-ign-msg-8.2.0-cmake-fixes.patch"
