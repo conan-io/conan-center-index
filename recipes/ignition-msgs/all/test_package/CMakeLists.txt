@@ -10,7 +10,6 @@ if(NOT IGN_MSGS_MAJOR_VER)
     message(FATAL_ERROR "IGN_MSGS_MAJOR_VER not set")
 endif()
 
-find_package(ignition-cmake2 REQUIRED)
 find_package(ignition-msgs${IGN_MSGS_MAJOR_VER} REQUIRED)
 
 add_executable(${PROJECT_NAME} test_ign_msg_recipe.cpp)

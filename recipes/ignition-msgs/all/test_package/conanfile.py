@@ -5,9 +5,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
 
-    def requirements(self):
-        self.requires("ignition-cmake/2.10.0")
-
     def build(self):
         cmake = CMake(self)
         cmake.definitions["IGN_MSGS_MAJOR_VER"] = tools.Version(self.deps_cpp_info["ignition-msgs"].version).major
