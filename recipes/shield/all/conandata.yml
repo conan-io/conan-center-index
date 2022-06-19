@@ -1,0 +1,7 @@
+sources:
+  "0.2":
+    url: "https://github.com/holoplot/shield/archive/0.2.tar.gz"
+    sha256: "bbc22d122a73467715074a92cbcd31c51adacf03256e5d24e304613f8f72197e"
+  "0.1":
+    url: "https://github.com/holoplot/shield/archive/refs/tags/0.1.tar.gz"
+    sha256: "83d10f4e2946a32762bd5718b98f1fbfbb5c7f6d3841d44030b17aeacfbd92f4"

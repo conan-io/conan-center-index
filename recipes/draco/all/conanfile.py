@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class DracoConan(ConanFile):
@@ -10,14 +11,11 @@ class DracoConan(ConanFile):
                   "geometric meshes and point clouds. It is intended to " \
                   "improve the storage and transmission of 3D graphics."
     license = "Apache-2.0"
-    topics = ("draco", "3d", "graphics", "mesh",
-              "compression", "decompression")
+    topics = ("draco", "3d", "graphics", "mesh", "compression", "decompression")
     homepage = "https://google.github.io/draco/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,7 +24,7 @@ class DracoConan(ConanFile):
         "enable_mesh_compression": [True, False],
         "enable_standard_edgebreaker": [True, False],
         "enable_predictive_edgebreaker": [True, False],
-        "enable_backwards_compatibility": [True, False]
+        "enable_backwards_compatibility": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,8 +34,11 @@ class DracoConan(ConanFile):
         "enable_mesh_compression": True,
         "enable_standard_edgebreaker": True,
         "enable_predictive_edgebreaker": True,
-        "enable_backwards_compatibility": True
+        "enable_backwards_compatibility": True,
     }
+
+    short_paths = True
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -47,29 +48,31 @@ class DracoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
         if not self.options.enable_mesh_compression:
             del self.options.enable_standard_edgebreaker
             del self.options.enable_predictive_edgebreaker
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build(target=self._get_target())
-
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
 
@@ -132,47 +135,31 @@ class DracoConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def _get_target(self):
-        if tools.Version(self.version) < "1.4.0":
-            return {
-                "decode_only": "dracodec",
-                "draco": "draco",
-                "encode_and_decode": "draco",
-                "encode_only": "dracoenc"
-            }.get(str(self.options.target))
-
-        if self.settings.os == "Windows":
-            return "draco"
-
-        if self.options.shared:
-            return "draco_shared"
-
-        return "draco_static"
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-        self.copy(pattern="*.h", dst="include",
-                  src=os.path.join(self._source_subfolder, "src"))
-        self.copy(pattern="*.h", dst=os.path.join("include", "draco"),
-                  src=os.path.join(self._build_subfolder, "draco"))
-
-        build_lib_dir = os.path.join(self._build_subfolder, "lib")
-        build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib",
-                  src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib",
-                  src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir,
-                  keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin",
-                  src=build_bin_dir, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if tools.Version(self.version) < "1.4.0":
+            tools.rmdir(os.path.join(self.package_folder, "lib", "draco"))
+        else:
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            if self.options.shared:
+                tools.remove_files_by_mask(
+                    os.path.join(self.package_folder, "lib"),
+                    "*draco.a",
+                )
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Draco"
-        self.cpp_info.names["cmake_find_package_multi"] = "Draco"
-        self.cpp_info.names["pkg_config"] = "draco"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.set_property("cmake_file_name", "draco")
+        self.cpp_info.set_property("cmake_target_name", "draco::draco")
+        self.cpp_info.set_property("pkg_config_name", "draco")
+        self.cpp_info.libs = ["draco"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

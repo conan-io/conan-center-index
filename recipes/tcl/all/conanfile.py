@@ -1,16 +1,21 @@
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
+
+required_conan_version = ">=1.45.0"
 
 
 class TclConan(ConanFile):
     name = "tcl"
     description = "Tcl is a very powerful but easy to learn dynamic programming language."
-    topics = ("conan", "tcl", "scripting", "programming")
+    topics = ("tcl", "scripting", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tcl.tk"
     license = "TCL"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -20,10 +25,6 @@ class TclConan(ConanFile):
         "shared": False,
     }
 
-    exports_sources = ("patches/*")
-
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -31,6 +32,10 @@ class TclConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,15 +48,15 @@ class TclConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
-
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration("Unsupported os")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -70,6 +75,12 @@ class TclConan(ConanFile):
         return os.path.join(self.source_folder, self._source_subfolder, build_system_subdir)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
+            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
+
         unix_config_dir = self._get_configure_dir("unix")
         # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
         # (${tcl_type_64bit} can be either "__int64" or "long long")
@@ -108,11 +119,11 @@ class TclConan(ConanFile):
             opts.append("static")
         if self.settings.build_type == "Debug":
             opts.append("symbols")
-        if "MD" in self.settings.compiler.runtime:
+        if "MD" in msvc_runtime_flag(self):
             opts.append("msvcrt")
         else:
             opts.append("nomsvcrt")
-        if "d" not in self.settings.compiler.runtime:
+        if "d" not in msvc_runtime_flag(self):
             opts.append("unchecked")
         with tools.vcvars(self.settings):
             with tools.chdir(self._get_configure_dir("win")):
@@ -123,10 +134,9 @@ class TclConan(ConanFile):
                     targets=" ".join(targets),
                 ))
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-threads",
@@ -134,22 +144,17 @@ class TclConan(ConanFile):
             "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
         ]
-        self._autotools.configure(configure_dir=self._get_configure_dir(), args=conf_args, vars={"PKG_CFG_ARGS": " ".join(conf_args)})
+        autotools.configure(configure_dir=self._get_configure_dir(), args=conf_args, vars={"PKG_CFG_ARGS": " ".join(conf_args)})
 
         # https://core.tcl.tk/tcl/tktview/840660e5a1
         for root, _, files in os.walk(self.build_folder):
             if "Makefile" in files:
                 tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
-        return self._autotools
+        return autotools
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
-            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self._build_nmake(["release"])
         else:
             autotools = self._configure_autotools()
@@ -157,7 +162,7 @@ class TclConan(ConanFile):
 
     def package(self):
         self.copy(pattern="license.terms", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self._build_nmake(["install-binaries", "install-libraries"])
         else:
             autotools = self._configure_autotools()
@@ -171,7 +176,7 @@ class TclConan(ConanFile):
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
         package_path = self.package_folder
         build_folder = self.build_folder
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+        if self.settings.os == "Windows" and not is_msvc(self):
             package_path = package_path.replace("\\", "/")
             drive, path = os.path.splitdrive(self.build_folder)
             build_folder = "".join([drive, path.lower().replace("\\", "/")])
@@ -212,6 +217,7 @@ class TclConan(ConanFile):
         self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = libs
         self.cpp_info.system_libs = systemlibs
+        self.cpp_info.set_property("cmake_file_name", "TCL")
         self.cpp_info.names["cmake_find_package"] = "TCL"
         self.cpp_info.names["cmake_find_package_multi"] = "TCL"
 

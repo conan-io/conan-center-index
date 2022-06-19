@@ -1,10 +1,10 @@
 import os
-
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.44.0"
 
 
 class LibPciAccessConan(ConanFile):
@@ -19,8 +19,9 @@ class LibPciAccessConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def validate(self):
         def is_supported(settings):
@@ -55,7 +56,6 @@ class LibPciAccessConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        # autoreconf
         self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
                  win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
 
@@ -75,5 +75,5 @@ class LibPciAccessConan(ConanFile):
             self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["pciaccess"]
         self.cpp_info.set_property("pkg_config_name", "pciaccess")

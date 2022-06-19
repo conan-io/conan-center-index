@@ -8,12 +8,11 @@ required_conan_version = ">=1.43.0"
 
 class XtensorConan(ConanFile):
     name = "xtensor"
+    description = "C++ tensors with broadcasting and lazy computing"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtensor"
-    description = "C++ tensors with broadcasting and lazy computing"
     topics = ("numpy", "multidimensional-arrays", "tensors")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xsimd": [True, False],
@@ -41,9 +40,9 @@ class XtensorConan(ConanFile):
             if tools.Version(self.version) < "0.24.0":
                 self.requires("xsimd/7.5.0")
             else:
-                self.requires("xsimd/8.0.3")
+                self.requires("xsimd/8.1.0")
         if self.options.tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2021.3.0")
 
     def validate(self):
         if self.options.tbb and self.options.openmp:

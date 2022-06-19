@@ -1,9 +1,11 @@
+from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class ZimgConan(ConanFile):
@@ -24,12 +26,6 @@ class ZimgConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,6 +33,10 @@ class ZimgConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,7 +53,7 @@ class ZimgConan(ConanFile):
             raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.build_requires("libtool/2.4.6")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
@@ -62,21 +62,22 @@ class ZimgConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return autotools
 
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared lib on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
         autotools = self._configure_autools()
         autotools.make()
 
@@ -103,7 +104,7 @@ class ZimgConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self._build_msvc()
         else:
             self._build_autotools()
@@ -111,13 +112,9 @@ class ZimgConan(ConanFile):
     def _package_autotools(self):
         autotools = self._configure_autools()
         autotools.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
-            for filename in glob.glob("*.la"):
-                os.unlink(filename)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def _package_msvc(self):
         self.copy("zimg.h", src=os.path.join(self._source_subfolder, "src", "zimg", "api"), dst="include")
@@ -127,22 +124,22 @@ class ZimgConan(ConanFile):
         if self.options.shared:
             self.copy("z_imp.lib", src=sln_dir, dst="lib")
             self.copy("z.dll", src=sln_dir, dst="bin")
-            tools.rename(os.path.join(self.package_folder, "lib", "z_imp.lib"),
+            rename(self, os.path.join(self.package_folder, "lib", "z_imp.lib"),
                          os.path.join(self.package_folder, "lib", "zimg.lib"))
         else:
             self.copy("z.lib", src=sln_dir, dst="lib")
-            tools.rename(os.path.join(self.package_folder, "lib", "z.lib"),
+            rename(self, os.path.join(self.package_folder, "lib", "z.lib"),
                          os.path.join(self.package_folder, "lib", "zimg.lib"))
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self._package_msvc()
         else:
             self._package_autotools()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "zimg"
+        self.cpp_info.set_property("pkg_config_name", "zimg")
         self.cpp_info.libs = ["zimg"]
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):

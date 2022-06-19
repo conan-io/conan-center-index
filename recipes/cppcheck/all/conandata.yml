@@ -1,66 +1,22 @@
 sources:
-  "2.7.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.7.3.tar.gz"
-    sha256: "edda6dc9627ccb2b0132a2e43e7b7deff47e479ae3dc3af1c1fbc8a66699a113"
-  "2.7.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.7.1.tar.gz"
-    sha256: "f4d4ec42eb214b113c6a7ca7aaf6bafa92c33029560223049b46ac12f17f54b8"
-  "2.6":
-    url: "https://github.com/danmar/cppcheck/archive/2.6.tar.gz"
-    sha256: "99f0c5cf58a0072876c4deb114f3f5f798c933b8e459cddb00a061c8bb4dd765"
-  "2.5":
-    url: "https://github.com/danmar/cppcheck/archive/2.5.tar.gz"
-    sha256: "dc27154d799935c96903dcc46653c526c6f4148a6912b77d3a50cb35dabd82e1"
-  "2.4.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.4.1.tar.gz"
-    sha256: "11a9d9fe5305a105561655c45d2cd83cb30fbc87b41d0569de1b00a1a314867f"
-  "2.4":
-    url: "https://github.com/danmar/cppcheck/archive/2.4.tar.gz"
-    sha256: "d1ac6a1eaf24f2f54df5a164c7e37d1e0624cc094a4622e226a73b53ede1eeb8"
-  "2.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.3.tar.gz"
-    sha256: "3c622628ebf46f68909c7a96743b07b6207894a0772fbe802603732152ab1035"
-  "2.2":
-    url: "https://github.com/danmar/cppcheck/archive/2.2.tar.gz"
-    sha256: "ad96290a1842c5934bf9c4268cb270953f3078d4ce33a9a53922d6cb6daf61aa"
+  "2.7.5":
+    url: "https://github.com/danmar/cppcheck/archive/2.7.5.tar.gz"
+    sha256: "6c7ac29e57fa8b3ac7be224510200e579d5a90217e2152591ef46ffc947d8f78"
+  "2.7.4":
+    url: "https://github.com/danmar/cppcheck/archive/2.7.4.tar.gz"
+    sha256: "f0558c497b7807763325f3a821f1c72b743e5d888b037b8d32157dd07d6c26e1"
 patches:
-  "2.7.3":
+  "2.7.5":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-htmlreport-python3.patch"
       base_path: "source_subfolder"
-  "2.7.1":
+    - patch_file: "patches/0003-handle-exename-on-macos.patch"
+      base_path: "source_subfolder"
+  "2.7.4":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-htmlreport-python3.patch"
       base_path: "source_subfolder"
-  "2.6":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-  "2.5":
-    - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-  "2.4.1":
-    - patch_file: "patches/0001-cmake-source-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-  "2.4":
-    - patch_file: "patches/0001-cmake-source-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-  "2.3":
-    - patch_file: "patches/0001-cmake-source-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
-      base_path: "source_subfolder"
-  "2.2":
-    - patch_file: "patches/0001-cmake-source-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-htmlreport-python3.patch"
+    - patch_file: "patches/0003-handle-exename-on-macos.patch"
       base_path: "source_subfolder"

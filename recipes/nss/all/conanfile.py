@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import msvc_runtime_flag
 import os, glob
 
 
@@ -28,9 +29,12 @@ class NSSConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.38.1")
 
     def configure(self):
         self.options["nspr"].shared = True
+        self.options["sqlite3"].shared = True
         self.options.shared = True
 
         if self.options.shared:
@@ -39,15 +43,19 @@ class NSSConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("nspr/4.32")
-        self.requires("sqlite3/3.36.0")
-        self.requires("zlib/1.2.11")
+        self.requires("nspr/4.33")
+        self.requires("sqlite3/3.38.1")
+        self.requires("zlib/1.2.12")
 
     def validate(self):
         if not self.options.shared:
             raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
         if not self.options["nspr"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
+        if msvc_runtime_flag(self) == "MTd":
+            raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
+        if not self.options["sqlite3"].shared:
+            raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARM builds not yet supported. Contributions are welcome.")
 
@@ -59,6 +67,10 @@ class NSSConan(ConanFile):
         args = []
         if self.settings.arch in ["x86_64"]:
             args.append("USE_64=1")
+            if self.settings.os == "Macos":
+                args.append("CPU_ARCH=i386")
+            else:
+                args.append("CPU_ARCH=x86_64")
         if self.settings.arch in ["armv8"]:
             args.append("CPU_ARCH=arm")
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
@@ -124,9 +136,9 @@ class NSSConan(ConanFile):
             _format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
             _format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
         args.append("NSS_DISABLE_GTESTS=1")
-        # args.append("NSS_USE_SYSTEM_SQLITE=1")
-        # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
-        # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
+        args.append("NSS_USE_SYSTEM_SQLITE=1")
+        args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
+        args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
         args.append("NSDISTMODE=copy")
         if tools.cross_building(self):
             args.append("CROSS_COMPILE=1")

@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -8,16 +9,20 @@ class HighwayConan(ConanFile):
     name = "highway"
     description = "Performance-portable, length-agnostic SIMD with runtime " \
                   "dispatch"
+    topics = ("highway", "simd")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/highway"
-    topics = ("highway", "simd")
-
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -30,7 +35,7 @@ class HighwayConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "8",
             "clang": "7",
         }
@@ -44,8 +49,14 @@ class HighwayConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if tools.Version(self.version) < "0.16.0":
+            del self.options.shared
+        elif self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._minimum_compilers_version.get(
                                                    str(self.settings.compiler))
@@ -74,13 +85,13 @@ class HighwayConan(ConanFile):
                               "set_property(TARGET hwy PROPERTY "
                               "POSITION_INDEPENDENT_CODE ON)", "")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["HWY_ENABLE_EXAMPLES"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -95,4 +106,11 @@ class HighwayConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libhwy"
+
         self.cpp_info.libs = ["hwy"]
+        if tools.Version(self.version) >= "0.12.1":
+            self.cpp_info.libs.append("hwy_contrib")
+        if tools.Version(self.version) >= "0.15.0":
+            self.cpp_info.libs.append("hwy_test")
+        if tools.Version(self.version) >= "0.16.0":
+            self.cpp_info.defines.append("HWY_SHARED_DEFINE" if self.options.shared else "HWY_STATIC_DEFINE")

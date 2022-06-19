@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -36,7 +37,6 @@ class LibrdkafkaConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package", "pkg_config"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -58,11 +58,11 @@ class LibrdkafkaConan(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.3")
         if self.options.zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.zstd:
-            self.requires("zstd/1.5.1")
+            self.requires("zstd/1.5.2")
         if self.options.ssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1n")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
 
@@ -78,25 +78,24 @@ class LibrdkafkaConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["RDKAFKA_BUILD_TESTS"] = False
-        self._cmake.definitions["WITHOUT_WIN32_CONFIG"] = True
-        self._cmake.definitions["WITH_BUNDLED_SSL"] = False
-        self._cmake.definitions["WITH_ZLIB"] = self.options.zlib
-        self._cmake.definitions["WITH_ZSTD"] = self.options.zstd
-        self._cmake.definitions["WITH_PLUGINS"] = self.options.plugins
-        self._cmake.definitions["WITH_SSL"] = self.options.ssl
-        self._cmake.definitions["WITH_SASL"] = self.options.sasl
-        self._cmake.definitions["ENABLE_LZ4_EXT"] = True
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
+        cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
+        cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
+        cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = False
+        cmake.definitions["RDKAFKA_BUILD_TESTS"] = False
+        cmake.definitions["WITHOUT_WIN32_CONFIG"] = True
+        cmake.definitions["WITH_BUNDLED_SSL"] = False
+        cmake.definitions["WITH_ZLIB"] = self.options.zlib
+        cmake.definitions["WITH_ZSTD"] = self.options.zstd
+        cmake.definitions["WITH_PLUGINS"] = self.options.plugins
+        cmake.definitions["WITH_SSL"] = self.options.ssl
+        cmake.definitions["WITH_SASL"] = self.options.sasl
+        cmake.definitions["ENABLE_LZ4_EXT"] = True
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()

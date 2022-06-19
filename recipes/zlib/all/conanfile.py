@@ -1,7 +1,9 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, CMake
+import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class ZlibConan(ConanFile):
@@ -24,7 +26,6 @@ class ZlibConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -35,8 +36,8 @@ class ZlibConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -74,39 +75,20 @@ class ZlibConan(ConanFile):
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SKIP_INSTALL_ALL"] = False
-        self._cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
-        self._cmake.definitions["SKIP_INSTALL_HEADERS"] = False
-        self._cmake.definitions["SKIP_INSTALL_FILES"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["SKIP_INSTALL_ALL"] = False
+        cmake.definitions["SKIP_INSTALL_LIBRARIES"] = False
+        cmake.definitions["SKIP_INSTALL_HEADERS"] = False
+        cmake.definitions["SKIP_INSTALL_FILES"] = True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-
-    def _rename_libraries(self):
-        if self.settings.os == "Windows":
-            lib_path = os.path.join(self.package_folder, "lib")
-            suffix = "d" if self.settings.build_type == "Debug" else ""
-
-            if self.options.shared:
-                if (self._is_msvc or self.settings.compiler == "clang") and suffix:
-                    current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
-                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-            else:
-                if self._is_msvc or self.settings.compiler == "clang":
-                    current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
-                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler == "gcc":
-                    if not self.settings.os.subsystem:
-                        current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                        tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
 
     def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
@@ -119,13 +101,17 @@ class ZlibConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        self._rename_libraries()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.libs = ["zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z"]
+        self.cpp_info.set_property("pkg_config_name", "zlib")
+        if is_msvc(self) or self._is_clang_cl:
+            libname = "zdll" if self.options.shared else "zlib"
+        else:
+            libname = "z"
+        self.cpp_info.libs = [libname]
 
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"

@@ -12,10 +12,10 @@ class AndroidNDKConan(ConanFile):
     description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
-    topics = ("android", "NDK", "toolchain", "compiler")
+    topics = ("android", "ndk", "toolchain", "compiler")
     license = "Apache-2.0"
 
-    settings = "os", "arch"
+    settings = "os", "arch", "build_type", "compiler"
 
     short_paths = True
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
@@ -24,11 +24,19 @@ class AndroidNDKConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_universal2(self):
+        return self.version in ["r23b", "r23c", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+
+    @property
+    def _arch(self):
+        return "x86_64" if self._is_universal2 else self.settings.arch
+
     def _settings_os_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os)) is not None
+        return self.conan_data["sources"][self.version].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
+        return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self._arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
@@ -37,12 +45,18 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r24']:
-            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+        if self.version in ['r23', 'r23b', 'r23c', 'r24']:
+            data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
+            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
+
+    def package_id(self):
+        if self._is_universal2:
+            self.info.settings.arch = "universal:armv8/x86_64"
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
@@ -140,7 +154,7 @@ class AndroidNDKConan(ConanFile):
     def _fix_broken_links(self):
         # https://github.com/android/ndk/issues/1671
         # https://github.com/android/ndk/issues/1569
-        if self.version == "r23b" and self.settings.os in ["Linux", "Macos"]:
+        if self.version in ["r23b", "r23c"] and self.settings.os in ["Linux", "Macos"]:
             platform = "darwin" if self.settings.os == "Macos" else "linux"
             links = {f"toolchains/llvm/prebuilt/{platform}-x86_64/aarch64-linux-android/bin/as": "../../bin/aarch64-linux-android-as",
                      f"toolchains/llvm/prebuilt/{platform}-x86_64/arm-linux-androideabi/bin/as": "../../bin/arm-linux-androideabi-as",
@@ -153,7 +167,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _host(self):
-        return f"{self._platform}-{self.settings.arch}"
+        return f"{self._platform}-{self._arch}"
 
     @property
     def _ndk_root(self):
@@ -228,6 +242,7 @@ class AndroidNDKConan(ConanFile):
 
         self.output.info(f"Creating ANDROID_NDK_HOME environment variable: {self.package_folder}")
         self.env_info.ANDROID_NDK_HOME = self.package_folder
+        self.cpp_info.includedirs = []
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, "settings_target"):
@@ -240,7 +255,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_targe.os} != Android")
+            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         cmake_system_processor = self._cmake_system_processor
@@ -305,7 +320,7 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
             self.env_info.READELF = self._define_tool_var("READELF", "readelf")
             self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
-        
+
         # The `ld` tool changed naming conventions earlier than others
         if self._ndk_version_major >= 22:
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
@@ -339,7 +354,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     import zipfile
     with zipfile.ZipFile(filename, "r") as z:
         zip_info = z.infolist()
-        
+
         names = [n.replace("\\", "/") for n in z.namelist()]
         common_folder = os.path.commonprefix(names).split("/", 1)[0]
 

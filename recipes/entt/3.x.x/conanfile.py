@@ -64,5 +64,9 @@ class EnttConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "EnTT")
         self.cpp_info.set_property("cmake_target_name", "EnTT::EnTT")
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         self.cpp_info.names["cmake_find_package"] = "EnTT"
         self.cpp_info.names["cmake_find_package_multi"] = "EnTT"

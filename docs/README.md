@@ -16,4 +16,4 @@
   + [Community Resources](community_resources.md)
   + [Review Guidelines](reviewing.md)
   + [Labels](labels.md)
-  + [Preparing recipes for Conan 2.0](preparing_recipes_for_conan2.md)
+  + [Preparing recipes for Conan 2.0](v2_migration.md)
