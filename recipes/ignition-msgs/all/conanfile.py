@@ -78,7 +78,7 @@ class IgnitionMsgssConan(ConanFile):
 
     def build_requirements(self):
         # at least cmake version 3.15.0 is needed by tinyxml2
-        self.build_requires("doxygen/1.8.20")
+        self.build_requires("doxygen/1.8.17")
         self.build_requires("ignition-cmake/2.10.0")
         if int(tools.Version(self.version).major) == 5:
             self.build_requires("ignition-tools/1.0.0")
