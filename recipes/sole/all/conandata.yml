@@ -1,4 +1,7 @@
 sources:
+  "1.0.4":
+    url: "https://github.com/r-lyeh-archived/sole/archive/1.0.4.tar.gz"
+    sha256: "2801bd0d275903bfa1086901eb887cfde844bafe5beea6c2a57f28de4e0540cc"
   "1.0.2":
     url: "https://github.com/r-lyeh-archived/sole/archive/1.0.2.tar.gz"
     sha256: "ff82a1d6071cbc9c709864266210ddedecdb2b1e507ac5e7c4290ca6453e89b3"
