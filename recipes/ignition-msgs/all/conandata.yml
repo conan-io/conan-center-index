@@ -19,4 +19,3 @@ patches:
   "8.2.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0003-ign-utils-8.2.0-cmake-fixes.patch"
- 

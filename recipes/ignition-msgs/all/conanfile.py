@@ -41,7 +41,7 @@ class IgnitionMsgssConan(ConanFile):
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -153,10 +153,10 @@ class IgnitionMsgssConan(ConanFile):
         self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["core"].build_modules["cmake_paths"] = [self._module_file_rel_path]
         self.cpp_info.components["core"].requires = ["ignition-math::ignition-math"]
-        
+
         self.cpp_info.components["core"].requires.append("protobuf::protobuf")
         self.cpp_info.components["core"].requires.append("tinyxml2::tinyxml2")
-    
+
     @property
     def _module_dir_rel_path(self):
         return os.path.join("lib", "cmake")
