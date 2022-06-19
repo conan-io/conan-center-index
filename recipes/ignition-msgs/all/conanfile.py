@@ -72,18 +72,16 @@ class IgnitionMsgssConan(ConanFile):
         self.requires("protobuf/3.17.1")
         self.requires("tinyxml2/8.0.0")
         if int(tools.Version(self.version).major) == 5:
+            self.requires("ignition-cmake/2.5.0")
             self.requires("ignition-math/6.7.0")
+            self.requires("ignition-tools/1.4.0")
         elif int(tools.Version(self.version).major) == 8:
+            self.requires("ignition-cmake/2.10.0")
             self.requires("ignition-math/6.10.0")
 
     def build_requirements(self):
-        # at least cmake version 3.15.0 is needed by tinyxml2
         self.build_requires("doxygen/1.8.17")
-        if int(tools.Version(self.version).major) == 5:
-            self.build_requires("ignition-tools/1.4.0")
-            self.build_requires("ignition-cmake/2.5.0")
-        if int(tools.Version(self.version).major) == 8:
-            self.build_requires("ignition-cmake/2.10.0")
+            
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -154,10 +152,9 @@ class IgnitionMsgssConan(ConanFile):
         self.cpp_info.components["core"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["core"].build_modules["cmake_paths"] = [self._module_file_rel_path]
-        self.cpp_info.components["core"].requires = ["ignition-math::ignition-math"]
-
-        self.cpp_info.components["core"].requires.append("protobuf::protobuf")
-        self.cpp_info.components["core"].requires.append("tinyxml2::tinyxml2")
+        self.cpp_info.components["core"].requires = ["ignition-math::ignition-math", "ignition-cmake::ignition-cmake", "protobuf::protobuf", "tinyxml2::tinyxml2"]
+        if int(tools.Version(self.version).major) == 5:
+            self.cpp_info.components["core"].requires.append("ignition-tools::ignition-tools")
 
     @property
     def _module_dir_rel_path(self):
