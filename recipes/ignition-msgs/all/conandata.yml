@@ -18,4 +18,4 @@ patches:
       patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
   "8.2.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0003-ign-utils-8.2.0-cmake-fixes.patch"
+      patch_file: "patches/0003-ign-msg-8.2.0-cmake-fixes.patch"
