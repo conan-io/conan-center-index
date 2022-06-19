@@ -4,7 +4,7 @@ import os
 import functools
 import re
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.33.0"
 
 class QCBORConan(ConanFile):
     name = "qcbor"
@@ -71,3 +71,5 @@ class QCBORConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["qcbor"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
