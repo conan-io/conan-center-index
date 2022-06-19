@@ -81,7 +81,7 @@ class IgnitionMsgssConan(ConanFile):
         self.build_requires("doxygen/1.8.17")
         self.build_requires("ignition-cmake/2.10.0")
         if int(tools.Version(self.version).major) == 5:
-            self.build_requires("ignition-tools/1.0.0")
+            self.build_requires("ignition-tools/1.4.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
