@@ -1,0 +1,21 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 8a5bcd0..84b05cd 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -14,6 +14,15 @@ set(SOURCE
+ 	src/qcbor_encode.c
+ 	src/qcbor_err_to_str.c
+ 	src/UsefulBuf.c
+-) 
++)
+ 
+ add_library(qcbor ${SOURCE})
++
++include(GNUInstallDirs)
++install(TARGETS qcbor
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++
++install(DIRECTORY "inc/qcbor" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
