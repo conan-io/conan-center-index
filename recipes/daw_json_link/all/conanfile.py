@@ -14,6 +14,7 @@ class DawJsonLinkConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
     no_copy_source = True
+    short_paths = True
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
