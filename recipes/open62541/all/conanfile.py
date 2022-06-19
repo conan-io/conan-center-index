@@ -412,6 +412,6 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "open62541", "posix"))
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.extend(["m", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules = [self._module_file_rel_path]
