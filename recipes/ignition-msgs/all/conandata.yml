@@ -1,13 +1,13 @@
 sources:
   "5.3.0":
-    url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs5_5.3.0.tar.gz"
-    sha256: "1e11986cdf9549f1b4e2a6da1b978525ff2f60539a451b24db5b81ca2c0893df"
+    url: "https://github.com/gazebosim/gz-msgs/archive/refs/tags/ignition-msgs5_5.3.0.tar.gz"
+    sha256: "191416dbf1bf0e8ea2eaa3b4fd5e3a3e33de281507b21910b8576501207cb607"
   "8.0.0":
-    url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.0.0.tar.gz"
-    sha256: "a6c67a67958d37c192930f779dd1940ba52ee96e83df981cd9879b57edd73ff4"
+    url: "https://github.com/gazebosim/gz-msgs/archive/refs/tags/ignition-msgs8_8.0.0.tar.gz"
+    sha256: "5860ee3a60e3b3153a83dbeec5abb871a61c92864b23bf5c09671b3ac21b9c94"
   "8.2.0":
-    url: "https://github.com/ignitionrobotics/ign-msgs/archive/refs/tags/ignition-msgs8_8.2.0.tar.gz"
-    sha256: "83671fac95273a3a4b2cc444cef88f00935fd55fb64085436d79d6e95221a9e7"
+    url: "https://github.com/gazebosim/gz-msgs/archive/refs/tags/ignition-msgs8_8.2.0.tar.gz"
+    sha256: "82f14983847ff3731fb81634e6de64b301d9b87f231155ae1d336436e229ffb3"
 
 patches:
   "5.3.0":
@@ -18,5 +18,5 @@ patches:
       patch_file: "patches/0002-ign-msg-8.0.0-cmake-fixes.patch"
   "8.2.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0003-ign-msg-8.2.0-cmake-fixes.patch"
+      patch_file: "patches/0003-ign-utils-8.2.0-cmake-fixes.patch"
  
