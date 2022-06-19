@@ -74,7 +74,7 @@ class IgnitionMsgssConan(ConanFile):
         if int(tools.Version(self.version).major) == 5:
             self.requires("ignition-math/6.7.0")
         elif int(tools.Version(self.version).major) == 8:
-            self.requires("ignition-math/6.9.0")
+            self.requires("ignition-math/6.10.0")
 
     def build_requirements(self):
         # at least cmake version 3.15.0 is needed by tinyxml2
