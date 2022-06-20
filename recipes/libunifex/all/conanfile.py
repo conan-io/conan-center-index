@@ -37,10 +37,11 @@ class LibunifexConan(ConanFile):
     def _minimum_standard(self):
         return "17"
 
-    def requirements(self):
+    # FIXME: Add support for liburing
+    # def requirements(self):
         # TODO: Make an option to opt-out of liburing for old kernel versions
-        if self.settings.os == "Linux":
-            self.requires("liburing/2.1")
+        # if self.settings.os == "Linux":
+        #    self.requires("liburing/2.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -100,6 +101,6 @@ class LibunifexConan(ConanFile):
             "cmake_target_name", "unifex::unifex")
         self.cpp_info.components["unifex"].libs = ["unifex"]
 
-        if self.settings.os == "Linux":
-            self.cpp_info.components["unifex"].requires.append(
-                "liburing::liburing")
+        # if self.settings.os == "Linux":
+        #    self.cpp_info.components["unifex"].requires.append(
+        #        "liburing::liburing")
