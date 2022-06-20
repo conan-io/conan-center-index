@@ -20,6 +20,10 @@ class ThreadPoolConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 17
 
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -28,5 +32,6 @@ class ThreadPoolConan(ConanFile):
         self.info.header_only()
 
     def package(self):
-        self.copy("*.hpp", dst="include/bs_thread_pool", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include/bs_thread_pool",
+                  src=self._source_subfolder)
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
