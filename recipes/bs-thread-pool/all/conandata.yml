@@ -1,0 +1,7 @@
+sources:
+  "2.0.0":
+    sha256: 9d545220a051db0432ac4616bbfb01342441fe941cf20df5922ad42683ca7e07
+    url: https://github.com/bshoshany/thread-pool/archive/refs/tags/v2.0.0.tar.gz
+  "3.0.0":
+    sha256: c36052b28b4f28698a6d6f3ad988d7979f6bf6823ebf2af2074714fde15dc19c
+    url: https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.0.0.tar.gz
