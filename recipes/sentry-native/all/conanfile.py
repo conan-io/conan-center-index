@@ -186,7 +186,7 @@ class SentryNativeConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shlwapi", "dbghelp"]
             if tools.Version(self.version) >= "0.4.7":
-                self.cpp_info.system_libs.append("Version")
+                self.cpp_info.system_libs.append("version")
             if self.options.transport == "winhttp":
                 self.cpp_info.system_libs.append("winhttp")
 
