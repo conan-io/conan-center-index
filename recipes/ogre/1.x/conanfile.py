@@ -265,7 +265,7 @@ class ogrecmakeconan(ConanFile):
             
         }
 
-        if self.options.ogre_static:
+        if not self.options.shared:
             for _, values in components.items():
                 libs = [lib + "Static" for lib in values.get("libs")]
                 values["libs"] = libs
