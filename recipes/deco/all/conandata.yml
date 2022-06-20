@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/Enhex/Deco/archive/refs/tags/v1.0.1.zip"
+    sha256: 819e0a7fe2053944e2ec7fe0dee5e028d51e998b6b46b82f9553f26da50e7c9a
   "1.0.0":
     url: "https://github.com/Enhex/Deco/archive/refs/tags/v1.0.0.zip"
     sha256: f167228306ccfaa24cffd08f5bc95e909b811920e7ed7b584ca83173534ff1eb
