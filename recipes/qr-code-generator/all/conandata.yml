@@ -11,6 +11,9 @@ sources:
   "1.7.0":
     url: "https://github.com/nayuki/QR-Code-generator/archive/v1.7.0.tar.gz"
     sha256: "a8138d84a2adbc9168bfadfb9db5272c89b69fb87f72a88ecd08ce7f402ee710"
+  "1.8.0":
+    url: "https://github.com/nayuki/QR-Code-generator/archive/v1.8.0.tar.gz"
+    sha256: "2ec0a4d33d6f521c942eeaf473d42d5fe139abcfa57d2beffe10c5cf7d34ae60"
 patches:
   "1.4.0":
     - base_path: "source_subfolder"
@@ -24,5 +27,8 @@ patches:
     - base_path: "."
       patch_file: "patches/003-cmake-1.6.patch"
   "1.7.0":
+    - base_path: "."
+      patch_file: "patches/004-cmake-1.7.patch"
+  "1.8.0":
     - base_path: "."
       patch_file: "patches/004-cmake-1.7.patch"
