@@ -45,6 +45,14 @@ class AtkConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
+
+    def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -89,3 +97,6 @@ class AtkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = ['include/atk-1.0']
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

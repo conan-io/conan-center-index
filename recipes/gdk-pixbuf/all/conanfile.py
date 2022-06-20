@@ -53,6 +53,8 @@ class GdkPixbufConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
 
     def requirements(self):
         if self.settings.compiler == "clang":
@@ -71,6 +73,10 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg/9d")
 
     def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
         if self.settings.os == "Macos":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
@@ -162,3 +168,6 @@ class GdkPixbufConan(ConanFile):
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "gdk-pixbuf-2.0"
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.12")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.10")
+            self.requires("libdeflate/1.12")
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
@@ -298,7 +298,7 @@ class GdalConan(ConanFile):
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_netcdf:
-            self.requires("netcdf/4.7.4")
+            self.requires("netcdf/4.8.1")
         if self.options.with_jasper:
             self.requires("jasper/2.0.33")
         if self.options.with_openjpeg:
@@ -306,7 +306,7 @@ class GdalConan(ConanFile):
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
         elif self.options.with_mysql == "mariadb-connector-c":
             self.requires("mariadb-connector-c/3.1.12")
         if self.options.with_xerces:
@@ -320,7 +320,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.83.0")
+            self.requires("libcurl/7.83.1")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.14")
         # if self.options.with_spatialite:
@@ -365,7 +365,7 @@ class GdalConan(ConanFile):
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.1.5")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.12.0")
 
