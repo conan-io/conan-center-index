@@ -18,7 +18,7 @@ class SamariumConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     generators = "cmake", "cmake_find_package_multi"
-    requires = "fmt/8.1.1", "sfml/2.5.1"
+    requires = "fmt/8.1.1", "sfml/2.5.1", "range-v3/0.11.0"
 
     @property
     def _min_cppstd(self):
