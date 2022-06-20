@@ -12,6 +12,7 @@ class BSThreadPoolConan(ConanFile):
     homepage = "https://github.com/bshoshany/thread-pool"
     license = "MIT"
     no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
