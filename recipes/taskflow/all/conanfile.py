@@ -16,6 +16,7 @@ class TaskflowConan(ConanFile):
     homepage = "https://github.com/taskflow/taskflow"
     topics = ("taskflow", "tasking", "parallelism")
     settings = "os", "arch", "compiler", "build_type"
+    short_paths = True
 
     @property
     def _source_subfolder(self):
