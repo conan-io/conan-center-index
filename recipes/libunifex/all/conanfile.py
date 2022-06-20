@@ -20,15 +20,6 @@ class LibunifexConan(ConanFile):
     no_copy_source = True
     exports_sources = ["CMakeLists.txt"]
 
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -51,14 +42,6 @@ class LibunifexConan(ConanFile):
         # TODO: Make an option to opt-out of liburing for old kernel versions
         # if self.settings.os == "Linux":
         #    self.requires("liburing/2.1")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
