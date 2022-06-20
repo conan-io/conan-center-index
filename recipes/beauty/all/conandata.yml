@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-rc1":
+    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.0-rc1.tar.gz"
+    sha256: "e5c0cdffd9324ed0cbe771a4aaff3a572ec553dc0275bbaf4db754ce043ecf49"

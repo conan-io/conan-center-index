@@ -31,7 +31,7 @@ class LogrConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("fmt/8.0.1")
+        self.requires("fmt/8.1.1")
 
         if self.options.backend == "spdlog":
             self.requires("spdlog/1.9.2")

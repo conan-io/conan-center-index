@@ -1,13 +1,19 @@
 sources:
-  "2.0.7":
-    url: https://github.com/eranpeer/FakeIt/archive/refs/tags/2.0.7.tar.gz
-    sha256: e28ad1181487447a7add926a289d0db0bbb354a64d3395f75066b74750a93769
-  "2.0.8":
-    url: https://github.com/eranpeer/FakeIt/archive/refs/tags/2.0.8.tar.gz
-    sha256: beff681216e6645ede25af1cc4dc743d525f38cba1fa4a58f964efcaba0dd7e5
-  "2.0.9":
-    url: "https://github.com/eranpeer/FakeIt/archive/2.0.9.tar.gz"
-    sha256: "dc4ee7b17a84c959019b92c20fce6dc9426e9e170b6edf84db6cb2e188520cd7"
+  "2.3.0":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.3.0.tar.gz"
+    sha256: "990469c1e4608ebf662d64e979aa607a0c32faa40cc5ffe38b74c7dd6968ed2d"
+  "2.2.0":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.2.0.tar.gz"
+    sha256: "a54267fc5787acda229be11d3f5ea9a80339a385685e0e0c4d7df0a304a6f57d"
   "2.1.0":
     url: "https://github.com/eranpeer/FakeIt/archive/2.1.0.tar.gz"
     sha256: "695826dc5c3012e57f2c7aa9801c7af1d1a8677f88c624343b3039c6b5c59871"
+  "2.0.9":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.0.9.tar.gz"
+    sha256: "dc4ee7b17a84c959019b92c20fce6dc9426e9e170b6edf84db6cb2e188520cd7"
+  "2.0.8":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.0.8.tar.gz"
+    sha256: "beff681216e6645ede25af1cc4dc743d525f38cba1fa4a58f964efcaba0dd7e5"
+  "2.0.7":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.0.7.tar.gz"
+    sha256: "e28ad1181487447a7add926a289d0db0bbb354a64d3395f75066b74750a93769"
