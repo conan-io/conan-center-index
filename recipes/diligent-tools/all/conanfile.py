@@ -58,7 +58,11 @@ class DiligentToolsConan(ConanFile):
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
 
     def requirements(self):
-        if self.version >= "2.5.2":
+        if self.version == "api.252003":
+            self.requires("diligent-core/api.252003")
+            self.requires('taywee-args/6.3.0')
+            self.requires("imgui/1.87")
+        elif self.version == "2.5.2":
             self.requires("diligent-core/2.5.2")
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
