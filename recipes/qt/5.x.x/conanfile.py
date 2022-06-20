@@ -151,6 +151,7 @@ class QtConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def build_requirements(self):
+        self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and self._is_msvc:
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
