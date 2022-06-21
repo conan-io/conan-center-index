@@ -64,8 +64,5 @@ class YyjsonConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("YYJSON_IMPORTS")
 
+        self.cpp_info.set_property("cmake_file_name", "yyjson")
         self.cpp_info.set_property("cmake_target_name", "yyjson::yyjson")
-
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "yyjson"
-        self.cpp_info.names["cmake_find_package_multi"] = "yyjson"
