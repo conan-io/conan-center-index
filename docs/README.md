@@ -6,7 +6,7 @@
 * [Changelog](changelog.md)
 
 * User documentation
-  + [Contributing to Conan Center Index](contributing.md)
+  + [Contributing to Conan Center Index](../contributing.md)
   + [Adding Packages to ConanCenter](how_to_add_packages.md)
   + [Review Process](review_process.md)
   + [Packaging policy](packaging_policy.md)
