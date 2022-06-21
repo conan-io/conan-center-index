@@ -63,7 +63,7 @@ class IgnitionToolsConan(ConanFile):
                 )
 
     def requirements(self):
-        self.requires("ruby/3.1.0")
+        self.requires("ruby/2.7.0@ar/thirdparty")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], 
@@ -117,22 +117,20 @@ class IgnitionToolsConan(ConanFile):
         tools.save(module_file, content)
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
         lib_name = "ignition-tools"
         self.cpp_info.names["cmake_find_package"] = lib_name
         self.cpp_info.names["cmake_find_package_multi"] = lib_name
         self.cpp_info.names["cmake_paths"] = lib_name
         self.cpp_info.set_property("cmake_file_name", "ignition-tools")
-
         self.cpp_info.components["core"].names["cmake_find_package"] = "core"
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
         self.cpp_info.components["core"].names["cmake_paths"] = "core"
+        self.cpp_info.components["core"].bindirs = ["bin"]
 
         self.cpp_info.components["core"].libs = []
         if int(tools.Version(self.version).minor) > 2:
             self.cpp_info.components["core"].libs.append(lib_name +"-backward")
-
-        self.cpp_info.components["core"].includedirs.append(os.path.join("include", "ignition", "tools"))
+            
         self.cpp_info.components["core"].requires = ["ruby::ruby"]
 
         self.cpp_info.components["core"].builddirs.append(self._module_dir_rel_path)

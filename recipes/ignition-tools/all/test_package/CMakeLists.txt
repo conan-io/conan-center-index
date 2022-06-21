@@ -4,7 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(ignition-tools REQUIRED COMPONENTS)
+find_package(ignition-tools REQUIRED COMPONENTS core)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ignition-tools::ignition-tools)
