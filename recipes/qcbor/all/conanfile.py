@@ -1,17 +1,18 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import functools
+import re
 
 required_conan_version = ">=1.33.0"
 
-
-class QrCodeGeneratorConan(ConanFile):
-    name = "qr-code-generator"
-    description = "High-quality QR Code generator library"
-    license = "MIT"
+class QCBORConan(ConanFile):
+    name = "qcbor"
+    description = "Comprehensive, powerful, commercial-quality CBOR encoder/decoder that is still suited for small devices."
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/nayuki/QR-Code-generator"
-    topics = ["qr-code", "qr-generator", "c-plus-plus"]
+    homepage = "https://github.com/laurencelundblade/QCBOR"
+    topics = ("serialization", "cbor", "rfc-7049", "rfc-8949")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,10 +28,6 @@ class QrCodeGeneratorConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -43,10 +40,8 @@ class QrCodeGeneratorConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -55,35 +50,26 @@ class QrCodeGeneratorConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         return cmake
 
-    def _patch_sources(self):
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-    def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-
-    def _extract_license(self):
-        header_name = ("QrCode.hpp" if tools.Version(self.version) < "1.7.0"
-                       else "qrcodegen.hpp")
-        header = tools.load(os.path.join(
-            self._source_subfolder, "cpp", header_name))
-        license_contents = header[2:header.find("*/", 1)]
-        return license_contents
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"),
-                   self._extract_license())
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # Extract the License/s from README.md to a file
+        tmp = tools.load(os.path.join(self._source_subfolder, "inc", "qcbor", "qcbor.h"))
+        license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
-        library_name = ("qrcodegen" if tools.Version(self.version) < "1.7.0"
-                       else "qrcodegencpp")
-        self.cpp_info.libs.append(library_name)
+        self.cpp_info.libs = ["qcbor"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

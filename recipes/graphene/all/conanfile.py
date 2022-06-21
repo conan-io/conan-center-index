@@ -41,13 +41,21 @@ class LibnameConan(ConanFile):
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.73.0")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared and self.options.with_glib:
+            self.options["glib"].shared = True
+
+    def validate(self):
+        if self.options.shared and self.options.with_glib and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -101,3 +109,7 @@ class LibnameConan(ConanFile):
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].names["pkg_config"] = "graphene-gobject-1.0"
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
+
+    def package_id(self):
+        if self.options.with_glib:
+            self.info.requires["glib"].full_package_mode()

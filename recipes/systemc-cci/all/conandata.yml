@@ -10,8 +10,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/cci_value_converter.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/makefile.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/rapidjson.patch"
-      base_path: "source_subfolder"
-
