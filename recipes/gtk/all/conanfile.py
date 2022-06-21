@@ -1,6 +1,8 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import fileinput
+import shlex
 
 required_conan_version = ">=1.33.0"
 
@@ -20,7 +22,6 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
-        "with_pango": [True, False],
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
@@ -31,7 +32,6 @@ class GtkConan(ConanFile):
         "fPIC": True,
         "with_wayland": False,
         "with_x11": True,
-        "with_pango": True,
         "with_ffmpeg": False,
         "with_gstreamer": False,
         "with_cups": False,
@@ -63,10 +63,6 @@ class GtkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            # Fix duplicate definitions of DllMain
-            self.options["gdk-pixbuf"].shared = True
-            # Fix segmentation fault
-            self.options["cairo"].shared = True
         if tools.Version(self.version) >= "4.1.0":
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
@@ -79,25 +75,35 @@ class GtkConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.2":
+            # TODO: Remove once gtk 4.1.2 and 4.0.2 are removed
+            if self._gtk4 and tools.Version(self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
-            if not self.options["gdk-pixbuf"].shared:
-                raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
-            if not self.options["cairo"].shared:
-                raise ConanInvalidConfiguration("MSVC build requires shared cairo")
+            # TODO: Remove once gtk 3.24.24 is removed
+            if self._gtk3 and tools.Version(self.version) < "3.24.34":
+                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/3.24.34")
         if tools.Version(self.version) >= "4.1.0":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
+        if self.settings.os == "Linux" and (self.options.with_wayland or self.options.with_x11) and not self.options["pango"].with_freetype:
+            raise ConanInvalidConfiguration(
+                "gtk requires pango with freetype when built with wayland/x11 support")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Linux":
-            if self.options.with_wayland or self.options.with_x11:
-                if not self.options.with_pango:
-                    raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
+        if self.options.shared:
+            self.options["glib"].shared = True
+            self.options["cairo"].shared = True
+            self.options["pango"].shared = True
+            self.options["gdk-pixbuf"].shared = True
+            if self._gtk3:
+                self.options["atk"].shared = True
+                if self.settings.os == "Linux" and self.options.with_x11:
+                    self.options["at-spi2-atk"].shared = True
+            if self._gtk4:
+                self.options["graphene"].shared = True
 
     def build_requirements(self):
         self.build_requires("meson/0.62.2")
@@ -108,7 +114,7 @@ class GtkConan(ConanFile):
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.6")
+        self.requires("gdk-pixbuf/2.42.8")
         self.requires("glib/2.73.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
@@ -119,21 +125,17 @@ class GtkConan(ConanFile):
             self.requires("libtiff/4.3.0")
             self.requires("libjpeg/9d")
         if self.settings.os == "Linux":
-            if self._gtk4:
-                self.requires("xkbcommon/1.4.1")
-            if self._gtk3:
-                self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
-                if self._gtk3:
-                    self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.4.1")
                 self.requires("wayland/1.20.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
+                if self._gtk3:
+                    self.requires("at-spi2-atk/2.38.0")
         if self._gtk3:
             self.requires("atk/2.38.0")
         self.requires("libepoxy/1.5.10")
-        if self.options.with_pango:
-            self.requires("pango/1.50.7")
+        self.requires("pango/1.50.7")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/5.0")
         if self.options.with_gstreamer:
@@ -157,9 +159,9 @@ class GtkConan(ConanFile):
         defs["datadir"] = os.path.join(self.package_folder, "res", "share")
         defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
         defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
-        
+
         if self._gtk4:
-            enabled_disabled = lambda opt : "enabled" if opt else "disabled" 
+            enabled_disabled = lambda opt : "enabled" if opt else "disabled"
             defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             defs["print-cups"] = enabled_disabled(self.options.with_cups)
@@ -185,14 +187,27 @@ class GtkConan(ConanFile):
                                   "dependency(false ? ")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
+
+            # the command response file for linking gtk exceeds msvc linker limit
+            # this hack fixes this by removing duplicates in the link arguments
+            # inside the build.ninja file
+            for line in fileinput.input(os.path.join(self._build_subfolder, "build.ninja"), inplace=True):
+                idx = line.find("LINK_ARGS =")
+                if idx >= 0:
+                    parts = shlex.split(line[idx + len("LINK_ARGS ="):])
+                    print("{} {}".format(
+                        line[: idx + len("LINK_ARGS =")],
+                        " ".join((f'"{v}"' for v in dict.fromkeys(parts)))), end='')
+                else:
+                    print(line, end='')
+
             meson.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
-        with tools.environment_append({
-            "PKG_CONFIG_PATH": self.install_folder,
-            "PATH": [os.path.join(self.package_folder, "bin")]}):
+        with tools.environment_append({**tools.RunEnvironment(self).vars,
+                                       "PKG_CONFIG_PATH": self.install_folder}):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
@@ -205,8 +220,7 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
             self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gdk-3.0"].requires = []
-            if self.options.with_pango:
-                self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
+            self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
             self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
             if self.settings.compiler != "Visual Studio":
                 self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
@@ -225,8 +239,9 @@ class GtkConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
             self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
-            if self.options.with_pango:
-                self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
+            if (self.settings.os == "Linux" and (self.options.with_wayland
+                 or self.options.with_x11)) or self.options["pango"].with_freetype:
+                self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
             self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
@@ -240,3 +255,33 @@ class GtkConan(ConanFile):
             self.cpp_info.names["pkg_config"] = "gtk4"
             self.cpp_info.libs = ["gtk-4"]
             self.cpp_info.includedirs.append(os.path.join("include", "gtk-4.0"))
+
+            self.cpp_info.requires.extend([
+                "gdk-pixbuf::gdk-pixbuf", "glib::gobject-2.0", "glib::gmodule-2.0",
+                "cairo::cairo", "cairo:::cairo-gobjec", "pango::pangocairo",
+                "libpng::libpng", "libtiff::libtiff", "libjpeg::libjpeg",
+                "libepoxy::libepoxy", "graphene::graphene-gobject-1.0",
+                "fribidi::fribidi"
+            ])
+            if self.settings.os == "Linux":
+                if self.options.with_x11:
+                    self.cpp_info.requires.append("xorg::xorg")
+                if self.options.with_wayland:
+                    self.cpp_info.requires.append("xkbcommon::libxkbcommon")
+
+            if (self.settings.os == "Linux" and (self.options.with_wayland
+                 or self.options.with_x11)) or self.options["pango"].with_freetype:
+                self.cpp_info.requires.append("pango::pangoft2")
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()
+        self.info.requires["cairo"].full_package_mode()
+        self.info.requires["pango"].full_package_mode()
+        self.info.requires["gdk-pixbuf"].full_package_mode()
+        if self._gtk3:
+            self.info.requires["atk"].full_package_mode()
+            if self.settings.os == "Linux" and self.options.with_x11:
+                self.info.requires["at-spi2-atk"].full_package_mode()
+
+        if self._gtk4:
+            self.info.requires["graphene"].full_package_mode()
