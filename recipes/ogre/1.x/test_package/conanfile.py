@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             return
  
         ogre_main_bin_path = os.path.join("bin", "ogre_main")
