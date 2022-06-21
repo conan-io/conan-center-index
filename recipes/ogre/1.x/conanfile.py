@@ -196,10 +196,9 @@ class ogrecmakeconan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-    def build(self):
         # the pkgs below are not available as conan recipes yet
         # TODO: delte line 200-208 once the conan recipes are available
         ogre_pkg_modules = ["AMDQBS", "Cg", "HLSL2GLSL", "GLSLOptimizer", "OpenGLES", "OpenGLES2", "OpenGLES3", "SDL2", "Softimage", "Wix"]
@@ -209,9 +208,10 @@ class ogrecmakeconan(ConanFile):
             if os.path.isfile(pkg_path):
                 shutil.copy(pkg_path, self.build_folder)
             else:
-                raise RuntimeError(f"The file Find{pkg_module}.cmake is not present in f{ogre_pkg_module_path}!")
+                raise ConanException(f"The file Find{pkg_module}.cmake is not present in f{ogre_pkg_module_path}!")
 
-
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
