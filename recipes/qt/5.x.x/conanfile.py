@@ -420,6 +420,10 @@ class QtConan(ConanFile):
                                   "  if (enable_precompiled_headers) {\n    if (is_win) {",
                                   "  if (enable_precompiled_headers) {\n    if (false) {"
                                   )
+        tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtbase", "configure.json"),
+                                  "-ldbus-1d",
+                                  "-ldbus-1"
+                                  )
 
     def _make_program(self):
         if self._is_msvc:
