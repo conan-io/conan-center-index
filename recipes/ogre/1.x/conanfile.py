@@ -289,7 +289,6 @@ class ogrecmakeconan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OGRE")
         self.cpp_info.names["cmake_find_package"] = "OGRE"
         self.cpp_info.names["cmake_find_package_multi"] = "OGRE"
-        self.cpp_info.names["cmake_paths"] = "OGRE"
 
         for comp, values in self._components.items():
             self.cpp_info.components[comp].names["cmake_find_package"] = comp
