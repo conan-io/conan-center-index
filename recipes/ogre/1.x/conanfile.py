@@ -155,8 +155,11 @@ class ogrecmakeconan(ConanFile):
         cmake.definitions["OGRE_CONFIG_DOUBLE"] = self.options.ogre_set_double
         cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
         cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.ogre_glsupport_use_egl
-        if not tools.valid_min_cppstd(self, 11):
-            cmake.definitions["CMAKE_CXX_STANDARD"] = 11 # for OpenEXR
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        else:
+            # INFO: OpenEXR requires C++11
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         cmake.definitions["OGRE_BUILD_TESTS"] = self.options.ogre_build_tests
         cmake.definitions["OGRE_ASSERT_MODE"] = self.options.ogre_assert_mode
         cmake.definitions["OGRE_BUILD_COMPONENT_BITES"]  = self.options.ogre_build_component_bites
