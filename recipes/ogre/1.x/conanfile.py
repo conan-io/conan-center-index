@@ -128,7 +128,7 @@ class ogrecmakeconan(ConanFile):
 
     def validate(self):
         """
-         OGRE 1.x is very old and will not work with latest gcc, clang and msvc compielrs
+         OGRE 1.x is very old and will not work with latest gcc, clang and msvc compilers.
          TODO: determine incompatible msvc compilers
         """
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 9:
