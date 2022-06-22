@@ -97,6 +97,7 @@ class LibunifexConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "unifex"
         self.cpp_info.names["cmake_find_package"] = "unifex"
         self.cpp_info.names["cmake_find_package_multi"] = "unifex"
+        self.cpp_info.names["pkg_config"] = "unifex"
         self.cpp_info.components["unifex"].names["cmake_find_package"] = "unifex"
         self.cpp_info.components["unifex"].names["cmake_find_package_multi"] = "unifex"
         self.cpp_info.components["unifex"].set_property(
