@@ -83,6 +83,7 @@ class FlatccConan(ConanFile):
         cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
         cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
         cmake.definitions["FLATCC_TEST"] = False
+        cmake.definitions["FLATCC_ALLOW_WERROR"] = False
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
