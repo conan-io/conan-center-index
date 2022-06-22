@@ -13,7 +13,6 @@ class BShoshanyThreadPoolConan(ConanFile):
     settings = "arch", "build_type", "compiler", "os"
     topics = ("concurrency", "cpp17", "header-only", "library", "multi-threading", "parallel-computing", "thread-pool", "threads")
     url = "https://github.com/conan-io/conan-center-index"
-    version = "3.0.0"
 
     @property
     def _minimum_compilers_version(self):
