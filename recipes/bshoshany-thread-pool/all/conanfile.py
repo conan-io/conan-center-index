@@ -31,9 +31,6 @@ class BShoshanyThreadPoolConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build(self):
-        pass
-
     def package(self):
         self.copy("BS_thread_pool.hpp", src=os.path.join(self._source_subfolder, "./"), dst="include")
         self.copy("LICENSE.txt", src=os.path.join(self._source_subfolder, "./"), dst="licenses")
