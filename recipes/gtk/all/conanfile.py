@@ -1,5 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import os
 import fileinput
 import shlex
@@ -74,7 +75,7 @@ class GtkConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             # TODO: Remove once gtk 4.1.2 and 4.0.2 are removed
             if self._gtk4 and tools.Version(self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
@@ -87,6 +88,12 @@ class GtkConan(ConanFile):
         if self.settings.os == "Linux" and (self.options.with_wayland or self.options.with_x11) and not self.options["pango"].with_freetype:
             raise ConanInvalidConfiguration(
                 "gtk requires pango with freetype when built with wayland/x11 support")
+        if self.settings.compiler == "clang":
+            # FIXME: gdk-pixbuf cannot be built using clang with the latest glib
+            # which all other dependencies of gtk depend on
+            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
+            raise ConanInvalidConfiguration(
+                "this recipe does not support building with clang")
 
     def configure(self):
         if self.options.shared:
