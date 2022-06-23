@@ -1,0 +1,11 @@
+sources:
+  "26":
+      Macos:
+          "x86_64":
+              url: "http://isoffice.ro/flexshare/public/archicad-apidevkit-mac-intel-v26.tar.gz"
+              sha256: "d9072a1dc3f8a99a8d2a944161651e063417f7da702b72187d48469ab7684be0"
+      Windows:
+          "x86_64":
+              url: "http://isoffice.ro/flexshare/public/archicad-apidevkit-win-intel-v26.zip"
+              sha256: "f921878cc969478a20fa440743c44d29c2578692ae44a15ae2df63bb719a77c8"
+
