@@ -12,8 +12,7 @@ index 4784c93..d377f18 100644
       gnu-like:$<$<AND:${is_c_lang},${__not_old_gnu}>:-Werror=int-conversion> msvc:/we4047
       # Discarding qualifiers
       gnu:$<$<AND:${is_c_lang},${__not_old_gnu}>:-Werror=discarded-qualifiers>
--     clang:$<${is_c_lang}:-Werror=ignored-qualifiers>
-+     clang:$<${is_c_lang}:-Werror=ignored-qualifiers>\\\\
+      clang:$<${is_c_lang}:-Werror=ignored-qualifiers>
       msvc:/we4090
       # Definite use of uninitialized value
       gnu-like:-Werror=uninitialized msvc:/we4700
