@@ -27,7 +27,7 @@ class FlatccTestConan(ConanFile):
 
     def test(self):
         if tools.cross_building(self):
-            bin_path = os.path.join(self.deps_cpp_info["objectbox-generator"].rootpath, "bin", "flatcc")
+            bin_path = os.path.join(self.deps_cpp_info["flatcc"].rootpath, "bin", "flatcc")
             if not os.path.isfile(bin_path) or not os.access(bin_path, os.X_OK):
                 raise ConanException("flatcc doesn't exist.")
         else:
