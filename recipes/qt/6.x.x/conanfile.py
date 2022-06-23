@@ -393,7 +393,7 @@ class QtConan(ConanFile):
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.1")
+        self.build_requires("cmake/3.23.2")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.os == "Windows":

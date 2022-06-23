@@ -49,7 +49,7 @@ class DaggyConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.21.3")
+        self.build_requires("cmake/3.23.2")
 
     def config_options(self):
         if self.settings.os == "Windows":

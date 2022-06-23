@@ -13,7 +13,7 @@ class HidapiTestConan(ConanFile):
             # set. This could be because you are using a Mac OS X version less than 10.5
             # or because CMake's platform configuration is corrupt.
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
+            self.build_requires("cmake/3.23.2")
 
     def build(self):
         cmake = CMake(self)

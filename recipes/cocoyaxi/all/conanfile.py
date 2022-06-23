@@ -56,7 +56,7 @@ class CocoyaxiConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             #  The OSX_ARCHITECTURES target property is now respected for the ASM language
-            self.build_requires("cmake/3.20.1")
+            self.build_requires("cmake/3.23.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

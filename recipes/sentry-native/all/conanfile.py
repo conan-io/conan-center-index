@@ -135,7 +135,7 @@ class SentryNativeConan(ConanFile):
 
     def build_requirements(self):
         if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
-            self.build_requires("cmake/3.22.0")
+            self.build_requires("cmake/3.23.2")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 

@@ -51,6 +51,9 @@ class FreetypeConan(ConanFile):
     def _has_with_brotli_option(self):
         return tools.Version(self.version) >= "2.10.2"
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.23.2")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC

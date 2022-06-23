@@ -43,6 +43,9 @@ class HarfbuzzConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.23.2")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"

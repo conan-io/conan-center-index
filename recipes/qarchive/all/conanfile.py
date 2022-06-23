@@ -51,7 +51,7 @@ class QarchiveConan(ConanFile):
         self.requires("qt/5.15.3")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.1")
+        self.build_requires("cmake/3.23.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

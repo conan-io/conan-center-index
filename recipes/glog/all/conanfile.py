@@ -50,7 +50,7 @@ class GlogConan(ConanFile):
 
     def build_requirements(self):
         if tools.Version(self.version) >= "0.6.0":
-            self.build_requires("cmake/3.22.3")
+            self.build_requires("cmake/3.23.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

@@ -77,7 +77,7 @@ class mailioConan(ConanFile):
 
     def build_requirements(self):
         # mailio requires cmake >= 3.16.3
-        self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.23.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
