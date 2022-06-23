@@ -80,7 +80,6 @@ class GLibConan(ConanFile):
 
         if tools.is_apple_os(self.settings.os):
             self.requires("libiconv/1.16")
-        self.requires("gvdb/cci.20220615") # cf https://gitlab.gnome.org/GNOME/glib/-/blob/2.73.1/subprojects/gvdb.wrap
 
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
