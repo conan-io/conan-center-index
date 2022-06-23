@@ -40,6 +40,7 @@ class ogrecmakeconan(ConanFile):
         "build_plugin_octree": [True, False],
         "build_plugin_pcz": [True, False],
         "build_plugin_pfx": [True, False],
+        "build_plugin_exrcodec" : [True, False],
         "build_rendersystem_d3d11": [True, False],
         "build_rendersystem_gl": [True, False],
         "build_rendersystem_gl3plus": [True, False],
@@ -82,6 +83,7 @@ class ogrecmakeconan(ConanFile):
         "build_plugin_octree": True,
         "build_plugin_pcz": True,
         "build_plugin_pfx": True,
+        "build_plugin_exrcodec" : True,
         "build_rendersystem_d3d11": True,
         "build_rendersystem_gl": True,
         "build_rendersystem_gl3plus": True,
@@ -95,7 +97,7 @@ class ogrecmakeconan(ConanFile):
         "config_enable_freeimage": True,
         "install_pdb": False,
         "install_samples": False,
-        "install_tools": True,
+        "install_tools": False,
         "install_vsprops": False,
         "resourcemanager_strict": 2,
         "set_double": False,
@@ -109,7 +111,6 @@ class ogrecmakeconan(ConanFile):
         self.requires("freeimage/3.18.0")
         self.requires("boost/1.75.0")
         self.requires("freetype/2.11.1")
-        self.requires("openexr/2.5.7")
         self.requires("poco/1.11.2")
         self.requires("tbb/2020.3")
         self.requires("zlib/1.2.12")
@@ -118,6 +119,8 @@ class ogrecmakeconan(ConanFile):
         self.requires("xorg/system")
         self.requires("glu/system")
         self.requires("sdl/2.0.20")
+        if self.options.build_plugin_exrcodec:
+            self.requires("openexr/2.5.7")
         if self.options.glsupport_use_egl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
         else:
@@ -129,16 +132,17 @@ class ogrecmakeconan(ConanFile):
          OGRE 1.x is very old and will not work with latest gcc, clang and msvc compilers.
          TODO: determine incompatible msvc compilers
         """
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 9:
-            raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc version greater than 9")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 9:
-            raise ConanInvalidConfiguration("OGRE 1.x not supported with clang version greater than 9")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
+            raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc version greater than 11")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 13:
+            raise ConanInvalidConfiguration("OGRE 1.x not supported with clang version greater than 13")
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
+        self.options.install_tools = self.options.build_tools
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -250,22 +254,64 @@ class ogrecmakeconan(ConanFile):
     def _components(self):
         pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
+        plugin_lib_dir = os.path.join("lib", "OGRE")
         components = {
             "OgreMain":  {"requires" : ["boost::boost", "cppunit::cppunit", "freeimage::freeimage", "openexr::openexr","freetype::freetype", 
                                         "sdl::sdl", "tbb::tbb", "xorg::xorg", "zlib::zlib", "zziplib::zziplib", "poco::poco","glu::glu", "egl::egl"], 
-                            "libs": ["OgreMain"], "include": [include_prefix]},
-            "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], "include": ["include", include_prefix, f"{include_prefix}/Bites"]},
-            "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], "include": ["include", include_prefix, f"{include_prefix}/HLMS"]},
-            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLodGenerator"], "include": ["include", include_prefix, f"{include_prefix}/MeshLodGenerator"]},
-            "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"], "include": ["include", include_prefix, f"{include_prefix}/Overlay"]},
-            "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], "include": ["include", include_prefix, f"{include_prefix}/Paging"]},
-            "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"], "include": ["include", include_prefix, f"{include_prefix}/Property"]},
-            "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"], "include": ["include", include_prefix, f"{include_prefix}/RTShaderSystem"]},
-            "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"], "include": ["include", include_prefix, f"{include_prefix}/Terrain"]},
-            "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"], "include": ["include", include_prefix, f"{include_prefix}/Volume"]}
+                            "libs": ["OgreMain"], "include": [include_prefix], "libdirs" : ["lib"]},
+            "Bites":  {"requires" : ["OgreMain", "Overlay"], "libs": ["OgreBites"], 
+                        "include": ["include", include_prefix, f"{include_prefix}/Bites"], "libdirs" : ["lib"]},
+            "HLMS" :  {"requires" : ["OgreMain"], "libs": ["OgreHLMS"], 
+                        "include": ["include", include_prefix, f"{include_prefix}/HLMS"], "libdirs" : ["lib"]},
+            "MeshLodGenerator" :  {"requires" : ["OgreMain"], "libs": ["OgreMeshLodGenerator"], 
+                        "include": ["include", include_prefix, f"{include_prefix}/MeshLodGenerator"], "libdirs" : ["lib"]},
+            "Overlay" :  {"requires" : ["OgreMain"], "libs": ["OgreOverlay"],
+                         "include": ["include", include_prefix, f"{include_prefix}/Overlay"], "libdirs" : ["lib"]},
+            "Paging" :  {"requires" : ["OgreMain"], "libs": ["OgrePaging"], 
+                        "include": ["include", include_prefix, f"{include_prefix}/Paging"], "libdirs" : ["lib"]},
+            "Property" :  {"requires" : ["OgreMain"], "libs": ["OgreProperty"],
+                        "include": ["include", include_prefix, f"{include_prefix}/Property"], "libdirs" : ["lib"]},
+            "RTShaderSystem" :  {"requires" : ["OgreMain"], "libs": ["OgreRTShaderSystem"],
+                        "include": ["include", include_prefix, f"{include_prefix}/RTShaderSystem"], "libdirs" : ["lib"]},
+            "Terrain" :  {"requires" : ["OgreMain"], "libs": ["OgreTerrain"],
+                        "include": ["include", include_prefix, f"{include_prefix}/Terrain"], "libdirs" : ["lib"]},
+            "Volume" :  {"requires" : ["OgreMain"], "libs": ["OgreVolume"],
+                        "include": ["include", include_prefix, f"{include_prefix}/Volume"], "libdirs" : ["lib"]}
             
         }
 
+        if self.options.build_component_python:
+            components["Python"] = {"requires" : ["OgreMain"], "libs": ["OgrePython"], "include": ["include", include_prefix, f"{include_prefix}/Python"]}
+
+        if self.options.build_plugin_bsp:
+            components["BSPSceneManager"] = {"requires" : ["OgreMain"], "libs": ["Plugin_BSPSceneManager"],
+                                            "libdirs" : ["lib", plugin_lib_dir],
+                                            "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "BSPSceneManager")]}
+
+        if self.options.build_plugin_octree:
+            components["OctreeSceneManager"] = {"requires" : ["OgreMain"], "libs": ["Plugin_OctreeSceneManager"],
+                                                "libdirs" : ["lib", plugin_lib_dir],
+                                                "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "OctreeSceneManager")]}
+
+        if self.options.build_plugin_exrcodec:
+            components["XRCodec"] = {"requires" : ["OgreMain"], "libs": ["Plugin_EXRCodec"],
+                        "libdirs" : ["lib", plugin_lib_dir],
+                        "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "EXRCodec")]}
+
+        if self.options.build_plugin_pfx:
+            components["ParticleFX"] = {"requires" : ["OgreMain"], "libs": ["Plugin_ParticleFX"],
+                                "libdirs" : ["lib", plugin_lib_dir],
+                                "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "ParticleFX")]}
+        
+        if self.options.build_plugin_pcz:
+            components["PCZSceneManager"] = {"requires" : ["OgreMain"], "libs": ["Plugin_PCZSceneManager"],
+                                "libdirs" : ["lib", plugin_lib_dir],
+                                "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "PCZSceneManager")]}
+
+            components["OctreeZone"] = {"requires" : ["OgreMain", "PCZSceneManager"], "libs": ["Plugin_OctreeZone"],
+                                "libdirs" : ["lib", plugin_lib_dir],
+                                "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "OctreeZone")]}
+        
         if not self.options.shared:
             for _, values in components.items():
                 libs = [lib + "Static" for lib in values.get("libs")]
@@ -273,9 +319,6 @@ class ogrecmakeconan(ConanFile):
 
         if self.options.build_tests:
             components["OgreMain"]["requires"].append("cppunit::cppunit")
-
-        if self.options.build_component_python:
-            components["Python"] = {"requires" : ["OgreMain"], "libs": ["OgrePython"], "include": ["include", include_prefix, f"{include_prefix}/Python"]}
 
         if self.settings.build_type == "Debug":
             for _, values in components.items():
@@ -296,6 +339,7 @@ class ogrecmakeconan(ConanFile):
             self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
             self.cpp_info.components[comp].names["cmake_paths"] = comp
             self.cpp_info.components[comp].libs = values.get("libs")
+            self.cpp_info.components[comp].libdirs = values.get("libdirs")
             self.cpp_info.components[comp].requires = values.get("requires")
             self.cpp_info.components[comp].set_property("cmake_target_name", f"OGRE::{comp}")
             self.cpp_info.components[comp].includedirs = values.get("include")
@@ -307,11 +351,9 @@ class ogrecmakeconan(ConanFile):
             self.cpp_info.components[comp].builddirs.append(self._module_file_rel_path)
             if self.settings.os == "Linux":
                 self.cpp_info.components[comp].system_libs.append("pthread")
-
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             
-            # TODO: bindir, plugindir, plugin_include_dirs plugin_lib_dirs
-            
+        if self.options.install_tools:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))    
 
     @property
     def _module_file_rel_dir(self):
