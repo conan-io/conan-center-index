@@ -195,18 +195,34 @@ class GtkConan(ConanFile):
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
 
-            # the command response file for linking gtk exceeds msvc linker limit
-            # this hack fixes this by removing duplicates in the link arguments
-            # inside the build.ninja file
+            cwd = os.path.join(os.getcwd(), self._build_subfolder).replace("\\", "/")
             for line in fileinput.input(os.path.join(self._build_subfolder, "build.ninja"), inplace=True):
+                # the command response file for linking gtk exceeds msvc linker limit
+                # this hack fixes this by removing duplicates in the link arguments
+                # inside the build.ninja file
+                # see https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/linker-tools-error-lnk1170?view=msvc-170
                 idx = line.find("LINK_ARGS =")
                 if idx >= 0:
                     parts = shlex.split(line[idx + len("LINK_ARGS ="):])
                     print("{} {}".format(
                         line[: idx + len("LINK_ARGS =")],
                         " ".join((f'"{v}"' for v in dict.fromkeys(parts)))), end='')
-                else:
-                    print(line, end='')
+                    continue
+
+                # in windows, ninja uses CreateProcess which has a limit of 32767 chars
+                # gnome.mkenums uses absolute paths, which increases the command length
+                # see: https://github.com/mesonbuild/meson/issues/6710
+                # this hack replaces all absolute paths of the build subfolder
+                # with relative paths to decrease the length of the command
+                idx = line.find("COMMAND = ")
+                if idx >= 0:
+                    parts = shlex.split(line[idx + len("COMMAND ="):])
+                    print("{} {}".format(
+                        line[: idx + len("COMMAND =")],
+                        " ".join((f'"{v.replace(cwd, ".")}"' for v in parts))))
+                    continue
+
+                print(line, end='')
 
             meson.build()
 
