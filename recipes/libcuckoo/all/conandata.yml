@@ -1,0 +1,4 @@
+sources:
+  "0.3.0":
+    sha256: "b91b77c49577059cd47b258e783f60d5b07dccc5e47258fea00cdedffd84afbe"
+    url: "https://github.com/efficient/libcuckoo/archive/refs/tags/v0.3.tar.gz"
