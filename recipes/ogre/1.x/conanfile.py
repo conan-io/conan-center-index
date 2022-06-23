@@ -40,7 +40,6 @@ class ogrecmakeconan(ConanFile):
         "build_plugin_octree": [True, False],
         "build_plugin_pcz": [True, False],
         "build_plugin_pfx": [True, False],
-        "build_plugin_exrcodec" : [True, False],
         "build_rendersystem_d3d11": [True, False],
         "build_rendersystem_gl": [True, False],
         "build_rendersystem_gl3plus": [True, False],
@@ -83,7 +82,6 @@ class ogrecmakeconan(ConanFile):
         "build_plugin_octree": True,
         "build_plugin_pcz": True,
         "build_plugin_pfx": True,
-        "build_plugin_exrcodec" : True,
         "build_rendersystem_d3d11": True,
         "build_rendersystem_gl": True,
         "build_rendersystem_gl3plus": True,
@@ -110,6 +108,7 @@ class ogrecmakeconan(ConanFile):
         self.requires("cppunit/1.15.1")
         self.requires("freeimage/3.18.0")
         self.requires("boost/1.75.0")
+        self.requires("openexr/2.5.7")
         self.requires("freetype/2.11.1")
         self.requires("poco/1.11.2")
         self.requires("tbb/2020.3")
@@ -119,8 +118,6 @@ class ogrecmakeconan(ConanFile):
         self.requires("xorg/system")
         self.requires("glu/system")
         self.requires("sdl/2.0.20")
-        if self.options.build_plugin_exrcodec:
-            self.requires("openexr/2.5.7")
         if self.options.glsupport_use_egl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
         else:
@@ -292,11 +289,6 @@ class ogrecmakeconan(ConanFile):
             components["OctreeSceneManager"] = {"requires" : ["OgreMain"], "libs": ["Plugin_OctreeSceneManager"],
                                                 "libdirs" : ["lib", plugin_lib_dir],
                                                 "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "OctreeSceneManager")]}
-
-        if self.options.build_plugin_exrcodec:
-            components["XRCodec"] = {"requires" : ["OgreMain"], "libs": ["Plugin_EXRCodec"],
-                        "libdirs" : ["lib", plugin_lib_dir],
-                        "include": ["include", include_prefix, os.path.join(include_prefix, "Plugins", "EXRCodec")]}
 
         if self.options.build_plugin_pfx:
             components["ParticleFX"] = {"requires" : ["OgreMain"], "libs": ["Plugin_ParticleFX"],
