@@ -10,6 +10,6 @@ add_executable(ogre_main ogre_main.cpp)
 target_link_libraries(ogre_main OGRE::OgreMain)
 
 set_target_properties(ogre_main PROPERTIES
-CXX_STANDARD 17
+CXX_STANDARD 11
 CXX_STANDARD_REQUIRED ON
 CXX_EXTENSIONS ON)
