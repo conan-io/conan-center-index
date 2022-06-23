@@ -34,7 +34,6 @@ class GeotransConan(ConanFile):
     }
 
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
     _cmake = None
 
     @property
@@ -44,6 +43,11 @@ class GeotransConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -69,6 +73,8 @@ class GeotransConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
