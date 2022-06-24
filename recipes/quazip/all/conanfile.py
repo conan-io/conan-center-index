@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class QuaZIPConan(ConanFile):
@@ -26,7 +26,6 @@ class QuaZIPConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
 
     @property
@@ -40,6 +39,11 @@ class QuaZIPConan(ConanFile):
     @property
     def _qt_major(self):
         return tools.Version(self.deps_cpp_info["qt"].version).major
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,6 +69,8 @@ class QuaZIPConan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
