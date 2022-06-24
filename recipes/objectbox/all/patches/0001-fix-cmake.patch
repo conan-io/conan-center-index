@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e32c84b..db5c699 100644
+index e32c84b..14ef678 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -9,6 +9,8 @@ if (${CMAKE_VERSION} VERSION_LESS "3.11.0")
+@@ -9,10 +9,17 @@ if (${CMAKE_VERSION} VERSION_LESS "3.11.0")
      endif ()
      link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
  else ()
@@ -11,7 +11,17 @@ index e32c84b..db5c699 100644
      function(defineObjectBoxLibForURL VARIANT DL_URL)
          include(FetchContent)
          project(objectbox${VARIANT}-download)
-@@ -27,6 +29,25 @@ else ()
+-        FetchContent_Declare(${PROJECT_NAME} URL ${DL_URL})
++        FetchContent_Declare(${PROJECT_NAME}
++            URL ${DL_URL}
++            # workaround for max path length in Windows (260byte)
++            SUBBUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sub
++            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tmp
++        )
+ 
+         FetchContent_Populate(${PROJECT_NAME})
+         set(DL_DIR "${${PROJECT_NAME}_SOURCE_DIR}")
+@@ -27,6 +34,25 @@ else ()
                  IMPORTED_IMPLIB ${DL_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}objectbox${CMAKE_IMPORT_LIBRARY_SUFFIX}
                  INTERFACE_INCLUDE_DIRECTORIES "${objectbox_include_dirs}"
          )
@@ -37,7 +47,7 @@ index e32c84b..db5c699 100644
      endfunction()
  
      function(defineObjectBoxLib VARIANT)
-@@ -72,10 +93,15 @@ else ()
+@@ -72,10 +98,15 @@ else ()
          defineObjectBoxLibForURL("" "${DL_URL}")
      else ()
          defineObjectBoxLib("")
