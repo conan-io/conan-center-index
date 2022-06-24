@@ -133,6 +133,10 @@ class ogrecmakeconan(ConanFile):
             raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc version greater than 11")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with clang version greater than 11")
+        
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("OGRE requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     @property
     def _source_subfolder(self):
@@ -146,6 +150,16 @@ class ogrecmakeconan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        self._strict_options_requirements()
+
+    def _strict_options_requirements(self):
+        self.options["boost"].header_only = False
+        for boost_comp in self._required_boost_components:
+            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+
+    @property
+    def _required_boost_components(self):
+        return ["date_time", "thread"]
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -249,7 +263,6 @@ class ogrecmakeconan(ConanFile):
 
     @property
     def _components(self):
-        pkg_name = "OGRE"
         include_prefix = os.path.join("include", "OGRE")
         plugin_lib_dir = os.path.join("lib", "OGRE")
         components = {
@@ -321,7 +334,6 @@ class ogrecmakeconan(ConanFile):
         return components
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
         self.cpp_info.set_property("cmake_file_name", "OGRE")
         self.cpp_info.names["cmake_find_package"] = "OGRE"
         self.cpp_info.names["cmake_find_package_multi"] = "OGRE"
