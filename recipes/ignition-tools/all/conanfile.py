@@ -128,6 +128,7 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.components["core"].bindirs = ["bin"]
 
         self.cpp_info.components["core"].libs = []
+        self.cpp_info.components["core"].includedirs = []
         if int(tools.Version(self.version).minor) > 2:
             self.cpp_info.components["core"].libs.append(lib_name +"-backward")
             
