@@ -63,8 +63,11 @@ class IgnitionToolsConan(ConanFile):
                 )
 
     def validate(self):
+        config_message = "dependencies gmp/1.6.2 and ruby/3.1.0 are not available for this configuration"
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
-            raise ConanInvalidConfiguration("dependencies gmp/1.6.2 and ruby/3.1.0 are not available for this configuration")
+            raise ConanInvalidConfiguration(config_message)
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 12:
+            raise ConanInvalidConfiguration(config_message)
 
     def requirements(self):
         self.requires("ruby/3.1.0")
