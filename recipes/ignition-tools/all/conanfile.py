@@ -63,7 +63,7 @@ class IgnitionToolsConan(ConanFile):
                 )
 
     def validate(self):
-        if self.settings.compiler == "gcc" and self.settings.compiler.version == "1":
+        if self.settings.compiler == "gcc" and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("dependencies gmp/1.6.2 and ruby/3.1.0 are not available for this configuration")
 
     def requirements(self):
