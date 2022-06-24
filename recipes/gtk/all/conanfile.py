@@ -242,18 +242,18 @@ class GtkConan(ConanFile):
         if self._gtk3 and is_msvc(self) and not self.options.shared:
             rename(
                 self,
-                os.path.join(self.package_folder, "lib", f"libgtk-3.a"),
-                os.path.join(self.package_folder, "lib", f"gtk-3.lib"),
+                os.path.join(self.package_folder, "lib", "libgtk-3.a"),
+                os.path.join(self.package_folder, "lib", "gtk-3.lib"),
             )
             rename(
                 self,
-                os.path.join(self.package_folder, "lib", f"libgdk-3.a"),
-                os.path.join(self.package_folder, "lib", f"gdk-3.lib"),
+                os.path.join(self.package_folder, "lib", "libgdk-3.a"),
+                os.path.join(self.package_folder, "lib", "gdk-3.lib"),
             )
             rename(
                 self,
-                os.path.join(self.package_folder, "lib", f"libgailutil-3.a"),
-                os.path.join(self.package_folder, "lib", f"gailutil-3.lib"),
+                os.path.join(self.package_folder, "lib", "libgailutil-3.a"),
+                os.path.join(self.package_folder, "lib", "gailutil-3.lib"),
             )
 
 
@@ -311,6 +311,12 @@ class GtkConan(ConanFile):
                 "libepoxy::libepoxy", "graphene::graphene-gobject-1.0",
                 "fribidi::fribidi"
             ])
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = [
+                    "advapi32", "comctl32", "crypt32", "dwmapi", "imm32",
+                    "setupapi", "winmm"
+                ]
+
             if self.settings.os == "Linux":
                 if self.options.with_x11:
                     self.cpp_info.requires.append("xorg::xorg")
