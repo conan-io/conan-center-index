@@ -12,7 +12,7 @@ class XoshiroCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("prng", "xoshiro", "header-only")
     settings = "arch", "build_type", "compiler", "os"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake"
     no_copy_source = True
 
     @property
