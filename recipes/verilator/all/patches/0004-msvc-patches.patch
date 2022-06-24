@@ -1,19 +1,19 @@
 --- src/Makefile_obj.in
 +++ src/Makefile_obj.in
-@@ -95,7 +95,6 @@ LIBS = $(CFG_LIBS) -lm
+@@ -95,6 +95,7 @@ LIBS = $(CFG_LIBS) -lm
  CPPFLAGS += -MMD
  CPPFLAGS += -I. -I$(bldsrc) -I$(srcdir) -I$(incdir) -I../../include
  CPPFLAGS += -DYYDEBUG 	# Required to get nice error messages
--CPPFLAGS += -DNOMINMAX 	# suppress the min and max definitions in Windef.h
++CPPFLAGS += -DNOMINMAX	# suppress the min and max definitions in Windef.h
  #CPPFLAGS += -DVL_LEAK_CHECKS 	# If running valgrind or other hunting tool
  CPPFLAGS += $(COPT)
  CPPFLAGS += -MP # Only works on recent GCC versions
-@@ -279,7 +278,7 @@ V3__CONCAT.cpp: $(addsuffix .cpp, $(basename $(RAW_OBJS)))
+@@ -278,7 +279,7 @@ V3__CONCAT.cpp: $(addsuffix .cpp, $(basename $(RAW_OBJS)))
  
  $(TGT): $(PREDEP_H) $(OBJS)
  	@echo "      Linking $@..."
--	${LINK} ${LDFLAGS} -o $@$(EXEEXT) $(OBJS) $(CCMALLOC) ${LIBS}
-+	${LINK} ${LDFLAGS} -o $@ $(OBJS) $(CCMALLOC) ${LIBS}
+-	${LINK} ${LDFLAGS} -o $@ $(OBJS) $(CCMALLOC) ${LIBS}
++	${LINK} ${LDFLAGS} -o $@$(EXEEXT) $(OBJS) $(CCMALLOC) ${LIBS}
  
  V3Number_test: V3Number_test.o
  	${LINK} ${LDFLAGS} -o $@ $^ ${LIBS}
@@ -74,8 +74,8 @@
  #include "V3Os.h"
  #include "VlcOptions.h"
 
---- verilated_imp.h
-+++ verilated_imp.h
+--- include/verilated_imp.h
++++ include/verilated_imp.h
 @@ -29,6 +29,7 @@
  #include "verilated_heavy.h"
  #include "verilated_syms.h"
@@ -84,3 +84,5 @@
  #include <deque>
  #include <set>
  #include <vector>
+
+
