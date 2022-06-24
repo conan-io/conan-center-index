@@ -54,10 +54,12 @@ class EmbeddedTemplateLibraryConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "etl")
         self.cpp_info.set_property("cmake_target_name", "etl")
+
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
