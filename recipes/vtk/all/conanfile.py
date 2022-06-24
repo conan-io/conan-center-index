@@ -703,10 +703,9 @@ class VtkConan(ConanFile):
         all_requires = [k + "::" + k for k in self._third_party().keys()]
 
         if self.options.group_enable_Rendering:
-            all_requires += [
-                    "opengl::opengl",
-                    "xorg::xorg",
-                    ]
+            all_requires += [ "opengl::opengl" ]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                all_requires += [ "xorg::xorg" ]
         all_requires.sort()
 
         # All modules use the same include dir.
