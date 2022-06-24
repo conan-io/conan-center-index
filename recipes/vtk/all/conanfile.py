@@ -793,7 +793,6 @@ class VtkConan(ConanFile):
                     self.cpp_info.components[comp].libs          = [comp_libname]
                     self.cpp_info.components[comp].libdirs       = ["lib"]
                     self.cpp_info.components[comp].includedirs   = vtk_include_dirs
-                    self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
 
                     # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
                 elif module_name in thirds:
@@ -804,13 +803,17 @@ class VtkConan(ConanFile):
                 else:
                     self.output.warning("Skipping module (lib file does not exist) {}".format(module_name))
 
-
+                # this is how we used to add ALL the requires at once
                 # self.cpp_info.components[comp].requires      = all_requires.copy() # else, []
 
             # second loop for internal dependencies
             for module_name in vtkmods["modules"]:
                 comp = module_name.split(':')[2]
                 if comp in self.cpp_info.components:
+
+                    # always depend on the cmake mini-module (declared afterwards)
+                    self.cpp_info.components[comp].requires.append("conan-cmake")
+
                     # these are the public depends
                     for dep in vtkmods["modules"][module_name]["depends"]:
                         dep_libname = vtkmods["modules"][dep]["library_name"]
@@ -835,4 +838,8 @@ class VtkConan(ConanFile):
                         self.cpp_info.components[comp].system_libs = ["m"]
                 else:
                     self.output.warning("Skipping module, did not become a component: {}".format(module_name))
+
+            # mini component just for the cmake build modules
+            self.cpp_info.components["conan-cmake"].set_property("cmake_target_name", "VTK::conan-cmake")
+            self.cpp_info.components["conan-cmake"].set_property("cmake_build_modules", vtk_cmake_build_modules)
 
