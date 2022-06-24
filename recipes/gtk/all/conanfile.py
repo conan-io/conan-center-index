@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 import os
@@ -238,6 +239,24 @@ class GtkConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
+        if self._gtk3 and is_msvc(self) and not self.options.shared:
+            rename(
+                self,
+                os.path.join(self.package_folder, "lib", f"libgtk-3.a"),
+                os.path.join(self.package_folder, "lib", f"gtk-3.lib"),
+            )
+            rename(
+                self,
+                os.path.join(self.package_folder, "lib", f"libgdk-3.a"),
+                os.path.join(self.package_folder, "lib", f"gdk-3.lib"),
+            )
+            rename(
+                self,
+                os.path.join(self.package_folder, "lib", f"libgailutil-3.a"),
+                os.path.join(self.package_folder, "lib", f"gailutil-3.lib"),
+            )
+
+
     def package_info(self):
         if self._gtk3:
             self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
@@ -253,6 +272,12 @@ class GtkConan(ConanFile):
                     self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
             self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
             self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
+            if self.settings.os == "Windows":
+                self.cpp_info.components["gdk-3.0"].system_libs = [
+                    "imm32", "gdi32", "shell32", "ole32", "winmm", "dwmapi",
+                    "setupapi", "cfgmgr32", "hid", "winspool", "comctl32",
+                    "comdlg32"
+                ]
 
             self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
             self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
