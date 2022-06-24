@@ -248,4 +248,4 @@ class MongoCDriverConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["bson"].system_libs = ["m", "pthread", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["bson"].system_libs = ["ws2_32", "crypt32"]
+            self.cpp_info.components["bson"].system_libs = ["ws2_32"]
