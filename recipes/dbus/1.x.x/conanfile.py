@@ -20,12 +20,14 @@ class DbusConan(ConanFile):
         "system_pid_file": "ANY",
         "with_x11": [True, False],
         "with_glib": [True, False],
+        "with_selinux": [True, False],
     }
     default_options = {
         "system_socket": "",
         "system_pid_file": "",
         "with_x11": False,
         "with_glib": False,
+        "with_selinux": False,
     }
 
     generators = "pkg_config", "cmake", "cmake_find_package"
@@ -52,6 +54,8 @@ class DbusConan(ConanFile):
         self.requires("expat/2.4.8")
         if self.options.with_glib:
             self.requires("glib/2.72.0")
+        if self.options.with_selinux:
+            self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
@@ -74,6 +78,9 @@ class DbusConan(ConanFile):
 
             args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
+
+            if not self.options.with_selinux:
+                args.append("--disable-selinux")
 
             if str(self.options.system_socket) != "":
                 args.append("--with-system-socket=%s" % self.options.system_socket)
