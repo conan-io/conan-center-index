@@ -31,9 +31,6 @@ from conans import RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version, environment_append
 
-# for auto-component generation
-import json
-
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
 
@@ -686,14 +683,6 @@ class VtkConan(ConanFile):
             # delete VTK-installed cmake files
             rmdir(os.path.join(self.package_folder,"lib","cmake"))
 
-        # make a copy of the modules.json, we use that in package_info
-        # TODO where should this file live?  perhaps just in the base package folder?
-        self.copy("modules.json",
-                dst=os.path.join(package_folder), # ,"lib","conan"))
-                src=os.path.join(self.build_folder,"modules.json"),
-                keep_path=False
-                )
-
         # create a cmake file with our special variables
         content = textwrap.dedent("""\
                 set (VTK_ENABLE_KITS {})
@@ -743,6 +732,8 @@ class VtkConan(ConanFile):
         # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
         # https://cmake.org/cmake/help/latest/module/FindVTK.html
 
+        components = list(l[3:] for l in collect_libs(self, folder="lib"))
+
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
 
@@ -752,87 +743,13 @@ class VtkConan(ConanFile):
         # Should not be added to the VTK::VTK target... right?
         # self.cpp_info.libdirs   = ["lib"]
 
-        existing_libs = collect_libs(self, folder="lib")
-
-        if False:
-            # old way - work from the list of library files and build a component list
-            # does not handle internal module dependencies.
-            for libname in existing_libs:
-                comp = libname[3:]
-                self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
-                self.cpp_info.components[comp].libs          = ["vtk" + comp]
-                self.cpp_info.components[comp].libdirs       = ["lib"]
-                self.cpp_info.components[comp].includedirs   = vtk_include_dirs
-                self.cpp_info.components[comp].requires      = all_requires
-                self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
-                if self.settings.os == "Linux":
-                    self.cpp_info.components[comp].system_libs = ["m"]
-
-        else:
-            # hard code the replacement 3rd party targets we are supplying,
-            # it doesn't seem to be listed in VTK anywhere
-            thirds = {
-                    "VTK::glew": "glew::glew"
-                    }
-
-            # new way - parse the modules.json file and generate a list of components
-            with open(os.path.join(self.package_folder,"modules.json"),'r') as modfile:
-                vtkmods = json.load(modfile)
-
-            self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
-
-            self.output.info("Found libs: {}".format(existing_libs))
-            self.output.info("Processing modules")
-            for module_name in vtkmods["modules"]:
-                comp = module_name.split(':')[2]
-                comp_libname = vtkmods["modules"][module_name]["library_name"]
-
-                if comp_libname in existing_libs:
-                    self.output.info("Processing module {}".format(module_name))
-                    self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                    self.cpp_info.components[comp].libs          = [comp_libname]
-                    self.cpp_info.components[comp].libdirs       = ["lib"]
-                    self.cpp_info.components[comp].includedirs   = vtk_include_dirs
-                    self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
-
-                    # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
-                elif module_name in thirds:
-                    self.output.info("Processing external module {} --> {}".format(module_name, thirds[module_name]))
-                    self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                    self.cpp_info.components[comp].requires.append(thirds[module_name])
-
-                else:
-                    self.output.warning("Skipping module (lib file does not exist) {}".format(module_name))
-
-
-                # self.cpp_info.components[comp].requires      = all_requires.copy() # else, []
-
-            # second loop for internal dependencies
-            for module_name in vtkmods["modules"]:
-                comp = module_name.split(':')[2]
-                if comp in self.cpp_info.components:
-                    # these are the public depends
-                    for dep in vtkmods["modules"][module_name]["depends"]:
-                        dep_libname = vtkmods["modules"][dep]["library_name"]
-                        if dep_libname in existing_libs:
-                            depname = dep.split(':')[2]
-                            self.output.info("   depends on {}".format(depname))
-                            self.cpp_info.components[comp].requires.append(depname)
-                        elif dep in thirds:
-                            extern = thirds[dep]
-                            self.output.info("   depends on external {} --> {}".format(dep, extern))
-                            self.cpp_info.components[comp].requires.append(extern)
-                        else:
-                            self.output.info("   skipping depends (lib file does not exist): {}".format(dep))
-
-                    # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
-
-                    # these are the private depends, not sure if we need these
-                    # for dep in vtkmods["modules"][module_name]["private_depends"]:
-                        # self.cpp_info.components[comp].requires.append(dep)
-
-                    if self.settings.os == "Linux":
-                        self.cpp_info.components[comp].system_libs = ["m"]
-                else:
-                    self.output.warning("Skipping module, did not become a component: {}".format(module_name))
+        for comp in components:
+            self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
+            self.cpp_info.components[comp].libs          = ["vtk" + comp]
+            self.cpp_info.components[comp].libdirs       = ["lib"]
+            self.cpp_info.components[comp].includedirs   = vtk_include_dirs
+            self.cpp_info.components[comp].requires      = all_requires
+            self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
+            if self.settings.os == "Linux":
+                self.cpp_info.components[comp].system_libs = ["m"]
 
