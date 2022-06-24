@@ -4,13 +4,12 @@ import textwrap
 
 required_conan_version = ">=1.43.0"
 
-
 class EmbeddedTemplateLibraryConan(ConanFile):
     name = "etl"
-    license = "MIT"
-    homepage = "https://www.etlcpp.com/"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "A C++ template library for embedded applications"
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.etlcpp.com/"
     topics = ("c++", "embedded", "template", "container", "utility", "framework", "messaging")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
