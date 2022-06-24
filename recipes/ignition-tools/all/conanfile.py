@@ -68,6 +68,8 @@ class IgnitionToolsConan(ConanFile):
             raise ConanInvalidConfiguration(config_message)
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 12:
             raise ConanInvalidConfiguration(config_message)
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= 13:
+            raise ConanInvalidConfiguration(config_message)
 
     def requirements(self):
         self.requires("ruby/3.1.0")
