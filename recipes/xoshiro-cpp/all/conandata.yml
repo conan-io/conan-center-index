@@ -1,7 +1,4 @@
 sources:
-  "1.0.0":
-    sha256: 587fb7fa288428b4dd6e926cba98f5e45206cb009cd058550419f5817e12338e
-    url: https://github.com/Reputeless/Xoshiro-cpp/archive/refs/tags/v1.0.tar.gz
   "1.1.0":
     sha256: 9e1fff51faa8754b5c61ab00f41339df0b9b1c09a13611e3357aab76c65f2ba0
     url: https://github.com/Reputeless/Xoshiro-cpp/archive/refs/tags/v1.1.tar.gz
