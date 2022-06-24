@@ -1,28 +1,5 @@
---- runtime/Cpp/CMakeLists.txt
-+++ runtime/Cpp/CMakeLists.txt
-@@ -40,8 +40,7 @@
- endif()
- 
- if(CMAKE_SYSTEM_NAME MATCHES "Linux")
--  find_package(PkgConfig REQUIRED)
--  pkg_check_modules(UUID REQUIRED uuid)
-+  find_package(libuuid REQUIRED)
- endif()
- if(APPLE)
-   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
 --- runtime/Cpp/runtime/CMakeLists.txt
 +++ runtime/Cpp/runtime/CMakeLists.txt
-@@ -76,8 +76,8 @@
- endif()
- 
- if(CMAKE_SYSTEM_NAME MATCHES "Linux")
--  target_link_libraries(antlr4_shared ${UUID_LIBRARIES})
--  target_link_libraries(antlr4_static ${UUID_LIBRARIES})
-+  target_link_libraries(antlr4_shared ${libuuid_LIBRARIES})
-+  target_link_libraries(antlr4_static ${libuuid_LIBRARIES})
- elseif(APPLE)
-   target_link_libraries(antlr4_shared ${COREFOUNDATION_LIBRARY})
-   target_link_libraries(antlr4_static ${COREFOUNDATION_LIBRARY})
 @@ -141,8 +141,8 @@
                                   COMPILE_FLAGS "${disabled_compile_warnings} ${extra_static_compile_flags}")
  

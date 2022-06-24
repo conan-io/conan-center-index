@@ -1,4 +1,7 @@
 sources:
+  "20":
+    url: "https://github.com/camgunz/cmp/archive/v20.tar.gz"
+    sha256: "cde6db84cb04913d4ce4880c4db665555f92c163f362de151e350d8f30113362"
   "19":
     url: "https://github.com/camgunz/cmp/archive/refs/tags/v19.tar.gz"
     sha256: "afa23e1961027c0146bda73f892726f3cdf0a85579a9813077890a51aec99916"

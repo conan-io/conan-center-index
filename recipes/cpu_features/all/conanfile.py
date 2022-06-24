@@ -52,7 +52,10 @@ class CpuFeaturesConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        if tools.Version(self.version) < "0.7.0":
+            self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        if tools.Version(self.version) >= "0.7.0":
+            self._cmake.definitions["BUILD_TESTING"] = False
         # TODO: should be handled by CMake helper
         if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"

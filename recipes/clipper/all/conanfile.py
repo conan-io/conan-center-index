@@ -9,7 +9,7 @@ class ClipperConan(ConanFile):
     description = "Clipper is an open source freeware polygon clipping library"
     topics = ("clipper", "clipping", "polygon")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/skyrpex/clipper"
+    homepage = "http://www.angusj.com/delphi/clipper.php"
     license = "BSL-1.0"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -47,13 +47,14 @@ class ClipperConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

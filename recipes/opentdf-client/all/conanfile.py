@@ -11,7 +11,7 @@ class OpenTDFConan(ConanFile):
     homepage = "https://www.virtru.com"
     topics = ("opentdf", "opentdf-client", "tdf", "virtru")
     description = "openTDF core c++ client library for creating and accessing TDF protected data"
-    license = "MIT"
+    license = "BSD-3-Clause-Clear"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"build_python": [True, False], "fPIC": [True, False]}

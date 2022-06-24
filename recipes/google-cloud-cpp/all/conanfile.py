@@ -1,5 +1,6 @@
 import os
 import textwrap
+import functools
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -13,7 +14,6 @@ class GoogleCloudCppConan(ConanFile):
     topics = "google", "cloud", "google-cloud-storage", "google-cloud-platform", "google-cloud-pubsub", "google-cloud-spanner", "google-cloud-bigtable"
     homepage = "https://github.com/googleapis/google-cloud-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,6 +31,11 @@ class GoogleCloudCppConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,51 +70,53 @@ class GoogleCloudCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
-        self.requires('protobuf/3.19.2')
-        self.requires('grpc/1.39.1')
-        self.requires('nlohmann_json/3.10.2')
-        self.requires('crc32c/1.1.1')
+        self.requires('protobuf/3.20.0')
+        self.requires('grpc/1.45.2')
+        self.requires('nlohmann_json/3.10.5')
+        self.requires('crc32c/1.1.2')
         self.requires('abseil/20211102.0')
-        self.requires('libcurl/7.78.0')
-        self.requires('openssl/1.1.1m')
+        self.requires('libcurl/7.80.0')
+        self.requires('openssl/1.1.1n')
         # TODO: Add googleapis once it is available in CCI (now it is embedded)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = 0
+        # Do not build in parallel for certain configurations, it fails writting/reading files at the same time
+        parallel = not (self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16" and self.version in ["1.31.1", "1.30.1"])
+        cmake = CMake(self, parallel=parallel)
+        cmake.definitions["BUILD_TESTING"] = 0
 
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
 
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
-        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
 
-        self._cmake.configure()
-        return self._cmake
+        cmake.configure()
+        return cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # Do not override CMAKE_CXX_STANDARD if provided
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            textwrap.dedent("""\
-                set(CMAKE_CXX_STANDARD
-                    11
-                    CACHE STRING "Configure the C++ standard version for all targets.")"""),
-            textwrap.dedent("""\
-                if(NOT "${CMAKE_CXX_STANDARD}")
-                    set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
-                endif()
-                """))
+        if tools.Version(self.version) < "1.33.0":
+            # Do not override CMAKE_CXX_STANDARD if provided
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                textwrap.dedent("""\
+                    set(CMAKE_CXX_STANDARD
+                        11
+                        CACHE STRING "Configure the C++ standard version for all targets.")"""),
+                textwrap.dedent("""\
+                    if(NOT "${CMAKE_CXX_STANDARD}")
+                        set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
+                    endif()
+                    """))
 
     def build(self):
         self._patch_sources()
@@ -136,11 +143,11 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
         self.cpp_info.components["bigtable"].names["pkg_config"] = "google_cloud_cpp_bigtable"
 
-        self.cpp_info.components["experimental-firestore"].requires = ["common"]
-        self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
-        self.cpp_info.components["experimental-firestore"].names["pkg_config"] = "google_cloud_cpp_firestore"
-        
-
+        if tools.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+            self.cpp_info.components["experimental-firestore"].requires = ["common"]
+            self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
+            self.cpp_info.components["experimental-firestore"].names["pkg_config"] = "google_cloud_cpp_firestore"
+            
         self.cpp_info.components["bigtable_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "iam_v1_iam_policy_protos", "iam_v1_policy_protos", "longrunning_operations_protos", "rpc_status_protos", "api_auth_protos"]
         self.cpp_info.components["bigtable_protos"].libs = ["google_cloud_cpp_bigtable_protos"]
         self.cpp_info.components["bigtable_protos"].names["pkg_config"] = "google_cloud_cpp_bigtable_protos"
@@ -229,11 +236,19 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].libs = ["google_cloud_cpp_devtools_cloudtrace_v2_tracing_protos"]
         self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].names["pkg_config"] = "google_cloud_cpp_devtools_cloudtrace_v2_tracing_protos"
 
-        self.cpp_info.components["logging_type_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
-        self.cpp_info.components["logging_type_protos"].libs = ["google_cloud_cpp_logging_type_protos"]
-        self.cpp_info.components["logging_type_protos"].names["pkg_config"] = "google_cloud_cpp_logging_type_protos"
+        cmp_logging_type_type_protos = None
+        if tools.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+            cmp_logging_type_type_protos = "logging_type_protos"
+            self.cpp_info.components[cmp_logging_type_type_protos].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
+            self.cpp_info.components[cmp_logging_type_type_protos].libs = ["google_cloud_cpp_logging_type_protos"]
+            self.cpp_info.components[cmp_logging_type_type_protos].names["pkg_config"] = "google_cloud_cpp_logging_type_protos"
+        else:
+            cmp_logging_type_type_protos = "logging_type_type_protos"
+            self.cpp_info.components[cmp_logging_type_type_protos].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
+            self.cpp_info.components[cmp_logging_type_type_protos].libs = ["google_cloud_cpp_logging_type_type_protos"]
+            self.cpp_info.components[cmp_logging_type_type_protos].names["pkg_config"] = "google_cloud_cpp_logging_type_type_protos"
 
-        self.cpp_info.components["logging_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_distribution_protos", "api_field_behavior_protos", "api_metric_protos", "api_monitored_resource_protos", "api_resource_protos", "logging_type_protos", "rpc_status_protos"]
+        self.cpp_info.components["logging_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_distribution_protos", "api_field_behavior_protos", "api_metric_protos", "api_monitored_resource_protos", "api_resource_protos", cmp_logging_type_type_protos, "rpc_status_protos"]
         self.cpp_info.components["logging_protos"].libs = ["google_cloud_cpp_logging_protos"]
         self.cpp_info.components["logging_protos"].names["pkg_config"] = "google_cloud_cpp_logging_protos"
 
@@ -329,9 +344,10 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["cloud_dialogflow_v2_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2_protos"]
         self.cpp_info.components["cloud_dialogflow_v2_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2_protos"
 
-        self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "longrunning_operations_protos", "rpc_status_protos", "type_latlng_protos"]
-        self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2beta1_protos"]
-        self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2beta1_protos"
+        if tools.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+            self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "longrunning_operations_protos", "rpc_status_protos", "type_latlng_protos"]
+            self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2beta1_protos"]
+            self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2beta1_protos"
 
         self.cpp_info.components["grpc_utils"].requires = ["abseil::absl_function_ref", "abseil::absl_memory", "abseil::absl_time", "rpc_status_protos", "common", "grpc::grpc++", "grpc::grpc"]
         self.cpp_info.components["grpc_utils"].libs = ["google_cloud_cpp_grpc_utils"]

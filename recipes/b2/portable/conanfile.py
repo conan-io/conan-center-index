@@ -76,6 +76,10 @@ class B2Conan(ConanFile):
         os.chdir(build_dir)
         command = os.path.join(
             engine_dir, "b2.exe" if use_windows_commands else "b2")
+        # auto, cxx, and cross-cxx aren't toolsets in b2; they're only used to affect
+        # the way build.sh builds b2. Don't pass them to b2 itself.
+        if self.options.toolset not in ['auto', 'cxx', 'cross-cxx']:
+            command += " toolset=" + str(self.options.toolset)
         full_command = \
             "{0} --ignore-site-config --prefix=../output --abbreviate-paths install b2-install-layout=portable".format(
                 command)
@@ -88,6 +92,7 @@ class B2Conan(ConanFile):
         self.copy(pattern="*.jam", dst="bin", src="output")
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.bindirs = ["bin"]
         self.env_info.path = [os.path.join(
             self.package_folder, "bin")]

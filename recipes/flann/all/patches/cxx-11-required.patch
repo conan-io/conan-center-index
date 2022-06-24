@@ -1,0 +1,28 @@
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index d8bff04..daec3d6 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -9,6 +9,7 @@ file(GLOB_RECURSE CPP_SOURCES flann_cpp.cpp)
+ file(GLOB_RECURSE CU_SOURCES *.cu)
+ 
+ add_library(flann_cpp_s STATIC ${CPP_SOURCES})
++target_compile_features(flann_cpp_s PUBLIC cxx_std_11)
+ target_link_libraries(flann_cpp_s ${LZ4_LINK_LIBRARIES})
+ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
+@@ -31,6 +32,7 @@ endif()
+ 
+ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
+     add_library(flann_cpp SHARED dummy.c)
++    target_compile_features(flann_cpp PUBLIC cxx_std_11)
+     set_target_properties(flann_cpp PROPERTIES LINKER_LANGUAGE CXX)
+     target_link_libraries(flann_cpp -Wl,-whole-archive flann_cpp_s -Wl,-no-whole-archive)
+ 
+@@ -80,6 +82,7 @@ endif()
+ 
+ if (BUILD_C_BINDINGS)
+     add_library(flann_s STATIC ${C_SOURCES})
++    target_compile_features(flann_s PRIVATE cxx_std_11)
+     target_link_libraries(flann_s ${LZ4_LINK_LIBRARIES})
+     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+         set_target_properties(flann_s PROPERTIES COMPILE_FLAGS -fPIC)

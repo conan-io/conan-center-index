@@ -82,7 +82,7 @@ class OpenCVConan(ConanFile):
         self.options["*"].with_jpeg = self.options.with_jpeg
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -147,6 +147,17 @@ class OpenCVConan(ConanFile):
                               "")
         tools.replace_in_file(install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
+        if self.options.contrib and tools.Version(self.version) <= "3.4.12":
+            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
+            search = '  find_package(Glog QUIET)\nendif()'
+            tools.replace_in_file(sfm_cmake, search, """{}
+            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
+              set(GFLAGS_LIBRARIES gflags::gflags)
+            endif()
+            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
+              set(GLOG_LIBRARIES glog::glog)
+            endif()""".format(search))
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -185,6 +196,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_js"] = False
         self._cmake.definitions["BUILD_opencv_apps"] = False
         self._cmake.definitions["BUILD_opencv_java"] = False
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.definitions["BUILD_opencv_python2"] = False
         self._cmake.definitions["BUILD_opencv_python3"] = False
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
@@ -267,6 +279,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -403,8 +416,10 @@ class OpenCVConan(ConanFile):
         debug = "d" if self.settings.build_type == "Debug" and self._is_msvc else ""
 
         def get_lib_name(module):
-            prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
-            return "%s%s%s%s" % (prefix, module, version, debug)
+            if module in ("correspondence", "multiview", "numeric"):
+                return module
+            else:
+                return "opencv_%s%s%s" % (module, version, debug)
 
         def add_components(components):
             for component in components:

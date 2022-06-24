@@ -8,3 +8,6 @@ sources:
   "0.3.0":
     url: "https://github.com/ngrodzitski/logr/archive/v0.3.0.tar.gz"
     sha256: "21eea6cce32e3ccf3769f66211143b17f8b36891e79ec3ef5209f849d9e79ad7"
+  "0.4.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.4.0.tar.gz"
+    sha256: "c355aa455d0a9c6d1d3bc168a2db0cd7f3c9706b382088e96948ec3a4cf1286f"

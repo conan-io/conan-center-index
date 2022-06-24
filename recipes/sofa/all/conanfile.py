@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -8,16 +9,22 @@ class SofaConan(ConanFile):
     name = "sofa"
     description = "IAU Standards of Fundamental Astronomy (SOFA) C Library."
     license = "SOFA Software License"
-    topics = ("conan", "sofa", "iau", "astronomy")
+    topics = ("sofa", "iau", "astronomy")
     homepage = "http://www.iausofa.org"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -45,13 +52,12 @@ class SofaConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SOFA_VERSION"] = self.version
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["SOFA_VERSION"] = self.version
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._get_license())

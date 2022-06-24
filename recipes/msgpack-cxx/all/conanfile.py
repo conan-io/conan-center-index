@@ -15,6 +15,15 @@ class MsgpackCXXConan(ConanFile):
     license = "BSL-1.0"
     no_copy_source = True
 
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "use_boost": [True, False],
+    }
+    default_options = {
+        "use_boost": True
+    }
+
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -23,18 +32,14 @@ class MsgpackCXXConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def configure_options(self):
+        # No boost was added in 4.1.0
+        if tools.Version(self.version) < "4.1.0":
+            del self.options.use_boost
+
     def requirements(self):
-        self.requires("boost/1.78.0")
-
-    def validate(self):
-        if self.options["boost"].header_only == True:
-            raise ConanInvalidConfiguration("{} requires boost with header_only = False".format(self.name))
-
-        if self.options["boost"].without_chrono == True or \
-            self.options["boost"].without_context == True or \
-            self.options["boost"].without_system == True or \
-            self.options["boost"].without_timer == True:
-            raise ConanInvalidConfiguration("{} requires boost with chrono, context, system, timer enabled".format(self.name))
+        if self.options.get_safe("use_boost", True):
+            self.requires("boost/1.78.0")
 
     def package_id(self):
         self.info.header_only()
@@ -85,4 +90,5 @@ class MsgpackCXXConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        self.cpp_info.defines = ["MSGPACK_USE_BOOST"]
+        if tools.Version(self.version) >= "4.1.0" and not self.options.use_boost:
+            self.cpp_info.defines.append("MSGPACK_NO_BOOST")

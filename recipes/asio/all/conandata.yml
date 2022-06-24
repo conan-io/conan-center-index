@@ -1,4 +1,7 @@
 sources:
+  "1.22.1":
+    url: "https://github.com/chriskohlhoff/asio/archive/asio-1-22-1.tar.gz"
+    sha256: "30cb54a5de5e465d10ec0c2026d6b5917f5e89fffabdbabeb1475846fc9a2cf0"
   "1.22.0":
     url: "https://github.com/chriskohlhoff/asio/archive/asio-1-22-0.tar.gz"
     sha256: "17bfd506f6d55c85a33603277a256b42ca5883bf290930040489ffeeed23724a"

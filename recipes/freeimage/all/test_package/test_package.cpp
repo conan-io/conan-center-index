@@ -2,7 +2,9 @@
 
 #include <FreeImage.h>
 
-#define NEED_INIT defined(FREEIMAGE_LIB) || !defined(WIN32)
+#if defined(FREEIMAGE_LIB) || !defined(WIN32)
+#define NEED_INIT 1
+#endif
 
 void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char* message)
 {
@@ -32,12 +34,12 @@ int main(int argc, char** argv )
     const char * image_file = argv[1];
     FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
     fif = FreeImage_GetFileType(image_file, 0);
-    if(fif == FIF_UNKNOWN) {
+    if (fif == FIF_UNKNOWN) {
         fif = FreeImage_GetFIFFromFilename(image_file);
     }
-    if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif)) {
+    if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif)) {
         FIBITMAP* dib = FreeImage_Load(fif, image_file, 0);
-        if(dib)
+        if (dib)
         {
             FreeImage_Unload(dib);
         }

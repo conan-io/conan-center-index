@@ -1,13 +1,15 @@
 versions:
-  "18.3.0":
+  "20.14.0":
     folder: all
-  "19.1.0":
-    folder: all
-  "19.2.0":
-    folder: all
-  "19.3.0":
+  "20.9.0":
     folder: all
   "20.8.0":
     folder: all
-  "20.9.0":
+  "19.3.0":
+    folder: all
+  "19.2.0":
+    folder: all
+  "19.1.0":
+    folder: all
+  "18.3.0":
     folder: all

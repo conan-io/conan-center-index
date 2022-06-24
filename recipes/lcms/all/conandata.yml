@@ -1,4 +1,7 @@
 sources:
+  "2.13.1":
+    url: "https://github.com/mm2/Little-CMS/archive/refs/tags/lcms2.13.1.tar.gz"
+    sha256: "6f84c942ecde1b4852b5a051894502ac8c98d010acb3400dec958c6db1bc94ef"
   "2.12":
     url: "https://github.com/mm2/Little-CMS/archive/2.12.tar.gz"
     sha256: "e501f1482fc424550ef3abbf86bf1c66090e1661249e89552d39ed5bf935df66"

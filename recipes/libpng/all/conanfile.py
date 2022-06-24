@@ -83,7 +83,7 @@ class LibpngConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -175,5 +175,5 @@ class LibpngConan(ConanFile):
         prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["{}png16{}".format(prefix, suffix)]
-        if self.settings.os in ["Linux", "Android", "FreeBSD"]:
+        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")

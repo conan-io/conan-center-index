@@ -32,6 +32,10 @@ class OpenH264Conan(ConanFile):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -77,7 +81,7 @@ class OpenH264Conan(ConanFile):
 
     @property
     def _library_filename(self):
-        prefix = "" if self._is_msvc else "lib"
+        prefix = "" if (self._is_msvc or self._is_clang_cl) else "lib"
         if self.options.shared:
             if tools.is_apple_os(self.settings.os):
                 suffix = ".dylib"
@@ -86,7 +90,7 @@ class OpenH264Conan(ConanFile):
             else:
                 suffix = ".so"
         else:
-            if self._is_msvc:
+            if self._is_msvc or self._is_clang_cl:
                 suffix = ".lib"
             else:
                 suffix = ".a"
@@ -127,7 +131,7 @@ class OpenH264Conan(ConanFile):
             autotools.fpic = True
         args.extend(["{}={}".format(k, v) for k,v in autotools.vars.items()])
 
-        if self._is_msvc:
+        if self._is_msvc or self._is_clang_cl:
             args.append("OS=msvc")
         else:
             if self.settings.os == "Windows":
@@ -150,14 +154,14 @@ class OpenH264Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target=self._library_filename)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self) if (self._is_msvc or self._is_clang_cl) else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
@@ -166,7 +170,7 @@ class OpenH264Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "openh264")
-        suffix = "_dll" if self._is_msvc and self.options.shared else ""
+        suffix = "_dll" if (self._is_msvc or self._is_clang_cl) and self.options.shared else ""
         self.cpp_info.libs = ["openh264{}".format(suffix)]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
