@@ -57,7 +57,7 @@ class GdkPixbufConan(ConanFile):
             self.options["glib"].shared = True
 
     def requirements(self):
-        if self.settings.compiler == "clang":
+        if self.settings.compiler == "clang" and self.settings.build_type == "Debug":
             # FIXME: cannot bump glib due to "undefined reference to `__muloti4'"
             # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
             self.requires("glib/2.70.4")
