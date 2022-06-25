@@ -113,7 +113,7 @@ class WasmtimeConan(ConanFile):
                 self.cpp_info.defines = ["WASM_API_EXTERN=", "WASI_API_EXTERN="]
             self.cpp_info.libs = ["wasmtime"]
 
-            if self.settings.os == "Windows":
+        if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
-            elif self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["pthread", "dl", "m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "dl", "m"]
