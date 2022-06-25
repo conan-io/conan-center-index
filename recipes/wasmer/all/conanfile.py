@@ -43,7 +43,7 @@ class WasmerConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Windows build of wasmer are non-working atm (no import libraries are available)")
 
         if self.settings.os == "Linux" and self.options.shared and tools.Version(self.version) >= "2.3.0":
-            raise ConanInvalidConfiguration("Shared Linux build of wasmer are not working (GLIBC version issue)")
+            raise ConanInvalidConfiguration("Shared Linux build of wasmer are not working. It requires glibc >= 2.25")
 
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared and self.settings.compiler.runtime != "MT":
