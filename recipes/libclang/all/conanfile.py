@@ -59,6 +59,9 @@ class LibClangConan(ConanFile):
     def requirements(self):
         self.requires('llvm-core/13.0.0')
 
+    def build_requirements(self):
+        self.build_requires('cmake/3.20.5')
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
