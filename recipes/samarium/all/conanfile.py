@@ -53,7 +53,6 @@ class SamariumConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
 
-        # from https://github.com/conan-io/conan-center-index/blob/eb92a57e0ea55c9d23b401797fa7d9544a343a4d/recipes/jfalcou-eve/all/conanfile.py#L38
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -98,10 +97,3 @@ class SamariumConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs.append("samarium")
-        # self.cpp_info.filenames["cmake_find_package"] = "SAMARIUM"
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "samarium"
-        # self.cpp_info.names["cmake_find_package"] = "samarium"
-        # self.cpp_info.names["cmake_find_package_multi"] = "samarium"
-
-        # self.cpp_info.set_property("cmake_file_name", "SAMARIUM")
-        # self.cpp_info.set_property("cmake_target_name", "samarium::samarium")
