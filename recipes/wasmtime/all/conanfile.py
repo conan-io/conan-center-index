@@ -116,4 +116,4 @@ class WasmtimeConan(ConanFile):
         if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "dl", "m"]
+            self.cpp_info.system_libs = ["pthread", "dl", "m", "rt"]
