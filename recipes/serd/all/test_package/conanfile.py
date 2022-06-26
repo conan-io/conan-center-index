@@ -5,6 +5,7 @@ from conan.tools.layout import cmake_layout
 
 required_conan_version = ">=1.43.0"
 
+
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package", "CMakeDeps"

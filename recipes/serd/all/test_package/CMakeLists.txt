@@ -10,7 +10,7 @@ target_link_libraries(test_package PRIVATE
         )
 
 set_target_properties(
-        example PROPERTIES
+        test_package PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF

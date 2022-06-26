@@ -1,19 +1,18 @@
 import os
 
-from conans import ConanFile
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.util.files import rmdir
+from conans.tools import rmdir
 
 required_conan_version = ">=1.33.0"
 
 
 class Recipe(ConanFile):
     name = "serd"
-    url = "https://gitlab.com/drobilla/serd.git"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://drobilla.net/software/serd.html"
     description = "A lightweight C library for RDF syntax"
-    topics = "linked-data", "semantic-web", "RDF", "turtle", "TriG", "NTriples", "NQuads"
-    author = "David Robillard <d@drobilla.net>"
+    topics = "linked-data", "semantic-web", "rdf", "turtle", "trig", "ntriples", "nquads"
     settings = "build_type", "compiler", "os", "arch"
     options = {
         "shared": [True, False],
@@ -24,8 +23,19 @@ class Recipe(ConanFile):
         "fPIC": True
     }
     license = "ISC"
-    generators = "cmake_find_package"
     exports_sources = "src*", "include*", "doc*", "waf", "wscript", "waflib*", "serd.pc.in"
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version]["serd"],
+                  destination=self.folders.base_source,
+                  strip_root=True)
+        # serd comes with its own modification of the waf build system
+        # It seems to be used only by serd and will be replaced in future versions with meson.
+        # So it makes no sense to create a separate conan package for the build system.
+        from pathlib import Path
+        tools.get(**self.conan_data["sources"][self.version]["autowaf"],
+                  destination=Path(self.folders.base_source).joinpath("waflib"),
+                  strip_root=True)
 
     def configure(self):
         # its a C library. So C++ properties compiler.{libcxx,cppstd} are not required.
@@ -45,7 +55,6 @@ class Recipe(ConanFile):
         args = " ".join(arg for arg in args)
 
         cflags = []
-        print(self.settings.build_type == "Release")
         if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
             cflags += ["-g"]
         if self.settings.build_type in ["Release", "RelWithDebInfo"]:
