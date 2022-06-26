@@ -134,7 +134,7 @@ class Antlr4CppRuntimeConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*antlr4-runtime.dylib*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         # FIXME: this also removes lib/cmake/antlr4-generator
