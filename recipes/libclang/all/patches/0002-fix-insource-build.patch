@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -341,13 +341,6 @@
+@@ -341,13 +341,13 @@
  set(CLANG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
  set(CLANG_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
  
@@ -11,6 +11,13 @@
 -"This process created the file `CMakeCache.txt' and the directory "
 -"`CMakeFiles'. Please delete them.")
 -endif()
++
++
++
++
++
++
++
  
  # If CLANG_VERSION_* is specified, use it, if not use LLVM_VERSION_*.
  if(NOT DEFINED CLANG_VERSION_MAJOR)
