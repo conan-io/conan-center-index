@@ -47,7 +47,10 @@ class Sol2Conan(ConanFile):
                                                     self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("lua/5.4.4")
+        if tools.Version(self.version) < "3.2.0":
+            self.requires("lua/5.3.5")
+        else:
+            self.requires("lua/5.4.4")
 
     def package_id(self):
         self.info.header_only()
