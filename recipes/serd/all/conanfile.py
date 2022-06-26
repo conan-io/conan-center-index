@@ -89,3 +89,6 @@ class Recipe(ConanFile):
         libname = f"{self.name}-0"
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [f"include/{libname}/"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
