@@ -49,6 +49,11 @@ class Recipe(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        # disable cross compiling
+        os_build, arch_build, os_host, arch_host = tools.get_cross_building_settings(self)
+        if os_build != arch_build or os_host != arch_host:
+            raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
+
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
 
