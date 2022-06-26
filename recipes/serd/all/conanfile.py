@@ -54,13 +54,13 @@ class Recipe(ConanFile):
 
     def build(self):
         args = ["--no-utils", " --prefix={}".format(self.folders.package_folder)]
-        if not self.options["shared"]:
+        if not self.options.shared:
             args += ["--static", "--no-shared"]
-        if self.options["fPIC"]:
-            args += ["-fPIC"]
         args = " ".join(arg for arg in args)
 
         cflags = []
+        if self.options.get_safe("fPIC"):
+            cflags += ["-fPIC"]
         if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
             cflags += ["-g"]
         if self.settings.build_type in ["Release", "RelWithDebInfo"]:
