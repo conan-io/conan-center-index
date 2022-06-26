@@ -51,15 +51,11 @@ class Recipe(ConanFile):
     def validate(self):
         # disable cross compiling
         os_build, arch_build, os_host, arch_host = tools.get_cross_building_settings(self)
-        if os_build != arch_build or os_host != arch_host:
+        if os_build != os_host or arch_build != arch_host:
             raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
 
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
-
-        if self.settings.compiler == "apple-clang":
-            if tools.Version(self.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration("apple-clang requires at least version 12.")
 
     def build(self):
         args = ["--no-utils", " --prefix={}".format(self.folders.package_folder)]
