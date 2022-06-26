@@ -90,7 +90,7 @@ class KissfftConan(ConanFile):
         self.cpp_info.components["libkissfft"].libs = [lib_name]
 
         # got to duplicate the logic from kissfft/CMakeLists.txt
-        if self.options.datatype == "float" or self.options.datatype == "double":
+        if self.options.datatype in ["float", "double"]:
             self.cpp_info.components["libkissfft"].defines.append("kiss_fft_scalar={}".format(self.options.datatype))
         elif self.options.datatype == "int16_t":
             self.cpp_info.components["libkissfft"].defines.append("FIXED_POINT=16")
