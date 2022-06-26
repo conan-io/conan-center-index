@@ -52,6 +52,10 @@ class Recipe(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
 
+        if self.settings.compiler == "apple-clang":
+            if self.settings.compiler.version < "12":
+                raise ConanInvalidConfiguration("apple-clang requires at least version 12.")
+
     def build(self):
         args = ["--no-utils", " --prefix={}".format(self.folders.package_folder)]
         if not self.options.shared:
