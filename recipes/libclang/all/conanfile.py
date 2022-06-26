@@ -91,6 +91,23 @@ class LibClangConan(ConanFile):
 
         return cmake
 
+
+    @classmethod
+    def _name_on_disk2lib(cls, name_on_disk):
+        if name_on_disk.endswith('.lib'):
+            return name_on_disk[:-4]
+        elif name_on_disk.endswith('.dll'):
+            return name_on_disk[:-4]
+        elif name_on_disk.startswith('lib') and name_on_disk.endswith('.a'):
+            return name_on_disk[3:-2]
+        elif name_on_disk.startswith('lib') and name_on_disk.endswith('.so'):
+            return name_on_disk[3:-3]
+        elif name_on_disk.endswith('.so'):
+            return name_on_disk[:-3]
+        else:
+            # FIXME: This fails to parse executables
+            raise Exception("don't know how to convert %s" % name_on_disk)
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -98,7 +115,22 @@ class LibClangConan(ConanFile):
         file_api.query(CMakeFileAPI.CODEMODELV2)
         cmake = self._configure_cmake()
         reply = file_api.reply(CMakeFileAPI.CODEMODELV2)
-        package = reply.to_conan_package()
+
+        package = CppPackage()
+
+        for name, target in reply._components.items():
+            if target['type'] not in CMakeFileAPI.SUPPORTED_TARGET_TYPES:
+                continue
+            component = package.add_component(name)
+            # TODO: CMakeDeps has nothing to do here
+            component.names["CMakeDeps"] = name
+            component.libs = [self._name_on_disk2lib(target['nameOnDisk'])]
+            deps = target["dependencies"] if 'dependencies' in target else []
+            deps = [reply._parse_dep_name(d['id']) for d in deps]
+            component.requires = [d for d in deps if d not in CMakeFileAPI.SKIP_TARGETS]
+
+        # package = reply.to_conan_package()
+
         package.save()
         cmake.build()
 
