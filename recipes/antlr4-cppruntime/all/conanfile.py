@@ -167,6 +167,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         return os.path.join(self._module_subfolder, f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "antlr4-runtime"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "antlr4-runtime"
         libname = "antlr4-runtime"
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             libname += "-static"
