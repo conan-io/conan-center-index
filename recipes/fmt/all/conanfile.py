@@ -17,6 +17,7 @@ try:
 except ImportError:
     from conans.errors import ConanInvalidConfiguration
 
+
 required_conan_version = ">=1.43.0"
 
 def copy(conanfile, *args, **kwargs):
@@ -59,12 +60,6 @@ class FmtConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
-            tc.variables["FMT_DOC"] = False
-            tc.variables["FMT_TEST"] = False
-            tc.variables["FMT_INSTALL"] = True
-            tc.variables["FMT_LIB_DIR"] = "lib"
-            if self._has_with_os_api_option:
-                tc.variables["FMT_OS"] = self.options.with_os_api
             tc.generate()  
 
     def layout(self):
@@ -89,12 +84,6 @@ class FmtConan(ConanFile):
         except Exception:
             pass
 
-    def validate(self):
-        if self.options.get_safe("shared") and is_msvc(self) and "MT" in msvc_runtime_flag(self):
-            raise ConanInvalidConfiguration(
-                "Visual Studio build for shared library with MT runtime is not supported"
-            )
-
     def package_id(self):
         if self.info.options.header_only:
             self.info.header_only()
@@ -108,7 +97,16 @@ class FmtConan(ConanFile):
         apply_conandata_patches(self)
         if not self.options.header_only:
             cmake = CMake(self)
-            cmake.configure()
+            # FIXME : https://github.com/conan-io/conan/issues/11476
+            cache_entries = {
+                "FMT_DOC": "False",
+                "FMT_TEST": "False",
+                "FMT_INSTALL": "True",
+                "FMT_LIB_DIR": "lib"
+            }
+            if self._has_with_os_api_option:
+                cache_entries["FMT_OS"] = self.options.with_os_api
+            cmake.configure(variables=cache_entries)
             cmake.build()
 
     @staticmethod
@@ -118,7 +116,7 @@ class FmtConan(ConanFile):
     def package(self):
         copy(self, pattern="*LICENSE.rst", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
-            copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst="include")
+            copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         else:
             cmake = CMake(self)
             cmake.install()
