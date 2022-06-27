@@ -12,7 +12,7 @@ class PlatformConvertersConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "platform.converters is one of the libraries of the LinksPlatform modular framework, " \
                   "to provide conversions between different types"
-    topics = ("linksplatform", "cpp20", "converters", "any", "ranges", "native")
+    topics = ("linksplatform", "cpp20", "converters", "any", "native")
     settings = "compiler", "arch"
     no_copy_source = True
 
