@@ -85,6 +85,8 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")
         if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
+        if tools.Version(self.version) >= "1.21.0" and self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration("shared build doesn't allow on Windows after 1.21.0")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
@@ -243,4 +245,4 @@ class MongoCDriverConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["bson"].system_libs = ["m", "pthread", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["bson"].system_libs = ["ws2_32", "crypt32"]
+            self.cpp_info.components["bson"].system_libs = ["ws2_32"]
