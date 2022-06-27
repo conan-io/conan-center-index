@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GOOGLEAPIS_RES_DIR"] = self.dependencies["googleapis"].cpp_info.resdirs[0]
+        tc.variables["GOOGLEAPIS_RES_DIR"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
         tc.generate()
 
     def layout(self):
