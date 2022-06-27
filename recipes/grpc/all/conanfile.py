@@ -105,6 +105,9 @@ class grpcConan(ConanFile):
             if self.options.shared:
                 raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
+        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("GCC older than 6 is not supported")
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._cxxstd_required)
 
