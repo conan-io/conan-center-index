@@ -1,17 +1,22 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f4f1f6bb0c..0c3c522042 100644
+index db075cbe4a..289cc52215 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -187,21 +187,6 @@ if (NOT DEFINED CMAKE_C_STANDARD)
-   set(CMAKE_C_STANDARD 99)
+@@ -220,26 +220,6 @@ if(WIN32)
+   set(_gRPC_PLATFORM_WINDOWS ON)
  endif()
  
--# Add c++11 flags
+- # Use C11 standard
+-if (NOT DEFINED CMAKE_C_STANDARD)
+-  set(CMAKE_C_STANDARD 11)
+-endif()
+-
+-# Add c++14 flags
 -if (NOT DEFINED CMAKE_CXX_STANDARD)
--  set(CMAKE_CXX_STANDARD 11)
+-  set(CMAKE_CXX_STANDARD 14)
 -else()
--  if (CMAKE_CXX_STANDARD LESS 11)
--    message(FATAL_ERROR "CMAKE_CXX_STANDARD is less than 11, please specify at least SET(CMAKE_CXX_STANDARD 11)")
+-  if (CMAKE_CXX_STANDARD LESS 14)
+-    message(FATAL_ERROR "CMAKE_CXX_STANDARD is less than 14, please specify at least SET(CMAKE_CXX_STANDARD 14)")
 -  endif()
 -endif()
 -if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
