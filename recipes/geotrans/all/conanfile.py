@@ -3,7 +3,6 @@ import os
 
 required_conan_version = ">=1.35.0"
 
-
 class GeotransConan(ConanFile):
     name = "geotrans"
     license = (
