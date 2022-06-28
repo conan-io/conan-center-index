@@ -108,7 +108,7 @@ class GtkConan(ConanFile):
             self.build_requires("sassc/3.6.2")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.6")
+        self.requires("gdk-pixbuf/2.42.8")
         self.requires("glib/2.73.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
