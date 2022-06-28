@@ -53,20 +53,14 @@ class SamariumConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+        compiler = str(self.settings.compiler)
+        if compiler not in self._compilers_minimum_version:
+            self.output.warn("Unknown compiler, assuming it supports at least C++20")
+            return
 
-        minimum_version = self._compilers_minimum_version.get(
-            str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(
-                "{} {} requires C++20. Your compiler is unknown. Assuming it supports C++20.".format(self.name, self.version))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(
-                "{} {} requires C++20, which your compiler does not support.".format(self.name, self.version))
+        version = tools.Version(self.settings.compiler.version)
+        if version < self._compilers_minimum_version[compiler]:
+            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++20")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
