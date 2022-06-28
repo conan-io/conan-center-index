@@ -72,7 +72,7 @@ class HarfbuzzConan(ConanFile):
             )
         if tools.Version(self.version) >= "4.4.0":
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-                raise ConanInvalidCOnfiguration("New versions of harfbuzz require at least gcc 7")
+                raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
     def requirements(self):
         if self.options.with_freetype:
