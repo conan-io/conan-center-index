@@ -29,7 +29,7 @@ from conan.tools.system.package_manager import Apt
 # TODO upgrade to new conan.* imports
 from conans import RunEnvironment
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version, environment_append
+from conans.tools import get, remove_files_by_mask, save, rmdir, rename, collect_libs, check_min_cppstd, Version, environment_append, load
 
 # for auto-component generation
 import json
@@ -270,6 +270,9 @@ class VtkConan(ConanFile):
             "module_FiltersOpenTURNS":  "NO",
             "module_DomainsMicroscopy": "NO",
             "module_CommonArchive":     "NO",
+
+            # kissfft - we want the double format (also known as kiss_fft_scalar)
+            "kissfft:datatype": "double",
             }
 
 
@@ -695,7 +698,7 @@ class VtkConan(ConanFile):
         # make a copy of the modules.json, we use that in package_info
         # TODO where should this file live?  perhaps just in the base package folder?
         self.copy("modules.json",
-                dst=os.path.join(package_folder), # ,"lib","conan"))
+                dst=os.path.join(self.package_folder), # ,"lib","conan"))
                 src=os.path.join(self.build_folder,"modules.json"),
                 keep_path=False
                 )
@@ -784,16 +787,14 @@ class VtkConan(ConanFile):
                     "VTK::doubleconversion": "double-conversion::double-conversion",
                     }
 
-            # TODO needed on linux?
-            # if self.settings.os != "Windows":
-                # if self.options.group_enable_Rendering:
-                    # thirds["VTK::opengl"] = "opengl/system"
-                # seems to not like windows
-                # TODO need xorg here as well?
+            if self.options.group_enable_Rendering:
+                thirds["VTK::opengl"] = "opengl::opengl"
+
+            # TODO check out abseil recipe, it parses the generated cmake-targets file for extra info.
 
             # new way - parse the modules.json file and generate a list of components
-            with open(os.path.join(self.package_folder,"modules.json"),'r') as modfile:
-                vtkmods = json.load(modfile)
+            modfile = load(os.path.join(self.package_folder,"modules.json"))
+            vtkmods = json.loads(modfile)
 
             self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
 
@@ -854,6 +855,11 @@ class VtkConan(ConanFile):
                         self.cpp_info.components[comp].system_libs = ["m"]
                 else:
                     self.output.warning("Skipping module, did not become a component: {}".format(module_name))
+
+
+            # add some more system libs
+            if self.settings.os == "Windows" and "vtksys" in self.cpp_info.components:
+                self.cpp_info.components["vtksys"].system_libs = ["ws2_32", "dbghelp", "psapi"]
 
             # All modules use the same include dir.
             #
