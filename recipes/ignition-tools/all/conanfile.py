@@ -45,6 +45,15 @@ class IgnitionToolsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        config_message = "dependencies gmp/1.6.2 and ruby/3.1.0 are not available for this configuration"
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
+            raise ConanInvalidConfiguration(config_message)
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 12:
+            raise ConanInvalidConfiguration(config_message)
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= 13:
+            raise ConanInvalidConfiguration(config_message)
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
@@ -61,15 +70,6 @@ class IgnitionToolsConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
-
-    def validate(self):
-        config_message = "dependencies gmp/1.6.2 and ruby/3.1.0 are not available for this configuration"
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
-            raise ConanInvalidConfiguration(config_message)
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 12:
-            raise ConanInvalidConfiguration(config_message)
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= 13:
-            raise ConanInvalidConfiguration(config_message)
 
     def requirements(self):
         self.requires("ruby/3.1.0")
