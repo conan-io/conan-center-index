@@ -1,4 +1,7 @@
 sources:
+  "2.8.0":
+    url: "https://github.com/danmar/cppcheck/archive/2.8.tar.gz"
+    sha256: "57298f3b805f0eb816a04115fbc70e701f75083cfb0305a44246e365cf27606a"
   "2.7.5":
     url: "https://github.com/danmar/cppcheck/archive/2.7.5.tar.gz"
     sha256: "6c7ac29e57fa8b3ac7be224510200e579d5a90217e2152591ef46ffc947d8f78"
@@ -6,6 +9,7 @@ sources:
     url: "https://github.com/danmar/cppcheck/archive/2.7.4.tar.gz"
     sha256: "f0558c497b7807763325f3a821f1c72b743e5d888b037b8d32157dd07d6c26e1"
 patches:
+  "2.8.0": []
   "2.7.5":
     - patch_file: "patches/0001-cmake-source-dir-2.5.patch"
       base_path: "source_subfolder"
