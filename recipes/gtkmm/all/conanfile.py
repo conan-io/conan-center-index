@@ -5,9 +5,9 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class GtkConan(ConanFile):
+class GtkmmConan(ConanFile):
     name = "gtkmm"
-    description = "libraries used for creating graphical user interfaces for applications."
+    description = "gtkmm is the official C++ interface for the popular GUI library GTK"
     topics = ("gtk", "widgets")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gtkmm.org"
