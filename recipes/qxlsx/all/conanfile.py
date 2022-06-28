@@ -29,6 +29,10 @@ class QXlsxConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _qt_major(self):
+        return tools.Version(self.deps_cpp_info["qt"].version).major
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -52,16 +56,16 @@ class QXlsxConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["QT_VERSION_MAJOR"] = tools.Version(self.deps_cpp_info["qt"].version).major
+        cmake.definitions["QT_VERSION_MAJOR"] = self._qt_major
         cmake.configure()
         return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "QXlsx", "CMakeLists.txt"),
-                              "CMAKE_CXX_STANDARD 11",
-                              "CMAKE_CXX_STANDARD 17")
+        if self._qt_major >= 6:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "QXlsx", "CMakeLists.txt"),
+                    "CMAKE_CXX_STANDARD 11", "CMAKE_CXX_STANDARD 17")
         cmake = self._configure_cmake()
         cmake.build()
 
