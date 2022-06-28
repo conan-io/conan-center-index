@@ -16,7 +16,7 @@ class OggConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "testing": [True, False],
+        "build_testing": [True, False],
     }
     default_options = {
         "shared": False,
