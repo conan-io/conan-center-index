@@ -21,7 +21,7 @@ class OggConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "testing": True,
+        "build_testing": False,
     }
 
     generators = "cmake"
