@@ -1,0 +1,16 @@
+diff -Naur a/folly/lang/SafeAssert.h b/folly/lang/SafeAssert.h
+--- a/folly/lang/SafeAssert.h	2022-01-29 03:30:47.000000000 -0700
++++ b/folly/lang/SafeAssert.h	2022-06-28 09:47:46.779345576 -0700
+@@ -24,12 +24,7 @@
+ #include <folly/Preprocessor.h>
+ #include <folly/lang/CArray.h>
+ 
+-#if __GNUC__ && !__clang__ && FOLLY_SANITIZE_ADDRESS
+-//  gcc+asan has a bug that discards sections when using `static` below
+-#define FOLLY_DETAIL_SAFE_CHECK_LINKAGE
+-#else
+ #define FOLLY_DETAIL_SAFE_CHECK_LINKAGE static
+-#endif
+ 
+ #define FOLLY_DETAIL_SAFE_CHECK_IMPL(d, p, expr, expr_s, ...)             \
+   do {                                                                    \
