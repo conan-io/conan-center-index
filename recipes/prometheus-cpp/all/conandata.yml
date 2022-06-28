@@ -15,3 +15,6 @@ patches:
   "0.11.0":
     - patch_file: "patches/0001-include-limits.patch"
       base_path: "source_subfolder"
+  "1.0.0":
+    - patch_file: "patches/0002-transfer-bucket-counters.patch"
+      base_path: "source_subfolder"

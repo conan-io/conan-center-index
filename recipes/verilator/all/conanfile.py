@@ -167,10 +167,6 @@ class VerilatorConan(ConanFile):
         del self.info.settings.compiler.version
 
     def package_info(self):
-        verilator_include_root = os.path.join(self.package_folder, "share", "verilator", "include")
-
-        self.cpp_info.includedirs = [verilator_include_root]
-
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)

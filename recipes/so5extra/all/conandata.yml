@@ -1,4 +1,7 @@
 sources:
+  "1.5.2":
+    url: "https://github.com/Stiffstream/so5extra/archive/v.1.5.2.tar.gz"
+    sha256: "5409dc255c970d2085381ceded122b80b9ac896a34bafc5ffc431bae304d485d"
   "1.5.1":
     url: "https://github.com/Stiffstream/so5extra/archive/v.1.5.1.tar.gz"
     sha256: "5cdacb07bafb4e8b76c1b642946705b3a65e3f71d66ae3cd915e4da41fdabf30"

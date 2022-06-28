@@ -1,0 +1,45 @@
+diff --git a/core/include/prometheus/histogram.h b/core/include/prometheus/histogram.h
+index fc5fdc2..2dc0f53 100644
+--- a/core/include/prometheus/histogram.h
++++ b/core/include/prometheus/histogram.h
+@@ -62,6 +62,13 @@ class PROMETHEUS_CPP_CORE_EXPORT Histogram {
+   void ObserveMultiple(const std::vector<double>& bucket_increments,
+                        const double sum_of_values);
+ 
++  /// \brief Transfer the contents of one histogram to other
++  ///
++  /// All buckets and sum are transferred from one histogram to the other. This
++  /// is especially useful if histogram is tracked elsewhere but report in
++  /// prometheus system.
++  void TransferBucketCounters(const std::vector<double> & counter_values, double sum);
++
+   /// \brief Get the current value of the counter.
+   ///
+   /// Collect is called by the Registry when collecting metrics.
+diff --git a/core/src/histogram.cc b/core/src/histogram.cc
+index 4947b3a..751fe6c 100644
+--- a/core/src/histogram.cc
++++ b/core/src/histogram.cc
+@@ -46,6 +46,22 @@ void Histogram::ObserveMultiple(const std::vector<double>& bucket_increments,
+   }
+ }
+ 
++void Histogram::TransferBucketCounters(const std::vector<double> & counter_values, double sum) {
++  double sum_diff = sum - sum_.Value();
++
++  std::lock_guard<std::mutex> lock(mutex_);
++  auto bkts_size = std::min(bucket_counts_.size(), counter_values.size());
++  for (std::size_t i = 0; i < bkts_size; ++i) {
++    double current_value = bucket_counts_[i].Value();
++    double diff = counter_values[i] - current_value;
++    // if diff turns out to  be "-0.00", i.e., <0, gaugue increment will discard it.
++    bucket_counts_[i].Increment(diff);
++  }
++
++  // if sum_diff turns out to  be "-0.00", i.e., <0, gaugue increment will discard it.
++  sum_.Increment(sum_diff);
++}
++
+ ClientMetric Histogram::Collect() const {
+   std::lock_guard<std::mutex> lock(mutex_);
+ 
