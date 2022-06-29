@@ -1,5 +1,5 @@
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
-from conan.tools.files import rename
+from conan.tools.files import rename, copy
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -92,6 +92,7 @@ class grpcConan(ConanFile):
         self.requires("protobuf/3.21.1")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
+        self.requires("googleapis/cci.20220531")
 
     def validate(self):
         if self._is_msvc:
@@ -124,6 +125,12 @@ class grpcConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        # Take googleapis from requirement instead of vendored/hardcoded version
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
+            "if (FALSE)  # Do not download, it is provided by Conan"
+        )
+        copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -423,3 +430,6 @@ class grpcConan(ConanFile):
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
+
+        # Hack. googleapis doesn't provide a library so it is not used by any component
+        self.cpp_info.components["__"].requires = ["googleapis::googleapis"]
