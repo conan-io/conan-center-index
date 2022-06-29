@@ -430,7 +430,7 @@ class QtConan(ConanFile):
                                   "-ldbus-1"
                                   )
         
-        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'harfbuzz', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'xcb', 'zlib', 'md4c']:
+        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'xcb', 'zlib', 'md4c']:
             tools.rmdir(os.path.join(self.source_folder, "qt5", "qtbase", "src", "3rdparty", f))
 
     def _make_program(self):
