@@ -32,8 +32,7 @@ class TestPackageConan(ConanFile):
         with self._buildenv():
             cmake = CMake(self)
             # FIXME: This combination of settings fail
-            cmake.definitions["TEST_ACTUAL_SERVER"] = not (self.deps_cpp_info["grpc"].version in ["1.45.2", "1.47.0"]
-                                                           and self.settings.compiler == "Visual Studio"
+            cmake.definitions["TEST_ACTUAL_SERVER"] = not (self.settings.compiler == "Visual Studio"
                                                            and self.settings.compiler.version == "15"
                                                            and self.settings.build_type == "Release")
             cmake.configure()
