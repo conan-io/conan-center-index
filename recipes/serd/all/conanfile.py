@@ -48,7 +48,6 @@ class Recipe(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        # disable cross compiling
         if tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
 
