@@ -79,7 +79,7 @@ class Recipe(ConanFile):
         self.run('./waf build')
 
     def package(self):
-        self.run('./waf install')
+        self.run('./waf install', run_environment=True)
         rmdir(os.path.join(self.package_folder, "share"))
         rmdir(os.path.join(self.package_folder, "lib/pkgconfig"))
         self.copy("COPYING", src=self.folders.base_source, dst="licenses")
