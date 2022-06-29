@@ -34,7 +34,7 @@ sources:
     sha256: "32184860ddc0b264ff95010e1c64e596bd746fe4c2e34014a1185340cdddeba6"
   "4.4.1":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/4.4.1/harfbuzz-4.4.1.tar.xz"
-    sha256: "ba3559de7c7bda51f830f0b5c65d72298bbf35a14d9bb0043b05bb6f7c8b4fd8"
+    sha256: "c5bc33ac099b2e52f01d27cde21cee4281b9d5bfec7684135e268512478bc9ee"
 patches:
   "2.6.8":
     - patch_file: "patches/icu.patch"
