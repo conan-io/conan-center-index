@@ -102,6 +102,10 @@ class GdkPixbufConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
+    @property
+    def _use_compiler_rt(self):
+        return self.settings.compiler == "clang" and self.settings.build_type == "Debug"
+
     @functools.lru_cache(1)
     def _configure_meson(self):
         meson = Meson(self)
@@ -129,7 +133,7 @@ class GdkPixbufConan(ConanFile):
         # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
         # Ony really for the purporses of building on CCI - end users can
         # workaround this by appropriately setting global linker flags in their profile
-        if self.settings.compiler == "clang":
+        if self._use_compiler_rt:
             args.append('-Dc_link_args="-rtlib=compiler-rt"')
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
@@ -161,6 +165,10 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if self._use_compiler_rt:
+            ldflags = ["-rtlib=compiler-rt"]
+            self.cpp_info.exelinkflags = ldflags
+            self.cpp_info.sharedlinkflags = ldflags
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)

@@ -8,15 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        compiler_env = {}
-        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
-        # Ony really for the purporses of building on CCI - end users can
-        # workaround this by appropriately setting global linker flags in their profile
-        if self.settings.compiler == "clang":
-            compiler_env = {"LDFLAGS": "-rtlib=compiler-rt"}
-        with tools.environment_append(compiler_env):
-            cmake.configure()
-            cmake.build()
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
