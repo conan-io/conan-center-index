@@ -1,8 +1,8 @@
+import os
+import re
+
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
-import os
-import shutil
-import re
 
 
 class LibdrmConan(ConanFile):
@@ -155,7 +155,6 @@ class LibdrmConan(ConanFile):
         if self.options.nouveau:
             self.cpp_info.components["libdrm_nouveau"].libs = ["drm_nouveau"]
             self.cpp_info.components["libdrm_nouveau"].includedirs.append(os.path.join('include', 'libdrm'))
-            self.cpp_info.components["libdrm_nouveau"].includedirs.append(os.path.join('include', 'nouveau'))
             self.cpp_info.components["libdrm_nouveau"].requires = ["libdrm_libdrm"]
             self.cpp_info.components["libdrm_nouveau"].set_property("pkg_config_name", "libdrm_nouveau")
 

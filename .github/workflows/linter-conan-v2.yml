@@ -28,7 +28,7 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.conan.version' '.c3i/c3i.yml'
+          cmd: yq '.conan.version' '.c3i/config_v1.yml'
       - uses: actions/setup-python@v3
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
@@ -74,7 +74,7 @@ jobs:
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.conan.version' '.c3i/c3i.yml'
+          cmd: yq '.conan.version' '.c3i/config_v1.yml'
       - uses: actions/setup-python@v3
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
