@@ -54,7 +54,7 @@ class Recipe(ConanFile):
         if tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
 
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
 
     def build(self):
