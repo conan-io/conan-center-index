@@ -13,7 +13,7 @@ class VerilatorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.veripool.org/wiki/verilator"
     description = "Verilator compiles synthesizable Verilog and Synthesis assertions into single- or multithreaded C++ or SystemC code"
-    topics = ("verilog", "HDL", "EDA", "simulator", "hardware", "fpga")
+    topics = ("verilog", "hdl", "eda", "simulator", "hardware", "fpga")
 
     settings = "os", "arch", "compiler", "build_type"
 
@@ -150,10 +150,10 @@ class VerilatorConan(ConanFile):
 
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"), 
-                    os.path.join(self.package_folder, "verilator-tools.cmake"))
-
+                    os.path.join(self.package_folder, "bin", "verilator-tools.cmake"))
+        tools.replace_in_file(os.path.join(self.package_folder, "bin", "verilator-tools.cmake"), "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/..")
         if self.settings.build_type == "Debug":
-            tools.replace_in_file(os.path.join(self.package_folder, "verilator-tools.cmake"), "verilator_bin", "verilator_bin_dbg")
+            tools.replace_in_file(os.path.join(self.package_folder, "bin", "verilator-tools.cmake"), "verilator_bin", "verilator_bin_dbg")
 
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), os.path.join(self.package_folder))
 
@@ -177,5 +177,6 @@ class VerilatorConan(ConanFile):
         self.output.info("Setting VERILATOR_ROOT environment variable to {}".format(verilator_root))
         self.env_info.VERILATOR_ROOT = verilator_root
 
-        self.cpp_info.build_modules = [os.path.join("verilator-tools.cmake")]
+        self.cpp_info.builddirs = ['bin']  
+        self.cpp_info.build_modules = [os.path.join("bin", "verilator-tools.cmake")]
 
