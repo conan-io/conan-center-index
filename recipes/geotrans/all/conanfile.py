@@ -93,6 +93,7 @@ class GeotransConan(ConanFile):
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["dtcc"].system_libs.append("pthread")
+            self.cpp_info.components["dtcc"].system_libs.append("m")
 
         self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
         self.cpp_info.components["ccs"].requires = ["dtcc"]
