@@ -57,12 +57,7 @@ class GdkPixbufConan(ConanFile):
             self.options["glib"].shared = True
 
     def requirements(self):
-        if self.settings.compiler == "clang":
-            # FIXME: cannot bump glib due to "undefined reference to `__muloti4'"
-            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
-            self.requires("glib/2.70.4")
-        else:
-            self.requires("glib/2.73.0")
+        self.requires("glib/2.73.0")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
@@ -130,7 +125,12 @@ class GdkPixbufConan(ConanFile):
         defs["builtin_loaders"] = "all"
         defs["gio_sniffing"] = "false"
         defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        args=[]
+        args = []
+        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
+        # Ony really for the purporses of building on CCI - end users can
+        # workaround this by appropriately setting global linker flags in their profile
+        if self.settings.compiler == "clang":
+            args.append('-Dc_link_args="-rtlib=compiler-rt"')
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
         return meson
