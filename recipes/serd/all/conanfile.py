@@ -33,9 +33,8 @@ class Recipe(ConanFile):
         # serd comes with its own modification of the waf build system
         # It seems to be used only by serd and will be replaced in future versions with meson.
         # So it makes no sense to create a separate conan package for the build system.
-        from pathlib import Path
         tools.get(**self.conan_data["sources"][self.version]["autowaf"],
-                  destination=Path(self.folders.base_source).joinpath("waflib"),
+                  destination=os.path.join(self.folders.base_source, "waflib"),
                   strip_root=True)
 
     def config_options(self):
