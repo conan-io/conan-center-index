@@ -87,6 +87,7 @@ class QtConan(ConanFile):
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
+        "with_md4c": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -128,6 +129,7 @@ class QtConan(ConanFile):
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
+        "with_md4c": True,
 
         "gui": True,
         "widgets": True,
@@ -216,6 +218,7 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+            del self.options.with_md4c
 
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
@@ -391,6 +394,8 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+        if self.options.get_safe("with_md4c", False):
+            self.requires("md4c/0.4.8")
 
     def build_requirements(self):
         self.build_requires("cmake/3.23.1")
@@ -442,6 +447,8 @@ class QtConan(ConanFile):
             file = os.path.join("qt6", "qtbase", "cmake", f)
             if os.path.isfile(file):
                 os.remove(file)
+        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'xcb', 'zlib']:
+            tools.rmdir(os.path.join(self.source_folder, "qt6", "qtbase", "src", "3rdparty", f))
 
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
@@ -615,7 +622,8 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "jpeg"),
                               ("with_libpng", "png"),
                               ("with_sqlite3", "sqlite"),
-                              ("with_pcre2", "pcre2"),]:
+                              ("with_pcre2", "pcre2"),
+                              ("with_md4c", "libmd4c")]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
@@ -969,6 +977,8 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg::libjpeg")
             if self.options.with_glib:
                 gui_reqs.append("glib::glib")
+            if self.options.with_md4c:
+                gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
 
             build_modules.append(self._cmake_qt6_private_file("Gui"))
