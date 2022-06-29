@@ -1,0 +1,4 @@
+sources:
+  "3.4.4":
+    url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_4_4.zip"
+    sha256: "04b52a67e90a56b18d9ddd0384630f43b5263a8fdee1afae081e32d7b23cd5ec"
