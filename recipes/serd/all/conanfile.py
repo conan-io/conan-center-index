@@ -3,6 +3,7 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import rmdir
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.33.0"
 
