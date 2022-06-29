@@ -73,8 +73,8 @@ class Recipe(ConanFile):
             cflags += ["-Os"]
         cflags = " ".join(cflag for cflag in cflags)
 
-        self.run(f'CFLAGS="{cflags}" ./waf configure {args}')
-        self.run('./waf build')
+        self.run(f'CFLAGS="{cflags}" ./waf configure {args}', run_environment=True)
+        self.run('./waf build', run_environment=True)
 
     def package(self):
         self.run('./waf install', run_environment=True)
