@@ -71,6 +71,10 @@ class grpcConan(ConanFile):
     def _cxxstd_required(self):
         return 14 if Version(self.version) >= "1.47" else 11
 
+    @property
+    def _uses_googleapis(self):
+        return Version(self.version) >= "1.47"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         self.copy(os.path.join("cmake", self._grpc_plugin_template))
@@ -92,7 +96,8 @@ class grpcConan(ConanFile):
         self.requires("protobuf/3.21.1")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
-        self.requires("googleapis/cci.20220531")
+        if self._uses_googleapis:
+            self.requires("googleapis/cci.20220531")
 
     def validate(self):
         if self._is_msvc:
@@ -125,12 +130,13 @@ class grpcConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        # Take googleapis from requirement instead of vendored/hardcoded version
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
-            "if (FALSE)  # Do not download, it is provided by Conan"
-        )
-        copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
+        if self._uses_googleapis:
+            # Take googleapis from requirement instead of vendored/hardcoded version
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
+                "if (FALSE)  # Do not download, it is provided by Conan"
+            )
+            copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -431,5 +437,6 @@ class grpcConan(ConanFile):
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
 
-        # Hack. googleapis doesn't provide a library so it is not used by any component
-        self.cpp_info.components["__"].requires = ["googleapis::googleapis"]
+        if self._uses_googleapis:
+            # Hack. googleapis doesn't provide a library so it is not used by any component
+            self.cpp_info.components["__"].requires = ["googleapis::googleapis"]
