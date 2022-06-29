@@ -622,8 +622,7 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "jpeg"),
                               ("with_libpng", "png"),
                               ("with_sqlite3", "sqlite"),
-                              ("with_pcre2", "pcre2"),
-                              ("with_md4c", "md4c")]:
+                              ("with_pcre2", "pcre2"),]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
@@ -632,6 +631,22 @@ class QtConan(ConanFile):
             else:
                 cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+                
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "libjpeg"),
+                              ("with_libpng", "libpng"),
+                              ("with_md4c", "libmd4c"),
+                              ("with_pcre2", "pcre"),]:
+            if self.options.get_safe(opt, False):
+                if self.options.multiconfiguration:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "qt"
+                else:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "system"
+            else:
+                cmake.definitions["INPUT_%s" % conf_arg] = "no"
 
         for feature in str(self.options.disabled_features).split():
             cmake.definitions["FEATURE_%s" % feature] = "OFF"
