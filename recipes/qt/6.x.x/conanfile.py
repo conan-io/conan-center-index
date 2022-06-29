@@ -447,8 +447,6 @@ class QtConan(ConanFile):
             file = os.path.join("qt6", "qtbase", "cmake", f)
             if os.path.isfile(file):
                 os.remove(file)
-        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'zlib']:
-            tools.rmdir(os.path.join(self.source_folder, "qt6", "qtbase", "src", "3rdparty", f))
 
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
