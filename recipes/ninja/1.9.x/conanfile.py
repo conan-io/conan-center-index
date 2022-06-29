@@ -60,6 +60,7 @@ class NinjaConan(ConanFile):
             os.unlink(pdb)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         # ensure ninja is executable
         if self.settings.os in ["Linux", "Macos"]:
             name = os.path.join(self.package_folder, "bin", "ninja")
