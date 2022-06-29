@@ -1,5 +1,6 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, CMake, Meson, tools
+from conans.errors import ConanInvalidConfiguration, ConanException
+from tempfile import TemporaryDirectory
 import functools
 import os
 import shutil
@@ -103,8 +104,35 @@ class GdkPixbufConan(ConanFile):
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
     @property
-    def _use_compiler_rt(self):
+    def _requires_compiler_rt(self):
         return self.settings.compiler == "clang" and self.settings.build_type == "Debug"
+
+    def _test_for_compiler_rt(self):
+        cmake = CMake(self)
+        with TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, "CMakeLists.txt"), "w") as cmake_file:
+                cmake_file.write(r"""
+                    cmake_minimum_required(VERSION 3.16)
+                    project(compiler_rt_test)
+                    try_compile(HAS_COMPILER_RT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/test.c OUTPUT_VARIABLE OUTPUT)
+                    if(NOT HAS_COMPILER_RT)
+                    message(FATAL_ERROR compiler-rt not present)
+                    endif()""")
+            with open(os.path.join(tmp, "test.c"), "w") as test_source:
+                test_source.write(r"""
+                    extern __int128_t __muloti4(__int128_t a, __int128_t b, int* overflow);
+                    int main() {
+                        __int128_t a;
+                        __int128_t b;
+                        int overflow;
+                        __muloti4(a, b, &overflow);
+                        return 0;
+                    }""")
+            cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-rtlib=compiler-rt"
+            try:
+                cmake.configure(source_folder=tmp)
+            except ConanException:
+                raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode")
 
     @functools.lru_cache(1)
     def _configure_meson(self):
@@ -133,13 +161,16 @@ class GdkPixbufConan(ConanFile):
         # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
         # Ony really for the purporses of building on CCI - end users can
         # workaround this by appropriately setting global linker flags in their profile
-        if self._use_compiler_rt:
+        if self._requires_compiler_rt:
             args.append('-Dc_link_args="-rtlib=compiler-rt"')
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
         return meson
 
     def build(self):
+        if self._requires_compiler_rt:
+            self._test_for_compiler_rt()
+
         self._patch_sources()
         if self.options.with_libpng:
             shutil.copy("libpng.pc", "libpng16.pc")
@@ -165,7 +196,7 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
-        if self._use_compiler_rt:
+        if self._requires_compiler_rt:
             ldflags = ["-rtlib=compiler-rt"]
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
