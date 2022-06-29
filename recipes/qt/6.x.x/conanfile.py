@@ -447,7 +447,7 @@ class QtConan(ConanFile):
             file = os.path.join("qt6", "qtbase", "cmake", f)
             if os.path.isfile(file):
                 os.remove(file)
-        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'xcb', 'zlib']:
+        for f in ['double-conversion', 'freetype', 'harfbuzz-ng', 'libjpeg', 'libpng', 'pcre2', 'sqlite', 'zlib']:
             tools.rmdir(os.path.join(self.source_folder, "qt6", "qtbase", "src", "3rdparty", f))
 
         # workaround QTBUG-94356
@@ -623,7 +623,7 @@ class QtConan(ConanFile):
                               ("with_libpng", "png"),
                               ("with_sqlite3", "sqlite"),
                               ("with_pcre2", "pcre2"),
-                              ("with_md4c", "libmd4c")]:
+                              ("with_md4c", "md4c")]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
