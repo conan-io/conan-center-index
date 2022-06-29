@@ -52,7 +52,7 @@ class ConanXOrg(ConanFile):
                             "libxv-dev", "libxvmc-dev", "libxxf86vm-dev", "xtrans-dev", "libxcb-render0-dev",
                             "libxcb-render-util0-dev", "libxcb-xkb-dev", "libxcb-icccm4-dev", "libxcb-image0-dev",
                             "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev", "libxcb-sync-dev", "libxcb-xfixes0-dev",
-                            "libxcb-xinerama0-dev", "xkb-data", "libxcb-dri3-dev", "uuid-dev"]
+                            "libxcb-xinerama0-dev", "xkb-data", "libxcb-dri3-dev", "uuid-dev", "libxcb-xinput-dev"]
                 if (tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "15") or\
                    (tools.os_info.linux_distro == "debian" and tools.os_info.os_version < "12") or\
                    (tools.os_info.linux_distro == "raspbian" and tools.os_info.os_version < "12"):
@@ -92,7 +92,7 @@ class ConanXOrg(ConanFile):
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
+                     "xcb-dri3", "xcb-xinput"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             self._fill_cppinfo_from_pkgconfig(name)
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")
