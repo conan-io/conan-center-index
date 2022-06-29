@@ -24,7 +24,6 @@ class Recipe(ConanFile):
         "fPIC": True
     }
     license = "ISC"
-    exports_sources = "src*", "include*", "doc*", "waf", "wscript", "waflib*", "serd.pc.in"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["serd"],
