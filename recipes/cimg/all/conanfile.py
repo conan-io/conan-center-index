@@ -9,11 +9,10 @@ required_conan_version = ">=1.36.0"
 class CImgConan(ConanFile):
     name = "cimg"
     description = "The CImg Library is a small and open-source C++ toolkit for image processing"
-    homepage = "http://cimg.eu"
-    topics = ("cimg", "physics", "simulation", "robotics", "kinematics", "engine")
     license = "CeCILL V2"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "http://cimg.eu"
+    topics = ("physics", "simulation", "robotics", "kinematics", "engine")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "enable_fftw": [True, False],
@@ -39,7 +38,6 @@ class CImgConan(ConanFile):
         "enable_xrandr": False,
         "enable_xshm": False,
     }
-
     no_copy_source = True
 
     @property
@@ -67,7 +65,7 @@ class CImgConan(ConanFile):
         if self.options.enable_jpeg:
             self.requires("libjpeg/9d")
         if self.options.enable_openexr:
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.1.5")
         if self.options.enable_png:
             self.requires("libpng/1.6.37")
         if self.options.enable_tiff:
@@ -75,7 +73,7 @@ class CImgConan(ConanFile):
         if self.options.enable_ffmpeg:
             self.requires("ffmpeg/4.4")
         if self.options.enable_opencv:
-            self.requires("opencv/4.5.3")
+            self.requires("opencv/4.5.5")
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
 
