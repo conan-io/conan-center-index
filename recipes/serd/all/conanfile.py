@@ -42,7 +42,6 @@ class Recipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # its a C library. So C++ properties compiler.{libcxx,cppstd} are not required.
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
