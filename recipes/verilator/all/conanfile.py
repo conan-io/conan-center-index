@@ -70,8 +70,8 @@ class VerilatorConan(ConanFile):
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
-        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("GCC < version 7 is not supported")
+        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("GCC < version 9 is not supported")
 
     @contextmanager
     def _build_context(self):
