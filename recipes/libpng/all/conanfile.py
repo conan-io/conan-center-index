@@ -92,15 +92,21 @@ class LibpngConan(ConanFile):
     def _patch(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "find_library(M_LIBRARY m)",
-                              "set(M_LIBRARY m)")
+        if self.version != "1.5.2":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                "find_library(M_LIBRARY m)",
+                                "set(M_LIBRARY m)")
 
         if tools.os_info.is_windows:
             if self._is_msvc:
-                tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                     'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                     'OUTPUT_NAME "${PNG_LIB_NAME}')
+                if self.version == "1.5.2":
+                    tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
+                                          'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
+                else:
+                    tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                        'OUTPUT_NAME "${PNG_LIB_NAME}_static',
+                                        'OUTPUT_NAME "${PNG_LIB_NAME}')
             else:
                 tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
@@ -174,6 +180,9 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["{}png16{}".format(prefix, suffix)]
+        version_list = self.version.split('.')
+        major_min_version = "{}{}".format(version_list[0],version_list[1])
+
+        self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
