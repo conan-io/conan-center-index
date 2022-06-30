@@ -1,4 +1,5 @@
 import functools
+import os
 
 from conans import ConanFile, CMake, tools
 
@@ -62,6 +63,18 @@ class OpenSubdivConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    @property
+    def _osd_gpu_enabled(self):
+        return any(
+            [
+                self.options.with_opengl,
+                self.options.with_opencl,
+                self.options.with_cuda,
+                self.options.get_safe("with_dx"),
+                self.options.get_safe("with_metal"),
+            ]
+        )
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -89,6 +102,9 @@ class OpenSubdivConan(ConanFile):
         return cmake
 
     def build(self):
+        if not self._osd_gpu_enabled and self.settings.os == "Macos":
+            path = os.path.join(self._source_subfolder, "opensubdiv", "CMakeLists.txt")
+            tools.replace_in_file(path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -110,17 +126,7 @@ class OpenSubdivConan(ConanFile):
         if self.options.with_tbb:
             self.cpp_info.components["osdcpu"].requires = ["onetbb::onetbb"]
 
-        osd_gpu_enabled = any(
-            [
-                self.options.with_opengl,
-                self.options.with_opencl,
-                self.options.with_cuda,
-                self.options.get_safe("with_dx"),
-                self.options.get_safe("with_metal"),
-            ]
-        )
-
-        if osd_gpu_enabled:
+        if self._osd_gpu_enabled:
             self.cpp_info.components["osdgpu"].libs = ["osdGPU"]
             self.cpp_info.components["osdgpu"].set_property("cmake_target_name", "OpenSubdiv::osdgpu")
             dl_required = self.options.with_opengl or self.options.with_opencl
