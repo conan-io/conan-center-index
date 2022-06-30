@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, Meson, tools
+from conan.tools import files
 from conans.errors import ConanInvalidConfiguration, ConanException
 from tempfile import TemporaryDirectory
 import functools
@@ -110,7 +111,10 @@ class GdkPixbufConan(ConanFile):
     def _test_for_compiler_rt(self):
         cmake = CMake(self)
         with TemporaryDirectory() as tmp:
-            with open(os.path.join(tmp, "CMakeLists.txt"), "w") as cmake_file:
+            def open_temp_file(file_name):
+                return open(os.path.join(tmp, file_name), "w", encoding="utf-8")
+
+            with open_temp_file("CMakeLists.txt") as cmake_file:
                 cmake_file.write(r"""
                     cmake_minimum_required(VERSION 3.16)
                     project(compiler_rt_test)
@@ -118,7 +122,7 @@ class GdkPixbufConan(ConanFile):
                     if(NOT HAS_COMPILER_RT)
                     message(FATAL_ERROR compiler-rt not present)
                     endif()""")
-            with open(os.path.join(tmp, "test.c"), "w") as test_source:
+            with open_temp_file("test.c") as test_source:
                 test_source.write(r"""
                     extern __int128_t __muloti4(__int128_t a, __int128_t b, int* overflow);
                     int main() {
@@ -131,8 +135,8 @@ class GdkPixbufConan(ConanFile):
             cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-rtlib=compiler-rt"
             try:
                 cmake.configure(source_folder=tmp)
-            except ConanException:
-                raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode")
+            except ConanException as ex:
+                raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
 
     @functools.lru_cache(1)
     def _configure_meson(self):
@@ -183,7 +187,7 @@ class GdkPixbufConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
+            files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
