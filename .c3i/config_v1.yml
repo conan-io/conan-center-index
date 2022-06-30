@@ -27,7 +27,7 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
-  conan_v2_run_export: false
+  conan_v2_run_export: true
   write_comments: true
   detailed_status_checks: true
   update_labels: true
