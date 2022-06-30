@@ -81,6 +81,8 @@ class OpenSubdivConan(ConanFile):
         cmake.definitions["NO_REGRESSION"] = True
         cmake.definitions["NO_TESTS"] = True
         cmake.definitions["NO_GLTESTS"] = True
+        if self.settings.os == "Linux" and self.settings.compiler == "clang" and not self.options.shared and self.settings.compiler.libcxx == "libc++":
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-stdlib=libc++"
 
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
 
