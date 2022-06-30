@@ -84,7 +84,11 @@ class Recipe(ConanFile):
     def package_info(self):
         libname = f"{self.name}-0"
         self.cpp_info.libs = [libname]
-        self.cpp_info.includedirs = [f"include/{libname}/"]
+        self.cpp_info.includedirs = [os.path.join("include", libname)]
+        self.cpp_info.set_property("pkg_config_name", libname)
+        
+        # TODO: to remove in conan v2 once pkg_config generators removed
+        self.cpp_info.names["pkg_config"] = libname
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
