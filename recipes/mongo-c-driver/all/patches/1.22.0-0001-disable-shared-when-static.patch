@@ -1,8 +1,8 @@
 diff --git a/src/libbson/CMakeLists.txt b/src/libbson/CMakeLists.txt
-index f376d22..6436efd 100644
+index d6df66f..72fcf47 100644
 --- a/src/libbson/CMakeLists.txt
 +++ b/src/libbson/CMakeLists.txt
-@@ -229,6 +229,8 @@ target_include_directories (
+@@ -230,6 +230,8 @@ target_include_directories (
        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/../../src>
        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/../../src/common>
  )
@@ -11,7 +11,7 @@ index f376d22..6436efd 100644
  set_target_properties (bson_shared PROPERTIES VERSION 0.0.0 SOVERSION 0)
  set_target_properties (bson_shared PROPERTIES OUTPUT_NAME "${BSON_OUTPUT_BASENAME}-${BSON_API_VERSION}")
  
-@@ -274,6 +276,7 @@ if (WIN32)
+@@ -275,6 +277,7 @@ if (WIN32)
     # must be handled specially since we can't resolve them
     set (BSON_SYSTEM_LIBRARIES ${BSON_SYSTEM_LIBRARIES} ws2_32)
  endif ()
@@ -19,7 +19,7 @@ index f376d22..6436efd 100644
  
  if (MONGOC_ENABLE_STATIC_BUILD)
     add_library (bson_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
-@@ -348,7 +351,7 @@ set (BSON_HEADER_INSTALL_DIR
+@@ -349,7 +352,7 @@ set (BSON_HEADER_INSTALL_DIR
  )
  
  if (MONGOC_ENABLE_STATIC_INSTALL)
@@ -29,7 +29,7 @@ index f376d22..6436efd 100644
     set (TARGETS_TO_INSTALL bson_shared)
  endif ()
 diff --git a/src/libmongoc/CMakeLists.txt b/src/libmongoc/CMakeLists.txt
-index 23a4d37..0d6fcb1 100644
+index f14ad6b..3a056ce 100644
 --- a/src/libmongoc/CMakeLists.txt
 +++ b/src/libmongoc/CMakeLists.txt
 @@ -758,6 +758,7 @@ if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
@@ -71,7 +71,7 @@ index 23a4d37..0d6fcb1 100644
  
  # mongoc-stat works if shared memory performance counters are enabled.
  if (ENABLE_SHM_COUNTERS STREQUAL "ON")
-@@ -1127,7 +1135,7 @@ file (COPY ${PROJECT_SOURCE_DIR}/tests/x509gen DESTINATION ${PROJECT_BINARY_DIR}
+@@ -1161,7 +1169,7 @@ file (COPY ${PROJECT_SOURCE_DIR}/tests/x509gen DESTINATION ${PROJECT_BINARY_DIR}
  file (COPY ${PROJECT_SOURCE_DIR}/tests/release_files DESTINATION ${PROJECT_BINARY_DIR}/tests)
  
  if (MONGOC_ENABLE_STATIC_INSTALL)
