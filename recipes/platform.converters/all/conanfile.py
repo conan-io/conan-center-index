@@ -30,7 +30,7 @@ class PlatformConvertersConan(ConanFile):
             "gcc": "10",
             "Visual Studio": "16",
             "clang": "12",
-            "apple-clang": "11"
+            "apple-clang": "12"
         }
 
     @property
