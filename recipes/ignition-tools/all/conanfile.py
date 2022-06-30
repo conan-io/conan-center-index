@@ -129,7 +129,6 @@ class IgnitionToolsConan(ConanFile):
         lib_name = "ignition-tools"
         self.cpp_info.names["cmake_find_package"] = lib_name
         self.cpp_info.names["cmake_find_package_multi"] = lib_name
-        self.cpp_info.names["cmake_paths"] = lib_name
         self.cpp_info.set_property("cmake_file_name", "ignition-tools")
         self.cpp_info.components["core"].names["cmake_find_package"] = "core"
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
