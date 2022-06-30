@@ -1,7 +1,7 @@
 #include <agrpc/asioGrpc.hpp>
+#include <boost/asio/post.hpp>
 
 #ifndef CROSSCOMPILING
-#include <boost/asio/post.hpp>
 #include <grpcpp/create_channel.h>
 #include <test.grpc.pb.h>
 #endif
