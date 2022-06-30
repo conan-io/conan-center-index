@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conan.tools import files
+from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
@@ -59,6 +61,8 @@ class TensorflowLiteConan(ConanFile):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
+        if Version(self.version) >= "2.9.1":
+            self.copy("patches/remove_simple_memory_arena_debug_dump.patch")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,29 +85,36 @@ class TensorflowLiteConan(ConanFile):
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20210622")
+        self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20211210")
+            self.requires("xnnpack/cci.20220621")
+
+        if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+        elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.apply_conandata_patches(self)
+
+        # Shared build fails on Windows with
+        # simple_memory_arena_debug_dump.obj : error LNK2005: "void __cdecl tflite::DumpArenaInfo(...) already defined in simple_memory_arena.obj
+        # Resolve the conflict by removing the conflicting
+        # implementation for now.
+        if Version(self.version) >= "2.9.1" and self.settings.os == "Windows" and self.options.shared:
+            tools.patch(patch_file="patches/remove_simple_memory_arena_debug_dump.patch", base_path="src")
 
         # All CMake targets will be provided by Conan through the wrapper, removing every occurrence of `find_package`
         cmake_lists_path = os.path.join(self.source_folder, self._source_subfolder, "tensorflow/lite/CMakeLists.txt")
