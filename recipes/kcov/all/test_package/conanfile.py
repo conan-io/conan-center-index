@@ -1,5 +1,3 @@
-import os
-
 from conans import ConanFile, tools
 
 
