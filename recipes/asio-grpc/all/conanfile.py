@@ -48,8 +48,11 @@ class AsioGrpcConan(ConanFile):
 
     def configure(self):
         if self.options.use_boost_container == "auto":
-            self.options.use_boost_container = self.settings.compiler.get_safe("libcxx") == "libc++" or \
-                (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9")
+            libcxx = self.settings.compiler.get_safe("libcxx")
+            compiler_version = tools.Version(self.settings.compiler.version)
+            self.options.use_boost_container = libcxx and str(libcxx) == "libc++" or \
+                (self.settings.compiler == "gcc" and compiler_version < "9")  or \
+                (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
 
     def requirements(self):
         self.requires("grpc/1.45.2")
