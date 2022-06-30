@@ -35,10 +35,6 @@ class VerilatorConan(ConanFile):
     def _needs_old_bison(self):
         return tools.Version(self.version) < "4.100"
 
-    def validate(self):
-        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("GCC < version 7 is not supported")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             if self.settings.compiler == "Visual Studio":
@@ -73,6 +69,9 @@ class VerilatorConan(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+
+        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     @contextmanager
     def _build_context(self):
