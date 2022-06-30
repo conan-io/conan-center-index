@@ -10,6 +10,9 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE asio-grpc::asio-grpc)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
+# See https://github.com/chriskohlhoff/asio/issues/955
+target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
+
 asio_grpc_protobuf_generate(
     GENERATE_GRPC
     TARGET ${PROJECT_NAME}
