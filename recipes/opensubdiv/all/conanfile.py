@@ -46,12 +46,14 @@ class OpenSubdivConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.shared
         if self.settings.os != "Windows":
             del self.options.with_dx
         if self.settings.os != "Macos":
             del self.options.with_metal
+
+    def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.shared
 
     def requirements(self):
         if self.options.with_tbb:
