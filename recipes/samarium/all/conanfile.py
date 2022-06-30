@@ -87,7 +87,6 @@ class SamariumConan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*.hpp", "src", "build/include")
 
     def package_info(self):
         self.cpp_info.libs.append("samarium")
