@@ -1,11 +1,17 @@
 #include <agrpc/asioGrpc.hpp>
+
+#ifndef CROSSCOMPILING
 #include <boost/asio/post.hpp>
 #include <grpcpp/create_channel.h>
 #include <test.grpc.pb.h>
+#endif
 
 int main() {
   agrpc::GrpcContext grpc_context{std::make_unique<grpc::CompletionQueue>()};
 
+  boost::asio::post(grpc_context, [] {});
+
+#ifndef CROSSCOMPILING
   std::unique_ptr<test::Test::Stub> stub;
   grpc::ClientContext client_context;
   std::unique_ptr<grpc::ClientAsyncResponseReader<test::TestReply>> reader;
@@ -22,4 +28,5 @@ int main() {
     agrpc::finish(reader, response, status,
                   boost::asio::bind_executor(grpc_context, [](bool) {}));
   });
+#endif
 }
