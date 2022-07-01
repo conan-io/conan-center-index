@@ -5,7 +5,7 @@ from contextlib import contextmanager
 import os
 import functools
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibiconvConan(ConanFile):
