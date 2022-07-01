@@ -1,8 +1,7 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc
 import functools
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -52,6 +51,10 @@ class ArsenalgearConan(ConanFile):
         }
 
     def validate(self):
+        # In 1.2.2, arsenalgear doesn't support Visual Studio.
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("{} doesn't support Visual Studio(yet)".format(self.name))
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
