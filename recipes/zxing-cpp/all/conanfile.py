@@ -64,10 +64,6 @@ class ZXingCppConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe might not support the compiler. Consider adding it.")
 
-    def validate(self):
-        if is_msvc_static_runtime(self) and self.options.shared:
-            raise ConanInvalidConfiguration("MT + DLL is not supported")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -83,6 +79,8 @@ class ZXingCppConan(ConanFile):
         # FIXME: This is a workaround for "The system cannot execute the specified program."
         if tools.Version(self.version) == "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
+        if is_msvc_static_runtime(self) and self.options.shared:
+            raise ConanInvalidConfiguration("MT + DLL is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
