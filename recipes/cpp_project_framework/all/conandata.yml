@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/sheepgrass/cpp_project_framework/archive/master.tar.gz"
+    sha256: "e8e23c120e0513628c2c482227a7003ce514ef4f362168d8ffc967a974895f6e"
