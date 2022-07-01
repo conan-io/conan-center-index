@@ -4,7 +4,6 @@
 #include "constants.hpp"
 #include "operators.hpp"
 
-
 void operators() {
   std::cout << "\n"
             << "======================================================"
