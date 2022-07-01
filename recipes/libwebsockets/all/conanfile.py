@@ -430,6 +430,11 @@ class LibwebsocketsConan(ConanFile):
             self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
             self._cmake.definitions["DISABLE_WERROR"] = True
 
+        # Temporary override Windows 10 SDK for Visual Studio 2019, see issue #4450
+        # CCI worker has 10.0.17763.0 SDK installed alongside with 10.0.20348 but only 20348 can be used with Visual Studio 2019
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == 16:
+            self._cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.20348"
+
         self._cmake.configure()
         return self._cmake
 
