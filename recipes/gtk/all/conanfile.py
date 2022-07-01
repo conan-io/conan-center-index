@@ -124,8 +124,7 @@ class GtkConan(ConanFile):
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.8")
         self.requires("glib/2.73.0")
-        if self._gtk4 or self.settings.compiler != "Visual Studio":
-            self.requires("cairo/1.17.4")
+        self.requires("cairo/1.17.4")
         if self._gtk4:
             self.requires("graphene/1.10.8")
             self.requires("fribidi/1.0.12")
