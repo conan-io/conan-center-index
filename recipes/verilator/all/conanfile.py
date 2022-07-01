@@ -149,18 +149,20 @@ class VerilatorConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "examples"))
-        tools.mkdir(os.path.join(self.package_folder, "bin", "cmake"))
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
-        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"), 
-                    os.path.join(self.package_folder, "bin", "cmake", "verilator-tools.cmake"))
-        tools.replace_in_file(os.path.join(self.package_folder, "bin", "cmake", "verilator-tools.cmake"), "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../..")
+        tools.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
+                     os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
+        tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
+                            "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../../..")
         if self.settings.build_type == "Debug":
-            tools.replace_in_file(os.path.join(self.package_folder, "bin", "cmake", "verilator-tools.cmake"), "verilator_bin", "verilator_bin_dbg")
+            tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
+                                "verilator_bin", "verilator_bin_dbg")
 
-        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), os.path.join(self.package_folder))
+        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), 
+                    os.path.join(self.package_folder))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"), "*")
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share"))
+        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
     def package_id(self):
         # Verilator is a executable-only package, so the compiler version does not matter
@@ -179,6 +181,5 @@ class VerilatorConan(ConanFile):
         self.output.info("Setting VERILATOR_ROOT environment variable to {}".format(verilator_root))
         self.env_info.VERILATOR_ROOT = verilator_root
 
-        self.cpp_info.builddirs = [os.path.join("bin", "cmake")]  
-        self.cpp_info.build_modules = [os.path.join("bin", "cmake", "verilator-tools.cmake")]
-
+        self.cpp_info.builddirs = [os.path.join("bin", "share", "verilator")]
+        self.cpp_info.build_modules = [os.path.join("bin", "share", "verilator", "verilator-tools.cmake")]
