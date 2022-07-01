@@ -15,7 +15,9 @@ class LibcurlConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
-    topics = ("curl", "libcurl", "data-transfer")
+    topics = ("curl", "data-transfer",
+            "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
+            "scp", "sftp", "smb", "smtp", "telnet", "tftp")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
