@@ -2,4 +2,4 @@ versions:
   "0.17.2":
     folder: "0.17.2"
   "0.20.0":
-    folder: "0.20.0"
+    folder: "all"
