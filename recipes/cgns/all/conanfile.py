@@ -63,7 +63,7 @@ class CgnsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.12.1")
+            self.requires("hdf5/1.12.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
