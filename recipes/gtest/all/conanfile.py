@@ -157,6 +157,9 @@ class GTestConan(ConanFile):
 
     @property
     def _postfix(self):
+        # In 1.12.0, gtest remove debug postfix.
+        if self.version != "cci.20210126" and tools.Version(self.version) >= "1.12.0":
+            return ""
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
     def package_info(self):
