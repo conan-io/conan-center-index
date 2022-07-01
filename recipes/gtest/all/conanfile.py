@@ -125,7 +125,7 @@ class GTestConan(ConanFile):
         internal_utils = os.path.join(self._source_subfolder, "googletest",
                                       "cmake", "internal_utils.cmake")
         tools.replace_in_file(internal_utils, "-WX", "")
-        if tools.Version(self.version) < "1.12.0":
+        if self.version == "cci.20210126" or tools.Version(self.version) < "1.12.0":
             tools.replace_in_file(internal_utils, "-Werror", "")
 
     @functools.lru_cache(1)
