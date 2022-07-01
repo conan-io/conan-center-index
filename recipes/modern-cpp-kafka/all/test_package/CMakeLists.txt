@@ -5,6 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 find_package(RdKafka REQUIRED CONFIG)
+find_package(ModernCppKafka REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} RdKafka::rdkafka)
+target_link_libraries(${PROJECT_NAME} RdKafka::rdkafka ModernCppKafka::ModernCppKafka)
