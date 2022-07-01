@@ -153,7 +153,7 @@ class VerilatorConan(ConanFile):
         tools.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
                      os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
         tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
-                            "${CMAKE_CURRENT_LIST_DIR}", os.path.join(self.package_folder))
+                            "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../../..")
         if self.settings.build_type == "Debug":
             tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
                                 "verilator_bin", "verilator_bin_dbg")
