@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conans import tools
 
 required_conan_version = ">=1.45.0"
@@ -11,10 +12,29 @@ class StatusCodeConan(ConanFile):
     homepage = "https://github.com/ned14/status-code"
     description = "Proposed SG14 status_code for the C++ standard"
     topics = ("header-only", "proposal")
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _compiler_required_cpp17(self):
+        return {
+            # Their README says gcc 5, but in testing only >=7 worked
+            "gcc": "7",
+            "clang": "3.3",
+            "Visual Studio": "14",
+            "apple-clang": "5",
+        }
+
+    def validate(self):
+        try:
+            minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
+            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                raise ConanInvalidConfiguration("This package requires c++11 support. The current compiler does not support it.")
+        except KeyError:
+            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def package_id(self):
         self.info.header_only()
