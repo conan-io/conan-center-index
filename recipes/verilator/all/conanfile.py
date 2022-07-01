@@ -181,5 +181,5 @@ class VerilatorConan(ConanFile):
         self.output.info("Setting VERILATOR_ROOT environment variable to {}".format(verilator_root))
         self.env_info.VERILATOR_ROOT = verilator_root
 
-        self.cpp_info.builddirs = [os.path.join("bin", "share", "verilator")]
-        self.cpp_info.build_modules = [os.path.join("bin", "share", "verilator", "verilator-tools.cmake")]
+        self.cpp_info.builddirs.append(os.path.join("bin", "share", "verilator"))
+        self.cpp_info.build_modules.append(os.path.join("bin", "share", "verilator", "verilator-tools.cmake"))
