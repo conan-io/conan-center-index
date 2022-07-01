@@ -1,4 +1,7 @@
 sources:
+  "1.11":
+    url: "https://github.com/dougbinks/enkiTS/archive/v1.11.tar.gz"
+    sha256: "b57a782a6a68146169d29d180d3553bfecb9f1a0e87a5159082331920e7d297e"
   "1.10":
     url: "https://github.com/dougbinks/enkiTS/archive/v1.10.tar.gz"
     sha256: "578f285fc7c2744bf831548f35b855c6ab06c0d541d08c9cc50b6b72a250811a"
@@ -6,6 +9,9 @@ sources:
     url: "https://github.com/dougbinks/enkiTS/archive/v1.8.zip"
     sha256: "b96d8d439502d52f9dc419539b12b588df10750f4631ad5518586f7048cdfaef"
 patches:
+  "1.11":
+    - patch_file: "patches/cmake-install-lib-location.patch"
+      base_path: "source_subfolder"
   "1.10":
     - patch_file: "patches/cmake-install-lib-location.patch"
       base_path: "source_subfolder"

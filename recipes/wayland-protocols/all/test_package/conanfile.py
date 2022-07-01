@@ -7,11 +7,11 @@ class TestPackageConan(ConanFile):
     generators = "pkg_config"
 
     def build_requirements(self):
-        self.build_requires("wayland/1.19.0")
-        self.build_requires("meson/0.59.1")
+        self.build_requires("wayland/1.20.0")
+        self.build_requires("meson/0.60.2")
 
     def requirements(self):
-        self.requires("wayland/1.19.0")
+        self.requires("wayland/1.20.0")
 
     def build(self):
         meson = Meson(self)

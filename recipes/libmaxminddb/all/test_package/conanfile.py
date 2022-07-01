@@ -1,8 +1,9 @@
 from conans import ConanFile, CMake, tools
 import os
 
-class libmaxminddbTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):

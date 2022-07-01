@@ -23,7 +23,7 @@ class B2Conan(ConanFile):
     'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
     'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
     'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142'
+    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143'
 
     Specifies the toolset to use for building. The default of 'auto' detects
     a usable compiler for building and should be preferred. The 'cxx' toolset
@@ -39,7 +39,7 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142']
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143']
     }
     default_options = {
         'use_cxx_env': False,

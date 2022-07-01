@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             test_env_dir = "test_env"
             tools.mkdir(test_env_dir)
             bin_path = os.path.join("bin", "test_package")

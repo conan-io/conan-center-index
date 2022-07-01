@@ -29,6 +29,7 @@ class MsgpackConan(ConanFile):
         "with_boost": False,
         "header_only": False
     }
+    deprecated = "msgpack-c or msgpack-cxx"
 
     _cmake = None
 

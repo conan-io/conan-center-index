@@ -11,6 +11,8 @@ class KeychainConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "pkg_config"
+    options = {'fPIC': [False, True]}
+    default_options = {'fPIC': True}
 
     @property
     def _source_subfolder(self):
@@ -19,6 +21,10 @@ class KeychainConan(ConanFile):
     def configure(self):
      if self.settings.compiler.cppstd:
          tools.check_min_cppstd(self, 11)
+
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
 
     def requirements(self):
         if self.settings.os == "Linux":

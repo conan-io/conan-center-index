@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 471c00e..7245461 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -225,7 +225,7 @@ endif()
+ if(MSVC)
+ else()
+     target_compile_options(${BEHAVIOR_TREE_LIBRARY} PRIVATE
+-        -Wall -Wextra -Werror=return-type)
++        -Wall -Wextra)
+ endif()
+ 
+ #############################################################

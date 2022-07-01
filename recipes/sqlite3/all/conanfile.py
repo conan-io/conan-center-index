@@ -3,19 +3,18 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
-class ConanSqlite3(ConanFile):
+class Sqlite3Conan(ConanFile):
     name = "sqlite3"
     description = "Self-contained, serverless, in-process SQL database engine."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
-    topics = ("conan", "sqlite", "database", "sql", "serverless")
+    topics = ("sqlite", "database", "sql", "serverless")
     license = "Unlicense"
-    generators = "cmake"
-    settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt"]
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,13 +32,17 @@ class ConanSqlite3(ConanFile):
         "enable_rtree": [True, False],
         "use_alloca": [True, False],
         "omit_load_extension": [True, False],
+        "omit_deprecated": [True, False],
         "enable_math_functions": [True, False],
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
         "disable_gethostuuid": [True, False],
+        "max_column": "ANY",
+        "max_variable_number": "ANY",
         "max_blob_size": "ANY",
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
+        "enable_dbpage_vtab": [True, False],
     }
     default_options = {
         "shared": False,
@@ -58,15 +61,21 @@ class ConanSqlite3(ConanFile):
         "enable_rtree": True,
         "use_alloca": False,
         "omit_load_extension": False,
+        "omit_deprecated": False,
         "enable_math_functions": True,
         "enable_unlock_notify": True,
         "enable_default_secure_delete": False,
         "disable_gethostuuid": False,
-        "max_blob_size": 1000000000,
+        "max_column": None,             # Uses default value from source
+        "max_variable_number": None,    # Uses default value from source
+        "max_blob_size": None,          # Uses default value from source
         "build_executable": True,
         "enable_default_vfs": True,
+        "enable_dbpage_vtab": False,
     }
 
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -90,9 +99,12 @@ class ConanSqlite3(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if not self.options.enable_default_vfs and self.options.build_executable:
-            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-            raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+        if self.options.build_executable:
+            if not self.options.enable_default_vfs:
+                # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+                raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+            if self.options.omit_load_extension:
+                raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -119,6 +131,7 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
         self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        self._cmake.definitions["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:
             self._cmake.definitions["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
         self._cmake.definitions["HAVE_FDATASYNC"] = True
@@ -128,8 +141,15 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["HAVE_STRERROR_R"] = True
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
-        self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        if self.options.max_column:
+            self._cmake.definitions["MAX_COLUMN"] = self.options.max_column
+        if self.options.max_variable_number:
+            self._cmake.definitions["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
+        if self.options.max_blob_size:
+            self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
+        self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
+
         self._cmake.configure()
         return self._cmake
 
@@ -143,6 +163,9 @@ class ConanSqlite3(ConanFile):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
         cmake = self._configure_cmake()
         cmake.install()
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        #       Indeed CMakeDeps uses 'cmake_file_name' property to qualify CMake variables
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
@@ -160,26 +183,16 @@ class ConanSqlite3(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "SQLite3")
-        self.cpp_info.names["cmake_find_package"] = "SQLite"
-        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
-        self.cpp_info.set_property("cmake_target_name", "SQLite")
-        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
-        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
-        self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite3")
-        self.cpp_info.components["sqlite"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_target_name", "SQLite::SQLite3")
+        self.cpp_info.set_property("pkg_config_name", "sqlite3")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["sqlite"].libs = ["sqlite3"]
         if self.options.omit_load_extension:
             self.cpp_info.components["sqlite"].defines.append("SQLITE_OMIT_LOAD_EXTENSION")
@@ -198,3 +211,15 @@ class ConanSqlite3(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.names["cmake_find_package"] = "SQLite"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
+        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
+        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite::SQLite3")
+        self.cpp_info.components["sqlite"].set_property("pkg_config_name", "sqlite3")

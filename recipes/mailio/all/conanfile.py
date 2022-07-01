@@ -1,9 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
-required_conan_version = ">=1.30.0"
+required_conan_version = ">=1.33.0"
 
 class mailioConan(ConanFile):
     name = "mailio"
@@ -11,7 +10,7 @@ class mailioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/karastojko/mailio"
     description = "mailio is a cross platform C++ library for MIME format and SMTP, POP3 and IMAP protocols."
-    topics = ("conan", "smtp", "imap", "email", "mail", "libraries", "cpp")
+    topics = ("smtp", "imap", "email", "mail", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
@@ -21,14 +20,12 @@ class mailioConan(ConanFile):
         "fPIC": True,
         "shared": False
     }
-    requires = ["boost/1.75.0", "openssl/1.1.1j"]
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
     _cmake = None
 
     _compiler_required_cpp17 = {
-        "gcc": "7",
+        "gcc": "8.3",
         "clang": "6",
         "Visual Studio": "15",
         "apple-clang": "10",
@@ -51,10 +48,10 @@ class mailioConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("mailio-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,6 +61,11 @@ class mailioConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("boost/1.78.0")
+        self.requires("openssl/1.1.1m")
+
+    def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
@@ -72,6 +74,14 @@ class mailioConan(ConanFile):
                 raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
+
+    def build_requirements(self):
+        # mailio requires cmake >= 3.16.3
+        self.build_requires("cmake/3.22.0")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -86,5 +96,5 @@ class mailioConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["mailio"]
         self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]

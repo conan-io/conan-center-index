@@ -1,0 +1,40 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -85,8 +85,7 @@ IF(MSVC)
+ ENDIF()
+ 
+ #Add custom CMake Module
+-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/"
+-  CACHE INTERNAL "Location of our custom CMake modules.")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
+ 
+ # auto-configure style checks, other CMake modules.
+ INCLUDE(CheckLibraryExists)
+@@ -789,7 +788,6 @@ ENDIF(USE_HDF5 OR ENABLE_NETCDF_4)
+ 
+ # See if we have libcurl
+ FIND_PACKAGE(CURL)
+-ADD_DEFINITIONS(-DCURL_STATICLIB=1)
+ INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIRS})
+ 
+ # Check to see if CURLOPT_USERNAME is defined.
+@@ -854,7 +852,7 @@ ENDIF()
+ # Option to support byte-range reading of remote datasets
+ OPTION(ENABLE_BYTERANGE "Enable byte-range access to remote datasets.." OFF)
+ 
+-IF(NOT CURL_LIBRARY)
++IF(NOT CURL_FOUND)
+   IF(ENABLE_BYTERANGE)
+     MESSAGE(FATAL_ERROR "Byte-range support specified, CURL libraries are not found.")
+   ENDIF()
+--- liblib/CMakeLists.txt
++++ liblib/CMakeLists.txt
+@@ -88,7 +88,7 @@ IF(USE_HDF5 OR USE_NETCDF4)
+ ENDIF()
+ 
+ IF(USE_DAP)
+-  SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARY})
++  SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARIES})
+ ENDIF()
+ 
+ IF(USE_HDF4)

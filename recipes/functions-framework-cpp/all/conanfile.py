@@ -1,30 +1,44 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class FunctionsFrameworkCppConan(ConanFile):
     name = "functions-framework-cpp"
     description = "An open source FaaS (Functions as a Service) framework"
     license = "Apache-2.0"
-    topics = "google", "cloud", "functions-as-a-service", "faas-framework"
+    topics = ("google", "cloud", "functions-as-a-service", "faas-framework")
     homepage = "https://github.com/GoogleCloudPlatform/functions-framework-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     short_paths = True
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,6 +47,11 @@ class FunctionsFrameworkCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("abseil/20211102.0")
+        self.requires("boost/1.78.0")
+        self.requires("nlohmann_json/3.10.5")
 
     @property
     def _compilers_minimum_version(self):
@@ -43,28 +62,39 @@ class FunctionsFrameworkCppConan(ConanFile):
             "apple-clang": "11",
         }
 
+    @property
+    def _required_boost_components(self):
+        return ["program_options"]
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
-        minimum_version = self._compilers_minimum_version.get(
-            str(self.settings.compiler), False
-        )
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires C++17, which your compiler does not support.".format(
-                        self.name
-                    )
-                )
-        else:
-            self.output.warn(
-                "{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(
-                    self.name
+        miss_boost_required_comp = \
+            any(getattr(self.options["boost"],
+                        "without_{}".format(boost_comp),
+                        True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                "{0} requires non-header-only boost with these components: {1}".format(
+                    self.name, ", ".join(self._required_boost_components)
                 )
             )
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                "{} requires C++17, which your compiler does not support.".format(self.name)
+            )
+
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("Fails to build for Visual Studio as a DLL")
 
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration(
@@ -78,11 +108,6 @@ class FunctionsFrameworkCppConan(ConanFile):
             strip_root=True
         )
 
-    def requirements(self):
-        self.requires("abseil/20210324.2")
-        self.requires("boost/1.77.0")
-        self.requires("nlohmann_json/3.10.2")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -94,6 +119,8 @@ class FunctionsFrameworkCppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -103,25 +130,12 @@ class FunctionsFrameworkCppConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # The package is not installing the `*.so` file:
-        #     https://github.com/GoogleCloudPlatform/functions-framework-cpp/issues/331
-        # create this manually:
-        if self.settings.os != "Windows" and self.options.shared:
-            src, dst = (".so.1.0.0", ".so") if self.settings.os != "Macos" else (".1.0.0.dylib", ".dylib")
-            os.link(
-                os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp" + src
-                ),
-                os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp" + dst
-                ),
-            )
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "functions_framework_cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "functions_framework_cpp"
-        self.cpp_info.names["cmake_find_package"] = "functions-framework-cpp"
-
+        self.cpp_info.set_property("cmake_file_name", "functions_framework_cpp")
+        self.cpp_info.set_property("cmake_target_name", "functions-framework-cpp::framework")
+        self.cpp_info.set_property("pkg_config_name", "functions_framework_cpp")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["framework"].libs = ["functions_framework_cpp"]
         self.cpp_info.components["framework"].requires = [
             "abseil::absl_time",
@@ -129,6 +143,12 @@ class FunctionsFrameworkCppConan(ConanFile):
             "boost::program_options",
             "nlohmann_json::nlohmann_json",
         ]
-        self.cpp_info.components["framework"].set_property(
-            "pkg_config_name", "functions_framework_cpp"
-        )
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["framework"].system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "functions_framework_cpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "functions_framework_cpp"
+        self.cpp_info.names["pkg_config"] = "functions_framework_cpp"
+        self.cpp_info.components["framework"].set_property("cmake_target_name", "functions-framework-cpp::framework")
+        self.cpp_info.components["framework"].set_property("pkg_config_name", "functions_framework_cpp")

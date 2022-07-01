@@ -57,13 +57,13 @@ class MariadbConnectorcConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.16")
         if self.options.with_curl:
-            self.requires("libcurl/7.79.1")
+            self.requires("libcurl/7.80.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/1.1.1n")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
@@ -106,6 +106,8 @@ class MariadbConnectorcConan(ConanFile):
         self._cmake.definitions["INSTALL_BINDIR"] = "bin"
         self._cmake.definitions["INSTALL_LIBDIR"] = "lib"
         self._cmake.definitions["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
+        # To install relocatable shared libs on Macos
+        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure()
         return self._cmake
 
@@ -136,5 +138,7 @@ class MariadbConnectorcConan(ConanFile):
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
         self.output.info("Prepending to MARIADB_PLUGIN_DIR runtime environment variable: {}".format(plugin_dir))
         self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+
+        # TODO: to remove in conan v2?
+        self.cpp_info.names["pkg_config"] = "libmariadb"
         self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

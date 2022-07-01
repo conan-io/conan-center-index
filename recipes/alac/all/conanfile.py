@@ -9,7 +9,7 @@ class AlacConan(ConanFile):
     description = "The Apple Lossless Audio Codec (ALAC) is a lossless audio " \
                   "codec developed by Apple and deployed on all of its platforms and devices."
     license = "Apache-2.0"
-    topics = ("conan", "alac", "audio-codec")
+    topics = ("alac", "audio-codec")
     homepage = "https://macosforge.github.io/alac"
     url = "https://github.com/conan-io/conan-center-index"
 

@@ -1,17 +1,19 @@
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
+
+required_conan_version = ">=1.45.0"
 
 
 class CpppeglibConan(ConanFile):
     name = "cpp-peglib"
     description = "A single file C++11 header-only PEG (Parsing Expression Grammars) library."
     license = "MIT"
-    topics = ("conan", "cpp-peglib", "peg", "parser", "header-only")
-    homepage = "https://github.com/yhirose/cpp-peglib"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
-    exports_sources = "patches/**"
+    homepage = "https://github.com/yhirose/cpp-peglib"
+    topics = ("peg", "parser", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -26,7 +28,10 @@ class CpppeglibConan(ConanFile):
             "apple-clang": "10"
         }
 
-    def configure(self):
+    def package_id(self):
+        self.info.header_only()
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
@@ -46,26 +51,22 @@ class CpppeglibConan(ConanFile):
            tools.stdcpp_library(self) == "stdc++":
             raise ConanInvalidConfiguration("{} {} does not support clang 7 with libstdc++.".format(self.name, self.version))
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("peglib.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
             self.cpp_info.cxxflags.append("-pthread")
             self.cpp_info.exelinkflags.append("-pthread")
             self.cpp_info.sharedlinkflags.append("-pthread")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")

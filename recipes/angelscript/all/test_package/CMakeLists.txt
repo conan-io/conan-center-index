@@ -4,14 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-
 find_package(Angelscript REQUIRED CONFIG)
 
-add_executable(example
-    example.cpp
-)
-
-target_link_libraries(example
-    PRIVATE
-    Angelscript::angelscript
-)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE Angelscript::angelscript)

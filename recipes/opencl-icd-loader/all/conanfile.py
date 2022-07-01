@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
-import os
 
-required_conan_version = ">=1.33.0" 
+required_conan_version = ">=1.43.0"
+
 
 class OpenclIcdLoaderConan(ConanFile):
     name = "opencl-icd-loader"
@@ -15,13 +15,17 @@ class OpenclIcdLoaderConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "disable_openclon12": [True, False]}
     default_options = {"shared": False, "fPIC": True, "disable_openclon12": False}
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":

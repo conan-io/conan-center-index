@@ -2,6 +2,9 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.43.0"
+
+
 class So5extraConan(ConanFile):
     name = "so5extra"
     license = "BSD-3-Clause"
@@ -9,7 +12,7 @@ class So5extraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A collection of various SObjectizer's extensions."
     topics = ("concurrency", "actor-framework", "actors", "agents", "sobjectizer")
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -17,11 +20,11 @@ class So5extraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("sobjectizer/5.7.2.3")
+        self.requires("sobjectizer/5.7.4")
 
-    def configure(self):
+    def validate(self):
         minimal_cpp_standard = "17"
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "7",
@@ -41,23 +44,27 @@ class So5extraConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-v." + self.version
-        os.rename(extracted_dir, self._source_subfolder )
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.hpp", dst="include/so_5_extra", src=os.path.join(self._source_subfolder, "dev", "so_5_extra"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "so5extra")
+        self.cpp_info.set_property("cmake_target_name", "sobjectizer::so5extra")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "so5extra"
         self.cpp_info.filenames["cmake_find_package_multi"] = "so5extra"
         self.cpp_info.names["cmake_find_package"] = "sobjectizer"
         self.cpp_info.names["cmake_find_package_multi"] = "sobjectizer"
         self.cpp_info.components["so_5_extra"].names["cmake_find_package"] = "so5extra"
         self.cpp_info.components["so_5_extra"].names["cmake_find_package_multi"] = "so5extra"
+        self.cpp_info.components["so_5_extra"].set_property("cmake_target_name", "sobjectizer::so5extra")
         self.cpp_info.components["so_5_extra"].requires = ["sobjectizer::sobjectizer"]

@@ -5,7 +5,6 @@ import os
 
 required_conan_version = ">=1.33.0"
 
-
 class PerfettoConan(ConanFile):
     name = "perfetto"
     license = "Apache-2.0"
@@ -16,16 +15,17 @@ class PerfettoConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
             "shared": [True, False],
-            "fPIC": [True, False]
+            "fPIC": [True, False],
+            "disable_logging": [True, False], # switches PERFETTO_DISABLE_LOG
     }
     default_options = {
             "shared": False,
-            "fPIC": True
+            "fPIC": True,
+            "disable_logging": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
+    short_paths = True
     generators = "cmake"
-
     _cmake = None
 
     @property
@@ -54,10 +54,22 @@ class PerfettoConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if self.options.get_safe("disable_logging", False) == True:
+            self._cmake.definitions["PERFETTO_DISABLE_LOGGING"] = True
         self._cmake.configure()
         return self._cmake
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

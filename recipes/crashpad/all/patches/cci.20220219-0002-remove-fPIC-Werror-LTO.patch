@@ -1,0 +1,50 @@
+--- third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
++++ third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
+@@ -108,7 +108,7 @@ config("release") {
+     }
+   } else if (mini_chromium_is_win) {
+     cflags = [
+-      "/GL",  # LTCG.
++        # LTCG.
+       "/O2",
+       "/Ob2",  # Both explicit and auto inlining.
+       "/Oy-",  # Disable omitting frame pointers, must be after /O2.
+@@ -118,9 +118,9 @@ config("release") {
+     ldflags = [
+       "/OPT:ICF",
+       "/OPT:REF",
+-      "/LTCG",
++
+     ]
+-    arflags = [ "/LTCG" ]
++    arflags = [  ]
+   }
+ }
+ 
+@@ -133,7 +133,7 @@ config("default") {
+     cflags = [
+       "-Wall",
+       "-Wendif-labels",
+-      "-Werror",
++
+       "-Wextra",
+       "-Wextra-semi",
+       "-Wheader-hygiene",
+@@ -244,7 +244,7 @@ config("default") {
+       "/D_UNICODE",
+       "/FS",
+       "/W4",
+-      "/WX",
++      
+       "/Zi",
+       "/bigobj",  # Support larger number of sections in obj file.
+       "/wd4100",  # Unreferenced formal parameter.
+@@ -329,7 +329,7 @@ config("default") {
+ 
+   if ((mini_chromium_is_posix && !mini_chromium_is_mac &&
+        !mini_chromium_is_ios) || mini_chromium_is_fuchsia) {
+-    cflags += [ "-fPIC" ]
++
+     ldflags += [
+       # This must follow Fuchsia’s fdio library above.
+       "-Wl,--as-needed",

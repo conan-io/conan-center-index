@@ -22,7 +22,7 @@ class SymengineConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "integer_class": "boostmp",
+        "integer_class": "gmp",
     }
     short_paths = True
 
@@ -38,7 +38,7 @@ class SymengineConan(ConanFile):
 
     def requirements(self):
         if self.options.integer_class == "boostmp":
-            self.requires("boost/1.76.0")
+            self.requires("boost/1.78.0")
         else:
             self.requires("gmp/6.2.1")
 

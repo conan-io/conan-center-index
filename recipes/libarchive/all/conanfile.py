@@ -2,18 +2,17 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
     description = "Multi-format archive and compression library"
-    topics = ("conan", "libarchive", "tar", "data-compressor", "file-compression")
+    topics = ("libarchive", "tar", "data-compressor", "file-compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,7 +31,9 @@ class LibarchiveConan(ConanFile):
         "with_lz4": [True, False],
         "with_lzo": [True, False],
         "with_lzma": [True, False],
-        "with_zstd": [True, False]
+        "with_zstd": [True, False],
+        "with_mbedtls": [True, False],
+        "with_xattr": [True, False],
     }
     default_options = {
         "shared": False,
@@ -51,9 +52,12 @@ class LibarchiveConan(ConanFile):
         "with_lz4": False,
         "with_lzo": False,
         "with_lzma": False,
-        "with_zstd": False
+        "with_zstd": False,
+        "with_mbedtls": False,
+        "with_xattr": False,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -64,9 +68,16 @@ class LibarchiveConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "3.4.2":
+            del self.options.with_mbedtls
 
     def configure(self):
         if self.options.shared:
@@ -76,24 +87,21 @@ class LibarchiveConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.13")
         if self.options.with_expat:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.8")
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
-            self.requires("pcre/8.44")
-        if self.options.with_cng:
-            # TODO: add cng when available in CCI
-            raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
+            self.requires("pcre/8.45")
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1n")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -103,16 +111,20 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.2")
+        if self.options.get_safe("with_mbedtls"):
+            self.requires("mbedtls/3.1.0")
 
     def validate(self):
+        if self.settings.os != "Windows" and self.options.with_cng:
+            # TODO: add cng when available in CCI
+            raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
         if self.options.with_expat and self.options.with_libxml2:
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -146,6 +158,9 @@ class LibarchiveConan(ConanFile):
         self._cmake.definitions["ENABLE_TEST"] = False
         # too strict check
         self._cmake.definitions["ENABLE_WERROR"] = False
+        if tools.Version(self.version) >= "3.4.2":
+            self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        self._cmake.definitions["ENABLE_XATTR"] = self.options.with_xattr
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -160,20 +175,14 @@ class LibarchiveConan(ConanFile):
         tools.replace_in_file(cmakelists_path,
                               "SET(CMAKE_MODULE_PATH",
                               "LIST(APPEND CMAKE_MODULE_PATH")
-        # workaround due to case sensitivity and limitations in cmake_find_package
-        # see https://github.com/conan-io/conan/issues/7691
-        if self.options.with_bzip2:
-            tools.replace_in_file(cmakelists_path, "BZIP2_FOUND", "BZip2_FOUND")
-            tools.replace_in_file(cmakelists_path, "BZIP2_INCLUDE_DIR", "BZip2_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "BZIP2_LIBRARIES", "BZip2_LIBRARIES")
+        # allow openssl on macOS
         if self.options.with_openssl:
             tools.replace_in_file(cmakelists_path,
                                   "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
                                   "IF(ENABLE_OPENSSL)")
+        # wrong lzma cmake var name
         if self.options.with_lzma:
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_FOUND", "LibLZMA_FOUND")
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LibLZMA_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
+            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
         # add possible names for lz4 library
         if not self.options.shared:
             tools.replace_in_file(cmakelists_path,
@@ -213,8 +222,16 @@ class LibarchiveConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "LibArchive")
+        self.cpp_info.set_property("cmake_target_name", "LibArchive::LibArchive")
+        self.cpp_info.set_property("pkg_config_name", "libarchive")
+
         self.cpp_info.names["cmake_find_package"] = "LibArchive"
         self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+
+        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and self.options.with_cng:
+            self.cpp_info.system_libs.append("bcrypt")
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]

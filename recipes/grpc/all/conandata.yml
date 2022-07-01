@@ -1,32 +1,26 @@
 sources:
-  "1.39.1":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.39.1.tar.gz"
-    sha256: "024118069912358e60722a2b7e507e9c3b51eeaeee06e2dd9d95d9c16f6639ec"
-  "1.38.1":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.38.1.tar.gz"
-    sha256: "f60e5b112913bf776a22c16a3053cc02cf55e60bf27a959fd54d7aaf8e2da6e8"
-  "1.38.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.38.0.tar.gz"
-    sha256: "abd9e52c69000f2c051761cfa1f12d52d8b7647b6c66828a91d462e796f2aede"
-  "1.37.1":
-    url: "https://github.com/grpc/grpc/archive/v1.37.1.tar.gz"
-    sha256: "acf247ec3a52edaee5dee28644a4e485c5e5badf46bdb24a80ca1d76cb8f1174"
-  "1.37.0":
-    url: https://github.com/grpc/grpc/archive/refs/tags/v1.37.0.tar.gz
-    sha256: "c2dc8e876ea12052d6dd16704492fd8921df8c6d38c70c4708da332cf116df22"
+  "1.47.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.47.0.tar.gz"
+    sha256: "271bdc890bf329a8de5b65819f0f9590a5381402429bca37625b63546ed19e54"
+  "1.46.3":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.46.3.tar.gz"
+    sha256: "d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964"
+  "1.45.2":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.45.2.tar.gz"
+    sha256: "e18b16f7976aab9a36c14c38180f042bb0fd196b75c9fd6a20a2b5f934876ad6"
+  "1.44.0":
+    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.44.0.tar.gz"
+    sha256: "8c05641b9f91cbc92f51cc4a5b3a226788d7a63f20af4ca7aaca50d92cc94a0d"
 patches:
-  "1.39.1":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+  "1.47.0":
+    - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.38.1":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+  "1.46.3":
+    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.38.0":
-    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
+  "1.45.2":
+    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-  "1.37.1":
-    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
-      base_path: "source_subfolder"
-  "1.37.0":
-    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
+  "1.44.0":
+    - patch_file: "patches/v1.44.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"

@@ -1,10 +1,10 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 
-class TestZlibConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)

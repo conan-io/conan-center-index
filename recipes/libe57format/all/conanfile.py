@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LibE57FormatConan(ConanFile):
@@ -12,11 +12,18 @@ class LibE57FormatConan(ConanFile):
     homepage = "https://github.com/asmaloney/libE57Format"
     description = "Library for reading & writing the E57 file format"
     topics = ("e57", "io", "point-cloud")
+
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
     @property
@@ -26,6 +33,11 @@ class LibE57FormatConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,7 +51,7 @@ class LibE57FormatConan(ConanFile):
         self.requires("xerces-c/3.2.3")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
     def source(self):
@@ -83,23 +95,21 @@ class LibE57FormatConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "e57format")
+        self.cpp_info.set_property("cmake_target_name", "E57Format")
         suffix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["E57Format{}".format(suffix)]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "e57format"
         self.cpp_info.filenames["cmake_find_package_multi"] = "e57format"
         self.cpp_info.names["cmake_find_package"] = "E57Format"
         self.cpp_info.names["cmake_find_package_multi"] = "E57Format"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")

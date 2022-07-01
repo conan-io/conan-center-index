@@ -1,0 +1,48 @@
+name: 'Package: Bug Report'
+description: 'Report a bug, something does not work as it supposed to'
+title: '[package] <LIBRARY-NAME>/<LIBRARY-VERSION>: SHORT DESCRIPTION'
+labels: bug
+body:
+- type: markdown
+  attributes:
+    value: |
+      Please don't forget to update the issue title.
+      Include all applicable information to help us reproduce your problem.
+
+- type: textarea
+  attributes:
+    label: Package and Environment Details
+    description: include every applicable attribute)
+    value: |
+     * Package Name/Version: **zlib/1.2.8**
+     * Operating System+version: **Linux Ubuntu 18.04**
+     * Compiler+version: **GCC 8**
+     * Docker image: **conanio/gcc8**
+     * Conan version: **conan 1.18.0**
+     * Python version: **Python 3.7.4**
+  validations:
+    required: true
+
+
+- type: textarea
+  attributes:
+    label: Conan profile
+    description: output of `conan profile show default` or `conan profile show <profile>` if custom profile is in use
+
+- type: textarea
+  attributes:
+    label:  Steps to reproduce
+    description: Include if Applicable
+
+- type: textarea
+  attributes:
+    label:  Logs
+    description: Include/Attach if Applicable
+    value: |
+      <details><summary>Click to expand log</summary>
+
+      ```
+      Put your log output here
+      ```
+
+      </details>

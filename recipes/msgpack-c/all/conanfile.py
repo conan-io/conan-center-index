@@ -1,7 +1,9 @@
 from conans import ConanFile, CMake, tools
 import os
+import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
+
 
 class MsgpackCConan(ConanFile):
     name = "msgpack-c"
@@ -68,16 +70,37 @@ class MsgpackCConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"msgpackc": "msgpack::msgpack"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "msgpack-c"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "msgpack-c"
-        self.cpp_info.set_property("cmake_file_name", "msgpack-c")
+        self.cpp_info.set_property("cmake_file_name", "msgpack")
+        self.cpp_info.set_property("cmake_target_name", "msgpackc")
+        self.cpp_info.set_property("pkg_config_name", "msgpack")
+        self.cpp_info.libs = ["msgpackc"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "msgpack"
         self.cpp_info.names["cmake_find_package_multi"] = "msgpack"
-        self.cpp_info.set_property("cmake_target_name", "msgpack")
-        self.cpp_info.components["msgpack"].names["cmake_find_package"] = "msgpack-c"
-        self.cpp_info.components["msgpack"].names["cmake_find_package_multi"] = "msgpack-c"
-        self.cpp_info.components["msgpack"].set_property("cmake_target_name", "msgpack-c")
-        self.cpp_info.components["msgpack"].set_property("pkg_config_name", "msgpack")
-        self.cpp_info.components["msgpack"].libs = ["msgpackc"]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "msgpack"

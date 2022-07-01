@@ -10,7 +10,7 @@ class MpdecimalConan(ConanFile):
     name = "mpdecimal"
     description = "mpdecimal is a package for correctly-rounded arbitrary precision decimal floating point arithmetic."
     license = "BSD-2-Clause"
-    topics = ("conan", "mpdecimal", "multiprecision", "library")
+    topics = ("mpdecimal", "multiprecision", "library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bytereef.org/mpdecimal"
     settings = "os", "compiler", "build_type", "arch"
@@ -25,8 +25,6 @@ class MpdecimalConan(ConanFile):
         "cxx": True,
     }
 
-    exports_sources = "patches/**"
-
     _autotools = None
 
     @property
@@ -36,6 +34,14 @@ class MpdecimalConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "setings_build", self.settings)
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,13 +55,13 @@ class MpdecimalConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("automake/1.16.3")
+        if self._is_msvc:
+            self.build_requires("automake/1.16.4")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self._is_msvc and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
         if self.options.cxx:
             if self.options.shared and self.settings.os == "Windows":
@@ -98,7 +104,7 @@ class MpdecimalConan(ConanFile):
                 with tools.chdir(build_dir):
                     self.run("""nmake /nologo /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_CXXFLAGS="{cxxflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                         target=target,
-                        machine={"x86": "pro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
+                        machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
                         debug="1" if self.settings.build_type == "Debug" else "0",
                         dll="1" if self.options.shared else "0",
                         cflags=" ".join(autotools.flags + extra_flags),
@@ -123,10 +129,14 @@ class MpdecimalConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        conf_vars = self._autotools.vars
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            conf_vars["LDFLAGS"] += " -arch arm64"
+            conf_vars["LDXXFLAGS"] = "-arch arm64"
         conf_args = [
             "--enable-cxx" if self.options.cxx else "--disable-cxx"
         ]
-        self._autotools.configure(args=conf_args)
+        self._autotools.configure(args=conf_args, vars=conf_vars)
         return self._autotools
 
     @property
@@ -146,7 +156,7 @@ class MpdecimalConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_msvc()
         else:
             with tools.chdir(self._source_subfolder):
@@ -162,7 +172,7 @@ class MpdecimalConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             distfolder = os.path.join(self.build_folder, self._source_subfolder, "vcbuild", "dist{}".format(32 if self.settings.arch == "x86" else 64))
             self.copy("vc*.h", src=os.path.join(self.build_folder, self._source_subfolder, "libmpdec"), dst="include")
             self.copy("*.h", src=distfolder, dst="include")
@@ -188,7 +198,7 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         lib_pre_suf = ("", "")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             lib_pre_suf = ("lib", "-{}".format(self.version))
         elif self.settings.os == "Windows":
             if self.options.shared:
@@ -196,13 +206,13 @@ class MpdecimalConan(ConanFile):
 
         self.cpp_info.components["libmpdecimal"].libs = ["{}mpdec{}".format(*lib_pre_suf)]
         if self.options.shared:
-            if self.settings.compiler == "Visual Studio":
+            if self._is_msvc:
                 if tools.Version(self.version) >= "2.5.1":
                     self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
                 else:
                     self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
         else:
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
 
         if self.options.cxx:

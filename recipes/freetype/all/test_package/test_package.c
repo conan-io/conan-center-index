@@ -69,7 +69,7 @@ main( int     argc,
   int           target_height;
   size_t        n, num_chars;
 
-  if (argv < 2) {
+  if (argc < 2) {
     fprintf(stderr, "Usage: %s FONT\n", argv[0]);
     return EXIT_FAILURE;
   }
@@ -118,7 +118,7 @@ main( int     argc,
     FT_Set_Transform( face, &matrix, &pen );
 
     /* load glyph image into the slot (erase previous one) */
-    error = FT_Load_Char( face, text[n], FT_LOAD_RENDER );
+    error = FT_Load_Char( face, text[n], FT_LOAD_RENDER);
     if (error) {
         exit(EXIT_FAILURE);
     }

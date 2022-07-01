@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-project(PackageTest CXX)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(so5extra REQUIRED)
+find_package(so5extra REQUIRED CONFIG)
 
-add_executable(example example.cpp)
-target_link_libraries(example sobjectizer::so5extra)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} sobjectizer::so5extra)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

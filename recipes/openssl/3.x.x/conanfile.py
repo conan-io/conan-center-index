@@ -1,3 +1,5 @@
+from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
@@ -6,7 +8,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -82,8 +84,6 @@ class OpenSSLConan(ConanFile):
     default_options["fPIC"] = True
     default_options["openssldir"] = None
 
-    exports_sources = "patches/*"
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -91,6 +91,10 @@ class OpenSSLConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -103,7 +107,6 @@ class OpenSSLConan(ConanFile):
             self.options.no_asm = True
             self.options.no_threads = True
             self.options.no_stdio = True
-            self.options.no_tests = True
 
     def configure(self):
         if self.options.shared:
@@ -113,7 +116,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if not self.options.no_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -131,10 +134,6 @@ class OpenSSLConan(ConanFile):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
 
     @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
-    @property
     def _is_clangcl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -144,7 +143,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or self._is_msvc
+        return self._is_clangcl or is_msvc(self)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -319,7 +318,8 @@ class OpenSSLConan(ConanFile):
     def _ancestor_target(self):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
-        query = f"{self.settings.os}-{self.settings.arch}-{self.settings.compiler}"
+        compiler = "Visual Studio" if self.settings.compiler == "msvc" else self.settings.compiler
+        query = f"{self.settings.os}-{self.settings.arch}-{compiler}"
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
             raise ConanInvalidConfiguration(
@@ -564,10 +564,6 @@ class OpenSSLConan(ConanFile):
 
     def _make_install(self):
         with tools.chdir(self._source_subfolder):
-            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
-            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
-                os.makedirs(os.path.join(self.package_folder, "bin"))
-
             self._run_make(targets=["install_sw"], parallel=False)
 
     @property
@@ -627,9 +623,10 @@ class OpenSSLConan(ConanFile):
         return make_program
 
     def _replace_runtime_in_file(self, filename):
-        for e in ("MDd", "MTd", "MD", "MT"):
-            tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
-            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
+        runtime = msvc_runtime_flag(self)
+        for e in ["MDd", "MTd", "MD", "MT"]:
+            tools.replace_in_file(filename, f"/{e} ", f"/{runtime} ", strict=False)
+            tools.replace_in_file(filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
     def package(self):
         self.copy("*LICENSE*", src=self._source_subfolder, dst="licenses")
@@ -642,8 +639,8 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             if self.settings.build_type == "Debug":
                 with tools.chdir(os.path.join(self.package_folder, "lib")):
-                    tools.rename("libssl.lib", "libssld.lib")
-                    tools.rename("libcrypto.lib", "libcryptod.lib")
+                    rename(self, "libssl.lib", "libssld.lib")
+                    rename(self, "libcrypto.lib", "libcryptod.lib")
 
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
@@ -712,7 +709,7 @@ class OpenSSLConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
-        self.cpp_info.set_property("cmake_target_name", "OpenSSL")
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
@@ -737,7 +734,7 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].requires.append("zlib::zlib")
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32"])
+            self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"])
         elif self.settings.os == "Linux":
             self.cpp_info.components["crypto"].system_libs.extend(["dl", "rt"])
             self.cpp_info.components["ssl"].system_libs.append("dl")
@@ -748,9 +745,9 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
 
-        self.cpp_info.components["crypto"].set_property("cmake_target_name", "Crypto")
+        self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
         self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
-        self.cpp_info.components["ssl"].set_property("cmake_target_name", "SSL")
+        self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"

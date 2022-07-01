@@ -1,6 +1,6 @@
 --- a/code/AssetLib/3MF/D3MFExporter.cpp
 +++ b/code/AssetLib/3MF/D3MFExporter.cpp
-@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -57,7 +57,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #include <zip/zip.h>
  #else
@@ -11,7 +11,7 @@
  namespace Assimp {
 --- a/code/AssetLib/Blender/BlenderTessellator.h
 +++ b/code/AssetLib/Blender/BlenderTessellator.h
-@@ -147,7 +147,7 @@ namespace Assimp
+@@ -147,7 +147,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <poly2tri/poly2tri.h>
  #else
@@ -22,18 +22,20 @@
  namespace Assimp
 --- a/code/AssetLib/IFC/IFCGeometry.cpp
 +++ b/code/AssetLib/IFC/IFCGeometry.cpp
-@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
  #else
 -#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
 +#  include <poly2tri/poly2tri.h>
- #  include "../contrib/clipper/clipper.hpp"
++#  include <polyclipping/clipper.hpp>
  #endif
  
+ #include <memory>
 --- a/code/AssetLib/IFC/IFCLoader.cpp
 +++ b/code/AssetLib/IFC/IFCLoader.cpp
-@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -54,7 +54,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #include <minizip/unzip.h>
  #else
@@ -44,18 +46,31 @@
  
 --- a/code/AssetLib/IFC/IFCOpenings.cpp
 +++ b/code/AssetLib/IFC/IFCOpenings.cpp
-@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -53,8 +53,8 @@
  #  include <poly2tri/poly2tri.h>
  #  include <polyclipping/clipper.hpp>
  #else
 -#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+-#  include "../contrib/clipper/clipper.hpp"
 +#  include <poly2tri/poly2tri.h>
- #  include "../contrib/clipper/clipper.hpp"
++#  include <polyclipping/clipper.hpp>
  #endif
+ 
+ #include <iterator>
+--- a/code/AssetLib/M3D/M3DWrapper.hpp
++++ b/code/AssetLib/M3D/M3DWrapper.h
+@@ -59,7 +59,7 @@
+ 
+ // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
+ #define STBI_ONLY_PNG
+-#include <stb/stb_image.h>
++#include <stb_image.h>
+ 
+ #include "m3d.h"
  
 --- a/code/AssetLib/MMD/MMDPmxParser.cpp
 +++ b/code/AssetLib/MMD/MMDPmxParser.cpp
-@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -45,7 +45,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8.h>
  #else
@@ -66,7 +81,7 @@
  
 --- a/code/AssetLib/SIB/SIBImporter.cpp
 +++ b/code/AssetLib/SIB/SIBImporter.cpp
-@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -62,7 +62,7 @@
  #include <utf8.h>
  #else
  //#  include "../contrib/ConvertUTF/ConvertUTF.h"
@@ -77,7 +92,7 @@
  #include <assimp/scene.h>
 --- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp
 +++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
-@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -48,7 +48,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #  include <utf8.h>
  #else
@@ -88,7 +103,7 @@
  #include <memory>
 --- a/code/CMakeLists.txt
 +++ b/code/CMakeLists.txt
-@@ -886,7 +886,7 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
+@@ -886,7 +886,7 @@
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(pugixml)
    find_package(pugixml CONFIG REQUIRED)
@@ -97,7 +112,16 @@
    SET( Pugixml_SRCS
      ../contrib/pugixml/src/pugiconfig.hpp
      ../contrib/pugixml/src/pugixml.hpp
-@@ -919,7 +919,7 @@ ENDIF()
+@@ -907,7 +907,7 @@
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(polyclipping)
+   find_package(polyclipping CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( Clipper_SRCS
+     ../contrib/clipper/clipper.hpp
+     ../contrib/clipper/clipper.cpp
+@@ -919,7 +919,7 @@
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(poly2tri)
    find_package(poly2tri CONFIG REQUIRED)
@@ -106,7 +130,7 @@
    SET( Poly2Tri_SRCS
      ../contrib/poly2tri/poly2tri/common/shapes.cc
      ../contrib/poly2tri/poly2tri/common/shapes.h
-@@ -940,7 +940,7 @@ ENDIF()
+@@ -940,7 +940,7 @@
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(minizip)
    find_package(minizip CONFIG REQUIRED)
@@ -115,7 +139,7 @@
    SET( unzip_SRCS
      ../contrib/unzip/crypt.c
      ../contrib/unzip/crypt.h
-@@ -956,7 +956,7 @@ ENDIF()
+@@ -956,7 +956,7 @@
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(zip)
    find_package(zip CONFIG REQUIRED)
@@ -124,7 +148,24 @@
    SET( ziplib_SRCS
      ../contrib/zip/src/miniz.h
      ../contrib/zip/src/zip.c
-@@ -1052,7 +1052,6 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -977,7 +977,7 @@
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(openddlparser)
+   find_package(openddlparser CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET ( openddl_parser_SRCS
+     ../contrib/openddlparser/code/OpenDDLParser.cpp
+     ../contrib/openddlparser/code/DDLNode.cpp
+@@ -1032,6 +1032,7 @@
+     ../contrib/Open3DGC/o3dgcVector.inl
+   )
+   SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
++  INCLUDE_DIRECTORIES("../contrib")
+ ENDIF()
+ 
+ # Check dependencies for glTF importer with Open3DGC-compression.
+@@ -1052,7 +1053,6 @@
    hunter_add_package(RapidJSON)
    find_package(RapidJSON CONFIG REQUIRED)
  ELSE()
@@ -132,7 +173,16 @@
    ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
    option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
    if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
-@@ -1088,7 +1087,7 @@ IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
+@@ -1064,7 +1064,7 @@
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(stb)
+   find_package(stb CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( stb_SRCS
+     ../contrib/stb/stb_image.h
+   )
+@@ -1088,7 +1088,7 @@
  endif ()
  
  IF(NOT ASSIMP_HUNTER_ENABLED)
@@ -141,7 +191,7 @@
      SET (unzip_compile_SRCS "")
    else ()
      SET (unzip_compile_SRCS ${unzip_SRCS})
-@@ -1160,13 +1159,6 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
+@@ -1160,12 +1160,6 @@
  
  TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
  
@@ -151,11 +201,10 @@
 -ELSE()
 -  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
 -ENDIF()
--
+ 
  # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
  TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
- 
-@@ -1195,7 +1187,7 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -1195,7 +1189,7 @@
      target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
    endif()
  ELSE()
@@ -164,9 +213,20 @@
    if (ASSIMP_BUILD_DRACO)
      target_link_libraries(assimp ${draco_LIBRARIES})
    endif()
+--- a/code/Common/Assimp.cpp
++++ b/code/Common/Assimp.cpp
+@@ -1290,7 +1290,7 @@
+ #   endif
+ 
+ #   define STB_IMAGE_IMPLEMENTATION
+-#   include "stb/stb_image.h"
++#   include "stb_image.h"
+ 
+ #   if _MSC_VER
+ #       pragma warning(pop)
 --- a/code/Common/BaseImporter.cpp
 +++ b/code/Common/BaseImporter.cpp
-@@ -330,7 +330,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
+@@ -330,7 +330,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #include <utf8.h>
  #else
@@ -177,7 +237,7 @@
  // ------------------------------------------------------------------------------------------------
 --- a/code/Common/ZipArchiveIOSystem.cpp
 +++ b/code/Common/ZipArchiveIOSystem.cpp
-@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@@ -54,7 +54,7 @@
  #ifdef ASSIMP_USE_HUNTER
  #    include <minizip/unzip.h>
  #else
@@ -186,3 +246,14 @@
  #endif
  
  namespace Assimp {
+--- a/code/Pbrt/PbrtExporter.cpp
++++ b/code/Pbrt/PbrtExporter.cpp
+@@ -83,7 +83,7 @@
+ #include <sstream>
+ #include <string>
+ 
+-#include "stb/stb_image.h"
++#include "stb_image.h"
+ 
+ using namespace Assimp;
+ 

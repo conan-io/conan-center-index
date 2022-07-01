@@ -8,3 +8,6 @@ sources:
   "0.60":
     url: "https://github.com/rbock/sqlpp11/archive/0.60.zip"
     sha256: 27ccc750d5eb8f234445e26e41d53d72c9df329eb2b30d64dbf21078ae57c52c
+  "0.61":
+    url: "https://github.com/rbock/sqlpp11/archive/0.61.tar.gz"
+    sha256: "d5a95e28ae93930f7701f517b1342ac14bcf33a9b1c5b5f0dff6aea5e315bb50"

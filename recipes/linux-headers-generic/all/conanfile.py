@@ -12,7 +12,7 @@ class LinuxHeadersGenericConan(ConanFile):
     license = "GPL-2.0-only"
     description = "Generic Linux kernel headers"
     topics = ("linux", "headers", "generic")
-    settings = "os", "arch"
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
@@ -20,6 +20,8 @@ class LinuxHeadersGenericConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.os
+        del self.info.settings.build_type
+        del self.info.settings.compiler
 
     def validate(self):
         if self.settings.os != "Linux":

@@ -1,13 +1,13 @@
 from conans import ConanFile, tools, CMake
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class Libheif(ConanFile):
     name = "libheif"
     description = "libheif is an HEIF and AVIF file format decoder and encoder."
-    topics = ("conan", "libheif", "heif", "codec", "video")
+    topics = ("libheif", "heif", "codec", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/strukturag/libheif"
     license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
@@ -28,13 +28,17 @@ class Libheif(ConanFile):
         "with_libaomav1": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,9 +57,9 @@ class Libheif(ConanFile):
         if self.options.with_x265:
             self.requires("libx265/3.4")
         if self.options.with_libaomav1:
-            self.requires("libaom-av1/3.1.1")
+            self.requires("libaom-av1/3.1.2")
         if self.options.get_safe("with_dav1d"):
-            self.requires("dav1d/0.8.1")
+            self.requires("dav1d/0.9.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -86,6 +90,7 @@ class Libheif(ConanFile):
 
         # Workaround for cross-build to at least iOS/tvOS/watchOS,
         # when dependencies are found with find_path() and find_library()
+        # TODO: won't be necessary with CMakeToolchain (https://github.com/conan-io/conan/pull/10186)
         if tools.cross_building(self):
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
@@ -106,13 +111,21 @@ class Libheif(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "libheif"
-        self.cpp_info.names["cmake_find_package_multi"] = "libheif"
-        self.cpp_info.names["pkg_config"] = "libheif"
+        self.cpp_info.set_property("cmake_file_name", "libheif")
+        self.cpp_info.set_property("cmake_target_name", "libheif::heif")
+        self.cpp_info.set_property("pkg_config_name", "libheif")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["heif"].libs = ["heif"]
+        if not self.options.shared:
+            self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["heif"].system_libs.extend(["m", "pthread"])
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["heif"].system_libs.append(tools.stdcpp_library(self))
 
-        self.cpp_info.components["heif"].names["cmake_find_package"] = "heif"
-        self.cpp_info.components["heif"].names["cmake_find_package_multi"] = "heif"
-        self.cpp_info.components["heif"].names["pkg_config"] = "libheif"
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["heif"].set_property("cmake_target_name", "libheif::heif")
+        self.cpp_info.components["heif"].set_property("pkg_config_name", "libheif")
         self.cpp_info.components["heif"].requires = ["libde265::libde265"]
         if self.options.with_x265:
             self.cpp_info.components["heif"].requires.append("libx265::libx265")
@@ -120,12 +133,3 @@ class Libheif(ConanFile):
             self.cpp_info.components["heif"].requires.append("libaom-av1::libaom-av1")
         if self.options.get_safe("with_dav1d"):
             self.cpp_info.components["heif"].requires.append("dav1d::dav1d")
-
-        self.cpp_info.components["heif"].libs = ["heif"]
-
-        if not self.options.shared:
-            self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["heif"].system_libs = ["m", "pthread"]
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.components["heif"].system_libs.append(tools.stdcpp_library(self))

@@ -7,7 +7,7 @@ required_conan_version = ">=1.36.0"
 class WaylandConan(ConanFile):
     name = "wayland"
     description = "Wayland is a project to define a protocol for a compositor to talk to its clients as well as a library implementation of the protocol"
-    topics = ("conan", "wayland")
+    topics = ("protocol", "compositor", "display")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
     license = "MIT"
@@ -51,11 +51,11 @@ class WaylandConan(ConanFile):
         if self.options.enable_libraries:
             self.requires("libffi/3.4.2")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.9.12")
-        self.requires("expat/2.4.1")
+            self.requires("libxml2/2.9.14")
+        self.requires("expat/2.4.8")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.60.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -86,7 +86,8 @@ class WaylandConan(ConanFile):
     def build(self):
         self._patch_sources()
         meson = self._configure_meson()
-        meson.build()
+        with tools.run_environment(self):
+            meson.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)

@@ -1,4 +1,7 @@
 sources:
+  "2.3.4":
+    url: "https://github.com/team-charls/charls/archive/2.3.4.tar.gz"
+    sha256: "28e895a6e22daee76c24cf4d36c62bb20fd60fad0c9cfefc2eb8fa9b6045ae84"
   "2.2.0":
     url: "https://github.com/team-charls/charls/archive/2.2.0.tar.gz"
     sha256: "e1d7dd70cd9d6d46de5abbf22278dc8169707995a21e8bf705f5746c04c76891"

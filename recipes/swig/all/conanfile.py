@@ -86,6 +86,8 @@ class SwigConan(ConanFile):
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
+        if self.settings.compiler == 'gcc':
+            args.append("LIBS=-ldl")
 
         host, build = None, None
 
@@ -108,7 +110,7 @@ class SwigConan(ConanFile):
             autotools.libs.extend(["mingwex", "ssp"])
 
         autotools.configure(args=args, configure_dir=self._source_subfolder,
-                                  host=host, build=build)
+                            host=host, build=build)
         return autotools
 
     def _patch_sources(self):

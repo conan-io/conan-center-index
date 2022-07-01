@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.43.0"
+
+
 class SobjectizerConan(ConanFile):
     name = "sobjectizer"
     license = "BSD-3-Clause"
@@ -13,12 +16,19 @@ class SobjectizerConan(ConanFile):
             "by using Actor, Publish-Subscribe and CSP models."
     )
     topics = ("concurrency", "actor-framework", "actors", "agents", "actor-model", "publish-subscribe", "CSP")
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -34,8 +44,12 @@ class SobjectizerConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         minimal_cpp_standard = "17"
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "7",
@@ -54,8 +68,6 @@ class SobjectizerConan(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-        if self.options.shared:
-            del self.options.fPIC
 
     def _configure_cmake(self):
         if self._cmake:
@@ -74,9 +86,8 @@ class SobjectizerConan(ConanFile):
         cmake.build()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-v." + self.version
-        os.rename(extracted_dir, self._source_subfolder )
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         cmake = self._configure_cmake()
@@ -85,14 +96,19 @@ class SobjectizerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "sobjectizer"
-        self.cpp_info.names["cmake_find_package_multi"] = "sobjectizer"
         cmake_target = "SharedLib" if self.options.shared else "StaticLib"
-        self.cpp_info.components["_sobjectizer"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_sobjectizer"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.set_property("cmake_file_name", "sobjectizer")
+        self.cpp_info.set_property("cmake_target_name", "sobjectizer::{}".format(cmake_target))
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_sobjectizer"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.components["_sobjectizer"].system_libs.append("pthread")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_sobjectizer"].system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.components["_sobjectizer"].defines.append("SO_5_STATIC_LIB")
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "sobjectizer"
+        self.cpp_info.names["cmake_find_package_multi"] = "sobjectizer"
+        self.cpp_info.components["_sobjectizer"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_sobjectizer"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_sobjectizer"].set_property("cmake_target_name", "sobjectizer::{}".format(cmake_target))

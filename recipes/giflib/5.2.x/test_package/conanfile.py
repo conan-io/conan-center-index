@@ -14,7 +14,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            self.run("{} testimg.gif".format(bin_path), run_environment=True)
-            assert os.path.isfile("testimg.gif")
-            self.run("gif2rgb -o testimg.rgb testimg.gif".format(bin_path), run_environment=True)
-            assert os.path.isfile("testimg.rgb.R")
+            if self.options["giflib"].utils:
+                self.run("{} testimg.gif".format(bin_path), run_environment=True)
+                assert os.path.isfile("testimg.gif")
+                self.run("gif2rgb -o testimg.rgb testimg.gif".format(bin_path), run_environment=True)
+                assert os.path.isfile("testimg.rgb.R")

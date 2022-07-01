@@ -1,0 +1,22 @@
+--- a/src/mfast/sqlite3/aggregate_inserter.cpp
++++ b/src/mfast/sqlite3/aggregate_inserter.cpp
+@@ -35,7 +35,7 @@ namespace mfast
+       if (primary_key.present())
+         return primary_key;
+       else {
+-        static const int64_field_instruction rowid_instruction(0,operator_none,presence_optional,0,"","",0, int_value_storage<int64_t>());
++        static const int64_field_instruction rowid_instruction(operator_none,presence_optional,0,"","",0, int_value_storage<int64_t>());
+         field_cref rowid_cref(&this->storage_, &rowid_instruction);
+         this->storage_.set(rowid);
+         this->storage_.present(true);
+--- a/src/mfast/sqlite3/third_pass_visitor.cpp
++++ b/src/mfast/sqlite3/third_pass_visitor.cpp
+@@ -12,7 +12,7 @@ namespace mfast
+ 
+       if (primary_key_.absent()) {
+         // the table has no primary key, use the last rowid instead
+-        static const int64_field_instruction rowid_instruction(0,operator_none,presence_optional,0,"","",0, int_value_storage<int64_t>());
++        static const int64_field_instruction rowid_instruction(operator_none,presence_optional,0,"","",0, int_value_storage<int64_t>());
+ 
+         field_cref rowid_cref(&this->key_storage_, &rowid_instruction);
+         this->key_storage_.set(rowid);

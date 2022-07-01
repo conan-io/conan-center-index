@@ -12,7 +12,7 @@ class AutoconfConan(ConanFile):
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
     topics = ("autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*"
 
@@ -90,6 +90,9 @@ class AutoconfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)

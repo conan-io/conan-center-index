@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0466e11..0726557 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -90,10 +90,17 @@ else()
+   foreach(spec ${spec_list})
+     if(${spec} STREQUAL "gl")
+       list(APPEND GLAD_HEADERS "${GLAD_INCLUDE_DIRS}/glad/glad.h")
+-      list(APPEND GLAD_SOURCES 
+-        "${GLAD_INCLUDE_DIRS}/glad/glad.h"
+-        "${GLAD_OUT_DIR}/src/glad.c"
+-      )
++      if(GLAD_SPEC STREQUAL "gl")
++        list(APPEND GLAD_SOURCES
++          "${GLAD_OUT_DIR}/src/glad.c"
++          "${GLAD_INCLUDE_DIRS}/glad/glad.h"
++        )
++      else()
++        list(APPEND GLAD_SOURCES
++          "${GLAD_OUT_DIR}/src/glad_${GLAD_SPEC}.c"
++          "${GLAD_INCLUDE_DIRS}/glad/glad_${GLAD_SPEC}.h"
++        )
++      endif()
+     else()
+       list(APPEND GLAD_HEADERS "${GLAD_INCLUDE_DIRS}/glad/glad_${spec}.h")
+       list(APPEND GLAD_SOURCES 

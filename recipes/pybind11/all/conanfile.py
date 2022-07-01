@@ -1,5 +1,8 @@
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 import os
+import functools
+
 
 required_conan_version = ">=1.33.0"
 
@@ -16,24 +19,26 @@ class PyBind11Conan(ConanFile):
     generators = "cmake"
     no_copy_source = True
 
-    _source_subfolder = "source_subfolder"
 
-    _cmake = None
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version),
-                  self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    def validate(self):
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "11.0":
+            raise ConanInvalidConfiguration("OSX support is bugged. Check https://github.com/pybind/pybind11/issues/3081")
+
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PYBIND11_INSTALL"] = True
-        self._cmake.definitions["PYBIND11_TEST"] = False
-        self._cmake.definitions["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["PYBIND11_INSTALL"] = True
+        cmake.definitions["PYBIND11_TEST"] = False
+        cmake.definitions["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()

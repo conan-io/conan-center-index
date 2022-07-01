@@ -1,10 +1,19 @@
-#include "daw/utf_range/daw_utf_range.h"
+#include "daw/utf8/unchecked.h"
 #include <iostream>
+#include <string>
 
 int main() {
-    auto constexpr const rng = daw::range::create_char_range(u8"あいうえお");
+    std::string sample{"あいうえお abcde"};
 
-    std::cout << rng.size() << std::endl;
+    auto first = daw::utf8::unchecked::iterator{sample.begin()};
+    auto last = daw::utf8::unchecked::iterator{sample.end()};
+
+    int count = 0;
+    for (; first != last; ++first) {
+        ++count;
+    }
+
+    std::cout << count << std::endl;
 
     return 0;
 }

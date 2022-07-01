@@ -4,7 +4,7 @@ import textwrap
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class CharlsConan(ConanFile):
@@ -52,6 +52,7 @@ class CharlsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -62,12 +63,12 @@ class CharlsConan(ConanFile):
                                                                                          self.settings.compiler.version))
 
         # name lookup issue for gcc == 5 in charls/2.2.0
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "5" and tools.Version(self.version) == "2.2.0":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "5" and tools.Version(self.version) >= "2.2.0":
             raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version],
+        tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def build(self):
@@ -110,9 +111,8 @@ class CharlsConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "charls")
         self.cpp_info.set_property("cmake_target_name", "charls")
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
+        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 

@@ -100,7 +100,7 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self):
+        if not tools.cross_building(self, skip_x64_x86=True):
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                     modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"

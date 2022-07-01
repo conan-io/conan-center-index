@@ -1,8 +1,9 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibaomAv1Conan(ConanFile):
@@ -12,6 +13,7 @@ class LibaomAv1Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://aomedia.googlesource.com/aom"
     license = "BSD-2-Clause"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,8 +27,6 @@ class LibaomAv1Conan(ConanFile):
     }
 
     generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/*"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -40,15 +40,20 @@ class LibaomAv1Conan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ("x86", "x86_64"):
+            del self.options.assembly
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.arch not in ("x86", "x86_64"):
-            del self.options.assembly
 
     def build_requirements(self):
         if self.options.get_safe("assembly", False):
@@ -57,7 +62,7 @@ class LibaomAv1Conan(ConanFile):
             self.build_requires("strawberryperl/5.30.0.1")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         # Check compiler version
         compiler = str(self.settings.compiler)
@@ -77,34 +82,31 @@ class LibaomAv1Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder)
+                  destination=self._source_subfolder,
+                  strip_root=tools.Version(self.version) >= "3.3.0")
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_EXAMPLES"] = False
-        self._cmake.definitions["ENABLE_TESTS"] = False
-        self._cmake.definitions["ENABLE_DOCS"] = False
-        self._cmake.definitions["ENABLE_TOOLS"] = False
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_EXAMPLES"] = False
+        cmake.definitions["ENABLE_TESTS"] = False
+        cmake.definitions["ENABLE_DOCS"] = False
+        cmake.definitions["ENABLE_TOOLS"] = False
         if not self.options.get_safe("assembly", False):
             # make non-assembly build
-            self._cmake.definitions["AOM_TARGET_CPU"] = "generic"
+            cmake.definitions["AOM_TARGET_CPU"] = "generic"
         # libyuv is used for examples, tests and non-essential 'dump_obu' tool so it is disabled
         # required to be 1/0 instead of False
-        self._cmake.definitions["CONFIG_LIBYUV"] = 0
+        cmake.definitions["CONFIG_LIBYUV"] = 0
         # webm is not yet packaged
-        self._cmake.definitions["CONFIG_WEBM_IO"] = 0
+        cmake.definitions["CONFIG_WEBM_IO"] = 0
         # required out-of-source build
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -113,13 +115,11 @@ class LibaomAv1Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "aom")
         self.cpp_info.libs = ["aom"]
-        self.cpp_info.names["cmake_find_package"] = "aom"
-        self.cpp_info.names["cmake_find_package_multi"] = "aom"
-        self.cpp_info.names["pkg_config"] = "libaom"
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
+
+        self.cpp_info.names["pkg_config"] = "aom"

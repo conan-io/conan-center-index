@@ -4,6 +4,7 @@ import fnmatch
 import os
 import shutil
 import subprocess
+import errno
 
 try:
     import ctypes
@@ -90,7 +91,7 @@ class MSYS2Conan(ConanFile):
                 out = subprocess.PIPE
                 err = subprocess.STDOUT
             else:
-                out = file(os.devnull, 'w')
+                out = open(os.devnull, 'w')
                 err = subprocess.PIPE
 
             if os.path.exists(taskkill_exe):
@@ -134,7 +135,7 @@ class MSYS2Conan(ConanFile):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
             for package in ['pkgconf']:
-                self.run('bash -l -c "pacman -Rs $(pacman -Qsq %s) --noconfirm"' % package)
+                self.run('bash -l -c "pacman -Rs -d -d $(pacman -Qsq %s) --noconfirm"' % package)
 
         self._kill_pacman()
 
@@ -167,6 +168,7 @@ class MSYS2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
         msys_root = self._msys_dir
         msys_bin = os.path.join(msys_root, "usr", "bin")
@@ -179,3 +181,6 @@ class MSYS2Conan(ConanFile):
 
         self.output.info("Appending PATH env var with : " + msys_bin)
         self.env_info.path.append(msys_bin)
+        
+        self.conf_info["tools.microsoft.bash:subsystem"] = "msys2"
+        self.conf_info["tools.microsoft.bash:path"] = os.path.join(msys_bin, "bash.exe")
