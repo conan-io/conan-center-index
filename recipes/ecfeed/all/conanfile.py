@@ -33,6 +33,8 @@ class EcFeedConan(ConanFile):
             return minimum_versions
         
     def validate(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
+            raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 20)
         minimum_version = self._compilers_minimum_version.get(
