@@ -28,6 +28,7 @@ set_target_properties(arsenalgear PROPERTIES
     PUBLIC_HEADER "${arsenalgear_inc}"
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
+target_compile_features(arsenalgear PUBLIC cxx_std_17)
 
 find_library(LIBM m)
 target_link_libraries(arsenalgear PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
