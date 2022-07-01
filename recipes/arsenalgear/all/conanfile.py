@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 class ArsenalgearConan(ConanFile):
     name = "arsenalgear"
