@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,6 +40,8 @@ set_target_properties(llhttp PROPERTIES PUBLIC_HEADER ${LLHTTP_HEADERS})
+ install(TARGETS llhttp
+         EXPORT llhttp
+         ARCHIVE DESTINATION lib
++        LIBRARY DESTINATION lib
++        RUNTIME DESTINATION bin
+         PUBLIC_HEADER DESTINATION include/
+ )
+ 

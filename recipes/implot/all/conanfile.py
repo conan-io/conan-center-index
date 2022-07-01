@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-import os
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -14,7 +14,6 @@ class ImplotConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    requires = "imgui/1.85"
 
     options = {
         "shared": [True, False],
@@ -24,8 +23,6 @@ class ImplotConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -39,15 +36,21 @@ class ImplotConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if tools.Version(self.version) >= "0.13":
+            self.requires("imgui/1.87")
+        else:
+            self.requires("imgui/1.86")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()

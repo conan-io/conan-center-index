@@ -2,12 +2,13 @@
 +++ bin/aclocal.in
 @@ -1,8 +1,8 @@
 -#!@PERL@ -w
-+#!/usr/bin/perl -w
- # -*- perl -*-
+-# -*- perl -*-
++#!/usr/bin/env perl
++# -*- perl -*- -w
  # @configure_input@
  
 -eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
-+eval 'case $# in 0) exec /usr/bin/perl -S "$0";; *) exec /usr/bin/perl -S "$0" "$@";; esac'
++eval 'case $# in 0) exec /usr/bin/env perl -S "$0";; *) exec /usr/bin/env perl -S "$0" "$@";; esac'
      if 0;
  
  # aclocal - create aclocal.m4 by scanning configure.ac
@@ -15,12 +16,13 @@
 +++ bin/automake.in
 @@ -1,8 +1,8 @@
 -#!@PERL@ -w
-+#!/usr/bin/perl -w
- # -*- perl -*-
+-# -*- perl -*-
++#!/usr/bin/env perl
++# -*- perl -*- -w
  # @configure_input@
  
 -eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
-+eval 'case $# in 0) exec /usr/bin/perl -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
++eval 'case $# in 0) exec /usr/bin/env perl -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
      if 0;
  
  # automake - create Makefile.in from Makefile.am
@@ -31,7 +33,7 @@
  PACKAGE_VERSION = @PACKAGE_VERSION@
  PATH_SEPARATOR = @PATH_SEPARATOR@
 -PERL = @PERL@
-+PERL = /usr/bin/perl
++PERL = /usr/bin/env perl
  RELEASE_YEAR = @RELEASE_YEAR@
  SET_MAKE = @SET_MAKE@
  SHELL = @SHELL@
@@ -42,7 +44,7 @@
  # that automake testsuite, if they are available.
  AWK=${AM_TESTSUITE_AWK-${AWK-'@AWK@'}}
 -PERL=${AM_TESTSUITE_PERL-${PERL-'@PERL@'}}
-+PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/perl'}}
++PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/env perl'}}
  MAKE=${AM_TESTSUITE_MAKE-${MAKE-'make'}}
  YACC=${AM_TESTSUITE_YACC-${YACC-'@YACC@'}}
  LEX=${AM_TESTSUITE_LEX-${LEX-'@LEX@'}}

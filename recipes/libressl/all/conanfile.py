@@ -60,6 +60,12 @@ class LibreSSLConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        if tools.Version(self.version) >= "3.1.1":
+            tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    "cmake_minimum_required (VERSION 3.16.4)",
+                    "cmake_minimum_required (VERSION 3.15.6)"
+            )
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,7 +77,7 @@ class LibreSSLConan(ConanFile):
         self._cmake.definitions["ENABLE_ASM"] = True
         self._cmake.definitions["ENABLE_EXTRATESTS"] = False
         self._cmake.definitions["ENABLE_NC"] = False
-        self._cmake.definitions["OPENSSLDIR"] = "C:/Windows/libressl/ssl" if self.settings.os == "Windows" else "/etc/ssl"
+        self._cmake.definitions["OPENSSLDIR"] = os.path.join(self.package_folder, "res")
         self._cmake.configure()
         return self._cmake
 
@@ -103,6 +109,8 @@ class LibreSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
+            if tools.Version(self.version) >= "3.3.0":
+                self.cpp_info.components["crypto"].system_libs.append("bcrypt")
 
         # SSL
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "LibreSSL::SSL")

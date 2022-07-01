@@ -1,0 +1,4 @@
+sources:
+  "1.7.1":
+    url: "https://github.com/mapbox/protozero/archive/refs/tags/v1.7.1.tar.gz"
+    sha256: "27e0017d5b3ba06d646a3ec6391d5ccc8500db821be480aefd2e4ddc3de5ff99"

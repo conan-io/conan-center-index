@@ -48,11 +48,11 @@ class OpenCVConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return "src"
 
     @property
     def _build_subfolder(self):
-        return "build_subfolder"
+        return "build"
 
     @property
     def _is_msvc(self):
@@ -74,7 +74,7 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_png:
@@ -88,7 +88,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
@@ -104,6 +104,9 @@ class OpenCVConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
+
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+
         # allow to find conan-supplied OpenEXR
         if self.options.with_openexr:
             find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
@@ -135,17 +138,28 @@ class OpenCVConan(ConanFile):
             for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
                 tools.replace_in_file(find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            tools.replace_in_file(cmakelists,
                                 "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
 
         for cascade in ["lbpcascades", "haarcascades"]:
             tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
                                   "share/OpenCV/%s" % cascade, "res/%s" % cascade)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "staticlib", "lib")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
+        tools.replace_in_file(cmakelists, "staticlib", "lib")
+        tools.replace_in_file(cmakelists, "ANDROID OR NOT UNIX", "FALSE")
+        tools.replace_in_file(cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
+
+        # relocatable shared lib on macOS
+        tools.replace_in_file(cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
+        # Cleanup RPATH
+        tools.replace_in_file(cmakelists,
+                              "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
+                              "")
+        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+
+        # Do not try to detect Python
+        tools.replace_in_file(cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -183,6 +197,8 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
         self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
+
+        self._cmake.definitions["ENABLE_CCACHE"] = False
 
         if self._is_msvc:
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
@@ -246,7 +262,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def tbb():
-            return ["tbb::tbb"] if self.options.with_tbb else []
+            return ["onetbb::onetbb"] if self.options.with_tbb else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 project(cspice C)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 include(GNUInstallDirs)
 

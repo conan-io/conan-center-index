@@ -39,7 +39,7 @@ This is a list of shortcuts to some interesting topics:
 * :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 * :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
-* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/preparing_recipes_for_conan2.md](docs/preparing_recipes_for_conan2.md).
+* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/v2_migration.md](docs/v2_migration.md).
 
 ### Reporting Issues
 

@@ -40,10 +40,12 @@ class AwsCS3(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.15")
-        self.requires("aws-c-io/0.10.13")
-        self.requires("aws-c-http/0.6.10")
-        self.requires("aws-c-auth/0.6.8")
+        self.requires("aws-c-common/0.6.19")
+        self.requires("aws-c-io/0.10.20")
+        self.requires("aws-c-http/0.6.13")
+        self.requires("aws-c-auth/0.6.11")
+        if tools.Version(self.version) >= "0.1.36":
+            self.requires("aws-checksums/0.1.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -86,3 +88,5 @@ class AwsCS3(ConanFile):
             "aws-c-http::aws-c-http-lib",
             "aws-c-auth::aws-c-auth-lib"
         ]
+        if tools.Version(self.version) >= "0.1.36":
+            self.cpp_info.components["aws-c-s3-lib"].requires.append("aws-checksums::aws-checksums-lib")

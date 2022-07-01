@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.29.1"
 
@@ -159,11 +160,9 @@ class OpenSceneGraphConanFile(ConanFile):
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
+    @functools.lru_cache(1)
     def _configured_cmake(self):
-        if hasattr(self, "_cmake"):
-            return self._cmake
-
-        self._cmake = cmake = CMake(self)
+        cmake = CMake(self)
 
         cmake.definitions["USE_3RDPARTY_BIN"] = False
 

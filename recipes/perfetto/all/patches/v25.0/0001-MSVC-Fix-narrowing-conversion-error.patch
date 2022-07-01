@@ -1,0 +1,13 @@
+diff --git a/sdk/perfetto.h b/sdk/perfetto.h
+index 677e0e2..df0de12 100644
+--- a/sdk/perfetto.h
++++ b/sdk/perfetto.h
+@@ -16140,7 +16140,7 @@ template <>
+ struct TraceTimestampTraits<uint64_t> {
+   static inline TraceTimestamp ConvertTimestampToTraceTimeNs(
+       const uint64_t& timestamp) {
+-    return {internal::TrackEventInternal::GetClockId(), timestamp};
++    return {static_cast<uint32_t>(internal::TrackEventInternal::GetClockId()), timestamp};
+   }
+ };
+

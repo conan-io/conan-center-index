@@ -3,6 +3,8 @@
 
 #include <X11/Xauth.h>
 
+#include <X11/SM/SMlib.h>
+
 #include <stdio.h>
 
 int main() {
@@ -20,4 +22,5 @@ int main() {
     }
 
     XCloseDisplay(display);
+    SmcSetErrorHandler(NULL);
 }

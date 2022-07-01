@@ -33,7 +33,7 @@ class CMakeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1o")
 
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
@@ -118,3 +118,5 @@ class CMakeConan(ConanFile):
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
+            
+        self.cpp_info.includedirs = []

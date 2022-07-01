@@ -1,0 +1,196 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,9 +69,11 @@ include_directories ("${PROJECT_BINARY_DIR}"
+ ## Setting up Boost Library
+ ################################
+ 
+-find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
+-include_directories(${Boost_INCLUDE_DIR})
+-link_directories(${Boost_LIBRARY_DIRS})
++find_package(Boost REQUIRED system filesystem)
++find_package(tinyxml2 REQUIRED CONFIG)
++if(BUILD_SQLITE3)
++    find_package(SQLite3 REQUIRED)
++endif()
+ 
+ ################################################################################
+ 
+@@ -95,7 +97,6 @@ set(MFAST_LIBRARY CACHE INTERNAL "")
+ 
+ # add the automatically determined parts of the RPATH
+ # which point to directories outside the build tree to the install RPATH
+-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+ 
+ ############################################################################
+@@ -174,9 +175,7 @@ endmacro()
+ # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
+ # cause another cmake executable to run. The same process will walk through
+ # the project's entire directory structure.
+-enable_testing()
+ 
+-add_subdirectory (tests)
+ 
+ if (BUILD_SHARED_LIBS)
+   set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
+@@ -185,7 +184,6 @@ else()
+   set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
+ endif()
+ 
+-add_subdirectory (examples)
+ 
+ 
+ # Setting up dist target
+--- a/src/fast_type_gen/CMakeLists.txt
++++ b/src/fast_type_gen/CMakeLists.txt
+@@ -11,9 +11,10 @@ add_executable (fast_type_gen
+ target_link_libraries (fast_type_gen
+                        mfast_xml_parser_static
+                        mfast_static
+-                       ${Boost_SYSTEM_LIBRARY}
+-                       ${Boost_FILESYSTEM_LIBRARY})
++                       Boost::headers
++                       Boost::system
++                       Boost::filesystem)
+ 
+ install(TARGETS fast_type_gen
+         EXPORT  mFASTTargets
+-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
+\ No newline at end of file
++        DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
+\ No newline at end of file
+--- a/src/mfast/CMakeLists.txt
++++ b/src/mfast/CMakeLists.txt
+@@ -10,6 +10,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_headers})
+ 
+ add_library(mfast_static STATIC ${mfast_SRCS})
++target_link_libraries(mfast_static Boost::headers)
+ 
+ 
+ if (UNIX)
+@@ -25,6 +26,7 @@ install(TARGETS mfast_static
+ 
+ if (BUILD_SHARED_LIBS)
+   add_library(mfast SHARED ${mfast_SRCS})
++  target_link_libraries(mfast Boost::headers)
+   # the add_dependencies is necessary for CMake 2.6.4. Otherwise, the shared
+   # library would be built before the static library, and the shared library
+   # would be deleted when the static library is built. For CMake 2.8.x, there
+@@ -38,6 +40,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS mfast
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   SET(MFAST_LIBRARY mfast CACHE INTERNAL "mFast Library name")
+--- a/src/mfast/coder/CMakeLists.txt
++++ b/src/mfast/coder/CMakeLists.txt
+@@ -9,6 +9,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(mfast_coder_SRCS ${sources} ${headers})
+ 
+ add_library(mfast_coder_static STATIC ${mfast_coder_SRCS})
++target_link_libraries(mfast_coder_static mfast_static Boost::headers)
+ 
+ if (UNIX)
+ 	set_target_properties(mfast_coder_static PROPERTIES OUTPUT_NAME mfast_coder)
+@@ -32,13 +33,14 @@ if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+ 	set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+   endif()
+-  target_link_libraries(mfast_coder mfast)
++  target_link_libraries(mfast_coder mfast Boost::headers)
+   set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+ 
+ 
+   install(TARGETS mfast_coder
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   SET(MFAST_DYNAMIC_COMPONENTS ${MFAST_DYNAMIC_COMPONENTS} coder CACHE INTERNAL "")
+--- a/src/mfast/json/CMakeLists.txt
++++ b/src/mfast/json/CMakeLists.txt
+@@ -9,6 +9,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(mfast_json_SRCS  ${sources} ${headers})
+ 
+ add_library(mfast_json_static STATIC ${mfast_json_SRCS})
++target_link_libraries(mfast_json_static mfast_static Boost::headers)
+ 
+ if (UNIX)
+ 	set_target_properties(mfast_json_static PROPERTIES OUTPUT_NAME mfast_json)
+@@ -32,12 +33,13 @@ if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+ 	set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+   endif()
+-  target_link_libraries(mfast_json mfast)
++  target_link_libraries(mfast_json mfast Boost::headers)
+   set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+ 
+   install(TARGETS mfast_json
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   SET(MFAST_DYNAMIC_COMPONENTS ${MFAST_DYNAMIC_COMPONENTS} json CACHE INTERNAL "")
+--- a/src/mfast/sqlite3/CMakeLists.txt
++++ b/src/mfast/sqlite3/CMakeLists.txt
+@@ -6,6 +6,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(mfast_sqlite3_SRCS  ${sources} ${headers})
+ 
+ add_library(mfast_sqlite3_static STATIC ${mfast_sqlite3_SRCS})
++target_link_libraries(mfast_sqlite3_static mfast_static Boost::headers SQLite::SQLite3)
+ 
+ if (UNIX)
+ 	set_target_properties(mfast_sqlite3_static PROPERTIES OUTPUT_NAME mfast_sqlite3)
+@@ -30,13 +31,14 @@ if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+ 	set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+   endif()
+-  target_link_libraries(mfast_sqlite3 mfast sqlite3)
++  target_link_libraries(mfast_sqlite3 mfast Boost::headers SQLite::SQLite3)
+   set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+ 
+ 
+   install(TARGETS mfast_sqlite3
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+           OPTIONAL)
+ 
+--- a/src/mfast/xml_parser/CMakeLists.txt
++++ b/src/mfast/xml_parser/CMakeLists.txt
+@@ -6,11 +6,11 @@ file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current
+ 
+ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ 
+-include_directories("${CMAKE_SOURCE_DIR}/tinyxml2")
+ 
+-set(mfast_xml_parser_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../../../tinyxml2/tinyxml2.cpp ${sources} ${headers})
++set(mfast_xml_parser_SRCS ${sources} ${headers})
+ 
+ add_library(mfast_xml_parser_static STATIC ${mfast_xml_parser_SRCS})
++target_link_libraries(mfast_xml_parser_static mfast_static Boost::headers tinyxml2::tinyxml2)
+ 
+ if (UNIX)
+ 	set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
+@@ -34,13 +34,14 @@ if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+ 	set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+   endif()
+-  target_link_libraries(mfast_xml_parser mfast)
++  target_link_libraries(mfast_xml_parser mfast Boost::headers tinyxml2::tinyxml2)
+   set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+ 
+ 
+   install(TARGETS mfast_xml_parser
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   SET(MFAST_DYNAMIC_COMPONENTS ${MFAST_DYNAMIC_COMPONENTS} coder CACHE INTERNAL "")

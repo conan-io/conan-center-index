@@ -1,15 +1,17 @@
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, tools
+from conan.tools.microsoft import is_msvc
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class TomlPlusPlusConan(ConanFile):
     name = "tomlplusplus"
-    homepage = "https://github.com/marzer/tomlplusplus"
     description = "Header-only TOML config file parser and serializer for modern C++."
-    topics = ("conan", "tomlformoderncpp", "toml++", "tomlplusplus",
+    topics = ("tomlformoderncpp", "toml++", "tomlplusplus",
               "toml", "json", "header-only", "single-header")
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/marzer/tomlplusplus"
     license = "MIT"
     settings = ("compiler",)
     options = {"multiple_headers": [True, False, "deprecated"]}
@@ -27,11 +29,14 @@ class TomlPlusPlusConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" else "15",
+            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" or tools.Version(self.version) >= "3.0.0" else "15",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
         }
+
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         if self.options.multiple_headers != "deprecated":
@@ -52,9 +57,8 @@ class TomlPlusPlusConan(ConanFile):
         if self.settings.compiler == "apple-clang" and tools.Version(self.version) < "2.3.0":
             raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
                     self.settings.compiler, self.settings.compiler.version))
-        
-        if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.version) == "2.1.0":
+
+        if is_msvc(self) and tools.Version(self.version) == "2.1.0":
                 raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
                         self.settings.compiler, self.settings.compiler.version))
 
@@ -65,7 +69,5 @@ class TomlPlusPlusConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.h**", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="*.inl", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy(pattern="toml.hpp", dst="include", src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()

@@ -40,7 +40,7 @@ class AsyncplusplusConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
@@ -63,6 +63,8 @@ class AsyncplusplusConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"Async++": "Async++::Async++"}
@@ -81,26 +83,20 @@ class AsyncplusplusConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Async++")
         self.cpp_info.set_property("cmake_target_name", "Async++")
-        self.cpp_info.names["cmake_find_package"] = "Async++"
-        self.cpp_info.names["cmake_find_package_multi"] = "Async++"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         self.cpp_info.libs = ["async++"]
         if not self.options.shared:
             self.cpp_info.defines = ["LIBASYNC_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "Async++"
+        self.cpp_info.names["cmake_find_package_multi"] = "Async++"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

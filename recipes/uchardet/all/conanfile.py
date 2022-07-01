@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -26,7 +27,6 @@ class UchardetConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -36,8 +36,12 @@ class UchardetConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self._settings_build not in ("x86", "x86_64"):
             del self.options.check_sse2
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -65,15 +69,14 @@ class UchardetConan(ConanFile):
             "add_subdirectory(test)",
             "#add_subdirectory(test)")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CHECK_SSE2"] = self.options.get_safe("check_sse2", False)
-        self._cmake.definitions["BUILD_BINARY"] = False
-        self._cmake.definitions["BUILD_STATIC"] = False  # disable building static libraries when self.options.shared is True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["CHECK_SSE2"] = self.options.get_safe("check_sse2", False)
+        cmake.definitions["BUILD_BINARY"] = False
+        cmake.definitions["BUILD_STATIC"] = False  # disable building static libraries when self.options.shared is True
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -88,6 +91,10 @@ class UchardetConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "uchardet")
+        self.cpp_info.set_property("cmake_target_name", "uchardet")
+        self.cpp_info.set_property("pkg_config_name", "libuchardet")
+
         self.cpp_info.names["cmake_find_package"] = "uchardet"
         self.cpp_info.names["cmake_find_package_multi"] = "uchardet"
         self.cpp_info.names["pkgconfig"] = "libuchardet"

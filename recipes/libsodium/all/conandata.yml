@@ -1,8 +1,16 @@
+# To update the version on CCI, add a new cci.date entry from the stable branch:
+# https://github.com/jedisct1/libsodium/commits/stable
 sources:
   "1.0.18":
     url: "https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz"
     sha256: "6f504490b342a4f8a4c4a02fc9b866cbef8622d5df4e5452b46be121e46636c1"
+  "cci.20220430":
+    url: "https://github.com/jedisct1/libsodium/archive/78b6f57493a02a70fca44e5ef3f9d7d1cae9029f.tar.gz"
+    sha256: "5274b09894c0a7d6676325277cb2e278f45e1e5e077bae4bd8778aba4d6d40da"
 patches:
   "1.0.18":
+    - patch_file: "patches/0001-1.0.18-msvc_props.patch"
+      base_path: "source_subfolder"
+  "cci.20220430":
     - patch_file: "patches/0001-1.0.18-msvc_props.patch"
       base_path: "source_subfolder"

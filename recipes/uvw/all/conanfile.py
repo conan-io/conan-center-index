@@ -4,21 +4,15 @@ import re
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class UvwConan(ConanFile):
     name = "uvw"
+    description = "Header-only, event based, tiny and easy to use libuv wrapper in modern C++."
+    topics = ("uvw", "libuv", "io", "networking", "header-only",)
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skypjack/uvw"
-    license = "MIT"
-    description = "Header-only, event based, tiny and easy to use libuv wrapper in modern C++."
-    topics = (
-        "conan",
-        "uvw",
-        "libuv",
-        "io",
-        "networking",
-        "header-only",
-    )
     no_copy_source = True
     settings = "compiler"
 
@@ -44,7 +38,10 @@ class UvwConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         if not self._supported_compiler:
-            raise ConanInvalidConfiguration("uvw requires C++17. {} {} does not support it.".format(str(self.settings.compiler), self.settings.compiler.version))
+            raise ConanInvalidConfiguration("uvw requires C++17. {} {} does not support it.".format(
+                str(self.settings.compiler),
+                self.settings.compiler.version)
+            )
 
     @property
     def _required_EXACT_libuv_version(self):
@@ -56,15 +53,17 @@ class UvwConan(ConanFile):
 
     def requirements(self):
         libuv_version = self._required_EXACT_libuv_version
-        self.requires("libuv/{}.{}.0".format(libuv_version.major, libuv_version.minor))
+        revision = 0
+        if libuv_version.major == "1" and libuv_version.minor == "44":
+            revision = 1
+        self.requires("libuv/{}.{}.{}".format(libuv_version.major, libuv_version.minor, revision))
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        archive_name = glob.glob("{}-{}_libuv*".format(self.name, self.version))[0]
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "src"))
@@ -80,4 +79,7 @@ class UvwConan(ConanFile):
         tuple_current = (current_version.major, current_version.minor)
 
         if tuple_exact != tuple_current:
-            raise ConanException("This version of uvw requires an exact libuv version as dependency: {}.{}".format(required_version.major, required_version.minor))
+            raise ConanException("This version of uvw requires an exact libuv version as dependency: {}.{}".format(
+                    required_version.major,
+                    required_version.minor)
+                )

@@ -1,5 +1,8 @@
+from conan.tools.files import rename
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import textwrap
 
@@ -21,6 +24,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": [True, False],
         "with_rtti": [True, False],
         "lite": [True, False],
+        "debug_suffix": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,12 +32,11 @@ class ProtobufConan(ConanFile):
         "with_zlib": True,
         "with_rtti": True,
         "lite": False,
+        "debug_suffix": True,
     }
 
     short_paths = True
-
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -42,6 +45,14 @@ class ProtobufConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == 'clang' and self.settings.os == 'Windows'
 
     @property
     def _is_clang_x86(self):
@@ -68,7 +79,7 @@ class ProtobufConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def validate(self):
         if self.options.shared and str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
@@ -96,21 +107,28 @@ class ProtobufConan(ConanFile):
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake", "protobuf")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
-            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-            self._cmake.definitions["protobuf_BUILD_TESTS"] = False
-            self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
-            if tools.Version(self.version) >= "3.14.0":
-                self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
-            if self._can_disable_rtti:
-                self._cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
-            if self.settings.compiler.get_safe("runtime"):
-                self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime) in ["MT", "MTd", "static"]
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
+        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        cmake.definitions["protobuf_BUILD_TESTS"] = False
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+        if not self.options.debug_suffix:
+            cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
+        if tools.Version(self.version) >= "3.14.0":
+            cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
+        if self._can_disable_rtti:
+            cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
+        if self._is_msvc or self._is_clang_cl:
+            runtime = msvc_runtime_flag(self)
+            if not runtime:
+                runtime = self.settings.get_safe("compiler.runtime")
+            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+        if tools.Version(self.version) < "3.18.0" and self._is_clang_cl:
+            cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -162,9 +180,10 @@ class ProtobufConan(ConanFile):
                  "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
+            cmd_str = "COMMAND  protobuf::protoc" if tools.Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
             tools.replace_in_file(
                 protobuf_config_cmake,
-                "COMMAND  protobuf::protoc",
+                cmd_str,
                 "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
             )
 
@@ -182,6 +201,13 @@ class ProtobufConan(ConanFile):
             "endif()",
         )
 
+        # https://github.com/protocolbuffers/protobuf/issues/9916
+        # it will be solved in protobuf 3.21.0
+        if tools.Version(self.version) == "3.20.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
+                "#elif PROTOBUF_GNUC_MIN(12, 0)",
+                "#elif PROTOBUF_GNUC_MIN(12, 2)")
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -195,7 +221,7 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
-        tools.rename(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
+        rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                      os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
@@ -215,8 +241,8 @@ class ProtobufConan(ConanFile):
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
-        lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
-        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
+        lib_prefix = "lib" if (self._is_msvc or self._is_clang_cl) else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")

@@ -1,0 +1,11 @@
+--- a/build/platform-darwin.mk
++++ b/build/platform-darwin.mk
+@@ -7,7 +7,7 @@ CURRENT_VERSION := 2.1.1
+ COMPATIBILITY_VERSION := 2.1.0
+ SHLDFLAGS = -dynamiclib -twolevel_namespace -undefined dynamic_lookup \
+ 	-fno-common -headerpad_max_install_names -install_name \
+-	$(SHAREDLIB_DIR)/$(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXMAJORVER)
++	@rpath/$(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXMAJORVER)
+ SHARED = -dynamiclib
+ SHARED += -current_version $(CURRENT_VERSION) -compatibility_version $(COMPATIBILITY_VERSION)
+ CFLAGS += -Wall -fPIC -MMD -MP -fstack-protector-all

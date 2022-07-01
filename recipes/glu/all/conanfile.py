@@ -1,13 +1,12 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException
-import os
 
 
 class SysConfigGLUConan(ConanFile):
     name = "glu"
     version = "system"
     description = "cross-platform virtual conan package for the GLU support"
-    topics = ("conan", "opengl", "glu")
+    topics = ("opengl", "glu")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
@@ -24,7 +23,7 @@ class SysConfigGLUConan(ConanFile):
             elif tools.os_info.with_pacman:
                 packages = ["glu"]
             elif tools.os_info.with_zypper:
-                packages = ["Mesa-libGLU-devel"]
+                packages = ["glu-devel"]
             else:
                 self.output.warn("Don't know how to install GLU for your distro")
         if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":

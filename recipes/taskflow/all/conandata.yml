@@ -1,31 +1,28 @@
 sources:
-  "2.2.0":
-    url: "https://github.com/taskflow/taskflow/archive/v2.2.0.tar.gz"
-    sha256: "A8AD8C94CEEAC0BC18D8429F877E10A2AF2CD44CD9DC420D9751E69F48FF85D1"
-  "2.4.0":
-    url: "https://github.com/taskflow/taskflow/archive/v2.4.0.tar.gz"
-    sha256: "1F6CC854DD579396CA22AE86014CBF13DD90205E7C9438E2B6B2FDDACA99668C"
-  "2.5.0":
-    url: "https://github.com/taskflow/taskflow/archive/v2.5.0.tar.gz"
-    sha256: "B7016EE3486458AE401D521EA6BC0403DDE975828038B9734621A6A325ACAC1A"
-  "2.6.0":
-    url: "https://github.com/taskflow/taskflow/archive/v2.6.0.tar.gz"
-    sha256: "2F511F4291653D759AF12A7854BABCEBF57CFBB8B49BF6CD3EB0DD98A1A4039C"
-  "2.7.0":
-    url: "https://github.com/taskflow/taskflow/archive/v2.7.0.tar.gz"
-    sha256: "BC2227DCABEC86ABEBA1FEE56BB357D9D3C0EF0184F7C2275D7008E8758DFC3E"
-  "3.0.0":
-    url: "https://github.com/taskflow/taskflow/archive/v3.0.0.tar.gz"
-    sha256: "553C88A6E56E115D29AC1520B8A0FEA4557A5FCDA1AF1427BD3BA454926D03A2"
-  "3.1.0":
-    url: "https://github.com/taskflow/taskflow/archive/v3.1.0.tar.gz"
-    sha256: "B83E9A78C254D831B8401D0F8A766E3C5B60D8D20BE5AF6E2D2FAD4AA4A8B980"
-  "3.2.0":
-    url: "https://github.com/taskflow/taskflow/archive/v3.2.0.tar.gz"
-    sha256: "26c37a494789fedc5de8d1f8452dc8a7774a220d02c14d5b19efe0dfe0359c0c"
+  "3.4.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.4.0.tar.gz"
+    sha256: "8f449137d3f642b43e905aeacdf1d7c5365037d5e1586103ed4f459f87cecf89"
   "3.3.0":
     url: "https://github.com/taskflow/taskflow/archive/v3.3.0.tar.gz"
     sha256: "66b891f706ba99a5ca5ed239d520ad6943ebe94728d1c89e07a939615a6488ef"
+  "3.2.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.2.0.tar.gz"
+    sha256: "26c37a494789fedc5de8d1f8452dc8a7774a220d02c14d5b19efe0dfe0359c0c"
+  "3.1.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.1.0.tar.gz"
+    sha256: "B83E9A78C254D831B8401D0F8A766E3C5B60D8D20BE5AF6E2D2FAD4AA4A8B980"
+  "3.0.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.0.0.tar.gz"
+    sha256: "553C88A6E56E115D29AC1520B8A0FEA4557A5FCDA1AF1427BD3BA454926D03A2"
+  "2.7.0":
+    url: "https://github.com/taskflow/taskflow/archive/v2.7.0.tar.gz"
+    sha256: "BC2227DCABEC86ABEBA1FEE56BB357D9D3C0EF0184F7C2275D7008E8758DFC3E"
+  "2.6.0":
+    url: "https://github.com/taskflow/taskflow/archive/v2.6.0.tar.gz"
+    sha256: "2F511F4291653D759AF12A7854BABCEBF57CFBB8B49BF6CD3EB0DD98A1A4039C"
+  "2.5.0":
+    url: "https://github.com/taskflow/taskflow/archive/v2.5.0.tar.gz"
+    sha256: "B7016EE3486458AE401D521EA6BC0403DDE975828038B9734621A6A325ACAC1A"
 patches:
   "3.3.0":
     - base_path: "source_subfolder"

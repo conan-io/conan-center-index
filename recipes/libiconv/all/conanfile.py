@@ -1,19 +1,20 @@
 from conan.tools.files import rename
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
+import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibiconvConan(ConanFile):
     name = "libiconv"
     description = "Convert text to and from Unicode"
+    license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
-    topics = ("libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion")
-    license = "LGPL-2.1"
-
+    topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,8 +25,6 @@ class LibiconvConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -35,8 +34,8 @@ class LibiconvConan(ConanFile):
         return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self))
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -66,22 +65,25 @@ class LibiconvConan(ConanFile):
     @contextmanager
     def _build_context(self):
         env_vars = {}
-        if self._is_msvc:
+        if is_msvc(self) or self._is_clang_cl:
+            cc = "cl" if is_msvc(self) else os.environ.get("CC", "clang-cl")
+            cxx = "cl" if is_msvc(self) else os.environ.get("CXX", "clang-cl")
+            lib = "lib" if is_msvc(self) else os.environ.get("AR", "llvm-lib")
             build_aux_path = os.path.join(self.build_folder, self._source_subfolder, "build-aux")
             lt_compile = tools.unix_path(os.path.join(build_aux_path, "compile"))
             lt_ar = tools.unix_path(os.path.join(build_aux_path, "ar-lib"))
             env_vars.update({
-                "CC": "{} cl -nologo".format(lt_compile),
-                "CXX": "{} cl -nologo".format(lt_compile),
+                "CC": "{} {} -nologo".format(lt_compile, cc),
+                "CXX": "{} {} -nologo".format(lt_compile, cxx),
                 "LD": "link",
                 "STRIP": ":",
-                "AR": "{} lib".format(lt_ar),
+                "AR": "{} {}".format(lt_ar, lib),
                 "RANLIB": ":",
                 "NM": "dumpbin -symbols"
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self) or self._is_msvc:
+        if not tools.cross_building(self) or is_msvc(self) or self._is_clang_cl:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
@@ -93,24 +95,23 @@ class LibiconvConan(ConanFile):
         if self._use_winbash:
             env_vars["RANLIB"] = ":"
 
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self.settings) if (is_msvc(self) or self._is_clang_cl) else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 with tools.environment_append(env_vars):
                     yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         host = None
         build = None
-        if self._is_msvc:
+        if is_msvc(self) or self._is_clang_cl:
             build = False
             if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
 
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         configure_args = []
         if self.options.shared:
@@ -120,10 +121,10 @@ class LibiconvConan(ConanFile):
 
         if (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12") or \
            self.settings.compiler == "msvc":
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
 
-        self._autotools.configure(args=configure_args, host=host, build=build)
-        return self._autotools
+        autotools.configure(args=configure_args, host=host, build=build)
+        return autotools
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -148,7 +149,7 @@ class LibiconvConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self._is_msvc and self.options.shared:
+        if (is_msvc(self) or self._is_clang_cl) and self.options.shared:
             for import_lib in ["iconv", "charset"]:
                 rename(self, os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
                              os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))

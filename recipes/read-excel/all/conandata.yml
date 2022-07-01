@@ -1,4 +1,7 @@
 sources:
+  "1.2.7":
+    url: "https://github.com/igormironchik/read-excel/archive/refs/tags/1.2.7.tar.gz"
+    sha256: "9ed9518e796167c1c121bb20c2d395c8c8ae52cf469613914254d55ca517ab34"
   "1.2.6":
     url: "https://github.com/igormironchik/read-excel/archive/refs/tags/1.2.6.tar.gz"
     sha256: "b3209ecdf16d023c4225a9bcc2d0664c9675fa34b805b4871f161c66e462a794"

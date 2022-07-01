@@ -1,11 +1,14 @@
-import os
-import glob
-import textwrap
-
-import configparser
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, RunEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
+import configparser
+import functools
+import glob
+import os
+import textwrap
+
+required_conan_version = ">=1.43.0"
 
 
 class qt(Generator):
@@ -47,7 +50,7 @@ class QtConan(ConanFile):
                    "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
                    "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
-                   "qtremoteobjects", "qtpositioning"]
+                   "qtremoteobjects", "qtpositioning", "qtlanguageserver"]
 
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
@@ -83,6 +86,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
+        "with_gssapi": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -91,6 +95,7 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "multiconfiguration": [True, False],
+        "disabled_features": "ANY",
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -120,8 +125,9 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_libalsa": False,
         "with_openal": True,
-        "with_gstreamer": True,
+        "with_gstreamer": False,
         "with_pulseaudio": False,
+        "with_gssapi": False,
 
         "gui": True,
         "widgets": True,
@@ -130,14 +136,17 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "multiconfiguration": False,
+        "disabled_features": "",
     }
     default_options.update({module: False for module in _submodules})
 
     short_paths = True
 
-    _cmake = None
-
     _submodules_tree = None
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _get_module_tree(self):
@@ -180,6 +189,7 @@ class QtConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
+            del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
@@ -240,6 +250,9 @@ class QtConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
+        if tools.Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
+            raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, of to libc++")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -247,8 +260,44 @@ class QtConan(ConanFile):
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
 
-            if tools.cross_building(self.settings, skip_x64_x86=True):
+            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
+
+            if tools.Version(self.version) < "6.3.0":
+                # Check if a valid python2 is available in PATH or it will failflex
+                # Start by checking if python2 can be found
+                python_exe = tools.which("python2")
+                if not python_exe:
+                    # Fall back on regular python
+                    python_exe = tools.which("python")
+
+                if not python_exe:
+                    msg = ("Python2 must be available in PATH "
+                           "in order to build Qt WebEngine")
+                    raise ConanInvalidConfiguration(msg)
+
+                # In any case, check its actual version for compatibility
+                from six import StringIO  # Python 2 and 3 compatible
+                mybuf = StringIO()
+                cmd_v = "\"{}\" --version".format(python_exe)
+                self.run(cmd_v, output=mybuf)
+                verstr = mybuf.getvalue().strip().split("Python ")[1]
+                if verstr.endswith("+"):
+                    verstr = verstr[:-1]
+                version = tools.Version(verstr)
+                # >= 2.7.5 & < 3
+                v_min = "2.7.5"
+                v_max = "3.0.0"
+                if (version >= v_min) and (version < v_max):
+                    msg = ("Found valid Python 2 required for QtWebengine:"
+                           " version={}, path={}".format(mybuf.getvalue(), python_exe))
+                    self.output.success(msg)
+                else:
+                    msg = ("Found Python 2 in path, but with invalid version {}"
+                           " (QtWebEngine requires >= {} & < "
+                           "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
+                           "python2(.exe)".format(verstr, v_min, v_max))
+                    raise ConanInvalidConfiguration(msg)
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
@@ -266,31 +315,35 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
         if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
-            raise ConanInvlidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
+            raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
+        if not self.options.with_pcre2:
+            raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.12")
         if self.options.openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1o")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.37")
+            self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.182")
+            self.requires("vulkan-loader/1.3.211.0")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.4")
+                self.requires("moltenvk/1.1.9")
         if self.options.with_glib:
-            self.requires("glib/2.70.1")
+            self.requires("glib/2.72.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.7")
+            self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.11.0")
+            self.requires("freetype/2.11.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/70.1")
+            self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/3.2.0")
+            self.requires("harfbuzz/4.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.2")
@@ -299,12 +352,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.38.5")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
-            self.requires("libpq/13.4")
+            self.requires("libpq/14.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
@@ -314,8 +367,7 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.5.1")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.1")
+            self.requires("xkbcommon/1.4.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -325,11 +377,11 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.4.3")
+            self.requires("expat/2.4.8")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.72")
+            self.requires("nss/3.77")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -337,16 +389,17 @@ class QtConan(ConanFile):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
 
     def build_requirements(self):
-        self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.23.1")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             self.build_requires('strawberryperl/5.30.0.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.build_requires("ninja/1.10.2")
             self.build_requires("nodejs/16.3.0")
             self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
@@ -355,41 +408,6 @@ class QtConan(ConanFile):
                 self.build_requires("flex/2.6.4")
             else:
                 self.build_requires("winflexbison/2.5.24")
-
-            # Check if a valid python2 is available in PATH or it will failflex
-            # Start by checking if python2 can be found
-            python_exe = tools.which("python2")
-            if not python_exe:
-                # Fall back on regular python
-                python_exe = tools.which("python")
-
-            if not python_exe:
-                msg = ("Python2 must be available in PATH "
-                       "in order to build Qt WebEngine")
-                raise ConanInvalidConfiguration(msg)
-
-            # In any case, check its actual version for compatibility
-            from six import StringIO  # Python 2 and 3 compatible
-            mybuf = StringIO()
-            cmd_v = "\"{}\" --version".format(python_exe)
-            self.run(cmd_v, output=mybuf)
-            verstr = mybuf.getvalue().strip().split("Python ")[1]
-            if verstr.endswith("+"):
-                verstr = verstr[:-1]
-            version = tools.Version(verstr)
-            # >= 2.7.5 & < 3
-            v_min = "2.7.5"
-            v_max = "3.0.0"
-            if (version >= v_min) and (version < v_max):
-                msg = ("Found valid Python 2 required for QtWebengine:"
-                       " version={}, path={}".format(mybuf.getvalue(), python_exe))
-                self.output.success(msg)
-            else:
-                msg = ("Found Python 2 in path, but with invalid version {}"
-                       " (QtWebEngine requires >= {} & < "
-                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
-                       "python2(.exe)".format(verstr, v_min, v_max))
-                raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
             self.build_requires("wayland/1.20.0")
@@ -418,8 +436,8 @@ class QtConan(ConanFile):
                                       )
 
         tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
-                              "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t)",
-                              "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t -Zc:twoPhase-)")
+                              "-Zc:wchar_t",
+                              "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join("qt6", "qtbase", "cmake", f)
             if os.path.isfile(file):
@@ -427,7 +445,8 @@ class QtConan(ConanFile):
 
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
-            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "FindWrapZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+            zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
             tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
@@ -468,22 +487,40 @@ class QtConan(ConanFile):
                 return "android-clang"
 
         elif self.settings.os == "Windows":
-            return {"Visual Studio": "win32-msvc",
-                    "gcc": "win32-g++",
-                    "clang": "win32-clang-g++"}.get(str(self.settings.compiler))
+            return {
+                "Visual Studio": "win32-msvc",
+                "msvc": "win32-msvc",
+                "gcc": "win32-g++",
+                "clang": "win32-clang-g++",
+            }.get(str(self.settings.compiler))
 
         elif self.settings.os == "WindowsStore":
-            if self.settings.compiler == "Visual Studio":
-                return {"14": {"armv7": "winrt-arm-msvc2015",
-                               "x86": "winrt-x86-msvc2015",
-                               "x86_64": "winrt-x64-msvc2015"},
-                        "15": {"armv7": "winrt-arm-msvc2017",
-                               "x86": "winrt-x86-msvc2017",
-                               "x86_64": "winrt-x64-msvc2017"},
-                        "16": {"armv7": "winrt-arm-msvc2019",
-                               "x86": "winrt-x86-msvc2019",
-                               "x86_64": "winrt-x64-msvc2019"}
-                        }.get(str(self.settings.compiler.version)).get(str(self.settings.arch))
+            if self._is_msvc:
+                if self.settings.compiler == "Visual Studio":
+                    msvc_version = str(self.settings.compiler.version)
+                else:
+                    msvc_version = {
+                        "190": "14",
+                        "191": "15",
+                        "192": "16",
+                    }.get(str(self.settings.compiler.version))
+                return {
+                    "14": {
+                        "armv7": "winrt-arm-msvc2015",
+                        "x86": "winrt-x86-msvc2015",
+                        "x86_64": "winrt-x64-msvc2015",
+                    },
+                    "15": {
+                        "armv7": "winrt-arm-msvc2017",
+                        "x86": "winrt-x86-msvc2017",
+                        "x86_64": "winrt-x64-msvc2017",
+                    },
+                    "16": {
+                        "armv7": "winrt-arm-msvc2019",
+                        "x86": "winrt-x86-msvc2019",
+                        "x86_64": "winrt-x64-msvc2019",
+                    }
+                }.get(msvc_version).get(str(self.settings.arch))
 
         elif self.settings.os == "FreeBSD":
             return {"clang": "freebsd-clang",
@@ -512,50 +549,48 @@ class QtConan(ConanFile):
 
         return None
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self, generator="Ninja")
+        cmake = CMake(self, generator="Ninja")
 
-        self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
-        self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
-        self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
-        self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
+        cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
+        cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
+        cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin")
+        cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
+        cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
 
-        self._cmake.definitions["QT_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
+        cmake.definitions["QT_BUILD_TESTS"] = "OFF"
+        cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
 
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
-                self._cmake.definitions["FEATURE_static_runtime"] = "ON"
+        if self._is_msvc and "MT" in msvc_runtime_flag(self):
+            cmake.definitions["FEATURE_static_runtime"] = "ON"
 
         if self.options.multiconfiguration:
-            self._cmake.generator = "Ninja Multi-Config"
-            self._cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
-        self._cmake.definitions["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
+            cmake.generator = "Ninja Multi-Config"
+            cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
+        cmake.definitions["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
 
         for module in self._get_module_tree:
             if module != 'qtbase':
-                self._cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
+                cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
 
-        self._cmake.definitions["FEATURE_system_zlib"] = "ON"
+        cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        self._cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
+        cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
 
         # openSSL
         if not self.options.openssl:
-            self._cmake.definitions["INPUT_openssl"] = "no"
+            cmake.definitions["INPUT_openssl"] = "no"
         else:
             if self.options["openssl"].shared:
-                self._cmake.definitions["INPUT_openssl"] = "runtime"
+                cmake.definitions["INPUT_openssl"] = "runtime"
             else:
-                self._cmake.definitions["INPUT_openssl"] = "linked"
+                cmake.definitions["INPUT_openssl"] = "linked"
 
         if self.options.with_dbus:
-           self._cmake.definitions["INPUT_dbus"] = "linked"
+            cmake.definitions["INPUT_dbus"] = "linked"
         else:
-           self._cmake.definitions["FEATURE_dbus"] = "OFF"
+            cmake.definitions["FEATURE_dbus"] = "OFF"
 
 
         for opt, conf_arg in [("with_glib", "glib"),
@@ -568,8 +603,9 @@ class QtConan(ConanFile):
                               ("widgets", "widgets"),
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
-                              ("with_brotli", "brotli")]:
-            self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
+                              ("with_brotli", "brotli"),
+                              ("with_gssapi", "gssapi")]:
+            cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
         for opt, conf_arg in [
@@ -582,44 +618,50 @@ class QtConan(ConanFile):
                               ("with_pcre2", "pcre2"),]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
-                    self._cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
+                    cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
                 else:
-                    self._cmake.definitions["FEATURE_system_%s" % conf_arg] = "ON"
+                    cmake.definitions["FEATURE_system_%s" % conf_arg] = "ON"
             else:
-                self._cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
-                self._cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+                cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
+                cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+
+        for feature in str(self.options.disabled_features).split():
+            cmake.definitions["FEATURE_%s" % feature] = "OFF"
 
         if self.settings.os == "Macos":
-            self._cmake.definitions["FEATURE_framework"] = "OFF"
+            cmake.definitions["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
-            self._cmake.definitions["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            self._cmake.definitions["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
+            cmake.definitions["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            cmake.definitions["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
                                            "x86_64": "x86_64"}.get(str(self.settings.arch))
 
         if self.options.sysroot:
-            self._cmake.definitions["CMAKE_SYSROOT"] = self.options.sysroot
+            cmake.definitions["CMAKE_SYSROOT"] = self.options.sysroot
 
         if self.options.device:
-            self._cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
+            cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = os.path.join("devices", self.options.device)
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                self._cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
+                cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
             else:
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
                                   self.settings.compiler.version, self.settings.arch))
         if self.options.cross_compile:
-            self._cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
+            cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
 
-        self._cmake.definitions["FEATURE_pkg_config"] = "ON"
+        cmake.definitions["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
-            self._cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+            cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+
+        if self.settings.os == "Windows":
+            cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
 
         try:
-            self._cmake.configure(source_folder="qt6")
+            cmake.configure(source_folder="qt6")
         except:
             cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
             cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
@@ -628,7 +670,7 @@ class QtConan(ConanFile):
             if (os.path.isfile(cmake_out_log)):
                 self.output.info(tools.load(cmake_out_log))
             raise
-        return self._cmake
+        return cmake
 
     def build(self):
         for f in glob.glob("*.cmake"):
@@ -650,34 +692,34 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 " IMPORTED)\n",
                 " IMPORTED GLOBAL)\n", strict=False)
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self) if self._is_msvc else tools.no_op():
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
-            build_env = tools.RunEnvironment(self).vars if self.settings.compiler == "Visual Studio" else {}
+            build_env = tools.RunEnvironment(self).vars if self._is_msvc else {}
             build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
                 if not "PATH" in build_env:
                     build_env["PATH"] = []
                 build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
-            if self.settings.compiler == "Visual Studio":
+            if self._is_msvc:
                 # this avoids cmake using gcc from strawberryperl
                 build_env["CC"] = "cl"
                 build_env["CXX"] = "cl"
             with tools.environment_append(build_env):
 
                 if tools.os_info.is_macos:
-                    open(".qmake.stash" , "w").close()
-                    open(".qmake.super" , "w").close()
+                    tools.save(".qmake.stash" , "")
+                    tools.save(".qmake.super" , "")
 
                 cmake = self._configure_cmake()
                 if tools.os_info.is_macos:
-                    with open("bash_env", "w") as f:
-                        f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                    tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                 with tools.environment_append({
                     "BASH_ENV": os.path.abspath("bash_env")
                 }) if tools.os_info.is_macos else tools.no_op():
                     with tools.run_environment(self):
-                        cmake.build()
+                        with tools.remove_from_path("perl") if self.settings.os == "Windows" else tools.no_op():
+                            cmake.build()
     @property
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
@@ -692,8 +734,7 @@ class QtConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write(qt.content_template("..", "res", self.settings.os))
+        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
@@ -752,6 +793,13 @@ class QtConan(ConanFile):
                     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{1})
                 endif()
                 """.format(target, exe_path))
+
+        filecontents += textwrap.dedent("""\
+            if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
+                set(QT_DEFAULT_MAJOR_VERSION %s)
+            endif()
+            """ % ver.major)
+        filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
@@ -779,6 +827,9 @@ class QtConan(ConanFile):
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
 
+        if self.options.widgets:
+            _create_private_module("Widgets", ["CorePrivate", "GuiPrivate", "Widgets"])
+
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
 
@@ -800,15 +851,22 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-        if self.options.multiconfiguration and self.settings.compiler == "Visual Studio":
-            if "MD" in self.settings.compiler.runtime:
-                self.info.settings.compiler.runtime = "MD/MDd"
+        if self.options.multiconfiguration and self._is_msvc:
+            if self.settings.compiler == "Visual Studio":
+                if "MD" in self.settings.compiler.runtime:
+                    self.info.settings.compiler.runtime = "MD/MDd"
+                else:
+                    self.info.settings.compiler.runtime = "MT/MTd"
             else:
-                self.info.settings.compiler.runtime = "MT/MTd"
+                self.info.settings.compiler.runtime_type = "Release/Debug"
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Qt6")
+
         self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
+
+        build_modules = []
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
@@ -823,9 +881,10 @@ class QtConan(ConanFile):
                 reqs.append(r if "::" in r else "qt%s" % r)
             return reqs
 
-        def _create_module(module, requires=[]):
+        def _create_module(module, requires=[], has_include_dir=True):
             componentname = "qt%s" % module
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
+            self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt6::{}".format(module))
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             if module.endswith("Private"):
@@ -833,7 +892,8 @@ class QtConan(ConanFile):
             else:
                 libname = module
             self.cpp_info.components[componentname].libs = ["Qt6%s%s" % (libname, libsuffix)]
-            self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
+            if has_include_dir:
+                self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
             self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
@@ -842,6 +902,7 @@ class QtConan(ConanFile):
         def _create_plugin(pluginname, libname, type, requires):
             componentname = "qt%s" % pluginname
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
+            self.cpp_info.components[componentname].set_property("cmake_target_name", "Qt6::{}".format(pluginname))
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
@@ -861,16 +922,25 @@ class QtConan(ConanFile):
             core_reqs.append("icu::icu")
         if self.options.with_zstd:
             core_reqs.append("zstd::zstd")
+        if self.options.with_glib:
+            core_reqs.append("glib::glib")
 
         _create_module("Core", core_reqs)
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
+            if tools.Version(self.version) >= "6.3.0":
+                self.cpp_info.components["qtCore"].system_libs.append("authz")
+        if self._is_msvc:
+            if tools.Version(self.version) >= "6.3.0":
+                self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
             if tools.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
             if tools.Version(self.version) >= "6.2.1":
                 self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
+        self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
+        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
@@ -884,9 +954,7 @@ class QtConan(ConanFile):
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.append("xorg::xorg")
-                if not tools.cross_building(self, skip_x64_x86=True):
-                    gui_reqs.append("xkbcommon::xkbcommon")
+                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -899,10 +967,17 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
+            if self.options.with_glib:
+                gui_reqs.append("glib::glib")
             _create_module("Gui", gui_reqs)
+
+            build_modules.append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
                     "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
             elif self.settings.os == "Android":
@@ -920,8 +995,8 @@ class QtConan(ConanFile):
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
-            else:
-                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
+            elif self.settings.os in ["Linux", "FreeBSD"]:
+                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
         if self.options.with_sqlite3:
@@ -936,11 +1011,16 @@ class QtConan(ConanFile):
             networkReqs.append("openssl::openssl")
         if self.options.with_brotli:
             networkReqs.append("brotli::brotli")
+        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
+            networkReqs.append("krb5::krb5-gssapi")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
+            build_modules.append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Widgets"))
         if self.options.gui and self.options.widgets:
             _create_module("PrintSupport", ["Gui", "Widgets"])
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
@@ -954,15 +1034,17 @@ class QtConan(ConanFile):
 
         if self.options.qt5compat:
             _create_module("Core5Compat")
-        
+
         # since https://github.com/qt/qtdeclarative/commit/4fb84137f1c0a49d64b8bef66fef8a4384cc2a68
         qt_quick_enabled = self.options.gui and (tools.Version(self.version) < "6.2.0" or self.options.qtshadertools)
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
+            build_modules.append(self._cmake_qt6_private_file("Qml"))
             self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Qml"))
             self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
+            self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_name", "Qt6::QmlImportScanner")
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
@@ -972,9 +1054,9 @@ class QtConan(ConanFile):
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
-            _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
+            self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt6::LinguistTools")
             self.cpp_info.components["qtLinguistTools"].names["cmake_find_package"] = "LinguistTools"
             self.cpp_info.components["qtLinguistTools"].names["cmake_find_package_multi"] = "LinguistTools"
             _create_module("UiPlugin", ["Gui", "Widgets"])
@@ -1101,9 +1183,9 @@ class QtConan(ConanFile):
 
         if (self.options.get_safe("qtlocation") and tools.Version(self.version) < "6.2.2") or \
             (self.options.get_safe("qtpositioning") and tools.Version(self.version) >= "6.2.2"):
-                _create_module("Positioning")
-                _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
-                _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
+            _create_module("Positioning")
+            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
+            _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
 
         if self.options.get_safe("qtsensors"):
             _create_module("Sensors")
@@ -1152,17 +1234,20 @@ class QtConan(ConanFile):
 
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
+                self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
                 self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package"] = "EntryPointImplementation"
                 self.cpp_info.components["qtEntryPointImplementation"].names["cmake_find_package_multi"] = "EntryPointImplementation"
                 self.cpp_info.components["qtEntryPointImplementation"].libs = ["Qt6EntryPoint%s" % libsuffix]
                 self.cpp_info.components["qtEntryPointImplementation"].system_libs = ["shell32"]
 
                 if self.settings.compiler == "gcc":
+                    self.cpp_info.components["qtEntryPointMinGW32"].set_property("cmake_target_name", "Qt6::EntryPointMinGW32")
                     self.cpp_info.components["qtEntryPointMinGW32"].names["cmake_find_package"] = "EntryPointMinGW32"
                     self.cpp_info.components["qtEntryPointMinGW32"].names["cmake_find_package_multi"] = "EntryPointMinGW32"
                     self.cpp_info.components["qtEntryPointMinGW32"].system_libs = ["mingw32"]
                     self.cpp_info.components["qtEntryPointMinGW32"].requires = ["qtEntryPointImplementation"]
 
+            self.cpp_info.components["qtEntryPointPrivate"].set_property("cmake_target_name", "Qt6::EntryPointPrivate")
             self.cpp_info.components["qtEntryPointPrivate"].names["cmake_find_package"] = "EntryPointPrivate"
             self.cpp_info.components["qtEntryPointPrivate"].names["cmake_find_package_multi"] = "EntryPointPrivate"
             if self.settings.os == "Windows":
@@ -1194,21 +1279,22 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
-                self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
+                if self.options.with_gssapi:
+                    self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
                 if self.options.gui and self.options.widgets:
                     self.cpp_info.components["qtPrintSupport"].system_libs.append("cups")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        build_modules.append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        build_modules.append(self._cmake_qt6_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Core"))
         if self.settings.os in ["Windows", "iOS"]:
+            build_modules.append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_entry_point_file)
             self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_entry_point_file)
-
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
@@ -1216,10 +1302,12 @@ class QtConan(ConanFile):
             if component_name == "qt":
                 component_name = "qtCore"
             if os.path.isfile(module):
+                build_modules.append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
 
             helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
+            build_modules.extend(helper_modules)
             self.cpp_info.components[component_name].build_modules["cmake_find_package"].extend(helper_modules)
             self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].extend(helper_modules)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
@@ -1236,3 +1324,5 @@ class QtConan(ConanFile):
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
+
+        self.cpp_info.set_property("cmake_build_modules", build_modules)

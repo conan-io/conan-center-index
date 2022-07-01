@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import rename
 from contextlib import contextmanager
 import os
 import shutil
@@ -9,7 +10,7 @@ required_conan_version = ">=1.33.0"
 class CoinCglConan(ConanFile):
     name = "coin-cgl"
     description = "COIN-OR Cut Generator Library"
-    topics = ("clp", "simplex", "solver", "linear", "programming")
+    topics = ("cgl", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Cgl"
     license = ("EPL-2.0",)
@@ -72,7 +73,7 @@ class CoinCglConan(ConanFile):
             raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-clp shared not supported yet when cross-building")
+            raise ConanInvalidConfiguration("coin-cgl shared not supported yet when cross-building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -101,8 +102,8 @@ class CoinCglConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--without-blas"
-            "--without-lapack"
+            "--without-blas",
+            "--without-lapack",
         ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
@@ -132,13 +133,14 @@ class CoinCglConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libCgl.la"))
 
         if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libCgl.a"),
-                      os.path.join(self.package_folder, "lib", "Cgl.lib"))
+            rename(self,
+                   os.path.join(self.package_folder, "lib", "libCgl.a"),
+                   os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["Cgl"]
-        self.cpp_info.includedirs = [os.path.join("include", "coin")]
+        self.cpp_info.includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.names["pkg_config"] = "cgl"

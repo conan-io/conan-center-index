@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class LAConan(ConanFile):
@@ -12,7 +12,7 @@ class LAConan(ConanFile):
     topics = ("linear-algebra", "multi-dimensional", "maths")
     license = "NCSA"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -53,6 +53,9 @@ class LAConan(ConanFile):
                         self.settings.compiler,
                         self.settings.compiler.version))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
@@ -62,9 +65,9 @@ class LAConan(ConanFile):
                   src=os.path.join(self._source_subfolder, "include"))
         self.copy("*LICENSE*", dst="licenses", keep_path=False)
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "wg21_linear_algebra")
+        self.cpp_info.set_property("cmake_target_name", "wg21_linear_algebra::wg21_linear_algebra")
+
         self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
         self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"

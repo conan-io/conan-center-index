@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 import shutil
 
@@ -26,11 +27,13 @@ class OdbcConan(ConanFile):
         "with_libiconv": True,
     }
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -57,36 +60,40 @@ class OdbcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        static_flag = "no" if self.options.shared else "yes"
-        shared_flag = "yes" if self.options.shared else "no"
-        libiconv_flag = "yes" if self.options.with_libiconv else "no"
-        args = ["--enable-static=%s" % static_flag,
-                "--enable-shared=%s" % shared_flag,
-                "--enable-ltdl-install",
-                "--enable-iconv=%s" % libiconv_flag,
-                "--sysconfdir=/etc"]
-        if self.options.with_libiconv:
-            libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-            args.append("--with-libiconv-prefix=%s" % libiconv_prefix)
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
+        # relocatable shared libs on macOS
+        for configure in [
+            os.path.join(self._source_subfolder, "configure"),
+            os.path.join(self._source_subfolder, "libltdl", "configure"),
+        ]:
+            tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+
+    @functools.lru_cache(1)
+    def _configure_autotools(self):
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-ltdl-install",
+            "--enable-iconv={}".format(yes_no(self.options.with_libiconv)),
+            "--sysconfdir=/etc",
+        ]
+        if self.options.with_libiconv:
+            libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
+            args.append("--with-libiconv-prefix={}".format(libiconv_prefix))
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
+
+    def build(self):
+        self._patch_sources()
         autotools = self._configure_autotools()
         autotools.make()
 

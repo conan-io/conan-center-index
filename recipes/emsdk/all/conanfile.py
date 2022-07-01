@@ -44,7 +44,7 @@ class EmSDKConan(ConanFile):
         with open(os.path.join(self.build_folder, self._source_subfolder, "emsdk_manifest.json"), 'r') as f:
             data = json.load(f)
             tools = data["tools"]
-            if self.settings.os != "Linux":
+            if self.settings.os == "Windows":
                 python = next((it for it in tools if (it["id"] == "python" and not it.get("is_old", False))), None)
                 ret["python"] = "python-{}-64bit".format(python["version"])
             node = next((it for it in tools if (it["id"] == "node" and not it.get("is_old", False))), None)

@@ -6,7 +6,13 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    test_type = "build_requires", "requires"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def build(self):
         if not hasattr(self, "settings_build"):

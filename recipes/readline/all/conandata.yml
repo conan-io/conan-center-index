@@ -2,3 +2,6 @@ sources:
   "8.0":
     url: "https://ftp.gnu.org/pub/gnu/readline/readline-8.0.tar.gz"
     sha256: "e339f51971478d369f8a053a330a190781acb9864cf4c541060f12078948e461"
+  "8.1.2":
+    url: "https://ftp.gnu.org/pub/gnu/readline/readline-8.1.2.tar.gz"
+    sha256: "7589a2381a8419e68654a47623ce7dfcb756815c8fee726b98f90bf668af7bc6"

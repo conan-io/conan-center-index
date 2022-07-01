@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-CONAN_BASIC_SETUP()
+CONAN_BASIC_SETUP(TARGETS)
 
 find_package(ApprovalTests REQUIRED CONFIG)
 
@@ -30,3 +30,6 @@ if(WITH_CPPUTEST)
     ADD_EXECUTABLE(test_package_cpputest test_cpputest.cpp)
     target_link_libraries(test_package_cpputest ApprovalTests::ApprovalTests)
 endif()
+
+ADD_EXECUTABLE(test_package test_package.cpp)
+target_link_libraries(test_package ApprovalTests::ApprovalTests)

@@ -63,7 +63,7 @@ class LibsndfileConan(ConanFile):
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.with_external_libs:
-            self.requires("ogg/1.3.4")
+            self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.3.3")
             self.requires("opus/1.3.1")

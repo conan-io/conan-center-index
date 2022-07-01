@@ -25,3 +25,15 @@ versions:
     folder: portable
   "4.7.1":
     folder: portable
+  "4.7.2":
+    folder: portable
+  "4.8.0":
+    folder: portable
+  "4.8.1":
+    folder: portable
+  "4.8.2":
+    folder: portable
+  "4.9.0":
+    folder: portable
+  "4.9.1":
+    folder: portable

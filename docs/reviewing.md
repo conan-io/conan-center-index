@@ -10,6 +10,7 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
+  * [Applying Patches](#applying-patches)
   * [CMake](#cmake)
     * [Caching Helper](#caching-helper)
     * [Build Folder](#build-folder)
@@ -18,7 +19,9 @@ The following policies are preferred during the review, but not mandatory:
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
   * [Recommended feature options names](#recommended-feature-options-names)
-  * [Supported Versions](#supported-versions)<!-- endToc -->
+  * [Supported Versions](#supported-versions)
+    * [Removing old versions](#removing-old-versions)
+    * [Adding old versions](#adding-old-versions)<!-- endToc -->
 
 ## Trailing white-spaces
 
@@ -55,12 +58,15 @@ Prefer the following order of documented methods in python code (`conanfile.py`,
 - export_sources
 - config_options
 - configure
+- layout
 - requirements
 - package_id
+- validate
 - build_id
 - build_requirements
 - system_requirements
 - source
+- generate
 - imports
 - build
 - package
@@ -75,6 +81,20 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
+## Applying Patches
+
+Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
+For simple cases, `tools.replace_in_file` is allowed.
+
+```py
+def _patch_sources(self):
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        tools.patch(**patch)
+    # remove bundled xxhash
+    tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
+    tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")
+```
+
 ## CMake
 
 When working with CMake based upstream projects it is prefered to follow these principals. They are not applicable to all projects so they can not be enforced.
@@ -83,7 +103,8 @@ When working with CMake based upstream projects it is prefered to follow these p
 
 Due to build times and the lenght to configure CMake multiple times, there is a strong motivation to cache the `CMake` build helper from Conan between the `build()` and `package()` methods.
 
-This can be done by adding a `_cmake` attribute to the `ConanFile` class.
+This can be done by adding a `_cmake` attribute to the `ConanFile` class, but consider it as outdated. The current option is using `@functools.lru_cache(1)` decorator.
+As example, take a look on [miniz](https://github.com/conan-io/conan-center-index/blob/16780f87ad3db3be81323ddafc668145e4348513/recipes/miniz/all/conanfile.py#L57) recipe.
 
 ### Build Folder
 
@@ -94,12 +115,12 @@ Ideally use out-of-source builds by calling `cmake.configure(build_folder=self._
 Use a seperate method to handle the common patterns with using CMake based projects. This method is `_configure_cmake` and looks like the follow in the most basic cases:
 
 ```py
+@functools.lru_cache(1)
 def _configure_cmake(self):
-    if not self._cmake:
-       self._cmake = CMake(self)
-       self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-       self._cmake.configure(build_folder=self._build_subfolder)
-    return self._cmake
+    cmake = CMake(self)
+    cmake.definitions["BUILD_STATIC"] = not self.options.shared
+    cmake.configure(build_folder=self._build_subfolder)
+    return cmake
 ```
 
 ## Test Package
@@ -169,12 +190,27 @@ having the same naming conventions for the options may help consumers, e.g. they
 
 ## Supported Versions
 
-Keeping older versions is needed due to users who are still using legacy versions and can not update their packages. However, some points should be considered:
-- Adding older versions should be allowed only in strict cases, when required by a user. The committer should express their needs on the PR.
-- Removing older versions is allowed, so long as it keeps:
-  - for each older major release available, at least one version
-  - for the latest major version, at least three last versions should be available (if there are more than three such versions).
+In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
+are released and old ones stop to be used. 
 
-Also, consider these FAQs:
-- [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)
-- [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
+We always welcome latest releases as soon as they are available, and from time to time we remove old versions mainly due to technical reasons: 
+the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
+more chances of failing because of unexpected errors).
+
+### Removing old versions
+
+When removing old versions, please follow these considerations:
+ - keep one version for every major release
+ - for the latest major release, at least three versions should be available (latest three minor versions)
+
+Logic associated to removed revisions, and entries in `config.yml` and `conandata.yml` files should be removed as well. If anyone needs to
+recover them in the future, Git contains the full history and changes can be recovered from it.
+
+Please, note that even if those versions are removed from this repository, **the packages will always be accessible in ConanCenter remote**
+associated to the recipe revision used to build them.
+
+### Adding old versions
+
+We usually don't add old versions unless there is a specific request for it. If you need some old version, please
+share in the pull-request what is the motivation. Take into account that the version might be removed in future
+pull-requests according to the statements above.

@@ -5,9 +5,9 @@
 +if(NOT TARGET ZSTD::ZSTD)
 +  add_library(ZSTD::ZSTD INTERFACE IMPORTED)
 +  if(TARGET zstd::libzstd_shared)
-+    target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_shared)
++    set_target_properties(ZSTD::ZSTD PROPERTIES INTERFACE_LINK_LIBRARIES zstd::libzstd_shared)
 +  else()
-+    target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_static)
++    set_target_properties(ZSTD::ZSTD PROPERTIES INTERFACE_LINK_LIBRARIES zstd::libzstd_static)
 +  endif()
 +endif()
 --- cmake/FindJBIG.cmake
@@ -16,7 +16,7 @@
 +include("${cmake_wrapper_SOURCE_DIR}/ConanFindjbig.cmake")
 +if(NOT TARGET JBIG::JBIG)
 +  add_library(JBIG::JBIG INTERFACE IMPORTED)
-+  target_link_libraries(JBIG::JBIG INTERFACE jbig::jbig)
++  set_target_properties(JBIG::JBIG PROPERTIES INTERFACE_LINK_LIBRARIES jbig::jbig)
 +endif()
 --- cmake/JPEGCodec.cmake
 +++ cmake/JPEGCodec.cmake

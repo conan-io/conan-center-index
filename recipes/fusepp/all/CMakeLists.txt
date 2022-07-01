@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.4)
+project(cmake_wrapper)
+
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_basic_setup(KEEP_RPATHS)
+
+set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+
+file(GLOB_RECURSE INCLUDE_FILES "${SOURCE_SUBFOLDER}/Fuse*.h" "${SOURCE_SUBFOLDER}/Fuse.cpp")
+
+add_library(fusepp ${SOURCE_SUBFOLDER}/Fuse.cpp)
+
+set_target_properties(fusepp PROPERTIES PUBLIC_HEADER "${INCLUDE_FILES}")
+install(TARGETS fusepp
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

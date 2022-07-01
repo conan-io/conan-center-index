@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -7,7 +8,7 @@ class GainputConan(ConanFile):
     name = "gainput"
     description = "Cross-platform C++ input library supporting gamepads, keyboard, mouse, touch."
     license = "MIT"
-    topics = ("conan", "gainput", "input", "keyboard", "gamepad", "mouse", "multi-touch")
+    topics = ("gainput", "input", "keyboard", "gamepad", "mouse", "multi-touch")
     homepage = "https://gainput.johanneskuhlmann.de"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -21,13 +22,16 @@ class GainputConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,23 +42,22 @@ class GainputConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["GAINPUT_SAMPLES"] = False
-        self._cmake.definitions["GAINPUT_TESTS"] = False
-        self._cmake.definitions["GAINPUT_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["GAINPUT_BUILD_STATIC"] = not self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["GAINPUT_SAMPLES"] = False
+        cmake.definitions["GAINPUT_TESTS"] = False
+        cmake.definitions["GAINPUT_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["GAINPUT_BUILD_STATIC"] = not self.options.shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

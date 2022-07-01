@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(MoltenVK)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup(TARGETS KEEP_RPATHS)
 
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
         CMAKE_SYSTEM_NAME STREQUAL "iOS" OR
@@ -65,6 +65,15 @@ add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
 target_include_directories(MoltenVKCommon PUBLIC ${MVK_COMMON_DIR})
 target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
 target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKCommon PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverter
 if(MVK_VERSION VERSION_LESS "1.1.0")
@@ -85,7 +94,11 @@ if(MVK_VERSION VERSION_LESS "1.1.4")
     list(APPEND MVK_SC_SOURCES ${MVK_SC_COMMON_SOURCES})
 endif()
 add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_SOURCES})
-target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVKShaderConverter
     PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKSPIRVToMSLConverter>
@@ -105,6 +118,15 @@ target_link_libraries(MoltenVKShaderConverter
 target_compile_definitions(MoltenVKShaderConverter PRIVATE
     $<$<NOT:$<BOOL:${MVK_WITH_SPIRV_TOOLS}>>:MVK_EXCLUDE_SPIRV_TOOLS>
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKShaderConverter PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverterTool
 if(MVK_BUILD_SHADERCONVERTER_TOOL)
@@ -113,7 +135,11 @@ if(MVK_BUILD_SHADERCONVERTER_TOOL)
         ${MVK_SC_DIR}/MoltenVKShaderConverterTool/*.mm
     )
     add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
-    target_compile_features(MoltenVKShaderConverterTool PRIVATE cxx_std_11)
+    if(MVK_VERSION VERSION_LESS "1.1.9")
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_11)
+    else()
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_17)
+    endif()
     set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
     target_include_directories(MoltenVKShaderConverterTool PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKGLSLToSPIRVConverter>
@@ -137,7 +163,11 @@ file(GLOB_RECURSE MVK_SOURCES
     ${MVK_LIB_DIR}/MoltenVK/*.cpp
 )
 add_library(MoltenVK ${MVK_SOURCES})
-target_compile_features(MoltenVK PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVK PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVK PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVK PRIVATE
     ${MVK_LIB_DIR}/MoltenVK/API
     ${MVK_LIB_DIR}/MoltenVK/Commands
@@ -165,6 +195,15 @@ target_link_libraries(MoltenVK
         ${IOSURFACE_FRAMEWORK}
         ${COREGRAPHICS_FRAMEWORK}
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVK PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 # Custom Target to generate internal header file required by MoltenVK target.

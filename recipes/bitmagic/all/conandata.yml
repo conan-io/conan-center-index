@@ -1,4 +1,10 @@
 sources:
+  "7.11.2":
+    url: "https://github.com/tlk00/BitMagic/archive/refs/tags/v7.11.2.tar.gz"
+    sha256: "09faf5b9da4e0cee4947e05b7af0bd834e63e90c8877c115b719b4f390709a6f"
+  "7.10.3":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.10.3.tar.gz"
+    sha256: "164aae4f52f35f3a0e4a596611efcd1494a9be5489be494c6a440e5a83f17460"
   "7.9.3":
     url: "https://github.com/tlk00/BitMagic/archive/v7.9.3.tar.gz"
     sha256: "fa1799f702dac47148dc8e2672957b1fc5be440d043ef2c4d275c04b434182e1"

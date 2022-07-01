@@ -1,15 +1,17 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires(str(self.requires["mfast"]))
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["MFAST_SHARED"] = self.options["mfast"].shared
         cmake.configure()
         cmake.build()
 

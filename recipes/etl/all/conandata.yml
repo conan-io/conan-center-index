@@ -1,7 +1,19 @@
 sources:
-  "20.21.0":
-    url: "https://github.com/ETLCPP/etl/archive/20.21.0.tar.gz"
-    sha256: "4e59b57cb54b9ee764c5a083693edc033d8e9630544d489015a9a7b7e07c91a0"
-  "20.19.0":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.19.0.zip"
-    sha256: "ce57c7543867b2fe2ff3c056d8ae8ebaced51c38547d19ddb3aa60aeeb1a5411"
+  "20.29.3":
+    url: "https://github.com/ETLCPP/etl/archive/20.29.3.tar.gz"
+    sha256: "8a0df2b475ea99bb27dd4ee04c39bda69e29be93b3709a1e243dcc2599e92ff4"
+  "20.29.1":
+    url: "https://github.com/ETLCPP/etl/archive/20.29.1.tar.gz"
+    sha256: "f762260ffd746ad52585b655eb97c8394662239704ac8695bec464b3d9ecf282"
+  "20.28.0":
+    url: "https://github.com/ETLCPP/etl/archive/20.28.0.tar.gz"
+    sha256: "2298d1872a8a387e0cdfb17cc0826107b2509286267ce5ff87956d740e80290d"
+  "20.27.1":
+    url: "https://github.com/ETLCPP/etl/archive/20.27.1.tar.gz"
+    sha256: "0f24130ede2d07a5584ea264e340bdb4d67025edd2ddd000953f35a81b1c944b"
+  "20.25.0":
+    url: "https://github.com/ETLCPP/etl/archive/20.25.0.tar.gz"
+    sha256: "ac220ef90140899d2401c35ca8dce7a785922c528024079ed6ce2669a35e99d9"
+  "20.24.1":
+    url: "https://github.com/ETLCPP/etl/archive/20.24.1.tar.gz"
+    sha256: "6ff1cecf8c0bab7a7dbc020efdaaa54127e86d4e0b957290a19be9d2b9aa74f5"

@@ -84,7 +84,7 @@ class SnappyConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Snappy")
         self.cpp_info.set_property("cmake_target_name", "Snappy::snappy")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["snappylib"].libs = tools.collect_libs(self)
+        self.cpp_info.components["snappylib"].libs = ["snappy"]
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["snappylib"].system_libs.append(tools.stdcpp_library(self))
 

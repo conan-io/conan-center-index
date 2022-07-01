@@ -42,6 +42,23 @@ class MesonInstallerConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package(self):
+        # FIXME: https://github.com/conan-io/conan/issues/10726
+        def _fix_symlinks(root, files):
+            if not tools.os_info.is_windows:
+                return
+            for filename in files:
+                filename = os.path.join(root, filename)
+                if os.path.islink(filename):
+                    target = os.readlink(filename)
+                    if "/" in target:
+                        self.output.info("fixing broken link {}".format(target))
+                        target = target.replace("/", "\\")
+                        os.unlink(filename)
+                        os.symlink(target, filename)
+
+        for root, dirs, files in os.walk(self.source_folder, self._source_subfolder):
+            _fix_symlinks(root, dirs)
+            _fix_symlinks(root, files)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="bin", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "bin", "test cases"))
@@ -55,3 +72,5 @@ class MesonInstallerConan(ConanFile):
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
 
         self.cpp_info.builddirs = [os.path.join("bin", "mesonbuild", "cmake", "data")]
+
+        self.cpp_info.includedirs = []

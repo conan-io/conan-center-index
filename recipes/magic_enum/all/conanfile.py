@@ -18,7 +18,7 @@ class MagicEnumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index "
     homepage = "https://github.com/Neargye/magic_enum"
     license = "MIT"
-    settings = "compiler"
+    settings = "compiler", "arch", "build_type", "os"
     no_copy_source = True
 
     @property

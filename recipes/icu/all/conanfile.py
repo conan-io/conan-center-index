@@ -1,3 +1,4 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import glob
@@ -26,6 +27,7 @@ class ICUBase(ConanFile):
         "with_dyload": [True, False],
         "dat_package_file": "ANY",
         "with_icuio": [True, False],
+        "with_extras": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +38,7 @@ class ICUBase(ConanFile):
         "with_dyload": True,
         "dat_package_file": None,
         "with_icuio": True,
+        "with_extras": False,
     }
 
     _env_build = None
@@ -73,34 +76,6 @@ class ICUBase(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if not bool(self._platform):
-            raise ConanInvalidConfiguration(
-                "Compiling ICU for {} with {} not supported yet".format(str(self.settings.os),
-                                                                        str(self.settings.compiler)))
-
-    @property
-    def _platform(self):
-        return {
-            ("Windows", "Visual Studio"): "Cygwin/MSVC",
-            ("Windows", "msvc"): "Cygwin/MSVC",
-            ("Windows", "gcc"): "MinGW",
-            ("AIX", "gcc"): "AIX/GCC",
-            ("AIX", "xlc"): "AIX",
-            ("Android", "clang"): "Linux",
-            ("SunOS", "gcc"): "Solaris/GCC",
-            ("Linux", "gcc"): "Linux/gcc",
-            ("Linux", "clang"): "Linux",
-            ("Macos", "gcc"): "MacOSX",
-            ("Macos", "clang"): "MacOSX",
-            ("Macos", "apple-clang"): "MacOSX",
-            ("iOS", "apple-clang"): "MacOSX",
-            ("tvOS", "apple-clang"): "MacOSX",
-            ("watchOS", "apple-clang"): "MacOSX",
-            ("FreeBSD", "gcc"): "FreeBSD",
-            ("FreeBSD", "clang"): "FreeBSD",
-        }.get((str(self.settings.os), str(self.settings.compiler)))
-
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
         del self.info.options.silent  # Verbosity doesn't affect package's ID
@@ -123,37 +98,21 @@ class ICUBase(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
 
         if self.options.dat_package_file:
             dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
             if dat_package_file:
                 shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
 
-        if self._is_msvc:
-            run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
-
-            if self.settings.compiler == "Visual Studio":
-                flags = "-{}".format(self.settings.compiler.runtime)
-                if tools.Version(self.settings.compiler.version) >= "12":
-                    flags += " -FS"
-            else:
-                flags = "-{}{}".format(
-                    "MT" if self.settings.runtime == "static" else "MD",
-                    "d" if self.settings.runtime_type == "Debug" else "",
-                )
-                flags += " -FS"
-            tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
-            tools.replace_in_file(run_configure_icu_file, "-MD", flags)
-
-        self._workaround_icu_20545()
-
         env_build = self._configure_autotools()
         build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
         os.mkdir(build_dir)
+        build_env = env_build.vars
+        if self._is_msvc:
+            build_env.update({'CC': 'cl', 'CXX': 'cl'})
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(env_build.vars):
+            with tools.environment_append(build_env):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
@@ -170,19 +129,10 @@ class ICUBase(ConanFile):
                                                                  silent=self._silent)
                         self.run(command, win_bash=tools.os_info.is_windows)
 
-    def _configure_autotools(self):
-        if self._env_build:
-            return self._env_build
-        self._env_build = AutoToolsBuildEnvironment(self)
-        if not self.options.shared:
-            self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
-        if tools.is_apple_os(self.settings.os):
-            self._env_build.defines.append("_DARWIN_C_SOURCE")
-        if "msys2" in self.deps_user_info:
-            self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
-        return self._env_build
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
-    def _workaround_icu_20545(self):
         if tools.os_info.is_windows:
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
             srcdir = os.path.join(self.build_folder, self._source_subfolder, "source")
@@ -191,17 +141,38 @@ class ICUBase(ConanFile):
                                   "pathBuf.appendPathPart(arg, localError);",
                                   "pathBuf.append(\"/\", localError); pathBuf.append(arg, localError);")
 
+        # relocatable shared libs on macOS
+        mh_darwin = os.path.join(self._source_subfolder, "source", "config", "mh-darwin")
+        tools.replace_in_file(mh_darwin, "-install_name $(libdir)/$(notdir", "-install_name @rpath/$(notdir")
+        tools.replace_in_file(
+            mh_darwin,
+            "-install_name $(notdir $(MIDDLE_SO_TARGET)) $(PKGDATA_TRAILING_SPACE)",
+            "-install_name @rpath/$(notdir $(MIDDLE_SO_TARGET))",
+        )
+
+    def _configure_autotools(self):
+        if self._env_build:
+            return self._env_build
+        self._env_build = AutoToolsBuildEnvironment(self)
+        if self._is_msvc:
+            self._env_build.flags.append("-FS")
+        if not self.options.shared:
+            self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
+        if tools.is_apple_os(self.settings.os):
+            self._env_build.defines.append("_DARWIN_C_SOURCE")
+        if "msys2" in self.deps_user_info:
+            self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
+        return self._env_build
+
     @property
     def _build_config_cmd(self):
         prefix = self.package_folder.replace("\\", "/")
         arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
-        args = [self._platform,
-                "--prefix={0}".format(prefix),
+        args = ["--prefix={0}".format(prefix),
                 "--disable-samples",
                 "--disable-layout",
-                "--disable-layoutex",
-                "--disable-extras"]
+                "--disable-layoutex"]
 
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
@@ -211,6 +182,9 @@ class ICUBase(ConanFile):
 
         if not self.options.with_icuio:
             args.append("--disable-icuio")
+
+        if not self.options.with_extras:
+            args.append("--disable-extras")
 
         env_build = self._configure_autotools()
         if tools.cross_building(self, skip_x64_x86=True):
@@ -252,7 +226,7 @@ class ICUBase(ConanFile):
             args.extend(["--enable-static", "--disable-shared"])
         if not self.options.with_unit_tests:
             args.append("--disable-tests")
-        return "../source/runConfigureICU %s" % " ".join(args)
+        return "../source/configure %s" % " ".join(args)
 
     @property
     def _silent(self):
@@ -269,7 +243,6 @@ class ICUBase(ConanFile):
                     command = "{make} {silent} install".format(make=self._make_tool,
                                                                silent=self._silent)
                     self.run(command, win_bash=tools.os_info.is_windows)
-        self._install_name_tool()
 
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
@@ -286,14 +259,6 @@ class ICUBase(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def _install_name_tool(self):
-        if tools.is_apple_os(self.settings.os):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for dylib in glob.glob("*icu*.{0}.dylib".format(self.version)):
-                    command = "install_name_tool -id {0} {1}".format(os.path.basename(dylib), dylib)
-                    self.output.info(command)
-                    self.run(command)
 
     @property
     def _data_path(self):
@@ -376,7 +341,7 @@ class ICUBase(ConanFile):
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Prepending to ICU_DATA runtime environment variable: {}".format(data_path))
             self.runenv_info.prepend_path("ICU_DATA", data_path)
-            if self._enable_icu_tools:
+            if self._enable_icu_tools or self.options.with_extras:
                 self.buildenv_info.prepend_path("ICU_DATA", data_path)
             # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
             self.env_info.ICU_DATA.append(data_path)
@@ -398,6 +363,7 @@ class ICUBase(ConanFile):
             self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
             self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
+        if self._enable_icu_tools or self.options.with_extras:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
