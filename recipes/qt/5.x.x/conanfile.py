@@ -1066,6 +1066,7 @@ Examples = bin/datadir/examples""")
                 if self.options.widgets:
                     cocoa_reqs.append("PrintSupport")                    
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
+                _create_plugin("QMacStylePlugin", "qmacstyle", "styles", cocoa_reqs)
                 self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
             elif self.settings.os in ["iOS", "tvOS"]:
