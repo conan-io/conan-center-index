@@ -43,6 +43,13 @@ class PangommConan(ConanFile):
             elif self._is_1_4_api:
                 tools.check_min_cppstd(self, 11)
 
+        if self.options.shared and (not self.options["pango"].shared
+                                    or not self.options["cairomm"].shared
+                                    or not self.options["glibmm"].shared):
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -61,12 +68,6 @@ class PangommConan(ConanFile):
 
     def requirements(self):
         self.requires("pango/1.50.7")
-
-        # FIXME: temporary fix for dependency versions mismatch
-        # once dependencies versions are bumped remove these requirements
-        self.requires("expat/2.4.8")
-        self.requires("zlib/1.2.12")
-        self.requires("glib/2.72.1")
 
         if self._is_2_48_api:
             self.requires("glibmm/2.72.1")
@@ -112,6 +113,11 @@ class PangommConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+        if self.options.shared:
+            self.options["pango"].shared = True
+            self.options["glibmm"].shared = True
+            self.options["cairomm"].shared = True
 
     def build(self):
         self._patch_sources()
@@ -184,6 +190,7 @@ class PangommConan(ConanFile):
             "pkg_config_custom_content",
             f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
 
-        # FIXME: remove once dependency mismatch issues are solved
-        self.cpp_info.components[pangomm_lib].requires.extend(
-            ["expat::expat", "zlib::zlib", "glib::glib-2.0"])
+    def package_id(self):
+        self.info.requires["pango"].full_package_mode()
+        self.info.requires["glibmm"].full_package_mode()
+        self.info.requires["cairomm"].full_package_mode()
