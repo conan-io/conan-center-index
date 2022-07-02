@@ -77,7 +77,7 @@ class GtkConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if is_msvc(self):
-            # TODO: Remove once gtk 4.1.2 and 4.0.2 are removed
+            # TODO: Remove once gtk 4.1.2 is removed
             if self._gtk4 and tools.Version(self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             # TODO: Remove once gtk 3.24.24 is removed
