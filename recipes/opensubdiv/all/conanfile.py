@@ -1,6 +1,7 @@
 import functools
 import os
 
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 
 
@@ -96,6 +97,8 @@ class OpenSubdivConan(ConanFile):
         cmake.definitions["NO_GLTESTS"] = True
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and not self.options.shared and self.settings.compiler.libcxx == "libc++":
             cmake.definitions["CMAKE_CXX_FLAGS"] = "-stdlib=libc++"
+        if is_msvc(self) and self.settings.compiler.runtime in ["MT", "MTd"]:
+            cmake.definitions["MSVC_STATIC_CRT"] = True
 
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
 
