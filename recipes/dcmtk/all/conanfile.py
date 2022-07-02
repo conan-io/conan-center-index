@@ -82,11 +82,11 @@ class DCMTKConan(ConanFile):
 
     def requirements(self):
         if self.options.charset_conversion == "libiconv":
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         elif self.options.charset_conversion == "icu":
             self.requires("icu/71.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_openssl:
@@ -94,7 +94,7 @@ class DCMTKConan(ConanFile):
                 # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
                 self.requires("openssl/1.0.2u")
             else:
-                self.requires("openssl/1.1.1n")
+                self.requires("openssl/1.1.1o")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
