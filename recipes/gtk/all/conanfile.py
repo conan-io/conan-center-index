@@ -280,8 +280,7 @@ class GtkConan(ConanFile):
 
             self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
             self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
-            if self.settings.compiler != "Visual Studio":
-                self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+            self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
             self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
             if self.settings.os == "Linux":
                 self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
