@@ -56,10 +56,10 @@ class NmosCppConan(ConanFile):
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
-        self.requires("boost/1.78.0")
+        self.requires("boost/1.79.0")
         self.requires("cpprestsdk/2.10.18")
         self.requires("websocketpp/0.8.2")
-        self.requires("openssl/1.1.1n")
+        self.requires("openssl/1.1.1o")
         self.requires("json-schema-validator/2.1.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
@@ -73,7 +73,7 @@ class NmosCppConan(ConanFile):
 
     def build_requirements(self):
         # nmos-cpp needs CMake 3.17 or higher but CCI doesn't allow version ranges
-        self.build_requires("cmake/3.22.0")
+        self.build_requires("cmake/3.23.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

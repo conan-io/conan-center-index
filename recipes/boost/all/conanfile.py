@@ -1468,7 +1468,9 @@ class BoostConan(ConanFile):
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["pkg_config"] = "boost_diagnostic_definitions"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
+            # I would assume headers also need the define BOOST_LIB_DIAGNOSTIC, as a header can trigger an autolink,
+            # and this definition triggers a print out of the library selected.  See notes below on autolink and headers.
+            self.cpp_info.components["headers"].requires.append("diagnostic_definitions")
             if self.options.diagnostic_definitions:
                 self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
 
@@ -1477,13 +1479,33 @@ class BoostConan(ConanFile):
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
+
+            # Even headers needs to know the flags for disabling autolinking ...
+            # magic_autolink is an option in the recipe, so if a consumer wants this version of boost,
+            # then they should not get autolinking.
+            # Note that autolinking can sneak in just by some file #including a header with (eg) boost/atomic.hpp,
+            # even if it doesn't use any part that requires linking with libboost_atomic in order to compile.
+            # So a boost-header-only library that links to Boost::headers needs to see BOOST_ALL_NO_LIB
+            # in order to avoid autolinking to libboost_atomic
+
+            # This define is already imported into all of the _libboost libraries from this recipe anyway,
+            # so it would be better to be consistent and ensure ANYTHING using boost (headers or libs) has consistent #defines.
+
+            # Same applies for for BOOST_AUTO_LINK_{layout}:
+            # consumer libs that use headers also need to know what is the layout/filename of the libraries.
+            #
+            # eg, if using the "tagged" naming scheme, and a header triggers an autolink,
+            # then that header's autolink request had better be configured to request the "tagged" library name.
+            # Otherwise, the linker will be looking for a (eg) "versioned" library name, and there will be a link error.
+
+            # Note that "_libboost" requires "headers" so these defines will be applied to all the libraries too.
+            self.cpp_info.components["headers"].requires.append("disable_autolinking")
             if self._is_msvc or self._is_clang_cl:
                 if self.options.magic_autolink:
                     if self.options.layout == "system":
-                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_SYSTEM")
+                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_SYSTEM")
                     elif self.options.layout == "tagged":
-                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_TAGGED")
+                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_TAGGED")
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
                 else:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
@@ -1495,7 +1517,11 @@ class BoostConan(ConanFile):
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
+            # A library that only links to Boost::headers can be linked into another library that links a Boost::library,
+            # so for this reasons, the header-only library should know the BOOST_ALL_DYN_LINK definition as it will likely
+            # change some important part of the boost code and cause linking errors downstream.
+            # This is in the same theme as the notes above, re autolinking.
+            self.cpp_info.components["headers"].requires.append("dynamic_linking")
             if self._shared:
                 # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
                 self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]

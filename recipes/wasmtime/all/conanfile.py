@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
@@ -8,12 +9,12 @@ required_conan_version = ">=1.33.0"
 
 class WasmtimeConan(ConanFile):
     name = "wasmtime"
-    homepage = "https://github.com/bytecodealliance/wasmtime"
+    description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
+    homepage = "https://github.com/bytecodealliance/wasmtime"
     topics = ("webassembly", "wasm", "wasi")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
     }
@@ -37,7 +38,7 @@ class WasmtimeConan(ConanFile):
 
     @property
     def _sources_os_key(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             return "Windows"
         elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
             return "MinGW"
@@ -112,7 +113,7 @@ class WasmtimeConan(ConanFile):
                 self.cpp_info.defines = ["WASM_API_EXTERN=", "WASI_API_EXTERN="]
             self.cpp_info.libs = ["wasmtime"]
 
-            if self.settings.os == "Windows":
+        if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
-            elif self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["pthread", "dl", "m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "dl", "m", "rt"]
