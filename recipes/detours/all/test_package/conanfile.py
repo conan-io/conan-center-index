@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.verbose = 1
         cmake.configure()
         cmake.build()
 
