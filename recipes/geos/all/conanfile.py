@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -27,7 +28,6 @@ class GeosConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -41,6 +41,10 @@ class GeosConan(ConanFile):
     def _has_utils_option(self):
         return tools.Version(self.version) >= "3.10.0"
 
+    @property
+    def _has_inline_option(self):
+        return tools.Version(self.version) < "3.11.0"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -51,6 +55,8 @@ class GeosConan(ConanFile):
             del self.options.fPIC
         if not self._has_utils_option:
             del self.options.utils
+        if not self._has_inline_option:
+            del self.options.inline
 
     def configure(self):
         if self.options.shared:
@@ -76,21 +82,21 @@ class GeosConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         if tools.Version(self.version) >= "3.9.1":
-            self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
+            cmake.definitions["BUILD_BENCHMARKS"] = False
+        if self._has_inline_option:
+            cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["BUILD_DOCUMENTATION"] = False
         if tools.Version(self.version) >= "3.10.0":
-            self._cmake.definitions["BUILD_ASTYLE"] = False
+            cmake.definitions["BUILD_ASTYLE"] = False
         if self._has_utils_option:
-            self._cmake.definitions["BUILD_GEOSOP"] = self.options.utils
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            cmake.definitions["BUILD_GEOSOP"] = self.options.utils
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -115,7 +121,7 @@ class GeosConan(ConanFile):
         # GEOS::geos_cxx_flags
         self.cpp_info.components["geos_cxx_flags"].set_property("cmake_target_name", "GEOS::geos_cxx_flags")
         self.cpp_info.components["geos_cxx_flags"].defines.append("USE_UNSTABLE_GEOS_CPP_API")
-        if self.options.inline:
+        if self.options.get_safe("inline"):
             self.cpp_info.components["geos_cxx_flags"].defines.append("GEOS_INLINE")
         if self.settings.os == "Windows":
             self.cpp_info.components["geos_cxx_flags"].defines.append("TTMATH_NOASM")
