@@ -1,5 +1,5 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
@@ -19,9 +19,8 @@ class HsmConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self)
 
     def validate(self):
         # https://github.com/erikzenker/hsm#dependencies
@@ -31,17 +30,17 @@ class HsmConan(ConanFile):
             raise ConanInvalidConfiguration("GCC 8+ is required")
 
     def source(self):
-        tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
 
     def package(self):
         cmake = CMake(self)    
         cmake.install()
         tools.files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
 
     def package_id(self):
         self.info.header_only()
