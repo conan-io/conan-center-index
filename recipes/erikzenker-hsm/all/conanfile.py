@@ -30,7 +30,7 @@ class HsmConan(ConanFile):
             raise ConanInvalidConfiguration("GCC 8+ is required")
 
     def source(self):
-        tools.files.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        tools.files.get(**self.conan_data["sources"][self.version], conanfile=self, destination=self.source_folder, strip_root=True)
 
     def build(self):
         cmake = CMake(self)
