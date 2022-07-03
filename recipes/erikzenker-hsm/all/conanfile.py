@@ -39,7 +39,7 @@ class HsmConan(ConanFile):
     def package(self):
         cmake = CMake(self)    
         cmake.install()
-        tools.files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(conanfile=self, path=os.path.join(self.package_folder, "lib", "cmake"))
         self.copy("LICENSE", src=self.source_folder, dst="licenses")
 
     def package_id(self):
