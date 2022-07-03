@@ -24,9 +24,9 @@ class HsmConan(ConanFile):
 
     def validate(self):
         # https://github.com/erikzenker/hsm#dependencies
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 8:
+        if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) < '8':
             raise ConanInvalidConfiguration("clang 8+ is required")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 8:
+        if self.settings.compiler == "gcc" and Version(str(self.settings.compiler.version)) < '8':
             raise ConanInvalidConfiguration("GCC 8+ is required")
 
     def source(self):
