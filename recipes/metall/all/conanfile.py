@@ -38,7 +38,6 @@ class Recipe(ConanFile):
     }
 
     default_options = {
-        "boost:header_only": True,
         "disable_free_file_space": False,
         "disable_small_object_cache": False,
         "use_sorted_bin": False,
@@ -49,7 +48,7 @@ class Recipe(ConanFile):
         "build_numa": False,
         "free_small_object_size_hint": 0,
     }
-    requires = "boost/1.75.0",
+    requires = "boost/1.79.0",
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -70,8 +69,10 @@ class Recipe(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Metall requires a Linux kernel.")
+
+        if self.settings.os not in ["Linux", "Macos"]:
+            raise ConanInvalidConfiguration(
+                "Metall requires some POSIX functionalities like mmap.")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -127,7 +128,7 @@ class Recipe(ConanFile):
         # TODO: to remove in conan v2 once pkg_config generators removed
         self.cpp_info.names["pkg_config"] = name
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux"]:
             self.cpp_info.system_libs = ["pthread"]
 
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
