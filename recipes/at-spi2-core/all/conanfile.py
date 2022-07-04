@@ -6,7 +6,7 @@ import os
 class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
-    topics = "atk", "accessibility"
+    topics = ("atk", "accessibility")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core/"
     license = "LGPL-2.1-or-later"
