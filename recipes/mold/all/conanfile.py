@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, ConanInvalidConfiguration
-import functools
 import os
 
 required_conan_version = ">=1.45.0"
@@ -26,7 +25,7 @@ class MoldConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-           raise ConanInvalidConfiguration("{} can't be built on {}.".format(self.name, self.settings.os))
+            raise ConanInvalidConfiguration('{} can't be built on {}.'.format(self.name, self.settings.os))
 
     @property
     def _source_subfolder(self):
@@ -56,10 +55,9 @@ class MoldConan(ConanFile):
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
 
         self.buildenv_info.prepend_path("MOLD_ROOT", self.package_folder)
         self.env_info.MOLD_ROOT = self.package_folder
-            
         self.cpp_info.includedirs = []
