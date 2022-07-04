@@ -55,7 +55,7 @@ class QuaZIPConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("qt/5.15.3")
+        self.requires("qt/5.15.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
