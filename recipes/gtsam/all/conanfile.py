@@ -121,6 +121,10 @@ class GtsamConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
             raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
 
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= '4.1' \
+                and self.options.shared:
+            raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
