@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 class HsmConan(ConanFile):
     name = "erikzenker-hsm"
@@ -12,7 +12,7 @@ class HsmConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "The hana state machine (hsm) is a finite state machine library based on the boost hana meta programming library. It follows the principles of the boost msm and boost sml libraries, but tries to reduce own complex meta programming code to a minimum."
     topics = ("state-machine", "template-meta-programming")
-    requires = "boost/1.77.0"
+    requires = "boost/1.79.0"
     no_copy_source = True
     generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
