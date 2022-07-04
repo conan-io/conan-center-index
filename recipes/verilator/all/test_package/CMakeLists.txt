@@ -18,5 +18,6 @@ if(BUILD_SYSTEMC)
         blinky_sc.cpp
     )
     verilate(blinky_sc SOURCES blinky.v SYSTEMC)
+    target_compile_features(blinky_sc PRIVATE cxx_std_11)
     target_link_libraries(blinky_sc PRIVATE CONAN_PKG::systemc)
 endif()
