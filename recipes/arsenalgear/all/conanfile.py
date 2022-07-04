@@ -40,6 +40,8 @@ class ArsenalgearConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.79.0")
+        if self.settings.os in ["Linux", "Macos"]:
+            self.requires("exprtk/0.0.1")
 
     @property
     def _compiler_required_cpp17(self):
@@ -86,3 +88,6 @@ class ArsenalgearConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["arsenalgear"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

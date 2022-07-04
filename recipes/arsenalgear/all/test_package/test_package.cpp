@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "constants.hpp"
-#include "operators.hpp"
+#include "arsenalgear/constants.hpp"
+#include "arsenalgear/operators.hpp"
 
 void operators() {
   std::cout << "\n"
