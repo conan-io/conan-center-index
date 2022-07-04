@@ -16,7 +16,6 @@ class HsmConan(ConanFile):
     topics = ("state-machine", "template-meta-programming")
     requires = "boost/1.79.0"
     no_copy_source = True
-    generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
 
     def layout(self):
