@@ -1,10 +1,9 @@
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment, ConanInvalidConfiguration
 import functools
 import os
 
 required_conan_version = ">=1.45.0"
-
 
 class MoldConan(ConanFile):
     name = "mold"
@@ -45,10 +44,6 @@ class MoldConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    #def _patch_sources(self):
-    #    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-    #        tools.patch(**patch)
 
     def build(self):
         #self._patch_sources()
