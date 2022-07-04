@@ -13,7 +13,7 @@ class Recipe(ConanFile):
     homepage = "https://github.com/LLNL/metall"
     description = "Meta allocator for persistent memory"
     license = "MIT", "Apache-2.0"
-    topics = "cpp", "allocator", "memory-alloctator", "persitent-memory", "ecp", "exascale-computing"
+    topics = "cpp", "allocator", "memory-allocator", "persistent-memory", "ecp", "exascale-computing"
     settings = "build_type", "compiler", "os", "arch"
     options = {
         # Disable freeing file space
