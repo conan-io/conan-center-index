@@ -187,8 +187,8 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             # allow to find gettext
             tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
-                "libintl = cc.find_library('intl', required : false)" if scm.Version(self.version) < "2.73.1" \
+                os.path.join(self.source_folder, "meson.build"),
+                "libintl = cc.find_library('intl', required : false)" if tools.Version(self.version) < "2.73.1" \
                 else "libintl = dependency('intl', required: false)",
                 "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
             )
