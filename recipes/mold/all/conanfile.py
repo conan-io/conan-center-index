@@ -1,4 +1,5 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, ConanInvalidConfiguration
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.45.0"
@@ -25,7 +26,7 @@ class MoldConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration('{} can't be built on {}.'.format(self.name, self.settings.os))
+            raise ConanInvalidConfiguration('{} can\'t be built on {}.'.format(self.name, self.settings.os))
 
     @property
     def _source_subfolder(self):
