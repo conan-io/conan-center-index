@@ -1,5 +1,5 @@
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
-from conan.tools.files import rename, copy, rm
+from conan.tools.files import rename, copy
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -184,7 +184,7 @@ class grpcConan(ConanFile):
 
         # Copy status.proto (TODO: Other protos are used in the test suite)
         status_proto_dir = os.path.join(self._source_subfolder, "src", "proto", "grpc", "status")
-        rm(self, "status.proto", status_proto_dir)
+        os.remove(os.path.join(status_proto_dir, "status.proto"))
         copy(self, "status.proto", 
              src=os.path.join(self.dependencies["googleapis"].cpp_info.resdirs[0], "google", "rpc"),
              dst=status_proto_dir)
