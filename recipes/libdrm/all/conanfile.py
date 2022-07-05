@@ -101,6 +101,7 @@ class LibdrmConan(ConanFile):
             defs[o] = "true" if getattr(self.options, o) else "false"
 
         defs["datadir"] = os.path.join(self.package_folder, "res")
+        defs["mandir"] = os.path.join(self.package_folder, "res", "man")
 
         meson.configure(
             defs = defs,
