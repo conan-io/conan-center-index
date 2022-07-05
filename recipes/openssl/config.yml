@@ -9,6 +9,10 @@ versions:
   3.0.0:
     folder: "3.x.x"
   # 1.1.1x releases
+  1.1.1q:
+    folder: "1.x.x"
+  1.1.1p:
+    folder: "1.x.x"
   1.1.1o:
     folder: "1.x.x"
   1.1.1n:
