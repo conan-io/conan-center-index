@@ -1,16 +1,4 @@
 sources:
-  "2.6.8":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.6.8/harfbuzz-2.6.8.tar.xz"
-    sha256: "6648a571a27f186e47094121f0095e1b809e918b3037c630c7f38ffad86e3035"
-  "2.7.4":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.7.4/harfbuzz-2.7.4.tar.xz"
-    sha256: "6ad11d653347bd25d8317589df4e431a2de372c0cf9be3543368e07ec23bb8e7"
-  "2.8.2":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.2/harfbuzz-2.8.2.tar.xz"
-    sha256: "d58461395ce28b9dc03903254374dd70c38c8c28c5046db123c08f7ab9417be7"
-  "2.9.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.9.1/harfbuzz-2.9.1.tar.xz"
-    sha256: "0edcc980f526a338452180e701d6aba6323aef457b6686976a7d17ccbddc51cf"
   "3.0.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.0.0/harfbuzz-3.0.0.tar.xz"
     sha256: "036b0ee118451539783ec7864148bb4106be42a2eb964df4e83e6703ec46f3d9"
@@ -36,18 +24,6 @@ sources:
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/4.4.1/harfbuzz-4.4.1.tar.xz"
     sha256: "c5bc33ac099b2e52f01d27cde21cee4281b9d5bfec7684135e268512478bc9ee"
 patches:
-  "2.6.8":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.7.4":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.8.2":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
-  "2.9.1":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
   "3.0.0":
     - patch_file: "patches/icu-3.0.x.patch"
       base_path: "source_subfolder"
