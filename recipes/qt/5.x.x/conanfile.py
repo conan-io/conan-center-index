@@ -797,7 +797,7 @@ Examples = bin/datadir/examples""")
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
 
-        os.remove(os.path.join(self.package_folder, "lib", "cmake", "Qt5CoreConfigExtras.cmake")) # will be replaced by conan_qt_core_extras.cmake
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "Qt5Core", "Qt5CoreConfigExtras.cmake"))  # will be replaced by conan_qt_core_extras.cmake
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "Qt5"))
 
         # delete empty folders in lib/cmake/
