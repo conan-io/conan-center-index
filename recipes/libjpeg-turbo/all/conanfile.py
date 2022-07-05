@@ -4,7 +4,7 @@ from conan.tools.microsoft import is_msvc
 import os
 import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibjpegTurboConan(ConanFile):
