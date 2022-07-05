@@ -1,10 +1,11 @@
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.45.0"
 
 
 class Antlr4CppRuntimeConan(ConanFile):
@@ -42,9 +43,10 @@ class Antlr4CppRuntimeConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _patch_sources(self):
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,19 +55,6 @@ class Antlr4CppRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def build_requirements(self):
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires("utfcpp/3.2.1")
@@ -102,8 +91,20 @@ class Antlr4CppRuntimeConan(ConanFile):
             else:
                 self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
-        if compiler == "Visual Studio" and antlr_version == "4.10":
+        if is_msvc(self) and antlr_version == "4.10":
             raise ConanInvalidConfiguration("{} Antlr4 4.10 version is broken on msvc - Use 4.10.1 or above.".format(self.name))
+
+    def build_requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.build_requires("pkgconf/1.7.4")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -111,8 +112,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake.definitions["ANTLR4_INSTALL"] = True
         cmake.definitions["WITH_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         cmake.definitions["ANTLR_BUILD_CPP_TESTS"] = False
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["WITH_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+        if is_msvc(self):
+            cmake.definitions["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         cmake.definitions["WITH_DEMO"] = False
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -134,13 +135,14 @@ class Antlr4CppRuntimeConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "antlr4-runtime.lib")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.dll*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*antlr4-runtime.dylib*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*antlr4-runtime.*dylib")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         # FIXME: this also removes lib/cmake/antlr4-generator
         # This cmake config script is needed to provide the cmake function `antlr4_generate`
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"antlr4_shared" if self.options.shared else "antlr4_static": "antlr4-cppruntime::antlr4-cppruntime"}
@@ -159,23 +161,24 @@ class Antlr4CppRuntimeConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder, f"conan-official-{self.name}-targets.cmake")
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "antlr4-runtime")
+        self.cpp_info.set_property("cmake_target_name", "antlr4_shared" if self.options.shared else "antlr4_static")
         libname = "antlr4-runtime"
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libname += "-static"
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs.append(os.path.join("include", "antlr4-runtime"))
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.builddirs.append(self._module_subfolder)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generatores removed
+        self.cpp_info.filenames["cmake_find_package"] = "antlr4-runtime"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "antlr4-runtime"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

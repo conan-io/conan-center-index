@@ -231,13 +231,13 @@ There are different motivations
 
 `Python 2.7` and earlier is not supported by the ConanCenter, as it's already [EOL](https://www.python.org/doc/sunset-python-2/).
 
-`Python 3.5` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://www.python.org/dev/peps/pep-0478/).
+`Python 3.6` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://peps.python.org/pep-0494/#lifespan).
 
-Versions `Python 3.6+` onwards are currently supported by the infrastructure and the recipes.
+Versions `Python 3.7+` onwards are currently supported by the infrastructure and the recipes.
 
-Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.5+` ATM.
+Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.13+` ATM.
 
-Windows agents currently use `Python 3.6.7+`. macOS agents use version `Python 3.7.3+`.
+Windows agents currently use `Python 3.7.9+`. macOS agents use version `Python 3.7.12+`.
 
 The version run by our agents and docker images is a subject to change, as security updates to the Python are released, or they enter EOL.
 

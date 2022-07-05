@@ -34,3 +34,8 @@ submodules:
       sha256: a2bcc1cda0154091ecbed25b8c40436c5b75d11bb38df28b35a2ceedb331d562
       url: https://github.com/OPCFoundation/UA-Nodeset/archive/Errata-1.04.5.zip
       archive_pattern: "UA-Nodeset-{version}"
+  "1.3.1":
+    deps/ua-nodeset:
+      sha256: a2bcc1cda0154091ecbed25b8c40436c5b75d11bb38df28b35a2ceedb331d562
+      url: https://github.com/OPCFoundation/UA-Nodeset/archive/Errata-1.04.5.zip
+      archive_pattern: "UA-Nodeset-{version}"

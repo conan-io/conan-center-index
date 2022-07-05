@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.29.1"
 
@@ -120,32 +121,32 @@ class OpenSceneGraphConanFile(ConanFile):
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
-            self.requires("asio/1.18.1")
-            self.requires("boost/1.75.0")
+            self.requires("asio/1.22.1")
+            self.requires("boost/1.79.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.74.0")
+            self.requires("libcurl/7.83.1")
         if self.options.get_safe("with_dcmtk"):
-            self.requires("dcmtk/3.6.5")
+            self.requires("dcmtk/3.6.6")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.12.1")
         if self.options.with_gdal:
-            self.requires("gdal/3.1.4")
+            self.requires("gdal/3.4.3")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.24")
+            self.requires("jasper/2.0.33")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9d")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/2.5.3")
+            self.requires("openexr/3.1.5")
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -159,11 +160,9 @@ class OpenSceneGraphConanFile(ConanFile):
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
+    @functools.lru_cache(1)
     def _configured_cmake(self):
-        if hasattr(self, "_cmake"):
-            return self._cmake
-
-        self._cmake = cmake = CMake(self)
+        cmake = CMake(self)
 
         cmake.definitions["USE_3RDPARTY_BIN"] = False
 

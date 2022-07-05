@@ -9,10 +9,11 @@ class CpppeglibConan(ConanFile):
     name = "cpp-peglib"
     description = "A single file C++11 header-only PEG (Parsing Expression Grammars) library."
     license = "MIT"
-    topics = ("cpp-peglib", "peg", "parser", "header-only")
-    homepage = "https://github.com/yhirose/cpp-peglib"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/yhirose/cpp-peglib"
+    topics = ("peg", "parser", "header-only")
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -26,10 +27,6 @@ class CpppeglibConan(ConanFile):
             "clang": "6",
             "apple-clang": "10"
         }
-
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def package_id(self):
         self.info.header_only()
@@ -56,10 +53,6 @@ class CpppeglibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

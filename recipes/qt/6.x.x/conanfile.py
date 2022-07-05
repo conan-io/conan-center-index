@@ -87,6 +87,7 @@ class QtConan(ConanFile):
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
+        "with_md4c": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -128,6 +129,7 @@ class QtConan(ConanFile):
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
+        "with_md4c": True,
 
         "gui": True,
         "widgets": True,
@@ -216,6 +218,7 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+            del self.options.with_md4c
 
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
@@ -249,7 +252,7 @@ class QtConan(ConanFile):
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
-           
+
         if tools.Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, of to libc++")
 
@@ -391,6 +394,8 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+        if self.options.get_safe("with_md4c", False):
+            self.requires("md4c/0.4.8")
 
     def build_requirements(self):
         self.build_requires("cmake/3.23.1")
@@ -445,7 +450,8 @@ class QtConan(ConanFile):
 
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
-            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "FindWrapZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+            zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
             tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
@@ -623,6 +629,22 @@ class QtConan(ConanFile):
             else:
                 cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+                
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "libjpeg"),
+                              ("with_libpng", "libpng"),
+                              ("with_md4c", "libmd4c"),
+                              ("with_pcre2", "pcre"),]:
+            if self.options.get_safe(opt, False):
+                if self.options.multiconfiguration:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "qt"
+                else:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "system"
+            else:
+                cmake.definitions["INPUT_%s" % conf_arg] = "no"
 
         for feature in str(self.options.disabled_features).split():
             cmake.definitions["FEATURE_%s" % feature] = "OFF"
@@ -792,7 +814,7 @@ class QtConan(ConanFile):
                     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{1})
                 endif()
                 """.format(target, exe_path))
-        
+
         filecontents += textwrap.dedent("""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
                 set(QT_DEFAULT_MAJOR_VERSION %s)
@@ -864,6 +886,10 @@ class QtConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
+
+        # consumers will need the QT_PLUGIN_PATH defined in runenv
+        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
+        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
 
         build_modules = []
 
@@ -968,6 +994,8 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg::libjpeg")
             if self.options.with_glib:
                 gui_reqs.append("glib::glib")
+            if self.options.with_md4c:
+                gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
 
             build_modules.append(self._cmake_qt6_private_file("Gui"))
@@ -976,6 +1004,7 @@ class QtConan(ConanFile):
 
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
                     "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
             elif self.settings.os == "Android":
@@ -1052,7 +1081,6 @@ class QtConan(ConanFile):
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
-            _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt6::LinguistTools")

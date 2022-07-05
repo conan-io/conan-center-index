@@ -2,6 +2,7 @@ from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 
 required_conan_version = ">=1.43.0"
@@ -66,6 +67,10 @@ class grpcConan(ConanFile):
     def _grpc_plugin_template(self):
         return "grpc_plugin_template.cmake.in"
 
+    @property
+    def _cxxstd_required(self):
+        return 14 if Version(self.version) >= "1.47" else 11
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         self.copy(os.path.join("cmake", self._grpc_plugin_template))
@@ -83,8 +88,8 @@ class grpcConan(ConanFile):
     def requirements(self):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1n")
-        self.requires("protobuf/3.20.0")
+        self.requires("openssl/1.1.1o")
+        self.requires("protobuf/3.21.1")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
 
@@ -100,15 +105,18 @@ class grpcConan(ConanFile):
             if self.options.shared:
                 raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
+        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("GCC older than 6 is not supported")
+
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, self._cxxstd_required)
 
     def package_id(self):
         del self.info.options.secure
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.20.0')
+            self.build_requires('protobuf/3.21.1')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
@@ -153,10 +161,9 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
         self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
-        # Require C++11 at least. Consumed targets (abseil) via interface target_compiler_feature
-        #  can propagate newer standards
-        if not tools.valid_min_cppstd(self, 11):
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+        # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
+        if not tools.valid_min_cppstd(self, self._cxxstd_required):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cxxstd_required
 
         if tools.cross_building(self):
             # otherwise find_package() can't find config files since
