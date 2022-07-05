@@ -20,7 +20,7 @@ class OsmanipConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):

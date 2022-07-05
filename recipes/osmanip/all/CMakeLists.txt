@@ -4,7 +4,7 @@ project(osmanip LANGUAGES CXX)
 include(conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS)
 
-include(GNUInstallDirs)
+find_package(arsenalgear REQUIRED CONFIG)
 
 set(osmanip_src
     source_subfolder/src/graphics/canvas.cpp
@@ -32,8 +32,12 @@ set_target_properties(osmanip PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
+target_link_libraries(osmanip PRIVATE arsenalgear::arsenalgear)
+
 find_library(LIBM m)
 target_link_libraries(osmanip PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
+
+include(GNUInstallDirs)
 
 install(
     TARGETS osmanip
