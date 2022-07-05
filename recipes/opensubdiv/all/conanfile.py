@@ -7,7 +7,7 @@ from conans import ConanFile, CMake, tools
 
 class OpenSubdivConan(ConanFile):
     name = "opensubdiv"
-    license = "Modified Apache 2.0 License"
+    license = "Modified-Apache-2.0"
     homepage = "https://github.com/PixarAnimationStudios/OpenSubdiv"
     url = "https://github.com/conan-io/conan-center-index"
     description = "An Open-Source subdivision surface library"
