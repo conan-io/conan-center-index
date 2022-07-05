@@ -787,7 +787,7 @@ Examples = bin/datadir/examples""")
             if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake", "*ConfigVersion.cmake", "*Plugin*.cmake", "*Factory.cmake"]:
             tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb*")
@@ -797,9 +797,12 @@ Examples = bin/datadir/examples""")
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
 
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "Qt5CoreConfigExtras.cmake")) # will be replaced by conan_qt_core_extras.cmake
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "Qt5"))
+
+        # delete empty folders in lib/cmake/
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
-            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
-            if not os.path.isfile(module):
+            if len(os.listdir(os.path.join(self.package_folder, "lib", "cmake", m))) == 0:
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
@@ -1383,9 +1386,9 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt5", "qt")
-            if os.path.isfile(module):
+            cmake_modules = glob.glob(os.path.join("lib", "cmake", m, "*.cmake"))
+            for module in cmake_modules:
                 build_modules.append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
