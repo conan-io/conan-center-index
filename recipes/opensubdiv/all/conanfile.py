@@ -106,6 +106,7 @@ class OpenSubdivConan(ConanFile):
         if not self._osd_gpu_enabled and self.settings.os == "Macos":
             path = os.path.join(self._source_subfolder, "opensubdiv", "CMakeLists.txt")
             tools.replace_in_file(path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
+            tools.replace_in_file(path, "${CMAKE_SOURCE_DIR}/opensubdiv", "${CMAKE_SOURCE_DIR}/source_subfolder/opensubdiv")
         cmake = self._configure_cmake()
         cmake.build()
 
