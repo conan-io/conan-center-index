@@ -40,7 +40,6 @@ class HarfbuzzConan(ConanFile):
 
     short_paths = True
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
     @property
@@ -50,6 +49,11 @@ class HarfbuzzConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,7 +84,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.73.0")
+            self.requires("glib/2.73.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
