@@ -1,0 +1,13 @@
+diff --git a/sharedlib/CMakeLists.txt b/sharedlib/CMakeLists.txt
+index aea0b9d..612be16 100644
+--- a/sharedlib/CMakeLists.txt
++++ b/sharedlib/CMakeLists.txt
+@@ -36,7 +36,7 @@ if(WIN32)
+   endif()
+ endif()
+ if(MSVC)
+-  configure_file(${CMAKE_SOURCE_DIR}/win/jpeg.rc.in
++  configure_file(../win/jpeg.rc.in
+     ${CMAKE_BINARY_DIR}/win/jpeg.rc)
+   set(JPEG_SRCS ${JPEG_SRCS} ${CMAKE_BINARY_DIR}/win/jpeg.rc)
+ endif()
