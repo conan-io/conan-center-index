@@ -1,7 +1,6 @@
 import functools
 import os
 
-from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 
 
@@ -46,6 +45,9 @@ class OpenSubdivConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -95,12 +97,8 @@ class OpenSubdivConan(ConanFile):
         cmake.definitions["NO_REGRESSION"] = True
         cmake.definitions["NO_TESTS"] = True
         cmake.definitions["NO_GLTESTS"] = True
-        if self.settings.os == "Linux" and self.settings.compiler == "clang" and not self.options.shared and self.settings.compiler.libcxx == "libc++":
-            cmake.definitions["CMAKE_CXX_FLAGS"] = "-stdlib=libc++"
-        if is_msvc(self) and self.settings.compiler.runtime in ["MT", "MTd"]:
-            cmake.definitions["MSVC_STATIC_CRT"] = True
 
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
 
         return cmake
 
