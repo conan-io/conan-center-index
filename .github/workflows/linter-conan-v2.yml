@@ -11,7 +11,7 @@ env:
 
 jobs:
   test_linter:
-    name: Test linter changes
+    name: Test linter changes (v2 migration)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -57,7 +57,7 @@ jobs:
           echo '> Note.- Check uploaded artifact for a full report.' >> $GITHUB_STEP_SUMMARY
 
   conanfile_recipe:
-    name: Lint changed conanfile.py
+    name: Lint changed conanfile.py (v2 migration)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
