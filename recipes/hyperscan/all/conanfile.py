@@ -95,5 +95,24 @@ class HyperscanConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libhs"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "hyperscan"
+        self.cpp_info.names["cmake_find_package_multi"] = "hyperscan"
+
+        self.cpp_info.components["hs"].libs = ["hs"]
+        self.cpp_info.components["hs"].requires = ["boost::headers"]
+        self.cpp_info.components["hs"].names["cmake_find_package"] = "hs"
+        self.cpp_info.components["hs"].names["cmake_find_package_multi"] = "hs"
+        self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
+
+        self.cpp_info.components["hs_runtime"].libs = ["hs_runtime"]
+        self.cpp_info.components["hs_runtime"].names["cmake_find_package"] = "hs_runtime"
+        self.cpp_info.components["hs_runtime"].names["cmake_find_package_multi"] = "hs_runtime"
+
+
+        if self.options.build_chimera:
+            self.cpp_info.components["chimera"].libs = ["chimera"]
+            self.cpp_info.components["chimera"].requires = ["pcre::libpcre", "hs"]
+            self.cpp_info.components["chimera"].names["cmake_find_package"] = "chimera"
+            self.cpp_info.components["chimera"].names["cmake_find_package_multi"] = "chimera"
+            self.cpp_info.components["chimera"].set_property("pkg_config_name", "libchimera")
+
