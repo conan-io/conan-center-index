@@ -1383,9 +1383,9 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt5", "qt")
-            if os.path.isfile(module):
+            modules = glob.glob(os.path.join("lib", "cmake", m, "*Macros.cmake"))
+            for module in modules:
                 build_modules.append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
