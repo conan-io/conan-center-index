@@ -1,0 +1,37 @@
+diff --git a/src/bin/pg_dump/pg_backup_archiver.c b/src/bin/pg_dump/pg_backup_archiver.c
+index a69b06f..a0cc283 100644
+--- a/src/bin/pg_dump/pg_backup_archiver.c
++++ b/src/bin/pg_dump/pg_backup_archiver.c
+@@ -425,6 +425,8 @@ RestoreArchive(Archive *AHX)
+ 		 */
+ 		AH->noTocComments = 1;
+ 	}
++	else
++		AHX->remoteVersion = 999999;  /* set all possible parameters */
+
+ 	/*
+ 	 * Work out if we have an implied data-only restore. This can happen if
+@@ -3059,8 +3061,10 @@ _doSetFixedOutputState(ArchiveHandle *AH)
+ 	 * Disable timeouts to allow for slow commands, idle parallel workers, etc
+ 	 */
+ 	ahprintf(AH, "SET statement_timeout = 0;\n");
+-	ahprintf(AH, "SET lock_timeout = 0;\n");
+-	ahprintf(AH, "SET idle_in_transaction_session_timeout = 0;\n");
++	if (AH->public.remoteVersion >= 90300)
++		ahprintf(AH, "SET lock_timeout = 0;\n");
++	if (AH->public.remoteVersion >= 90600)
++		ahprintf(AH, "SET idle_in_transaction_session_timeout = 0;\n");
+
+ 	/* Select the correct character set encoding */
+ 	ahprintf(AH, "SET client_encoding = '%s';\n",
+@@ -3091,8 +3095,9 @@ _doSetFixedOutputState(ArchiveHandle *AH)
+
+ 	/* Adjust row-security state */
+ 	if (ropt && ropt->enable_row_security)
++		/* write it even if the server doesn't support it which leads to fail */
+ 		ahprintf(AH, "SET row_security = on;\n");
+-	else
++	else if (AH->public.remoteVersion >= 90500)
+ 		ahprintf(AH, "SET row_security = off;\n");
+
+ 	ahprintf(AH, "\n");
