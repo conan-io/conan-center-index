@@ -36,6 +36,7 @@ class OpenSubdivConan(ConanFile):
         "with_metal": False,
     }
 
+    short_paths = True
     generators = "cmake"
 
     @property
