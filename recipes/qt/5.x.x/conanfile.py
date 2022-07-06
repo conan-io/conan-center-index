@@ -79,6 +79,7 @@ class QtConan(ConanFile):
         "with_dbus": [True, False],
         "with_gssapi": [True, False],
         "with_atspi": [True, False],
+        "with_md4c": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -119,6 +120,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_gssapi": False,
         "with_atspi": False,
+        "with_md4c": True,
 
         "gui": True,
         "widgets": True,
@@ -235,6 +237,7 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+            del self.options.with_md4c
         
         if not self.options.with_dbus:
             del self.options.with_atspi
@@ -408,6 +411,8 @@ class QtConan(ConanFile):
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.44.0")
+        if self.options.get_safe("with_md4c", False):
+            self.requires("md4c/0.4.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -625,7 +630,8 @@ class QtConan(ConanFile):
                               ("with_harfbuzz", "harfbuzz"),
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
-                              ("with_sqlite3", "sqlite")]:
+                              ("with_sqlite3", "sqlite"),
+                              ("with_md4c", "libmd4c")]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     args += ["-qt-" + conf_arg]
@@ -655,7 +661,8 @@ class QtConan(ConanFile):
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
                   ("libalsa", "ALSA"),
-                  ("xkbcommon", "XKBCOMMON")]
+                  ("xkbcommon", "XKBCOMMON"),
+                  ("md4c", "LIBMD4C")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == "freetype":
@@ -1006,6 +1013,8 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
+            if self.options.with_md4c:
+                gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             build_modules.append(self._cmake_qt5_private_file("Gui"))
             self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
