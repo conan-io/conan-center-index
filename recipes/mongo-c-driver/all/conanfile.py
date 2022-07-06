@@ -1,18 +1,17 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.43.0"
 
-
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
+    description = "A Cross Platform MongoDB Client Library for C"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mongoc.org/"
-    description = "A Cross Platform MongoDB Client Library for C"
     topics = ("libbson", "libmongoc", "mongo", "mongodb", "database", "db")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +24,6 @@ class MongoCDriverConan(ConanFile):
         "with_icu": [True, False],
         "srv": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -37,10 +35,8 @@ class MongoCDriverConan(ConanFile):
         "with_icu": True,
         "srv": True,
     }
-
     short_paths = True
     generators = "cmake", "cmake_find_package", "pkg_config"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -68,9 +64,9 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         elif self.options.with_ssl == "libressl":
-            self.requires("libressl/3.4.3")
+            self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
@@ -89,6 +85,8 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")
         if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
+        if tools.Version(self.version) >= "1.21.0" and self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration("shared build doesn't allow on Windows after 1.21.0")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
@@ -130,44 +128,43 @@ class MongoCDriverConan(ConanFile):
             "cyrus": "CYRUS",
         }.get(str(self.options.with_sasl), "OFF")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
-        self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
-        self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
-        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["ENABLE_TESTS"] = "OFF"
-        self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
-        self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
-        self._cmake.definitions["ENABLE_MAINTAINER_FLAGS"] = "OFF"
-        self._cmake.definitions["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
-        self._cmake.definitions["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
-        self._cmake.definitions["ENABLE_TRACING"] = "OFF"
-        self._cmake.definitions["ENABLE_COVERAGE"] = "OFF"
-        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
-        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
-        self._cmake.definitions["ENABLE_BSON"] = "ON"
-        self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
-        self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
-        self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
-        self._cmake.definitions["ENABLE_MAN_PAGES"] = False
-        self._cmake.definitions["ENABLE_HTML_DOCS"] = False
-        self._cmake.definitions["ENABLE_EXTRA_ALIGNMENT"] = True
-        self._cmake.definitions["ENABLE_RDTSCP"] = False
-        self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
-        self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
-        self._cmake.definitions["ENABLE_UNINSTALL"] = False
-        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
-        self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
-        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
+        cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
+        cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
+        cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
+        cmake.definitions["ENABLE_TESTS"] = "OFF"
+        cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
+        cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
+        cmake.definitions["ENABLE_MAINTAINER_FLAGS"] = "OFF"
+        cmake.definitions["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
+        cmake.definitions["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
+        cmake.definitions["ENABLE_TRACING"] = "OFF"
+        cmake.definitions["ENABLE_COVERAGE"] = "OFF"
+        cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
+        cmake.definitions["ENABLE_MONGOC"] = "ON"
+        cmake.definitions["ENABLE_BSON"] = "ON"
+        cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
+        cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
+        cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        cmake.definitions["ENABLE_MAN_PAGES"] = False
+        cmake.definitions["ENABLE_HTML_DOCS"] = False
+        cmake.definitions["ENABLE_EXTRA_ALIGNMENT"] = True
+        cmake.definitions["ENABLE_RDTSCP"] = False
+        cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
+        cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
+        cmake.definitions["ENABLE_UNINSTALL"] = False
+        cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
+        cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
+        cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
-            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
+            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
 
-        self._cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
 
-        return self._cmake
+        return cmake
 
     def build(self):
         self._patch_sources()
