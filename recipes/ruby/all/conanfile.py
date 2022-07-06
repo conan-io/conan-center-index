@@ -104,6 +104,8 @@ class RubyConan(ConanFile):
         if self.options.shared and not is_msvc(self):
             # Force fPIC
             tc.fpic = True
+            if "--enable-shared" not in tc.configure_args:
+                tc.configure_args.append("--enable-shared")
 
         if cross_building(self) and is_apple_os(self.settings.os):
             apple_arch = to_apple_arch(self.settings.arch)
