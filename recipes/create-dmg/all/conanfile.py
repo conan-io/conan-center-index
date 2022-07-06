@@ -30,13 +30,15 @@ class CreateDmgConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("create-dmg", dst="bin", src=self._source_subfolder)
+        self.copy("*", dst=os.path.join("bin","support"), src=os.path.join(self._source_subfolder,"support"))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        self.info.header_only() 
+        self.info.header_only()
 
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
+        self.cpp_info.includedirs = []
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)

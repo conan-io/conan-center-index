@@ -29,7 +29,6 @@ communicating those changes and the relevant updates in the
 [changelog](changelog.md). Here there are the main steps that we are
 planning for the following months.
 
-
 ## Short term
 
 ### Prepare the CI infrastructure
@@ -72,7 +71,6 @@ this repository.
 It will help us to know how many recipes are fixed at a given time and
 think about efforts and impact of next steps.
 
-
 ## Mid term
 
 ### Add CI running Conan v2 (hidden)
@@ -92,7 +90,7 @@ in pull-requests (although successful builds using v2 won't be required to
 merge). Again, we expect some contributors to be aware of these errors,
 maybe try to fix those builds, and for sure report feedback.
 
-### Linter - turn more warnings to errors
+### Linter - turn more warnings to errors
 
 During all this time, the plan is to move linter warnings to errors, one
 by one and taking into account the effort required to fix them. With the
@@ -105,8 +103,7 @@ When a significant number (TBD) of recipes start to be exported
 successfully, we will turn those export warnings into actual errors and
 they will be become required to merge the pull-requests
 
-
-## Long term
+## Long term
 
 ### CI running v2 is reported (and required)
 
@@ -114,7 +111,7 @@ Next step is to start running and reporting the results of the builds using
 v2 for all the configurations, like we do for Conan v1. At this time all
 pull-requests need to work with v1 and v2 to be merged.
 
-### Conan v2 remote
+### Conan v2 remote
 
 TBD. Packages built using Conan v2 will become available for users
 
@@ -122,7 +119,6 @@ TBD. Packages built using Conan v2 will become available for users
 
 ConanCenter webpage will start to show relevant information related to v2
 packages and, eventually, v2 information will be the only available.
-
 
 ## Future
 

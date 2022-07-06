@@ -55,7 +55,7 @@ class QuaZIPConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("qt/5.15.3")
+        self.requires("qt/5.15.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -83,19 +83,18 @@ class QuaZIPConan(ConanFile):
 
     def package_info(self):
         quazip_major = tools.Version(self.version).major
-        _qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
-        self.cpp_info.set_property("cmake_file_name", f"QuaZip-Qt{_qt_major}")
+        self.cpp_info.set_property("cmake_file_name", f"QuaZip-Qt{self._qt_major}")
         self.cpp_info.set_property("cmake_target_name", "QuaZip::QuaZip")
-        self.cpp_info.set_property("pkg_config_name", f"quazip{quazip_major}-qt{_qt_major}")
+        self.cpp_info.set_property("pkg_config_name", f"quazip{quazip_major}-qt{self._qt_major}")
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = [f"quazip{quazip_major}-qt{_qt_major}{suffix}"]
-        self.cpp_info.includedirs = [os.path.join("include", f"QuaZip-Qt{_qt_major}-{self.version}")]
+        self.cpp_info.libs = [f"quazip{quazip_major}-qt{self._qt_major}{suffix}"]
+        self.cpp_info.includedirs = [os.path.join("include", f"QuaZip-Qt{self._qt_major}-{self.version}")]
         if not self.options.shared:
             self.cpp_info.defines.append("QUAZIP_STATIC")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"QuaZip-Qt{_qt_major}"
-        self.cpp_info.filenames["cmake_find_package_multi"] = f"QuaZip-Qt{_qt_major}"
+        self.cpp_info.filenames["cmake_find_package"] = f"QuaZip-Qt{self._qt_major}"
+        self.cpp_info.filenames["cmake_find_package_multi"] = f"QuaZip-Qt{self._qt_major}"
         self.cpp_info.names["cmake_find_package"] = "QuaZip"
         self.cpp_info.names["cmake_find_package_multi"] = "QuaZip"
-        self.cpp_info.names["pkg_config"] = f"quazip{quazip_major}-qt{_qt_major}"
+        self.cpp_info.names["pkg_config"] = f"quazip{quazip_major}-qt{self._qt_major}"
