@@ -40,6 +40,9 @@ class MoldConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("zlib/1.2.12")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
