@@ -114,6 +114,9 @@ class RubyConan(ConanFile):
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 tc.ldflags.append("-debug")
             tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
+
+        tc.configure_args.append("--prefix=")
+
         tc.generate()
 
     def build(self):
