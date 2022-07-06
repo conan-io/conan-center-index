@@ -220,6 +220,18 @@ index 8bc6077..579a7b4 100644
                  )
          endif (BUILD_AVX512VBMI)
          add_library(hs_exec_common_shared OBJECT
+diff --git chimera/CMakeLists.txt chimera/CMakeLists.txt
+index 1cd66a3..ebb3b49 100644
+--- chimera/CMakeLists.txt
++++ chimera/CMakeLists.txt
+@@ -44,6 +44,6 @@ if (NOT WIN32)
+     set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
+ 
+     configure_file(libch.pc.in libch.pc @ONLY) # only replace @ quoted vars
+-    install(FILES ${CMAKE_BINARY_DIR}/chimera/libch.pc
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libch.pc
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ endif()
 diff --git tools/hsbench/CMakeLists.txt tools/hsbench/CMakeLists.txt
 index bbceda4..18545d0 100644
 --- tools/hsbench/CMakeLists.txt
