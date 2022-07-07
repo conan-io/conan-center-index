@@ -900,7 +900,7 @@ class QtConan(ConanFile):
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
+            if self.settings.os == "Windows" and self._is_msvc:
                 libsuffix = "d"
             if tools.is_apple_os(self.settings.os):
                 libsuffix = "_debug"
