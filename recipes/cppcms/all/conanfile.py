@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import shutil
+
 
 required_conan_version = ">=1.33.0"
 
@@ -45,6 +47,25 @@ class CppcmsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version.value)
+
+        minimal_version = {
+            "gcc": "6",
+            "clang": "3.5",
+            "apple-clang": "7.3",
+            "Visual Studio": "14"
+        }
+
+        if compiler in minimal_version and \
+           compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports"
+                                            " at least C++11. %s %s is not"
+                                            " supported." % (self.name, compiler, compiler_version))
+
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
