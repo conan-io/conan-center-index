@@ -63,6 +63,7 @@ class QtConan(ConanFile):
 
     options = {
         "shared": [True, False],
+        "pch": ["auto", "on", "off"],
         "opengl": ["no", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
@@ -105,6 +106,7 @@ class QtConan(ConanFile):
 
     default_options = {
         "shared": False,
+        "pch": "auto",
         "opengl": "desktop",
         "with_vulkan": False,
         "openssl": True,
@@ -675,8 +677,11 @@ class QtConan(ConanFile):
             cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
 
         cmake.definitions["FEATURE_pkg_config"] = "ON"
-        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
+        
+        if self.options.pch == "off" or (self.options.pch == "auto" and self.settings.compiler == "gcc"
+                                         and self.settings.build_type == "Debug" and not self.options.shared):
             cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+        
 
         if self.settings.os == "Windows":
             cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
