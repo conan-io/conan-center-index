@@ -27,6 +27,8 @@ class MoldConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration('{} can\'t be built on {}.'.format(self.name, self.settings.os))
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration('Use Gcc compiler version higher than 8')
 
     @property
     def _source_subfolder(self):
