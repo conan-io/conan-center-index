@@ -1,0 +1,4 @@
+sources:
+  "0.20":
+    url: "https://github.com/LLNL/metall/archive/refs/tags/v0.20.tar.gz"
+    sha256: "cafe54c682004a66a059f54e2d7128ea7622e9941ea492297d04c260675e9af4"
