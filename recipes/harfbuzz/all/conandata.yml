@@ -1,43 +1,7 @@
 sources:
-  "2.6.8":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.6.8/harfbuzz-2.6.8.tar.xz"
-    sha256: "6648a571a27f186e47094121f0095e1b809e918b3037c630c7f38ffad86e3035"
-  "2.7.0":
-    url: "https://github.com/harfbuzz/harfbuzz/archive/refs/tags/2.7.0.tar.gz"
-    sha256: "4dba05de1fd44705f54c40d801e0e3d4833555d004cb611cc18675173feae75b"
-  "2.7.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.7.1/harfbuzz-2.7.1.tar.xz"
-    sha256: "e95ee43b6bd0d3d1307e2aacf0f9c0050e5baceb21988b367b833028114aa569"
-  "2.7.2":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.7.2/harfbuzz-2.7.2.tar.xz"
-    sha256: "b8c048d7c2964a12f2c80deb6634dfc836b603dd12bf0d0a3df1627698e220ce"
-  "2.7.4":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.7.4/harfbuzz-2.7.4.tar.xz"
-    sha256: "6ad11d653347bd25d8317589df4e431a2de372c0cf9be3543368e07ec23bb8e7"
-  "2.8.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.0/harfbuzz-2.8.0.tar.xz"
-    sha256: "a1079fd021adaf5683351f34587a255975cc3bcadba31246ae40ebebb95ecd42"
-  "2.8.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.1/harfbuzz-2.8.1.tar.xz"
-    sha256: "4124f663ec4bf4e294d9cf230668370b4249a48ff34deaf0f06e8fc82d891300"
-  "2.8.2":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.2/harfbuzz-2.8.2.tar.xz"
-    sha256: "d58461395ce28b9dc03903254374dd70c38c8c28c5046db123c08f7ab9417be7"
-  "2.9.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.9.0/harfbuzz-2.9.0.tar.xz"
-    sha256: "3e1c2e1d2c65d56364fd16d1c41a06b2a35795496f78dfff635c2b7414b54c5a"
-  "2.9.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.9.1/harfbuzz-2.9.1.tar.xz"
-    sha256: "0edcc980f526a338452180e701d6aba6323aef457b6686976a7d17ccbddc51cf"
   "3.0.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.0.0/harfbuzz-3.0.0.tar.xz"
     sha256: "036b0ee118451539783ec7864148bb4106be42a2eb964df4e83e6703ec46f3d9"
-  "3.1.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.1.0/harfbuzz-3.1.0.tar.xz"
-    sha256: "2359390944a74a933d2b1bd214754a5b3f817916a09c6d4ca3d263473cf19b8e"
-  "3.1.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.1.1/harfbuzz-3.1.1.tar.xz"
-    sha256: "f3f3247bdeabf36765acc237a5f651e651e4e9706582b9cc2cf6c9b8102dfa93"
   "3.1.2":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.1.2/harfbuzz-3.1.2.tar.xz"
     sha256: "4056b1541dd8bbd8ec29207fe30e568805c0705515632d7fec53a94399bc7945"
@@ -50,53 +14,17 @@ sources:
   "4.1.0":
     url: "https://github.com/harfbuzz/harfbuzz/archive/4.1.0.tar.gz"
     sha256: "0dad9332aa017d216981382cc07a9cf115740990c83b81ce3ea71ad88026d7f1"
-  "4.2.0":
-    url: "https://github.com/harfbuzz/harfbuzz/archive/4.2.0.tar.gz"
-    sha256: "7152d1bdcbd2bf6ba777cfe9161d40564fe0a7583e04e55e0a057d5f4414d3c9"
   "4.2.1":
     url: "https://github.com/harfbuzz/harfbuzz/archive/4.2.1.tar.gz"
     sha256: "99fcd30e2f4c66d05af3d61ad4cdba2abc2a51ecabb7eb6dc222520a892b50b0"
   "4.3.0":
     url: "https://github.com/harfbuzz/harfbuzz/archive/4.3.0.tar.gz"
     sha256: "32184860ddc0b264ff95010e1c64e596bd746fe4c2e34014a1185340cdddeba6"
+  "4.4.1":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/4.4.1/harfbuzz-4.4.1.tar.xz"
+    sha256: "c5bc33ac099b2e52f01d27cde21cee4281b9d5bfec7684135e268512478bc9ee"
 patches:
-  "2.6.8":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.7.0":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.7.1":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.7.2":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.7.4":
-    - patch_file: "patches/icu.patch"
-      base_path: "source_subfolder"
-  "2.8.0":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
-  "2.8.1":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
-  "2.8.2":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
-  "2.9.0":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
-  "2.9.1":
-    - patch_file: "patches/icu-2.8.x.patch"
-      base_path: "source_subfolder"
   "3.0.0":
-    - patch_file: "patches/icu-3.0.x.patch"
-      base_path: "source_subfolder"
-  "3.1.0":
-    - patch_file: "patches/icu-3.0.x.patch"
-      base_path: "source_subfolder"
-  "3.1.1":
     - patch_file: "patches/icu-3.0.x.patch"
       base_path: "source_subfolder"
   "3.1.2":
@@ -111,12 +39,12 @@ patches:
   "4.1.0":
     - patch_file: "patches/icu-4.0.x.patch"
       base_path: "source_subfolder"
-  "4.2.0":
-    - patch_file: "patches/icu-4.0.x.patch"
-      base_path: "source_subfolder"
   "4.2.1":
     - patch_file: "patches/icu-4.0.x.patch"
       base_path: "source_subfolder"
   "4.3.0":
+    - patch_file: "patches/icu-4.0.x.patch"
+      base_path: "source_subfolder"
+  "4.4.1":
     - patch_file: "patches/icu-4.0.x.patch"
       base_path: "source_subfolder"

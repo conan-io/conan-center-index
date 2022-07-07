@@ -24,13 +24,9 @@ github:
 #  - "license/cla"
 #  - "continuous-integration/jenkins/pr-merge"
 
-#check_runs:
-#  - "Lint changed files (YAML files)"
-#  - "Lint changed conanfile.py (v2 migration)"
-
-slack:
-  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
-  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+#slack:
+#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
