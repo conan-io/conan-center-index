@@ -57,13 +57,16 @@ class MoldConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("mold", src=self._build_subfolder, dst="bin")
+        self.copy("mold", src=self._source_subfolder, dst="bin", keep_path=False)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
-
+        self.env_info.LD = "mold"
         self.buildenv_info.prepend_path("MOLD_ROOT", self.package_folder)
         self.env_info.MOLD_ROOT = self.package_folder
         self.cpp_info.includedirs = []
+
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["m"])
