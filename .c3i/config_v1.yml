@@ -153,7 +153,7 @@ node_labels:
   Windows:
     x86_64:
       "Visual Studio":
-        default: "windows20220608"
+        default: "windows20220707"
   Macos:
     x86_64:
       "apple-clang":
