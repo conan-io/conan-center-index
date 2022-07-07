@@ -740,7 +740,8 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
-                     "-system-webengine-opus"]
+                     "-system-webengine-opus",
+                     "-webengine-jumbo-build 0"]
 
         if self.options.config:
             args.append(str(self.options.config))
