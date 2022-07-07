@@ -47,5 +47,5 @@ ret:
     hs_free_database(db);
     hs_free_scratch(scratch);
 
-    return 0;
+    return retval;
 }

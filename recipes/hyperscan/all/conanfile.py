@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 import os
 
@@ -53,9 +54,13 @@ class HyperscanConan(ConanFile):
         self.build_requires("ragel/6.10");
 
     def requirements(self):
-        self.requires("boost/1.75.0");
+        self.requires("boost/1.79.0");
         if self.options.build_chimera:
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
+
+    def validate(self):
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,9 +85,13 @@ class HyperscanConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+            
         if self.options.shared:
             del self.options.fPIC
-            
+
+        if self.options.shared and self.options.build_chimera:
+            raise ConanInvalidConfiguration("Chimera build requires static building")
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
