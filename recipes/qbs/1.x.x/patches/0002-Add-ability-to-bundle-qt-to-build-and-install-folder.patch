@@ -1,0 +1,109 @@
+From 86d92e01ffdd3689874784e02abfa100f3391b6d Mon Sep 17 00:00:00 2001
+From: Petr Mikhalicin <pmikhalicin@rutoken.ru>
+Date: Tue, 5 Jul 2022 15:04:59 +0300
+Subject: [PATCH 2/2] Add ability to bundle qt to build and install folder via
+ qmake
+
+This feature will be used for creation qbs conan package:
+https://github.com/conan-io/conan-center-index/pull/11592
+
+Change-Id: I8d41544252048300641398446c2f1725156b020e
+---
+ doc/qbs.qdoc                       |  1 +
+ src/app/app.pro                    |  3 ++-
+ src/lib/corelib/corelib.pro        |  5 ++++
+ src/shared/bundledqt/bundledqt.pro | 41 ++++++++++++++++++++++++++++++
+ 4 files changed, 49 insertions(+), 1 deletion(-)
+ create mode 100644 src/shared/bundledqt/bundledqt.pro
+
+diff --git a/doc/qbs.qdoc b/doc/qbs.qdoc
+index 7fcc7e68b..8af637427 100644
+--- a/doc/qbs.qdoc
++++ b/doc/qbs.qdoc
+@@ -557,6 +557,7 @@
+                                         non-developer build.
+     \row    \li qbs_no_man_install  \li Exclude the man page from installation.
+     \row    \li qbs_use_bundled_qtscript        \li Use the bundled QtScript library.
++    \row    \li qbs_enable_bundled_qt        \li Bundle Qt to build and install folder.
+     \endtable
+ 
+     In addition, you can set the \c QBS_SYSTEM_SETTINGS_DIR environment variable
+diff --git a/src/app/app.pro b/src/app/app.pro
+index 935ce1776..5ef24de82 100644
+--- a/src/app/app.pro
++++ b/src/app/app.pro
+@@ -5,6 +5,7 @@ SUBDIRS =\
+     qbs-setup-android \
+     qbs-setup-toolchains \
+     qbs-setup-qt \
+-    config
++    config \
++    ../shared/bundledqt
+ 
+ !isEmpty(QT.widgets.name):SUBDIRS += config-ui
+diff --git a/src/lib/corelib/corelib.pro b/src/lib/corelib/corelib.pro
+index afe07f48f..3b56300b8 100644
+--- a/src/lib/corelib/corelib.pro
++++ b/src/lib/corelib/corelib.pro
+@@ -34,6 +34,11 @@ win32:LIBS += -lpsapi -lshell32
+ HEADERS += \
+     qbs.h
+ 
++qbs_enable_bundled_qt {
++    linux-*: QMAKE_LFLAGS += -Wl,-z,origin \'-Wl,-rpath,\$\$ORIGIN\'
++    macos: QMAKE_LFLAGS += -Wl,-rpath,@loader_path
++}
++
+ !qbs_no_dev_install {
+     qbs_h.files = qbs.h
+     qbs_h.path = $${QBS_INSTALL_PREFIX}/include/qbs
+diff --git a/src/shared/bundledqt/bundledqt.pro b/src/shared/bundledqt/bundledqt.pro
+new file mode 100644
+index 000000000..6d36c01cc
+--- /dev/null
++++ b/src/shared/bundledqt/bundledqt.pro
+@@ -0,0 +1,41 @@
++TEMPLATE = aux
++
++qbs_enable_bundled_qt {
++    !isEmpty(QBS_APPS_DESTDIR): bindir = $${QBS_APPS_DESTDIR}
++    else: bindir = bin
++
++    !isEmpty(QBS_LIBRARY_DIRNAME): libdir = $${QBS_LIBRARY_DIRNAME}
++    else: libdir = lib
++
++    win32: dstdir = $${bindir}
++    else: dstdir = $${libdir}
++    dstdir=$$shell_quote($$shell_path($$absolute_path($$dstdir,  $${OUT_PWD}/../../..)))
++
++    win32: bundled_qt.path = $${QBS_INSTALL_PREFIX}/$${bindir}
++    else: bundled_qt.path = $${QBS_INSTALL_PREFIX}/$${libdir}
++
++    target_qt_libs = Qt5Core Qt5Xml Qt5Network Qt5Script
++    bundled_qt_at_build.target = bundled_qt_libs
++
++    for(lib, target_qt_libs) {
++        win32: srcdir = $$[QT_INSTALL_BINS]
++        else: srcdir = $$[QT_INSTALL_LIBS]
++        srcdir = $$shell_quote($$shell_path($${srcdir}))
++
++        win32: file = "$${lib}.dll"
++        macos: file = "lib$${lib}*.dylib"
++        linux-*: file = "lib$${lib}.so*"
++        file = $$shell_path($$absolute_path($${file}, $${srcdir}))
++
++        win32:bundled_qt.files += $${file}
++        else: bundled_qt.extra += $${QMAKE_COPY} -P $${file} $(INSTALL_ROOT)/$${bundled_qt.path} $$escape_expand(\n\t)
++
++        !win32: copy_flags = -P
++        bundled_qt_at_build.commands += $${QMAKE_COPY} $${copy_flags} $${file} $${dstdir} $$escape_expand(\n\t)
++    }
++
++    QMAKE_EXTRA_TARGETS += bundled_qt_at_build
++    PRE_TARGETDEPS += $${bundled_qt_at_build.target}
++
++    INSTALLS += bundled_qt
++}
+-- 
+2.32.0
+

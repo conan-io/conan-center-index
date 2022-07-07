@@ -1,0 +1,9 @@
+sources:
+  "1.22.1":
+    url: "http://download.qt.io/official_releases/qbs/1.22.1/qbs-src-1.22.1.tar.gz"
+    sha256: b06003f49683971b552bb800bc134bf6c76cff79e1809cce741c40382b297b04
+
+patches:
+  "1.22.1":
+    - patch_file: "patches/0001-Allow-to-get-qbs-settings-dir-from-env-var.patch"
+    - patch_file: "patches/0002-Add-ability-to-bundle-qt-to-build-and-install-folder.patch"

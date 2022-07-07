@@ -1,0 +1,49 @@
+From 8cc718eaabc2f477759694a03e5a1e6dacbdd281 Mon Sep 17 00:00:00 2001
+From: Petr Mikhalicin <pmikhalicin@rutoken.ru>
+Date: Mon, 4 Jul 2022 12:29:09 +0300
+Subject: [PATCH 1/2] Allow to get qbs settings dir from env var
+
+This feature will be useful for using qbs conan package at virtual
+environment
+
+Change-Id: I0d903d9696edcc9b339226deb2cb38de89e319f5
+---
+ src/lib/corelib/tools/settingscreator.cpp | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/src/lib/corelib/tools/settingscreator.cpp b/src/lib/corelib/tools/settingscreator.cpp
+index f94ae6f10..e5b2ae1c3 100644
+--- a/src/lib/corelib/tools/settingscreator.cpp
++++ b/src/lib/corelib/tools/settingscreator.cpp
+@@ -53,14 +53,26 @@
+ namespace qbs {
+ namespace Internal {
+ 
++namespace {
++QString getBaseDir(QString baseDir) {
++    if (!baseDir.isEmpty())
++        return std::move(baseDir);
++
++    const char key[] = "QBS_SETTINGS_DIR";
++    if (qEnvironmentVariableIsSet(key))
++        return QLatin1String(qgetenv(key));
++
++    return QString();
++}
++}
++
+ static QSettings::Format format()
+ {
+     return HostOsInfo::isWindowsHost() ? QSettings::IniFormat : QSettings::NativeFormat;
+ }
+ 
+-
+ SettingsCreator::SettingsCreator(QString baseDir)
+-    : m_settingsBaseDir(std::move(baseDir))
++    : m_settingsBaseDir(getBaseDir(std::move(baseDir)))
+     , m_qbsVersion(Version::fromString(QLatin1String(QBS_VERSION)))
+ {
+ }
+-- 
+2.32.0
+
