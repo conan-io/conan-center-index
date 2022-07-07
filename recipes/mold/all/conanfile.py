@@ -46,10 +46,15 @@ class MoldConan(ConanFile):
     def _patch_sources(self):
         zlib_include_path = self.deps_cpp_info["zlib"].rootpath
         zlib_include_path = os.path.join(zlib_include_path, "include")
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-Ithird-party/xxhash -I{}".format(zlib_include_path))
+
+        openssl_include_path = self.deps_cpp_info["openssl"].rootpath
+        openssl_include_path = os.path.join(openssl_include_path, "include")
+
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-Ithird-party/xxhash -I{} -I{}".format(zlib_include_path, openssl_include_path))
 
     def requirements(self):
         self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1o")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
