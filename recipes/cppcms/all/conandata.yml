@@ -1,0 +1,8 @@
+sources:
+  "1.2.1":
+    url: "https://github.com/artyom-beilis/cppcms/archive/v1.2.1.tar.gz"
+    sha256: "50e65ab9f4a4a600bf94989949afaa36a91fffcfb48cb0321103e0e2d611e975"
+patches:
+  "1.2.1":
+    - patch_file: "patches/0001-cmake-enable-policy-cmp0042.patch"
+      base_path: "source_subfolder"

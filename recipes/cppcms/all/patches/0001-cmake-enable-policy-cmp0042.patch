@@ -1,0 +1,39 @@
+From 684cd10d93444f36f7202ad11914780edb730514 Mon Sep 17 00:00:00 2001
+From: Rasmus Thomsen <rasmus.thomsen@dampsoft.de>
+Date: Fri, 30 Jul 2021 09:55:40 +0200
+Subject: [PATCH] CMake: Enable policy CMP0042
+
+This fixes RPATH handling under MacOS
+---
+ CMakeLists.txt         | 4 +---
+ booster/CMakeLists.txt | 3 +++
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 915b2f6..bbe456d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ cmake_minimum_required(VERSION 2.6)
+ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+-
++cmake_policy(SET CMP0042 NEW)
+ 
+ project(cppcms)
+ set(CPPCMS_PACKAGE_NAME "CppCMS")
+diff --git a/booster/CMakeLists.txt b/booster/CMakeLists.txt
+index 4f81833..18c4e3e 100644
+--- a/booster/CMakeLists.txt
++++ b/booster/CMakeLists.txt
+@@ -7,6 +7,8 @@
+ #
+ 
+ cmake_minimum_required(VERSION 2.6)
++cmake_policy(SET CMP0042 NEW)
++
+ project(booster)
+ include(CheckFunctionExists)
+ include(CheckCXXSourceCompiles)
+-- 
+GitLab
+
