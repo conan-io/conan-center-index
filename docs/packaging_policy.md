@@ -137,7 +137,7 @@ in this direction. However, there are a couple of options that have a special me
    ```python
    def _configure_cmake(self):
       cmake = CMake(self)
-      cmake.definitions['BUILD_TESTING'] = bool(self.conf.get("tools.build:skip_test", check_type=bool))
+      cmake.definitions['BUILD_TESTING'] = bool(self.conf_info.get("tools.build:skip_test", check_type=bool))
    ```
 
    The `skip_test` configuration is supported by [CMake](https://docs.conan.io/en/latest/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/en/latest/reference/build_helpers/meson.html#test).
