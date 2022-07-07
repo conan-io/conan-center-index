@@ -13,14 +13,6 @@ class MoldConan(ConanFile):
     topics = ("mold", "ld", "linkage", "compilation")
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     generators = "make"
     exports_sources = ["patches/**"]
@@ -38,10 +30,6 @@ class MoldConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def _patch_sources(self):
         zlib_include_path = self.deps_cpp_info["zlib"].rootpath
