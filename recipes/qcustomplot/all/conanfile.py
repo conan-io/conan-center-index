@@ -18,10 +18,12 @@ class QcustomplotConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "opengl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "opengl": False,
     }
 
     generators = "cmake", "cmake_find_package_multi"
@@ -76,7 +78,8 @@ class QcustomplotConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
-        # TODO: add an option to enable QCUSTOMPLOT_USE_OPENGL
+        if self.options.opengl:
+            cmake.definitions["QCUSTOMPLOT_USE_OPENGL"] = 1
         cmake.configure()
         return cmake
 
@@ -95,4 +98,6 @@ class QcustomplotConan(ConanFile):
         self.cpp_info.libs = ["qcustomplot" + postfix]
         if self.options.shared:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_LIBRARY")
+        if self.options.opengl:
+            self.cpp_info.defines.append("QCUSTOMPLOT_USE_OPENGL")
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport"]
