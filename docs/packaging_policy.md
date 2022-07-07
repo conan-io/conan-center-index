@@ -130,3 +130,14 @@ in this direction. However, there are a couple of options that have a special me
    ```
 
    ensuring that, when the option is active, the recipe ignores all the settings and only one package ID is generated.
+
+* `build_testing` should not be added, nor any other related unit test option. Options affect the package ID, therefore, testing should not be part of that.
+   Instead, use Conan config [skip_test](https://docs.conan.io/en/latest/reference/config_files/global_conf.html#tools-configurations) feature:
+
+   ```python
+   def _configure_cmake(self):
+      cmake = CMake(self)
+      cmake.definitions['BUILD_TESTING'] = bool(self.conf.get("tools.build:skip_test", check_type=bool))
+   ```
+
+   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/en/latest/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/en/latest/reference/build_helpers/meson.html#test).
