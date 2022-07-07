@@ -44,8 +44,11 @@ class MoldConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        zlib_include_path = self.deps_cpp_info["zlib"].rootpath
+        zlib_include_path = os.path.join(zlib_include_path, "include")
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-Ithird-party/xxhash -I{}".format(zlib_include_path))
+        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        #    tools.patch(**patch)
 
     def requirements(self):
         self.requires("zlib/1.2.12")
