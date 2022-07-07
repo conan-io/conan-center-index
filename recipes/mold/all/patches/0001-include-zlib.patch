@@ -1,0 +1,12 @@
+diff --git a/Makefile b/Makefile
+index f3aa3fc3..3a5d6666 100644
+--- a/Makefile
++++ b/Makefile
+@@ -40,6 +40,7 @@ CXXFLAGS = -O2
+ 
+ MOLD_CXXFLAGS := -std=c++20 -fno-exceptions -fno-unwind-tables \
+                  -fno-asynchronous-unwind-tables -Ithird-party/xxhash \
++                 -I${CONAN_INCLUDE_DIRS_ZLIB}/include \
+                  -DMOLD_VERSION=\"$(VERSION)\" -DLIBDIR="\"$(LIBDIR)\""
+ 
+ MOLD_LDFLAGS := -pthread -lz -lm -ldl
