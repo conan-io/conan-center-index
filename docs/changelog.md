@@ -1,6 +1,6 @@
 # Changelog
 
-#### 06-July-2022 - 14:28 CEST
+### 06-July-2022 - 14:28 CEST
 
 - [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
 - [fix]: Improve Conan v2 export message.
