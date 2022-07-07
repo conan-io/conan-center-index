@@ -23,6 +23,7 @@ class MoldConan(ConanFile):
     }
 
     generators = "make"
+    exports_sources = ["patches/**"]
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -42,6 +43,10 @@ class MoldConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def requirements(self):
         self.requires("zlib/1.2.12")
 
@@ -50,7 +55,7 @@ class MoldConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        #self._patch_sources()
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="mold")
@@ -69,4 +74,4 @@ class MoldConan(ConanFile):
         self.cpp_info.includedirs = []
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m"])
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl", "z"])

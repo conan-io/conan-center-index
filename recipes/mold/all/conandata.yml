@@ -2,3 +2,8 @@ sources:
   "1.3.1":
     url: "https://github.com/rui314/mold/archive/refs/tags/v1.3.1.tar.gz"
     sha256: "d436e2d4c1619a97aca0e28f26c4e79c0242d10ce24e829c1b43cfbdd196fd77"
+patches:
+  "1.3.1":
+    - patch_file: "patches/0001-include-zlib.patch"
+      base_path: "source_subfolder"
+
