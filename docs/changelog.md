@@ -1,5 +1,14 @@
 # Changelog
 
+#### 06-July-2022 - 14:28 CEST
+
+- [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
+- [fix]: Improve Conan v2 export message.
+- [fix]: Fix config parameters for RelaunchUnexpected job
+- [fix]: Make AccessRequest job open PR against cci repo.
+- [fix]: DSL: Remove old jobs by date only
+- [refactor]: Refactor GitHub-related code utilities.
+
 ### 27-June-2022 - 17:29 CEST
 
 - [fix] Fix "no changes detected" issue in some pull-requests.
