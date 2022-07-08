@@ -1,5 +1,8 @@
+import re
+
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
@@ -211,8 +214,21 @@ class GLibConan(ConanFile):
                 "if false #cc.has_function('ngettext'",
             )
 
+    def _patch_pkgconfig(self):
+        with tools.chdir(self.generators_folder):
+            for filename in glob.glob("*.pc"):
+                self.output.info("processing %s" % filename)
+                content = tools.load(filename)
+                results = re.findall(r"-F (.*)[ \n]", content)
+                for result in results:
+                    if not os.path.isdir(result):
+                        self.output.info("removing bad framework path %s" % result)
+                        content = content.replace("-F %s" % result, "")
+                tools.save(filename, content)
+
     def build(self):
         self._patch_sources()
+        self._patch_pkgconfig()
         meson = Meson(self)
         meson.configure()
         meson.build()
