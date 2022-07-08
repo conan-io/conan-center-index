@@ -71,7 +71,7 @@ jobs:
           jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}'  test_package.json > test_package2.json
           jq -r '" * \(.message): \(.length)"' test_package2.json >> $GITHUB_STEP_SUMMARY
 
-      - name: Create report (test_package)
+      - name: Create report
         if: steps.changed_files.outputs.any_changed == 'true' && always()
         run: |
           echo '> Note.- Check uploaded artifacts for a full report.' >> $GITHUB_STEP_SUMMARY
