@@ -24,6 +24,8 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration('Use Gcc compiler version higher than 9')
         if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and tools.Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration('Use Clang compiler version higher than 11')
+        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch :
+            raise ConanInvalidConfiguration('Use apple-clang does not work on ARM with this recipe')
 
     @property
     def _source_subfolder(self):
