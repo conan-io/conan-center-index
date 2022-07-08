@@ -14,11 +14,9 @@ class PicobenchConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_cli": [True, False],
-        "bind_to_one_core": [True, False],
     }
     default_options = {
         "with_cli": False,
-        "bind_to_one_core": False,
     }
     generators = "cmake"
 
@@ -36,7 +34,9 @@ class PicobenchConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
-        if not self.options.with_cli:
+        if self.options.with_cli:
+            del self.info.settings.compiler
+        else:
             self.info.header_only()
 
     def source(self):
@@ -51,7 +51,6 @@ class PicobenchConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["PICOBENCH_BUILD_TOOLS"] = self.options.with_cli
-        cmake.definitions["PICOBENCH_BIND_TO_ONE_CORE"] = self.options.bind_to_one_core
         cmake.configure()
         return cmake
 
