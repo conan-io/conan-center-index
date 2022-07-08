@@ -22,7 +22,7 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration('{} can\'t be built on {}.'.format(self.name, self.settings.os))
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "9":
             raise ConanInvalidConfiguration('Use Gcc compiler version higher than 9')
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "11":
+        if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and tools.Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration('Use Clang compiler version higher than 11')
 
     @property
