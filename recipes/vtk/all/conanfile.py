@@ -342,14 +342,14 @@ class VtkConan(ConanFile):
                 "expat":             "expat/2.4.8",
                 "exprtk":            "exprtk/0.0.1",
                 "fmt":               "fmt/8.1.1",      # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                "freetype":          "freetype/2.11.1",
+                "freetype":          "freetype/2.12.1",
                 "glew":              "glew/2.2.0",
                 "jsoncpp":           "jsoncpp/1.9.5",
                 # "libharu": "libharu/2.3.0", -- use VTK's bundled version - heavily patched
                 "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.3",
                 "libpng":            "libpng/1.6.37",
-                "proj":              "proj/9.0.0", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
+                "proj":              "proj/9.0.1", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
                 "pugixml":           "pugixml/1.12.1",
                 "sqlite3":           "sqlite3/3.38.5",
                 "utfcpp":            "utfcpp/3.2.1",
@@ -361,7 +361,7 @@ class VtkConan(ConanFile):
 
         if (self.options.build_all_modules
                 or self.options.group_enable_StandAlone):
-            parties["hdf5"]    = "hdf5/1.12.1"
+            parties["hdf5"]    = "hdf5/1.13.1"
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
@@ -407,7 +407,7 @@ class VtkConan(ConanFile):
             self.requires("openssl/1.1.1o", override=True)
 
         # HACK TODO working around a dependency bug in conan
-        self.requires("cmake/3.23.1")
+        self.requires("cmake/3.23.2")
 
 
     def build_requirements(self):
