@@ -6,23 +6,28 @@ conan_basic_setup(KEEP_RPATHS)
 
 find_package(arsenalgear REQUIRED CONFIG)
 
-set(osmanip_src
-    source_subfolder/src/graphics/canvas.cpp
-    source_subfolder/src/graphics/plot_2D.cpp
-    source_subfolder/src/manipulators/csmanip.cpp
-    source_subfolder/src/progressbar/progress_bar.cpp
-    source_subfolder/src/utility/windows.cpp
-)
-
-set(osmanip_inc
-    source_subfolder/include/graphics/canvas.hpp
-    source_subfolder/include/graphics/plot_2D.hpp
-    source_subfolder/include/manipulators/csmanip.hpp
-    source_subfolder/include/progressbar/multi_progress_bar.hpp
-    source_subfolder/include/progressbar/progress_bar.hpp
-    source_subfolder/include/utility/windows.hpp
-)
-
+if(${OSMANIP_VERSION} VERSION_EQUAL 4.0.0)
+    set(osmanip_src
+        source_subfolder/src/graphics/canvas.cpp
+        source_subfolder/src/graphics/plot_2D.cpp
+        source_subfolder/src/manipulators/csmanip.cpp
+        source_subfolder/src/progressbar/progress_bar.cpp
+        source_subfolder/src/utility/windows.cpp
+    )
+elseif(${OSMANIP_VERSION} VERSION_GREATER 4.0.0)
+    set(osmanip_src
+        source_subfolder/src/graphics/canvas.cpp
+        source_subfolder/src/graphics/plot_2D.cpp
+        source_subfolder/src/manipulators/printer.cpp
+        source_subfolder/src/manipulators/cursor.cpp
+        source_subfolder/src/manipulators/common.cpp
+        source_subfolder/src/manipulators/colsty.cpp
+        source_subfolder/src/progressbar/progress_bar.cpp
+        source_subfolder/src/utility/windows.cpp
+    )
+else()
+    message(FATAL_ERROR "unsupported osmanip version : ${OSMANIP_VERSION}")
+endif()
 
 add_library(osmanip ${osmanip_src})
 target_include_directories(osmanip PUBLIC source_subfolder/include/)
