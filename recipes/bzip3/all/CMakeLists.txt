@@ -28,6 +28,7 @@ set_target_properties(bzip3 PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
     C_EXTENSIONS OFF
 )
+target_compile_features(bzip3 PUBLIC c_std_99)
 if (with_thread)
     target_compile_definitions(bzip3 PRIVATE "PTHREAD")
 endif()
