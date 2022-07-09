@@ -486,6 +486,7 @@ class VtkConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+        # WTF resdirs # self.cpp.package.resdirs = ["res"]
 
 
     def generate(self):
@@ -759,6 +760,7 @@ class VtkConan(ConanFile):
                 self.cpp_info.components[comp].set_property("cmake_target_name", "VTK::" + comp)
                 self.cpp_info.components[comp].libs          = ["vtk" + comp]
                 self.cpp_info.components[comp].libdirs       = ["lib"]
+                # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
                 self.cpp_info.components[comp].requires      = all_requires
                 self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
                 if self.settings.os == "Linux":
@@ -809,6 +811,7 @@ class VtkConan(ConanFile):
                     self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                     self.cpp_info.components[comp].libs          = [comp_libname]
                     self.cpp_info.components[comp].libdirs       = ["lib"]
+                    # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
 
                     # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
                 elif module_name in thirds:
