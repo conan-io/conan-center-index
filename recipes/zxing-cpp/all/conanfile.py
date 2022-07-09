@@ -6,6 +6,7 @@ import os
 
 required_conan_version = ">=1.43.0"
 
+
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
     description = "c++14 port of ZXing, a barcode scanning library"
@@ -13,6 +14,7 @@ class ZXingCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nu-book/zxing-cpp"
     topics = ("zxing", "barcode", "scanner", "generator")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,15 +57,6 @@ class ZXingCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
-        try:
-            minimum_required_version = self._compiler_cpp14_support[str(self.settings.compiler)]
-            if self.settings.compiler.version < tools.Version(minimum_required_version):
-                raise ConanInvalidConfiguration("This compiler is too old. This library needs a compiler with c++14 support")
-        except KeyError:
-            self.output.warn("This recipe might not support the compiler. Consider adding it.")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -79,8 +72,6 @@ class ZXingCppConan(ConanFile):
         # FIXME: This is a workaround for "The system cannot execute the specified program."
         if tools.Version(self.version) == "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
-        if is_msvc_static_runtime(self) and self.options.shared:
-            raise ConanInvalidConfiguration("MT + DLL is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
