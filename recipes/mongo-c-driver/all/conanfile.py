@@ -112,6 +112,9 @@ class MongoCDriverConan(ConanFile):
         for old_new in to_replace_old_new:
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
                                   old_new["old"], old_new["new"])
+        # cleanup rpath
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")
 
     @property
     def _ssl_cmake_value(self):
