@@ -5,6 +5,7 @@ import functools
 
 required_conan_version = ">=1.43.0"
 
+
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
     description = "A Cross Platform MongoDB Client Library for C"
@@ -12,6 +13,7 @@ class MongoCDriverConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mongoc.org/"
     topics = ("libbson", "libmongoc", "mongo", "mongodb", "database", "db")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,6 +37,7 @@ class MongoCDriverConan(ConanFile):
         "with_icu": True,
         "srv": True,
     }
+
     short_paths = True
     generators = "cmake", "cmake_find_package", "pkg_config"
 
@@ -85,8 +88,6 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")
         if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
-        if tools.Version(self.version) >= "1.21.0" and self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration("shared build doesn't allow on Windows after 1.21.0")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
