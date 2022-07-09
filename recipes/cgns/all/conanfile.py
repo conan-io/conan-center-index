@@ -84,6 +84,8 @@ class CgnsConan(ConanFile):
         self._cmake.definitions["CGNS_USE_SHARED"] = self.options.shared
         self._cmake.definitions["CGNS_ENABLE_PARALLEL"] = self.options.parallel
         self._cmake.definitions["CGNS_BUILD_CGNSTOOLS"] = False
+        # CMAKE_BUILD_TYPE is not set by all the CMake generators, but cgns needs it
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.configure()
 
         # Other flags, seen in appveyor.yml in source code, not currently managed.
