@@ -1,0 +1,30 @@
+diff --git a/aws-cpp-sdk-text-to-speech/CMakeLists.txt b/aws-cpp-sdk-text-to-speech/CMakeLists.txt
+index b1054515d5..d1a34ddfc5 100644
+--- a/aws-cpp-sdk-text-to-speech/CMakeLists.txt
++++ b/aws-cpp-sdk-text-to-speech/CMakeLists.txt
+@@ -9,8 +9,6 @@ file( GLOB TEXT_TO_SPEECH_HEADERS "include/aws/text-to-speech/*.h" )
+ 
+ set(PLATFORM_LIBS "")
+ 
+-check_include_files("pulse/simple.h" HAVE_PULSE)
+-
+ if(PLATFORM_WINDOWS)
+     file( GLOB TEXT_TO_SPEECH_PLATFORM_HEADERS "include/aws/text-to-speech/windows/*.h" )
+ 	file( GLOB TEXT_TO_SPEECH_PLATFORM_SOURCE "source/text-to-speech/windows/*.cpp" )
+@@ -20,13 +18,14 @@ if(PLATFORM_WINDOWS)
+ endif()
+ 
+ if (PLATFORM_LINUX)
+-    if(HAVE_PULSE)
++    find_package(pulseaudio)
++    if (1)
+         file( GLOB TEXT_TO_SPEECH_PLATFORM_HEADERS "include/aws/text-to-speech/linux/*.h" )
+         file( GLOB TEXT_TO_SPEECH_PLATFORM_SOURCE "source/text-to-speech/linux/*.cpp" )
+ 
+         message(STATUS "Pulse audio header files have been detected, included pulse audio as a possible sound driver implementation.")
+         add_definitions("-DPULSE")
+-        set(PLATFORM_LIBS ${PLATFORM_LIBS} pulse pulse-simple)
++        set(PLATFORM_LIBS ${PLATFORM_LIBS} "CONAN_PKG::pulseaudio")
+     else()
+         message(WARNING "We've detected that you are building on linux, but the header files for pulseaudio are not available.\
+                 If you are providing your own audio implementation or you will not be using the text-to-speech library, this is fine.\

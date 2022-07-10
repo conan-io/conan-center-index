@@ -1,6 +1,10 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
+
+required_conan_version = ">=1.36.0"
 
 
 class PCREConan(ConanFile):
@@ -10,8 +14,7 @@ class PCREConan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +28,8 @@ class PCREConan(ConanFile):
         "with_zlib": [True, False],
         "with_jit": [True, False],
         "with_utf": [True, False],
-        "with_unicode_properties": [True, False]
+        "with_unicode_properties": [True, False],
+        "with_stack_for_recursion": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,11 +42,13 @@ class PCREConan(ConanFile):
         "with_bzip2": True,
         "with_zlib": True,
         "with_jit": False,
-        "with_utf": False,
-        "with_unicode_properties": False
+        "with_utf": True,
+        "with_unicode_properties": True,
+        "with_stack_for_recursion": True,
     }
 
-    _cmake = None
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -51,6 +57,10 @@ class PCREConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,12 +75,6 @@ class PCREConan(ConanFile):
         if not self.options.build_pcregrep:
             del self.options.with_bzip2
             del self.options.with_zlib
-        if not self.options.build_pcre_8 and not self.options.build_pcre_16 and not self.options.build_pcre_32:
-            raise ConanInvalidConfiguration("At least one of build_pcre_8, build_pcre_16 or build_pcre_32 must be enabled")
-        if self.options.build_pcrecpp and not self.options.build_pcre_8:
-            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the C++ library support")
-        if self.options.build_pcregrep and not self.options.build_pcre_8:
-            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
         if self.options.with_unicode_properties:
             self.options.with_utf = True
 
@@ -78,48 +82,65 @@ class PCREConan(ConanFile):
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
+
+    def validate(self):
+        if not self.options.build_pcre_8 and not self.options.build_pcre_16 and not self.options.build_pcre_32:
+            raise ConanInvalidConfiguration("At least one of build_pcre_8, build_pcre_16 or build_pcre_32 must be enabled")
+        if self.options.build_pcrecpp and not self.options.build_pcre_8:
+            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the C++ library support")
+        if self.options.build_pcregrep and not self.options.build_pcre_8:
+            raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def patch_cmake(self):
-        """Patch CMake file to avoid man and share during install stage
-        """
+    def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # Avoid man and share during install stage
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
+        # Do not override CMAKE_MODULE_PATH and do not add ${PROJECT_SOURCE_DIR}/cmake
+        # because it contains a custom FindPackageHandleStandardArgs.cmake which
+        # can break conan generators
+        tools.replace_in_file(
+            cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(
+            cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PCRE_BUILD_TESTS"] = False
-        self._cmake.definitions["PCRE_BUILD_PCRE8"] = self.options.build_pcre_8
-        self._cmake.definitions["PCRE_BUILD_PCRE16"] = self.options.build_pcre_16
-        self._cmake.definitions["PCRE_BUILD_PCRE32"] = self.options.build_pcre_32
-        self._cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
-        self._cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
-        self._cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
-        self._cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
-        self._cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
-        self._cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
-        self._cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
-        self._cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
-        self._cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["PCRE_BUILD_TESTS"] = False
+        cmake.definitions["PCRE_BUILD_PCRE8"] = self.options.build_pcre_8
+        cmake.definitions["PCRE_BUILD_PCRE16"] = self.options.build_pcre_16
+        cmake.definitions["PCRE_BUILD_PCRE32"] = self.options.build_pcre_32
+        cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
+        cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
+        cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
+        cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
+        cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
+        cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
+        cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
+        cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
+        cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
+        if self._is_msvc:
+            cmake.definitions["PCRE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        if tools.is_apple_os(self.settings.os):
+            # Generate a relocatable shared lib on Macos
+            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
-        self.patch_cmake()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -127,34 +148,35 @@ class PCREConan(ConanFile):
         self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PCRE"
         self.cpp_info.names["cmake_find_package_multi"] = "PCRE"
         if self.options.build_pcre_8:
             # pcre
-            self.cpp_info.components["libpcre"].names["pkg_config"] = "libpcre"
+            self.cpp_info.components["libpcre"].set_property("pkg_config_name", "libpcre")
             self.cpp_info.components["libpcre"].libs = [self._lib_name("pcre")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre"].defines.append("PCRE_STATIC=1")
             # pcreposix
-            self.cpp_info.components["libpcreposix"].names["pkg_config"] = "libpcreposix"
+            self.cpp_info.components["libpcreposix"].set_property("pkg_config_name", "libpcreposix")
             self.cpp_info.components["libpcreposix"].libs = [self._lib_name("pcreposix")]
             self.cpp_info.components["libpcreposix"].requires = ["libpcre"]
             # pcrecpp
             if self.options.build_pcrecpp:
-                self.cpp_info.components["libpcrecpp"].names["pkg_config"] = "libpcrecpp"
+                self.cpp_info.components["libpcrecpp"].set_property("pkg_config_name", "libpcrecpp")
                 self.cpp_info.components["libpcrecpp"].libs = [self._lib_name("pcrecpp")]
                 self.cpp_info.components["libpcrecpp"].requires = ["libpcre"]
         # pcre16
         if self.options.build_pcre_16:
-            self.cpp_info.components["libpcre16"].names["pkg_config"] = "libpcre16"
+            self.cpp_info.components["libpcre16"].set_property("pkg_config_name", "libpcre16")
             self.cpp_info.components["libpcre16"].libs = [self._lib_name("pcre16")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre16"].defines.append("PCRE_STATIC=1")
         # pcre32
         if self.options.build_pcre_32:
-            self.cpp_info.components["libpcre32"].names["pkg_config"] = "libpcre32"
+            self.cpp_info.components["libpcre32"].set_property("pkg_config_name", "libpcre32")
             self.cpp_info.components["libpcre32"].libs = [self._lib_name("pcre32")]
             if not self.options.shared:
                 self.cpp_info.components["libpcre32"].defines.append("PCRE_STATIC=1")

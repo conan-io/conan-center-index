@@ -1,0 +1,45 @@
+libsepol: remove leftovers of cil_mem_error_handler
+
+Commit 4459d63 ("libsepol: Remove cil_mem_error_handler() function
+pointer") replaced cil_mem_error_handler usage with inline contents of
+the default handler. However, it left over the header declaration and
+two callers. Convert these as well and remove the header declaration.
+
+This also fixes a build failure with -fno-common.
+
+see https://github.com/SELinuxProject/selinux/commit/3d32fc24d6aff360a538c63dad08ca5c957551b0
+
+--- a/cil/src/cil_mem.h
++++ b/cil/src/cil_mem.h
+@@ -36,7 +36,6 @@ void *cil_calloc(size_t num_elements, size_t element_size);
+ void *cil_realloc(void *ptr, size_t size);
+ char *cil_strdup(const char *str);
+ int cil_asprintf(char **strp, const char *fmt, ...);
+-void (*cil_mem_error_handler)(void);
+ 
+ #endif /* CIL_MEM_H_ */
+ 
+--- a/cil/src/cil_strpool.c
++++ b/cil/src/cil_strpool.c
+@@ -80,8 +80,8 @@ char *cil_strpool_add(const char *str)
+ 		int rc = hashtab_insert(cil_strpool_tab, (hashtab_key_t)strpool_ref->str, strpool_ref);
+ 		if (rc != SEPOL_OK) {
+ 			pthread_mutex_unlock(&cil_strpool_mutex);
+-			(*cil_mem_error_handler)();
+-			pthread_mutex_lock(&cil_strpool_mutex);
++			cil_log(CIL_ERR, "Failed to allocate memory\n");
++			exit(1);
+ 		}
+ 	}
+ 
+@@ -104,8 +104,8 @@ void cil_strpool_init(void)
+ 		cil_strpool_tab = hashtab_create(cil_strpool_hash, cil_strpool_compare, CIL_STRPOOL_TABLE_SIZE);
+ 		if (cil_strpool_tab == NULL) {
+ 			pthread_mutex_unlock(&cil_strpool_mutex);
+-			(*cil_mem_error_handler)();
+-			return;
++			cil_log(CIL_ERR, "Failed to allocate memory\n");
++			exit(1);
+ 		}
+ 	}
+ 	cil_strpool_readers++;

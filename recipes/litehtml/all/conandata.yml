@@ -1,0 +1,8 @@
+sources:
+  "cci.20211028":
+    url: "https://github.com/litehtml/litehtml/archive/b095539f8dc5a723c2226b353e6815423b36e0c8.tar.gz"
+    sha256: "c3795594fabeb060e21b9128ff22051986b393bd0b4e6000a5e171c71cabe224"
+patches:
+  "cci.20211028":
+    - patch_file: "patches/0001-icu.patch"
+      base_path: "source_subfolder"

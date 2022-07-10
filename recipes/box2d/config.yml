@@ -3,4 +3,6 @@ versions:
     folder: "all"
   "2.4.0":
     folder: "2.4.x"
+  "2.4.1":
+    folder: "2.4.x"
 

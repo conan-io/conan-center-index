@@ -1,0 +1,5 @@
+sources:
+  # NOTE: https://github.com/mackron/dr_libs/blob/15f37e3ab01654c1a3bc98cff2a9ca64e8296fa9/dr_wav.h#L3
+  "0.13.6":
+    url: https://github.com/mackron/dr_libs/archive/15f37e3ab01654c1a3bc98cff2a9ca64e8296fa9.zip
+    sha256: "39ea8c1f9b60a945735dfe4a2e0a2a6bd3bc921619fa7d2612dbc284b68c2419"

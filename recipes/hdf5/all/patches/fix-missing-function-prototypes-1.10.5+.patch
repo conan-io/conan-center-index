@@ -1,0 +1,34 @@
+diff --git a/src/H5Fsuper.c b/src/H5Fsuper.c
+index 9339b3df6c..052c296ac1 100644
+--- a/src/H5Fsuper.c
++++ b/src/H5Fsuper.c
+@@ -54,6 +54,7 @@
+ /********************/
+ static herr_t H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr);
+ static herr_t H5F__update_super_ext_driver_msg(H5F_t *f);
++herr_t H5O__fsinfo_set_version(H5F_t *f, H5O_fsinfo_t *fsinfo);
+ 
+ 
+ /*********************/
+diff --git a/src/H5Odeprec.c b/src/H5Odeprec.c
+index 33ed787440..b8e1af55ce 100644
+--- a/src/H5Odeprec.c
++++ b/src/H5Odeprec.c
+@@ -54,6 +54,17 @@
+ /********************/
+ /* Local Prototypes */
+ /********************/
++herr_t
++H5CX_set_apl(hid_t *, const H5P_libclass_t *,
++             hid_t
++#ifndef H5_HAVE_PARALLEL
++H5_ATTR_UNUSED
++#endif /* H5_HAVE_PARALLEL */
++, hbool_t
++#ifndef H5_HAVE_PARALLEL
++             H5_ATTR_UNUSED
++#endif /* H5_HAVE_PARALLEL */
++);
+ 
+ 
+ /*********************/

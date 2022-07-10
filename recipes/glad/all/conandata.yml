@@ -1,4 +1,10 @@
 sources:
+  "0.1.36":
+    url: "https://github.com/Dav1dde/glad/archive/v0.1.36.tar.gz"
+    sha256: "8470ed1b0e9fbe88e10c34770505c8a1dc8ccb78cadcf673331aaf5224f963d2"
+  "0.1.35":
+    url: "https://github.com/Dav1dde/glad/archive/v0.1.35.tar.gz"
+    sha256: "5fc384062960bc38f26128b9bfef3c667e405e592f121a235ecbecb20f8ec8af"
   "0.1.34":
     url: "https://github.com/Dav1dde/glad/archive/v0.1.34.tar.gz"
     sha256: "4be2900ff76ac71a2aab7a8be301eb4c0338491c7e205693435b09aad4969ecd"
@@ -6,6 +12,12 @@ sources:
     url: "https://github.com/Dav1dde/glad/archive/v0.1.33.tar.gz"
     sha256: "4bc850062e9bcfc182bd4095d45b987517507d8ec0edcc424ed58f67b4ea9e37"
 patches:
+  "0.1.36":
+    - patch_file: "patches/0003-CMake-handle-all-specs.patch"
+      base_path: "source_subfolder"
+  "0.1.35":
+    - patch_file: "patches/0003-CMake-handle-all-specs.patch"
+      base_path: "source_subfolder"
   "0.1.34":
     - patch_file: "patches/0002-CMake-handle-all-specs.patch"
       base_path: "source_subfolder"

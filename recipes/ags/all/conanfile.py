@@ -3,6 +3,9 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
+required_conan_version = ">=1.33.0"
+
+
 class AGSConan(ConanFile):
     name = "ags"
     description = "The AMD GPU Services (AGS) library provides software developers with the ability to query AMD GPU " \
@@ -47,9 +50,8 @@ class AGSConan(ConanFile):
                 raise ConanInvalidConfiguration("ags doesn't support arch: {}".format(self.settings.arch))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "AGS_SDK-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _convert_msvc_version_to_vs_version(self, msvc_version):
         vs_versions = {

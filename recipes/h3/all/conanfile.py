@@ -1,31 +1,38 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class H3Conan(ConanFile):
     name = "h3"
     description = "Hexagonal hierarchical geospatial indexing system."
     license = "Apache-2.0"
-    topics = ("conan", "h3", "hierarchical", "geospatial", "indexing")
+    topics = ("h3", "hierarchical", "geospatial", "indexing")
     homepage = "https://github.com/uber/h3"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "build_filters": [True, False],
-        "h3_prefix": "ANY"
+        "h3_prefix": "ANY",
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_filters": True,
-        "h3_prefix": ""
+        "h3_prefix": "",
     }
 
+    generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -46,8 +53,8 @@ class H3Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -78,9 +85,11 @@ class H3Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "h3"
+        self.cpp_info.names["cmake_find_package_multi"] = "h3"
+        self.cpp_info.libs = ["h3"]
         self.cpp_info.defines.append("H3_PREFIX={}".format(self.options.h3_prefix))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
         if self.options.build_filters:

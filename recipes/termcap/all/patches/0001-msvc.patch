@@ -11,13 +11,13 @@ index b19fb0a..1116b3f 100644
 +#if defined _MSC_VER
 +#  define TERMCAP_SHARED_EXPORT_API __declspec(dllexport)
 +#  define TERMCAP_SHARED_IMPORT_API __declspec(dllimport)
-+#  define TERMCAP_STATIC_IMPORT_API extern
-+#  define TERMCAP_STATIC_EXPORT_API extern
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
 +#else
 +#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility("default")))
 +#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility("default")))
-+#  define TERMCAP_STATIC_IMPORT_API extern
-+#  define TERMCAP_STATIC_EXPORT_API extern
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
 +#endif
 +
 +#if defined TERMCAP_BUILDING
@@ -49,8 +49,8 @@ index b19fb0a..1116b3f 100644
 -extern char PC;
 -extern short ospeed;
 -extern void tputs (const char *string, int nlines, int (*outfun) (int));
-+TERMCAP_API char PC;
-+TERMCAP_API short ospeed;
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
 +TERMCAP_API void tputs (const char *string, int nlines, int (*outfun) (int));
  
 -extern char *tparam (const char *ctlstring, char *buffer, int size, ...);
@@ -58,8 +58,8 @@ index b19fb0a..1116b3f 100644
  
 -extern char *UP;
 -extern char *BC;
-+TERMCAP_API char *UP;
-+TERMCAP_API char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
  
 -extern char *tgoto (const char *cstring, int hpos, int vpos);
 +TERMCAP_API char *tgoto (const char *cstring, int hpos, int vpos);
@@ -78,8 +78,8 @@ index b19fb0a..1116b3f 100644
  
 -extern char PC;
 -extern short ospeed;
-+TERMCAP_API char PC;
-+TERMCAP_API short ospeed;
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
  
 -extern void tputs ();
 +TERMCAP_API void tputs ();
@@ -89,8 +89,8 @@ index b19fb0a..1116b3f 100644
  
 -extern char *UP;
 -extern char *BC;
-+TERMCAP_API char *UP;
-+TERMCAP_API char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
  
 -extern char *tgoto ();
 +TERMCAP_API char *tgoto ();
@@ -126,13 +126,13 @@ index 0000000..4179163
 +#if defined _MSC_VER
 +#  define TERMCAP_SHARED_EXPORT_API __declspec(dllexport)
 +#  define TERMCAP_SHARED_IMPORT_API __declspec(dllimport)
-+#  define TERMCAP_STATIC_IMPORT_API extern
-+#  define TERMCAP_STATIC_EXPORT_API extern
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
 +#else
 +#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility("default")))
 +#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility("default")))
-+#  define TERMCAP_STATIC_IMPORT_API extern
-+#  define TERMCAP_STATIC_EXPORT_API extern
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
 +#endif
 +
 +#if defined TERMCAP_BUILDING
@@ -157,14 +157,14 @@ index 0000000..4179163
 +TERMCAP_API int tgetflag ( char *name);
 +TERMCAP_API char *tgetstr ( char *name, char **area);
 +
-+TERMCAP_API char PC;
-+TERMCAP_API short ospeed;
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
 +TERMCAP_API void tputs ( char *string, int nlines, int (*outfun) (int));
 +
 +TERMCAP_API char *tparam ();
 +
-+TERMCAP_API char *UP;
-+TERMCAP_API char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
 +
 +TERMCAP_API char *tgoto ( char *cstring, int hpos, int vpos);
 +
@@ -176,15 +176,15 @@ index 0000000..4179163
 +TERMCAP_API int tgetflag ();
 +TERMCAP_API char *tgetstr ();
 +
-+TERMCAP_API char PC;
-+TERMCAP_API short ospeed;
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
 +
 +TERMCAP_API void tputs ();
 +
 +TERMCAP_API char *tparam ();
 +
-+TERMCAP_API char *UP;
-+TERMCAP_API char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
 +
 +TERMCAP_API char *tgoto ();
 +

@@ -1,0 +1,4 @@
+sources:
+  "1.0":
+    url: "https://github.com/rigtorp/MPMCQueue/archive/refs/tags/v1.0.tar.gz"
+    sha256: "f009ef10b66f2b8bc6e3a4f50577efbdfea0c163464cd7de368378f173007b75"

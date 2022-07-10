@@ -1,0 +1,4 @@
+sources:
+  'cci.20201227':
+    url: 'https://github.com/orca-zhang/influxdb-cpp/archive/800e0912552bc1b261c2afc6553a95caf5e9c66d.tar.gz'
+    sha256: '456f0160cd6b12f88a19dcd0106dc0ba1935841f53ec642bf368843fa28def0e'

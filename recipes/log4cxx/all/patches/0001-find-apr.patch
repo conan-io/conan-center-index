@@ -1,0 +1,17 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -25,10 +25,12 @@ if(NOT BUILD_SHARED_LIBS)
+ endif()
+ 
+ # Find Apache Runtime
+-find_package(APR REQUIRED)
++find_package(apr REQUIRED)
++set(APR_LIBRARIES apr::apr)
+ 
+ # Find Apache Runtime Utilities
+-find_package(APR-Util REQUIRED)
++find_package(apr-util REQUIRED)
++set(APR_UTIL_LIBRARIES apr-util::apr-util)
+ 
+ find_package( Threads REQUIRED )
+ 

@@ -1,8 +1,10 @@
-import os
-import glob
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, CMake, tools
+import functools
+import os
+import textwrap
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.43.0"
 
 
 class GlfwConan(ConanFile):
@@ -13,19 +15,34 @@ class GlfwConan(ConanFile):
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/glfw/glfw"
-    topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
+    topics = ("graphics", "opengl", "vulkan", "opengl-es")
 
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "vulkan_static": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "vulkan_static": False,
+    }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,13 +56,14 @@ class GlfwConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
+        if self.options.vulkan_static:
+            self.requires("vulkan-loader/1.3.211.0")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -53,18 +71,29 @@ class GlfwConan(ConanFile):
         # don't force PIC
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # Allow to link vulkan-loader into shared glfw
+        if self.options.vulkan_static:
+            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            tools.replace_in_file(cmakelists,
+                                  'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
+                                  "")
+            tools.replace_in_file(cmakelists,
+                                  'list(APPEND glfw_PKG_DEPS "vulkan")',
+                                  ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
+                                   'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
-            self._cmake.definitions["GLFW_BUILD_TESTS"] = False
-            self._cmake.definitions["GLFW_BUILD_DOCS"] = False
-            self._cmake.definitions["GLFW_INSTALL"] = True
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-            self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
+        cmake.definitions["GLFW_BUILD_TESTS"] = False
+        cmake.definitions["GLFW_BUILD_DOCS"] = False
+        cmake.definitions["GLFW_INSTALL"] = True
+        cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
+        if self._is_msvc:
+            cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -77,18 +106,49 @@ class GlfwConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"glfw": "glfw::glfw"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        # FIXME: official CMake imported target is not namespaced
-        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
-        self.cpp_info.names["cmake_find_package"] = "glfw"
-        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.names["pkg_config"] = "glfw3"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.set_property("cmake_file_name", "glfw3")
+        self.cpp_info.set_property("cmake_target_name", "glfw")
+        self.cpp_info.set_property("pkg_config_name", "glfw3")
+        libname = "glfw"
+        if self.settings.os == "Windows" or not self.options.shared:
+            libname += "3"
+        if self._is_msvc and self.options.shared:
+            libname += "dll"
+        self.cpp_info.libs = [libname]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+
+        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
+        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
+        self.cpp_info.names["cmake_find_package"] = "glfw"
+        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "glfw3"

@@ -1,0 +1,16 @@
+sources:
+  "4.0.0":
+    url: "https://codesynthesis.com/download/xsd/4.0/xsd-4.0.0+dep.tar.bz2"
+    sha256: "eca52a9c8f52cdbe2ae4e364e4a909503493a0d51ea388fc6c9734565a859817"
+patches:
+  "4.0.0":
+    - patch_file: "patches/0002-missing-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0100-C++Parser_Expat_support.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0105-Fix_path_handling_bug.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0110-xerces-c3.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0700_hurd_PATH_MAX.patch"
+      base_path: "source_subfolder"

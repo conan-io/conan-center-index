@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 64f3b131..32b21a8c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -143,7 +143,7 @@ else()
+ endif()
+ 
+ check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+-if(COMPILER_SUPPORTS_MARCH_NATIVE)
++if(ENABLE_OPTIMIZATIONS AND COMPILER_SUPPORTS_MARCH_NATIVE)
+   set(MARCH_NATIVE_FLAGS "${MARCH_NATIVE_FLAGS} -march=native")
+   if(NOT CLANG AND MSVC)
+     # clang-cl does not know this argument
+@@ -154,7 +154,7 @@ endif()
+ 
+ message("CMAKE_SYSTEM_PROCESSOR=<${CMAKE_SYSTEM_PROCESSOR}>")
+ 
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
++if(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64|amd64|i386|i686")
+ 
+   set(HAVE_NEON FALSE)
+ 
+@@ -239,7 +239,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
+     add_definitions("-DHAVE_NEON")
+   endif()
+ 
+-else()
++else(ENABLE_OPTIMIZATIONS)
+ 
+   set(HAVE_AVX FALSE)
+   set(HAVE_AVX2 FALSE)

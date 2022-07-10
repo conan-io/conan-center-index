@@ -1,0 +1,16 @@
+sources:
+  "1.2.0":
+    url: "https://downloads.sourceforge.net/project/aaf/AAF-src/1.2.0/AAF-src-1.2.0.tar.gz"
+    sha256: "02789b22c96a6f0da112ba990967a8b3fe7228b0435db8ea328d88f9e424086d"
+patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-001-simpler-cmakelists.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.0-002-link-core-with-find-library.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.0-003-remove-register-keyword.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.0-004-remove-expat.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.0-005-remove-libjpeg.patch"
+      base_path: "source_subfolder"

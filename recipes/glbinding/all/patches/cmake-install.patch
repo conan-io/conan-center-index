@@ -1,0 +1,16 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -152,11 +152,11 @@ if(UNIX AND SYSTEM_DIR_INSTALL)
+     set(INSTALL_INIT      "/etc/init")              # /etc/init (upstart init scripts)
+ else()
+     # Install into local directory
+-    set(INSTALL_ROOT      ".")                      # ./
++    set(INSTALL_ROOT      "share")                      # ./
+     set(INSTALL_CMAKE     "cmake")                  # ./cmake
+     set(INSTALL_EXAMPLES  ".")                      # ./
+     set(INSTALL_DATA      ".")                      # ./
+-    set(INSTALL_BIN       ".")                      # ./
++    set(INSTALL_BIN       "bin")                      # ./
+     set(INSTALL_SHARED    "lib")                    # ./lib
+     set(INSTALL_LIB       "lib")                    # ./lib
+     set(INSTALL_INCLUDE   "include")                # ./include

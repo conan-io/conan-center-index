@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -84,11 +84,15 @@ set(SOURCE_FILES
+@@ -84,11 +84,27 @@ set(SOURCE_FILES
  source_group(include FILES ${INCLUDE_FILES})
  source_group(source FILES ${SOURCE_FILES})
  
@@ -18,3 +18,15 @@
 +if(WIN32)
      target_link_libraries(enet winmm ws2_32)
  endif()
++
++include(GNUInstallDirs)
++install(
++    TARGETS enet
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(
++    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/enet
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)

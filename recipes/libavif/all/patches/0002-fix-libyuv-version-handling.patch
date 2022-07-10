@@ -1,0 +1,73 @@
+From ded15fb7b41b0513e138ba457034a2fb91c1f2c9 Mon Sep 17 00:00:00 2001
+From: Bruno Pagani <bruno.n.pagani@gmail.com>
+Date: Thu, 4 Nov 2021 21:05:15 +0400
+Subject: [PATCH] =?UTF-8?q?Fix=20compilation=20with=201755=20=E2=89=A4=20L?=
+ =?UTF-8?q?IBYUV=5FVERSION=20<=201774?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+ScalePlane_12 only provide optimization for 2x scale up using
+linear/bilinear filter (when scaling up, box and bilinear are the same),
+and for the rest cases, it simply calls ScalePlane_16, which handles 2x
+scale up just fine (slower though).
+
+This optimization is thus optional and compilation can be allowed for
+libyuv versions not providing it.
+
+Fixes GH-781 (the function was introduced in libavif
+https://github.com/AOMediaCodec/libavif/commit/46104d6db42ec2a94a7da6fc0693f24fa90a1b98).
+---
+ CMakeLists.txt | 4 ++++
+ src/scale.c    | 8 ++++++++
+ 2 files changed, 12 insertions(+)
+
+ diff --git a/CMakeLists.txt b/CMakeLists.txt
+ index 3fc76dfb..e18156d4 100644
+ --- a/CMakeLists.txt
+ +++ b/CMakeLists.txt
+ @@ -233,12 +233,16 @@ endif()
+  find_package(libyuv QUIET) # not required
+  if(libyuv_FOUND)
+      # libyuv 1755 exposed all of the I*Matrix() functions, which libavif relies on.
+ +    # libyuv 1774 exposed ScalePlane_12 function, which libavif can use for some additional optimizations.
+      if(NOT LIBYUV_VERSION)
+          message(STATUS "libavif: libyuv found, but version unknown; libyuv-based fast paths disabled.")
+      elseif(LIBYUV_VERSION LESS 1755)
+          message(STATUS "libavif: libyuv (${LIBYUV_VERSION}) found, but is too old; libyuv-based fast paths disabled.")
+      else()
+          message(STATUS "libavif: libyuv (${LIBYUV_VERSION}) found; libyuv-based fast paths enabled.")
+ +        if(LIBYUV_VERSION LESS 1774)
+ +            message(STATUS "libavif: some libyuv optimizations require at least version 1774 to work.")
+ +        endif()
+          set(AVIF_PLATFORM_DEFINITIONS ${AVIF_PLATFORM_DEFINITIONS} -DAVIF_LIBYUV_ENABLED=1)
+          set(AVIF_PLATFORM_INCLUDES ${AVIF_PLATFORM_INCLUDES} ${LIBYUV_INCLUDE_DIR})
+          set(AVIF_PLATFORM_LIBRARIES ${AVIF_PLATFORM_LIBRARIES} ${LIBYUV_LIBRARY})
+diff --git a/src/scale.c b/src/scale.c
+index 6ca651b2..1bbbdd86 100644
+--- a/src/scale.c
++++ b/src/scale.c
+@@ -107,7 +107,11 @@ avifBool avifImageScale(avifImage * image, uint32_t dstWidth, uint32_t dstHeight
+                 const uint32_t srcStride = srcYUVRowBytes[i] / 2;
+                 uint16_t * const dstPlane = (uint16_t *)image->yuvPlanes[i];
+                 const uint32_t dstStride = image->yuvRowBytes[i] / 2;
++#if LIBYUV_VERSION >= 1774
+                 ScalePlane_12(srcPlane, srcStride, srcW, srcH, dstPlane, dstStride, dstW, dstH, AVIF_LIBYUV_FILTER_MODE);
++#else
++                ScalePlane_16(srcPlane, srcStride, srcW, srcH, dstPlane, dstStride, dstW, dstH, AVIF_LIBYUV_FILTER_MODE);
++#endif
+             } else {
+                 uint8_t * const srcPlane = srcYUVPlanes[i];
+                 const uint32_t srcStride = srcYUVRowBytes[i];
+@@ -130,7 +134,11 @@ avifBool avifImageScale(avifImage * image, uint32_t dstWidth, uint32_t dstHeight
+             const uint32_t srcStride = srcAlphaRowBytes / 2;
+             uint16_t * const dstPlane = (uint16_t *)image->alphaPlane;
+             const uint32_t dstStride = image->alphaRowBytes / 2;
++#if LIBYUV_VERSION >= 1774
+             ScalePlane_12(srcPlane, srcStride, srcWidth, srcHeight, dstPlane, dstStride, dstWidth, dstHeight, AVIF_LIBYUV_FILTER_MODE);
++#else
++            ScalePlane_16(srcPlane, srcStride, srcWidth, srcHeight, dstPlane, dstStride, dstWidth, dstHeight, AVIF_LIBYUV_FILTER_MODE);
++#endif
+         } else {
+             uint8_t * const srcPlane = srcAlphaPlane;
+             const uint32_t srcStride = srcAlphaRowBytes;

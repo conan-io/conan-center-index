@@ -1,18 +1,40 @@
 sources:
-  "2.2.5":
-    url: "https://github.com/libgd/libgd/releases/download/gd-2.2.5/libgd-2.2.5.tar.gz"
-    sha256: "a66111c9b4a04e818e9e2a37d7ae8d4aae0939a100a36b0ffb52c706a09074b5"
+  "2.3.2":
+    url: "https://github.com/libgd/libgd/archive/gd-2.3.2.tar.gz"
+    sha256: "dcc22244d775f469bee21dce1ea42552adbb72ba0cc423f9fa6a64601b3a1893"
+  "2.3.1":
+    url: "https://github.com/libgd/libgd/archive/gd-2.3.1.tar.gz"
+    sha256: "795978dcec1bf931148ebcdca9ed1e9cdfa9e71acff8bf035a8867dd1f7af6cd"
   "2.3.0":
     url: "https://github.com/libgd/libgd/archive/gd-2.3.0.tar.gz"
     sha256: "a77dfbbf8bfa7f19c935c11f3b939321f8c1059953a91203158cb2dbf27a0f9e"
-patches:
   "2.2.5":
-    - patch_file: "patches/2.2.5-msvc-static-lib.patch"
+    url: "https://github.com/libgd/libgd/releases/download/gd-2.2.5/libgd-2.2.5.tar.gz"
+    sha256: "a66111c9b4a04e818e9e2a37d7ae8d4aae0939a100a36b0ffb52c706a09074b5"
+patches:
+  "2.3.2":
+    - patch_file: "patches/remove-unistd-h.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/2.2.5-qualify-nondll.patch"
+    - patch_file: "patches/2.3.2-qualify-nondll.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.3.x-png-msvc.patch"
+      base_path: "source_subfolder"
+  "2.3.1":
+    - patch_file: "patches/remove-unistd-h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/qualify-nondll.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.3.x-png-msvc.patch"
       base_path: "source_subfolder"
   "2.3.0":
     - patch_file: "patches/remove-unistd-h.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/qualify-nondll.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.3.x-png-msvc.patch"
+      base_path: "source_subfolder"
+  "2.2.5":
+    - patch_file: "patches/2.2.5-msvc-static-lib.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.2.5-qualify-nondll.patch"
       base_path: "source_subfolder"

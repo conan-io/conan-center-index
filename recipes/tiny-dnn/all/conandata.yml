@@ -1,0 +1,4 @@
+sources:
+  "cci.20201023":
+    url: "https://github.com/tiny-dnn/tiny-dnn/archive/c0f576f5cb7b35893f62127cb7aec18f77a3bcc5.tar.gz"
+    sha256: "123dabe15b019938e04c7ccdd22c8423ceae091f4bd2fb878f972a2ea031d4b9"

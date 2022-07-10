@@ -1,5 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class BlissConan(ConanFile):
@@ -7,7 +10,7 @@ class BlissConan(ConanFile):
     description = "bliss is an open source tool for computing automorphism groups and canonical forms of graphs. "
     topics = "conan", "bliss", "automorphism", "group", "graph"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.tcs.hut.fi/Software/bliss/"
+    homepage = "https://users.aalto.fi/~tjunttil/bliss"
     license = "GPL-3-or-later", "LGPL-3-or-later"
     settings = "arch", "os", "compiler", "build_type"
     options = {
@@ -33,10 +36,6 @@ class BlissConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("bliss-{}".format(self.version), self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,12 +50,22 @@ class BlissConan(ConanFile):
         elif self.options.with_exact_int == "mpir":
             self.requires("mpir/3.0.0")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("bliss doesn't support Visual Studio < 2017")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["WITH_GMP"] = self.options.with_exact_int != False
+        self._cmake.definitions["USE_GMP"] = self.options.with_exact_int != False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -74,10 +83,12 @@ class BlissConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["bliss"]
+        self.cpp_info.libs = ["bliss" if self.options.shared else "bliss_static"]
         self.cpp_info.includedirs.append(os.path.join("include", "bliss"))
         if self.options.with_exact_int != False:
             self.cpp_info.defines = ["BLISS_USE_GMP"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags.append("/permissive-")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))

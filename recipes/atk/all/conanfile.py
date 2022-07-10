@@ -5,7 +5,7 @@ import glob
 
 required_conan_version = ">=1.29"
 
-class LibnameConan(ConanFile):
+class AtkConan(ConanFile):
     name = "atk"
     description = "set of accessibility interfaces that are implemented by other toolkits and applications"
     topics = ("conan", "atk", "accessibility")
@@ -27,22 +27,32 @@ class LibnameConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    exports_sources = "patches/**"
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-    
+
     def build_requirements(self):
-        self.build_requires('meson/0.55.3')
-        self.build_requires('pkgconf/1.7.3')
-    
+        self.build_requires('meson/0.60.2')
+        self.build_requires('pkgconf/1.7.4')
+
     def requirements(self):
-        self.requires('glib/2.66.2')
+        self.requires('glib/2.73.0')
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
+
+    def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,7 +70,12 @@ class LibnameConan(ConanFile):
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
         return meson
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
             "subdir('tests')",
             "#subdir('tests')")
@@ -82,3 +97,6 @@ class LibnameConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = ['include/atk-1.0']
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

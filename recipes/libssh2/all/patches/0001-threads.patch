@@ -1,0 +1,16 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index eee1a80..3373f2a 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -42,6 +42,11 @@ include(CheckSymbolExists)
+ include(CheckNonblockingSocketSupport)
+ include(SocketLibraries)
+ 
++if(UNIX AND NOT APPLE)
++  find_package(Threads REQUIRED)
++  list(APPEND LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
++endif()
++
+ ## Cryptography backend choice
+ 
+ set(CRYPTO_BACKEND

@@ -1,0 +1,10 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/jkuhlmann/gainput/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "e1444f2093d0b8c1a0a127668e957b91517177aa1ece292efefacc127a56bd96"
+patches:
+  "1.0.0":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-cmake-win32-condition.patch"
+      base_path: "source_subfolder"

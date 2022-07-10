@@ -1,0 +1,22 @@
+--- a/ports/cmake/src/libout123/CMakeLists.txt
++++ b/ports/cmake/src/libout123/CMakeLists.txt
+@@ -18,7 +18,7 @@ add_library(${TARGET}
+     $<TARGET_OBJECTS:compat>
+     $<$<BOOL:${USE_MODULES}>:$<TARGET_OBJECTS:compat_dl>>)
+ 
+-set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME out123)
++set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME out123 WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ target_link_libraries(${TARGET} PRIVATE
+     $<TARGET_NAME_IF_EXISTS:defaultmodule>
+--- a/ports/cmake/src/libsyn123/CMakeLists.txt
++++ b/ports/cmake/src/libsyn123/CMakeLists.txt
+@@ -15,7 +15,7 @@ add_library(${TARGET}
+     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libsyn123/sampleconv.c"
+     $<TARGET_OBJECTS:compat_str>)
+ 
+-set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME syn123)
++set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME syn123 WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ target_include_directories(${TARGET} INTERFACE
+     "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"

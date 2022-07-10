@@ -8,3 +8,5 @@ patches:
       patch_file: "patches/0001-allow-cmake-subproject.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0002-linux-add-m-system-library.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-rename-tiff-symbols.patch"

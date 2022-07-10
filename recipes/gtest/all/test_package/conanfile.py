@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -17,6 +15,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         assert os.path.isfile(os.path.join(self.deps_cpp_info["gtest"].rootpath, "licenses", "LICENSE"))
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

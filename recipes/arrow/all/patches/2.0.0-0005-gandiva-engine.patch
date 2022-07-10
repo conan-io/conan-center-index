@@ -1,0 +1,13 @@
+--- cpp/src/gandiva/engine.cc
++++ cpp/src/gandiva/engine.cc
+@@ -64,6 +64,10 @@
+ #include <llvm/Transforms/Utils.h>
+ #include <llvm/Transforms/Vectorize.h>
+ 
++#if GANDIVA_LLVM_VERSION >= 11
++#include <llvm/Support/Host.h>
++#endif
++
+ #if defined(_MSC_VER)
+ #pragma warning(pop)
+ #endif

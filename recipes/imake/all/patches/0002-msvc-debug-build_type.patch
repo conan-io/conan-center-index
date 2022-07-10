@@ -1,0 +1,57 @@
+Needed when building MSVC with build_type=Debug + compiler.runtime=MTd
+- escape comments with XCOMM
+- avoid C4717: '_fstat64i32': recursive on all control paths, function will cause runtime stack overflow
+- /tmp/xxxx does not exist on Windows
+--- mdepend.cpp
++++ mdepend.cpp
+@@ -125,9 +125,9 @@
+ 			    shift
+ 			    ;;
+ 
+-			# Flag to tell compiler to output dependencies directly
+-			# For example, with Sun compilers, -xM or -xM1 or
+-			# with gcc, -M
++			XCOMM Flag to tell compiler to output dependencies directly
++			XCOMM For example, with Sun compilers, -xM or -xM1 or
++			XCOMM with gcc, -M
+ 		        -d)
+ 			    compilerlistsdepends="y"
+ 			    compilerlistdependsflag="$2"
+--- imake.c
++++ imake.c
+@@ -159,9 +159,6 @@
+ #include <X11/Xosdefs.h>
+ #include <string.h>
+ #include <ctype.h>
+-#ifdef WIN32
+-# include "Xw32defs.h"
+-#endif
+ #include <sys/types.h>
+ #include <fcntl.h>
+ #ifdef X_NOT_POSIX
+@@ -252,6 +249,9 @@
+ #if defined(__NetBSD__)		/* see code clock in init() below */
+ # include <sys/utsname.h>
+ #endif
++#ifdef WIN32
++# include "Xw32defs.h"
++#endif
+ 
+ typedef unsigned char boolean;
+ #define TRUE		1
+@@ -303,9 +303,14 @@
+ const char *cpp = NULL;
+ 
+ const char	*tmpMakefile;
++#ifdef _WIN32
++const char	*tmpMakefileTemplate = "Imf.XXXXXX";  /* HACK: create temporary files in current folder */
++const char	*tmpImakefileTemplate = "IIf.XXXXXX";  /* HACK: create temporary files in current folder */
++#else
+ const char	*tmpMakefileTemplate = "/tmp/Imf.XXXXXX";
+-const char	*tmpImakefile;
+ const char	*tmpImakefileTemplate = "/tmp/IIf.XXXXXX";
++#endif
++const char	*tmpImakefile;
+ const char	*make_argv[ ARGUMENTS ] = {
+ #ifdef WIN32
+     "nmake"

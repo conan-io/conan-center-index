@@ -1,16 +1,18 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
-from contextlib import contextmanager
+from conans.errors import ConanException
+import contextlib
 import os
 import re
 import shlex
+
+required_conan_version = ">=1.33.0"
 
 
 class MpfrConan(ConanFile):
     name = "mpfr"
     description = "The MPFR library is a C library for multiple-precision floating-point computations with " \
                   "correct rounding"
-    topics = ("conan", "mpfr", "multiprecision", "math", "mathematics")
+    topics = ("mpfr", "multiprecision", "math", "mathematics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mpfr.org/"
     license = "LGPL-3.0-or-later"
@@ -23,8 +25,9 @@ class MpfrConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "exact_int": "mpir",
+        "exact_int": "gmp",
     }
+
     exports_sources = "CMakeLists.txt.in", "patches/**"
     generators = "cmake"
 
@@ -35,42 +38,46 @@ class MpfrConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.options.exact_int == "mpir":
+        if self.options.exact_int == "gmp":
+            self.requires("gmp/6.2.1")
+        elif self.options.exact_int == "mpir":
             self.requires("mpir/3.0.0")
-        elif self.options.exact_int == "gmp":
-            self.requires("gmp/6.2.0")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PAH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-thread-safe",
             "--with-gmp-include={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "include"))),
             "--with-gmp-lib={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "lib"))),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--disable-static"])
         if self.settings.compiler == "clang":
             # warning: optimization flag '-ffloat-store' is not supported
             args.append("mpfr_cv_gcc_floatconv_bug=no")
@@ -108,12 +115,11 @@ class MpfrConan(ConanFile):
         defs = self._extract_makefile_variable(makefile, "DEFS")
         return sources, headers, defs
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
+            with tools.vcvars(self):
+                env = {
                     "AR": "lib",
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -122,7 +128,7 @@ class MpfrConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
@@ -143,9 +149,9 @@ class MpfrConan(ConanFile):
             cmakelists_in = tools.load("CMakeLists.txt.in")
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
             tools.save(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), cmakelists_in.format(
-                mpfr_sources = " ".join(sources),
-                mpfr_headers = " ".join(headers),
-                definitions = " ".join(definitions),
+                mpfr_sources=" ".join(sources),
+                mpfr_headers=" ".join(headers),
+                definitions=" ".join(definitions),
             ))
             cmake = self._configure_cmake()
             cmake.build()

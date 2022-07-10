@@ -9,7 +9,7 @@ if (PACKIO_VERSION VERSION_LESS "1.2.0")
 elseif (PACKIO_VERSION VERSION_LESS "2.0.0")
     add_executable(main 1.2.x.cpp)
 else ()
-    add_executable(main 2.0.x.cpp)
+    add_executable(main latest.cpp)
 endif ()
 
 target_link_libraries(main ${CONAN_LIBS})

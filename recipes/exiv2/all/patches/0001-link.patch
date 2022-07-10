@@ -1,0 +1,26 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index c52b352f..2c270c5f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -215,7 +215,7 @@ else()
+ endif()
+ 
+ if( EXIV2_ENABLE_PNG )
+-    target_link_libraries( exiv2lib PRIVATE $<BUILD_INTERFACE:${ZLIB_LIBRARIES}>)
++    target_link_libraries( exiv2lib PRIVATE ZLIB::ZLIB)
+ endif()
+ 
+ if( EXIV2_ENABLE_NLS )
+diff --git a/xmpsdk/CMakeLists.txt b/xmpsdk/CMakeLists.txt
+index a22698fb..9ef87970 100644
+--- a/xmpsdk/CMakeLists.txt
++++ b/xmpsdk/CMakeLists.txt
+@@ -28,7 +28,7 @@ add_library(exiv2-xmp STATIC
+ 
+ target_link_libraries(exiv2-xmp
+     PRIVATE 
+-        $<BUILD_INTERFACE:${EXPAT_LIBRARY}>
++        EXPAT::EXPAT
+ )
+ 
+ target_include_directories(exiv2-xmp

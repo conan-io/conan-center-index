@@ -1,0 +1,42 @@
+Patch adapted from:
+https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
+
+diff --git a/src/Common/QuickFASTPch.h b/src/Common/QuickFASTPch.h
+index 381f846..e6f6b13 100644
+--- a/src/Common/QuickFASTPch.h
++++ b/src/Common/QuickFASTPch.h
+@@ -36,7 +36,7 @@
+ #include <string.h>
+ 
+ // If building for .NET, must link boost threads dynamically
+-#define BOOST_THREAD_USE_DLL
++// #define BOOST_THREAD_USE_DLL
+ // This reports at compile time which boost libraries will be used
+ // #define BOOST_LIB_DIAGNOSTIC
+ 
+diff --git a/src/Communication/AsioService.h b/src/Communication/AsioService.h
+index 4f61915..54f92ed 100644
+--- a/src/Communication/AsioService.h
++++ b/src/Communication/AsioService.h
+@@ -58,6 +58,7 @@ namespace QuickFAST
+       {
+         return ioService_.poll();
+       }
++      boost::asio::io_service::executor_type get_executor() BOOST_ASIO_NOEXCEPT { return ioService_.get_executor();}
+ 
+       /// @brief execute at most one ready event handler than return.
+       size_t poll_one()
+diff --git a/src/Communication/AsioService_fwd.h b/src/Communication/AsioService_fwd.h
+index dc2f235..6ad5e68 100644
+--- a/src/Communication/AsioService_fwd.h
++++ b/src/Communication/AsioService_fwd.h
+@@ -17,7 +17,8 @@ namespace boost
+ {
+   namespace asio
+   {
+-    class io_service;
++    class io_context;
++    typedef io_context io_service;
+   }
+ }
+ 

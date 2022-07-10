@@ -1,4 +1,4 @@
-#include <morton.h>
+#include <libmorton/morton.h>
 
 #include <iostream>
 

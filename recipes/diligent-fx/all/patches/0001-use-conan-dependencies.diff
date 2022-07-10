@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d56e79..46b1113 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,11 +18,8 @@ endif()
+ 
+ target_link_libraries(DiligentFX 
+ PRIVATE
+-    Diligent-BuildSettings
+-PUBLIC
+-    Diligent-GraphicsEngine
+-    Diligent-GraphicsTools
+-    Diligent-AssetLoader
++    diligent-core::diligent-core
++    diligent-tools::diligent-tools
+ )
+ set_common_target_properties(DiligentFX)
+ 

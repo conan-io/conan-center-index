@@ -1,0 +1,14 @@
+sources:
+  "2.5.1":
+    url: "https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip"
+    sha256: "bf1e0643acb92369b24572b703473af60bac82caf5af61e77c063b779471bb7f"
+patches:
+  "2.5.1":
+    - patch_file: "patches/0001-cmake-robust-find-deps.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-non-x86-64-macos.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-allow-shared-MT.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-fix-ios.patch"
+      base_path: "source_subfolder"

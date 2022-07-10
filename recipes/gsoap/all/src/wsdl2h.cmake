@@ -29,9 +29,17 @@ endif()
 set_source_files_properties(${SRC_CPP} PROPERTIES LANGUAGE CXX)
 set_source_files_properties(${CMAKE_BINARY_DIR}/generated/wsdlC.cpp PROPERTIES GENERATED TRUE)
 
+# Search for soapcpp2 executable
+if(CMAKE_CROSSCOMPILING)
+    find_program(SOAPCPP2_PROGRAM soapcpp2 PATHS ENV PATH NO_DEFAULT_PATH)
+endif()
+if(NOT SOAPCPP2_PROGRAM)
+    set(SOAPCPP2_PROGRAM $<TARGET_FILE:soapcpp2>)
+endif()
+
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/generated/wsdlC.cpp
-    COMMAND $<TARGET_FILE:soapcpp2> -I${GSOAP_PATH}/gsoap/import -SC -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
+    COMMAND ${SOAPCPP2_PROGRAM} -I${GSOAP_PATH}/gsoap/import -SC -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
     COMMENT "Parsing WSDL and Schema definitions"
     WORKING_DIRECTORY ${WSDL2H_PATH}
     )
@@ -47,9 +55,10 @@ target_include_directories(wsdl2h
     PRIVATE ${WSDL2H_PATH})
 add_dependencies(wsdl2h WSDL2H_GENERATORS)
 if(${WITH_OPENSSL})
+    find_package(ZLIB REQUIRED)
     target_include_directories(wsdl2h PRIVATE ${GSOAP_PATH}/gsoap/plugin)
     target_compile_definitions(wsdl2h PRIVATE WITH_OPENSSL WITH_GZIP)
-    target_link_libraries(wsdl2h ${CONAN_LIBS})
+    target_link_libraries(wsdl2h OpenSSL::OpenSSL ZLIB::ZLIB)
 endif()
 
 install(TARGETS wsdl2h RUNTIME DESTINATION bin)

@@ -1,0 +1,15 @@
+--- libmpdec/mpdecimal32vc.h
++++ libmpdec/mpdecimal32vc.h
+@@ -63,1 +63,1 @@
+-#elif defined(_DLL)
++#elif defined(MPDECIMAL_DLL)
+--- libmpdec/mpdecimal64vc.h
++++ libmpdec/mpdecimal64vc.h
+@@ -63,1 +63,1 @@
+-#elif defined(_DLL)
++#elif defined(MPDECIMAL_DLL)
+--- libmpdec++/decimal.hh
++++ libmpdec++/devimal.hh
+@@ -63,1 +63,1 @@
+-  #elif defined(_DLL)
++  #elif defined(MPDECIMALXX_DLL)

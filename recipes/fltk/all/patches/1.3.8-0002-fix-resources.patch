@@ -1,0 +1,78 @@
+diff --git a/CMake/options.cmake b/CMake/options.cmake
+index ddd650f..28c4190 100644
+--- a/CMake/options.cmake
++++ b/CMake/options.cmake
+@@ -327,12 +327,22 @@ endif (debug_threads)
+ unset (debug_threads)
+ 
+ #######################################################################
++if (0)
++
+ option (OPTION_USE_SYSTEM_ZLIB "use system zlib" ON)
+ 
+ if (OPTION_USE_SYSTEM_ZLIB)
+   include (FindZLIB)
+ endif (OPTION_USE_SYSTEM_ZLIB)
+ 
++else()
++
++option (OPTION_USE_SYSTEM_ZLIB "use system zlib" ON)
++find_package(ZLIB)
++set (FLTK_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
++
++endif()
++
+ if (ZLIB_FOUND)
+   set (FLTK_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
+   include_directories (${ZLIB_INCLUDE_DIRS})
+@@ -352,6 +362,8 @@ endif (ZLIB_FOUND)
+ set (HAVE_LIBZ 1)
+ 
+ #######################################################################
++if (0)
++
+ if (APPLE)
+   option (OPTION_USE_SYSTEM_LIBJPEG "use system libjpeg" OFF)
+ else ()
+@@ -377,9 +389,22 @@ else ()
+   set (FLTK_BUILTIN_JPEG_FOUND TRUE)
+ endif (JPEG_FOUND)
+ 
++else()
++
++option (OPTION_USE_SYSTEM_LIBJPEG "use system libjpeg" ON)
++find_package(JPEG REQUIRED)
++set (FLTK_JPEG_LIBRARIES ${JPEG_LIBRARIES})
++set (FLTK_BUILTIN_JPEG_FOUND FALSE)
++
++endif()
++
++
++
+ set (HAVE_LIBJPEG 1)
+ 
+ #######################################################################
++if(0) 
++
+ if (APPLE)
+   option (OPTION_USE_SYSTEM_LIBPNG "use system libpng" OFF)
+ else ()
+@@ -409,6 +434,18 @@ else()
+   set (FLTK_BUILTIN_PNG_FOUND TRUE)
+ endif (PNG_FOUND)
+ 
++else()
++
++option (OPTION_USE_SYSTEM_LIBPNG "use system libpng" ON)
++find_package(PNG REQUIRED)
++set (FLTK_PNG_LIBRARIES ${PNG_LIBRARIES})
++set (FLTK_BUILTIN_PNG_FOUND FALSE)
++set (HAVE_PNG_H 1)
++set (HAVE_PNG_GET_VALID 1)
++set (HAVE_PNG_SET_TRNS_TO_ALPHA 1)
++
++endif()
++
+ set (HAVE_LIBPNG 1)
+ 
+ #######################################################################

@@ -8,3 +8,15 @@ sources:
   "3.9.1":
     url: "https://github.com/martinus/robin-hood-hashing/archive/3.9.1.tar.gz"
     sha256: "d6d15546a58d170717b2be5311425f80dc06f087a0885bd95de61a727bf9adef"
+  "3.11.1":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.1.tar.gz"
+    sha256: "31143d316b49e29b57773e720ec9ac3f7a8223dc7710329b566c874c69e1d087"
+  "3.11.3":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.3.tar.gz"
+    sha256: "dcf2b7fa9ef9dd0c67102d94c28e8df3effbe1845e0ed1f31f4772ca5e857fc4"
+  "3.11.4":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.4.tar.gz"
+    sha256: "99d3624069a0b06df2675b4ba9d2ebac1a1236dbc52326cd6f31ca056c24eb89"
+  "3.11.5":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/3.11.5.tar.gz"
+    sha256: "3693e44dda569e9a8b87ce8263f7477b23af448a3c3600c8ab9004fe79c20ad0"

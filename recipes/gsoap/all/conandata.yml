@@ -1,13 +1,21 @@
 sources:
-  "2.8.103":
-    sha256: "afe2ba08d2fa56adc3c774b6741587203a72140a255346e9947b8d2ee6c7d4b6"
-    url: "https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.103.zip/download"
-  "2.8.104":
-    sha256: "60fcd137c59a7640470f873d9a0a29c62896a15e8517a2f5a03eb2d7eebc0c52"
-    url: "https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.104.zip/download"
-  "2.8.105":
-    sha256: "aa20c535cf08f1576bebad97cc6159ca57c68bc43acfc9a296e4e9faf041097e"
-    url: "https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.105.zip/download"
-  "2.8.106":
-    sha256: "4e74838baf5437e95ae17aa3efb48bd0621f483bff4424f6255fcf327ff80765"
-    url: "https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.106.zip/download"
+  "2.8.114":
+    sha256: "aa70a999258100c170a3f8750c1f91318a477d440f6a28117f68bc1ded32327f"
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.114.zip/download"
+      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.114.zip"
+  "2.8.115":
+    sha256: "6f6813b189d201022254a2879cc8ee005bdb1bcf126bc03238710f19ec4e7268"
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.115.zip/download"
+      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.115.zip"
+  "2.8.116":
+    sha256: "2a41e42aaddbcd603b99004af95bb83559dbd4fd2d842920f003d24867599192"
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.116.zip/download"
+      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.116.zip"
+  "2.8.117":
+    sha256: "7cadf8808cfd982629948fe09e4fa6cd18e23cafd40df0aaaff1b1f5b695c442"
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.117.zip/download"
+      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.117.zip"

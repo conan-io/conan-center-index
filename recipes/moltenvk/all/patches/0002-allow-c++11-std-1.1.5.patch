@@ -1,0 +1,16 @@
+upstream issue: https://github.com/KhronosGroup/MoltenVK/issues/1474
+
+--- a/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm
+@@ -769,7 +769,10 @@ void MVKCommandEncoder::markTimestamp(MVKTimestampQueryPool* pQueryPool, uint32_
+ 	if (sampPts) {
+ 		for (uint32_t qOfst = 0; qOfst < queryCount; qOfst++) {
+ 			if (mvkIsAnyFlagEnabled(sampPts, MVK_COUNTER_SAMPLING_AT_PIPELINE_STAGE)) {
+-				_timestampStageCounterQueries.push_back({ pQueryPool, query + qOfst });
++				GPUCounterQuery timestampCounterQuery = {};
++				timestampCounterQuery.queryPool = pQueryPool;
++				timestampCounterQuery.query = query + qOfst;
++				_timestampStageCounterQueries.push_back(timestampCounterQuery);
+ 			} else {
+ 				encodeGPUCounterSample(pQueryPool, query + qOfst, sampPts);
+ 			}

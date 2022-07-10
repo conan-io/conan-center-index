@@ -1,0 +1,4 @@
+sources:
+  "0.1.13":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v0.1.13.tar.gz"
+    sha256: "84af1255c0c53be57abbc41bf216d6ab7e0dbd0ff8886841b29e0e089dd985ca"

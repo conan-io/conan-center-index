@@ -1,0 +1,11 @@
+Add install destination for runtime
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,6 +24,7 @@ endif(UNIX)
+ 
+ 
+ install(TARGETS GKlib
++  RUNTIME DESTINATION bin/${LINSTALL_PATH}
+   ARCHIVE DESTINATION lib/${LINSTALL_PATH}
+   LIBRARY DESTINATION lib/${LINSTALL_PATH})
+ install(FILES ${GKlib_includes} DESTINATION include/${HINSTALL_PATH})

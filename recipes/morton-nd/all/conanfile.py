@@ -2,16 +2,18 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.43.0"
+
 
 class MortonndConan(ConanFile):
     name = "morton-nd"
     description = "A header-only Morton encode/decode library (C++14) capable " \
                   "of encoding from and decoding to N-dimensional space."
     license = "MIT"
-    topics = ("conan", "morton-nd", "morton", "encoding", "decoding", "n-dimensional")
+    topics = ("morton-nd", "morton", "encoding", "decoding", "n-dimensional")
     homepage = "https://github.com/kevinhartman/morton-nd"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -27,8 +29,8 @@ class MortonndConan(ConanFile):
             "apple-clang": "5.1",
         }
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
@@ -40,15 +42,19 @@ class MortonndConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "morton-nd")
+        self.cpp_info.set_property("cmake_target_name", "morton-nd::MortonND")
+
         self.cpp_info.names["cmake_find_package"] = "morton-nd"
         self.cpp_info.names["cmake_find_package_multi"] = "morton-nd"
         self.cpp_info.components["mortonnd"].names["cmake_find_package"] = "MortonND"
         self.cpp_info.components["mortonnd"].names["cmake_find_package_multi"] = "MortonND"
+        self.cpp_info.components["mortonnd"].set_property("cmake_target_name", "morton-nd::MortonND")

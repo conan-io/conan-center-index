@@ -1,0 +1,179 @@
+--- a/alg/makefile.vc
++++ b/alg/makefile.vc
+@@ -14,7 +14,7 @@ EXTRAFLAGS =	-I../frmts/vrt -I../ogr/ogrsf_frmts $(GEOS_CFLAGS) $(PROJ_FLAGS) $(
+ EXTRAFLAGS = $(EXTRAFLAGS) -DINTERNAL_QHULL
+ !ELSE
+ !IF "$(QHULL_SETTING)" == "EXTERNAL"
+-EXTRAFLAGS = $(EXTRAFLAGS) -DEXTERNAL_QHULL $(QHULL_INC)
++EXTRAFLAGS = $(EXTRAFLAGS) -DEXTERNAL_QHULL -DQHULL_INCLUDE_SUBDIR_IS_LIBQHULL=1 $(QHULL_INC)
+ !ENDIF
+ !ENDIF
+ !ENDIF
+--- a/apps/makefile.vc
++++ b/apps/makefile.vc
+@@ -8,6 +8,9 @@ EXTRAFLAGS =	-I..\frmts\vrt -I..\ogr\ogrsf_frmts\geojson\libjson -I..\ogr\ogrsf_
+ !INCLUDE ..\nmake.opt
+ 
+ LIBS	=	$(GDALLIB)
++!IF "$(DLLBUILD)" != "1"
++LIBS = $(LIBS) $(EXTERNAL_LIBS)
++!ENDIF
+ 
+ !IFDEF INCLUDE_OGR_FRMTS
+ OGR_PROGRAMS =	gdal_contour.exe gdaltindex.exe gdal_rasterize.exe \
+--- a/frmts/gif/makefile.vc
++++ b/frmts/gif/makefile.vc
+@@ -10,14 +10,8 @@ EXTRAFLAGS = 	-Igiflib
+ 
+ default:	$(OBJ)
+ 	xcopy /D  /Y *.obj ..\o
+-	cd giflib
+-	$(MAKE) /f makefile.vc
+-	cd ..
+ 
+ clean:
+ 	-del *.obj
+-	cd giflib
+-	$(MAKE) /f makefile.vc clean
+-	cd ..
+ 
+ 
+--- a/frmts/jpeg/makefile.vc
++++ b/frmts/jpeg/makefile.vc
+@@ -29,12 +29,16 @@ default:	$(EXTRA_DEP) $(OBJ)
+ 
+ clean:
+ 	-del *.obj
++!IFNDEF JPEG_EXTERNAL_LIB
+         cd libjpeg
+ 	$(MAKE) /f makefile.vc clean
+ 	cd ..
++!ENDIF
++!IFDEF JPEG12_SUPPORTED
+         cd libjpeg12
+ 	$(MAKE) /f makefile.vc clean
+ 	cd ..
++!ENDIF
+ 
+ libjpeg12src:
+ 	cd libjpeg12
+--- a/frmts/kea/makefile.vc
++++ b/frmts/kea/makefile.vc
+@@ -1,7 +1,7 @@
+ 
+ OBJ	=	keaband.obj keacopy.obj keadataset.obj keadriver.obj keamaskband.obj keaoverview.obj kearat.obj
+ 
+-EXTRAFLAGS 	= 	$(KEA_CFLAGS) -DH5_BUILT_AS_DYNAMIC_LIB 
++EXTRAFLAGS 	= 	$(KEA_CFLAGS)
+ 
+ GDAL_ROOT	=	..\..
+ 
+--- a/frmts/makefile.vc
++++ b/frmts/makefile.vc
+@@ -3,11 +3,11 @@ GDAL_ROOT = ..
+ 
+ EXTRAFLAGS =	-DFRMT_ceos -DFRMT_aigrid -DFRMT_elas -DFRMT_hfa -DFRMT_gtiff\
+ 		-DFRMT_sdts -DFRMT_raw -DFRMT_gxf -DFRMT_ceos2 -DFRMT_png \
+-		-DFRMT_dted -DFRMT_mem -DFRMT_jdem -DFRMT_gif -DFRMT_esric \
++		-DFRMT_dted -DFRMT_mem -DFRMT_jdem -DFRMT_esric \
+ 		-DFRMT_envisat -DFRMT_aaigrid -DFRMT_usgsdem -DFRMT_l1b \
+ 		-DFRMT_fit -DFRMT_vrt -DFRMT_xpm -DFRMT_bmp -DFRMT_rmf \
+-		-DFRMT_nitf -DFRMT_pcidsk -DFRMT_airsar -DFRMT_rs2 \
+-		-DFRMT_ilwis -DFRMT_msgn -DFRMT_rik -DFRMT_pcraster \
++		-DFRMT_nitf -DFRMT_airsar -DFRMT_rs2 \
++		-DFRMT_ilwis -DFRMT_msgn -DFRMT_rik \
+ 		-DFRMT_leveller -DFRMT_sgi -DFRMT_srtmhgt -DFRMT_idrisi \
+ 		-DFRMT_jaxapalsar -DFRMT_ers -DFRMT_ingr -DFRMT_dimap \
+ 		-DFRMT_gff -DFRMT_terragen -DFRMT_gsg -DFRMT_cosar -DFRMT_pds \
+@@ -32,6 +32,22 @@ PLUGINDIRLIST 	=	$(PLUGINFLAGS:-DFRMT_=)
+ EXTRAFLAGS	=	$(EXTRAFLAGS) -DFRMT_postgisraster
+ !ENDIF
+ 
++!IFDEF GIF_SETTING
++EXTRAFLAGS	=	$(EXTRAFLAGS) -DFRMT_gif
++!ENDIF
++
++!IFDEF PCIDSK_SETTING
++EXTRAFLAGS	=	$(EXTRAFLAGS) -DFRMT_pcidsk
++!ENDIF
++
++!IFDEF PCRASTER_SETTING
++EXTRAFLAGS	=	$(EXTRAFLAGS) -DFRMT_pcraster
++!ENDIF
++
++!IFDEF EXR_INC
++EXTRAFLAGS	=	$(EXTRAFLAGS) -DFRMT_exr
++!ENDIF
++
+ !IFDEF JPEG_SUPPORTED
+ EXTRAFLAGS	=	-DFRMT_jpeg $(EXTRAFLAGS)
+ !ENDIF
+--- a/frmts/pcidsk/makefile.vc
++++ b/frmts/pcidsk/makefile.vc
+@@ -14,7 +14,11 @@ OBJ		=	pcidskdataset2.obj ogrpcidsklayer.obj vsi_pcidsk_io.obj gdal_edb.obj
+ !ENDIF
+ 
+ !IF "$(PCIDSK_SETTING)" == "INTERNAL"
++!IFDEF JPEG_SUPPORTED
+ PCIDSKFLAGS	=	-Isdk -DPCIDSK_INTERNAL -DHAVE_LIBJPEG 
++!ELSE
++PCIDSKFLAGS	=	-Isdk -DPCIDSK_INTERNAL
++!ENDIF
+ 
+ OBJ	=	pcidskdataset2.obj ogrpcidsklayer.obj vsi_pcidsk_io.obj gdal_edb.obj \
+ 	sdk\blockdir\asciitiledir.obj \
+@@ -70,11 +74,13 @@ OBJ	=	pcidskdataset2.obj ogrpcidsklayer.obj vsi_pcidsk_io.obj gdal_edb.obj \
+ 	
+ !ENDIF
+             
++!IFDEF JPEG_SUPPORTED
+ !IFDEF JPEG_EXTERNAL_LIB
+ JPEGFLAGS = -I$(JPEGDIR)
+ !ELSE
+ JPEGFLAGS = -I..\jpeg\libjpeg
+ !ENDIF
++!ENDIF
+ 
+ .cpp.obj:	
+ 	$(CC) $(CFLAGS) $(PCIDSKFLAGS) $(JPEGFLAGS) /c $*.cpp /Fo$*.obj
+--- a/makefile.vc
++++ b/makefile.vc
+@@ -84,7 +84,7 @@ staticlib:	$(LIB_DEPENDS)
+ 	call <<clean_main_build_output.bat
+ $(CLEAN_MAIN_BUILD_OUTPUT_CMDS)
+ <<
+-	lib /nologo /out:$(GDAL_LIB_NAME) $(LIBOBJ) $(EXTERNAL_LIBS)
++	lib /nologo /out:$(GDAL_LIB_NAME) $(LIBOBJ)
+ 
+ appslib-target:
+ 	cd apps
+--- a/nmake.opt
++++ b/nmake.opt
+@@ -155,9 +155,9 @@ CXX_PDB_FLAGS=
+ 
+ !IFNDEF OPTFLAGS
+ !IF "$(DEBUG)" == "0"
+-OPTFLAGS= $(CXX_ANALYZE_FLAGS) $(CXX_PDB_FLAGS) /nologo /MP$(CPU_COUNT) /MD /EHsc /Ox /FC /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DNDEBUG
++OPTFLAGS= $(CXX_ANALYZE_FLAGS) $(CXX_PDB_FLAGS) /nologo /MP$(CPU_COUNT) /EHsc /FC /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DNDEBUG
+ !ELSE
+-OPTFLAGS= $(CXX_ANALYZE_FLAGS) $(CXX_PDB_FLAGS) /nologo /MP$(CPU_COUNT) /MDd /EHsc /FC /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DDEBUG
++OPTFLAGS= $(CXX_ANALYZE_FLAGS) $(CXX_PDB_FLAGS) /nologo /MP$(CPU_COUNT) /EHsc /FC /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /DDEBUG
+ !ENDIF
+ !ENDIF  # OPTFLAGS
+ 
+--- a/ogr/ogrsf_frmts/geojson/makefile.vc
++++ b/ogr/ogrsf_frmts/geojson/makefile.vc
+@@ -28,13 +28,7 @@ EXTRAFLAGS = -I. -I.. -I..\.. -Ilibjson
+ OBJ	=	$(GEOJSON_OBJ)
+ 
+ default:	$(OBJ)
+-	cd libjson
+-	$(MAKE) /f makefile.vc
+-	cd ..
+ 	
+ clean:
+-	cd libjson
+-	$(MAKE) /f makefile.vc clean
+-	cd ..
+ 	-del *.lib
+ 	-del *.obj *.pdb

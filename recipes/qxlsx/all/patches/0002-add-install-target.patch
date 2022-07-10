@@ -1,0 +1,37 @@
+--- a/QXlsx/CMakeLists.txt
++++ b/QXlsx/CMakeLists.txt
+@@ -53,3 +53,34 @@ target_compile_definitions(QXlsx PRIVATE QXLSX_LIBRARY)
+ if (BUILD_SHARED_LIBS)
+     target_compile_definitions(QXlsx PRIVATE QXLSX_SHARED)
+ endif()
++
++set(QXLSX_PUBLIC_HEADERS
++    header/xlsxdocument.h
++    header/xlsxabstractooxmlfile.h
++    header/xlsxabstractsheet.h
++    header/xlsxabstractsheet_p.h
++    header/xlsxcellformula.h
++    header/xlsxcell.h
++    header/xlsxcelllocation.h
++    header/xlsxcellrange.h
++    header/xlsxcellreference.h
++    header/xlsxchart.h
++    header/xlsxchartsheet.h
++    header/xlsxconditionalformatting.h
++    header/xlsxdatavalidation.h
++    header/xlsxdatetype.h
++    header/xlsxdocument.h
++    header/xlsxformat.h
++    header/xlsxglobal.h
++    header/xlsxrichstring.h
++    header/xlsxworkbook.h
++    header/xlsxworksheet.h
++)
++set_property(TARGET QXlsx PROPERTY PUBLIC_HEADER ${QXLSX_PUBLIC_HEADERS})
++include(GNUInstallDirs)
++install(TARGETS QXlsx
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QXlsx
++)

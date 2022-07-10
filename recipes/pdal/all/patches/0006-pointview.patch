@@ -1,0 +1,26 @@
+Adapted from vcpkg recipe
+---
+diff --git a/pdal/PointView.hpp b/pdal/PointView.hpp
+index 837cd25b8..ac9c8bbb6 100644
+--- a/pdal/PointView.hpp
++++ b/pdal/PointView.hpp
+@@ -668,7 +668,7 @@ public:
+ 
+     bool operator==(const PointViewIter& i)
+         { return m_id == i.m_id; }
+-    bool operator!=(const PointViewIter& i)
++    bool operator!=(const PointViewIter& i) const
+         { return m_id != i.m_id; }
+     bool operator<(const PointViewIter& i)
+         { return m_id < i.m_id; }
+@@ -679,9 +679,7 @@ public:
+     bool operator>=(const PointViewIter& i)
+         { return m_id >= i.m_id; }
+ 
+-    reference operator*()
+-        { return PointRef(*m_view, m_id); }
+-    const reference operator*() const
++    reference operator*() const
+         { return PointRef(*m_view, m_id); }
+     pointer operator->()
+         { return nullptr; }

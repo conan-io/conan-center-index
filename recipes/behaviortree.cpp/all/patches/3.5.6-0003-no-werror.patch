@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 242c214..cb8d77a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -232,10 +232,10 @@ if( ZeroMQ_FOUND )
+ endif()
+ 
+ if(MSVC)
+-    target_compile_options(${BEHAVIOR_TREE_LIBRARY} PRIVATE /W3 /WX)
++    target_compile_options(${BEHAVIOR_TREE_LIBRARY} PRIVATE /W3)
+ else()
+     target_compile_options(${BEHAVIOR_TREE_LIBRARY} PRIVATE
+-        -Wall -Wextra -Werror=return-type)
++        -Wall -Wextra)
+ endif()
+ 
+ ######################################################

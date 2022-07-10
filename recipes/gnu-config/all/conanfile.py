@@ -1,7 +1,8 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class GnuConfigConan(ConanFile):
@@ -9,7 +10,7 @@ class GnuConfigConan(ConanFile):
     description = "The GNU config.guess and config.sub scripts"
     homepage = "https://savannah.gnu.org/projects/config/"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "gnu", "config", "autotools", "canonical", "host", "build", "target", "triplet")
+    topics = ("gnu", "config", "autotools", "canonical", "host", "build", "target", "triplet")
     license = "GPL-3.0-or-later", "autoconf-special-exception"
     no_copy_source = True
 
@@ -17,9 +18,12 @@ class GnuConfigConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("config*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _extract_license(self):
         txt_lines = tools.load(os.path.join(self.source_folder, self._source_subfolder, "config.guess")).splitlines()
@@ -40,9 +44,6 @@ class GnuConfigConan(ConanFile):
         tools.save(os.path.join(self.package_folder, "licenses", "COPYING"), self._extract_license())
         self.copy("config.guess", src=self._source_subfolder, dst="bin")
         self.copy("config.sub", src=self._source_subfolder, dst="bin")
-
-    def package_id(self):
-        self.info.header_only()
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

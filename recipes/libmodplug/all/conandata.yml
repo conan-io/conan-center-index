@@ -2,3 +2,7 @@ sources:
   "0.8.9.0":
     url: "https://github.com/Konstanty/libmodplug/archive/5a39f5913d07ba3e61d8d5afdba00b70165da81d.zip"
     sha256: "12d12362428ebcefd473e56ff94faa6ee5c066b777e153d2bbca15c1e379d1bc"
+patches:
+  "0.8.9.0":
+    - patch_file: "patches/0001-cmake-install-dll.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,19 @@
+--- Clients/dns-sd.c
++++ Clients/dns-sd.c
+@@ -58,6 +58,7 @@
+ //#define TEST_NEW_CLIENTSTUB 1
+ 
+ #include <ctype.h>
++#include <stdarg.h>         // For va_list, va_start, va_end
+ #include <stdio.h>          // For stdout, stderr
+ #include <stdlib.h>         // For exit()
+ #include <string.h>         // For strlen(), strcpy()
+@@ -943,7 +944,7 @@
+     va_end(ptr);
+     if (result > 0 && size > 0)
+     {
+-        length = MIN((size_t)result, size-1);
++        length = ((((size_t)result)<(size-1))?((size_t)result):(size-1));
+     }
+     return length;
+ }

@@ -1,0 +1,13 @@
+diff --git a/threadproc/unix/signals.c b/threadproc/unix/signals.c
+index c735eab..e8b44c3 100644
+--- a/threadproc/unix/signals.c
++++ b/threadproc/unix/signals.c
+@@ -116,7 +116,7 @@ void apr_signal_init(apr_pool_t *pglobal)
+ }
+ const char *apr_signal_description_get(int signum)
+ {
+-    return (signum >= 0) ? sys_siglist[signum] : "unknown signal (number)";
++    return (signum >= 0) ? strsignal(signum) : "unknown signal (number)";
+ }
+ 
+ #else /* !(SYS_SIGLIST_DECLARED || HAVE_DECL_SYS_SIGLIST) */

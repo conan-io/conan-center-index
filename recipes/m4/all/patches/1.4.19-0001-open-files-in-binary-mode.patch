@@ -1,0 +1,15 @@
+This will open all files in binary mode.
+files may contain binary data.
+This fixes e.g. autoconf, of whose frozen file, contains all characters from 0x00 to 0xff.  
+
+--- src/path.c
++++ src/path.c
+@@ -110,7 +110,7 @@
+ static FILE *
+ m4_fopen (const char *file)
+ {
+-  FILE *fp = fopen (file, "re");
++  FILE *fp = fopen (file, "reb");
+   if (fp)
+     {
+       struct stat st;

@@ -1,18 +1,21 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.tools import Version
-from contextlib import contextmanager
+import contextlib
 import os
-import platform
+import shutil
+
+required_conan_version = ">=1.36"
 
 
 class LibffiConan(ConanFile):
     name = "libffi"
     description = "A portable, high level programming interface to various calling conventions"
-    topics = ("conan", "libffi", "runtime", "foreign-function-interface", "runtime-library")
+    topics = ("libffi", "runtime", "foreign-function-interface", "runtime-library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceware.org/libffi/"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,21 +24,32 @@ class LibffiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
+
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _autotools = None
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20200517")
 
     def configure(self):
         if self.options.shared:
@@ -43,20 +57,24 @@ class LibffiConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Generate rpath friendly shared lib on macOS
         configure_path = os.path.join(self._source_subfolder, "configure")
-        if self.settings.os == "Macos":
-            tools.replace_in_file(configure_path, r"-install_name \$rpath/", "-install_name ")
+        tools.replace_in_file(configure_path, "-install_name \\$rpath/", "-install_name @rpath/")
 
-        if Version(self.version) < "3.3":
-            if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
+        if tools.Version(self.version) < "3.3":
+            if self.settings.compiler == "clang" and tools.Version(str(self.settings.compiler.version)) >= 7.0:
                 # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
                 sysv_s_src = os.path.join(self._source_subfolder, "src", "arm", "sysv.S")
                 tools.replace_in_file(sysv_s_src, "fldmiad", "vldmia")
@@ -66,16 +84,20 @@ class LibffiConan(ConanFile):
                 # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
                 tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         extra_env_vars = {}
-        if self.settings.compiler == "Visual Studio":
+        if tools.os_info.is_windows and (self._is_msvc or self.settings.compiler == "clang") :
             msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
             msvcc_args = []
-            if self.settings.arch == "x86_64":
-                msvcc_args.append("-m64")
-            elif self.settings.arch == "x86":
-                msvcc_args.append("-m32")
+            if self._is_msvc:
+                if self.settings.arch == "x86_64":
+                    msvcc_args.append("-m64")
+                elif self.settings.arch == "x86":
+                    msvcc_args.append("-m32")
+            elif self.settings.compiler == "clang":
+                msvcc_args.append("-clang-cl")
+
             if msvcc_args:
                 msvcc = "{} {}".format(msvcc, " ".join(msvcc_args))
             extra_env_vars.update(tools.vcvars_dict(self.settings))
@@ -104,17 +126,17 @@ class LibffiConan(ConanFile):
         self._autotools.defines.append("FFI_BUILDING")
         if self.options.shared:
             self._autotools.defines.append("FFI_BUILDING_DLL")
-        if self.settings.compiler == "Visual Studio":
-            if "MT" in str(self.settings.compiler.runtime):
+        if self._is_msvc:
+            if "MT" in msvc_runtime_flag(self):
                 self._autotools.defines.append("USE_STATIC_RTL")
-            if "d" in str(self.settings.compiler.runtime):
+            if "d" in msvc_runtime_flag(self):
                 self._autotools.defines.append("USE_DEBUG_RTL")
         build = None
         host = None
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             build = "{}-{}-{}".format(
-                "x86_64" if "64" in platform.machine() else "i686",
-                "pc" if self.settings.arch == "x86" else "w64",
+                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
+                "pc" if self._settings_build.arch == "x86" else "w64",
                 "cygwin")
             host = "{}-{}-{}".format(
                 "x86_64" if self.settings.arch == "x86_64" else "i686",
@@ -128,6 +150,11 @@ class LibffiConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -136,7 +163,7 @@ class LibffiConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             if self.options.shared:
                 self.copy("libffi.dll", src=".libs", dst="bin")
             self.copy("libffi.lib", src=".libs", dst="lib")
@@ -148,14 +175,11 @@ class LibffiConan(ConanFile):
 
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-
-            os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.filenames["pkg_config"] = "libffi"
+        self.cpp_info.set_property("pkg_config_name", "libffi")
+        self.cpp_info.libs = ["{}ffi".format("lib" if self._is_msvc else "")]
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
-        libffi = "ffi"
-        if self.settings.compiler == "Visual Studio":
-            libffi = "lib" + libffi
-        self.cpp_info.libs = [libffi]
+

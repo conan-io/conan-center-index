@@ -1,0 +1,8 @@
+sources:
+  "5.4.0":
+    url: "https://github.com/intel/hyperscan/archive/v5.4.0.tar.gz"
+    sha256: "e51aba39af47e3901062852e5004d127fa7763b5dbbc16bcca4265243ffa106f"
+patches:
+  "5.4.0":
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -550,6 +550,7 @@ target_include_directories(
+ PUBLIC
+     utils
+ )
++target_compile_features(objUtil PUBLIC cxx_std_11)
+ 
+ add_subdirectory(interface/basisu_c_binding)
+ 

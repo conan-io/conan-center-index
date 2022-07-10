@@ -1,0 +1,8 @@
+sources:
+  "cci.20210928":
+    url: "https://github.com/google/gemmlowp/archive/daf630d3d0c439dbe22229838a5ba1bc5f82908d.zip"
+    sha256: "7b48199021cfad7d06ea84b975b5ff3c259b8f7c0d3d289e0c99e1708704e6db"
+patches:
+  "cci.20210928":
+    - patch_file: "patches/build-static-libraries.patch"
+      base_path: "source_subfolder"

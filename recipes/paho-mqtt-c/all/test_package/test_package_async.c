@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     conn_opts.onFailure = onConnectFailure;
     conn_opts.context = client;
 
-    printf("finished!");
+    printf("finished!\n");
 
     MQTTAsync_destroy(&client);
     return 0;

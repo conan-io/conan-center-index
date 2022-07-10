@@ -1,0 +1,8 @@
+sources:
+  "1.0.7":
+    url: "https://www.x.org/pub/individual/util/xorg-cf-files-1.0.7.tar.gz"
+    sha256: "a49478ba0c2138bc53de38979cd2dee073b6fd6728597c552d266a707747f472"
+patches:
+  "1.0.7":
+    - patch_file: "patches/1.0.7-0001-win-fixes.patch"
+      base_path: "source_subfolder"

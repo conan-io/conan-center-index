@@ -1,0 +1,24 @@
+From 2330dcc88711e4909da925c1278be2866980c071 Mon Sep 17 00:00:00 2001
+From: Wouter Zirkzee <wouter.zirkzee@gmail.com>
+Date: Thu, 25 Nov 2021 23:30:53 +0100
+Subject: [PATCH 2/2] Add runtime export to install
+
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 816a676..794aff8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,6 +68,7 @@ install(TARGETS iir EXPORT iir-targets
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+   PRIVATE_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iir)
+ 
+ configure_file(iir.pc.in iir.pc @ONLY)
+-- 
+2.25.1
+

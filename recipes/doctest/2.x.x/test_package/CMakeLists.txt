@@ -12,4 +12,4 @@ target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 enable_testing()
 
-doctest_discover_tests(${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

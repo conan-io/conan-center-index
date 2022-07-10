@@ -1,0 +1,40 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -162,7 +192,7 @@
+     if (UNICORN_HAS_SPARC)
+         set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-DUNICORN_HAS_SPARC ")
+     endif()
+-    set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-fPIC -fvisibility=hidden")
++    set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-fPIC -fvisibility=hidden ${CMAKE_C_FLAGS}")
+ 
+     set(TARGET_LIST "--target-list=")
+     if (UNICORN_HAS_X86)
+@@ -185,10 +185,28 @@
+     endif()
+     set (TARGET_LIST "${TARGET_LIST} ")
+
++    set (HOST_CPU)
++    if (CMAKE_CROSSCOMPILING)
++        if (CMAKE_SYSTEM_PROCESSOR MATCHES "[xX]86_64")
++            set (HOST_CPU x86_64)
++        elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "[iI][3456]86|[xX]86")
++            set (HOST_CPU i386)
++        elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|armv[89]")
++            set (HOST_CPU aarch64)
++        elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "armv?[3-7]")
++            set (HOST_CPU arm)
++        endif ()
++    endif ()
++    set (CPU_ARG)
++    if (HOST_CPU)
++        set (CPU_ARG "--cpu=${HOST_CPU}")
++    endif()
++
+     # GEN config-host.mak & target directories
+     execute_process(COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/qemu/configure
+         ${EXTRA_CFLAGS}
+         ${TARGET_LIST}
++        ${CPU_ARG} --cc=${CMAKE_C_COMPILER}
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+     )
+     execute_process(COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/qemu/scripts/create_config

@@ -11,6 +11,21 @@ sources:
   "1.40.0":
     url: "https://github.com/libuv/libuv/archive/v1.40.0.zip"
     sha256: "61366e30d8484197dc9e4a94dbd98a0ba52fb55cb6c6d991af1f3701b10f322b"
+  "1.41.0":
+    url: "https://github.com/libuv/libuv/archive/v1.41.0.zip"
+    sha256: "cb89a8b9f686c5ccf7ed09a9e0ece151a73ebebc17af3813159c335b02181794"
+  "1.41.1":
+    url: "https://github.com/libuv/libuv/archive/v1.41.1.tar.gz"
+    sha256: "62c29d1d76b0478dc8aaed0ed1f874324f6cd2d6ff4cb59a44026c09e818cd53"
+  "1.42.0":
+    url: "https://github.com/libuv/libuv/archive/v1.42.0.tar.gz"
+    sha256: "371e5419708f6aaeb8656671f89400b92a9bba6443369af1bb70bcd6e4b3c764"
+  "1.43.0":
+    url: "https://github.com/libuv/libuv/archive/v1.43.0.tar.gz"
+    sha256: "9e27825a55279de69a7c43e42d509fd1337c9bece2547c761e91a1592e91cc4d"
+  "1.44.1":
+    url: "https://github.com/libuv/libuv/archive/v1.44.1.tar.gz"
+    sha256: "e91614e6dc2dd0bfdd140ceace49438882206b7a6fb00b8750914e67a9ed6d6b"
 patches:
   "1.34.2":
     - base_path: "source_subfolder"
@@ -24,3 +39,24 @@ patches:
   "1.40.0":
     - base_path: "source_subfolder"
       patch_file: "patches/1.40.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.41.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.41.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.41.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.41.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
+  "1.42.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.42.0/fix-cmake.patch"
+  "1.43.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.43.0/fix-cmake.patch"
+  "1.44.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.44.1/fix-cmake.patch"

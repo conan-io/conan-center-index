@@ -1,23 +1,34 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
 import shutil
+
+required_conan_version = ">=1.45.0"
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
+    test_type = "explicit"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        self.build_requires(self.tested_reference_str)
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+        if is_msvc(self):
+            with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
                     yield
         else:
@@ -36,16 +47,20 @@ class TestPackageConan(ConanFile):
         if not system_cc:
             system_cc = self._default_cc.get(str(self.settings.compiler))
         return system_cc
+    
+    @property
+    def _user_info(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def _build_scripts(self):
         """Test compile script of automake"""
-        compile_script = self.deps_user_info["automake"].compile
-        ar_script = self.deps_user_info["automake"].ar_lib
+        compile_script = self._user_info["automake"].compile
+        ar_script = self._user_info["automake"].ar_lib
         assert os.path.isfile(ar_script)
         assert os.path.isfile(compile_script)
 
         if self._system_cc:
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            with tools.vcvars(self) if is_msvc(self) else tools.no_op():
                 self.run("{} {} test_package_1.c -o script_test".format(tools.unix_path(compile_script), self._system_cc), win_bash=tools.os_info.is_windows)
 
     def _build_autotools(self):
@@ -67,8 +82,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if self._system_cc:
-            if not tools.cross_building(self.settings):
+            if not tools.cross_building(self):
                 self.run(os.path.join(".", "script_test"), run_environment=True)
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join(".", "test_package"), run_environment=True)

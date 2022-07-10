@@ -1,0 +1,14 @@
+Forwared to upstream and fixed in pdal>2.2.0
+---
+diff --git a/pdal/util/Bounds.hpp b/pdal/util/Bounds.hpp
+index 7d9e60b64..f40731f16 100644
+--- a/pdal/util/Bounds.hpp
++++ b/pdal/util/Bounds.hpp
+@@ -36,6 +36,7 @@
+ 
+ #include <cstdint>
+ #include <sstream>
++#include <stdexcept>
+ 
+ #include "pdal_util_export.hpp"
+ 

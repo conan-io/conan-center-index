@@ -1,0 +1,27 @@
+Fix autotools:
+* Disable test and tools
+* Do not check transitive dependencies (zlib and proj)
+
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,6 +1,6 @@
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-SUBDIRS = headers lib src test
++SUBDIRS = headers lib
+ 
+ AUTOMAKE_OPTIONS = dist-zip
+ 
+--- a/configure.ac
++++ b/configure.ac
+@@ -73,10 +73,8 @@ AC_FUNC_STRFTIME
+ AC_CHECK_FUNCS([memset sqrt strcasecmp strerror strncasecmp strstr fdatasync ftruncate getcwd gettimeofday localtime_r memmove strerror])
+ 
+ # Checks for required libraries
+-AC_CHECK_LIB(z,inflateInit_,,AC_MSG_ERROR(['libz' is required but it doesn't seem to be installed on this system.]),-lm)
+ AC_CHECK_LIB(jpeg,jpeg_start_compress,,AC_MSG_ERROR(['libjpeg' is required but it doesn't seem to be installed on this system.]),-lm)
+ AC_CHECK_LIB(tiff,TIFFClientOpen,,AC_MSG_ERROR(['libtiff' is required but it doesn't seem to be installed on this system.]),-lm)
+-AC_CHECK_LIB(proj,pj_init_plus,,AC_MSG_ERROR(['libproj' is required but it doesn't seem to be installed on this system.]),-lm)
+ AC_CHECK_LIB(geotiff,GTIFSetFromProj4,,AC_MSG_ERROR(['libgeotiff' [>= v.1.2.5] is required but it doesn't seem to be installed on this system.]),-lm)
+ 
+ PKG_CHECK_MODULES([LIBSPATIALITE], [spatialite], , AC_MSG_ERROR(['libspatialite' is required but it doesn't seem to be installed on this system.]))

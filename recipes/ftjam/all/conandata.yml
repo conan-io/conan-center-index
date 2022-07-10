@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-mingw-fix-makefile.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-missing-includes.patch"
+      base_path: "source_subfolder"

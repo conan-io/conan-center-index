@@ -1,0 +1,43 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 66505b5..d63cc96 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -213,16 +213,16 @@ configure_file(dev/release/pkg-config.txt xlsxwriter.pc @ONLY)
+ # INCLUDES
+ # --------
+ enable_language(CXX)
+-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
++#list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+ 
+ # ZLIB
+ find_package(ZLIB REQUIRED "1.0")
+-list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
++#list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
+ message("zlib version: " ${ZLIB_VERSION})
+ 
+ # MINIZIP
+ if (USE_SYSTEM_MINIZIP)
+-    find_package(MINIZIP REQUIRED "1.0")
++#    find_package(MINIZIP REQUIRED "1.0")
+     list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${MINIZIP_INCLUDE_DIRS})
+ endif()
+ 
+@@ -259,7 +259,7 @@ if(NOT USE_OPENSSL_MD5 AND NOT USE_NO_MD5)
+ endif()
+ 
+ if(USE_OPENSSL_MD5)
+-	find_package(OpenSSL REQUIRED)
++#	find_package(OpenSSL REQUIRED)
+ 	if(OpenSSL_FOUND)
+ 	    include_directories(${OPENSSL_INCLUDE_DIR})
+ 	    message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
+@@ -278,7 +278,8 @@ target_sources(${PROJECT_NAME}
+     PRIVATE ${LXW_SOURCES}
+     PUBLIC ${LXW_HEADERS}
+ )
+-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${ZLIB_LIBRARIES} ${MINIZIP_LIBRARIES} ${LIB_CRYPTO} ${OPENSSL_CRYPTO_LIBRARY})
++#target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${ZLIB_LIBRARIES} ${MINIZIP_LIBRARIES} ${LIB_CRYPTO} ${OPENSSL_CRYPTO_LIBRARY})
++target_link_libraries(${PROJECT_NAME} LINK_PUBLIC CONAN_PKG::zlib CONAN_PKG::minizip)
+ target_compile_definitions(${PROJECT_NAME} PRIVATE ${LXW_PRIVATE_COMPILE_DEFINITIONS})
+ 
+ # /utf-8 needs VS2015 Update 2 or above.

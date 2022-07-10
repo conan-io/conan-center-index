@@ -1,0 +1,32 @@
+This patch for msvc build allows to:
+* define OPTFLAG ourself from conanfile (allow to honor profile)
+* inject a custom SYSTEM_LIBS variable from conanfile (allow robust shared build)
+* not hardcode this very specific C:\OSGeo4W environment
+
+--- a/makefile.vc
++++ b/makefile.vc
+@@ -2,13 +2,12 @@
+ #
+ # NMAKE Makefile to build libreadosm on Windows
+ #
+-!INCLUDE nmake.opt
+ 
+ LIBOBJ	               =	src\readosm.obj src\osmxml.obj \
+ 							src\protobuf.obj src\osm_objects.obj
+ READOSM_DLL	 	       =	readosm$(VERSION).dll
+ 
+-CFLAGS	=	/nologo -I. -Iheaders -IC:\OSGeo4W\include $(OPTFLAGS)
++CFLAGS	=	/nologo -I. -Iheaders $(CFLAGS) $(OPTFLAGS)
+ 
+ default:	all
+ 
+@@ -22,8 +21,7 @@ $(READOSM_DLL):	readosm_i.lib
+ 
+ readosm_i.lib:	$(LIBOBJ)
+ 	link /dll /out:$(READOSM_DLL) \
+-		/implib:readosm_i.lib $(LIBOBJ) \
+-		C:\OSGeo4w\lib\libexpat.lib C:\OSGeo4w\lib\zlib.lib
++		/implib:readosm_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
+ 	if exist $(READOSM_DLL).manifest mt -manifest \
+ 		$(READOSM_DLL).manifest -outputresource:$(READOSM_DLL);2 
+ 		

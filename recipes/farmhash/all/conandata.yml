@@ -1,0 +1,4 @@
+sources:
+  "cci.20190513":
+    url: "https://github.com/google/farmhash/archive/0d859a811870d10f53a594927d0d0b97573ad06d.tar.gz"
+    sha256: "18392cf0736e1d62ecbb8d695c31496b6507859e8c75541d7ad0ba092dc52115"

@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: 17a7e24b367dd93ab50684d44378ed11397bcae9547e45cc4aa9bb5833c9d052
+    url: https://github.com/h2non/semver.c/archive/v1.0.0.tar.gz

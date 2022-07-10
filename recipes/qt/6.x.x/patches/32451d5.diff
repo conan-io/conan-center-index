@@ -1,0 +1,32 @@
+From 32451d5c9126921180aad4bf78ec6af5eb27ec2a Mon Sep 17 00:00:00 2001
+From: Ulf Hermann <ulf.hermann@qt.io>
+Date: Tue, 13 Jul 2021 11:05:51 +0200
+Subject: [PATCH] Directly include Unicode.h in YarrCanonicalize.h
+
+The redirection via utypes.h can be problematic if you have another
+utypes.h around in a prominent place. It's easily avoided, though.
+
+Fixes: QTBUG-77528
+Change-Id: I50368f56b0d7eb957955900a32dbb625a38d02af
+---
+
+diff --git a/src/3rdparty/masm/stubs/wtf/unicode/utypes.h b/src/3rdparty/masm/stubs/wtf/unicode/utypes.h
+deleted file mode 100644
+index e1b4ff9..0000000
+--- a/src/3rdparty/masm/stubs/wtf/unicode/utypes.h
++++ /dev/null
+@@ -1 +0,0 @@
+-#include <unicode/Unicode.h>
+diff --git a/src/3rdparty/masm/yarr/YarrCanonicalize.h b/src/3rdparty/masm/yarr/YarrCanonicalize.h
+index cbd279e..17c9831 100644
+--- a/src/3rdparty/masm/yarr/YarrCanonicalize.h
++++ b/src/3rdparty/masm/yarr/YarrCanonicalize.h
+@@ -26,7 +26,7 @@
+ #pragma once
+ 
+ #include <stdint.h>
+-#include <unicode/utypes.h>
++#include <unicode/Unicode.h>
+ 
+ namespace JSC { namespace Yarr {
+ 

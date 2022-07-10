@@ -1,0 +1,44 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1496d7f97..d56481cb8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -139,7 +139,12 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
+ include(${PDAL_CMAKE_DIR}/dimension.cmake)
+ include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+ include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+-include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
++# disable openssl support for arbiter
++#include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
++
++# Set aliases for widely used variables
++set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
++set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
+ 
+ #------------------------------------------------------------------------------
+ # generate the pdal_features.hpp header
+@@ -270,7 +275,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
+         ${PDAL_VENDOR_DIR}/eigen
+         ${PDAL_VENDOR_DIR}/pdalboost
+         ${LIBXML2_INCLUDE_DIR}
+-        ${ZSTD_INCLUDE_DIRS}
++        ${zstd_INCLUDE_DIRS}
+         ${NLOHMANN_INCLUDE_DIR}
+         ${GDAL_INCLUDE_DIR}
+         ${LASZIP_INCLUDE_DIR}
+@@ -278,13 +283,13 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
+ target_link_libraries(${PDAL_BASE_LIB_NAME}
+     PRIVATE
+         ${CMAKE_THREAD_LIBS_INIT}
+-        ${GDAL_LIBRARY}
+-        ${GEOTIFF_LIBRARY}
++        ${GDAL_LIBRARIES}
++        ${GeoTIFF_LIBRARY}
+         ${LASZIP_LIBRARY}
+         ${LIBXML2_LIBRARIES}
+         ${ZLIB_LIBRARIES}
+         ${LIBLZMA_LIBRARIES}
+-        ${ZSTD_LIBRARIES}
++        ${zstd_LIBRARIES}
+         ${WINSOCK_LIBRARY}
+         ${PDAL_REEXPORT}
+         ${PDAL_UTIL_LIB_NAME}

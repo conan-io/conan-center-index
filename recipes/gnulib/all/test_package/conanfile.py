@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from contextlib import contextmanager
+import contextlib
 import os
 import shutil
 
@@ -8,16 +8,19 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package.c"
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-        self.build_requires("automake/1.16.1")
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    @contextmanager
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        self.build_requires("automake/1.16.4")
+
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "AR": "{} lib".format(tools.unix_path(os.path.join(self.build_folder, "build-aux", "ar-lib"))),
                     "CC": "cl -nologo",
@@ -39,9 +42,12 @@ class TestPackageConan(ConanFile):
         with tools.chdir(self.build_folder):
             for fn in ("COPYING", "NEWS", "INSTALL", "README", "AUTHORS", "ChangeLog"):
                 tools.save(fn, "\n")
-            self.run("gnulib-tool --list", win_bash=tools.os_info.is_windows)
-            self.run("gnulib-tool --import getopt-posix", win_bash=tools.os_info.is_windows)
-            self.run("{} -ifv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+            with tools.run_environment(self):
+                self.run("gnulib-tool --list", win_bash=tools.os_info.is_windows, run_environment=True)
+                self.run("gnulib-tool --import getopt-posix", win_bash=tools.os_info.is_windows, run_environment=True)
+            # m4 built with Visual Studio does not support executing *nix utils (e.g. `test`)
+            with tools.environment_append({"M4":None}) if self.settings.os == "Windows" else tools.no_op():
+                self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows, run_environment=True)
 
             with self._build_context():
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -49,6 +55,6 @@ class TestPackageConan(ConanFile):
                 autotools.make()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
             self.run(bin_path, run_environment=True)

@@ -2,12 +2,12 @@
 +++ bin/aclocal.in
 @@ -1,1 +1,1 @@
 -#!@PERL@
-+#!/usr/bin/perl
++#!/usr/bin/env perl
 --- bin/automake.in
 +++ bin/automake.in
 @@ -1,1 +1,1 @@
 -#!@PERL@
-+#!/usr/bin/perl
++#!/usr/bin/env perl
 --- Makefile.in
 +++ Makefile.in
 @@ -535,7 +535,7 @@
@@ -15,7 +15,7 @@
  PACKAGE_VERSION = @PACKAGE_VERSION@
  PATH_SEPARATOR = @PATH_SEPARATOR@
 -PERL = @PERL@
-+PERL = /usr/bin/perl
++PERL = /usr/bin/env perl
  RELEASE_YEAR = @RELEASE_YEAR@
  SET_MAKE = @SET_MAKE@
  SHELL = @SHELL@
@@ -26,7 +26,7 @@
  # that automake testsuite, if they are available.
  AWK=${AM_TESTSUITE_AWK-${AWK-'@AWK@'}}
 -PERL=${AM_TESTSUITE_PERL-${PERL-'@PERL@'}}
-+PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/perl'}}
++PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/env perl'}}
  MAKE=${AM_TESTSUITE_MAKE-${MAKE-'make'}}
  YACC=${AM_TESTSUITE_YACC-${YACC-'@YACC@'}}
  LEX=${AM_TESTSUITE_LEX-${LEX-'@LEX@'}}

@@ -1,0 +1,4 @@
+sources:
+  "1.18":
+    url: "https://github.com/vpiotr/decimal_for_cpp/archive/c949929d796ea389f2203a198a23fe59c0ab47d9.tar.gz"
+    sha256: "575d06e0a75e9db981a2cdb6949c2fe0709214aaf3fb293c94df7657cd394192"

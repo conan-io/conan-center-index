@@ -1,0 +1,4 @@
+sources:
+  "cci.20200921":
+    url: "https://gitlab.com/wilzegers/autotest/-/archive/501c6e96e41c3fb60ac667c17a405b56b2527963/autotest-501c6e96e41c3fb60ac667c17a405b56b2527963.tar.gz"
+    sha256: "aa4f8fca7cb113e5452c0c09a2dfc1e73989742fccb490dab1aa8c127ca10979"

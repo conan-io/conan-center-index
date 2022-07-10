@@ -1,0 +1,56 @@
+avoid building shared lib when shared=False,
+and a fix to install .dlls correctly on Windows
+--- "CMakeLists.txt"	2017-04-07 16:55:00.000000000 +0200
++++ CMakeLists.txt	2017-07-21 20:01:33.330845600 +0200
+@@ -389,12 +391,6 @@
+ 
+ SET (LIBMIKMOD_LIBS)
+ 
+-ADD_LIBRARY (mikmod
+-    SHARED
+-    ${MIKMOD_LIB_MODULES}
+-    )
+-
+-LIST (APPEND LIBMIKMOD_LIBS "mikmod")
+ IF (ENABLE_STATIC)
+     ADD_LIBRARY (mikmod-static
+         STATIC
+@@ -410,16 +406,22 @@
+         ${LIBMIKMOD_LIBS}
+         PROPERTIES CLEAN_DIRECT_OUTPUT 1
+     )
+-ENDIF (ENABLE_STATIC)
+-
+-SET_TARGET_PROPERTIES(mikmod
+-    PROPERTIES VERSION 3.3.0 SOVERSION 3
+-)
+-IF(WIN32)
++ELSE (ENABLE_STATIC)
++    ADD_LIBRARY (mikmod
++        SHARED
++        ${MIKMOD_LIB_MODULES}
++        )
++    LIST (APPEND LIBMIKMOD_LIBS "mikmod")
+     SET_TARGET_PROPERTIES(mikmod
+-        PROPERTIES DEFINE_SYMBOL DLL_EXPORT
++        PROPERTIES VERSION 3.3.0 SOVERSION 3
+     )
+-ENDIF(WIN32)
++    IF(WIN32)
++        SET_TARGET_PROPERTIES(mikmod
++            PROPERTIES DEFINE_SYMBOL DLL_EXPORT
++        )
++    ENDIF(WIN32)
++ENDIF (ENABLE_STATIC)
++
+ 
+ IF(DISABLE_HQMIXER)
+   SET(NO_HQMIXER 1)
+@@ -854,6 +856,7 @@
+     TARGETS ${LIBMIKMOD_LIBS}
+     LIBRARY DESTINATION "lib${LIB_SUFFIX}"
+     ARCHIVE DESTINATION "lib${LIB_SUFFIX}"
++    RUNTIME DESTINATION "bin${LIB_SUFFIX}"
+ )
+ 
+ INSTALL(

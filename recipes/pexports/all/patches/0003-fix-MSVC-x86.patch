@@ -1,0 +1,7 @@
+--- pexports.c
++++ pexports.c
+@@ -81,2 +81,2 @@
+-  extern __declspec(dllimport) void __stdcall *GetModuleHandleA(char *name);
+-  extern __declspec(dllimport) void __stdcall *GetProcAddress(void *module, char *name);
++  extern __declspec(dllimport) void * __stdcall GetModuleHandleA(char *name);
++  extern __declspec(dllimport) void * __stdcall GetProcAddress(void *module, char *name);
