@@ -107,21 +107,24 @@ class ConanRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Catch2")
         self.cpp_info.set_property("cmake_target_name", "Catch2::Catch2{}".format("WithMain" if self.options.with_main else ""))
+        self.cpp_info.set_property("pkg_config_name", "catch2".format("-with-main" if self.options.with_main else ""))
         self.cpp_info.names["cmake_find_package"] = "Catch2"
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
         if self.options.with_main:
-            self.cpp_info.components["Catch2"].set_property("cmake_target_name", "Catch2::Catch2")
-            self.cpp_info.components["Catch2"].names["cmake_find_package"] = "Catch2"
-            self.cpp_info.components["Catch2"].names["cmake_find_package_multi"] = "Catch2"
+            self.cpp_info.components["_catch2"].set_property("cmake_target_name", "Catch2::Catch2")
+            self.cpp_info.components["_catch2"].set_property("pkg_config_name", "catch2")
+            self.cpp_info.components["_catch2"].names["cmake_find_package"] = "Catch2"
+            self.cpp_info.components["_catch2"].names["cmake_find_package_multi"] = "Catch2"
 
-            self.cpp_info.components["Catch2WithMain"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
-            self.cpp_info.components["Catch2WithMain"].libs = ["Catch2WithMain"]
-            self.cpp_info.components["Catch2WithMain"].system_libs = ["log"] if self.settings.os == "Android" else []
-            self.cpp_info.components["Catch2WithMain"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
-            self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
-            self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
-            defines = self.cpp_info.components["Catch2WithMain"].defines
+            self.cpp_info.components["catch2_with_main"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
+            self.cpp_info.components["catch2_with_main"].libs = ["Catch2WithMain"]
+            self.cpp_info.components["catch2_with_main"].system_libs = ["log"] if self.settings.os == "Android" else []
+            self.cpp_info.components["catch2_with_main"].set_property("cmake_target_name", "Catch2::Catch2WithMain")
+            self.cpp_info.components["catch2_with_main"].set_property("pkg_config_name", "catch2-with-main")
+            self.cpp_info.components["catch2_with_main"].names["cmake_find_package"] = "Catch2WithMain"
+            self.cpp_info.components["catch2_with_main"].names["cmake_find_package_multi"] = "Catch2WithMain"
+            defines = self.cpp_info.components["catch2_with_main"].defines
         else:
             self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
             self.cpp_info.system_libs = ["log"] if self.settings.os == "Android" else []
