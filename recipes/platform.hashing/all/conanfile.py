@@ -1,4 +1,5 @@
-from conan import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
 from conan.errors import ConanInvalidConfiguration
 import os
 
