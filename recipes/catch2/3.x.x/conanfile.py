@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
-class Catch2Recipe(ConanFile):
+class Catch2Conan(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
     topics = ("catch2", "unit-test", "tdd", "bdd")
