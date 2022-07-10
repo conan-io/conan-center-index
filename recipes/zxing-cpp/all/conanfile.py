@@ -43,7 +43,8 @@ class ZXingCppConan(ConanFile):
     def _compiler_cpp14_support(self):
         return {
             "gcc": "5" if tools.Version(self.version) < "1.2" else "6",
-            "Visual Studio": "14",
+            # In Visual Studio <= 15, there are compilation error "C2131: expression did not evaluate to a constant" in PDFCodewordDecoder.cpp.
+            "Visual Studio": "14" if tools.Version(self.version) < "1.4" else "16",
             "clang": "3.4",
             "apple-clang": "3.4",
         }
