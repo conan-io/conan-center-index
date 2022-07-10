@@ -76,6 +76,7 @@ class LibjpegConan(ConanFile):
             make_args = [
                 "nodebug=1" if self.settings.build_type != 'Debug' else "",
             ]
+            self.output.info(os.environ)
             if self._is_clang_cl:
                 cl = os.environ.get('CC', 'clang-cl')
                 link = os.environ.get('LD', 'lld-link')
