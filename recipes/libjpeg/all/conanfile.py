@@ -71,12 +71,12 @@ class LibjpegConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "Win32.Mak"),
                               "\nccommon = -c ",
                               "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "))
-        with tools.chdir(self._source_subfolder):
+        # clean environment variables that might affect on the build (e.g. if set by Jenkins)
+        with tools.chdir(self._source_subfolder), tools.environment_append({"PROFILE": None, "TUNE": None, "NODEBUG": None}):
             shutil.copy("jconfig.vc", "jconfig.h")
             make_args = [
                 "nodebug=1" if self.settings.build_type != 'Debug' else "",
             ]
-            self.output.info(os.environ)
             if self._is_clang_cl:
                 cl = os.environ.get('CC', 'clang-cl')
                 link = os.environ.get('LD', 'lld-link')
