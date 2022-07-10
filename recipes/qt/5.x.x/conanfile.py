@@ -209,6 +209,7 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             del self.options.with_libalsa
+            del self.options.qtx11extras
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
@@ -224,6 +225,13 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.qtwayland = False
             self.options.with_atspi = False
+
+        if self.settings.os != "Windows":
+            del self.options.qtwinextras
+            del self.options.qtactiveqt
+
+        if self.settings.os != "Macos":
+            del self.options.qtmacextras
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -251,8 +259,6 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
-        else:
-            del self.options.qtx11extras
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -1324,16 +1330,16 @@ Examples = bin/datadir/examples""")
         if self.options.qtremoteobjects:
             _create_module("RemoteObjects")
 
-        if self.options.qtwinextras:
+        if self.options.get_safe("qtwinextras"):
             _create_module("WinExtras")
 
-        if self.options.qtmacextras:
+        if self.options.get_safe("qtmacextras"):
             _create_module("MacExtras")
 
         if self.options.qtxmlpatterns:
             _create_module("XmlPatterns", ["Network"])
 
-        if self.options.qtactiveqt:
+        if self.options.get_safe("qtactiveqt"):
             _create_module("AxBase", ["Gui", "Widgets"])
             self.cpp_info.components["qtAxBase"].includedirs = ["include", os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxBase"].system_libs.extend(["ole32", "oleaut32", "user32", "gdi32", "advapi32"])
@@ -1374,7 +1380,7 @@ Examples = bin/datadir/examples""")
                 if self.options.widgets:
                     self.cpp_info.components["qtWidgets"].system_libs.append("UxTheme")
                     self.cpp_info.components["qtWidgets"].system_libs.append("dwmapi")
-                if self.options.qtwinextras:
+                if self.options.get_safe("qtwinextras"):
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
 
 
