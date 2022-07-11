@@ -32,6 +32,11 @@ option(QCUSTOMPLOT_USE_OPENGL "Use OpenGL" OFF)
 
 if(QCUSTOMPLOT_USE_OPENGL)
     target_compile_definitions(${PROJECT_NAME} PUBLIC QCUSTOMPLOT_USE_OPENGL)
+	target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::OpenGL)
+	if (MSVC)
+	    target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL32)
+	endif()
+	#TODO: Other platforms may need other libraries linked in
 endif()
 
 if(QT_VERSION VERSION_GREATER_EQUAL "6.0.0")
