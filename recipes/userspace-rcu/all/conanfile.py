@@ -34,8 +34,8 @@ class UserspaceRCUConan(ConanFile):
     )
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration("Only Linux/FreeBSD/Macos supported")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Only Linux/FreeBSD supported")
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -58,13 +58,6 @@ class UserspaceRCUConan(ConanFile):
                     extra_args.append('--enable-static=no')
                 else:
                     extra_args.append('--enable-shared=no')
-                if self.settings.os == "Macos":
-                    if self.settings.arch == "x86":
-                        extra_args.append('--build=i686-apple-darwin11')
-                    elif self.settings.arch == "x86_64":
-                        extra_args.append('--build=x86_64-apple-darwin11')
-                    else:
-                        extra_args.append('--build=armv8-apple-darwin11')
                 env_build.configure("../", args=extra_args, build=False, host=False, target=False)
                 env_build.make()
 
