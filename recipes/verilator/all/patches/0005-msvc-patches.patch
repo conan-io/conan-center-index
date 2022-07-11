@@ -1,0 +1,86 @@
+--- src/Makefile_obj.in
++++ src/Makefile_obj.in
+@@ -95,6 +95,7 @@ LIBS = $(CFG_LIBS) -lm
+ 
+ CPPFLAGS += -MMD
+ CPPFLAGS += -I. -I$(bldsrc) -I$(srcdir) -I$(incdir) -I../../include
++CPPFLAGS += -DNOMINMAX	# suppress the min and max definitions in Windef.h
+ #CPPFLAGS += -DVL_LEAK_CHECKS 	# If running valgrind or other hunting tool
+ CPPFLAGS += $(COPT)
+ CPPFLAGS += -MP # Only works on recent GCC versions
+@@ -280,7 +281,7 @@ V3__CONCAT.cpp: $(addsuffix .cpp, $(basename $(RAW_OBJS)))
+ 
+ $(TGT): $(PREDEP_H) $(OBJS)
+ 	@echo "      Linking $@..."
+-	${LINK} ${LDFLAGS} -o $@ $(OBJS) $(CCMALLOC) ${LIBS}
++	${LINK} ${LDFLAGS} -o $@$(EXEEXT) $(OBJS) $(CCMALLOC) ${LIBS}
+ 
+ V3Number_test: V3Number_test.o
+ 	${LINK} ${LDFLAGS} -o $@ $^ ${LIBS}
+
+--- src/V3Number.h
++++ melsrc/V3Number.h
+@@ -22,6 +22,7 @@
+ 
+ #include "V3Error.h"
+ 
++#include <algorithm>
+ #include <cmath>
+ #include <limits>
+ #include <vector>
+
+--- src/V3Os.cpp
++++ src/V3Os.cpp
+@@ -73,8 +73,8 @@ string V3Os::getenvStr(const string& envvar, const string& defaultValue) {
+ #if defined(_MSC_VER)
+     // Note: MinGW does not offer _dupenv_s
+     char* envvalue = nullptr;
+-    _dupenv_s(&envvalue, nullptr, envvar.c_str());
+-    if (envvalue != nullptr) {
++    int dupres = _dupenv_s(&envvalue, nullptr, envvar.c_str());
++    if ((dupres == 0) && (envvalue != nullptr)) {
+         const std::string result{envvalue};
+         free(envvalue);
+         return result;
+@@ -346,6 +346,9 @@ void V3Os::u_sleep(int64_t usec) {
+ int V3Os::system(const string& command) {
+     UINFO(1, "Running system: " << command << endl);
+     const int ret = ::system(command.c_str());
++#ifdef _MSC_VER
++    return ret;
++#else
+     if (VL_UNCOVERABLE(ret == -1)) {
+         v3fatal("Failed to execute command:"  // LCOV_EXCL_LINE
+                 << command << " " << strerror(errno));
+@@ -357,4 +360,5 @@ int V3Os::system(const string& command) {
+         UASSERT(exit_code >= 0, "exit code must not be negative");
+         return exit_code;
+     }
++#endif
+ }
+
+--- src/VlcTop.cpp
++++ src/VlcTop.cpp
+@@ -14,6 +14,11 @@
+ //
+ //*************************************************************************
+ 
++#if defined(_WIN32) || defined(__MINGW32__)
++#define NOMINMAX
++#include <windows.h>  
++#endif
++
+ #include "V3Error.h"
+ #include "V3Os.h"
+ #include "VlcOptions.h"
+
+--- include/verilated_imp.h
++++ include/verilated_imp.h
+@@ -30,6 +30,7 @@
+ #include "verilated_heavy.h"
+ #include "verilated_syms.h"
+ 
++#include <algorithm>
+ #include <deque>
+ #include <set>
+ #include <vector>
