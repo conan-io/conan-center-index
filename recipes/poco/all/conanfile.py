@@ -121,7 +121,10 @@ class PocoConan(ConanFile):
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
 
     def requirements(self):
-        self.requires("pcre/8.45")
+        if tools.Version(self.version) < "1.12":
+            self.requires("pcre/8.45")
+        else:
+            self.requires("pcre2/10.40")
         self.requires("zlib/1.2.12")
         if self.options.enable_xml:
             self.requires("expat/2.4.8")
@@ -240,6 +243,9 @@ class PocoConan(ConanFile):
             if comp.option is None or self.options.get_safe(comp.option):
                 conan_component = "poco_{}".format(compname.lower())
                 requires = ["poco_{}".format(dependency.lower()) for dependency in comp.dependencies] + comp.external_dependencies
+                # dirty hack to manipulate the external dependencies based on the poco version
+                if tools.Version(self.version) >= "1.12":
+                    requires = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, requires))
                 self.cpp_info.components[conan_component].set_property("cmake_target_name", "Poco::{}".format(compname))
                 self.cpp_info.components[conan_component].set_property("cmake_file_name", compname)
                 self.cpp_info.components[conan_component].names["cmake_find_package"] = compname
