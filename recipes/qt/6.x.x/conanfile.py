@@ -800,7 +800,9 @@ class QtConan(ConanFile):
         if self.options.widgets:
             targets.append("uic")
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
+            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
+            if self.settings.os == "Windows":
+                targets.extend(["windeployqt"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
