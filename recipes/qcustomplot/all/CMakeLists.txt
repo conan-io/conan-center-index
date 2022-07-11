@@ -28,6 +28,12 @@ if(BUILD_SHARED_LIBS)
     )
 endif()
 
+option(QCUSTOMPLOT_USE_OPENGL "Use OpenGL" OFF)
+
+if(QCUSTOMPLOT_USE_OPENGL)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC QCUSTOMPLOT_USE_OPENGL)
+endif()
+
 if(QT_VERSION VERSION_GREATER_EQUAL "6.0.0")
     find_package(Qt6 COMPONENTS Core Gui Widgets PrintSupport REQUIRED CONFIG)
     target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport)
