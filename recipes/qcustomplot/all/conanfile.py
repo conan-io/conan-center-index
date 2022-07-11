@@ -18,7 +18,7 @@ class QcustomplotConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "opengl": [True, False],
+        "with_opengl": [True, False],
     }
     default_options = {
         "shared": False,
