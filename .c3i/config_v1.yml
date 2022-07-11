@@ -16,7 +16,13 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  check_runs:
+    - "Lint changed files (YAML files)"
+    - "Lint changed conanfile.py (v2 migration)"
 
+# Requirements to merge a given pull-request:
+# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+# * check_runs refers to notifications from GH actions
 status_checks:
   - "license/cla"
   - "continuous-integration/jenkins/pr-merge"
