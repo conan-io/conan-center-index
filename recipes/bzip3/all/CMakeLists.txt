@@ -7,7 +7,12 @@ conan_basic_setup(KEEP_RPATHS)
 option(WITH_THREAD "enable thread" OFF)
 option(WITH_UTIL "build and install utility" OFF)
 
-set(BZIP3_SRC
+set(BZIP3_INC
+    source_subfolder/include/libbz3.h
+)
+
+add_library(bzip3)
+target_sources(bzip3 PRIVATE
     source_subfolder/src/cm.c
     source_subfolder/src/crc32.c
     source_subfolder/src/libbz3.c
@@ -15,14 +20,7 @@ set(BZIP3_SRC
     source_subfolder/src/lzp.c
     source_subfolder/src/rle.c
 )
-
-set(BZIP3_INC
-    source_subfolder/include/libbz3.h
-)
-
-include_directories(source_subfolder/include)
-
-add_library(bzip3 ${BZIP3_SRC})
+target_include_directories(bzip3 PUBLIC source_subfolder/include)
 set_target_properties(bzip3 PROPERTIES
     PUBLIC_HEADER "${BZIP3_INC}"
     WINDOWS_EXPORT_ALL_SYMBOLS ON
