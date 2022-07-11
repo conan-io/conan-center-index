@@ -78,8 +78,7 @@ class QcustomplotConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
-        if self.options.opengl:
-            cmake.definitions["QCUSTOMPLOT_USE_OPENGL"] = 1
+        cmake.definitions["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
         cmake.configure()
         return cmake
 
