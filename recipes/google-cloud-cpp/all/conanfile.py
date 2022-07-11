@@ -77,7 +77,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.80.0')
         self.requires('openssl/1.1.1n')
-        # TODO: Add googleapis once it is available in CCI (now it is embedded)
+        self.requires("googleapis/cci.20220531")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -117,6 +117,16 @@ class GoogleCloudCppConan(ConanFile):
                         set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
                     endif()
                     """))
+
+        # Use googleapis from requirement
+        tools.replace_in_file(os.path.join(self._source_subfolder, "external", "googleapis", "CMakeLists.txt"),
+            textwrap.dedent("""\
+                set(EXTERNAL_GOOGLEAPIS_SOURCE
+                    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")"""),
+            textwrap.dedent(f"""\
+                set(EXTERNAL_GOOGLEAPIS_SOURCE
+                    "{self.dependencies["googleapis"].cpp_info.resdirs[0]}")
+                """))
 
     def build(self):
         self._patch_sources()
