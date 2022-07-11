@@ -93,6 +93,7 @@ class grpcConan(ConanFile):
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
         self.requires("googleapis/cci.20220531")
+        self.requires("grpc-proto/cci.20220627")
 
     def validate(self):
         if self._is_msvc:
@@ -196,6 +197,11 @@ class grpcConan(ConanFile):
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
             copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
+
+        # Copy from grpc-proto
+        copy(self, "*", 
+             src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
+             dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         # We are fine with protobuf::protoc coming from conan generated Find/config file
         # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
@@ -442,4 +448,4 @@ class grpcConan(ConanFile):
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
 
         # Hack. googleapis doesn't provide a library so it is not used by any component
-        self.cpp_info.components["__"].requires = ["googleapis::googleapis"]
+        self.cpp_info.components["__"].requires = ["googleapis::googleapis", "grpc-proto::grpc-proto"]
