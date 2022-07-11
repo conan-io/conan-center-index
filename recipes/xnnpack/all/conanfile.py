@@ -89,6 +89,9 @@ class XnnpackConan(ConanFile):
         self._cmake.definitions["XNNPACK_BUILD_TESTS"] = False
         self._cmake.definitions["XNNPACK_BUILD_BENCHMARKS"] = False
 
+        # Default fPIC on if it doesn't exist (i.e. for shared library builds)
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+
         # Use conan dependencies instead of downloading them during configuration
         self._cmake.definitions["XNNPACK_USE_SYSTEM_LIBS"] = True
 

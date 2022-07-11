@@ -26,6 +26,7 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [Why not add an option to build unit tests](#why-not-add-an-option-to-build-unit-tests)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
@@ -226,6 +227,12 @@ in an incompatible Conan package. To deal with those cases, you are allowed to p
 There are different motivations
 - time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
 - ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+# Why not add an option to build unit tests
+
+- Adding a testing option will change the package ID, but will not provide different packaged binaries
+- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
+
 
 ## What is the policy for supported python versions?
 

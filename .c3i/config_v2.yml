@@ -20,9 +20,9 @@ github:
 #status_checks:
 #  - "continuous-integration/jenkins/pr-merge"
 
-slack:
-  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
-  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+#slack:
+#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
@@ -83,7 +83,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20220608"
+        default: "windows20220708"
   Macos:
     x86_64:
       "apple-clang":

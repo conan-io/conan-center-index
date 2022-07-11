@@ -89,10 +89,17 @@ class RuyConan(ConanFile):
         # This is because ruy only links to 'cpuinfo' but it also needs 'clog' (from the same package)
         cpuinfoLibs = self.deps_cpp_info["cpuinfo"].libs + self.deps_cpp_info["cpuinfo"].system_libs
         libsListAsString = ";".join(cpuinfoLibs)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
-                              "set(ruy_6_cpuinfo \"cpuinfo\")",
-                              f"set(ruy_6_cpuinfo \"{libsListAsString}\")"
-                              )
+        if int(self.version.strip('cci.')) < 20220628:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
+                                  "set(ruy_6_cpuinfo \"cpuinfo\")",
+                                  f"set(ruy_6_cpuinfo \"{libsListAsString}\")"
+                                  )
+        else:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
+                                  "set(ruy_6_cpuinfo_cpuinfo \"cpuinfo::cpuinfo\")",
+                                  f"set(ruy_6_cpuinfo_cpuinfo \"{libsListAsString}\")"
+                                  )
+
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -137,4 +144,4 @@ class RuyConan(ConanFile):
                             "ruy_profiler_profiler"
                             ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])

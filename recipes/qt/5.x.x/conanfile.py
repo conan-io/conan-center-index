@@ -79,6 +79,7 @@ class QtConan(ConanFile):
         "with_dbus": [True, False],
         "with_gssapi": [True, False],
         "with_atspi": [True, False],
+        "with_md4c": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -119,6 +120,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_gssapi": False,
         "with_atspi": False,
+        "with_md4c": True,
 
         "gui": True,
         "widgets": True,
@@ -235,6 +237,7 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+            del self.options.with_md4c
         
         if not self.options.with_dbus:
             del self.options.with_atspi
@@ -408,6 +411,8 @@ class QtConan(ConanFile):
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.44.0")
+        if self.options.get_safe("with_md4c", False):
+            self.requires("md4c/0.4.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -625,7 +630,8 @@ class QtConan(ConanFile):
                               ("with_harfbuzz", "harfbuzz"),
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
-                              ("with_sqlite3", "sqlite")]:
+                              ("with_sqlite3", "sqlite"),
+                              ("with_md4c", "libmd4c")]:
             if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     args += ["-qt-" + conf_arg]
@@ -655,7 +661,8 @@ class QtConan(ConanFile):
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
                   ("libalsa", "ALSA"),
-                  ("xkbcommon", "XKBCOMMON")]
+                  ("xkbcommon", "XKBCOMMON"),
+                  ("md4c", "LIBMD4C")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == "freetype":
@@ -666,8 +673,8 @@ class QtConan(ConanFile):
         for package in self.deps_cpp_info.deps:
             args += ["-I \"%s\"" % s for s in self.deps_cpp_info[package].include_paths]
             args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
-        lib_arg = "/LIBPATH:" if self._is_msvc else "-L"
-        args.append("QMAKE_LFLAGS+=\"%s\"" % " ".join("%s%s" % (lib_arg, l) for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
+        args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
+        args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
 
         if "libmysqlclient" in self.deps_cpp_info.deps:
             args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info["libmysqlclient"].rootpath, "bin", "mysql_config"))
@@ -733,7 +740,8 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
-                     "-system-webengine-opus"]
+                     "-system-webengine-opus",
+                     "-webengine-jumbo-build 0"]
 
         if self.options.config:
             args.append(str(self.options.config))
@@ -1006,6 +1014,8 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
+            if self.options.with_md4c:
+                gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             build_modules.append(self._cmake_qt5_private_file("Gui"))
             self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
@@ -1066,6 +1076,7 @@ Examples = bin/datadir/examples""")
                 if self.options.widgets:
                     cocoa_reqs.append("PrintSupport")                    
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
+                _create_plugin("QMacStylePlugin", "qmacstyle", "styles", cocoa_reqs)
                 self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
             elif self.settings.os in ["iOS", "tvOS"]:
@@ -1195,6 +1206,8 @@ Examples = bin/datadir/examples""")
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
                                       "nss::nss", "libdrm::libdrm"])
             _create_module("WebEngineCore", webenginereqs)
+            if self.settings.os != "Windows":
+                self.cpp_info.components["WebEngineCore"].system_libs.append("resolv")
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 

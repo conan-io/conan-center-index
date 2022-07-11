@@ -1,0 +1,7 @@
+sources:
+  "cci.20211106":  # Synced here https://github.com/grpc/grpc/pull/27957
+    url: "https://github.com/grpc/grpc-proto/archive/8e3fec8612bc0708e857950dccadfd5063703e04.zip"
+    sha256: "8675b46d7997f9b6b80b37e8c30c359e0f919632ca3d8d6076944c7893c2d4cf"
+  "cci.20220627":
+    url: "https://github.com/grpc/grpc-proto/archive/d653c6d98105b2af937511aa6e46610c7e677e6e.zip"
+    sha256: "365c0c8d9ae90aa11a8bd7fa870d8962a13600cfc851405acd5327907f9f4c56"
