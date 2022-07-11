@@ -119,6 +119,9 @@ class PocoConan(ConanFile):
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
+        if tools.Version(self.version) >= "1.12":
+            foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
+            self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
 
     def requirements(self):
         if tools.Version(self.version) < "1.12":
@@ -243,9 +246,6 @@ class PocoConan(ConanFile):
             if comp.option is None or self.options.get_safe(comp.option):
                 conan_component = "poco_{}".format(compname.lower())
                 requires = ["poco_{}".format(dependency.lower()) for dependency in comp.dependencies] + comp.external_dependencies
-                # dirty hack to manipulate the external dependencies based on the poco version
-                if tools.Version(self.version) >= "1.12":
-                    requires = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, requires))
                 self.cpp_info.components[conan_component].set_property("cmake_target_name", "Poco::{}".format(compname))
                 self.cpp_info.components[conan_component].set_property("cmake_file_name", compname)
                 self.cpp_info.components[conan_component].names["cmake_find_package"] = compname
