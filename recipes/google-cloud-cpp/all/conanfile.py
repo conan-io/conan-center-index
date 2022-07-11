@@ -77,7 +77,10 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.80.0')
         self.requires('openssl/1.1.1n')
-        self.requires("googleapis/cci.20220531")
+        if tools.Version(self.version) <= "1.31.1":
+            self.requires("googleapis/cci.20210730")
+        else:
+            self.requires("googleapis/cci.20220531")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -85,7 +88,7 @@ class GoogleCloudCppConan(ConanFile):
         parallel = not (self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16" and self.version in ["1.31.1", "1.30.1"])
         cmake = CMake(self, parallel=parallel)
         cmake.definitions["BUILD_TESTING"] = 0
-
+ 
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
 
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
@@ -382,3 +385,6 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["storage"].requires = ["abseil::absl_memory", "abseil::absl_strings", "abseil::absl_str_format", "abseil::absl_time", "abseil::absl_variant", "common", "nlohmann_json::nlohmann_json", "crc32c::crc32c", "libcurl::libcurl", "openssl::ssl", "openssl::crypto"]
         self.cpp_info.components["storage"].libs = ["google_cloud_cpp_storage"]
         self.cpp_info.components["storage"].names["pkg_config"] = "google_cloud_cpp_storage"
+
+        # Hack. googleapis doesn't provide a library so it is not used by any component
+        self.cpp_info.components["__"].requires = ["googleapis::googleapis",]
