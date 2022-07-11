@@ -228,7 +228,7 @@ There are different motivations
 - time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
 - ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
 
-# Why not add an option to build unit tests
+## Why not add an option to build unit tests
 
 - Adding a testing option will change the package ID, but will not provide different packaged binaries
 - Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
