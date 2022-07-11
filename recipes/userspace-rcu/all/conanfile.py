@@ -31,11 +31,13 @@ class UserspaceRCUConan(ConanFile):
         "libtool/2.4.6",
     )
 
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration("Only Linux/FreeBSD/Macos supported")
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration("Only Linux/FreeBSD/Macos supported")
         if self.options.shared:
             del self.options.fPIC
 
@@ -51,9 +53,16 @@ class UserspaceRCUConan(ConanFile):
                 env_build = AutoToolsBuildEnvironment(self)
                 extra_args = list()
                 if self.options.shared:
-                    extra_args.extend(('--enable-static=no',))
+                    extra_args.append('--enable-static=no')
                 else:
-                    extra_args.extend(('--enable-shared=no',))
+                    extra_args.append('--enable-shared=no')
+                if self.settings.os == "Macos":
+                    if self.settings.arch == "x86":
+                        extra_args.append('--build=i686-apple-darwin11')
+                    elif self.settings.arch == "x86_64":
+                        extra_args.append('--build=x86_64-apple-darwin11')
+                    else:
+                        extra_args.append('--build=armv8-apple-darwin11')
                 env_build.configure("../", args=extra_args, build=False, host=False, target=False)
                 env_build.make()
 
