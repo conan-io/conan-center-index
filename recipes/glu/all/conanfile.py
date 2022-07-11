@@ -19,7 +19,7 @@ class SysConfigGLUConan(ConanFile):
             if tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["mesa-libGLU-devel"]
             elif tools.os_info.with_apt:
-                packages = ["libglu1-mesa-dev"]
+                packages = ["libglu1-mesa-dev", "libopengl-dev"]
             elif tools.os_info.with_pacman:
                 packages = ["glu"]
             elif tools.os_info.with_zypper:
