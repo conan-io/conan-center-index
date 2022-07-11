@@ -1,12 +1,5 @@
 
-# Class ConanFile doesn't declare all the valid members and functions,
-#   some are injected by Conan dynamically to the class.
-
-import textwrap
 import astroid
-from astroid.builder import AstroidBuilder
-from astroid.manager import AstroidManager
-
 
 def register(_):
     pass
