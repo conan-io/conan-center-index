@@ -22,10 +22,12 @@ class UserspaceRCUConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "model": ["generic", "mb", "signal", "bp"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "model": "generic",
     }
     build_requires = (
         "libtool/2.4.6",
@@ -71,14 +73,29 @@ class UserspaceRCUConan(ConanFile):
         self.copy("*.h", excludes=("*_build/*", "*doc/*", "*tests/*"), src="{}/src".format(self._source_subfolder), dst="include/", keep_path=True)
         self.copy("*.h", excludes=("*_build/*", "*doc/*", "*tests/*"), src="{}/include".format(self._source_subfolder), dst="include/", keep_path=True)
         self.copy("*.h", src="{}/_build/include/urcu/".format(self._source_subfolder), dst="include/urcu", keep_path=False)
-        if self.options.shared:
-            self.copy("*.dll", dst="bin", keep_path=False)
-            self.copy("*.so*", dst="lib", keep_path=False)
-            self.copy("*.dylib", dst="lib", keep_path=False)
+        lib_name = ''
+        if self.options.model == "generic":
+            lib_name = 'liburcu'
+        elif self.options.model == "mb":
+            lib_name = 'liburcu-mb'
+        elif self.options.model == "signal":
+            lib_name = 'liburcu-signal'
         else:
-            self.copy("*.a", dst="lib", keep_path=False)
+            lib_name = 'liburcu-bp'
+        if self.options.shared:
+            self.copy("*{}.dll".format(lib_name), dst="bin", keep_path=False)
+            self.copy("*{}.so*".format(lib_name), dst="lib", keep_path=False)
+            self.copy("*{}.dylib".format(lib_name), dst="lib", keep_path=False)
+        else:
+            self.copy("*{}.a".format(lib_name), dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["urcu", "urcu-common"]
+        self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.model == "mb":
+            self.cpp_info.cxxflags = ["-DRCU_MB"]
+        elif self.options.model == "signal":
+            self.cpp_info.cxxflags = ["-DRCU_SIGNAL"]
+        elif self.options.model == "bp":
+            self.cpp_info.cxxflags = ["-DRCU_BP"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])

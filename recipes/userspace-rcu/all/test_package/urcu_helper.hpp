@@ -17,20 +17,11 @@
  *********************************************************************************/
 #pragma once
 
-#if __cplusplus <= 201703L
-#if defined __clang__ or defined __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif
+#ifndef RCU_BP
 #include <urcu.h>
-#if defined __clang__ or defined __GNUC__
-#pragma GCC diagnostic pop
-#endif
 #else
-#include <urcu.h>
+#include <urcu-bp.h>
 #endif
-#include <urcu-call-rcu.h>
-#include <urcu/static/urcu-qsbr.h>
 
 #include <functional>
 #include <memory>
