@@ -12,7 +12,7 @@ env:
 jobs:
   test_linter:
     # A job to run when the linter changes. We want to know in advance how many files will be broken
-    name: Test linter changes
+    name: Test linter changes (YAML files)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
 
   lint_pr_files:
     # Lint files modified in the pull_request
-    name: Lint YML files
+    name: Lint changed files (YAML files)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
