@@ -98,6 +98,6 @@ class QcustomplotConan(ConanFile):
         self.cpp_info.libs = ["qcustomplot" + postfix]
         if self.options.shared:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_LIBRARY")
-        if self.options.opengl:
+        if self.options.with_opengl:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_OPENGL")
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport"]
