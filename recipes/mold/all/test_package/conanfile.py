@@ -8,4 +8,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
+            self.run("echo $LD", run_environment=True)
             self.run("mold -v", run_environment=True)

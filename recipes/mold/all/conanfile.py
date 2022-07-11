@@ -64,11 +64,12 @@ class MoldConan(ConanFile):
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
+        mold_location = os.path.join(bindir, "bindir")
+
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
-        self.env_info.LD = "mold"
-        self.buildenv_info.prepend_path("MOLD_ROOT", self.package_folder)
-        self.env_info.MOLD_ROOT = self.package_folder
+        self.env_info.LD = mold_location
+        self.buildenv_info.prepend_path("MOLD_ROOT", bindir)
         self.cpp_info.includedirs = []
 
         if self.settings.os == "Linux":
