@@ -32,10 +32,12 @@ class UserspaceRCUConan(ConanFile):
     )
 
     def configure(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration("Only Linux/FreeBSD/Macos supported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration("Only Linux/FreeBSD/Macos supported")
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
