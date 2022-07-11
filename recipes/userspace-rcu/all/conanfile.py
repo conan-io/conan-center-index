@@ -70,6 +70,6 @@ class UserspaceRCUConan(ConanFile):
             self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["urcu", "urcu-common"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])
