@@ -26,3 +26,16 @@ from conan import ConanFile
 All v2-compatible tools are available in module `conan.tools` under different submodules. Recipes
 should start to import their tools from this new module. Some of the new tools accept new 
 argument, please, check the [Conan documentation](https://docs.conan.io/en/latest/reference/conanfile/tools.html).
+
+For example, the `cross_building` tool now should be used like:
+
+```python
+from conan.tools.build import cross_building
+
+...
+class Recipe(ConanFile):
+
+    def test(self):
+        if not cross_building(self):
+            pass
+```
