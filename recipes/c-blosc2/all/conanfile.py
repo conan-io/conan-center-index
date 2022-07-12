@@ -93,6 +93,10 @@ class CBlosc2Conan(ConanFile):
         return cmake
 
     def build(self):
+        ## TODO: dirty fix.
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakelists.txt"),
+            "cmake_minimum_required(VERSION 3.16.3)",
+            "cmake_minimum_required(VERSION 3.15)")
         cmake = self._configure_cmake()
         cmake.build()
 
