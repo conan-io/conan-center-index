@@ -403,6 +403,7 @@ It may happen due to the usage of new features within recipe (such as `strip_roo
 The policy of Conan Center Index to support only the latest version of the Conan Client, so it's safe to put the version Conan Center Index currently runs into the recipe.
 Otherwise, it's not an easy task on its own to determine the minimal version that has to be specified: checking the Conan Client [Changelog](https://docs.conan.io/en/latest/changelog.html), one has to know in which Conan Client releases all the attributes, methods, build helpers, etc. used by the recipe were first introduced, and then select the most recent of them.
 Consider adding the following code:
+
 ```python
 required_conan_version = ">=1.43.0"  # use the version that Conan Center Index runs
 
@@ -418,6 +419,7 @@ See also: [Submitting a Package](how_to_add_packages.md#submitting-a-package).
 The recipe missess [short_paths](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#short-paths) attribute.
 It may happen due to the very long paths within source, build or package directories during the package creating.
 Consider adding the following code:
+
 ```python
 class SomeRecipe(ConanFile):
     ...
@@ -425,7 +427,28 @@ class SomeRecipe(ConanFile):
     short_paths = True
 ```
 
-See also: (Maximum Path Length Limitation)[https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd].
+See also: [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd).
+
+#### **<a name="KB-H068">#KB-H068</a>: "TEST_TYPE MANAGEMENT"**
+
+https://github.com/conan-io/hooks/commit/ad867ad0a3656fe77ecc964e9b8f3657995f0d5d
+
+#### **<a name="KB-H069">#KB-H069</a>: "TEST PACKAGE - NO DEFAULT OPTIONS"**
+
+https://github.com/conan-io/hooks/commit/7349d593d0728ae665dcb2c92ed3038b3cbb8ee5
+
+#### **<a name="KB-H070">#KB-H070</a>: "MANDATORY SETTINGS"**
+
+https://github.com/conan-io/hooks/commit/3e7e77fa5d14ee53dc1ad6b10d85358871fdd037
+             
+#### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
+
+It's erroneous to leave the default `include` directory when it's no present. Consider adding:
+
+```python
+def package_info(self):
+    self.cpp_info.includedirs = []
+```
 
 # Deprecated errors
 
