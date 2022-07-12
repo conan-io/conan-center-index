@@ -26,6 +26,12 @@ class CppProjectFrameworkConan(ConanFile):
     build_requires = "gtest/1.10.0", "doxygen/1.8.20", "benchmark/1.5.1"
     exports_resources = ".gitignore", "LICENSE", "conanfile.txt", "CMakeLists.txt", "make.bat", "Makefile", "cpp_project_framework_callables.cmake", "cpp_project_framework.cmake"
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+        if self.settings.os != "Linux" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("%s is just supported for Linux and Windows" % self.name)
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
