@@ -139,8 +139,6 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.components["core"].includedirs = []
         if int(tools.Version(self.version).minor) > 2:
             self.cpp_info.components["core"].libs.append(lib_name +"-backward")
-            
-        self.cpp_info.components["core"].requires = ["ruby::ruby"]
 
         self.cpp_info.components["core"].builddirs.append(self._module_dir_rel_path)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
