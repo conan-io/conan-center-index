@@ -46,7 +46,7 @@ class OneDplConan(ConanFile):
 
     def package(self):
         self.copy("*", src=os.path.join(self._source_subfolder, "include"), dst="include")
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licensing")
+        self.copy("LICENSE.txt", src=os.path.join(self._source_subfolder, "licensing"), dst="licenses")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ParallelSTL")
