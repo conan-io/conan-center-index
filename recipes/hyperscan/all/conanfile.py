@@ -59,6 +59,8 @@ class HyperscanConan(ConanFile):
             self.requires("pcre/8.45")
 
     def validate(self):
+        tools.check_min_cppstd(self, "11")
+
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
 
@@ -83,9 +85,6 @@ class HyperscanConan(ConanFile):
         return self._cmake
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
-            
         if self.options.shared:
             del self.options.fPIC
 
@@ -115,6 +114,7 @@ class HyperscanConan(ConanFile):
         self.cpp_info.components["hs"].names["cmake_find_package_multi"] = "hs"
         self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
 
+
         self.cpp_info.components["hs_runtime"].libs = ["hs_runtime"]
         self.cpp_info.components["hs_runtime"].names["cmake_find_package"] = "hs_runtime"
         self.cpp_info.components["hs_runtime"].names["cmake_find_package_multi"] = "hs_runtime"
@@ -126,4 +126,14 @@ class HyperscanConan(ConanFile):
             self.cpp_info.components["chimera"].names["cmake_find_package"] = "chimera"
             self.cpp_info.components["chimera"].names["cmake_find_package_multi"] = "chimera"
             self.cpp_info.components["chimera"].set_property("pkg_config_name", "libchimera")
+
+
+
+        if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["hs"].system_libs = ["m"]
+                self.cpp_info.components["hs_runtime"].system_libs = ["m"]
+
+                if self.options.build_chimera:
+                    self.cpp_info.components["chimera"].system_libs = ["m"]
 

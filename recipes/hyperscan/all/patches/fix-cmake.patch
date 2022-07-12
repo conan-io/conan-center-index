@@ -232,6 +232,19 @@ index 1cd66a3..ebb3b49 100644
 +    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libch.pc
          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
  endif()
+diff --git chimera/ch_database.h chimera/ch_database.h
+index 28bde86..d757c82 100644
+--- chimera/ch_database.h
++++ chimera/ch_database.h
+@@ -38,7 +38,7 @@ extern "C"
+ {
+ #endif
+ 
+-#define PCRE_STATIC
++/* #define PCRE_STATIC */
+ #include <pcre.h>
+ 
+ #include "ch_compile.h" // for CH_MODE_ flags
 diff --git cmake/pcre.cmake cmake/pcre.cmake
 index e0acda5..c68601f 100644
 --- cmake/pcre.cmake

@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conan.tools.build import cross_building
 
 
 class HyperscanTestConan(ConanFile):
@@ -15,7 +16,7 @@ class HyperscanTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "hs_example")
             self.run(bin_path, run_environment=True)
 
