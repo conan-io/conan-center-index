@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conan.tools.microsoft import is_msvc
 import os
 import functools
+import glob
 
 required_conan_version = ">=1.45.0"
 
@@ -31,7 +32,7 @@ class CBlosc2Conan(ConanFile):
         "with_zstd": True,
         "with_plugins": True,
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
@@ -43,6 +44,8 @@ class CBlosc2Conan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,11 +95,18 @@ class CBlosc2Conan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        for filename in glob.glob(os.path.join(self._source_subfolder, "cmake", "Find*.cmake")):
+            if os.path.basename(filename) not in [
+                "FindSIMD.cmake",
+            ]:
+                os.remove(filename)
+
     def build(self):
-        ## TODO: dirty fix.
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "cmake_minimum_required(VERSION 3.16.3)",
-            "cmake_minimum_required(VERSION 3.15)")
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -117,7 +127,7 @@ class CBlosc2Conan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = ["{}blosc2".format(prefix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m", "pthread"]
+            self.cpp_info.system_libs = ["rt", "m", "pthread"]
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "blosc2"
