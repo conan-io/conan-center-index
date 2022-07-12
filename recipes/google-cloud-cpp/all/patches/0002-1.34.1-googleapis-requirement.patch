@@ -1,24 +1,15 @@
 diff --git a/external/googleapis/CMakeLists.txt b/external/googleapis/CMakeLists.txt
-index a61b3c9..360863b 100644
+index 00bcebb..b8274d2 100644
 --- a/external/googleapis/CMakeLists.txt
 +++ b/external/googleapis/CMakeLists.txt
-@@ -25,7 +25,7 @@ set(GOOGLE_CLOUD_CPP_GOOGLEAPIS_SHA256
-     "741a6fcd6aaf171f6e72b6a132629c8efcfbab86212cbff392320f89d2ffd46f")
- 
- set(EXTERNAL_GOOGLEAPIS_SOURCE
--    "${CMAKE_BINARY_DIR}/external/googleapis/src/googleapis_download")
-+    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
- 
- set(EXTERNAL_GOOGLEAPIS_PROTO_FILES
-     "google/api/http.proto"
-@@ -164,29 +164,30 @@ endforeach ()
+@@ -132,29 +132,30 @@ endforeach ()
  
  include(ExternalProject)
  
 -ExternalProject_Add(
 -    googleapis_download
 -    EXCLUDE_FROM_ALL ON
--    PREFIX "${CMAKE_BINARY_DIR}/external/googleapis"
+-    PREFIX "${PROJECT_BINARY_DIR}/external/googleapis"
 -    URL ${GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL}
 -    URL_HASH SHA256=${GOOGLE_CLOUD_CPP_GOOGLEAPIS_SHA256}
 -    PATCH_COMMAND
@@ -42,7 +33,7 @@ index a61b3c9..360863b 100644
 +# ExternalProject_Add(
 +#     googleapis_download
 +#     EXCLUDE_FROM_ALL ON
-+#     PREFIX "${CMAKE_BINARY_DIR}/external/googleapis"
++#     PREFIX "${PROJECT_BINARY_DIR}/external/googleapis"
 +#     URL ${GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL}
 +#     URL_HASH SHA256=${GOOGLE_CLOUD_CPP_GOOGLEAPIS_SHA256}
 +#     PATCH_COMMAND
@@ -65,7 +56,7 @@ index a61b3c9..360863b 100644
  
  find_package(ProtobufWithTargets REQUIRED)
  find_package(gRPC REQUIRED)
-@@ -242,7 +243,6 @@ function (external_googleapis_add_library proto)
+@@ -210,7 +211,6 @@ function (external_googleapis_add_library proto)
  endfunction ()
  
  function (external_googleapis_set_version_and_alias short_name)

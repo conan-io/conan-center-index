@@ -1,19 +1,13 @@
 sources:
-  "1.30.1":
-    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.30.1.tar.gz"
-    sha256: "b651a58cb44bd715f0cb8e42c7ea58490b3e768a35ede01d798b983eef88e143"
-  "1.31.1":
-    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.31.1.tar.gz"
-    sha256: "dc7cbf95b506a84b48cf71e0462985d262183edeaabdacaaee2109852394a609"
+  "1.34.1":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.34.1.tar.gz"
+    sha256: "f38ae4ab6f2ed7579a7ceb5d0b32ed04097da07bc898907ed01c8d840c2bdbce"
   "1.40.1":
     url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.40.1.tar.gz"
     sha256: "fb62f0e7dc964c5d3cd0d85977b85f3e0e7dce97e9029abf9c32ecc29db07043"
 patches:
-  "1.30.1":
-    - patch_file: "patches/0002-1.30.1-googleapis-requirement.patch"
-      base_path: "source_subfolder"
-  "1.31.1":
-    - patch_file: "patches/0002-1.31.1-googleapis-requirement.patch"
+  "1.34.1":
+    - patch_file: "patches/0002-1.34.1-googleapis-requirement.patch"
       base_path: "source_subfolder"
   "1.40.1":
     - patch_file: "patches/0002-googleapis-requirement.patch"

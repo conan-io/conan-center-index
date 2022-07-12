@@ -77,10 +77,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.83.1')
         self.requires('openssl/1.1.1o')
-        if tools.Version(self.version) <= "1.31.1":
-            self.requires("googleapis/cci.20210730")
-        else:
-            self.requires("googleapis/cci.20220531")
+        self.requires("googleapis/cci.20220531")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
