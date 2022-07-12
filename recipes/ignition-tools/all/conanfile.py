@@ -72,7 +72,7 @@ class IgnitionToolsConan(ConanFile):
                 )
 
     def requirements(self):
-        self.requires("ruby/3.1.0")
+        pass
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], 
