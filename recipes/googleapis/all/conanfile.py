@@ -112,5 +112,5 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        proto_libraries = self._parse_proto_libraries()
-        self.cpp_info.libs = [it.cmake_target for it in filter(lambda u: u.srcs, proto_libraries)]
+        # We are not creating components, we can just collect the libraries
+        self.cpp_info.libs = tools.collect_libs(self)
