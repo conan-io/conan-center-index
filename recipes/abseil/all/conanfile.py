@@ -65,7 +65,6 @@ class AbseilConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self.not_exists()
         self._cmake = CMake(self)
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["ABSL_PROPAGATE_CXX_STD"] = True

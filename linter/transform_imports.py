@@ -11,7 +11,7 @@ we are modifying the messages to point users in the right direction.
 
 def register(linter: PyLinter):
     msge1101 = linter.msgs_store._messages_definitions["E1101"]
-    msge1101.msg += ". Please, **check** [https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md](https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md)"
+    msge1101.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
     linter.msgs_store.register_message(msge1101)
 
 def transform_tools(module):
