@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 from io import StringIO
 import os
 import re
@@ -314,11 +314,18 @@ class CPythonConan(ConanFile):
                 "curses_library.startswith('ncurses')",
                 "False"
             )
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "setup.py"),
-                "curses_library == 'curses' and not MACOS",
-                "False"
-            )
+            try:
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "setup.py"),
+                    "curses_library == 'curses' and not MACOS",
+                    "False"
+                )
+            except ConanException:
+                tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "setup.py"),
+                    "curses_library == 'curses' and host_platform != 'darwin'",
+                    "False"
+                )
 
         # Enable static MSVC cpython
         if not self.options.shared:
