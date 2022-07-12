@@ -70,7 +70,6 @@ class GoogleAPIS(ConanFile):
         all_deps = [f"{it.qname}:{it.name}" for it in proto_libraries]
         all_deps += ["protobuf::libprotobuf"]
         for it in proto_libraries:
-            self.output.info(it.dumps())
             it.validate(self.source_folder, all_deps)
 
         # Mark the libraries we need recursively (C++ context)
@@ -85,9 +84,11 @@ class GoogleAPIS(ConanFile):
         for it in filter(lambda u: u.is_used, proto_libraries):
             activate_library(it)
 
-        # Force some extra libraries
-        if self.version == "cci.20220711":
-            pass
+        # Tweaks
+        #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs.
+        #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
+        if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.2" and self.settings.os == "Macos":
+            all_dict["//google/storagetransfer/v1:storagetransfer_proto"].is_used = False
 
         return proto_libraries
 
