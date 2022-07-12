@@ -77,7 +77,7 @@ class GoogleAPIS(ConanFile):
 
     def build(self):
         proto_libraries = self._parse_proto_libraries()
-        with open(os.path.join(self.source_folder, "CMakeLists.txt"), "a") as f:
+        with open(os.path.join(self.source_folder, "CMakeLists.txt"), "a", encoding="utf-8") as f:
             for it in proto_libraries:
                 f.write(it.cmake_content)
         cmake = self._configure_cmake()
@@ -90,7 +90,7 @@ class GoogleAPIS(ConanFile):
         
         copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
-        copy(self, pattern="*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), symlinks=True)
+        copy(self, pattern="*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
 
