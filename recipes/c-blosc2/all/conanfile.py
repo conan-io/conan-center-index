@@ -108,6 +108,10 @@ class CBlosc2Conan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # Remove MS runtime files
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "blosc2")
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
