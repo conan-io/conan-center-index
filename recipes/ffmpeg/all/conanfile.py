@@ -31,6 +31,7 @@ class FFMpegConan(ConanFile):
         "swscale": [True, False],
         "postproc": [True, False],
         "avfilter": [True, False],
+        "with_asm": [True, False],
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
@@ -107,6 +108,7 @@ class FFMpegConan(ConanFile):
         "swscale": True,
         "postproc": True,
         "avfilter": True,
+        "with_asm": True,
         "with_zlib": True,
         "with_bzip2": True,
         "with_lzma": True,
@@ -342,6 +344,8 @@ class FFMpegConan(ConanFile):
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             ).split("-")
+            if target_os == "gnueabihf":
+                target_os = "gnu" # could also be "linux"
             return target_os
 
     def _patch_sources(self):
@@ -361,11 +365,12 @@ class FFMpegConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self._is_msvc:
-            with tools.vcvars(self):
+        with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
+            if self._is_msvc:
+                with tools.vcvars(self):
+                    yield
+            else:
                 yield
-        else:
-            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -385,6 +390,7 @@ class FFMpegConan(ConanFile):
             "--pkg-config-flags=--static",
             "--disable-doc",
             opt_enable_disable("cross-compile", tools.cross_building(self)),
+            opt_enable_disable("asm", self.options.with_asm),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),
