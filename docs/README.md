@@ -8,6 +8,7 @@
 * User documentation
   + [Contributing to Conan Center Index](../CONTRIBUTING.md)
   + [Adding Packages to ConanCenter](how_to_add_packages.md)
+  + [Policy about patching](policy_patching.md)
   + [Review Process](review_process.md)
   + [Packaging policy](packaging_policy.md)
   + [Supported platforms and configurations](supported_platforms_and_configurations.md)
