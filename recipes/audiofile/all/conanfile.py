@@ -6,7 +6,7 @@ class AudiofileConan(ConanFile):
     name = "audiofile"
     description = "A simple C++11 library for reading and writing audio files."
     topics = ("conan", "audiofile", "audio", "file-format", "wav", "aif")
-    license = "GPL-3.0-or-later"
+    license = "MIT"
     homepage = "https://github.com/adamstark/AudioFile"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
@@ -19,6 +19,8 @@ class AudiofileConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if tools.Version(self.version) < "1.1.0":
+            self.license = "GPL-3.0-or-later"
 
     def package_id(self):
         self.info.header_only()

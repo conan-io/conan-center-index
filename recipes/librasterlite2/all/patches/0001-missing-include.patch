@@ -1,0 +1,11 @@
+--- a/headers/rasterlite2_private.h
++++ b/headers/rasterlite2_private.h
+@@ -77,6 +77,8 @@ the terms of any one of the MPL, the GPL or the LGPL.
+ #include <geo_normalize.h>
+ #endif
+ 
++#include <time.h>
++
+ #ifndef DOXYGEN_SHOULD_SKIP_THIS
+ #ifdef _WIN32
+ #ifdef DLL_EXPORT

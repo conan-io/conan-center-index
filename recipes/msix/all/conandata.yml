@@ -1,0 +1,10 @@
+sources:
+  "1.7":
+    url: "https://github.com/microsoft/msix-packaging/archive/refs/tags/v1.7.zip"
+    sha256: "23179d577d0b9d34e93374ae38284ab9f1247ff6cc9175851983fb114ab00087"
+patches:
+  "1.7":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.7/cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.7/signaturevalidator.patch"

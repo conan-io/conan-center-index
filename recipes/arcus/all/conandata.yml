@@ -1,0 +1,4 @@
+sources:
+  "4.9.1":
+    url: "https://github.com/Ultimaker/libArcus/archive/refs/tags/4.9.1.tar.gz"
+    sha256: "18d939fd2428c72fdce35a286c196438327cfc3c8476e463e5ca46570168c9ce"

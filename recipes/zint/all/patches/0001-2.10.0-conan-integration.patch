@@ -1,0 +1,152 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -15,7 +15,7 @@ set(ZINT_VERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}.${ZINT_VERSION_REL
+ 
+ add_definitions(-DZINT_VERSION=\"${ZINT_VERSION}\")
+ 
+-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
++#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+ 
+ option(ZINT_DEBUG    "Set debug compile flags"         OFF)
+ option(ZINT_SANITIZE "Set sanitize compile/link flags" OFF)
+@@ -25,7 +25,7 @@ option(ZINT_STATIC   "Build static library"            OFF)
+ option(ZINT_USE_PNG  "Build with PNG support"          ON)
+ option(ZINT_USE_QT   "Build with QT support"           ON)
+ 
+-include(SetPaths.cmake)
++#include(SetPaths.cmake)
+ 
+ include(CheckCXXCompilerFlag)
+ include(CheckFunctionExists)
+@@ -126,15 +126,15 @@
+ 
+ check_function_exists(getopt HAVE_GETOPT)
+ if(NOT HAVE_GETOPT)
+-    add_subdirectory(getopt)
++    #add_subdirectory(getopt)
+ endif()
+ 
+ add_subdirectory(backend)
+-add_subdirectory(frontend)
++#add_subdirectory(frontend)
+ 
+ if(NOT ZINT_USE_QT)
+     message(STATUS "Qt support was disabled for this build")
+-elseif($ENV{CMAKE_PREFIX_PATH} MATCHES "6[.][0-9][.][0-9]")
++elseif(0)
+     set(USE_QT6 TRUE)
+     message(STATUS "Using Qt6")
+     cmake_policy(SET CMP0012 NEW) # Recognize constants in if()
+@@ -151,21 +151,21 @@
+     else()
+         message(STATUS "Could NOT find Qt6")
+     endif()
+ else()
+-    message(STATUS "Using Qt5")
+-    find_package(Qt5Widgets)
+-    find_package(Qt5Gui)
+-    find_package(Qt5UiTools)
+-    find_package(Qt5Xml)
++    message(STATUS "Using Qt${QT_VERSION_MAJOR}")
++    find_package(
++        Qt${QT_VERSION_MAJOR}
++        COMPONENTS Gui
++        REQUIRED)
+ 
+-    if(Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5UiTools_FOUND AND Qt5Xml_FOUND)
++    if(1)
+         message(STATUS "Qt version: " ${Qt5Core_VERSION_STRING})
+         # Old Qt does not provide QT_VERSION_MAJOR
+         if (NOT QT_VERSION_MAJOR)
+             string(SUBSTRING ${Qt5Core_VERSION_STRING} 0 1 QT_VERSION_MAJOR)
+         endif()
+         add_subdirectory(backend_qt)
+-        add_subdirectory(frontend_qt)
++        # add_subdirectory(frontend_qt)
+     else()
+         message(STATUS "Could NOT find Qt5")
+     endif()
+--- backend/CMakeLists.txt
++++ backend/CMakeLists.txt
+@@ -13,10 +13,10 @@
+ set(zint_OUTPUT_SRCS vector.c ps.c svg.c emf.c bmp.c pcx.c gif.c png.c tif.c raster.c output.c)
+ set(zint_SRCS ${zint_OUTPUT_SRCS} ${zint_COMMON_SRCS} ${zint_ONEDIM_SRCS} ${zint_POSTAL_SRCS} ${zint_TWODIM_SRCS})
+ 
+-add_library(zint SHARED ${zint_SRCS})
+-
+-if(ZINT_STATIC)
+-    add_library(zint-static STATIC ${zint_SRCS})
++add_library(zint ${zint_SRCS})
++set_target_properties(zint PROPERTIES DEFINE_SYMBOL ZINT_BUILD_DLL)
++if(NOT BUILD_SHARED_LIBS)
++    set_target_properties(zint PROPERTIES OUTPUT_NAME "zint-static")# ARCHIVE_OUTPUT_NAME "zint-static")
+ endif()
+-
++target_include_directories(zint PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ function(zint_target_link_libraries library)
+@@ -59,1 +59,1 @@
+-    target_compile_definitions(zint PRIVATE DLL_EXPORT)
++    #target_compile_definitions(zint PRIVATE DLL_EXPORT)
+@@ -63,7 +63,7 @@
+ if(ZINT_STATIC)
+     install(TARGETS zint-static ${INSTALL_TARGETS_DEFAULT_ARGS})
+ endif()
+-install(FILES zint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
++install(FILES zint.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Devel)
+ 
+ if(ZINT_TEST)
+     add_subdirectory(tests)
+--- backend_qt/CMakeLists.txt
++++ backend_qt/CMakeLists.txt
+@@ -12,7 +12,7 @@
+     qt5_wrap_cpp(QZint_SRCS qzint.h)
+ endif()
+ 
+-add_library(${PROJECT_NAME} STATIC ${QZint_SRCS})
++add_library(${PROJECT_NAME} ${QZint_SRCS})
+-
++set_target_properties(${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL QZINT_BUILD_DLL)
+ set_target_properties(${PROJECT_NAME} PROPERTIES  SOVERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}"
+                                         VERSION ${ZINT_VERSION})
+@@ -22,5 +22,5 @@
+-target_link_libraries(${PROJECT_NAME} zint Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui)
++target_link_libraries(${PROJECT_NAME} PUBLIC zint Qt${QT_VERSION_MAJOR}::Gui)
+ 
+ 
+ install(TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
+-install(FILES qzint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
++install(FILES qzint.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Devel)
+--- backend/zint.h
++++ backend/zint.h
+@@ -315,7 +315,7 @@
+ #define ZINT_DEBUG_TEST         2   /* For internal test use only */
+ 
+ #ifdef _WIN32
+-#  if defined(DLL_EXPORT) || defined(PIC) || defined(_USRDLL)
++#  if defined(ZINT_BUILD_DLL)
+ #    define ZINT_EXTERN __declspec(dllexport)
+ #  elif defined(ZINT_DLL)
+ #    define ZINT_EXTERN __declspec(dllimport)
+--- backend_qt/qzint.h
++++ backend_qt/qzint.h
+@@ -24,8 +25,18 @@
+ 
+ namespace Zint
+ {
+-
+-class QZint : public QObject
++#ifdef _WIN32
++# ifdef QZINT_BUILD_DLL
++#  define QZINT_EXTERN __declspec(dllexport)
++# elif defined(QZINT_DLL)
++#  define QZINT_EXTERN __declspec(dllimport)
++# else
++#  define QZINT_EXTERN
++# endif
++#else
++# define QZINT_EXTERN
++#endif
++class QZINT_EXTERN QZint : public QObject
+ {
+     Q_OBJECT
+ 

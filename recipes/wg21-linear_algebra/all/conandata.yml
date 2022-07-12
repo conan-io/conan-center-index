@@ -1,0 +1,4 @@
+sources:
+  "0.7.2":
+    url: https://github.com/BobSteagall/wg21/archive/refs/tags/v0.7.2.tar.gz
+    sha256: 4a192d279491264be2d687f89c15432fcb4f2e2d113599152bd3df2df42ce9e1

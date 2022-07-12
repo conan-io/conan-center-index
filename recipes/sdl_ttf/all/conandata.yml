@@ -1,0 +1,15 @@
+sources:
+  "2.0.18":
+    url: "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-2.0.18.tar.gz"
+    sha256: "6b61544441b72bdfa1ced89034c6396fe80228eff201eb72c5f78e500bb80bd0"
+  "2.0.15":
+    url: "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-2.0.15.tar.gz"
+    sha256: "02e887b560faf398cbd60f56ce0a1cbaf96012dd4ddaa455f8307cb4911c86cc"
+
+patches:
+  "2.0.18":
+    - patch_file: "patches/cmake-fix-link-target-2.0.18.patch"
+      base_path: "source_subfolder"
+  "2.0.15":
+    - patch_file: "patches/cmake-fix-link-target-2.0.15.patch"
+      base_path: "source_subfolder"

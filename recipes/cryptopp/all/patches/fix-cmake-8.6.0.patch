@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1024,8 +1024,8 @@
+   # https://stackoverflow.com/q/61250087
+   add_definitions("${CMAKE_CPP_FLAGS}" "${CMAKE_CXX_FLAGS}" "${CRYPTOPP_COMPILE_DEFINITIONS}" "${CRYPTOPP_COMPILE_OPTIONS}")
+ else()
+-  add_compile_definitions("${CMAKE_CPP_FLAGS}" "${CRYPTOPP_COMPILE_DEFINITIONS}")
+-  add_compile_options("${CMAKE_CXX_FLAGS}" "${CRYPTOPP_COMPILE_OPTIONS}")
++  add_compile_definitions(${CRYPTOPP_COMPILE_DEFINITIONS})
++  add_compile_options(${CRYPTOPP_COMPILE_OPTIONS})
+ endif()
+ 
+ #============================================================================

@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.43.0"
 
 
 class ZstdConan(ConanFile):
@@ -7,14 +9,22 @@ class ZstdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/zstd"
     description = "Zstandard - Fast real-time compression algorithm"
-    topics = ("conan", "zstd", "compression", "algorithm", "decoder")
+    topics = ("zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "threading": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "threading": True,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -24,6 +34,11 @@ class ZstdConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,9 +51,7 @@ class ZstdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -47,6 +60,10 @@ class ZstdConan(ConanFile):
         self._cmake.definitions["ZSTD_BUILD_PROGRAMS"] = False
         self._cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
+        if tools.Version(self.version) < "1.4.3":
+            # Generate a relocatable shared lib on Macos
+            self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -72,9 +89,13 @@ class ZstdConan(ConanFile):
 
     def package_info(self):
         zstd_cmake = "libzstd_shared" if self.options.shared else "libzstd_static"
-        self.cpp_info.components["zstdlib"].names["pkg_config"] = "libzstd"
+        self.cpp_info.set_property("cmake_file_name", "zstd")
+        self.cpp_info.set_property("cmake_target_name", "zstd::{}".format(zstd_cmake))
+        self.cpp_info.set_property("pkg_config_name", "libzstd")
+        self.cpp_info.components["zstdlib"].set_property("pkg_config_name", "libzstd")
         self.cpp_info.components["zstdlib"].names["cmake_find_package"] = zstd_cmake
         self.cpp_info.components["zstdlib"].names["cmake_find_package_multi"] = zstd_cmake
+        self.cpp_info.components["zstdlib"].set_property("cmake_target_name", "zstd::{}".format(zstd_cmake))
         self.cpp_info.components["zstdlib"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["zstdlib"].system_libs.append("pthread")

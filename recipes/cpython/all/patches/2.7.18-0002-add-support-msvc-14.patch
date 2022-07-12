@@ -1,0 +1,59 @@
+Patches from https://bugs.python.org/issue30742
+
+--- Modules/posixmodule.c
++++ Modules/posixmodule.c
+@@ -563,7 +563,10 @@ typedef struct {
+     char osfile;
+ } my_ioinfo;
+ 
++#if _MSC_VER < 1900 // MSVS2013 and lower (https://bugs.python.org/issue30742)
+ extern __declspec(dllimport) char * __pioinfo[];
++#endif
++
+ #define IOINFO_L2E 5
+ #define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
+ #define IOINFO_ARRAYS 64
+@@ -575,6 +578,7 @@ extern __declspec(dllimport) char * __pioinfo[];
+ int
+ _PyVerify_fd(int fd)
+ {
++#if _MSC_VER < 1900 // MSVS2013 and lower (https://bugs.python.org/issue30742)
+     const int i1 = fd >> IOINFO_L2E;
+     const int i2 = fd & ((1 << IOINFO_L2E) - 1);
+ 
+@@ -607,6 +611,13 @@ _PyVerify_fd(int fd)
+   fail:
+     errno = EBADF;
+     return 0;
++#else
++    //a call to _get_osfhandle with invalid fd sets errno to EBADF
++    if (_get_osfhandle(fd) == INVALID_HANDLE_VALUE)
++        return 0;
++    else
++        return 1;
++#endif
+ }
+ 
+ /* the special case of checking dup2.  The target fd must be in a sensible range */
+--- Modules/timemodule.c
++++ Modules/timemodule.c
+@@ -803,7 +803,18 @@ inittimezone(PyObject *m) {
+ 
+     And I'm lazy and hate C so nyer.
+      */
+-#if defined(HAVE_TZNAME) && !defined(__GLIBC__) && !defined(__CYGWIN__)
++#if defined(HAVE_TZNAME) && (_MSC_VER >= 1900) //MSVS2015+ (https://bugs.python.org/issue30742)
++    tzset();
++    PyModule_AddIntConstant(m, "timezone", _timezone);
++#ifdef HAVE_ALTZONE
++    PyModule_AddIntConstant(m, "altzone", altzone);
++#else
++    PyModule_AddIntConstant(m, "altzone", _timezone - 3600);
++#endif
++    PyModule_AddIntConstant(m, "daylight", _daylight);
++    PyModule_AddObject(m, "tzname",
++        Py_BuildValue("(zz)", _tzname[0], _tzname[1]));
++#elif defined(HAVE_TZNAME) && !defined(__GLIBC__) && !defined(__CYGWIN__)
+     tzset();
+ #ifdef PYOS_OS2
+     PyModule_AddIntConstant(m, "timezone", _timezone);

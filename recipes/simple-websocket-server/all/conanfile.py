@@ -13,9 +13,6 @@ class SimpleWebSocketServerConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
     license = "MIT"
-    requires = (
-        "openssl/1.1.1h",
-    )
     options = {
         "use_asio_standalone": [True, False],
     }
@@ -28,6 +25,7 @@ class SimpleWebSocketServerConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
+        self.requires("openssl/1.1.1j")
         # only version 2.0.2 upwards is able to build against asio 1.18.0 or higher
         if tools.Version(self.version) <= "2.0.1":
             if self.options.use_asio_standalone:

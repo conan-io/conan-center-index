@@ -1,0 +1,39 @@
+diff --git a/src/msix/PAL/Signature/OpenSSL/SignatureValidator.cpp b/src/msix/PAL/Signature/OpenSSL/SignatureValidator.cpp
+index 1cc34b20..ccbf68dc 100644
+--- a/src/msix/PAL/Signature/OpenSSL/SignatureValidator.cpp
++++ b/src/msix/PAL/Signature/OpenSSL/SignatureValidator.cpp
+@@ -94,11 +94,10 @@ namespace MSIX
+         STACK_OF(X509) *certStack = p7.get()->d.sign->cert;
+         for (int i = 0; i < sk_X509_num(certStack); i++)
+         {
+-            X509* cert = sk_X509_value(certStack, i);
+-            STACK_OF(X509_EXTENSION) *exts = cert->cert_info->extensions;
+-            for (int i = 0; i < sk_X509_EXTENSION_num(exts); i++) 
++            X509* cert = sk_X509_value(certStack, i); 
++            for (int i = 0; i < X509_get_ext_count(cert); i++)
+             {
+-                X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
++                X509_EXTENSION *ext = X509_get_ext(cert, i);
+                 if (ext)
+                 {
+                     if (X509_EXTENSION_get_object(ext))
+@@ -106,7 +105,7 @@ namespace MSIX
+                         unique_BIO extbio(BIO_new(BIO_s_mem()));
+                         if (!X509V3_EXT_print(extbio.get(), ext, 0, 0)) 
+                         {
+-                            M_ASN1_OCTET_STRING_print(extbio.get(), ext->value);
++                            M_ASN1_OCTET_STRING_print(extbio.get(), X509_EXTENSION_get_data(ext));
+                         }
+                         // null terminate the string.
+                         BIO_write(extbio.get(), "", 1);
+@@ -207,8 +206,8 @@ namespace MSIX
+         // If we encounter an expired cert error (which is fine) or a critical extension (most MS
+         // certs contain MS-specific extensions that OpenSSL doesn't know how to evaluate), 
+         // just return success
+-        if (!ok && (ctx->error == X509_V_ERR_CERT_HAS_EXPIRED || 
+-                    ctx->error == X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION))
++        if (!ok && (X509_STORE_CTX_get_error(ctx) == X509_V_ERR_CERT_HAS_EXPIRED || 
++                    X509_STORE_CTX_get_error(ctx) == X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION))
+         {
+             ok = static_cast<int>(true);
+         }

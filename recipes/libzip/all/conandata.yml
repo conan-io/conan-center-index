@@ -1,4 +1,14 @@
 sources:
+  "1.8.0":
+    url: "https://libzip.org/download/libzip-1.8.0.tar.gz"
+    sha256: "30ee55868c0a698d3c600492f2bea4eb62c53849bcf696d21af5eb65f3f3839e"
   "1.7.3":
     url: "https://libzip.org/download/libzip-1.7.3.tar.gz"
     sha256: "0e2276c550c5a310d4ebf3a2c3dfc43fb3b4602a072ff625842ad4f3238cb9cc"
+patches:
+  "1.8.0":
+    - patch_file: "patches/0001-cmake-install-bundle.patch"
+      base_path: "source_subfolder"
+  "1.7.3":
+    - patch_file: "patches/0001-cmake-install-bundle.patch"
+      base_path: "source_subfolder"

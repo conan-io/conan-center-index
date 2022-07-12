@@ -1,4 +1,7 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/kevinhartman/morton-nd/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "29337c7f7afb6361dd483ca4fe2111aad9d590f3b9d3fe519856a5bdf450e059"
   "3.0.0":
     url: "https://github.com/kevinhartman/morton-nd/archive/v3.0.0.tar.gz"
     sha256: "ba57df04a2e1e73709f55fd3fee71082750013c5792de3c6eb84a8c87d40d781"

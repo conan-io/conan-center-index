@@ -1,7 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class Argon2Conan(ConanFile):
@@ -20,6 +20,10 @@ class Argon2Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -31,12 +35,12 @@ class Argon2Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("phc-winner-argon2-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _kernel_name(self):

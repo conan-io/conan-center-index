@@ -1,21 +1,28 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import functools
+
+required_conan_version = ">=1.33.0"
+
 
 class LaszipConan(ConanFile):
     name = "laszip"
     description = "C++ library for lossless LiDAR compression."
     license = "LGPL-2.1"
-    topics = ("conan", "laszip", "las", "laz", "lidar", "compression", "decompression")
+    topics = ("laszip", "las", "laz", "lidar", "compression", "decompression")
     homepage = "https://github.com/LASzip/LASzip"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
-    _cmake = None
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -25,28 +32,35 @@ class LaszipConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("LASzip-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        # Do not build laszip_api, only laszip
-        tools.replace_in_file(os.path.join(self._source_subfolder, "dll", "CMakeLists.txt"),
-                              "LASZIP_ADD_LIBRARY(${LASZIP_API_LIB_NAME} ${LASZIP_API_SOURCES})", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LASZIP_BUILD_STATIC"] = not self.options.shared
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["LASZIP_BUILD_STATIC"] = not self.options.shared
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -54,8 +68,13 @@ class LaszipConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        suffix = tools.Version(self.version).major if self.settings.os == "Windows" else ""
+        self.cpp_info.libs = [f"laszip{suffix}"]
         if self.options.shared:
             self.cpp_info.defines.append("LASZIP_DYN_LINK")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+        else:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
+            libcxx = tools.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)

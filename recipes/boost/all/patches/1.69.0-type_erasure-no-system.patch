@@ -1,0 +1,9 @@
+This library links to boost_system, even though that library is header-only.
+--- libs/type_erasure/build/Jamfile.v2
++++ libs/type_erasure/build/Jamfile.v2
+@@ -12,4 +12,4 @@
+   : usage-requirements <link>shared:<define>BOOST_TYPE_ERASURE_DYN_LINK
+ ;
+ 
+-lib boost_type_erasure : dynamic_binding.cpp /boost//thread /boost//system ;
++lib boost_type_erasure : dynamic_binding.cpp /boost//thread ;

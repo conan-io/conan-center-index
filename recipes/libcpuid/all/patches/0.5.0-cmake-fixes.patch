@@ -1,19 +1,31 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -11,8 +11,8 @@ set(CMAKE_CXX_STANDARD 11)
- set(CMAKE_C_STANDARD 99)
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,4 +27,3 @@ endif(UNIX)
+ # Include subdirectories
+ add_subdirectory(libcpuid)
+ add_subdirectory(cpuid_tool)
+-add_subdirectory(tests)
+--- a/cpuid_tool/CMakeLists.txt
++++ b/cpuid_tool/CMakeLists.txt
+@@ -2,7 +2,7 @@ add_executable(cpuid_tool cpuid_tool.c)
  
- # Global variables
--set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
--
-+set(PROJECT_CMAKE_DIR "${PROJECT_SOURCE_DIR}/cmake")
-+list(APPEND MAKE_MODULE_PATH "${PROJECT_CMAKE_DIR}/cmake")
- if(UNIX)
-   include(GNUInstallDirs)
-   set(prefix "${CMAKE_INSTALL_PREFIX}")
---- libcpuid/CMakeLists.txt
-+++ libcpuid/CMakeLists.txt
-@@ -13,7 +13,7 @@
+ target_link_libraries(cpuid_tool cpuid)
+ 
+-if(WIN32)
++if(0)
+   install(
+     TARGETS cpuid_tool
+     CONFIGURATIONS Debug
+@@ -12,5 +12,5 @@ if(WIN32)
+     CONFIGURATIONS Release
+     RUNTIME DESTINATION bin/Release)
+ else()
+-  install(TARGETS cpuid_tool RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++  install(TARGETS cpuid_tool DESTINATION ${CMAKE_INSTALL_BINDIR})
+ endif()
+--- a/libcpuid/CMakeLists.txt
++++ b/libcpuid/CMakeLists.txt
+@@ -13,7 +13,7 @@ if("${MSVC_CXX_ARCHITECTURE_ID}" MATCHES "x64")
  endif()
  
  if(UNIX)
@@ -27,18 +39,7 @@
  
  # Configure '<PROJECT-NAME>Config.cmake' Use variables: * TARGETS_EXPORT_NAME * PROJECT_NAME
 -configure_package_config_file("${CMAKE_MODULE_PATH}/Config.cmake.in" "${project_config}"
-+configure_package_config_file("${PROJECT_CMAKE_DIR}/Config.cmake.in" "${project_config}"
++configure_package_config_file("${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in" "${project_config}"
                                INSTALL_DESTINATION "${config_install_dir}")
  
  # Installation
---- cpuid_tool/CMakeLists.txt
-+++ cpuid_tool/CMakeLists.txt
-@@ -2,7 +2,7 @@
- 
- target_link_libraries(cpuid_tool cpuid)
- 
--if(WIN32)
-+if(0)
-   install(
-     TARGETS cpuid_tool
-     CONFIGURATIONS Debug

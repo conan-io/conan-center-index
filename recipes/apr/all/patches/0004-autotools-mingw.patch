@@ -1,0 +1,160 @@
+--- configure.in
++++ configure.in
+@@ -1864,11 +1864,13 @@ esac
+ 
+ dnl I would expect much of the above to go away with new compile test
+ APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, long, ld, [ssize_t_fmt="ld"], [
+-APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, int, d, [ssize_t_fmt="d"])
+-])
++APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, int, d, [ssize_t_fmt="d"], [
++APR_CHECK_TYPES_FMT_COMPATIBLE(ssize_t, long long, lld, [ssize_t_fmt="lld"])
++])])
+ APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned long, lu, [size_t_fmt="lu"], [
+-APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned int, u, [size_t_fmt="u"])
+-])
++APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned int, u, [size_t_fmt="u"], [
++APR_CHECK_TYPES_FMT_COMPATIBLE(size_t, unsigned long long, llu, [size_t_fmt="llu"])
++])])
+ 
+ APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
+ 
+--- configure
++++ configure
+@@ -14194,7 +14194,7 @@
+ LIBTOOL_DEPS=$ltmain
+ 
+ # Always use our own libtool.
+-LIBTOOL='$(SHELL) $(apr_builddir)/libtool'
++LIBTOOL='$(SHELL) $(top_builddir)/libtool'
+ 
+ 
+ 
+@@ -24674,8 +24674,62 @@
+ else
+     :
+ 
++
++
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ssize_t and long long use fmt %lld" >&5
++$as_echo_n "checking whether ssize_t and long long use fmt %lld... " >&6; }
++if ${apr_cv_typematch_ssize_t_long_long_lld+:} false; then :
++  $as_echo_n "(cached) " >&6
++else
++
++apr_save_CFLAGS=$CFLAGS
++ CFLAGS="$CFLAGS $CFLAGS_WARN"
++ if test "$ac_cv_c_compiler_gnu" = "yes"; then
++   CFLAGS="$CFLAGS -Werror"
++ fi
++ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++#include "confdefs.h"
++
++   #include <sys/types.h>
++#include <stdio.h>
++#ifdef HAVE_STDINT_H
++#include <stdint.h>
++#endif
++
++   int main(int argc, const char *const *argv) {
++
++    ssize_t chk1, *ptr1;
++    long long chk2, *ptr2 = &chk1;
++    ptr1 = &chk2;
++    *ptr1 = *ptr2 = 0;
++    printf("%lld %lld", chk1, chk2);
++
++      return 0; }
++
++_ACEOF
++if ac_fn_c_try_compile "$LINENO"; then :
++  CFLAGS=$apr_save_CFLAGS
++apr_cv_typematch_ssize_t_long_long_lld=yes
++else
++  CFLAGS=$apr_save_CFLAGS
++apr_cv_typematch_ssize_t_long_long_lld=no
++fi
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
++
+ fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $apr_cv_typematch_ssize_t_long_long_lld" >&5
++$as_echo "$apr_cv_typematch_ssize_t_long_long_lld" >&6; }
++if test "$apr_cv_typematch_ssize_t_long_long_lld" = "yes"; then
++    :
++    ssize_t_fmt="lld"
++else
++    :
++
++fi
++
+ 
++fi
+ 
+ fi
+ 
+@@ -24783,11 +24837,65 @@
+ else
+     :
+ 
++
++
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether size_t and unsigned long long use fmt %llu" >&5
++$as_echo_n "checking whether size_t and unsigned long long use fmt %llu... " >&6; }
++if ${apr_cv_typematch_size_t_unsigned_long_long_llu+:} false; then :
++  $as_echo_n "(cached) " >&6
++else
++
++apr_save_CFLAGS=$CFLAGS
++ CFLAGS="$CFLAGS $CFLAGS_WARN"
++ if test "$ac_cv_c_compiler_gnu" = "yes"; then
++   CFLAGS="$CFLAGS -Werror"
++ fi
++ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++#include "confdefs.h"
++
++   #include <sys/types.h>
++#include <stdio.h>
++#ifdef HAVE_STDINT_H
++#include <stdint.h>
++#endif
++
++   int main(int argc, const char *const *argv) {
++
++    size_t chk1, *ptr1;
++    unsigned long long chk2, *ptr2 = &chk1;
++    ptr1 = &chk2;
++    *ptr1 = *ptr2 = 0;
++    printf("%llu %llu", chk1, chk2);
++
++      return 0; }
++
++_ACEOF
++if ac_fn_c_try_compile "$LINENO"; then :
++  CFLAGS=$apr_save_CFLAGS
++apr_cv_typematch_size_t_unsigned_long_long_llu=yes
++else
++  CFLAGS=$apr_save_CFLAGS
++apr_cv_typematch_size_t_unsigned_long_long_llu=no
++fi
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
++
++fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $apr_cv_typematch_size_t_unsigned_long_long_llu" >&5
++$as_echo "$apr_cv_typematch_size_t_unsigned_long_long_llu" >&6; }
++if test "$apr_cv_typematch_size_t_unsigned_long_long_llu" = "yes"; then
++    :
++    size_t_fmt="llu"
++else
++    :
++
+ fi
+ 
+ 
+ fi
+ 
++fi
++
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking size of ssize_t" >&5
+ $as_echo_n "checking size of ssize_t... " >&6; }

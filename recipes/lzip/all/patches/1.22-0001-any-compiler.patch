@@ -1,0 +1,18 @@
+--- configure
++++ configure
+@@ -24,7 +24,7 @@
+ check=no
+ installdir=
+-CXX=g++
+-CPPFLAGS=
+-CXXFLAGS='-Wall -W -O2'
+-LDFLAGS=
++#CXX=g++
++#CPPFLAGS=
++#CXXFLAGS='-Wall -W -O2'
++#LDFLAGS=
+ 
+@@ -31,2 +31,2 @@
+ # checking whether we are using GNU C++.
+-/bin/sh -c "${CXX} --version" > /dev/null 2>&1 || { CXX=c++ ; CXXFLAGS=-O2 ; }
++# /bin/sh -c "${CXX} --version" > /dev/null 2>&1 || { CXX=c++ ; CXXFLAGS=-O2 ; }

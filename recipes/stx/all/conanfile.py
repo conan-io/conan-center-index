@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class STXConan(ConanFile):
     name = 'stx'
@@ -9,29 +11,31 @@ class STXConan(ConanFile):
     license = 'MIT'
     url = 'https://github.com/conan-io/conan-center-index'
     description = 'C++17 & C++ 20 error-handling and utility extensions.'
-    generators = 'cmake', 'cmake_find_package'
     topics = 'error-handling', 'result', 'option', 'backtrace', 'panic'
+
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
-        'backtrace': [True, False],
-        'panic_handler': [None, 'default', 'backtrace'],
         'shared': [True, False],
         'fPIC': [True, False],
+        'backtrace': [True, False],
+        'panic_handler': [None, 'default', 'backtrace'],
         'visible_panic_hook': [True, False],
     }
     default_options = {
-        'backtrace': False,
-        'panic_handler': 'default',
         'shared': False,
         'fPIC': True,
+        'backtrace': False,
+        'panic_handler': 'default',
         'visible_panic_hook': False,
     }
+
     exports_sources = ['CMakeLists.txt', 'patches/*']
-    
+    generators = 'cmake', 'cmake_find_package'
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
@@ -41,6 +45,14 @@ class STXConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.backtrace:
+            self.requires('abseil/20200923.1')
+
+    def validate(self):
         if (self.options.panic_handler == 'backtrace' and
                 not self.options.backtrace):
             raise ConanInvalidConfiguration(
@@ -81,10 +93,10 @@ class STXConan(ConanFile):
                 'which clang < 10 with libc++ lacks'
             )
 
-        if compiler == 'apple-clang':
+        if compiler == 'apple-clang' and compiler_version < 12:
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which apple-clang with libc++ lacks'
+                'which apple-clang < 12 with libc++ lacks'
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
@@ -94,13 +106,9 @@ class STXConan(ConanFile):
                 'STX version <= 1.0.1'
             )
 
-    def requirements(self):
-        if self.options.backtrace:
-            self.requires('abseil/20200923.1')
-
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        tools.rename('STX-{}'.format(self.version), dst=self._source_subfolder)
+        tools.get(**self.conan_data['sources'][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):

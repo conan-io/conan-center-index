@@ -1,0 +1,11 @@
+sources:
+  "2020.06":
+    url: "https://github.com/mosra/magnum-plugins/archive/refs/tags/v2020.06.tar.gz"
+    sha256: "8650cab43570c826d2557d5b42459150d253316f7f734af8b3e7d0883510b40a"
+patches:
+  "2020.06":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2020.06/0001-emscripten-toolchain.patch"
+      # patch_type: "portability" 
+      # description: "Remove unnecessary dependency on UseEmscripten"
+      # source: "https://github.com/mosra/magnum/issues/490"

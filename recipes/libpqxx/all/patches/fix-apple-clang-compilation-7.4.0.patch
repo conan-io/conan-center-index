@@ -1,0 +1,25 @@
+Fix Apple clang compilation 7.4.0 only (https://github.com/jtv/libpqxx/commit/cbd2b35ef5bce8a1fc8bfd1efd804d965976ce23)
+diff --git a/include/pqxx/connection.hxx b/include/pqxx/connection.hxx
+index b44daa18..21dc1fd3 100644
+--- a/include/pqxx/connection.hxx
++++ b/include/pqxx/connection.hxx
+@@ -33,6 +33,7 @@
+ #include "pqxx/errorhandler.hxx"
+ #include "pqxx/except.hxx"
+ #include "pqxx/prepared_statement.hxx"
++#include "pqxx/separated_list.hxx"
+ #include "pqxx/strconv.hxx"
+ #include "pqxx/util.hxx"
+ #include "pqxx/zview.hxx"
+diff --git a/include/pqxx/stream_to.hxx b/include/pqxx/stream_to.hxx
+index 96ddbf56..5ed91b23 100644
+--- a/include/pqxx/stream_to.hxx
++++ b/include/pqxx/stream_to.hxx
+@@ -16,6 +16,7 @@
+ #include "pqxx/compiler-public.hxx"
+ #include "pqxx/internal/compiler-internal-pre.hxx"
+ 
++#include "pqxx/separated_list.hxx"
+ #include "pqxx/transaction_base.hxx"
+ 
+ 

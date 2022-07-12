@@ -1,13 +1,25 @@
 sources:
-  "0.4.7":
-    url: "https://github.com/lemire/simdjson/archive/v0.4.7.tar.gz"
-    sha256: "44c20aa1000a8ed67ed6d541048aa7e5ea26a3bcb833a7232310414fc46b3ef9"
-  "0.5.0":
-    url: "https://github.com/lemire/simdjson/archive/v0.5.0.tar.gz"
-    sha256: "60846ae482e17230e41f5abf8f058a6e367c2a0ec1b5a6fd7a883a54ad21bee8"
-  "0.6.1":
-    url: "https://github.com/lemire/simdjson/archive/v0.6.1.tar.gz"
-    sha256: "57ce12d94555cddc358a96a4995fb74375683a5ae09d3c7323dbd8ba09f4a850"
-  "0.7.0":
-    url: "https://github.com/lemire/simdjson/archive/v0.7.0.tar.gz"
-    sha256: "c814f7e20103cded7c2758ceaf41f9f63febe8914e7e72dd1daf1d6071aba8f0"
+  "2.2.0":
+    url: "https://github.com/simdjson/simdjson/archive/v2.2.0.tar.gz"
+    sha256: "011974352049e986bdcdf64fc807cf3ab901865240f4ae8e3de670dd42aab099"
+  "2.1.0":
+    url: "https://github.com/simdjson/simdjson/archive/v2.1.0.tar.gz"
+    sha256: "051b90427ddd1eac319f4eb34b973592728a6d8608fbac61e8aaa5a2dee4b693"
+  "2.0.4":
+    url: "https://github.com/simdjson/simdjson/archive/v2.0.4.tar.gz"
+    sha256: "c8a12cf60f6ce8c0e556f68bd80e7bd9f11f5876e198ed3637da8ccf182eaa24"
+  "2.0.3":
+    url: "https://github.com/simdjson/simdjson/archive/v2.0.3.tar.gz"
+    sha256: "c1bcf65b3bd830bf8f747b8dd7126edd4bb7562bebb92698c1750acf4c979df6"
+  "2.0.1":
+    url: "https://github.com/simdjson/simdjson/archive/v2.0.1.tar.gz"
+    sha256: "581e508210614a5024edf79e0b65db943ab5711cc42163826bcbf3df6a5e34d1"
+  "1.1.0":
+    url: "https://github.com/simdjson/simdjson/archive/v1.1.0.tar.gz"
+    sha256: "9effcb21fe48e4bcc9b96031e60c3911c58aa656ad8c78212d269c0db9e0133e"
+  "1.0.2":
+    url: "https://github.com/simdjson/simdjson/archive/v1.0.2.tar.gz"
+    sha256: "46d5995488de76ae61f1c3bcff445a9085c8d34f6cbc9bf0422a99c6d98a002c"
+  "0.9.7":
+    url: "https://github.com/simdjson/simdjson/archive/v0.9.7.tar.gz"
+    sha256: "a21279ae4cf0049234a822c5c3550f99ec1707d3cda12156d331dcc8cd411ba0"

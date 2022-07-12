@@ -1,0 +1,46 @@
+--- src/hpdf_image_ccitt.c
++++ src/hpdf_image_ccitt.c
+@@ -578,11 +578,11 @@ HPDF_Fax3Encode2DRow(struct _HPDF_CCITT_Data *pData, unsigned char* bp, unsigned
+ 				a2 = finddiff2(bp, a1, bits, PIXEL(bp,a1));
+ 				putcode(pData, &horizcode);
+ 				if (a0+a1 == 0 || PIXEL(bp, a0) == 0) {
+-					putspan(pData, a1-a0, TIFFFaxWhiteCodes);
+-					putspan(pData, a2-a1, TIFFFaxBlackCodes);
++					putspan(pData, a1-a0, HPDF_TIFFFaxWhiteCodes);
++					putspan(pData, a2-a1, HPDF_TIFFFaxBlackCodes);
+ 				} else {
+-					putspan(pData, a1-a0, TIFFFaxBlackCodes);
+-					putspan(pData, a2-a1, TIFFFaxWhiteCodes);
++					putspan(pData, a1-a0, HPDF_TIFFFaxBlackCodes);
++					putspan(pData, a2-a1, HPDF_TIFFFaxWhiteCodes);
+ 				}
+ 				a0 = a2;
+ 			} else {			/* vertical mode */
+--- src/t4.h
++++ src/t4.h
+@@ -55,7 +55,7 @@ typedef struct tableentry {
+  *     during state generation (see mkg3states.c).
+  */
+ #ifdef G3CODES
+-const tableentry TIFFFaxWhiteCodes[] = {
++const tableentry HPDF_TIFFFaxWhiteCodes[] = {
+     { 8, 0x35, 0 },	/* 0011 0101 */
+     { 6, 0x7, 1 },	/* 0001 11 */
+     { 4, 0x7, 2 },	/* 0111 */
+@@ -167,7 +167,7 @@ const tableentry TIFFFaxWhiteCodes[] = {
+     { 12, 0x0, G3CODE_INVALID },	/* 0000 0000 0000 */
+ };
+ 
+-const tableentry TIFFFaxBlackCodes[] = {
++const tableentry HPDF_TIFFFaxBlackCodes[] = {
+     { 10, 0x37, 0 },	/* 0000 1101 11 */
+     { 3, 0x2, 1 },	/* 010 */
+     { 2, 0x3, 2 },	/* 11 */
+@@ -281,5 +281,7 @@ const tableentry TIFFFaxBlackCodes[] = {
+ #else
+ extern	const tableentry TIFFFaxWhiteCodes[];
+ extern	const tableentry TIFFFaxBlackCodes[];
++const tableentry *HPDF_TIFFFaxWhiteCodes = TIFFFaxWhiteCodes;
++const tableentry *HPDF_TIFFFaxBlackCodes = TIFFFaxBlackCodes;
+ #endif
+ #endif /* _T4_ */

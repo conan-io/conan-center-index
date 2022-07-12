@@ -29,13 +29,22 @@ class ResiprocateConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
+    def configure(self):
         if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration("reSIProcate is not support on {}.".format(self.settings.os))
+            # FIXME: Visual Studio project & Mac support seems available in resiprocate
+            raise ConanInvalidConfiguration("reSIProcate recipe does not currently support {}.".format(self.settings.os))
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.with_postgresql:
-            self.requires("libpq/11.5")
+            self.requires("libpq/11.9")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
 
@@ -51,12 +60,17 @@ class ResiprocateConan(ConanFile):
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-ssl={}".format(yes_no(not self.options.with_ssl)),
-            "--with-mysql={}".format(yes_no(not self.options.with_mysql)),
-            "--with-postgresql={}".format(yes_no(not self.options.with_postgresql)),
-            "--with-pic={}".format(yes_no(not self.options.fPIC))
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
         ]
 
+        # These options do not support yes/no
+        if self.options.with_ssl:
+            configure_args.append("--with-ssl")
+        if self.options.with_mysql:
+            configure_args.append("--with-mysql")
+        if self.options.with_postgresql:
+            configure_args.append("--with-postgresql")
+        
         self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
@@ -73,6 +87,8 @@ class ResiprocateConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["resip", "rutil", "dum", "resipares"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs = ["pthread"]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -17,7 +17,7 @@ class GodotHeadersConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        tools.rename(glob.glob("godot_headers-*")[0], self._source_subfolder)
+        tools.rename(glob.glob("godot-headers-*")[0], self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)

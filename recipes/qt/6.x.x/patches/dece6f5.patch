@@ -1,0 +1,25 @@
+From dece6f5840463ae2ddf927d65eb1b3680e34a547 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C3=98ystein=20Heskestad?= <oystein.heskestad@qt.io>
+Date: Wed, 27 Oct 2021 13:07:46 +0200
+Subject: Add missing macOS header file that was indirectly included before
+
+Change-Id: I4d4c7d4f957fc36dea5e06eb6d661aeecf6385f1
+Reviewed-by: Timur Pocheptsov <timur.pocheptsov@qt.io>
+---
+ src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+(limited to 'src/plugins/platforms/cocoa')
+
+diff --git a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
+index 5d4b6d6a71..cc7193d8b7 100644
+--- a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
++++ b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
+@@ -43,6 +43,7 @@
+ #include <qpa/qplatformgraphicsbuffer.h>
+ #include <private/qcore_mac_p.h>
+ 
++#include <CoreGraphics/CGColorSpace.h>
+ #include <IOSurface/IOSurface.h>
+ 
+ QT_BEGIN_NAMESPACE

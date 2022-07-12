@@ -1,0 +1,12 @@
+Fixes building a shared library with mingw@Windows
+--- Makefile.am
++++ Makefile.am
+@@ -20,7 +20,7 @@
+ lib_LTLIBRARIES = libgsl.la
+ libgsl_la_SOURCES = version.c
+ libgsl_la_LIBADD = $(GSL_LIBADD) $(SUBLIBS)
+-libgsl_la_LDFLAGS = $(GSL_LDFLAGS) -version-info $(GSL_LT_VERSION)
++libgsl_la_LDFLAGS = $(GSL_LDFLAGS) -version-info $(GSL_LT_VERSION) -export-symbols-regex '^gsl_'
+ noinst_HEADERS = templates_on.h templates_off.h build.h
+ 
+ m4datadir = $(datadir)/aclocal

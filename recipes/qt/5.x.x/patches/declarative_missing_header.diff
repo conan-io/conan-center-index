@@ -1,0 +1,11 @@
+--- a/src/qmldebug/qqmlprofilerevent_p.h
++++ b/src/qmldebug/qqmlprofilerevent_p.h
+@@ -49,7 +49,7 @@
+ 
+ #include <initializer_list>
+ #include <type_traits>
+-
++#include <limits>
+ //
+ //  W A R N I N G
+ //  -------------

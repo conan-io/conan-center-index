@@ -1,0 +1,99 @@
+--- a/tmxlite/src/ImageLayer.cpp
++++ b/tmxlite/src/ImageLayer.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/ImageLayer.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/detail/Log.hpp>
+--- a/tmxlite/src/LayerGroup.cpp
++++ b/tmxlite/src/LayerGroup.cpp
+@@ -24,7 +24,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/LayerGroup.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/ObjectGroup.hpp>
+--- a/tmxlite/src/Map.cpp
++++ b/tmxlite/src/Map.cpp
+@@ -26,7 +26,7 @@ source distribution.
+ *********************************************************************/
+ 
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/Map.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/ObjectGroup.hpp>
+--- a/tmxlite/src/Object.cpp
++++ b/tmxlite/src/Object.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/Object.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/Map.hpp>
+--- a/tmxlite/src/ObjectGroup.cpp
++++ b/tmxlite/src/ObjectGroup.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/ObjectGroup.hpp>
+ #include <tmxlite/detail/Log.hpp>
+--- a/tmxlite/src/ObjectTypes.cpp
++++ b/tmxlite/src/ObjectTypes.cpp
+@@ -24,7 +24,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/ObjectTypes.hpp>
+ #include <tmxlite/detail/Log.hpp>
+--- a/tmxlite/src/Property.cpp
++++ b/tmxlite/src/Property.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/Property.hpp>
+ #include <tmxlite/detail/Log.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+--- a/tmxlite/src/TileLayer.cpp
++++ b/tmxlite/src/TileLayer.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/TileLayer.hpp>
+ #include <tmxlite/detail/Log.hpp>
+--- a/tmxlite/src/Tileset.cpp
++++ b/tmxlite/src/Tileset.cpp
+@@ -25,7 +25,7 @@ and must not be misrepresented as being the original software.
+ source distribution.
+ *********************************************************************/
+ 
+-#include "detail/pugixml.hpp"
++#include <pugixml.hpp>
+ #include <tmxlite/Tileset.hpp>
+ #include <tmxlite/FreeFuncs.hpp>
+ #include <tmxlite/detail/Log.hpp>

@@ -3,7 +3,10 @@ from conans.errors import ConanException
 from io import StringIO
 
 class TestPackage(ConanFile):
-        
+    
+    def build(self):
+        pass # nothing to do, skip hook warning
+
     def test(self):
         bash = tools.which("bash.exe")
         

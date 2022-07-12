@@ -7,10 +7,10 @@ class PahoMqttCppConan(ConanFile):
     name = "paho-mqtt-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.cpp"
-    topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "Cpp")
+    topics = ("mqtt", "iot", "eclipse", "ssl", "paho", "cpp")
     license = "EPL-1.0"
-    description = """The open-source client implementations of MQTT and MQTT-SN"""
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    description = "The open-source client implementations of MQTT and MQTT-SN"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -33,25 +33,30 @@ class PahoMqttCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Paho cpp can not be built as shared on Windows.")
-
         self.options["paho-mqtt-c"].shared = self.options.shared
         self.options["paho-mqtt-c"].ssl = self.options.ssl
 
+    def validate(self):
+        if self.options["paho-mqtt-c"].shared != self.options.shared:
+            raise ConanInvalidConfiguration("{} requires paho-mqtt-c to have a matching 'shared' option.".format(self.name))
+        if self.options["paho-mqtt-c"].ssl != self.options.ssl:
+            raise ConanInvalidConfiguration("{} requires paho-mqtt-c to have a matching 'ssl' option.".format(self.name))
 
     def requirements(self):
-        self.requires("paho-mqtt-c/1.3.5")
+        if tools.Version(self.version) >= "1.2.0":
+            self.requires("paho-mqtt-c/1.3.9")
+        else:
+            self.requires("paho-mqtt-c/1.3.1") # https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.replace("-", ".") + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -66,7 +71,14 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        # See this conversation https://github.com/conan-io/conan-center-index/pull/4096#discussion_r556119143
+        # Changed by https://github.com/eclipse/paho.mqtt.c/commit/f875768984574fede6065c8ede0a7eac890a6e09
+        # and https://github.com/eclipse/paho.mqtt.c/commit/c116b725fff631180414a6e99701977715a4a690
+        # FIXME: after https://github.com/conan-io/conan/pull/8053#pullrequestreview-541120387
+        if tools.Version(self.version) < "1.2.0" and tools.Version(self.deps_cpp_info["paho-mqtt-c"].version) >= "1.3.2":
+            raise ConanInvalidConfiguration("{}/{} requires paho-mqtt-c =< 1.3.1".format(self.name, self.version))
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()

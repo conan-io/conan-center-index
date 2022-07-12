@@ -1,0 +1,11 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -4,7 +4,7 @@ foreach(PROGRAM zipcmp zipmerge ziptool)
+   target_link_libraries(${PROGRAM} zip)
+   target_include_directories(${PROGRAM} PRIVATE BEFORE ${PROJECT_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR})
+   if(LIBZIP_DO_INSTALL)
+-    install(TARGETS ${PROGRAM} EXPORT ${PROJECT_NAME}-targets RUNTIME DESTINATION bin)
++    install(TARGETS ${PROGRAM} EXPORT ${PROJECT_NAME}-targets DESTINATION bin)
+   endif()
+   if(NOT HAVE_GETOPT)
+     target_sources(${PROGRAM} PRIVATE getopt.c)

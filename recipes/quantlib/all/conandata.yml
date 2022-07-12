@@ -1,0 +1,8 @@
+sources:
+  "1.22":
+    url: "https://github.com/lballabio/QuantLib/releases/download/QuantLib-v1.22/QuantLib-1.22.tar.gz"
+    sha256: "85c81816f689f458596dd7073e4da8fd7f596c1e4c8ada81a6300389a39588af"
+patches:
+  "1.22":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"

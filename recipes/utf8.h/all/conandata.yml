@@ -1,0 +1,4 @@
+sources:
+  "cci.20210310":
+    url: "https://github.com/sheredom/utf8.h/archive/ee5a7d4beb7755da13e4d4ec3eccfb65a0530456.tar.gz"
+    sha256: "d7c9ad480b640c76292a1c4b9735497fd635cb8828e95beabb7db91ea4cecf55"

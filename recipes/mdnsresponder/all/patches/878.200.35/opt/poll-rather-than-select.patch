@@ -1,0 +1,121 @@
+From a1b3c1faa53c8c51aa52361bf7035d6fc91b747d Mon Sep 17 00:00:00 2001
+From: garethsb-sony <gareth.sylvester-bradley@sony.com>
+Date: Mon, 26 Feb 2018 12:58:27 +0000
+Subject: [PATCH] On Linux, use poll rather than select to wait on the socket
+
+---
+ .../mDNSShared/dnssd_clientstub.c    | 77 ++++++++--------------
+ 1 file changed, 30 insertions(+), 47 deletions(-)
+
+diff --git a/mDNSShared/dnssd_clientstub.c b/mDNSShared/dnssd_clientstub.c
+index 27e90ee..d0bfcd3 100644
+--- a/mDNSShared/dnssd_clientstub.c
++++ b/mDNSShared/dnssd_clientstub.c
+@@ -80,6 +80,7 @@ static void syslog( int priority, const char * message, ...)
+ }
+ #else
+ 
++    #include <poll.h>
+     #include <sys/fcntl.h>      // For O_RDWR etc.
+     #include <sys/time.h>
+     #include <sys/socket.h>
+@@ -283,46 +284,23 @@ static int read_all(dnssd_sock_t sd, char *buf, int len)
+ // Returns 1 if more bytes remain to be read on socket descriptor sd, 0 otherwise
+ static int more_bytes(dnssd_sock_t sd)
+ {
+-    struct timeval tv = { 0, 0 };
+-    fd_set readfds;
+-    fd_set *fs;
+     int ret;
+ 
+ #if defined(_WIN32)
+-    fs = &readfds;
+-    FD_ZERO(fs);
+-    FD_SET(sd, fs);
+-    ret = select((int)sd+1, fs, (fd_set*)NULL, (fd_set*)NULL, &tv);
++    struct timeval tv = { 0, 0 };
++    fd_set readfds;
++    FD_ZERO(&readfds);
++    FD_SET(sd, &readfds);
++    ret = select((int)sd+1, &readfds, (fd_set*)NULL, (fd_set*)NULL, &tv);
+ #else
+-    if (sd < FD_SETSIZE)
+-    {
+-        fs = &readfds;
+-        FD_ZERO(fs);
+-    }
+-    else
+-    {
+-        // Compute the number of integers needed for storing "sd". Internally fd_set is stored
+-        // as an array of ints with one bit for each fd and hence we need to compute
+-        // the number of ints needed rather than the number of bytes. If "sd" is 32, we need
+-        // two ints and not just one.
+-        int nfdbits = sizeof (int) * 8;
+-        int nints = (sd/nfdbits) + 1;
+-        fs = (fd_set *)calloc(nints, (size_t)sizeof(int));
+-        if (fs == NULL) 
+-        { 
+-            syslog(LOG_WARNING, "dnssd_clientstub more_bytes: malloc failed"); 
+-            return 0; 
+-        }
+-    }
+-    FD_SET(sd, fs);
+-    ret = select((int)sd+1, fs, (fd_set*)NULL, (fd_set*)NULL, &tv);
+-    if (fs != &readfds) 
+-        free(fs);
++    // Use poll in order to be able to wait for a file descriptor larger than FD_SETSIZE
++    struct pollfd pfd_read = { sd, POLLIN, 0 };
++    ret = poll(&pfd_read, 1, 0);
+ #endif
+     return (ret > 0);
+ }
+ 
+-// set_waitlimit() implements a timeout using select. It is called from deliver_request() before recv() OR accept()
++// set_waitlimit() implements a timeout using select or poll. It is called from deliver_request() before recv() OR accept()
+ // to ensure the UDS clients are not blocked in these system calls indefinitely.
+ // Note: Ideally one should never be blocked here, because it indicates either mDNSResponder daemon is not yet up/hung/
+ // superbusy/crashed or some other OS bug. For eg: On Windows which suffers from 3rd party software 
+@@ -331,23 +309,28 @@ static int more_bytes(dnssd_sock_t sd)
+ static int set_waitlimit(dnssd_sock_t sock, int timeout)
+ {
+     int gDaemonErr = kDNSServiceErr_NoError;
++    int ret;
+ 
+-    // To prevent stack corruption since select does not work with timeout if fds > FD_SETSIZE(1024)
+-    if (!gDaemonErr && sock < FD_SETSIZE)
+-    {
+-        struct timeval tv;
+-        fd_set set;
++#if defined(_WIN32)
++    struct timeval tv;
++    fd_set set;
++
++    FD_ZERO(&set);
++    FD_SET(sock, &set);
++    tv.tv_sec = timeout;
++    tv.tv_usec = 0;
++    ret = select((int)(sock + 1), &set, NULL, NULL, &tv);
++#else
++    // Use poll in order to be able to wait for a file descriptor larger than FD_SETSIZE
++    struct pollfd pfd_read = { sock, POLLIN, 0 };
++    ret = poll(&pfd_read, 1, timeout * 1000);
++#endif
+ 
+-        FD_ZERO(&set);
+-        FD_SET(sock, &set);
+-        tv.tv_sec = timeout;
+-        tv.tv_usec = 0;
+-        if (!select((int)(sock + 1), &set, NULL, NULL, &tv))
+-        {
+-            // Ideally one should never hit this case: See comments before set_waitlimit()
+-            syslog(LOG_WARNING, "dnssd_clientstub set_waitlimit:_daemon timed out (%d secs) without any response: Socket %d", timeout, sock);
+-            gDaemonErr = kDNSServiceErr_Timeout;
+-        }
++    if (!(ret > 0))
++    {
++        // Ideally one should never hit this case: See comments before set_waitlimit()
++        syslog(LOG_WARNING, "dnssd_clientstub set_waitlimit:_daemon timed out (%d secs) without any response: Socket %d", timeout, sock);
++        gDaemonErr = kDNSServiceErr_Timeout;
+     }
+     return gDaemonErr;
+ }

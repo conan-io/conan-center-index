@@ -1,6 +1,5 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
 
 
 class TestConan(ConanFile):
@@ -15,4 +14,4 @@ class TestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
-            bin_path = self.run(bin_path, run_environment=True)
+            self.run(bin_path, run_environment=True)

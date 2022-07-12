@@ -1,0 +1,12 @@
+diff --git a/3rdparty/minitrace/minitrace.h b/3rdparty/minitrace/minitrace.h
+index c7d5b31..d68dc52 100644
+--- a/3rdparty/minitrace/minitrace.h
++++ b/3rdparty/minitrace/minitrace.h
+@@ -21,6 +21,7 @@
+ // More:
+ // http://www.altdevblogaday.com/2012/08/21/using-chrometracing-to-view-your-inline-profiling-data/
+ 
++#define __STDC_FORMAT_MACROS
+ #include <inttypes.h>
+ 
+ #define MTR_ENABLED

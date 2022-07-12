@@ -1,8 +1,26 @@
 sources:
+  "4.200":
+    url: "https://www.veripool.org/ftp/verilator-4.200.tgz"
+    sha256: "773913f4410512a7a51de3d04964766438dc11fc22b213eab5c6c29730df3e36"
+  "4.038":
+    url: "https://www.veripool.org/ftp/verilator-4.038.tgz"
+    sha256: "fa004493216034ac3e26b21b814441bd5801592f4f269c5a4672e3351d73b515"
   "4.034":
     url: "https://www.veripool.org/ftp/verilator-4.034.tgz"
     sha256: "54ed7b06ee28b5d21f9d0ee98406d29a508e6124b0d10e54bb32081613ddb80b"
 patches:
+  "4.200":
+    - patch_file: "patches/0003-add-msvc_link-sh.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-msvc-patches.patch"
+      base_path: "source_subfolder"
+  "4.038":
+    - patch_file: "patches/0001-split-opt-and-debug-build-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-msvc-patches.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-add-msvc_link-sh.patch"
+      base_path: "source_subfolder"
   "4.034":
     - patch_file: "patches/0001-split-opt-and-debug-build-install.patch"
       base_path: "source_subfolder"

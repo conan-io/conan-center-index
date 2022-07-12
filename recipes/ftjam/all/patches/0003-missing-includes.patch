@@ -1,0 +1,26 @@
+--- a/execunix.c
++++ b/execunix.c
+@@ -60,6 +60,8 @@
+ # define wait my_wait
+ static int my_wait( int *status );
+ # endif
++# else
++# include <unistd.h>
+ # endif
+ 
+ static int intr = 0;
+--- a/make1.c
++++ b/make1.c
+@@ -62,6 +62,12 @@
+ # include "command.h"
+ # include "execcmd.h"
+ 
++# ifdef _MSC_VER
++# include <io.h>
++# else
++# include <unistd.h>
++# endif
++
+ static void make1a( TARGET *t, TARGET *parent );
+ static void make1b( TARGET *t );
+ static void make1c( TARGET *t );

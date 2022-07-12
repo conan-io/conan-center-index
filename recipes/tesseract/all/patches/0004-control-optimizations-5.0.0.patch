@@ -1,0 +1,48 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cf554090..0417fda0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -138,7 +138,7 @@ else()
+ endif()
+ 
+ CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+-if(COMPILER_SUPPORTS_MARCH_NATIVE)
++if(ENABLE_OPTIMIZATIONS AND COMPILER_SUPPORTS_MARCH_NATIVE)
+     set(MARCH_NATIVE_FLAGS "${MARCH_NATIVE_FLAGS} -march=native")
+     if(NOT CLANG AND MSVC)
+         # clang-cl does not know this argument
+@@ -149,7 +149,7 @@ endif()
+ 
+ message("CMAKE_SYSTEM_PROCESSOR=<${CMAKE_SYSTEM_PROCESSOR}>")
+ 
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|AMD64")
++if(ENABLE_OPTIMIZATIONS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86|AMD64")
+ 
+ set(HAVE_NEON FALSE)
+ 
+@@ -220,7 +220,7 @@ set(HAVE_SSE4_1 FALSE)
+ add_definitions("-DHAVE_NEON")
+ set(HAVE_NEON TRUE)
+ 
+-else()
++elseif(ENABLE_OPTIMIZATIONS)
+ 
+ set(HAVE_AVX FALSE)
+ set(HAVE_AVX2 FALSE)
+@@ -236,6 +236,7 @@ endif()
+ endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|AMD64")
+ 
+ # auto optimize - used only for information about available vectors
++if (ENABLE_OPTIMIZATIONS)
+ include(OptimizeForArchitecture)
+ OptimizeForArchitecture()
+ # remove global definition to eliminate effect on build
+@@ -247,6 +248,7 @@ endforeach(_flag)
+ foreach(flag ${Vc_ARCHITECTURE_FLAGS})
+     set(Vc_CXX_FLAGS "${Vc_CXX_FLAGS} ${flag}")
+ endforeach()
++endif()
+ 
+ # Compiler specific environments
+ if(CMAKE_COMPILER_IS_GNUCXX OR MINGW)
+ 

@@ -1,10 +1,29 @@
 sources:
-  "1.3.0":
-    url: "https://github.com/nanomsg/nng/archive/v1.3.0.tar.gz"
-    sha256: "e8fe50d0f79ec3243733f8b4c25099c88b2597ed1bb0d94a27c4385a2a24ecac"
-  "1.3.1":
-    url: "https://github.com/nanomsg/nng/archive/v1.3.1.tar.gz"
-    sha256: "3f258514b6aed931485ce1a6e5745e07416d32e6c4315ae771ff358e9fd18e55"
+  "1.5.2":
+    url: "https://github.com/nanomsg/nng/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "f8b25ab86738864b1f2e3128e8badab581510fa8085ff5ca9bb980d317334c46"
+  "1.5.1":
+    url: "https://github.com/nanomsg/nng/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "31656c22d0b2c5675360b50fd28b33f9471aa6e80c131239bfbc23bc912411bf"
   "1.3.2":
     url: "https://github.com/nanomsg/nng/archive/v1.3.2.tar.gz"
     sha256: "0f8f2ede7f5ea2018c7fa615c76f48662eb06d39c71c3339f8ff38da44470855"
+  "1.3.1":
+    url: "https://github.com/nanomsg/nng/archive/v1.3.1.tar.gz"
+    sha256: "3f258514b6aed931485ce1a6e5745e07416d32e6c4315ae771ff358e9fd18e55"
+  "1.3.0":
+    url: "https://github.com/nanomsg/nng/archive/v1.3.0.tar.gz"
+    sha256: "e8fe50d0f79ec3243733f8b4c25099c88b2597ed1bb0d94a27c4385a2a24ecac"
+patches:
+  "1.5.1":
+    - patch_file: patches/0001-fix-ios-tvos-watchos-1.5.1.patch
+      base_path: source_subfolder
+  "1.3.2":
+    - patch_file: patches/0001-fix-ios-tvos-watchos-1.3.1.patch
+      base_path: source_subfolder
+  "1.3.1":
+    - patch_file: patches/0001-fix-ios-tvos-watchos-1.3.1.patch
+      base_path: source_subfolder
+  "1.3.0":
+    - patch_file: patches/0001-fix-ios-tvos-watchos-1.3.0.patch
+      base_path: source_subfolder

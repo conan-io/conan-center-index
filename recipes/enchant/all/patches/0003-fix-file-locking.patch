@@ -1,0 +1,100 @@
+--- src/pwl.c
++++ src/pwl.c
+@@ -54,14 +54,24 @@
+ 
+ #include "config.h"
+ 
++#define _DEFAULT_SOURCE 1
++
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#include <sys/file.h>
+ #include <fcntl.h>
+ 
++#if defined _WIN32
++# include <io.h>
++# include <Windows.h>
++#elif defined HAVE_FLOCK
++# include <sys/file.h>
++#else
++# include <unistd.h>
++#endif
++
+ #include <glib.h>
+ #include <glib/gstdio.h>
+ #include "enchant-provider.h"
+@@ -182,8 +192,69 @@
+ 
+ static int edit_dist(const char* word1, const char* word2);
+ 
+-#define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
+-#define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
++static void enchant_lock_file(FILE * f)
++{
++#if defined _WIN32
++  const DWORD all_bits = ~(DWORD)0;
++  int descriptor = -1;
++  HANDLE handle = INVALID_HANDLE_VALUE;
++  OVERLAPPED overlapped = {0};
++
++  if ((descriptor = _fileno (f)) == -1)
++    goto warning;
++
++  if ((handle = (HANDLE) _get_osfhandle (descriptor)) == INVALID_HANDLE_VALUE)
++    goto warning;
++
++  if (LockFileEx (handle, LOCKFILE_EXCLUSIVE_LOCK, 0, all_bits, all_bits, &overlapped) == TRUE)
++    return;
++#elif defined HAVE_FLOCK
++  int descriptor = fileno (f);
++
++  if (descriptor != -1 && flock (descriptor, LOCK_EX) == 0)
++    return;
++#else
++  int descriptor = fileno (f);
++
++  if (descriptor != -1 && lockf (descriptor, F_LOCK, 0) == 0)
++    return;
++#endif
++
++warning:
++  g_warning("Could not lock file\n");
++}
++
++static void enchant_unlock_file(FILE * f)
++{
++#if defined _WIN32
++  const DWORD all_bits = ~(DWORD)0;
++  int descriptor = -1;
++  HANDLE handle = INVALID_HANDLE_VALUE;
++  OVERLAPPED overlapped = {0};
++
++  if ((descriptor = _fileno (f)) == -1)
++    goto warning;
++
++  if ((handle = (HANDLE) _get_osfhandle (descriptor)) == INVALID_HANDLE_VALUE)
++    goto warning;
++
++  if (UnlockFileEx (handle, 0, all_bits, all_bits, &overlapped))
++    return;
++#elif defined HAVE_FLOCK
++  int descriptor = fileno (f);
++
++  if (descriptor != -1 && flock (descriptor, LOCK_UN) == 0)
++    return;
++#else
++  int descriptor = fileno (f);
++
++  if (descriptor != -1 && lockf (descriptor, F_ULOCK, 0) == 0)
++    return;
++#endif
++
++warning:
++  g_warning("Could not unlock file\n");
++}
+ 
+ /**
+  * enchant_pwl_init

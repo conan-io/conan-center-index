@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a8e771a..ff89a66 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,18 +35,6 @@ macro(CeleroSetDefaultCompilerOptions)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /D_SCL_SECURE_NO_WARNINGS)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+ 
+-		if (NOT CELERO_COMPILE_DYNAMIC_LIBRARIES)
+-			if(VCPKG_CRT_LINKAGE)
+-				if(VCPKG_CRT_LINKAGE STREQUAL "static")
+-					target_compile_options(${PROJECT_NAME} PRIVATE /MT$<$<CONFIG:Debug>:d>)
+-				else()
+-					target_compile_options(${PROJECT_NAME} PRIVATE /MD$<$<CONFIG:Debug>:d>)
+-				endif()
+-			else()
+-				target_compile_options(${PROJECT_NAME} PRIVATE /MD$<$<CONFIG:Debug>:d>)
+-			endif()
+-		endif()
+-
+         if(CELERO_TREAT_WARNINGS_AS_ERRORS)
+             target_compile_options(${PROJECT_NAME} PRIVATE /WX)
+ 		endif()

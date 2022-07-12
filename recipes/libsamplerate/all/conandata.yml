@@ -1,0 +1,7 @@
+sources:
+  "0.2.2":
+    url: "https://github.com/libsndfile/libsamplerate/archive/0.2.2.tar.gz"
+    sha256: "16e881487f184250deb4fcb60432d7556ab12cb58caea71ef23960aec6c0405a"
+  "0.2.1":
+    url: "https://github.com/libsndfile/libsamplerate/releases/download/0.2.1/libsamplerate-0.2.1.tar.bz2"
+    sha256: "f6323b5e234753579d70a0af27796dde4ebeddf58aae4be598e39b3cee00c90a"

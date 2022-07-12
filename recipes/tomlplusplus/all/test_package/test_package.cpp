@@ -1,4 +1,5 @@
-#include <toml.hpp>
+#include <toml.hpp> // Single header
+
 #include <fstream> //required for toml::parse_file()
 #include <iostream>
 

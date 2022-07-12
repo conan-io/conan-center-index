@@ -1,0 +1,82 @@
+Fixes for MinGW:
+https://github.com/KhronosGroup/Vulkan-Loader/pull/475
+https://github.com/KhronosGroup/Vulkan-Loader/pull/495
+https://github.com/KhronosGroup/Vulkan-Loader/pull/523
+
+--- a/loader/CMakeLists.txt
++++ b/loader/CMakeLists.txt
+@@ -133,9 +133,28 @@ set(ASM_FAILURE_MSG "${ASM_FAILURE_MSG}Note that this may be unsafe, as the C co
+ set(ASM_FAILURE_MSG "${ASM_FAILURE_MSG} the stack frame for certain calls. If the compiler does not do this, then unknown device")
+ set(ASM_FAILURE_MSG "${ASM_FAILURE_MSG} extensions will suffer from a corrupted stack.")
+ if(WIN32)
+-    enable_language(ASM_MASM)
+-    if(CMAKE_ASM_MASM_COMPILER_WORKS)
+-        if(NOT CMAKE_CL_64)
++   if(MINGW)
++        find_program(JWASM_FOUND jwasm)
++        if (JWASM_FOUND)
++            set(CMAKE_ASM_MASM_COMPILER ${JWASM_FOUND})
++            execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE COMPILER_VERSION_OUTPUT)
++            if (COMPILER_VERSION_OUTPUT)
++                if (COMPILER_VERSION_OUTPUT MATCHES "x86_64")
++                    set(JWASM_FLAGS -win64)
++                else()
++                    set(JWASM_FLAGS -coff)
++                endif()
++            endif()
++        endif()
++    endif()
++    option(USE_MASM "Use MASM" ON)
++    if (USE_MASM)
++      enable_language(ASM_MASM)
++    endif ()
++    if(CMAKE_ASM_MASM_COMPILER_WORKS OR JWASM_FOUND)
++        if(MINGW)
++            set(CMAKE_ASM_MASM_FLAGS ${CMAKE_ASM_MASM_FLAGS} ${JWASM_FLAGS})
++        elseif(NOT CMAKE_CL_64 AND NOT JWASM_FOUND)
+             set(CMAKE_ASM_MASM_FLAGS ${CMAKE_ASM_MASM_FLAGS} /safeseh)
+         endif()
+ 
+@@ -205,14 +224,16 @@ if(WIN32)
+                           PROPERTIES LINK_FLAGS_DEBUG
+                                      "/ignore:4098"
+                                      OUTPUT_NAME
+-                                     vulkan-1)
++                                     vulkan-1
++                                     PREFIX
++                                     "")
+     target_link_libraries(vulkan Vulkan::Headers)
+ 
+     if(ENABLE_WIN10_ONECORE)
+         target_link_libraries(vulkan OneCoreUAP.lib LIBCMT.LIB LIBCMTD.LIB LIBVCRUNTIME.LIB LIBUCRT.LIB)
+         set_target_properties(vulkan PROPERTIES LINK_FLAGS "/NODEFAULTLIB")
+     else()
+-        target_link_libraries(vulkan Cfgmgr32)
++        target_link_libraries(vulkan cfgmgr32)
+     endif()
+ 
+     add_dependencies(vulkan loader_asm_gen_files)
+--- a/loader/loader.c
++++ b/loader/loader.c
+@@ -71,6 +71,9 @@
+ #include <devpkey.h>
+ #include <winternl.h>
+ #include <strsafe.h>
++#ifdef __MINGW32__
++#undef strcpy  // fix error with redfined strcpy when building with MinGW-w64
++#endif
+ #include <dxgi1_6.h>
+ #include "adapters.h"
+ 
+@@ -695,7 +698,11 @@ VkResult loaderGetDeviceRegistryFiles(const struct loader_instance *inst, char *
+                                       LPCSTR value_name) {
+     static const wchar_t *softwareComponentGUID = L"{5c4c3332-344d-483c-8739-259e934c9cc8}";
+     static const wchar_t *displayGUID = L"{4d36e968-e325-11ce-bfc1-08002be10318}";
++#ifdef CM_GETIDLIST_FILTER_PRESENT
+     const ULONG flags = CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT;
++#else
++    const ULONG flags = 0x300;
++#endif
+ 
+     wchar_t childGuid[MAX_GUID_STRING_LEN + 2];  // +2 for brackets {}
+     ULONG childGuidSize = sizeof(childGuid);

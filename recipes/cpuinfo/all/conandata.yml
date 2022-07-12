@@ -1,0 +1,7 @@
+sources:
+  "cci.20220228":
+    url: "https://github.com/pytorch/cpuinfo/archive/6288930068efc8dff4f3c0b95f062fc5ddceba04.tar.gz"
+    sha256: "9e9e937b3569320d23d8b1c8c26ed3603affe55c3e4a3e49622e8a2c6d6e1696"
+  "cci.20201217":
+    url: "https://github.com/pytorch/cpuinfo/archive/5916273f79a21551890fd3d56fc5375a78d1598d.tar.gz"
+    sha256: "f3c16d5d393d6d1fa6b6ed8621dd0a535552df9bc88cbba739375dde38a93142"

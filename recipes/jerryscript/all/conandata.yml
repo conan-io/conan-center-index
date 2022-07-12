@@ -5,11 +5,18 @@ sources:
   "2.3.0":
     sha256: 59b31bf519fcfd7c250815848820bf64439843bbfe54452b4060df2079e01d83
     url: https://github.com/jerryscript-project/jerryscript/archive/v2.3.0.zip
-
+  "2.4.0":
+    sha256: 08c950b8689f1229e9796a7beb2e6c5c911f49666db7712ddf006d76a0766b79
+    url: https://github.com/jerryscript-project/jerryscript/archive/v2.4.0.zip
 patches:
   "2.2.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/001-2.5.0-remove-werror.patch"
+      patch_file: "patches/0001-2.3.0-remove-werror.patch"
   "2.3.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/001-2.5.0-remove-werror.patch"
+      patch_file: "patches/0001-2.3.0-remove-werror.patch"
+  "2.4.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-2.4.0-remove-werror.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-2.4.0-no-CMAKE_SOURCE_DIR.patch"

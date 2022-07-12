@@ -1,0 +1,9 @@
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -10,4 +10,4 @@
+ 
+ # The header name clipper.hpp is too generic, so install in a subdirectory
+ INSTALL (FILES clipper.hpp DESTINATION include/polyclipping)
+-INSTALL (TARGETS polyclipping LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
++INSTALL (TARGETS polyclipping LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ 

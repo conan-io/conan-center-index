@@ -1,0 +1,10 @@
+--- a/tlx/CMakeLists.txt
++++ b/tlx/CMakeLists.txt
+@@ -86,6 +86,7 @@ if(TLX_BUILD_SHARED_LIBS)
+   install(TARGETS tlx
+     EXPORT tlx-targets
+     COMPONENT Libraries
++    RUNTIME DESTINATION ${TLX_INSTALL_BIN_DIR}
+     ARCHIVE DESTINATION ${TLX_INSTALL_LIB_DIR}
+     LIBRARY DESTINATION ${TLX_INSTALL_LIB_DIR})
+ 

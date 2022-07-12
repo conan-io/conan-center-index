@@ -1,0 +1,15 @@
+diff --git a/libomptarget/CMakeLists.txt b/libomptarget/CMakeLists.txt
+index 6c90ced..629e20a 100644
+--- a/libomptarget/CMakeLists.txt
++++ b/libomptarget/CMakeLists.txt
+@@ -30,10 +30,6 @@ include(LibomptargetUtils)
+ # Get dependencies for the different components of the project.
+ include(LibomptargetGetDependencies)
+
+-# LLVM source tree is required at build time for libomptarget
+-if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)
+-  message(FATAL_ERROR "Missing definition for LIBOMPTARGET_LLVM_INCLUDE_DIRS")
+-endif()
+
+ # This is a list of all the targets that are supported/tested right now.
+ set (LIBOMPTARGET_ALL_TARGETS "${LIBOMPTARGET_ALL_TARGETS} aarch64-unknown-linux-gnu")

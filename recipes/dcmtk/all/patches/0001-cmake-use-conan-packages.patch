@@ -1,6 +1,8 @@
---- CMake/3rdparty.cmake
-+++ CMake/3rdparty.cmake
-@@ -42,7 +42,7 @@
+--- a/CMake/3rdparty.cmake
++++ b/CMake/3rdparty.cmake
+@@ -40,13 +40,15 @@ if(WIN32 AND NOT MINGW)
+   # libxml support: configure compiler
+   if(DCMTK_WITH_XML)
      if(WITH_LIBXMLINC)
 -      set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
 -      set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
@@ -10,8 +12,15 @@
 +      set(LIBXML_LIBS ${CONAN_LIBS_LIBXML2})
        message(STATUS "Info: DCMTK XML support will be enabled")
        set(WITH_LIBXML 1)
++      if(NOT WITH_LIBXML_SHARED)
        # this hides some warnings that are emitted when linking against libxmlXXX.lib instead of linking the DLL directly
-@@ -59,7 +59,7 @@
+       add_definitions("-DLIBXML_STATIC")
++      endif()
+     else() # turn off library if library path not set
+       message(STATUS "Warning: XML support will be disabled because libxml2 directory is not specified. Correct path and re-enable DCMTK_WITH_XML.")
+       set(DCMTK_WITH_XML OFF CACHE BOOL "" FORCE)
+@@ -58,8 +60,8 @@ if(WIN32 AND NOT MINGW)
+   if(DCMTK_WITH_PNG)
      if(WITH_LIBPNGINC)
        set(LIBPNG_INCDIR "${WITH_LIBPNGINC}/include")
 -      set(LIBPNG_LIBDIR "${WITH_LIBPNGINC}/lib")
@@ -21,7 +30,8 @@
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
      else() # turn off library if library path not set
-@@ -74,7 +74,7 @@
+@@ -73,8 +75,8 @@ if(WIN32 AND NOT MINGW)
+   if(DCMTK_WITH_TIFF)
      if(WITH_LIBTIFFINC)
        set(LIBTIFF_INCDIR "${WITH_LIBTIFFINC}/include")
 -      set(LIBTIFF_LIBDIR "${WITH_LIBTIFFINC}/lib")
@@ -31,7 +41,9 @@
        message(STATUS "Info: DCMTK TIFF support will be enabled")
        set(WITH_LIBTIFF 1)
      else() # turn off library if library path not set
-@@ -92,7 +92,7 @@
+@@ -90,9 +92,9 @@ if(WIN32 AND NOT MINGW)
+       include(CheckCXXSourceCompiles)
+       set(OPENSSL_BINDIR "${WITH_OPENSSLINC}/bin")
        set(OPENSSL_INCDIR "${WITH_OPENSSLINC}/include")
 -      set(OPENSSL_LIBDIR "${WITH_OPENSSLINC}/lib")
 +      link_directories(${WITH_OPENSSLINC}/lib)
@@ -41,7 +53,8 @@
        set(TEMP_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
        list(APPEND CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCDIR}")
        CHECK_CXX_SOURCE_COMPILES("extern \"C\" {\n#include <openssl/ssl.h>\n}\nint main(){\n#if OPENSSL_VERSION_NUMBER < 0x10001000L\n#error OpenSSL too old\n#endif\n}\n" OPENSSL_VERSION_CHECK)
-@@ -117,7 +117,7 @@
+@@ -116,8 +118,8 @@ if(WIN32 AND NOT MINGW)
+   if(DCMTK_WITH_ZLIB)
      if(WITH_ZLIBINC)
        set(ZLIB_INCDIR "${WITH_ZLIBINC}/include")
 -      set(ZLIB_LIBDIR "${WITH_ZLIBINC}/lib")
@@ -51,7 +64,8 @@
        message(STATUS "Info: DCMTK ZLIB support will be enabled")
        set(WITH_ZLIB 1)
      else() # turn off library if library path not set
-@@ -132,7 +132,7 @@
+@@ -131,8 +133,8 @@ if(WIN32 AND NOT MINGW)
+   if(DCMTK_WITH_SNDFILE)
      if(WITH_SNDFILEINC)
        set(SNDFILE_INCDIR "${WITH_SNDFILEINC}/include")
 -      set(SNDFILE_LIBDIR "${WITH_SNDFILEINC}/lib")
@@ -61,7 +75,8 @@
        message(STATUS "Info: DCMTK SNDFILE support will be enabled")
        set(WITH_SNDFILE 1)
      else() # turn off library if library path not set
-@@ -147,7 +147,7 @@
+@@ -146,8 +148,8 @@ if(WIN32 AND NOT MINGW)
+   if(DCMTK_WITH_ICONV)
      if(WITH_LIBICONVINC)
        set(LIBICONV_INCDIR "${WITH_LIBICONVINC}/include")
 -      set(LIBICONV_LIBDIR "${WITH_LIBICONVINC}/lib")
@@ -71,7 +86,7 @@
        message(STATUS "Info: DCMTK ICONV support will be enabled")
        set(WITH_LIBICONV 1)
      else() # turn off library if library path not set
-@@ -170,7 +170,7 @@
+@@ -170,7 +172,7 @@ if(WIN32 AND NOT MINGW)
        else()
            set(OPENJPEG_INCDIR "${WITH_OPENJPEGINC1}")
            set(OPENJPEG_LIBDIR "${WITH_OPENJPEGINC}/lib")
@@ -80,7 +95,7 @@
            message(STATUS "Info: DCMTK OpenJPEG support will be enabled")
            set(WITH_OPENJPEG 1)
        endif()
-@@ -185,7 +185,7 @@
+@@ -185,7 +187,7 @@ else(WIN32 AND NOT MINGW)
  
    # Find TIFF
    if(DCMTK_WITH_TIFF)
@@ -89,7 +104,7 @@
      # turn off library if it could not be found
      if(NOT TIFF_FOUND)
        message(STATUS "Warning: TIFF support will be disabled because libtiff was not found.")
-@@ -194,21 +194,21 @@
+@@ -194,21 +196,21 @@ else(WIN32 AND NOT MINGW)
      else()
        set(WITH_LIBTIFF 1)
        # libtiff can be compiled with libjpeg support; if available, add libjpeg to library and include path
@@ -116,7 +131,7 @@
      if(NOT PNG_FOUND)
        set(DCMTK_WITH_PNG OFF CACHE BOOL "" FORCE)
        message(STATUS "Warning: PNG support will be disabled because libpng was not found.")
-@@ -217,13 +217,13 @@
+@@ -217,13 +219,13 @@ else(WIN32 AND NOT MINGW)
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
        include_directories(${PNG_INCLUDE_DIR})
@@ -132,25 +147,7 @@
      if(NOT OPENSSL_FOUND)
        message(STATUS "Warning: OPENSSL support will be disabled because openssl was not found.")
        set(WITH_OPENSSL "")
-@@ -232,14 +232,14 @@
-       include(CheckLibraryExists)
-       include(CheckCXXSourceCompiles)
-       set(TEMP_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
--      list(APPEND CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
-+      list(APPEND CMAKE_REQUIRED_INCLUDES ${OpenSSL_INCLUDE_DIRS})
-       CHECK_CXX_SOURCE_COMPILES("extern \"C\" {\n#include <openssl/ssl.h>\n}\nint main(){\n#if OPENSSL_VERSION_NUMBER < 0x10001000L\n#error OpenSSL too old\n#endif\n}\n" OPENSSL_VERSION_CHECK)
-       set(CMAKE_REQUIRED_INCLUDES "${TEMP_INCLUDES}")
-       if(OPENSSL_VERSION_CHECK)
-         message(STATUS "Info: DCMTK OPENSSL support will be enabled")
-         set(WITH_OPENSSL 1)
--        include_directories(${OPENSSL_INCLUDE_DIR})
--        set(OPENSSL_LIBS ${OPENSSL_LIBRARIES})
-+        include_directories(${OpenSSL_INCLUDE_DIRS})
-+        set(OPENSSL_LIBS ${OpenSSL_LIBRARIES})
-         CHECK_LIBRARY_EXISTS(dl dlopen "" HAVE_LIBDL)
-         if(HAVE_LIBDL)
-           set(OPENSSL_LIBS ${OPENSSL_LIBS} dl)
-@@ -254,7 +254,7 @@
+@@ -254,7 +256,7 @@ else(WIN32 AND NOT MINGW)
  
    # Find libXML2
    if(DCMTK_WITH_XML)
@@ -159,16 +156,7 @@
      if(NOT LIBXML2_FOUND)
        message(STATUS "Warning: XML support will be disabled because libxml2 was not found.")
        set(WITH_LIBXML "")
-@@ -262,14 +262,14 @@
-     else()
-       message(STATUS "Info: DCMTK XML support will be enabled")
-       set(WITH_LIBXML 1)
--      include_directories(${LIBXML2_INCLUDE_DIR})
--      set(LIBXML_LIBS ${LIBXML2_LIBRARIES})
-+      include_directories(${LibXml2_INCLUDE_DIR})
-+      set(LIBXML_LIBS ${LibXml2_LIBRARIES})
-     endif()
-   endif()
+@@ -269,7 +271,7 @@ else(WIN32 AND NOT MINGW)
  
    # Find zlib
    if(DCMTK_WITH_ZLIB)
@@ -177,7 +165,7 @@
      if(NOT ZLIB_FOUND)
        message(STATUS "Warning: ZLIB support will be disabled because zlib was not found.")
        set(WITH_ZLIB "")
-@@ -284,7 +284,7 @@
+@@ -284,7 +286,7 @@ else(WIN32 AND NOT MINGW)
  
    # Find libsndfile
    if(DCMTK_WITH_SNDFILE)
@@ -186,7 +174,7 @@
      if(NOT SNDFILE_LIBS)
        message(STATUS "Warning: SNDFILE support will be disabled because libsndfile was not found.")
        set(WITH_SNDFILE "")
-@@ -292,16 +292,16 @@
+@@ -292,16 +294,16 @@ else(WIN32 AND NOT MINGW)
      else()
        message(STATUS "Info: DCMTK SNDFILE support will be enabled")
        set(WITH_SNDFILE 1)
@@ -208,7 +196,7 @@
          if(NOT Iconv_IS_BUILT_IN)
              set(LIBICONV_FOUND ${ICONV_FOUND})
          else()
-@@ -322,29 +322,29 @@
+@@ -322,14 +324,14 @@ else(WIN32 AND NOT MINGW)
        set(WITH_LIBICONV 1)
        set(LIBICONV_INCDIR ${LIBICONV_INCLUDE_DIRS} ${Iconv_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR} ${LIBCHARSET_INCLUDE_DIRS})
        set(LIBICONV_LIBDIR ${LIBICONV_LIBDIR})
@@ -225,14 +213,7 @@
      if(NOT WRAP_FOUND)
        message(STATUS "Warning: WRAP support will be disabled because libwrap was not found.")
        set(WITH_TCPWRAPPER "")
-       set(DCMTK_WITH_WRAP OFF CACHE BOOL "" FORCE)
-     else()
-       message(STATUS "Info: DCMTK WRAP support will be enabled")
-       set(WITH_TCPWRAPPER 1)
-       include_directories(${WRAP_INCLUDE_DIRS})
-       set(WRAP_LIBS ${WRAP_LIBRARIES})
-     endif()
-   endif()
+@@ -344,7 +346,7 @@ else(WIN32 AND NOT MINGW)
  
    # Find OpenJPEG
    if(DCMTK_WITH_OPENJPEG)
@@ -241,7 +222,7 @@
      if(NOT OPENJPEG_FOUND)
        message(STATUS "Warning: OpenJPEG support will be disabled because the OpenJPEG library was not found.")
        set(WITH_OPENJPEG "")
-@@ -352,8 +352,8 @@
+@@ -352,8 +354,8 @@ else(WIN32 AND NOT MINGW)
      else()
        message(STATUS "Info: DCMTK OpenJPEG support will be enabled")
        set(WITH_OPENJPEG 1)
@@ -252,7 +233,7 @@
      endif()
    endif()
  
-@@ -371,7 +371,7 @@
+@@ -371,7 +373,7 @@ if(NOT DEFINED DCMTK_WITH_STDLIBC_ICONV)
  endif()
  
  if(DCMTK_WITH_ICU)
@@ -261,7 +242,7 @@
    if(NOT ICU_FOUND)
      message(STATUS "Warning: ICU support will be disabled because the ICU were not found.")
      set(DCMTK_WITH_ICU OFF CACHE BOOL "" FORCE)
-@@ -387,7 +387,7 @@
+@@ -387,7 +389,7 @@ endif()
  
  # Find doxygen
  if(DCMTK_WITH_DOXYGEN)

@@ -1,42 +1,51 @@
 sources:
+  "6.3":
+    url: [
+      "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.3.tar.gz",
+      "https://invisible-mirror.net/archives/ncurses/ncurses-6.3.tar.gz",
+    ]
+    sha256: "97fc51ac2b085d4cde31ef4d2c3122c21abc217e9090a43a30fc5ec21684e059"
   "6.2":
-    url: "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz"
+    url: [
+        "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz",
+        "https://invisible-mirror.net/archives/ncurses/ncurses-6.2.tar.gz",
+    ]
     sha256: "30306e0c76e0f9f1f0de987cf1c82a5c21e1ce6568b9227f7da5b71cbea86c9d"
 patches:
   "6.2":
-    - patch_file: "patches/0001-Look-for-pcre2posix-instead-of-pcre2-posix.h.patch"
+    - patch_file: "patches/6.2.0-0001-Look-for-pcre2posix-instead-of-pcre2-posix.h.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-Optionally-include-sys-time.h.patch"
+    - patch_file: "patches/6.2.0-0002-Optionally-include-sys-time.h.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-Do-not-redeclare-exit.patch"
+    - patch_file: "patches/6.2.0-0003-Do-not-redeclare-exit.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0004-fix-win32con.patch"
+    - patch_file: "patches/6.2.0-0004-fix-win32con.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0005-api-must-be-placed-next-to-variable-name.patch"
+    - patch_file: "patches/6.2.0-0005-api-must-be-placed-next-to-variable-name.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0006-Add-potentially-missing-STDOUT_FILENO.patch"
+    - patch_file: "patches/6.2.0-0006-Add-potentially-missing-STDOUT_FILENO.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0007-No-import-export-declaration-on-class-members.patch"
+    - patch_file: "patches/6.2.0-0007-No-import-export-declaration-on-class-members.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0008-Add-include-file-to-add-export-annotation.patch"
+    - patch_file: "patches/6.2.0-0008-Add-include-file-to-add-export-annotation.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0010-Pass-BUILDING_XXX-compile-definition-while-building-.patch"
+    - patch_file: "patches/6.2.0-0010-Pass-BUILDING_XXX-compile-definition-while-building-.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0011-Let-each-sublibrary-do-its-own-import-exporting.patch"
+    - patch_file: "patches/6.2.0-0011-Let-each-sublibrary-do-its-own-import-exporting.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0012-Learn-configure-about-msvc.patch"
+    - patch_file: "patches/6.2.0-0012-Learn-configure-about-msvc.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0013-Fix-lib_gen.c.patch"
+    - patch_file: "patches/6.2.0-0013-Fix-lib_gen.c.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0014-avoid-macro-expansion-in-args-by-defining-NCURSES_NO.patch"
+    - patch_file: "patches/6.2.0-0014-avoid-macro-expansion-in-args-by-defining-NCURSES_NO.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0015-MSVC-access-does-not-support-X_OK.patch"
+    - patch_file: "patches/6.2.0-0015-MSVC-access-does-not-support-X_OK.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0016-msvc-has-wchar-support.patch"
+    - patch_file: "patches/6.2.0-0016-msvc-has-wchar-support.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0017-msvc-fix-tests.patch"
+    - patch_file: "patches/6.2.0-0017-msvc-fix-tests.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0018-missing-functions-c-linkage.patch"
+    - patch_file: "patches/6.2.0-0018-missing-functions-c-linkage.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0019-Run-autoreconf.patch"
+    - patch_file: "patches/6.2.0-0019-Run-autoreconf.patch"
       base_path: "source_subfolder"

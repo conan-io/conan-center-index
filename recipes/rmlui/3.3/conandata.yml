@@ -1,0 +1,4 @@
+sources:
+  "3.3":
+    sha256: "b58a8c4fc4128a880471d708ba5b0c7f4389645265c53803824b10d9a4255ec5"
+    url: "https://github.com/mikke89/RmlUi/archive/3.3.zip"

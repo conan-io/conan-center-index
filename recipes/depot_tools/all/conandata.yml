@@ -1,3 +1,9 @@
 sources:
   "20200407":
     url: "https://chromium.googlesource.com/chromium/tools/depot_tools/+archive/48c5c9c50455c625c58dab2fbb0904cac467168c.tar.gz"
+  "cci.20201009":
+    url: "https://chromium.googlesource.com/chromium/tools/depot_tools.git/+archive/b073999c6f90103a36a923e63ae8cf7a5c9c6c8c.tar.gz"
+patches:
+  "cci.20201009":
+    - patch_file: "patches/001-use-system-python.patch"
+      base_path: "source_subfolder"

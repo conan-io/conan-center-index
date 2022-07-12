@@ -1,31 +1,27 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanException
-import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package"
 
-    # # FIXME: cpython is not available on CCI (yet)
-    # def build(self):
-    #     cmake = CMake(self)
-    #     cmake.configure(args=["--trace", "--trace-expand"])
-    #     cmake.build()
-    #
-    # def build_requirements(self):
-    #     self.build_requires("cpython/3.8.3")
-    #
-    # def requirements(self):
-    #     self.requires("cpython/3.8.3")
+    @property
+    def _can_build(self):
+        # FIXME: Python does not distribute debug libraries (use cci CPython recipe)
+        return not (self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug")
+
+    def build(self):
+        if not tools.cross_building(self, skip_x64_x86=True):
+            self.run("swig -swiglib", run_environment=True)
+            if self._can_build:
+                cmake = CMake(self)
+                cmake.verbose = True
+                cmake.configure()
+                cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            # # FIXME: cpython is not available on CCI (yet)
-            # with tools.chdir("lib"):
-            #     self.run("python -c \"import sys; import _PackageTest; gcd = _PackageTest.gcd(12, 16); print('gcd =', gcd); sys.exit(0 if gcd == 4 else 1)\"", run_environment=True)
-            #     self.run("python -c \"import sys; import _PackageTest; foo = _PackageTest.cvar.foo; print('foo =', foo); sys.exit(0 if foo == 3.14159265359 else 1)\"", run_environment=True)
-            testdir = os.path.dirname(os.path.realpath(__file__))
-            self.run("swig -python -outcurrentdir %s" % os.path.join(testdir, "test.i"))
-            if not os.path.isfile("example.py"):
-                raise ConanException("example.py is not created by swig")
+        if not tools.cross_building(self):
+            if self._can_build:
+                cmake = CMake(self)
+                cmake.test(output_on_failure=True)
+            self.run("swig -version", run_environment=True)

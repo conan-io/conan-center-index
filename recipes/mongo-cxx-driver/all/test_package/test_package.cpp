@@ -13,7 +13,5 @@
 int main() {
     const mongocxx::instance instance_;  // This should be done only once.
     mongocxx::client client{mongocxx::uri{}};
-
-    std::cout << "Bincrafters!\n";
     return EXIT_SUCCESS;
 }

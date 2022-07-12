@@ -1,0 +1,22 @@
+--- 3rdParty/LightPcapNg/Makefile
++++ 3rdParty/LightPcapNg/Makefile
+@@ -15,7 +15,7 @@
+ 
+ Obj/%.o: LightPcapNg/src/%.c
+ 	@echo Building file: $<
+-	@$(CC) $(INCLUDES) -Wall -O2 $(GLOBAL_FLAGS) $(DEFS) -g -c -o "$@" "$<"
++	@$(CC) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -Wall -O2 $(GLOBAL_FLAGS) $(DEFS) -g -c -o "$@" "$<"
+ 
+ CUR_TARGET := $(notdir $(shell pwd))
+ 
+--- 3rdParty/hash-library/Makefile
++++ 3rdParty/hash-library/Makefile
+@@ -13,7 +13,7 @@ DEFS := -DUNIVERSAL -fPIC
+ 
+ Obj/%.o: %.cpp
+ 	@echo Building file: $<
+-	@$(CXX) $(INCLUDES) -Wall -O2 $(GLOBAL_FLAGS) $(DEFS) -g -c -o "$@" "$<"
++	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -Wall -O2 $(GLOBAL_FLAGS) $(DEFS) -g -c -o "$@" "$<"
+ 
+ CUR_TARGET := $(notdir $(shell pwd))
+ 

@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import re
@@ -32,6 +33,10 @@ class PremakeConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Windows" or self.settings.compiler == "Visual Studio":
             del self.options.lto
+
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     @property
     def _msvc_version(self):

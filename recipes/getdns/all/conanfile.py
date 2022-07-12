@@ -68,17 +68,17 @@ class GetDnsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
+        self.requires("openssl/1.1.1j")
         if self._with_libev:
             self.requires("libev/4.33")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libuv:
-            self.requires("libuv/1.38.1")
+            self.requires("libuv/1.41.0")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
         if self.options.tls == "gnutls":
-            self.requires("nettle/6.2")
+            self.requires("nettle/3.6")
             # FIXME: missing gnutls recipe
             raise ConanInvalidConfiguration("gnutls is not (yet) available on cci")
         if not self._stub_only:

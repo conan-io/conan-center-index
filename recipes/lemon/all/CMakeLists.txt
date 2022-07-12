@@ -5,5 +5,5 @@ include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_executable(lemon source_subfolder/tool/lemon.c)
-install(TARGETS lemon RUNTIME DESTINATION bin)
+install(TARGETS lemon DESTINATION bin)
 install(FILES source_subfolder/tool/lempar.c DESTINATION bin)

@@ -1,4 +1,7 @@
 sources:
+  "5.0-1.8.0":
+    url: "https://github.com/ctabin/libzippp/archive/libzippp-v5.0-1.8.0.tar.gz"
+    sha256: "b70f2d0f64eb68b00a16290bac40ac1a3fd3d2896cfddc93e370a7fa28c591c5"
   "4.0":
     url: "https://github.com/ctabin/libzippp/archive/libzippp-v4.0-1.7.3.tar.gz"
     sha256: "7560c2d8bbace39245ba6e89c5454b8bc5eb753bb13451bca2c7b5810c0a2f2d"

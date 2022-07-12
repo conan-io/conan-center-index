@@ -1,0 +1,20 @@
+diff --color -Naur --label a/CMakeLists.txt --label b/CMakeLists.txt a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -180,7 +180,6 @@
+ #----------------------------------
+ 
+ option(BUILD_DOC "Build documentation for sdbus-c++" ON)
+-
+ if(BUILD_DOC)
+     message(STATUS "Building with documentation")
+     option(BUILD_DOXYGEN_DOC "Build doxygen documentation for sdbus-c++ API" OFF)
+@@ -217,7 +216,7 @@
+ set(CPACK_PACKAGE_VENDOR "Kistler")
+ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "high-level C++ D-Bus library")
+ set(CPACK_PACKAGE_CONTACT "info@kistler.com")
+-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
++set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+ set(CPACK_COMPONENTS_ALL runtime dev doc)
+ set(CPACK_COMPONENT_DEV_DEPENDS "runtime")
+ 

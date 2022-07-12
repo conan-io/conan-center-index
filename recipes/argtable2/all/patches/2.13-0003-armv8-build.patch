@@ -1,0 +1,12 @@
+diff --git a/src/arg_int.c b/src/arg_int.c
+index 29c20e5..bc10012 100644
+--- a/src/arg_int.c
++++ b/src/arg_int.c
+@@ -30,6 +30,7 @@ USA.
+ 
+ #include "argtable2.h"
+ #include <limits.h>
++#include <ctype.h>
+ 
+ /* local error codes */
+ enum {EMINCOUNT=1,EMAXCOUNT,EBADINT,EOVERFLOW};

@@ -1,0 +1,16 @@
+--- a/src/libnova/ln_types.h
++++ b/src/libnova/ln_types.h
+@@ -19,9 +19,11 @@
+ #ifndef _LN_TYPES_H
+ #define _LN_TYPES_H
+ 
+-#if !defined(__WIN32__) && (defined(__WIN32) || defined(WIN32))
+-#define __WIN32__
++#if (defined(__WIN32__) || defined(_WIN32) || defined(WIN32))
+ #define ALIGN32
++#if !defined(__WIN32__)
++#define __WIN32__
++#endif
+ #else
+ #define ALIGN32 __attribute__((aligned(32)))
+ #endif

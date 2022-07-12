@@ -1,0 +1,4 @@
+sources:
+  "cci.20210316":
+    url: "https://github.com/pytorch/tensorpipe/archive/c54fdda499bbf78f277ea78c1e4d1f6d635b9a98.zip"
+    sha256: "65829f7ca0c50c4e84de88b2c4b0bb25bca4ec119a0a451ca5fd2f7cb348d5bd"

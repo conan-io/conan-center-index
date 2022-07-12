@@ -1,0 +1,49 @@
+commit a9b8fe86b3d8659e02653a4a502827a6f779e4ba
+Author: Martin Delille <martin@delille.org>
+Date:   Thu Sep 2 16:38:59 2021 +0200
+
+    Remove expat
+
+diff --git a/ref-impl/CMakeLists.txt b/ref-impl/CMakeLists.txt
+index b1fe34c52..8f4df30b9 100644
+--- a/ref-impl/CMakeLists.txt
++++ b/ref-impl/CMakeLists.txt
+@@ -37,7 +37,6 @@ project(MakeSDK LANGUAGES CXX)
+ 
+ add_subdirectory(aafiid)
+ add_subdirectory(aaflib)
+-add_subdirectory(expat)
+ add_subdirectory(libjpeg)
+ add_subdirectory(plugins)
+ add_subdirectory(src/com-api)
+diff --git a/ref-impl/src/OM/CMakeLists.txt b/ref-impl/src/OM/CMakeLists.txt
+index e0c5be195..1210f4d99 100644
+--- a/ref-impl/src/OM/CMakeLists.txt
++++ b/ref-impl/src/OM/CMakeLists.txt
+@@ -158,9 +158,13 @@ target_include_directories(OM PRIVATE
+     # HACK (see OMStructuredStorage.h): Required with OM_USE_SCHEMASOFT_SS and OM_USE_GSF_SS
+     ${AAFSDK_ROOT}/ss-impl/ref
+     # AAF-XML stored format support requires the expat library which is bundled with the AAF SDK.
+-    ${AAFSDK_ROOT}/ref-impl/expat
++    #${AAFSDK_ROOT}/ref-impl/expat
+ )
+ 
++find_package(EXPAT REQUIRED)
++
++target_link_libraries(OM PUBLIC EXPAT::EXPAT)
++
+ target_compile_definitions(OM PUBLIC
+     XML_STATIC
+     $<$<CONFIG:Debug>:OM_DEBUG>
+diff --git a/ref-impl/src/com-api/CMakeLists.txt b/ref-impl/src/com-api/CMakeLists.txt
+index f0afde40a..e60955f7f 100644
+--- a/ref-impl/src/com-api/CMakeLists.txt
++++ b/ref-impl/src/com-api/CMakeLists.txt
+@@ -251,7 +251,6 @@ endif()
+ target_link_libraries(comapi PRIVATE
+     Impl
+     OM
+-    expat
+     ss
+     ${CORE_FOUNDATION}
+     ${CORE_SERVICES}

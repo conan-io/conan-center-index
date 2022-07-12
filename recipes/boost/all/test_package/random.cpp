@@ -4,6 +4,10 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <iostream>
 
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 int main() {
     std::string chars(
         "abcdefghijklmnopqrstuvwxyz"

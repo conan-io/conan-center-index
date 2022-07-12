@@ -1,0 +1,4 @@
+sources:
+  "4.1.2":
+    url: "https://github.com/rtouzani/ofeli/releases/download/ofeli-4.1.2/ofeli-4.1.2.tar.gz"
+    sha256: "672723856be984b6ea423976c4d13748e327f04e6571694cd662bcda1ed1f8d4"

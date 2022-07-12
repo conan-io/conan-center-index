@@ -1,0 +1,4 @@
+sources:
+  "3.6.0":
+    url: "https://github.com/rurban/safeclib/archive/v3.6.tar.gz"
+    sha256: "bd99d4555030719a83807649b3749bc483143b3548278daaa0a4af0fed5dc4de"

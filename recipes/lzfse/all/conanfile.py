@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class LzfseConan(ConanFile):
     name = "lzfse"
@@ -9,12 +11,19 @@ class LzfseConan(ConanFile):
     topics = ("conan", "lzfse", "compression", "decompression")
     homepage = "https://github.com/lzfse/lzfse"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -30,18 +39,25 @@ class LzfseConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{0}-{1}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "POSITION_INDEPENDENT_CODE TRUE", "")
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "POSITION_INDEPENDENT_CODE TRUE", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -58,7 +74,10 @@ class LzfseConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["lzfse"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("LZFSE_DLL")
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)

@@ -1,0 +1,218 @@
+--- a/QXlsx/CMakeLists.txt
++++ b/QXlsx/CMakeLists.txt
+@@ -39,7 +39,7 @@ file(GLOB QXLSX_H "${QXLSX_HEADERPATH}/*.h")
+ set(SRC_FILES ${QXLSX_CPP})
+ list(APPEND SRC_FILES ${QXLSX_H})
+ 
+-add_library(QXlsx STATIC
++add_library(QXlsx
+  ${SRC_FILES} )
+ 
+ target_include_directories(QXlsx PRIVATE ${QXLSX_HEADERPATH})
+@@ -50,3 +50,6 @@ target_link_libraries(${PROJECT_NAME}
+  )
+ 
+ target_compile_definitions(QXlsx PRIVATE QXLSX_LIBRARY)
++if (BUILD_SHARED_LIBS)
++    target_compile_definitions(QXlsx PRIVATE QXLSX_SHARED)
++endif()
+--- a/QXlsx/header/xlsxabstractooxmlfile.h
++++ b/QXlsx/header/xlsxabstractooxmlfile.h
+@@ -10,7 +10,7 @@ QT_BEGIN_NAMESPACE_XLSX
+ class Relationships;
+ class AbstractOOXmlFilePrivate;
+ 
+-class AbstractOOXmlFile
++class QXLSX_EXPORT AbstractOOXmlFile
+ {
+     Q_DECLARE_PRIVATE(AbstractOOXmlFile)
+ 
+--- a/QXlsx/header/xlsxabstractsheet.h
++++ b/QXlsx/header/xlsxabstractsheet.h
+@@ -12,7 +12,7 @@ class Workbook;
+ class Drawing;
+ class AbstractSheetPrivate;
+ 
+-class AbstractSheet : public AbstractOOXmlFile
++class QXLSX_EXPORT AbstractSheet : public AbstractOOXmlFile
+ {
+     Q_DECLARE_PRIVATE(AbstractSheet)
+ 
+--- a/QXlsx/header/xlsxcell.h
++++ b/QXlsx/header/xlsxcell.h
+@@ -24,7 +24,7 @@ class CellFormula;
+ class CellPrivate;
+ class WorksheetPrivate;
+ 
+-class Cell
++class QXLSX_EXPORT Cell
+ {
+ 	Q_DECLARE_PRIVATE(Cell)
+ 
+--- a/QXlsx/header/xlsxcellformula.h
++++ b/QXlsx/header/xlsxcellformula.h
+@@ -17,7 +17,7 @@ class CellRange;
+ class Worksheet;
+ class WorksheetPrivate;
+ 
+-class   CellFormula
++class QXLSX_EXPORT CellFormula
+ {
+ public:
+     enum FormulaType { NormalType, ArrayType, DataTableType, SharedType };
+--- a/QXlsx/header/xlsxcelllocation.h
++++ b/QXlsx/header/xlsxcelllocation.h
+@@ -17,7 +17,7 @@ QT_BEGIN_NAMESPACE_XLSX
+ 
+ class Cell;
+ 
+-class CellLocation
++class QXLSX_EXPORT CellLocation
+ {
+ public:
+     CellLocation();
+--- a/QXlsx/header/xlsxcellrange.h
++++ b/QXlsx/header/xlsxcellrange.h
+@@ -12,7 +12,7 @@
+ QT_BEGIN_NAMESPACE_XLSX
+ 
+ // dev57
+-class CellRange
++class QXLSX_EXPORT CellRange
+ {
+ public:
+     CellRange();
+--- a/QXlsx/header/xlsxcellreference.h
++++ b/QXlsx/header/xlsxcellreference.h
+@@ -9,7 +9,7 @@
+ 
+ QT_BEGIN_NAMESPACE_XLSX
+ 
+-class   CellReference
++class QXLSX_EXPORT CellReference
+ {
+ public:
+     CellReference();
+--- a/QXlsx/header/xlsxchart.h
++++ b/QXlsx/header/xlsxchart.h
+@@ -18,7 +18,7 @@ class ChartPrivate;
+ class CellRange;
+ class DrawingAnchor;
+ 
+-class Chart : public AbstractOOXmlFile
++class QXLSX_EXPORT Chart : public AbstractOOXmlFile
+ {
+     Q_DECLARE_PRIVATE(Chart)
+ public:
+--- a/QXlsx/header/xlsxchartsheet.h
++++ b/QXlsx/header/xlsxchartsheet.h
+@@ -16,7 +16,7 @@ class DocumentPrivate;
+ class ChartsheetPrivate;
+ class Chart;
+ 
+-class Chartsheet : public AbstractSheet
++class QXLSX_EXPORT Chartsheet : public AbstractSheet
+ {
+     Q_DECLARE_PRIVATE(Chartsheet)
+ 
+--- a/QXlsx/header/xlsxconditionalformatting.h
++++ b/QXlsx/header/xlsxconditionalformatting.h
+@@ -24,7 +24,7 @@ class Worksheet;
+ class Styles;
+ class ConditionalFormattingPrivate;
+ 
+-class ConditionalFormatting
++class QXLSX_EXPORT ConditionalFormatting
+ {
+ public:
+     enum HighlightRuleType {
+--- a/QXlsx/header/xlsxdatavalidation.h
++++ b/QXlsx/header/xlsxdatavalidation.h
+@@ -22,7 +22,7 @@ class CellRange;
+ class CellReference;
+ 
+ class DataValidationPrivate;
+-class   DataValidation
++class QXLSX_EXPORT DataValidation
+ {
+ public:
+     enum ValidationType
+--- a/QXlsx/header/xlsxdatetype.h
++++ b/QXlsx/header/xlsxdatetype.h
+@@ -15,7 +15,7 @@
+ 
+ QT_BEGIN_NAMESPACE_XLSX
+ 
+-class DateType
++class QXLSX_EXPORT DateType
+ {
+ public:
+     DateType();
+--- a/QXlsx/header/xlsxdocument.h
++++ b/QXlsx/header/xlsxdocument.h
+@@ -24,7 +24,7 @@ class Chart;
+ class CellReference;
+ class DocumentPrivate;
+ 
+-class Document : public QObject
++class QXLSX_EXPORT Document : public QObject
+ {
+ 	Q_OBJECT
+     Q_DECLARE_PRIVATE(Document) // D-Pointer. Qt classes have a Q_DECLARE_PRIVATE
+--- a/QXlsx/header/xlsxformat.h
++++ b/QXlsx/header/xlsxformat.h
+@@ -24,7 +24,7 @@ class SharedStrings;
+ 
+ class FormatPrivate;
+ 
+-class Format
++class QXLSX_EXPORT Format
+ {
+ public:
+     enum FontScript
+--- a/QXlsx/header/xlsxglobal.h
++++ b/QXlsx/header/xlsxglobal.h
+@@ -30,4 +30,10 @@
+ #define Q_DECL_NOTHROW 
+ #endif
+ 
++#ifdef QXLSX_SHARED
++#define QXLSX_EXPORT Q_DECL_EXPORT
++#else
++#define QXLSX_EXPORT
++#endif
++
+ #endif // XLSXGLOBAL_H
+--- a/QXlsx/header/xlsxrichstring.h
++++ b/QXlsx/header/xlsxrichstring.h
+@@ -37,7 +37,7 @@ class RichString;
+ // qHash is a friend, but we can't use default arguments for friends (§8.3.6.4)
+   uint qHash(const RichString &rs, uint seed = 0) Q_DECL_NOTHROW;
+ 
+-class   RichString
++class QXLSX_EXPORT RichString
+ {
+ public:
+     RichString();
+--- a/QXlsx/header/xlsxworkbook.h
++++ b/QXlsx/header/xlsxworkbook.h
+@@ -28,7 +28,7 @@ class Chartsheet;
+ class Worksheet;
+ class WorkbookPrivate;
+ 
+-class Workbook : public AbstractOOXmlFile
++class QXLSX_EXPORT Workbook : public AbstractOOXmlFile
+ {
+     Q_DECLARE_PRIVATE(Workbook)
+ public:
+--- a/QXlsx/header/xlsxworksheet.h
++++ b/QXlsx/header/xlsxworksheet.h
+@@ -37,7 +37,7 @@ class Relationships;
+ class Chart;
+ 
+ class WorksheetPrivate;
+-class Worksheet : public AbstractSheet
++class QXLSX_EXPORT Worksheet : public AbstractSheet
+ {
+     Q_DECLARE_PRIVATE(Worksheet)
+ 

@@ -1,0 +1,203 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d8ef047..a81aa8e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -90,8 +90,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+ 
+ # dependencies
+-FIND_PACKAGE(PkgConfig)    # try find PKGConfig as it will be used if found
+-FIND_PACKAGE(LibUSB REQUIRED)
++find_package(libusb REQUIRED)
+ 
+ # Add includes
+ INCLUDE_DIRECTORIES(
+@@ -99,7 +98,7 @@ INCLUDE_DIRECTORIES(
+   "${MY_DIR}/include/internal"
+   ${PROJECT_BINARY_DIR} # for generated headers
+   ${LIBFREENECT2_THREADING_INCLUDE_DIR}
+-  ${LibUSB_INCLUDE_DIRS}
++  # ${LibUSB_INCLUDE_DIRS}
+ )
+ 
+ SET(RESOURCES_INC_FILE "${PROJECT_BINARY_DIR}/resources.inc.h")
+@@ -157,12 +156,12 @@ SET(SOURCES
+ )
+ 
+ SET(LIBRARIES
+-  ${LibUSB_LIBRARIES}
++  libusb::libusb
+   ${LIBFREENECT2_THREADING_LIBRARIES}
+ )
+ 
+ SET(LIBFREENECT2_DLLS
+-  ${LibUSB_DLL}
++  #${LibUSB_DLL}
+ )
+ 
+ SET(HAVE_VideoToolbox "no (Apple only)")
+@@ -193,13 +192,14 @@ ENDIF(APPLE)
+ 
+ SET(HAVE_VAAPI disabled)
+ IF(ENABLE_VAAPI)
+-  IF(PKG_CONFIG_FOUND)
+-    PKG_CHECK_MODULES(VAAPI libva libva-drm)
+-  ENDIF()
+-  FIND_PACKAGE(JPEG)
++  # IF(PKG_CONFIG_FOUND)
++  #   PKG_CHECK_MODULES(VAAPI libva libva-drm)
++  # ENDIF()
++  find_package(vaapi REQUIRED)
++  find_package(libjpeg-turbo REQUIRED)
+ 
+   SET(HAVE_VAAPI no)
+-  IF(VAAPI_FOUND AND JPEG_FOUND)
++  # IF(VAAPI_FOUND AND JPEG_FOUND)
+     SET(LIBFREENECT2_WITH_VAAPI_SUPPORT 1)
+     SET(HAVE_VAAPI yes)
+ 
+@@ -209,10 +209,10 @@ IF(ENABLE_VAAPI)
+       src/vaapi_rgb_packet_processor.cpp
+     )
+     LIST(APPEND LIBRARIES
+-      ${VAAPI_LIBRARIES}
+-      ${JPEG_LIBRARY}
++      vaapi::vaapi
++      libjpeg-turbo::libjpeg-turbo
+     )
+-  ENDIF()
++  # ENDIF()
+ ENDIF(ENABLE_VAAPI)
+ 
+ SET(HAVE_TegraJPEG disabled)
+@@ -237,38 +237,38 @@ IF(ENABLE_TEGRAJPEG)
+ ENDIF()
+ 
+ IF(LIBFREENECT2_WITH_VT_SUPPORT)
+-  FIND_PACKAGE(TurboJPEG)
++  find_package(libjpeg-turbo REQUIRED)
+ ELSE()
+   # VAAPI can fail to start at runtime. It must have a fallback.
+-  FIND_PACKAGE(TurboJPEG REQUIRED)
++  find_package(libjpeg-turbo REQUIRED)
+ ENDIF()
+ 
+ SET(HAVE_TurboJPEG no)
+-IF(TurboJPEG_FOUND)
++IF(libjpeg-turbo_FOUND)
+   SET(LIBFREENECT2_WITH_TURBOJPEG_SUPPORT 1)
+   SET(HAVE_TurboJPEG yes)
+ 
+-  INCLUDE_DIRECTORIES(${TurboJPEG_INCLUDE_DIRS})
++  #INCLUDE_DIRECTORIES(${TurboJPEG_INCLUDE_DIRS})
+ 
+   LIST(APPEND SOURCES
+     src/turbo_jpeg_rgb_packet_processor.cpp
+   )
+ 
+   LIST(APPEND LIBRARIES
+-    ${TurboJPEG_LIBRARIES}
++    libjpeg-turbo::libjpeg-turbo
+   )
+ 
+   LIST(APPEND LIBFREENECT2_DLLS
+-   ${TurboJPEG_DLL}
++   #${TurboJPEG_DLL}
+   )
+ ENDIF()
+ 
+ SET(HAVE_OpenGL disabled)
+ IF(ENABLE_OPENGL)
+-  FIND_PACKAGE(GLFW3)
+-  FIND_PACKAGE(OpenGL)
++  find_package(glfw3 REQUIRED)
++  find_package(opengl_system REQUIRED)
+   SET(HAVE_OpenGL no)
+-  IF(GLFW3_FOUND AND OPENGL_FOUND)
++  # IF(GLFW3_FOUND AND OPENGL_FOUND)
+     SET(LIBFREENECT2_WITH_OPENGL_SUPPORT 1)
+     SET(HAVE_OpenGL yes)
+ 
+@@ -276,8 +276,8 @@ IF(ENABLE_OPENGL)
+ 
+     LIST(APPEND LIBFREENECT2_DLLS ${GLFW3_DLL})
+     LIST(APPEND LIBRARIES
+-      ${GLFW3_LIBRARIES}
+-      ${OPENGL_gl_LIBRARY}
++      glfw::glfw
++      opengl::opengl
+     )
+     LIST(APPEND SOURCES
+       src/flextGL.cpp
+@@ -292,19 +292,19 @@ IF(ENABLE_OPENGL)
+       src/shader/stage1.fs
+       src/shader/stage2.fs
+     )
+-  ENDIF()
++  # ENDIF()
+ ENDIF(ENABLE_OPENGL)
+ 
+ SET(HAVE_OpenCL disabled)
+ IF(ENABLE_OPENCL)
+-  FIND_PACKAGE(OpenCL)
++  find_package(opencl-icd-loader REQUIRED)
+ 
+   SET(HAVE_OpenCL no)
+-  IF(OpenCL_FOUND)
++  #IF(OpenCL_FOUND)
+     SET(LIBFREENECT2_WITH_OPENCL_SUPPORT 1)
+     SET(HAVE_OpenCL yes)
+ 
+-    IF(UNIX AND NOT APPLE)
++    IF(0)
+       INCLUDE(CheckOpenCLICDLoader)
+       IF(OpenCL_C_WORKS AND NOT OpenCL_CXX_WORKS)
+         SET(LIBFREENECT2_OPENCL_ICD_LOADER_IS_OLD 1)
+@@ -312,7 +312,7 @@ IF(ENABLE_OPENCL)
+         MESSAGE(WARNING "Your libOpenCL.so is incompatible with CL/cl.h. Install ocl-icd-opencl-dev to update libOpenCL.so?")
+       ENDIF()
+     ENDIF()
+-    INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
++    #INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
+ 
+     LIST(APPEND SOURCES
+       src/opencl_depth_packet_processor.cpp
+@@ -320,7 +320,7 @@ IF(ENABLE_OPENCL)
+     )
+ 
+     LIST(APPEND LIBRARIES
+-      ${OpenCL_LIBRARIES}
++      opencl-icd-loader::opencl-icd-loader
+     )
+ 
+     LIST(APPEND RESOURCES
+@@ -334,7 +334,7 @@ IF(ENABLE_OPENCL)
+     IF(UNIX AND NOT APPLE)
+       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+     ENDIF()
+-  ENDIF(OpenCL_FOUND)
++  #ENDIF(OpenCL_FOUND)
+ ENDIF(ENABLE_OPENCL)
+ 
+ SET(HAVE_CUDA disabled)
+@@ -385,7 +385,7 @@ IF(ENABLE_CUDA)
+ ENDIF(ENABLE_CUDA)
+ 
+ # RPATH handling for CUDA 8.0 libOpenCL.so conflict. See #804.
+-IF(HAVE_OpenCL STREQUAL yes AND UNIX AND NOT APPLE)
++IF(0)
+   FILE(GLOB CUDA_ld_so_conf /etc/ld.so.conf.d/cuda*.conf)
+   IF(CUDA_ld_so_conf)
+     MESSAGE(WARNING "Your CUDA installation overrides OpenCL system library path.")
+@@ -403,9 +403,9 @@ ENDIF()
+ # Both command line -DCMAKE_INSTALL_RPATH=... and CMake GUI settings are accepted.
+ #
+ # Anyway if wrong versions of libusb is used, errors will be reported explicitly.
+-IF(NOT DEFINED CMAKE_INSTALL_RPATH AND NOT ${LibUSB_LIBDIR} MATCHES "^/usr/lib")
++IF(0 AND NOT DEFINED CMAKE_INSTALL_RPATH AND NOT ${LibUSB_LIBDIR} MATCHES "^/usr/lib")
+   SET(CMAKE_INSTALL_RPATH ${LibUSB_LIBDIR} CACHE STRING "Set RPATH for a private libusb")
+-ELSEIF(DEFINED CMAKE_INSTALL_RPATH)
++ELSEIF(0 AND DEFINED CMAKE_INSTALL_RPATH)
+   SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} CACHE STRING "Set RPATH for a private libusb")
+ ENDIF()
+ IF(DEFINED CMAKE_INSTALL_RPATH)

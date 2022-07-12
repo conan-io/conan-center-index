@@ -1,0 +1,16 @@
+--- include/ucl.h
++++ include/ucl.h
+@@ -33,7 +33,12 @@
+ #include <stdio.h>
+-
+ #ifdef _WIN32
++#ifdef ucl_EXPORTS
+ # define UCL_EXTERN __declspec(dllexport)
++#elif !defined(UCL_STATIC)
++# define UCL_EXTERN __declspec(dllimport)
+ #else
+ # define UCL_EXTERN
++#endif
++#else
++# define UCL_EXTERN
+ #endif

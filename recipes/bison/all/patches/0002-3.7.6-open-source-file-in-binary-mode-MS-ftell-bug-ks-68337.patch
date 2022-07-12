@@ -1,0 +1,26 @@
+--- src/location.c
++++ src/location.c
+@@ -258,6 +258,14 @@
+ static bool
+ caret_set_file (const char *file)
+ {
++#if defined(_WIN32)
++    /* ftell() is unusable on Windows in the face of text files
++       that use just LF and not Windows-style CR-LF as newlines
++       http://support.microsoft.com/kb/68337 */
++    char fopen_mode[3] = "rb";
++#else
++    char fopen_mode[2] = "r";
++#endif
+   /* If a different file than before, close and let the rest open
+      the new one. */
+   if (caret_info.pos.file && caret_info.pos.file != file)
+@@ -268,7 +268,7 @@
+   if (!caret_info.pos.file)
+     {
+       caret_info.pos.file = file;
+-      if ((caret_info.file = fopen (caret_info.pos.file, "r")))
++      if ((caret_info.file = fopen (caret_info.pos.file, fopen_mode)))
+         {
+           /* If the file is not regular (imagine #line 1 "/dev/stdin"
+              in the input file for instance), don't try to quote the

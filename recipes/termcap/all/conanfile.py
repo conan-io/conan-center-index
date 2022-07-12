@@ -1,7 +1,9 @@
 import os
 from conans import ConanFile, CMake, tools
 import re
-import shutil
+
+
+required_conan_version = ">=1.33.0"
 
 
 class TermcapConan(ConanFile):
@@ -9,9 +11,8 @@ class TermcapConan(ConanFile):
     homepage = "https://www.gnu.org/software/termcap"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Enables programs to use display terminals in a terminal-independent manner"
-    license = "GPL-2.0"
-    topics = ("conan", "termcap", "terminal", "display")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    license = "GPL-2.0-or-later"
+    topics = ("terminal", "display", "text", "writing")
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], }
@@ -23,6 +24,15 @@ class TermcapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -30,11 +40,11 @@ class TermcapConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
-        archive_name = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _extract_sources(self):
         makefile_text = open(os.path.join(self._source_subfolder, "Makefile.in")).read()
@@ -54,18 +64,19 @@ class TermcapConan(ConanFile):
         self._cmake.definitions["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
         self._cmake.definitions["TERMCAP_CAP_FILE"] = os.path.join(self._source_subfolder, "termcap.src").replace("\\", "/")
         self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
-        self._cmake.verbose = True
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        for src in self._extract_sources()[0]:
-            txt = open(src).read()
-            with open(src, "w") as f:
-                f.write("#include \"termcap_intern.h\"\n\n")
-                f.write(txt)
+
+        if self.settings.os == "Windows":
+            for src in self._extract_sources()[0]:
+                txt = open(src).read()
+                with open(src, "w") as f:
+                    f.write("#include \"termcap_intern.h\"\n\n")
+                    f.write(txt)
 
     def build(self):
         self._patch_sources()
@@ -82,11 +93,9 @@ class TermcapConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "etc", "termcap")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Termcap"
-        self.cpp_info.names["cmake_find_package_multi"] = "Termcap"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
-            self.cpp_info.definitions = ["TERMCAP_SHARED"]
+            self.cpp_info.defines = ["TERMCAP_SHARED"]
 
         self.output.info("Setting TERMCAP environment variable: {}".format(self._termcap_path))
         self.env_info.TERMCAP = self._termcap_path

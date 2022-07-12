@@ -1,12 +1,13 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibTomMathConan(ConanFile):
     name = "libtommath"
     description = "LibTomMath is a free open source portable number theoretic multiple-precision integer library written entirely in C."
-    topics = "conan", "libtommath", "math", "multiple", "precision"
+    topics = "libtommath", "math", "multiple", "precision"
     license = "Unlicense"
     homepage = "https://www.libtom.net/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -19,11 +20,16 @@ class LibTomMathConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
+
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,14 +42,14 @@ class LibTomMathConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
-            self.build_requires("make/4.2.1")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio":
+            self.build_requires("make/4.3")
         if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
             self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libtommath-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _run_makefile(self, target=None):
         target = target or ""
@@ -51,6 +57,9 @@ class LibTomMathConan(ConanFile):
         autotools.libs = []
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             autotools.link_flags.append("-lcrypt32")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: should be handled by helper
+            autotools.link_flags.append("-arch arm64")
         args = autotools.vars
         args.update({
             "PREFIX": self.package_folder,
@@ -73,7 +82,7 @@ class LibTomMathConan(ConanFile):
                         target = "tommath.dll"
                     else:
                         target = "tommath.lib"
-                    with tools.vcvars(self.settings):
+                    with tools.vcvars(self):
                         self.run("nmake -f makefile.msvc {} {}".format(
                             target,
                             arg_str,
@@ -114,18 +123,15 @@ class LibTomMathConan(ConanFile):
         else:
             self._run_makefile("install")
 
-        # FIXME: use tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        la = os.path.join(self.package_folder, "lib", "libtommath.la")
-        if os.path.isfile(la):
-            os.unlink(la)
-
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "tommath.lib"))
+
     def package_info(self):
-        suffix = ""
-        if self.settings.os == "Windows":
-            suffix = ".dll" if self.options.shared else ""
-        self.cpp_info.libs = ["tommath" + suffix]
+        self.cpp_info.libs = ["tommath"]
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]

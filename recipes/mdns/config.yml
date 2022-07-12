@@ -1,4 +1,3 @@
----
 versions:
   "20200130":
     folder: "all"
@@ -9,4 +8,14 @@ versions:
   "1.0":
     folder: "all"
   "1.1":
+    folder: "all"
+  "1.2":
+    folder: "all"
+  "1.3":
+    folder: "all"
+  "1.4":
+    folder: "all"
+  "1.4.1":
+    folder: "all"
+  "1.4.2":
     folder: "all"

@@ -6,7 +6,7 @@ class SysConfigOpenGLConan(ConanFile):
     name = "opengl"
     version = "system"
     description = "cross-platform virtual conan package for the OpenGL support"
-    topics = ("conan", "opengl", "gl")
+    topics = ("opengl", "gl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
@@ -58,7 +58,7 @@ class SysConfigOpenGLConan(ConanFile):
             else:
                 self.output.warn("Don't know how to install OpenGL for your distro.")
         elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["mesa-libs"]
+            packages = ["libglvnd"]
         if packages:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             for p in packages:
@@ -68,6 +68,8 @@ class SysConfigOpenGLConan(ConanFile):
         # TODO: Workaround for #2311 until a better solution can be found
         self.cpp_info.filenames["cmake_find_package"] = "opengl_system"
         self.cpp_info.filenames["cmake_find_package_multi"] = "opengl_system"
+
+        self.cpp_info.set_property("cmake_file_name", "opengl_system")
 
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []

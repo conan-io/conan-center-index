@@ -1,0 +1,10 @@
+--- a/easy_profiler_converter/CMakeLists.txt
++++ b/easy_profiler_converter/CMakeLists.txt
+@@ -15,7 +15,6 @@ target_link_libraries(profiler_converter easy_profiler)
+ install(
+     TARGETS
+     profiler_converter
+-    RUNTIME
+     DESTINATION
+     bin
+ )

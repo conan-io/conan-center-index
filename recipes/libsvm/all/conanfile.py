@@ -1,5 +1,8 @@
 from conans import ConanFile, tools, CMake
-import os
+from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
+
 
 class libsvmConan(ConanFile):
     name = "libsvm"
@@ -19,22 +22,36 @@ class libsvmConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and self.options.shared:
-                self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-            self._cmake.configure()
-        return self._cmake
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
+        if (
+            self.settings.compiler == "Visual Studio" and
+            "MT" in self.settings.compiler.runtime and
+            self.options.shared
+        ):
+            raise ConanInvalidConfiguration(
+                "{} can not be built as shared library + runtime {}.".format(
+                    self.name,
+                    self.settings.compiler.runtime
+                )
+            )
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -46,6 +63,4 @@ class libsvmConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = "LibSVM"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibSVM"
+        self.cpp_info.libs = ["svm"]

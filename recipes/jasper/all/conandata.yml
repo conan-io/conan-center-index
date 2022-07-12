@@ -1,4 +1,28 @@
 sources:
+  "2.0.33":
+    url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-2.0.33.tar.gz"
+    sha256: "38b8f74565ee9e7fec44657e69adb5c9b2a966ca5947ced5717cde18a7d2eca6"
+  "2.0.32":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.32.tar.gz"
+    sha256: "a3583a06698a6d6106f2fc413aa42d65d86bedf9a988d60e5cfa38bf72bc64b9"
+  "2.0.28":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.28.tar.gz"
+    sha256: "6b4e5f682be0ab1a5acb0eeb6bf41d6ce17a658bb8e2dbda95de40100939cc88"
+  "2.0.27":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.27.tar.gz"
+    sha256: "df41bd015a9dd0cc2a2e696f8ca5cbfb633323ca9429621f7fa801778681f2dd"
+  "2.0.26":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.26.tar.gz"
+    sha256: "a82a119e85b7d1f448e61309777fa5f79053a9adca4a2b5bfe44be5439fb8fea"
+  "2.0.25":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.25.tar.gz"
+    sha256: "f5bc48e2884bcabd2aca1737baff4ca962ec665b6eb673966ced1f7adea07edb"
+  "2.0.24":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.24.tar.gz"
+    sha256: "d2d28e115968d38499163cf8086179503668ce0d71b90dd33855b3de96a1ca1d"
+  "2.0.23":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.23.tar.gz"
+    sha256: "20facc904bd9d38c20e0c090b1be3ae02ae5b2703b803013be2ecad586a18927"
   "2.0.22":
     url: "https://github.com/jasper-software/jasper/archive/version-2.0.22.tar.gz"
     sha256: "afc4166bff29b8a0dc46ed5e8d6a208d7976fccfd0b1146e3400c8b2948794a2"

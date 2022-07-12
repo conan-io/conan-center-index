@@ -1,0 +1,37 @@
+This patch for msvc build allows to:
+* define OPTFLAG ourself from conanfile (allow to honor profile)
+* inject a custom SYSTEM_LIBS variable from conanfile (allow robust shared build)
+* not hardcode this very specific C:\OSGeo4W environment
+
+--- a/makefile.vc
++++ b/makefile.vc
+@@ -2,7 +2,6 @@
+ #
+ # NMAKE Makefile to build libspatialite on Windows
+ #
+-!INCLUDE nmake.opt
+ 
+ LIBOBJ = src\gaiaaux\gg_sqlaux.obj src\gaiaaux\gg_utf8.obj \
+ 	src\gaiaexif\gaia_exif.obj src\gaiageo\gg_advanced.obj \
+@@ -93,7 +92,7 @@ LIBOBJ = src\gaiaaux\gg_sqlaux.obj src\gaiaaux\gg_utf8.obj \
+ SPATIALITE_DLL = spatialite$(VERSION).dll
+ 
+ CFLAGS = /nologo -I.\src\headers -I.\src\topology \
+-	-I. -IC:\OSGeo4W\include $(OPTFLAGS)
++	-I. $(CFLAGS) $(OPTFLAGS)
+ 
+ default:	all
+ 
+@@ -108,11 +107,7 @@ $(SPATIALITE_DLL):	spatialite_i.lib
+ 
+ spatialite_i.lib:     $(LIBOBJ)
+ 	link /dll /out:$(SPATIALITE_DLL) \
+-		/implib:spatialite_i.lib $(LIBOBJ) \
+-		C:\OSGeo4W\lib\proj_i.lib C:\OSGeo4W\lib\geos_c.lib \
+-		C:\OSGeo4w\lib\freexl_i.lib C:\OSGeo4w\lib\iconv.lib \
+-		C:\OSGeo4W\lib\sqlite3_i.lib C:\OSGeo4W\lib\zlib.lib \
+-		C:\OSGeo4W\lib\libxml2.lib C:\OSGeo4W\lib\librttopo.lib
++		/implib:spatialite_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
+ 	if exist $(SPATIALITE_DLL).manifest mt -manifest \
+ 		$(SPATIALITE_DLL).manifest -outputresource:$(SPATIALITE_DLL);2
+ 		

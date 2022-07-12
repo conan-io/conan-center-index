@@ -9,3 +9,33 @@ versions:
     folder: standard
   "4.3.0":
     folder: portable
+  "4.4.0":
+    folder: portable
+  "4.4.1":
+    folder: portable
+  "4.4.2":
+    folder: portable
+  "4.5.0":
+    folder: portable
+  "4.6.0":
+    folder: portable
+  "4.6.1":
+    folder: portable
+  "4.7.0":
+    folder: portable
+  "4.7.1":
+    folder: portable
+  "4.7.2":
+    folder: portable
+  "4.8.0":
+    folder: portable
+  "4.8.1":
+    folder: portable
+  "4.8.2":
+    folder: portable
+  "4.9.0":
+    folder: portable
+  "4.9.1":
+    folder: portable
+  "4.9.2":
+    folder: portable

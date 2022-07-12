@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -150,8 +150,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ if(JPEGXL_STATIC)
+   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+   set(BUILD_SHARED_LIBS 0)
+-  set(CMAKE_EXE_LINKER_FLAGS
+-      "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")
+   if (MINGW)
+     # In MINGW libstdc++ uses pthreads directly. When building statically a
+     # program (regardless of whether the source code uses pthread or not) the
+@@ -247,8 +245,6 @@ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_STANDARD_REQUIRED YES)
+ 
+-add_subdirectory(third_party)
+-
+ set(THREADS_PREFER_PTHREAD_FLAG YES)
+ find_package(Threads REQUIRED)
+ 
+@@ -331,6 +327,3 @@ endif ()
+ if (${JPEGXL_ENABLE_PLUGINS})
+ add_subdirectory(plugins)
+ endif ()
+-
+-# Binary tools
+-add_subdirectory(tools)
+
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -119,7 +119,6 @@ endif()  #!MSVC
+ include(jxl.cmake)
+ 
+ # Other libraries outside the core jxl library.
+-include(jxl_extras.cmake)
+ include(jxl_threads.cmake)
+ 
+ # Install all the library headers from the source and the generated ones. There

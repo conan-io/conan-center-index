@@ -1,0 +1,51 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,17 +14,11 @@ if (MSVC)
+     add_compile_options(/permissive-)
+ else()
+     # Warnings, optimization, no assertions
+-    add_compile_options(-Wall -pedantic -O3 -DNDEBUG) #-Wextra -Werror
+ endif()
+ 
+ if(USE_GMP)
+-  find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+-  find_library(GMP_LIBRARIES NAMES gmp libgmp mpir REQUIRED)
+-  if (MSVC)
+-    add_compile_options(/DBLISS_USE_GMP /I${GMP_INCLUDE_DIR})
+-  else()
+-    add_compile_options(-DBLISS_USE_GMP -I${GMP_INCLUDE_DIR})
+-  endif()
++  link_libraries(${CONAN_LIBS})
++  add_definitions(-DBLISS_USE_GMP)
+ endif(USE_GMP)
+ 
+ set(
+@@ -50,7 +44,7 @@ endif(MSVC)
+ 
+ # Add the shared library
+ add_library(bliss SHARED ${BLISS_SOURCE_FILES})
+-set_property(TARGET bliss PROPERTY POSITION_INDEPENDENT_CODE 1)
++set_property(TARGET bliss PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ # Add the static library
+ add_library(bliss_static STATIC ${BLISS_SOURCE_FILES})
+@@ -59,6 +53,18 @@ add_library(bliss_static STATIC ${BLISS_SOURCE_FILES})
+ add_executable(bliss-executable src/bliss.cc)
+ target_link_libraries(bliss-executable bliss_static)
+ if(USE_GMP)
+-  target_link_libraries(bliss-executable ${GMP_LIBRARIES})
+ endif(USE_GMP)
+ set_target_properties(bliss-executable PROPERTIES OUTPUT_NAME bliss)
++
++install(TARGETS bliss-executable DESTINATION ${CMAKE_INSTALL_BINDIR})
++
++file(GLOB BLISS_HEADERS src/*.h src/*.hh)
++install(FILES ${BLISS_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/bliss)
++if(BUILD_SHARED_LIBS)
++  install(TARGETS bliss
++          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
++else()
++  install(TARGETS bliss_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
++endif()

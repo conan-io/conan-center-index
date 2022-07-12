@@ -1,0 +1,27 @@
+Upstream-pull-request: https://github.com/libsdl-org/SDL/pull/4492
+Upstream-pull-request-status: Merged
+---
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b9b9eb62..454a0bbd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2092,7 +2092,8 @@ if(NOT CMAKE_HOST_WIN32)
+   execute_process(COMMAND sh ${SDL2_SOURCE_DIR}/build-scripts/updaterev.sh
+     WORKING_DIRECTORY ${SDL2_BINARY_DIR})
+ endif()
+-if(NOT WINDOWS OR CYGWIN)
++if(NOT WINDOWS OR CYGWIN OR MINGW)
++
+   set(prefix ${CMAKE_INSTALL_PREFIX})
+   set(exec_prefix "\${prefix}")
+   set(libdir "\${exec_prefix}/lib${LIB_SUFFIX}")
+@@ -2361,7 +2361,7 @@ else()
+   set(SOPOSTFIX "")
+ endif()
+ 
+-if(NOT (WINDOWS OR CYGWIN))
++if(NOT (WINDOWS OR CYGWIN OR MINGW))
+   if(SDL_SHARED)
+     set(SOEXT ${CMAKE_SHARED_LIBRARY_SUFFIX}) # ".so", ".dylib", etc.
+     get_target_property(SONAME SDL2 OUTPUT_NAME)

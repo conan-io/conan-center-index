@@ -1,10 +1,24 @@
 sources:
+  "1.7.4":
+    url: "https://distfiles.dereferenced.org/pkgconf/pkgconf-1.7.4.tar.xz"
+    sha256: "d73f32c248a4591139a6b17777c80d4deab6b414ec2b3d21d0a24be348c476ab"
   "1.7.3":
-    url: "https://git.sr.ht/~kaniini/pkgconf/archive/pkgconf-1.7.3.tar.gz"
-    sha256: "88e93bbd1d4dc81fc08bfc7a39b3eca241aee3131091c9ba0684531ee4d9d2b3"
+    url: "https://distfiles.dereferenced.org/pkgconf/pkgconf-1.7.3.tar.xz"
+    sha256: "b846aea51cf696c3392a0ae58bef93e2e72f8e7073ca6ad1ed8b01c85871f9c0"
 patches:
-  "1.7.3":
-    - patch_file: "patches/0001-meson-use-declare-dependencies.patch"
+  "1.7.4":
+    - patch_file: "patches/1.7.4-0001-clang-12-strndup-not-in-string-h.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-c89-compatible.patch"
+    - patch_file: "patches/1.7.4-0002-fix-static-link.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.4-0003-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
+      base_path: "source_subfolder"
+  "1.7.3":
+    - patch_file: "patches/1.7.3-0001-meson-use-declare-dependencies.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-0002-clang-12-strndup-not-in-string-h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-0003-meson-use-library.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-0004-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
       base_path: "source_subfolder"

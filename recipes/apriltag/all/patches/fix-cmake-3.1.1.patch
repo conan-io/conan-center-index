@@ -10,7 +10,8 @@
  aux_source_directory(common COMMON_SRC)
  aux_source_directory(. APRILTAG_SRCS)
 @@ -10,7 +8,8 @@
- set(CMAKE_BUILD_TYPE Release)
+-set(CMAKE_BUILD_TYPE Release)
++#set(CMAKE_BUILD_TYPE Release)
  
  # Library
 -add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC})

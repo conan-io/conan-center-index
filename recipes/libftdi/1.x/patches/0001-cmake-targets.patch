@@ -1,0 +1,829 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5aecafc..abb133f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,36 +1,54 @@
+-# Project
+ project(libftdi1 C)
++
+ set(MAJOR_VERSION 1)
+ set(MINOR_VERSION 5)
+ set(PACKAGE libftdi1)
+ set(VERSION_STRING ${MAJOR_VERSION}.${MINOR_VERSION})
+ set(VERSION ${VERSION_STRING})
+-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
++list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ 
+-# CMake
+ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+    set(CMAKE_BUILD_TYPE     RelWithDebInfo)
+ endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
+ set(CMAKE_COLOR_MAKEFILE ON)
+-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
++
++cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
++if(POLICY CMP0057)
++    cmake_policy(SET CMP0057 NEW)
++endif()
++if(POLICY CMP0011)
++    cmake_policy(SET CMP0011 NEW)
++endif()
++if(POLICY CMP0099)
++    cmake_policy(SET CMP0099 NEW)
++endif()
+ 
+ add_definitions(-Wall)
+ 
+ include(CMakeOptions.txt)
+ 
++set(as_subproject LibFTDI)
++macro(find_package)
++    if(NOT ${ARGV0} IN_LIST as_subproject)
++        _find_package(${ARGV})
++    endif()
++endmacro()
++
+ # Debug build
+-message("-- Build type: ${CMAKE_BUILD_TYPE}")
++message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+ if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    add_definitions(-DDEBUG)
+ endif(${CMAKE_BUILD_TYPE} STREQUAL Debug)
+ 
+-# find libusb
+-find_package ( USB1 REQUIRED )
+-include_directories ( ${LIBUSB_INCLUDE_DIR} )
++find_package (libusb REQUIRED)
++
++if (FTDIPP)
++  find_package(Boost REQUIRED)
++endif()
+ 
+-# Find Boost
+-if (FTDIPP OR BUILD_TESTS)
+-  find_package( Boost REQUIRED )
++if (APPLE)
++    find_library(APPLE_CF CoreFoundation)
++    find_library(APPLE_IOK IOKit)
+ endif()
+ 
+ # Set components
+@@ -97,7 +115,7 @@ if ( WIN32 )
+   set ( CPACK_NSIS_MODIFY_PATH             ON )
+ endif ()
+ 
+-set(CPACK_RESOURCE_FILE_LICENSE        ${CMAKE_SOURCE_DIR}/LICENSE)
++set(CPACK_RESOURCE_FILE_LICENSE        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
+ 
+ set(CPACK_SOURCE_GENERATOR             TGZ)
+ set(CPACK_SOURCE_IGNORE_FILES          "\\\\.git;~$;build/")
+@@ -136,7 +154,7 @@ endif ()
+ 
+ add_subdirectory(src)
+ if ( FTDIPP )
+-  project(libftdipp1 C CXX)
++  project(libftdi1 C CXX)
+   add_subdirectory(ftdipp)
+ endif ()
+ if ( PYTHON_BINDINGS )
+@@ -150,6 +168,9 @@ if ( EXAMPLES )
+ endif ()
+ add_subdirectory(packages)
+ if ( BUILD_TESTS )
++  project(libftdi1 C CXX)
++  find_package(Boost COMPONENTS unit_test_framework REQUIRED)
++  enable_testing()
+   add_subdirectory(test)
+ endif ()
+ 
+@@ -165,8 +186,8 @@ if(${WIN32})
+    set(libdir      ${CMAKE_INSTALL_PREFIX}/bin)
+ endif(${WIN32})
+ 
+-configure_file(${CMAKE_SOURCE_DIR}/libftdi1.pc.in ${CMAKE_BINARY_DIR}/libftdi1.pc @ONLY)
+-configure_file(${CMAKE_SOURCE_DIR}/libftdipp1.pc.in ${CMAKE_BINARY_DIR}/libftdipp1.pc @ONLY)
++configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libftdi1.pc.in ${CMAKE_BINARY_DIR}/libftdi1.pc @ONLY)
++configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libftdipp1.pc.in ${CMAKE_BINARY_DIR}/libftdipp1.pc @ONLY)
+ install(FILES ${CMAKE_BINARY_DIR}/libftdi1.pc ${CMAKE_BINARY_DIR}/libftdipp1.pc
+         DESTINATION lib${LIB_SUFFIX}/pkgconfig)
+ 
+@@ -202,30 +223,25 @@ set ( LIBFTDI_VERSION_MINOR ${MINOR_VERSION} )
+ 
+ set ( LIBFTDI_USE_FILE ${CMAKE_INSTALL_PREFIX}/${LIBFTDI_CMAKE_CONFIG_DIR}/UseLibFTDI1.cmake )
+ 
+-if(CMAKE_VERSION VERSION_LESS 2.8.8) 
+-  configure_file ( cmake/LibFTDI1Config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/LibFTDI1Config.cmake @ONLY )
+-  configure_file ( cmake/LibFTDI1ConfigVersion.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/LibFTDI1ConfigVersion.cmake @ONLY )
+-else ()
+-  include(CMakePackageConfigHelpers)
+-
+-  configure_package_config_file (
+-    cmake/LibFTDI1Config.cmake.in
+-    ${CMAKE_CURRENT_BINARY_DIR}/LibFTDI1Config.cmake
+-    INSTALL_DESTINATION ${LIBFTDI_CMAKE_CONFIG_DIR}
+-    PATH_VARS
+-      LIBFTDI_USE_FILE
+-      LIBFTDI_ROOT_DIR
+-      LIBFTDI_INCLUDE_DIR
+-      LIBFTDI_INCLUDE_DIRS
+-      LIBFTDI_LIBRARY_DIRS
+-    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+-  )
+-  write_basic_package_version_file (
+-    LibFTDI1ConfigVersion.cmake 
+-    VERSION ${LIBFTDI_VERSION_STRING} 
+-    COMPATIBILITY AnyNewerVersion
+-  )
+-endif ()
++include(CMakePackageConfigHelpers)
++
++configure_package_config_file (
++cmake/LibFTDI1Config.cmake.in
++${CMAKE_CURRENT_BINARY_DIR}/LibFTDI1Config.cmake
++INSTALL_DESTINATION ${LIBFTDI_CMAKE_CONFIG_DIR}
++PATH_VARS
++  LIBFTDI_USE_FILE
++  LIBFTDI_ROOT_DIR
++  LIBFTDI_INCLUDE_DIR
++  LIBFTDI_INCLUDE_DIRS
++  LIBFTDI_LIBRARY_DIRS
++NO_CHECK_REQUIRED_COMPONENTS_MACRO
++)
++write_basic_package_version_file (
++LibFTDI1ConfigVersion.cmake
++VERSION ${LIBFTDI_VERSION_STRING}
++COMPATIBILITY AnyNewerVersion
++)
+ 
+ 
+ install ( FILES 
+@@ -240,7 +256,7 @@ include(CPack)
+ 
+ message (STATUS "Summary of build options:
+ 
+-  Build static libs: ${STATICLIBS}
++  Build shared libs: ${BUILD_SHARED_LIBS}
+   Build C++ bindings: ${FTDIPP}
+   Build Python bindings: ${PYTHON_BINDINGS}
+   Build ftdi_eeprom: ${FTDI_EEPROM}
+diff --git a/CMakeOptions.txt b/CMakeOptions.txt
+index 07b5887..1088090 100644
+--- a/CMakeOptions.txt
++++ b/CMakeOptions.txt
+@@ -1,4 +1,4 @@
+-option ( STATICLIBS "Build static libraries" ON )
++option ( BUILD_SHARED_LIBS "Build static libraries" OFF )
+ option ( BUILD_TESTS "Build unit tests with Boost Unit Test framework" OFF )
+ option ( DOCUMENTATION "Generate API documentation with Doxygen" OFF )
+ option ( EXAMPLES "Build example programs" ON )
+@@ -6,3 +6,4 @@ option ( FTDIPP "Build C++ binding library libftdi1++" OFF )
+ option ( FTDI_EEPROM "Build ftdi_eeprom" ON )
+ option ( PYTHON_BINDINGS "Build python bindings via swig" OFF )
+ option ( LINK_PYTHON_LIBRARY "Link against python libraries" OFF )
++option ( ENABLE_STREAMING "Enable data streaming" OFF )
+\ No newline at end of file
+diff --git a/cmake/FindConfuse.cmake b/cmake/FindConfuse.cmake
+deleted file mode 100644
+index f6af7d5..0000000
+--- a/cmake/FindConfuse.cmake
++++ /dev/null
+@@ -1,74 +0,0 @@
+-# libConfuse is a configuration file parser library
+-# available at http://www.nongnu.org/confuse/
+-#
+-# The module defines the following variables:
+-#  CONFUSE_FOUND - the system has Confuse
+-#  CONFUSE_INCLUDE_DIR - where to find confuse.h
+-#  CONFUSE_INCLUDE_DIRS - confuse includes
+-#  CONFUSE_LIBRARY - where to find the Confuse library
+-#  CONFUSE_LIBRARIES - additional libraries
+-#  CONFUSE_ROOT_DIR - root dir (ex. /usr/local)
+-
+-#=============================================================================
+-# Copyright 2010-2013, Julien Schueller
+-# All rights reserved.
+-# 
+-# Redistribution and use in source and binary forms, with or without
+-# modification, are permitted provided that the following conditions are met: 
+-# 
+-# 1. Redistributions of source code must retain the above copyright notice, this
+-#    list of conditions and the following disclaimer. 
+-# 2. Redistributions in binary form must reproduce the above copyright notice,
+-#    this list of conditions and the following disclaimer in the documentation
+-#    and/or other materials provided with the distribution. 
+-#
+-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-
+-# The views and conclusions contained in the software and documentation are those
+-# of the authors and should not be interpreted as representing official policies, 
+-# either expressed or implied, of the FreeBSD Project.
+-#=============================================================================
+-
+-
+-find_path ( CONFUSE_INCLUDE_DIR
+-  NAMES confuse.h
+-)
+-
+-set ( CONFUSE_INCLUDE_DIRS ${CONFUSE_INCLUDE_DIR} )
+-
+-find_library ( CONFUSE_LIBRARY
+-  NAMES confuse
+-)
+-
+-set ( CONFUSE_LIBRARIES ${CONFUSE_LIBRARY} )
+-
+-
+-# try to guess root dir from include dir
+-if ( CONFUSE_INCLUDE_DIR )
+-  string ( REGEX REPLACE "(.*)/include.*" "\\1" CONFUSE_ROOT_DIR ${CONFUSE_INCLUDE_DIR} )
+-# try to guess root dir from library dir
+-elseif ( CONFUSE_LIBRARY )
+-  string ( REGEX REPLACE "(.*)/lib[/|32|64].*" "\\1" CONFUSE_ROOT_DIR ${CONFUSE_LIBRARY} )
+-endif ()
+-
+-
+-# handle the QUIETLY and REQUIRED arguments
+-include ( FindPackageHandleStandardArgs )
+-find_package_handle_standard_args( Confuse DEFAULT_MSG CONFUSE_LIBRARY CONFUSE_INCLUDE_DIR  )
+-
+-mark_as_advanced (
+-  CONFUSE_LIBRARY 
+-  CONFUSE_LIBRARIES
+-  CONFUSE_INCLUDE_DIR
+-  CONFUSE_INCLUDE_DIRS
+-  CONFUSE_ROOT_DIR
+-)
+diff --git a/cmake/FindLibConfuse.cmake b/cmake/FindLibConfuse.cmake
+new file mode 100644
+index 0000000..19e63c5
+--- /dev/null
++++ b/cmake/FindLibConfuse.cmake
+@@ -0,0 +1,21 @@
++find_package(PkgConfig)
++pkg_check_modules(PC_LibConfuse libconfuse)
++
++find_path(LibConfuse_INCLUDE_DIR confuse.h
++        PATHS ${PC_LibConfuse_INCLUDEDIR} ${PC_LibConfuse_INCLUDE_DIRS})
++
++find_library(LibConfuse_LIBRARY NAMES confuse
++        PATHS ${PC_LibConfuse_LIBDIR} ${PC_LibConfuse_LIBRARY_DIRS})
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(LibConfuse DEFAULT_MSG LibConfuse_LIBRARY LibConfuse_INCLUDE_DIR)
++
++if (LibConfuse_FOUND AND NOT TARGET LibConfuse::LibConfuse)
++  add_library(LibConfuse::LibConfuse INTERFACE IMPORTED)
++  set_target_properties(LibConfuse::LibConfuse PROPERTIES
++          INTERFACE_LINK_LIBRARIES "${LibConfuse_LIBRARY}"
++          INTERFACE_INCLUDE_DIRECTORIES "${LibConfuse_INCLUDE_DIR}"
++          )
++endif()
++
++mark_as_advanced(LibConfuse_INCLUDE_DIR LibConfuse_LIBRARY)
+diff --git a/cmake/FindLibintl.cmake b/cmake/FindLibintl.cmake
+deleted file mode 100644
+index 65ed91c..0000000
+--- a/cmake/FindLibintl.cmake
++++ /dev/null
+@@ -1,47 +0,0 @@
+-# Try to find Libintl functionality
+-# Once done this will define
+-#
+-#  LIBINTL_FOUND - system has Libintl
+-#  LIBINTL_INCLUDE_DIR - Libintl include directory
+-#  LIBINTL_LIBRARIES - Libraries needed to use Libintl
+-#
+-# TODO: This will enable translations only if Gettext functionality is
+-# present in libc. Must have more robust system for release, where Gettext
+-# functionality can also reside in standalone Gettext library, or the one
+-# embedded within kdelibs (cf. gettext.m4 from Gettext source).
+- 
+-# Copyright (c) 2006, Chusslove Illich, <caslav.ilic@gmx.net>
+-# Copyright (c) 2007, Alexander Neundorf, <neundorf@kde.org>
+-#
+-# Redistribution and use is allowed according to the terms of the BSD license.
+-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+- 
+-if(LIBINTL_INCLUDE_DIR AND LIBINTL_LIB_FOUND)
+-  set(Libintl_FIND_QUIETLY TRUE)
+-endif(LIBINTL_INCLUDE_DIR AND LIBINTL_LIB_FOUND)
+- 
+-find_path(LIBINTL_INCLUDE_DIR libintl.h)
+- 
+-set(LIBINTL_LIB_FOUND FALSE)
+- 
+-if(LIBINTL_INCLUDE_DIR)
+-  include(CheckFunctionExists)
+-  check_function_exists(dgettext LIBINTL_LIBC_HAS_DGETTEXT)
+- 
+-  if (LIBINTL_LIBC_HAS_DGETTEXT)
+-    set(LIBINTL_LIBRARIES)
+-    set(LIBINTL_LIB_FOUND TRUE)
+-  else (LIBINTL_LIBC_HAS_DGETTEXT)
+-    find_library(LIBINTL_LIBRARIES NAMES intl libintl )
+-    if(LIBINTL_LIBRARIES)
+-      set(LIBINTL_LIB_FOUND TRUE)
+-    endif(LIBINTL_LIBRARIES)
+-  endif (LIBINTL_LIBC_HAS_DGETTEXT)
+- 
+-endif(LIBINTL_INCLUDE_DIR)
+- 
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(Libintl  DEFAULT_MSG  LIBINTL_INCLUDE_DIR  LIBINTL_LIB_FOUND)
+- 
+-mark_as_advanced(LIBINTL_INCLUDE_DIR  LIBINTL_LIBRARIES  LIBINTL_LIBC_HAS_DGETTEXT  LIBINTL_LIB_FOUND)
+-
+diff --git a/cmake/FindUSB1.cmake b/cmake/FindUSB1.cmake
+deleted file mode 100644
+index b90e297..0000000
+--- a/cmake/FindUSB1.cmake
++++ /dev/null
+@@ -1,37 +0,0 @@
+-# - Try to find the freetype library
+-# Once done this defines
+-#
+-#  LIBUSB_FOUND - system has libusb
+-#  LIBUSB_INCLUDE_DIR - the libusb include directory
+-#  LIBUSB_LIBRARIES - Link these to use libusb
+-
+-# Copyright (c) 2006, 2008  Laurent Montel, <montel@kde.org>
+-#
+-# Redistribution and use is allowed according to the terms of the BSD license.
+-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+-
+-
+-if (LIBUSB_INCLUDE_DIR AND LIBUSB_LIBRARIES)
+-
+-  # in cache already
+-  set(LIBUSB_FOUND TRUE)
+-
+-else (LIBUSB_INCLUDE_DIR AND LIBUSB_LIBRARIES)
+-  # use pkg-config to get the directories and then use these values
+-  # in the FIND_PATH() and FIND_LIBRARY() calls
+-  find_package(PkgConfig)
+-  pkg_check_modules(PC_LIBUSB libusb-1.0)
+-
+-  FIND_PATH(LIBUSB_INCLUDE_DIR libusb.h
+-    PATH_SUFFIXES libusb-1.0
+-    PATHS ${PC_LIBUSB_INCLUDEDIR} ${PC_LIBUSB_INCLUDE_DIRS})
+-
+-  FIND_LIBRARY(LIBUSB_LIBRARIES NAMES usb-1.0
+-    PATHS ${PC_LIBUSB_LIBDIR} ${PC_LIBUSB_LIBRARY_DIRS})
+-
+-  include(FindPackageHandleStandardArgs)
+-  FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBUSB DEFAULT_MSG LIBUSB_LIBRARIES LIBUSB_INCLUDE_DIR)
+-
+-  MARK_AS_ADVANCED(LIBUSB_INCLUDE_DIR LIBUSB_LIBRARIES)
+-
+-endif (LIBUSB_INCLUDE_DIR AND LIBUSB_LIBRARIES)
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 6fc3c09..0d6a6c1 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -1,9 +1,3 @@
+-# Includes
+-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
+-		${CMAKE_CURRENT_BINARY_DIR}
+-		)
+-
+-# Targets
+ add_executable(simple simple.c)
+ add_executable(bitbang bitbang.c)
+ add_executable(bitbang2 bitbang2.c)
+@@ -15,33 +9,28 @@ add_executable(baud_test baud_test.c)
+ add_executable(stream_test stream_test.c)
+ add_executable(eeprom eeprom.c)
+ add_executable(async async.c)
+-add_executable(purge_test purge_test.c)
++if(NOT MINGW)
++    add_executable(purge_test purge_test.c)
++endif(NOT MINGW)
+ 
+-# Linkage
+-target_link_libraries(simple ftdi1)
+-target_link_libraries(bitbang ftdi1)
+-target_link_libraries(bitbang2 ftdi1)
+-target_link_libraries(bitbang_cbus ftdi1)
+-target_link_libraries(bitbang_ft2232 ftdi1)
+-target_link_libraries(find_all ftdi1)
+-target_link_libraries(serial_test ftdi1)
+-target_link_libraries(baud_test ftdi1)
+-target_link_libraries(stream_test ftdi1)
+-target_link_libraries(eeprom ftdi1)
+-target_link_libraries(async ftdi1)
+-target_link_libraries(purge_test ftdi1)
++find_package(LibFTDI REQUIRED)
+ 
+-# libftdi++ examples
+-if( FTDIPP )
+-	include_directories(BEFORE ${CMAKE_SOURCE_DIR}/ftdipp
+-			${Boost_INCLUDE_DIRS})
++target_link_libraries(simple PRIVATE LibFTDI::ftdi1)
++target_link_libraries(bitbang PRIVATE LibFTDI::ftdi1)
++target_link_libraries(bitbang2 PRIVATE LibFTDI::ftdi1)
++target_link_libraries(bitbang_cbus PRIVATE LibFTDI::ftdi1)
++target_link_libraries(bitbang_ft2232 PRIVATE LibFTDI::ftdi1)
++target_link_libraries(find_all PRIVATE LibFTDI::ftdi1)
++target_link_libraries(serial_test PRIVATE LibFTDI::ftdi1)
++target_link_libraries(baud_test PRIVATE LibFTDI::ftdi1)
++target_link_libraries(stream_test PRIVATE LibFTDI::ftdi1)
++target_link_libraries(eeprom PRIVATE LibFTDI::ftdi1)
++target_link_libraries(async PRIVATE LibFTDI::ftdi1)
++if(NOT MINGW)
++    target_link_libraries(purge_test PRIVATE LibFTDI::ftdi1)
++endif(NOT MINGW)
+ 
+-	# Target
++if( FTDIPP )
+ 	add_executable(find_all_pp find_all_pp.cpp)
+-
+-	# Linkage
+-	target_link_libraries(find_all_pp ftdipp1)
++	target_link_libraries(find_all_pp PRIVATE LibFTDI::ftdipp1)
+ endif( FTDIPP )
+-
+-# Source includes
+-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
+diff --git a/examples/bitbang_cbus.c b/examples/bitbang_cbus.c
+index b902b50..359097e 100644
+--- a/examples/bitbang_cbus.c
++++ b/examples/bitbang_cbus.c
+@@ -60,8 +60,9 @@ int main(void)
+     while (1)
+     {
+         // Set bitmask from input
+-        fgets(input, sizeof(input) - 1, stdin);
+-        if (input[0] == '\n') break;
++        char *s = fgets(input, sizeof(input) - 1, stdin);
++        if (s == NULL || input[0] == '\n')
++            break;
+         bitmask = strtol(input, NULL, 0);
+         printf("Using bitmask 0x%02x\n", bitmask);
+         f = ftdi_set_bitmode(ftdi, bitmask, BITMODE_CBUS);
+diff --git a/examples/cmake_example/CMakeLists.txt b/examples/cmake_example/CMakeLists.txt
+index fe203ed..99571a0 100644
+--- a/examples/cmake_example/CMakeLists.txt
++++ b/examples/cmake_example/CMakeLists.txt
+@@ -1,13 +1,10 @@
+-cmake_minimum_required ( VERSION 2.8 )
+-
++cmake_minimum_required ( VERSION 3.0 )
+ project ( example C )
+ 
+-find_package ( LibFTDI1 NO_MODULE REQUIRED )
+-include ( ${LIBFTDI_USE_FILE} )
++find_package ( LibFTDI NO_MODULE REQUIRED )
+ 
+ add_executable ( example main.c )
+-target_link_libraries( example ${LIBFTDI_LIBRARIES} )
++target_link_libraries( example PRIVATE LibFTDI::ftdi1 )
+ 
+-install ( TARGETS example
+-          DESTINATION bin )
++install ( TARGETS example DESTINATION bin )
+           
+diff --git a/ftdi_eeprom/CMakeLists.txt b/ftdi_eeprom/CMakeLists.txt
+index 8737c4b..e83a0fc 100644
+--- a/ftdi_eeprom/CMakeLists.txt
++++ b/ftdi_eeprom/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-find_package ( Confuse REQUIRED )
+-find_package ( Libintl )
++find_package (LibConfuse REQUIRED )
++find_package (Intl)
+ 
+ # determine docdir
+ include(GNUInstallDirs)
+@@ -13,32 +13,30 @@ endif(NOT CMAKE_INSTALL_DOCDIR)
+ 
+ message(STATUS "Building ftdi_eeprom")
+ 
+-include_directories ( ${CONFUSE_INCLUDE_DIRS} )
+-list ( APPEND libs ${CONFUSE_LIBRARIES} )
+-
+-if ( LIBINTL_FOUND )
+-  include_directories ( ${LIBINTL_INCLUDE_DIR} )
+-  list ( APPEND libs ${LIBINTL_LIBRARIES} )
+-endif ()
+-
+-
+ # Version defines
+ set ( EEPROM_MAJOR_VERSION 0 )
+ set ( EEPROM_MINOR_VERSION 17 )
+ set ( EEPROM_VERSION_STRING ${EEPROM_MAJOR_VERSION}.${EEPROM_MINOR_VERSION} )
+ 
+-include_directories ( BEFORE ${CMAKE_SOURCE_DIR}/src )
+-include_directories ( BEFORE ${CMAKE_CURRENT_BINARY_DIR} )
+-
+ configure_file(
+                ftdi_eeprom_version.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/ftdi_eeprom_version.h
+ )
+ 
+ add_executable ( ftdi_eeprom main.c )
+-target_link_libraries ( ftdi_eeprom ftdi1 ${CONFUSE_LIBRARIES} )
+-if ( LIBINTL_FOUND )
+-  target_link_libraries ( ftdi_eeprom ${LIBINTL_LIBRARIES} )
++find_package(Threads)
++target_link_libraries ( ftdi_eeprom
++        PRIVATE
++        LibFTDI::ftdi1
++        LibConfuse::LibConfuse
++        libusb::libusb
++        )
++target_include_directories(ftdi_eeprom PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
++
++if ( Intl_FOUND )
++  target_link_libraries ( ftdi_eeprom PRIVATE ${Intl_LIBRARIES} )
++  target_include_directories ( ftdi_eeprom PRIVATE ${Intl_INCLUDE_DIRS})
+ endif ()
++
+ install ( TARGETS ftdi_eeprom DESTINATION bin )
+ install ( FILES example.conf DESTINATION ${CMAKE_INSTALL_DOCDIR} )
+diff --git a/ftdipp/CMakeLists.txt b/ftdipp/CMakeLists.txt
+index fac5bcc..cde211b 100644
+--- a/ftdipp/CMakeLists.txt
++++ b/ftdipp/CMakeLists.txt
+@@ -4,24 +4,29 @@
+ set(cpp_sources ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.cpp CACHE INTERNAL "List of cpp sources" )
+ set(cpp_headers ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.hpp CACHE INTERNAL "List of cpp headers" )
+ 
+-# Includes
+-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}
+-	${CMAKE_CURRENT_SOURCE_DIR}
+-	${CMAKE_SOURCE_DIR}/src)
+-
+-include_directories(${Boost_INCLUDE_DIRS})
+-
+ # Shared library
+-add_library(ftdipp1 SHARED ${cpp_sources})
++add_library(ftdipp1 ${cpp_sources})
++add_library(LibFTDI::ftdipp1 ALIAS ftdipp1)
+ 
+ math(EXPR VERSION_FIXUP "${MAJOR_VERSION} + 1")    # Compatibility with previous releases
+ set_target_properties(ftdipp1 PROPERTIES VERSION ${VERSION_FIXUP}.${MINOR_VERSION}.0 SOVERSION 3)
+ 
+ # Prevent clobbering each other during the build
+ set_target_properties(ftdipp1 PROPERTIES CLEAN_DIRECT_OUTPUT 1)
++set_target_properties(ftdipp1 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ # Dependencies
+-target_link_libraries(ftdipp1 ftdi1 ${LIBUSB_LIBRARIES} ${BOOST_LIBRARIES})
++target_link_libraries(ftdipp1
++	PRIVATE
++		libusb::libusb
++	PUBLIC
++		LibFTDI::ftdi1
++		Boost::headers
++)
++target_include_directories(ftdipp1 PUBLIC
++		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
++		$<INSTALL_INTERFACE:include/libftdi1>
++		)
+ 
+ install ( TARGETS ftdipp1
+ 					RUNTIME DESTINATION bin
+@@ -29,18 +34,6 @@ install ( TARGETS ftdipp1
+ 					ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 				)
+ 
+-# Static library
+-if ( STATICLIBS )
+-	add_library(ftdipp1-static STATIC ${cpp_sources})
+-	set_target_properties(ftdipp1-static PROPERTIES OUTPUT_NAME "ftdipp1")
+-	set_target_properties(ftdipp1-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+-
+-	install ( TARGETS ftdipp1-static
+-						ARCHIVE DESTINATION lib${LIB_SUFFIX}
+-						COMPONENT staticlibs
+-					)
+-endif ()
+-
+ install ( FILES ${cpp_headers}
+ 					DESTINATION include/${PROJECT_NAME}
+ 					COMPONENT headers
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 17b3617..3148e02 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,36 +1,57 @@
+-# Includes
+-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}
+-                     ${CMAKE_CURRENT_SOURCE_DIR}
+-                     )
+ 
+ # Version information
+ set(SNAPSHOT_VERSION "unknown")
+ execute_process(COMMAND git describe
+                 OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
+                 RESULT_VARIABLE GIT_DESCRIBE_RESULT
++                ERROR_QUIET
+                 OUTPUT_STRIP_TRAILING_WHITESPACE
+                 )
+ if(${GIT_DESCRIBE_RESULT} STREQUAL 0)
+   set(SNAPSHOT_VERSION ${GIT_DESCRIBE_OUTPUT})
+-endif ()
++endif()
+ message(STATUS "Detected git snapshot version: ${SNAPSHOT_VERSION}")
+ 
+ configure_file(ftdi_version_i.h.in "${CMAKE_CURRENT_BINARY_DIR}/ftdi_version_i.h" @ONLY)
+ 
+ # Targets
+-set(c_sources     ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.c ${CMAKE_CURRENT_SOURCE_DIR}/ftdi_stream.c CACHE INTERNAL "List of c sources" )
+-set(c_headers     ${CMAKE_CURRENT_SOURCE_DIR}/ftdi.h CACHE INTERNAL "List of c headers" )
++set(c_sources
++  ftdi.c
++)
++if(ENABLE_STREAMING)
++  set(c_sources
++    ftdi_stream.c
++    ${c_sources}
++  )
++endif()
+ 
+-add_library(ftdi1 SHARED ${c_sources})
++set(c_headers
++  ftdi.h
++  "${CMAKE_CURRENT_BINARY_DIR}/ftdi_version_i.h"
++)
++
++add_library(ftdi1 ${c_sources} ${c_headers})
++add_library(LibFTDI::ftdi1 ALIAS ftdi1)
++target_include_directories(ftdi1 PUBLIC
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
++        $<INSTALL_INTERFACE:include/libftdi1>
++        )
+ 
+ math(EXPR VERSION_FIXUP "${MAJOR_VERSION} + 1")    # Compatibility with previous releases
+ set_target_properties(ftdi1 PROPERTIES VERSION ${VERSION_FIXUP}.${MINOR_VERSION}.0 SOVERSION 2)
+ # Prevent clobbering each other during the build
+ set_target_properties ( ftdi1 PROPERTIES CLEAN_DIRECT_OUTPUT 1 )
++set_target_properties ( ftdi1 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
++target_link_libraries(ftdi1 PRIVATE libusb::libusb)
++if (APPLE)
++    target_link_libraries(ftdi1 PRIVATE ${APPLE_CF} ${APPLE_IOK})
++endif()
+ 
+-# Dependencies
+-target_link_libraries(ftdi1 ${LIBUSB_LIBRARIES})
++if(ENABLE_STREAMING)
++target_compile_definitions(ftdi1 PUBLIC ENABLE_STREAMING)
++endif()
+ 
+ install ( TARGETS ftdi1
+           RUNTIME DESTINATION bin
+@@ -38,17 +59,6 @@ install ( TARGETS ftdi1
+           ARCHIVE DESTINATION lib${LIB_SUFFIX}
+         )
+ 
+-if ( STATICLIBS )
+-  add_library(ftdi1-static STATIC ${c_sources})
+-  target_link_libraries(ftdi1-static ${LIBUSB_LIBRARIES})
+-  set_target_properties(ftdi1-static PROPERTIES OUTPUT_NAME "ftdi1")
+-  set_target_properties(ftdi1-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+-  install ( TARGETS ftdi1-static
+-            ARCHIVE DESTINATION lib${LIB_SUFFIX}
+-            COMPONENT staticlibs
+-          )
+-endif ()
+-
+ install ( FILES ${c_headers}
+           DESTINATION include/${PROJECT_NAME}
+           COMPONENT headers
+diff --git a/src/ftdi.c b/src/ftdi.c
+index f5b7018..03d7b07 100644
+--- a/src/ftdi.c
++++ b/src/ftdi.c
+@@ -1328,7 +1328,7 @@ static int ftdi_to_clkbits_AM(int baudrate, unsigned long *encoded_divisor)
+    AM Type chips have only four fractional subdivisors at value[15:14]
+    for subdivisors 0, 0.5, 0.25, 0.125
+ */
+-static int ftdi_to_clkbits(int baudrate, unsigned int clk, int clk_div, unsigned long *encoded_divisor)
++static int ftdi_to_clkbits(int baudrate, int clk, int clk_div, unsigned long *encoded_divisor)
+ {
+     static const char frac_code[8] = {0, 3, 2, 4, 1, 5, 6, 7};
+     int best_baud = 0;
+@@ -3044,10 +3044,13 @@ int ftdi_eeprom_build(struct ftdi_context *ftdi)
+         case TYPE_2232H:
+         case TYPE_4232H:
+             i += 2;
++			/* Fall through*/
+         case TYPE_R:
+             i += 2;
++			/* Fall through*/
+         case TYPE_2232C:
+             i += 2;
++			/* Fall through*/
+         case TYPE_AM:
+         case TYPE_BM:
+             i += 0x94;
+@@ -3438,15 +3441,20 @@ int ftdi_eeprom_build(struct ftdi_context *ftdi)
+     {
+         case TYPE_230X:
+             free_start += 2;
++			/* Fall through*/
+         case TYPE_232H:
+             free_start += 6;
++			/* Fall through*/
+         case TYPE_2232H:
+         case TYPE_4232H:
+             free_start += 2;
++			/* Fall through*/
+         case TYPE_R:
+             free_start += 2;
++			/* Fall through*/
+         case TYPE_2232C:
+             free_start++;
++			/* Fall through*/
+         case TYPE_AM:
+         case TYPE_BM:
+             free_start += 0x14;
+diff --git a/src/ftdi.h b/src/ftdi.h
+index fb45008..d2eed07 100644
+--- a/src/ftdi.h
++++ b/src/ftdi.h
+@@ -19,6 +19,7 @@
+ #define __libftdi_h__
+ 
+ #include <stdint.h>
++#include <libusb.h>
+ #ifndef _WIN32
+ #include <sys/time.h>
+ #endif
+@@ -475,6 +476,7 @@ enum ftdi_cbusx_func
+ /**
+     \brief Progress Info for streaming read
+ */
++#ifdef ENABLE_STREAMING
+ struct size_and_time
+ {
+     uint64_t totalBytes;
+@@ -483,17 +485,17 @@ struct size_and_time
+ 
+ typedef struct
+ {
+-    struct size_and_time first;
+-    struct size_and_time prev;
+-    struct size_and_time current;
+-    double totalTime;
+-    double totalRate;
+-    double currentRate;
++  struct size_and_time first;
++  struct size_and_time prev;
++  struct size_and_time current;
++  double totalTime;
++  double totalRate;
++  double currentRate;
+ } FTDIProgressInfo;
+ 
+ typedef int (FTDIStreamCallback)(uint8_t *buffer, int length,
+                                  FTDIProgressInfo *progress, void *userdata);
+-
++#endif
+ /**
+  * Provide libftdi version information
+  * major: Library major version
+@@ -580,8 +582,8 @@ extern "C"
+     int ftdi_write_data_set_chunksize(struct ftdi_context *ftdi, unsigned int chunksize);
+     int ftdi_write_data_get_chunksize(struct ftdi_context *ftdi, unsigned int *chunksize);
+ 
+-    int ftdi_readstream(struct ftdi_context *ftdi, FTDIStreamCallback *callback,
+-                        void *userdata, int packetsPerTransfer, int numTransfers);
++    //int ftdi_readstream(struct ftdi_context *ftdi, FTDIStreamCallback *callback,
++    //                    void *userdata, int packetsPerTransfer, int numTransfers);
+     struct ftdi_transfer_control *ftdi_write_data_submit(struct ftdi_context *ftdi, unsigned char *buf, int size);
+ 
+     struct ftdi_transfer_control *ftdi_read_data_submit(struct ftdi_context *ftdi, unsigned char *buf, int size);
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index 392c910..6e7ecaa 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -1,13 +1,7 @@
+-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+-
+-enable_testing()
+-
+-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS})
+-
+ set(cpp_tests basic.cpp baudrate.cpp)
+ 
+ add_executable(test_libftdi1 ${cpp_tests})
+-target_link_libraries(test_libftdi1 ftdi1 ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
++target_link_libraries(test_libftdi1 PRIVATE LibFTDI::ftdi1 Boost::unit_test_framework)
+ 
+ add_test(test_libftdi1 test_libftdi1)
+ 
+-- 
+2.31.0.windows.1
+

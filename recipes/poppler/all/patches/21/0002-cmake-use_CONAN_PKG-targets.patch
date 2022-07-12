@@ -1,0 +1,158 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d1d3653..dadcd02 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -25,7 +25,7 @@ include(GNUInstallDirs)
+ 
+ set(ENABLE_FUZZER FALSE)
+ 
+-find_package (ECM 1.6.0 QUIET NO_MODULE)
++find_package (ECM 1.6.0 QUIET NO_MODULE)
+ if (ECM_FOUND)
+     include("${ECM_MODULE_DIR}/ECMEnableSanitizers.cmake")
+ 
+@@ -235,7 +235,7 @@ if(ENABLE_GTK_DOC)
+ endif()
+ 
+ if(ENABLE_CPP)
+-  macro_optional_find_package(Iconv)
++  macro_optional_find_package(Iconv REQUIRED)
+   set(ENABLE_CPP ${ICONV_FOUND})
+   set(HAVE_ICONV ${ICONV_FOUND})
+ endif()
+@@ -249,7 +249,7 @@ if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
+ endif()
+ set(WITH_OPENJPEG FALSE)
+ if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
+-  find_package(OpenJPEG)
++  find_package(OpenJPEG REQUIRED)
+   set(WITH_OPENJPEG ${OpenJPEG_FOUND})
+   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
+     message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You can also decide to use the internal unmaintained JPX decoder or none at all.")
+@@ -266,13 +266,13 @@ else()
+ endif()
+ set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
+ if(ENABLE_CMS STREQUAL "lcms2")
+-  find_package(LCMS2)
++  find_package(LCMS2 REQUIRED)
+   set(USE_CMS ${LCMS2_FOUND})
+ elseif(NOT ENABLE_CMS STREQUAL "none")
+   message(FATAL_ERROR "Invalid ENABLE_CMS value: ${ENABLE_CMS}")
+ endif()
+ if(ENABLE_LIBCURL)
+-  find_package(CURL)
++  find_package(CURL REQUIRED)
+   if(CURL_FOUND)
+     include_directories(SYSTEM ${CURL_INCLUDE_DIR})
+     set(POPPLER_HAS_CURL_SUPPORT ON)
+@@ -458,16 +458,16 @@ set(poppler_SRCS
+   splash/SplashXPath.cc
+   splash/SplashXPathScanner.cc
+ )
+-set(poppler_LIBS ${FREETYPE_LIBRARIES})
+-if(FONTCONFIG_FOUND)
+-  set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
++set(poppler_LIBS CONAN_PKG::freetype)
++if(WITH_FONTCONFIGURATION_FONTCONFIG)
++  set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::fontconfig)
+ endif()
+ 
+-if(JPEG_FOUND)
++if(ENABLE_JPEG)
+   set(poppler_SRCS ${poppler_SRCS}
+     poppler/DCTStream.cc
+   )
+-  set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
++  set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::libjpeg)
+ endif()
+ if(ENABLE_ZLIB)
+   set(poppler_SRCS ${poppler_SRCS}
+@@ -486,7 +486,7 @@ if(ENABLE_LIBCURL)
+     poppler/CurlPDFDocBuilder.cc
+   )
+   if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+-    set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
++    set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::libcurl)
+   else()
+     set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
+   endif()
+@@ -497,18 +497,18 @@ if (ENABLE_NSS3)
+   )
+   set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
+ endif()
+-if (OpenJPEG_FOUND)
++if (ENABLE_LIBOPENJPEG STREQUAL "libopenjpeg2")
+   set(poppler_SRCS ${poppler_SRCS}
+     poppler/JPEG2000Stream.cc
+   )
+-  set(poppler_LIBS ${poppler_LIBS} openjp2)
++  set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::openjpeg)
+ else ()
+   set(poppler_SRCS ${poppler_SRCS}
+     poppler/JPXStream.cc
+   )
+ endif()
+ if(USE_CMS)
+-  set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
++  set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::lcms)
+ endif()
+ if(WIN32)
+   # use clean APIs
+diff --git a/cmake/modules/FindLCMS2.cmake b/cmake/modules/FindLCMS2.cmake
+index 2ec91d0..ec2c80b 100644
+--- a/cmake/modules/FindLCMS2.cmake
++++ b/cmake/modules/FindLCMS2.cmake
+@@ -16,11 +16,11 @@
+ 
+ # use pkg-config to get the directories and then use these values
+ # in the FIND_PATH() and FIND_LIBRARY() calls
+-if(NOT WIN32)
++if(1)
+    find_package(PkgConfig)
+    pkg_check_modules(PC_LCMS2 lcms2)
+    set(LCMS2_DEFINITIONS ${PC_LCMS2_CFLAGS_OTHER})
+-endif(NOT WIN32)
++endif()
+ 
+ find_path(LCMS2_INCLUDE_DIR lcms2.h
+    PATHS
+@@ -29,7 +29,7 @@ find_path(LCMS2_INCLUDE_DIR lcms2.h
+    PATH_SUFFIXES lcms2 liblcms2
+ )
+ 
+-find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2
++find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2 lcms2_static
+    PATHS     
+    ${PC_LCMS2_LIBDIR}
+    ${PC_LCMS2_LIBRARY_DIRS}
+--- cpp/CMakeLists.txt
++++ cpp/CMakeLists.txt
+@@ -34,1 +34,1 @@
+-target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
++target_link_libraries(poppler-cpp poppler CONAN_PKG::libiconv)
+diff --git a/qt5/src/CMakeLists.txt b/qt5/src/CMakeLists.txt
+index d80c81f..01d3e3e 100644
+--- a/qt5/src/CMakeLists.txt
++++ b/qt5/src/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
+     set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-qt5 poppler Qt5::Core Qt5::Gui Qt5::Xml ${FREETYPE_LIBRARIES})
++target_link_libraries(poppler-qt5 poppler Qt5::Core Qt5::Gui Qt5::Xml CONAN_PKG::freetype)
+ if(MSVC)
+ target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
+ endif()
+diff --git a/qt6/src/CMakeLists.txt b/qt6/src/CMakeLists.txt
+index f30b1a8..6337173 100644
+--- a/qt6/src/CMakeLists.txt
++++ b/qt6/src/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_QT6_SOVERSION poppler-qt6 SOVERSION)
+     set_target_properties(poppler-qt6 PROPERTIES SUFFIX "-${POPPLER_QT6_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui ${FREETYPE_LIBRARIES})
++target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui CONAN_PKG::freetype})
+ if(MSVC)
+ target_link_libraries(poppler-qt6 poppler ${poppler_LIBS})
+ endif()

@@ -1,0 +1,8 @@
+sources:
+  "cci.20201220":
+    url: "https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz"
+    sha256: "056ae59d63c5d7f34dd90510adf2996ef1c4c17ec2b26ba9c9cb9974025b2c2c"
+patches:
+  "cci.20201220":
+    - patch_file: "patches/0001-fix-include-windows.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,54 @@
+--- a/allocfail.c
++++ b/allocfail.c
+@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <unistd.h>
+ 
+ #include "filenames.h"
+ 
+--- a/fileline.c
++++ b/fileline.c
+@@ -37,7 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <stdlib.h>
++#ifdef _MSC_VER
++#include <process.h>
++#else
+ #include <unistd.h>
++#endif
+ 
+ #if defined (HAVE_KERN_PROC_ARGS) || defined (HAVE_KERN_PROC)
+ #include <sys/sysctl.h>
+--- a/posix.c
++++ b/posix.c
+@@ -36,7 +36,11 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
++#ifdef _MSC_VER
++#include <io.h>
++#else
+ #include <unistd.h>
++#endif
+ 
+ #include "backtrace.h"
+ #include "internal.h"
+--- a/read.c
++++ b/read.c
+@@ -35,7 +35,13 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <sys/types.h>
++#ifdef _MSC_VER
++#include <io.h>
++#include <basetsd.h>
++typedef SSIZE_T ssize_t;
++#else
+ #include <unistd.h>
++#endif
+ 
+ #include "backtrace.h"
+ #include "internal.h"

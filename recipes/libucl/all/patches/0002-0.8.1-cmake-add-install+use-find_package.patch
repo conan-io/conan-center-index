@@ -1,0 +1,147 @@
+- Fixes dll/static cmake builds
+- Fixes libcurl
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -4,13 +4,13 @@
+ SET(LIBUCL_VERSION_MAJOR 0)
+ SET(LIBUCL_VERSION_MINOR 5)
+ SET(LIBUCL_VERSION_PATCH 0)
+-
+-SET(LIBUCL_VERSION
+-        "${LIBUCL_VERSION_MAJOR}.${LIBUCL_VERSION_MINOR}.${LIBUCL_VERSION_PATCH}")
++SET(LIBUCL_VERSION "${LIBUCL_VERSION_MAJOR}.${LIBUCL_VERSION_MINOR}.${LIBUCL_VERSION_PATCH}")
+-
+ INCLUDE(CheckCCompilerFlag)
+-INCLUDE(FindOpenSSL)
+-
++IF(ENABLE_URL_SIGN)
++  FIND_PACKAGE(OpenSSL REQUIRED)
++  SET(HAVE_OPENSSL 1)
++  ADD_DEFINITIONS(-DHAVE_OPENSSL)
++ENDIF(ENABLE_URL_SIGN)
+ OPTION(ENABLE_URL_INCLUDE  "Enable urls in ucl includes (requires libcurl or libfetch) [default: OFF]" OFF)
+ OPTION(ENABLE_URL_SIGN  "Enable signatures check in ucl includes (requires openssl) [default: OFF]" OFF)
+ OPTION(BUILD_SHARED_LIBS "Build Shared Libraries [default: OFF]" OFF)
+@@ -131,31 +131,31 @@
+ 	LIST(APPEND CMAKE_REQUIRED_LIBRARIES rt)
+ ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ 
+-IF(ENABLE_URL_INCLUDE MATCHES "ON")
+-    FIND_LIBRARY(LIBFETCH_LIBRARY NAMES fetch PATHS	PATH_SUFFIXES lib64 lib
+-                      PATHS
+-                          ~/Library/Frameworks
+-                          /Library/Frameworks
+-                          /usr/local
+-                          /usr
+-                          /sw
+-                          /opt/local
+-                          /opt/csw
+-                          /opt
+-                     DOC "Path where the libfetch library can be found")
+-    IF(LIBFETCH_LIBRARY)
+-    	FIND_FILE(HAVE_FETCH_H NAMES fetch.h PATHS /usr/include
+-    											   /opt/include
+-    											   /usr/local/include
+-    				DOC "Path to libfetch header")
+-    ELSE(LIBFETCH_LIBRARY)
+-    	# Try to find libcurl
+-    	ProcessPackage(CURL libcurl)
+-    	IF(NOT CURL_FOUND)
+-    		MESSAGE(WARNING "Neither libcurl nor libfetch were found, no support of URL includes in configuration")
+-    	ENDIF(NOT CURL_FOUND)
+-    ENDIF(LIBFETCH_LIBRARY)
+-ENDIF(ENABLE_URL_INCLUDE MATCHES "ON")
++IF(ENABLE_URL_INCLUDE)
++  FIND_PACKAGE(CURL REQUIRED)
++  ADD_DEFINITIONS(-DCURL_FOUND)
++  SET(CURL_LIBRARIES CURL::CURL)
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++ENDIF()
+ 
+ SET(CMAKE_C_WARN_FLAGS "")
+ CHECK_C_COMPILER_FLAG(-Wall SUPPORT_WALL)
+@@ -214,4 +214,4 @@
+ ENDIF (BUILD_SHARED_LIBS)
+ ADD_LIBRARY(ucl ${LIB_TYPE} ${UCLSRC})
+ SET_TARGET_PROPERTIES(ucl PROPERTIES VERSION ${LIBUCL_VERSION} SOVERSION ${LIBUCL_VERSION_MAJOR})
+-
++INSTALL(TARGETS ucl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+@@ -218,29 +218,29 @@
+-IF(ENABLE_LUA MATCHES "ON")
++IF(ENABLE_LUA OR ENABLE_LUAJIT)
+-	IF(ENABLE_LUAJIT MATCHES "ON")
+-		FindLua(VERSION_MAJOR "5" VERSION_MINOR "1" ROOT "${LUA_ROOT}")
+-		IF(NOT LUA_FOUND)
+-			MESSAGE(FATAL_ERROR "Lua not found, lua support is required")
+-		ELSE(NOT LUA_FOUND)
+-			INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}")
+-		ENDIF(NOT LUA_FOUND)
+-	ELSE(ENABLE_LUAJIT MATCHES "ON")
+-		FindLua(VERSION_MAJOR "5" VERSION_MINOR "2" ROOT "${LUA_ROOT}")
+-		IF(NOT LUA_FOUND)
+-			FindLua(VERSION_MAJOR "5" VERSION_MINOR "1" ROOT "${LUA_ROOT}")
+-		ENDIF(NOT LUA_FOUND)
+-		IF(NOT LUA_FOUND)
+-			MESSAGE(FATAL_ERROR "Lua not found, lua support is required")
+-		ELSE(NOT LUA_FOUND)
+-			INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}")
+-		ENDIF(NOT LUA_FOUND)
+-	ENDIF(ENABLE_LUAJIT MATCHES "ON")
+ 	SET(UCL_LUA_SRC lua/lua_ucl.c)
+ 	ADD_LIBRARY(lua-ucl ${LIB_TYPE} ${UCL_LUA_SRC})
+-	IF(ENABLE_LUAJIT MATCHES "ON")
+-		TARGET_LINK_LIBRARIES(lua-ucl "${LUAJIT_LIBRARY}")
+-	ELSE(ENABLE_LUAJIT MATCHES "ON")
+-		TARGET_LINK_LIBRARIES(lua-ucl "${LUA_LIBRARY}")
+-	ENDIF(ENABLE_LUAJIT MATCHES "ON")
+ 	TARGET_LINK_LIBRARIES(lua-ucl ucl)
+ 	SET_TARGET_PROPERTIES(lua-ucl PROPERTIES VERSION ${LIBUCL_VERSION} SOVERSION ${LIBUCL_VERSION_MAJOR})
+-ENDIF()
++
++
++  IF(ENABLE_LUA)
++     FIND_PACKAGE(lua REQUIRED CONFIG)
++     TARGET_LINK_LIBRARIES(lua-ucl lua::lua) 
++
++  ELSEIF(ENABLE_LUAJIT)
++     FIND_PACKAGE(luajit REQUIRED CONFIG)
++     TARGET_LINK_LIBRARIES(lua-ucl luajit::luajit)
++  ENDIF()
++
++
++
++
++
++
++
++
++
++
++
++  INSTALL(TARGETS lua-ucl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
++  INSTALL(FILES include/lua_ucl.h DESTINATION include)
++ENDIF()
+@@ -257,3 +257,4 @@
+ 		TARGET_LINK_LIBRARIES(ucl ${OPENSSL_LIBRARIES})
+ 	ENDIF(OPENSSL_FOUND)
+ ENDIF(ENABLE_URL_SIGN MATCHES "ON")
++INSTALL(FILES include/ucl.h include/ucl++.h DESTINATION include)

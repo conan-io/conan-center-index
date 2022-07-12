@@ -6,11 +6,13 @@
 #include <folly/executors/ThreadedExecutor.h>
 #include <folly/Uri.h>
 #include <folly/FBString.h>
+#if FOLLY_HAVE_ELF
+#include <folly/experimental/symbolizer/Elf.h>
+#endif
 
 static void print_uri(const folly::fbstring& value) {
     const folly::Uri uri(value);
-    const auto authority = folly::format("The authority from {} is {}", value, uri.authority());
-    std::cout << authority << std::endl;
+    std::cout << "The authority from " << value << " is " << uri.authority() << std::endl;
 }
 
 int main() {
@@ -20,5 +22,8 @@ int main() {
     folly::Future<folly::Unit> unit = std::move(future).thenValue(print_uri);
     promise.setValue("https://github.com/bincrafters");
     std::move(unit).get();
+#if FOLLY_HAVE_ELF
+    folly::symbolizer::ElfFile elffile;
+#endif
     return EXIT_SUCCESS;
 }

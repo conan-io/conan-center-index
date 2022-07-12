@@ -1,8 +1,14 @@
 sources:
+  "4.3":
+    url: "http://ftpmirror.gnu.org/gnu/make/make-4.3.tar.gz"
+    sha256: "e05fdde47c5f7ca45cb697e973894ff4f5d79e13b750ed57d7b66d8defc78e19"
   "4.2.1":
     url: "http://ftpmirror.gnu.org/gnu/make/make-4.2.1.tar.bz2"
     sha256: "d6e262bf3601b42d2b1e4ef8310029e1dcf20083c5446b4b7aa67081fdffc589"
 patches:
+  "4.3":
+    - patch_file: "patches/4.3-0001-clang.patch"
+      base_path: "source_subfolder"
   "4.2.1":
-    - patch_file: "patches/0001-clang.patch"
+    - patch_file: "patches/4.2.1-0001-clang.patch"
       base_path: "source_subfolder"

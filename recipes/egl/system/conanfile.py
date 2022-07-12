@@ -59,7 +59,7 @@ class SysConfigEGLConan(ConanFile):
             else:
                 self.output.warn("Don't know how to install EGL for your distro.")
         if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["mesa-libs"]
+            packages = ["libglvnd"]
         if packages:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             for p in packages:

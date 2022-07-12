@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -123,7 +123,6 @@
+ 		${NSYNC_OS_CPP_SRC}
+ 		"platform/c++11/src/nsync_semaphore_mutex.cc"
+ 		"platform/posix/src/clock_gettime.c"
+-		"platform/posix/src/nsync_semaphore_mutex.c"
+ 	)
+ elseif ("${CMAKE_SYSTEM_NAME}X" STREQUAL "LinuxX")
+ 	set (NSYNC_POSIX ON)

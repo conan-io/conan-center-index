@@ -2,15 +2,17 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.43.0"
+
 
 class FunctionalPlusConan(ConanFile):
     name = "functionalplus"
     description = "Functional Programming Library for C++."
     license = "BSL-1.0"
-    topics = ("conan", "functionalplus", "fplus", "functional programming")
+    topics = ("functionalplus", "fplus", "functional programming")
     homepage = "https://github.com/Dobiasd/FunctionalPlus"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -26,8 +28,8 @@ class FunctionalPlusConan(ConanFile):
             "apple-clang": "9",
         }
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
         def lazy_lt_semver(v1, v2):
@@ -46,17 +48,23 @@ class FunctionalPlusConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("FunctionalPlus-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "FunctionalPlus")
+        self.cpp_info.set_property("cmake_target_name", "FunctionalPlus::fplus")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["fplus"].system_libs = ["pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "FunctionalPlus"
         self.cpp_info.names["cmake_find_package_multi"] = "FunctionalPlus"
         self.cpp_info.components["fplus"].names["cmake_find_package"] = "fplus"
         self.cpp_info.components["fplus"].names["cmake_find_package_multi"] = "fplus"
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["fplus"].system_libs = ["pthread"]
+        self.cpp_info.components["fplus"].set_property("cmake_target_name", "FunctionalPlus::fplus")

@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -233,6 +233,7 @@ install(TARGETS cpu_features list_cpu_features
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+ )
+ install(EXPORT CpuFeaturesTargets
+   NAMESPACE CpuFeatures::
