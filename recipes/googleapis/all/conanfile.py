@@ -1,6 +1,7 @@
 import os
 import functools
 import glob
+from io import StringIO
 from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
@@ -44,11 +45,32 @@ class GoogleAPIS(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def requirements(self):
         self.requires('protobuf/3.21.1')
 
+    @property
+    def _cmake_new_enough(self):
+        try:
+            import re
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+)\.(\d+)\.(\d+)', output.getvalue())
+            major, minor = int(m.group(1)), int(m.group(2))
+            assert major >= 3 and minor >= 20
+        except:
+            return False
+        else:
+            return True
+
     def build_requirements(self):
         self.build_requires('protobuf/3.21.1')
+        # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
+        if not self._cmake_new_enough:
+            self.build_requires('cmake/3.23.2')
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
