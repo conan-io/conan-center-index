@@ -7,10 +7,14 @@ class _ProtoLibrary:
     qname: str = None
     srcs: list = None
     deps: list = None
+    is_cc: bool = False
+    is_used: bool = False
 
-    def __init__(self) -> None:
+    def __init__(self, is_cc) -> None:
         self.srcs = []
         self.deps = set(["protobuf::libprotobuf"])  # Add to all libraries even if not explicitly set
+        self.is_cc = is_cc
+        self.is_used = self.is_cc
 
     def validate(self, source_folder, all_deps):
         # Check all files exists
@@ -26,7 +30,8 @@ class _ProtoLibrary:
             "name": self.name,
             "qname": self.qname,
             "srcs": self.srcs,
-            "deps": list(self.deps)
+            "deps": list(self.deps),
+            "is_cc": self.is_cc,
         }, indent=4)
 
     @property
@@ -59,7 +64,6 @@ class _ProtoLibrary:
                                 TARGET {self.cmake_target} 
                                 PROTOS ${{{self.cmake_target}_PROTOS}}
                                 IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}
-                                # PROTOC_OUT_DIR ${{CMAKE_BINARY_DIR}}
                                 )
             """)
 
@@ -114,7 +118,10 @@ def parse_proto_libraries(filename, source_folder, error):
             
             if line == "proto_library(":
                 assert proto_library == None
-                proto_library = _ProtoLibrary()
+                proto_library = _ProtoLibrary(is_cc=False)
+            elif line == "cc_proto_library(":
+                assert proto_library == None
+                proto_library = _ProtoLibrary(is_cc=True)
             elif line == '_PROTO_SUBPACKAGE_DEPS = [':
                 variables["_PROTO_SUBPACKAGE_DEPS"] = []
                 parsing_variable = lambda u: collecting_items(variables["_PROTO_SUBPACKAGE_DEPS"], u)

@@ -66,19 +66,35 @@ class GoogleAPIS(ConanFile):
         for filename in glob.iglob(os.path.join(self.source_folder, 'grafeas', '**', 'BUILD.bazel'), recursive=True):
             proto_libraries += parse_proto_libraries(filename, self.source_folder, self.output.error)
             
-        # print(json.dumps(proto_libraries, indent=4))
+        # Validate that all files exist and all dependencies are found
         all_deps = [f"{it.qname}:{it.name}" for it in proto_libraries]
         all_deps += ["protobuf::libprotobuf"]
-        for it in proto_libraries:
+        for it in filter(lambda u: u.is_cc, proto_libraries):
             self.output.info(it.dumps())
             it.validate(self.source_folder, all_deps)
+
+        # Mark the libraries we need recursively (C++ context)
+        all_dict = {f"{it.qname}:{it.name}": it for it in proto_libraries}
+        def activate_library(proto_library):
+            proto_library.is_used = True
+            for it_dep in proto_library.deps:
+                if it_dep == "protobuf::libprotobuf":
+                    continue
+                activate_library(all_dict[it_dep])
+            
+        for it in filter(lambda u: u.is_cc, proto_libraries):
+            activate_library(it)
+
+        # Force some extra libraries
+        if self.version == "cci.20220711":
+            pass
 
         return proto_libraries
 
     def build(self):
         proto_libraries = self._parse_proto_libraries()
         with open(os.path.join(self.source_folder, "CMakeLists.txt"), "a", encoding="utf-8") as f:
-            for it in proto_libraries:
+            for it in filter(lambda u: u.is_used, proto_libraries):
                 f.write(it.cmake_content)
         cmake = self._configure_cmake()
         cmake.build()
