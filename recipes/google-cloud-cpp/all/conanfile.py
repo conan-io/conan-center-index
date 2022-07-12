@@ -75,7 +75,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('nlohmann_json/3.10.5')
         self.requires('crc32c/1.1.2')
         self.requires('abseil/20211102.0')
-        self.requires('libcurl/7.80.0')
+        self.requires('libcurl/7.83.1')
         self.requires('openssl/1.1.1o')
         if tools.Version(self.version) <= "1.31.1":
             self.requires("googleapis/cci.20210730")
