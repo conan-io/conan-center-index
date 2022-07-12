@@ -4,6 +4,8 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+set(CMAKE_CXX_STANDARD 17)
+
 find_package(RdKafka REQUIRED CONFIG)
 find_package(ModernCppKafka REQUIRED CONFIG)
 
