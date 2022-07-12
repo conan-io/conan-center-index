@@ -69,7 +69,7 @@ class GoogleAPIS(ConanFile):
         # Validate that all files exist and all dependencies are found
         all_deps = [f"{it.qname}:{it.name}" for it in proto_libraries]
         all_deps += ["protobuf::libprotobuf"]
-        for it in filter(lambda u: u.is_cc, proto_libraries):
+        for it in proto_libraries:
             self.output.info(it.dumps())
             it.validate(self.source_folder, all_deps)
 
@@ -82,7 +82,7 @@ class GoogleAPIS(ConanFile):
                     continue
                 activate_library(all_dict[it_dep])
             
-        for it in filter(lambda u: u.is_cc, proto_libraries):
+        for it in filter(lambda u: u.is_used, proto_libraries):
             activate_library(it)
 
         # Force some extra libraries
@@ -112,4 +112,4 @@ class GoogleAPIS(ConanFile):
 
     def package_info(self):
         proto_libraries = self._parse_proto_libraries()
-        self.cpp_info.libs = [it.cmake_target for it in proto_libraries]
+        self.cpp_info.libs = [it.cmake_target for it in filter(lambda u: u.srcs, proto_libraries)]
