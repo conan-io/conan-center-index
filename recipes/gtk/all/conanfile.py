@@ -89,12 +89,6 @@ class GtkConan(ConanFile):
         if self.settings.os == "Linux" and (self.options.with_wayland or self.options.with_x11) and not self.options["pango"].with_freetype:
             raise ConanInvalidConfiguration(
                 "gtk requires pango with freetype when built with wayland/x11 support")
-        if self.settings.compiler == "clang":
-            # FIXME: gdk-pixbuf cannot be built using clang with the latest glib
-            # which all other dependencies of gtk depend on
-            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
-            raise ConanInvalidConfiguration(
-                "this recipe does not support building with clang")
 
     def configure(self):
         if self.options.shared:
