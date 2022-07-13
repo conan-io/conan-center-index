@@ -1,0 +1,25 @@
+diff --git a/boost/smart_ptr/detail/sp_counted_base_cw_ppc.hpp b/boost/smart_ptr/detail/sp_counted_base_cw_ppc.hpp
+index 81387ce..58a69e6 100644
+--- a/boost/smart_ptr/detail/sp_counted_base_cw_ppc.hpp
++++ b/boost/smart_ptr/detail/sp_counted_base_cw_ppc.hpp
+@@ -35,8 +35,6 @@ BOOST_PRAGMA_MESSAGE("Using CodeWarrior/PowerPC sp_counted_base")
+ 
+ #endif
+ 
+-BOOST_SP_OBSOLETE()
+-
+ namespace boost
+ {
+ 
+@@ -64,7 +62,11 @@ inline long atomic_decrement( register long * pw )
+ 
+     asm
+     {
++#if defined(__PPCZen__) || defined(__PPCe500__) || defined(__PPCe500v2__)
++    msync
++#else
+     sync
++#endif
+ 
+ loop:
+ 
