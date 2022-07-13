@@ -1,0 +1,19 @@
+commit e13f072edd7e117760f6ca5bb77d527b5e19312c
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Wed Jul 13 09:24:20 2022 +0200
+
+    7
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 809ce1fc2..015eba686 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -335,7 +335,7 @@ if(MSVC)
+     # - w4100 - unreferenced formal parameter
+     # - w4201 - nonstandard extension used: nameless struct/union
+     # - w4505 - unreferenced local function has been removed
+-    target_compile_options(Diligent-BuildSettings INTERFACE /W4 /wd4100 /wd4201 /wd4505 /MP ${DILIGENT_MSVC_COMPILE_OPTIONS})
++    target_compile_options(Diligent-BuildSettings INTERFACE /W0 /wd4100 /wd4201 /wd4505 /MP ${DILIGENT_MSVC_COMPILE_OPTIONS})
+ 
+     # In all release modes also:
+     # - disable w4189 - local variable is initialized but not referenced

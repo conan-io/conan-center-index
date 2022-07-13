@@ -1,4 +1,7 @@
 sources:
+  "cci.20220713":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/8095ae05d8fe3e510e9804b8ec30d5bd6d562df1.tar.gz"
+    sha256: "1760d27a3c7ec9d9e6a75b58c037c53b9764a4bf951ad01dde051a6944bc8117"
   "api.252003":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252003.tar.gz"
     sha256: "18f17eaa0b6425022be4019c61fede441b9feec4b94c2b7e8ab73d86a7f6a913"
@@ -12,6 +15,21 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API250014.tar.gz"
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
+  "cci.20220713":
+    - patch_file: "patches/0026-cci.20220713-exclude-tests.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0027-cci.20220713-dont-install-3d-party-license.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0028-cci.20220713-fix-glslang-usage.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0029-cci.20220713-fix-glslang-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0030-cci.20220713-dont-install-3d-party-license.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0031-cci.20220713-fix-warning-as-error-win.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0032-cci.20220713-fix-warning-as-error.patch"
+      base_path: "source_subfolder"
   "api.252003":
     - patch_file: "patches/0019-252003-exclude-tests.patch"
       base_path: "source_subfolder"

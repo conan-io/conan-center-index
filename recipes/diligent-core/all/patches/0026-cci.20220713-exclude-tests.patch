@@ -1,4 +1,11 @@
+commit d8c58074fd0468354407a3cbb21e88569e7c1c10
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Wed Jul 13 09:23:09 2022 +0200
+
+    1
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b3bb8c832..809ce1fc2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -491,7 +491,7 @@ add_subdirectory(Primitives)

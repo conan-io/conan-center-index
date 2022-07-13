@@ -1,0 +1,19 @@
+commit 750645e5929ef60dada988d5baf11750142548dd
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Wed Jul 13 09:23:52 2022 +0200
+
+    4
+
+diff --git a/Graphics/ShaderTools/src/GLSLangUtils.cpp b/Graphics/ShaderTools/src/GLSLangUtils.cpp
+index 8cc930a72..4749d8265 100644
+--- a/Graphics/ShaderTools/src/GLSLangUtils.cpp
++++ b/Graphics/ShaderTools/src/GLSLangUtils.cpp
+@@ -34,7 +34,7 @@
+ #    include <MoltenGLSLToSPIRVConverter/GLSLToSPIRVConverter.h>
+ #else
+ #    define ENABLE_HLSL
+-#    include "SPIRV/GlslangToSpv.h"
++#    include <glslang/SPIRV/GlslangToSpv.h>
+ #endif
+ 
+ #include "GLSLangUtils.hpp"
