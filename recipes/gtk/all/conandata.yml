@@ -1,4 +1,7 @@
 sources:
+  "4.7.1":
+    sha256: "dbe0495d2933c461515bfed886b57f4d10b4e70a0c7ce6c933d8720b400d09b4"
+    url: "https://download.gnome.org/sources/gtk/4.7/gtk-4.7.1.tar.xz"
   "4.7.0":
     sha256: "913fcd9d065efb348723e18c3b9113e23b92072e927ebd2f61d32745c8228b94"
     url: "https://download.gnome.org/sources/gtk/4.7/gtk-4.7.0.tar.xz"
