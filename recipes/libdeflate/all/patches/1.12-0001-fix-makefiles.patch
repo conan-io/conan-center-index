@@ -1,0 +1,40 @@
+diff --git a/Makefile b/Makefile
+index 9e55d0c..917b6db 100644
+--- a/Makefile
++++ b/Makefile
+@@ -54,7 +54,7 @@ cc-option = $(shell if $(CC) $(1) -c -x c /dev/null -o /dev/null \
+ 	      1>&2 2>/dev/null; then echo $(1); fi)
+ 
+ override CFLAGS :=							\
+-	-O2 -fomit-frame-pointer -std=c99 -I. -Wall -Wundef		\
++	-fomit-frame-pointer -std=c99 -I. -Wall -Wundef		\
+ 	$(call cc-option,-Wpedantic)					\
+ 	$(call cc-option,-Wdeclaration-after-statement)			\
+ 	$(call cc-option,-Wmissing-prototypes)				\
+@@ -124,7 +124,7 @@ else ifneq ($(findstring -darwin,$(TARGET_MACHINE)),)
+    SHARED_LIB         := libdeflate.$(SOVERSION).dylib
+    SHARED_LIB_SYMLINK := libdeflate.dylib
+    SHARED_LIB_CFLAGS  := -fPIC
+-   SHARED_LIB_LDFLAGS := -install_name $(LIBDIR)/$(SHARED_LIB)
++   SHARED_LIB_LDFLAGS := -install_name @rpath/$(SHARED_LIB)
+ 
+ # Compiling for Android?
+ else ifneq ($(findstring -android,$(TARGET_MACHINE)),)
+diff --git a/Makefile.msc b/Makefile.msc
+index 1449618..a61c034 100644
+--- a/Makefile.msc
++++ b/Makefile.msc
+@@ -7,11 +7,10 @@
+ 
+ .SUFFIXES: .c .obj .dllobj
+ 
+-CC = cl
++CC = $(CC)
+ LD = link
+ AR = lib
+-CFLAGS = /MD /O2 -I.
+-LDFLAGS =
++CFLAGS = /nologo $(CFLAGS) -I.
+ 
+ STATIC_LIB = libdeflatestatic.lib
+ SHARED_LIB = libdeflate.dll

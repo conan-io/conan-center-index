@@ -1,12 +1,15 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, RunEnvironment, CMake
-from conans.errors import ConanInvalidConfiguration
-from conans.model import Generator
+from contextlib import contextmanager
+
 import configparser
 import functools
 import glob
 import os
 import textwrap
+
+from conan.tools.microsoft import msvc_runtime_flag
+from conans import ConanFile, tools, RunEnvironment, CMake
+from conans.errors import ConanInvalidConfiguration
+from conans.model import Generator
 
 required_conan_version = ">=1.43.0"
 
@@ -87,6 +90,7 @@ class QtConan(ConanFile):
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
+        "with_md4c": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -128,6 +132,7 @@ class QtConan(ConanFile):
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
+        "with_md4c": True,
 
         "gui": True,
         "widgets": True,
@@ -216,6 +221,7 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+            del self.options.with_md4c
 
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
@@ -249,7 +255,7 @@ class QtConan(ConanFile):
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
-           
+
         if tools.Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, of to libc++")
 
@@ -391,6 +397,8 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+        if self.options.get_safe("with_md4c", False):
+            self.requires("md4c/0.4.8")
 
     def build_requirements(self):
         self.build_requires("cmake/3.23.1")
@@ -445,7 +453,8 @@ class QtConan(ConanFile):
 
         # workaround QTBUG-94356
         if tools.Version(self.version) >= "6.1.1":
-            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "FindWrapZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+            zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
             tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
                 "")
@@ -548,6 +557,28 @@ class QtConan(ConanFile):
 
         return None
 
+    @contextmanager
+    def _build_context(self):
+        with tools.vcvars(self) if self._is_msvc else tools.no_op():
+            # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
+            build_env = tools.RunEnvironment(self).vars if self._is_msvc else {}
+            build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
+            build_env["PKG_CONFIG_PATH"] = [self.build_folder]
+            if self.settings.os == "Windows":
+                if not "PATH" in build_env:
+                    build_env["PATH"] = []
+                build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
+            if self._is_msvc:
+                # this avoids cmake using gcc from strawberryperl
+                build_env["CC"] = "cl"
+                build_env["CXX"] = "cl"
+            with tools.environment_append(build_env):
+
+                if tools.os_info.is_macos:
+                    tools.save(".qmake.stash" , "")
+                    tools.save(".qmake.super" , "")
+                yield
+
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self, generator="Ninja")
@@ -623,6 +654,22 @@ class QtConan(ConanFile):
             else:
                 cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
+                
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "libjpeg"),
+                              ("with_libpng", "libpng"),
+                              ("with_md4c", "libmd4c"),
+                              ("with_pcre2", "pcre"),]:
+            if self.options.get_safe(opt, False):
+                if self.options.multiconfiguration:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "qt"
+                else:
+                    cmake.definitions["INPUT_%s" % conf_arg] = "system"
+            else:
+                cmake.definitions["INPUT_%s" % conf_arg] = "no"
 
         for feature in str(self.options.disabled_features).split():
             cmake.definitions["FEATURE_%s" % feature] = "OFF"
@@ -691,34 +738,18 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 " IMPORTED)\n",
                 " IMPORTED GLOBAL)\n", strict=False)
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
-            # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
-            build_env = tools.RunEnvironment(self).vars if self._is_msvc else {}
-            build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
-            build_env["PKG_CONFIG_PATH"] = [self.build_folder]
-            if self.settings.os == "Windows":
-                if not "PATH" in build_env:
-                    build_env["PATH"] = []
-                build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
-            if self._is_msvc:
-                # this avoids cmake using gcc from strawberryperl
-                build_env["CC"] = "cl"
-                build_env["CXX"] = "cl"
-            with tools.environment_append(build_env):
+            
+        with self._build_context():
+            cmake = self._configure_cmake()
+            if tools.os_info.is_macos:
+                tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+            with tools.environment_append({
+                "BASH_ENV": os.path.abspath("bash_env")
+            }) if tools.os_info.is_macos else tools.no_op():
+                with tools.run_environment(self):
+                    with tools.remove_from_path("perl") if self.settings.os == "Windows" else tools.no_op():
+                        cmake.build()
 
-                if tools.os_info.is_macos:
-                    tools.save(".qmake.stash" , "")
-                    tools.save(".qmake.super" , "")
-
-                cmake = self._configure_cmake()
-                if tools.os_info.is_macos:
-                    tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
-                with tools.environment_append({
-                    "BASH_ENV": os.path.abspath("bash_env")
-                }) if tools.os_info.is_macos else tools.no_op():
-                    with tools.run_environment(self):
-                        with tools.remove_from_path("perl") if self.settings.os == "Windows" else tools.no_op():
-                            cmake.build()
     @property
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
@@ -731,8 +762,9 @@ class QtConan(ConanFile):
         return os.path.join("lib", "cmake", "Qt6{0}".format(module), "conan_qt_qt6_{0}private.cmake".format(module.lower()))
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
+        with self._build_context():
+            cmake = self._configure_cmake()
+            cmake.install()
         tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._get_module_tree:
@@ -768,7 +800,9 @@ class QtConan(ConanFile):
         if self.options.widgets:
             targets.append("uic")
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
+            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
+            if self.settings.os == "Windows":
+                targets.extend(["windeployqt"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
@@ -792,7 +826,7 @@ class QtConan(ConanFile):
                     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{1})
                 endif()
                 """.format(target, exe_path))
-        
+
         filecontents += textwrap.dedent("""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
                 set(QT_DEFAULT_MAJOR_VERSION %s)
@@ -864,6 +898,10 @@ class QtConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
+
+        # consumers will need the QT_PLUGIN_PATH defined in runenv
+        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
+        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
 
         build_modules = []
 
@@ -968,6 +1006,8 @@ class QtConan(ConanFile):
                 gui_reqs.append("libjpeg::libjpeg")
             if self.options.with_glib:
                 gui_reqs.append("glib::glib")
+            if self.options.with_md4c:
+                gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
 
             build_modules.append(self._cmake_qt6_private_file("Gui"))
@@ -976,6 +1016,7 @@ class QtConan(ConanFile):
 
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
                     "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
             elif self.settings.os == "Android":
@@ -1052,7 +1093,6 @@ class QtConan(ConanFile):
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
-            _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt6::LinguistTools")

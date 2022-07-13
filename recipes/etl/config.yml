@@ -1,4 +1,8 @@
 versions:
+  "20.29.3":
+    folder: all
+  "20.29.1":
+    folder: all
   "20.28.0":
     folder: all
   "20.27.1":
@@ -6,10 +10,4 @@ versions:
   "20.25.0":
     folder: all
   "20.24.1":
-    folder: all
-  "20.24.0":
-    folder: all
-  "20.21.0":
-    folder: all
-  "20.19.0":
     folder: all

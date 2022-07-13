@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -39,7 +40,6 @@ class HarfbuzzConan(ConanFile):
 
     short_paths = True
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
     @property
@@ -49,6 +49,11 @@ class HarfbuzzConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,6 +66,17 @@ class HarfbuzzConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared and self.options.with_glib:
+            self.options["glib"].shared = True
+
+    def validate(self):
+        if self.options.shared and self.options.with_glib and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+        if tools.Version(self.version) >= "4.4.0":
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+                raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
     def requirements(self):
         if self.options.with_freetype:
@@ -68,7 +84,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/71.1")
         if self.options.with_glib:
-            self.requires("glib/2.73.0")
+            self.requires("glib/2.73.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -138,3 +154,7 @@ class HarfbuzzConan(ConanFile):
             libcxx = tools.stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
+
+    def package_id(self):
+        if self.options.with_glib:
+            self.info.requires["glib"].full_package_mode()

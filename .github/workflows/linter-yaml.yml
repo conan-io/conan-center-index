@@ -1,0 +1,93 @@
+name: "[linter] YAML files"
+
+on:
+  pull_request:
+
+env:
+  PYTHONPATH: ${{github.workspace}}
+  PYVER: "3.8"
+  CONFIG_FILES_PATH: "recipes/**/config.yml"
+  CONANDATA_FILES_PATH: "recipes/**/**/conandata.yml"
+
+jobs:
+  test_linter:
+    # A job to run when the linter changes. We want to know in advance how many files will be broken
+    name: Test linter changes (YAML files)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Get changed files
+        uses: tj-actions/changed-files@v20
+        id: changed_files
+        with:
+          files: |
+            linter/**
+
+      - uses: actions/setup-python@v3
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+      
+      - name: Install dependencies
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: pip install yamllint
+
+      - name: Run linter (config.yml)
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONFIG_FILES_PATH }}
+
+      - name: Run linter (conandata.yml)
+        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        run: yamllint --config-file linter/yamllint_rules.yml -f parsable ${{ env.CONANDATA_FILES_PATH }}
+
+
+  lint_pr_files:
+    # Lint files modified in the pull_request
+    name: Lint changed files (YAML files)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYVER }}
+      
+      - name: Install dependencies
+        run: pip install yamllint
+
+      ## Work on config.yml files
+      - name: Get changed files (config)
+        id: changed_files_config
+        if: always()
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            ${{ env.CONFIG_FILES_PATH }}
+      
+      - name: Run linter (config.yml)
+        if: steps.changed_files_config.outputs.any_changed == 'true' && always()
+        run: |
+          for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
+            yamllint --config-file linter/yamllint_rules.yml ${file}
+          done
+
+      ## Work on conandata.yml files
+      - name: Get changed files (conandata)
+        id: changed_files_conandata
+        if: always()
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            ${{ env.CONANDATA_FILES_PATH }}
+      
+      - name: Run linter (conandata.yml)
+        if: steps.changed_files_conandata.outputs.any_changed == 'true' && always()
+        run: |
+          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
+            yamllint --config-file linter/yamllint_rules.yml ${file}
+          done

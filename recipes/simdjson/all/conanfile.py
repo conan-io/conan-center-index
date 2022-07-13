@@ -10,10 +10,10 @@ required_conan_version = ">=1.45.0"
 class SimdjsonConan(ConanFile):
     name = "simdjson"
     description = "Parsing gigabytes of JSON per second"
-    topics = ("json", "parser", "simd", "format")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/simdjson"
+    topics = ("json", "parser", "simd", "format")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +25,6 @@ class SimdjsonConan(ConanFile):
         "fPIC": True,
         "threads": True
     }
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
     @property
@@ -45,6 +44,9 @@ class SimdjsonConan(ConanFile):
             "clang": "6",
             "apple-clang": "9.4",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -122,5 +124,5 @@ class SimdjsonConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
             self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
-            if tools.Version(self.version) >= "0.9.0" and is_msvc(self):
+            if is_msvc(self):
                 self.cpp_info.defines.append("SIMDJSON_USING_WINDOWS_DYNAMIC_LIBRARY=1")

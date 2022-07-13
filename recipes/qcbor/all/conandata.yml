@@ -1,0 +1,8 @@
+sources:
+  "1.0":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.0.tar.gz"
+    sha256: "961a46eb5a599cc040bfce4f4fade4427e046f1748f37ba4ebbc097fb9cdf1d3"
+patches:
+  "1.0":
+    - patch_file: "patches/1.0-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
