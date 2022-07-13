@@ -8,7 +8,7 @@ recipes to Conan v2.
 
 It is important to note that these rules are targetting Conan v2 compatibility layer, their
 purpose is to fail for v1 syntax that will be no longer available in v2. Even if the syntax
-if perfectly valid in Conan v1, the recipe might fail here because it is not v2-complaint.
+if perfectly valid in Conan v1, the recipe might fail here because it is not v2-compliant.
 
 > **Note.-** Some of the errored checks might be just plain Python syntax errors, while
 > others might be related to the custom rules added by us.
