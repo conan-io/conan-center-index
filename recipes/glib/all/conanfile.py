@@ -151,13 +151,14 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        for filename in [
-            os.path.join(self._source_subfolder, "meson.build"),
-            os.path.join(self._source_subfolder, "glib", "meson.build"),
-            os.path.join(self._source_subfolder, "gobject", "meson.build"),
-            os.path.join(self._source_subfolder, "gio", "meson.build"),
-        ]:
-            tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
+        if tools.Version(self.version) < "2.73.2":
+            for filename in [
+                os.path.join(self._source_subfolder, "meson.build"),
+                os.path.join(self._source_subfolder, "glib", "meson.build"),
+                os.path.join(self._source_subfolder, "gobject", "meson.build"),
+                os.path.join(self._source_subfolder, "gio", "meson.build"),
+            ]:
+                tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
         if self.settings.os != "Linux":
             # allow to find gettext
             tools.replace_in_file(
