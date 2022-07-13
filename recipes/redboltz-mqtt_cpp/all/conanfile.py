@@ -33,7 +33,7 @@ class MqttCPPConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
