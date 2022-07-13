@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, cmake_layout
 from conans import CMake, tools
@@ -10,7 +11,7 @@ def _strip_version(package):
 def _option_name(dep):
     if 'option' in dep:
         return dep['option']
-    return "with_" + _strip_version(dep["conan_dep"])
+    return "with_" + _strip_version(dep["require"])
 
 def _make_options(gdal_deps):
     options = {
@@ -19,7 +20,7 @@ def _make_options(gdal_deps):
         "tools": [True, False]
     }
     for dep in gdal_deps:
-        if "conan_dep" in dep:
+        if "require" in dep:
             options[_option_name(dep)] = [True, False]
     return options
 
@@ -30,10 +31,15 @@ def _make_default_options(gdal_deps):
         "tools": False
     }
     for dep in gdal_deps:
-        if "conan_dep" in dep:
+        if "require" in dep:
             default_options[_option_name(dep)] = ("default" in dep and dep["default"])
             
     return default_options
+
+def _component(gdal_dep):
+    if "conan_dep" in gdal_dep:
+        return gdal_dep["conan_dep"]
+    return _strip_version(gdal_dep["require"])
 
 class GdalConan(ConanFile):
     name = "gdal"
@@ -53,40 +59,43 @@ class GdalConan(ConanFile):
     # grep -E '^[ \t]*gdal_check_package\(' cmake/helpers/CheckDependentLibraries.cmake \
     #   | sed 's/[ \t]*gdal_check_package(\([a-zA-Z_0-9]\+\) "\(.*\)"\(.*\)/{ 'dep': \'\1\', 'descr': \'\2\' },/' \
     #   | sort | uniq
+    #
+    #   'PROJ' has been added manually.
 
     gdal_deps = [
+        { 'conan_dep': 'proj::projlib', 'require': "proj/9.0.0", 'dep': 'PROJ', 'default': True },
         { 'dep': 'Armadillo', 'descr': 'C++ library for linear algebra (used for TPS transformation)' },
         { 'dep': 'Arrow', 'descr': 'Apache Arrow C++ library' },
         { 'dep': 'BRUNSLI', 'descr': 'Enable BRUNSLI for JPEG packing in MRF' },
-        { 'conan_dep': "c-blosc/1.21.1", 'option': 'blosc', 'dep': 'Blosc', 'descr': 'Blosc compression' },
-        { 'conan_dep': "cfitsio/4.1.0", 'dep': 'CFITSIO', 'descr': 'C FITS I/O library' },
+        { 'require': "c-blosc/1.21.1", 'option': 'blosc', 'dep': 'Blosc', 'descr': 'Blosc compression' },
+        { 'require': "cfitsio/4.1.0", 'dep': 'CFITSIO', 'descr': 'C FITS I/O library' },
         { 'dep': 'CURL', 'descr': 'Enable drivers to use web API' },
         { 'dep': 'Crnlib', 'descr': 'enable gdal_DDS driver' },
         { 'dep': 'CryptoPP', 'descr': 'Use crypto++ library for CPL.' },
-        { 'conan_dep': 'libdeflate/1.12', 'default': True, 'dep': 'Deflate', 'descr': 'Enable libdeflate compression library (complement to ZLib)' },
+        { 'require': 'libdeflate/1.12', 'default': True, 'dep': 'Deflate', 'descr': 'Enable libdeflate compression library (complement to ZLib)' },
         { 'dep': 'ECW', 'descr': 'Enable ECW driver' },
         { 'dep': 'EXPAT', 'descr': 'Read and write XML formats' },
         { 'dep': 'FYBA', 'descr': 'enable ogr_SOSI driver' },
         { 'dep': 'FileGDB', 'descr': 'Enable FileGDB (based on closed-source SDK) driver' },
         { 'dep': 'FreeXL', 'descr': 'Enable XLS driver' },
-        { 'conan_dep': "geos/3.11.0", 'default': True, 'dep': 'GEOS', 'targets': "CONAN_PKG::geos", 'descr': 'Geometry Engine - Open Source (GDAL core dependency)' },
-        { 'conan_dep': "giflib/5.2.1", 'option': 'gif', 'default': True, 'targets': "CONAN_PKG::giflib", 'dep': 'GIF', 'descr': 'GIF compression library (external)' },
+        { 'conan_dep': "geos::geos_c", 'require': "geos/3.11.0", 'default': True, 'dep': 'GEOS', 'descr': 'Geometry Engine - Open Source (GDAL core dependency)' },
+        { 'require': "giflib/5.2.1", 'option': 'gif', 'default': True, 'dep': 'GIF', 'descr': 'GIF compression library (external)' },
         { 'dep': 'GTA', 'descr': 'Enable GTA driver' },
-        { 'conan_dep':"libgeotiff/1.7.1", 'default': True, 'targets': "CONAN_PKG::libgeotiff", 'dep': 'GeoTIFF', 'descr': 'libgeotiff library (external)' },
+        { 'require':"libgeotiff/1.7.1", 'default': True, 'dep': 'GeoTIFF', 'descr': 'libgeotiff library (external)' },
         { 'dep': 'HDF4', 'descr': 'Enable HDF4 driver' },
         { 'dep': 'HDF5', 'descr': 'Enable HDF5" COMPONENTS "C" "CXX' },
         { 'dep': 'HDFS', 'descr': 'Enable Hadoop File System through native library' },
         { 'dep': 'HEIF', 'descr': 'HEIF >= 1.1' },
         { 'dep': 'IDB', 'descr': 'enable ogr_IDB driver' },
-        { 'conan_dep': "libiconv/1.17", 'dep': 'Iconv', 'descr': 'Character set recoding (used in GDAL portability library)' },
+        { 'require': "libiconv/1.17", 'dep': 'Iconv', 'descr': 'Character set recoding (used in GDAL portability library)' },
         { 'dep': 'JPEG', 'descr': 'JPEG compression library (external)' },
-        { 'conan_dep': "json-c/0.15", 'default': True, 'targets': "CONAN_PKG::json-c", 'dep': 'JSONC', 'descr': 'json-c library (external)' },
+        { 'require': "json-c/0.15", 'default': True, 'dep': 'JSONC', 'descr': 'json-c library (external)' },
         { 'dep': 'JXL', 'descr': 'JPEG-XL compression (when used with internal libtiff)' },
         { 'dep': 'KDU', 'descr': 'Enable KAKADU' },
         { 'dep': 'KEA', 'descr': 'Enable KEA driver' },
         { 'dep': 'LERC', 'descr': 'Enable LERC (external)' },
         { 'dep': 'LURATECH', 'descr': 'Enable JP2Lura driver' },
-        { 'conan_dep': "lz4/1.9.3", 'dep': 'LZ4', 'descr': 'LZ4 compression' },
+        { 'require': "lz4/1.9.3", 'dep': 'LZ4', 'descr': 'LZ4 compression' },
         { 'dep': 'LibLZMA', 'descr': 'LZMA compression' },
         { 'dep': 'LibXml2', 'descr': 'Read and write XML formats' },
         { 'dep': 'MONGOCXX', 'descr': 'Enable MongoDBV3 driver' },
@@ -106,26 +115,26 @@ class GdalConan(ConanFile):
         { 'dep': 'PCRE', 'descr': 'Enable PCRE support for sqlite3' },
         { 'dep': 'PCRE2', 'descr': 'Enable PCRE2 support for sqlite3' },
         { 'dep': 'PDFIUM', 'descr': 'Enable PDF driver with Pdfium (read side)' },
-        { 'conan_dep': "libpng/1.6.37", 'default': True, 'targets': "CONAN_PKG::libpng", 'dep': 'PNG', 'descr': 'PNG compression library (external)' },
+        { 'require': "libpng/1.6.37", 'default': True, 'dep': 'PNG', 'descr': 'PNG compression library (external)' },
         { 'dep': 'Parquet', 'descr': 'Apache Parquet C++ library' },
         { 'dep': 'Podofo', 'descr': 'Enable PDF driver with Podofo (read side)' },
         { 'dep': 'Poppler', 'descr': 'Enable PDF driver with Poppler (read side)' },
-        { 'conan_dep': "libpq/14.2", 'option': 'with_pg', 'dep': 'PostgreSQL', 'descr': '' },
-        { 'conan_dep': "qhull/8.0.1", 'default': True, 'dep': 'QHULL', 'descr': 'Enable QHULL (external)' },
+        { 'require': "libpq/14.2", 'option': 'with_pg', 'dep': 'PostgreSQL', 'descr': '' },
+        { 'conan_dep': 'qhull::libqhull', 'require': "qhull/8.0.1", 'default': True, 'dep': 'QHULL', 'descr': 'Enable QHULL (external)' },
         { 'dep': 'RASDAMAN', 'descr': 'enable rasdaman driver' },
         { 'dep': 'RASTERLITE2', 'descr': 'Enable RasterLite2 support for sqlite3' },
         { 'dep': 'SFCGAL', 'descr': 'gdal core supports ISO 19107:2013 and OGC Simple Features Access 1.2 for 3D operations' },
         { 'dep': 'SPATIALITE', 'descr': 'Enable spatialite support for sqlite3' },
-        { 'conan_dep': "sqlite3/3.38.5", 'default': True, 'dep': 'SQLite3', 'descr': 'Enable SQLite3 support (used by SQLite/Spatialite, GPKG, Rasterlite, MBTiles, etc.)' },
+        { 'conan_dep': 'sqlite3::sqlite', 'require': "sqlite3/3.38.5", 'default': True, 'dep': 'SQLite3', 'descr': 'Enable SQLite3 support (used by SQLite/Spatialite, GPKG, Rasterlite, MBTiles, etc.)' },
         { 'dep': 'SWIG', 'descr': 'Enable language bindings' },
         { 'dep': 'Shapelib', 'descr': 'Enable Shapelib support (not recommended, internal Shapelib is preferred).' },
         { 'dep': 'TEIGHA', 'descr': 'Enable DWG and DGNv8 drivers' },
-        { 'conan_dep': "libtiff/4.3.0", 'dep': 'TIFF', 'default': True, 'descr': 'Support for the Tag Image File Format (TIFF).' },
+        { 'require': "libtiff/4.3.0", 'dep': 'TIFF', 'default': True, 'descr': 'Support for the Tag Image File Format (TIFF).' },
         { 'dep': 'TileDB', 'descr': 'enable TileDB driver' },
         { 'dep': 'WebP', 'descr': 'WebP compression' },
         { 'dep': 'XercesC', 'descr': 'Read and write XML formats (needed for GMLAS and ILI drivers)' },
-        { 'conan_dep':"zlib/1.2.12", 'default': True, 'dep': 'ZLIB', 'descr': 'zlib (external)' },
-        { 'conan_dep': 'zstd/1.5.2', 'dep': 'ZSTD', 'descr': 'ZSTD compression library' },
+        { 'require':"zlib/1.2.12", 'default': True, 'dep': 'ZLIB', 'descr': 'zlib (external)' },
+        { 'require': 'zstd/1.5.2', 'dep': 'ZSTD', 'descr': 'ZSTD compression library' },
         { 'dep': 'rdb', 'descr': 'enable RIEGL RDB library' }
     ]
     
@@ -248,16 +257,24 @@ class GdalConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.with_sqlite3:
+            self.options["sqlite3"].enable_column_metadata = True
+
     def requirements(self):
-        self.requires("proj/9.0.0")
 
         for dep in self.gdal_deps:
-            if "conan_dep" in dep and getattr(self.options, _option_name(dep)):
-                    self.requires(dep['conan_dep'])
+            if "require" in dep and getattr(self.options, _option_name(dep)):
+                    self.requires(dep['require'])
 
     def layout(self):
         cmake_layout(self)
@@ -294,13 +311,24 @@ class GdalConan(ConanFile):
         cmake.definitions["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
         cmake.definitions["BUILD_APPS"] = self.options.tools
+        del cmake.definitions["CMAKE_MODULE_PATH"]
+
+
+        cmake.definitions["SQLite3_HAS_COLUMN_METADATA"] = \
+            self.options["sqlite3"].enable_column_metadata
+
+        cmake.definitions["SQLite3_HAS_RTREE"] = self.options["sqlite3"].enable_rtree
 
         for dep in self.gdal_deps:
             upper = dep['dep'].upper()
-            enabled = "conan_dep" in dep and getattr(self.options, _option_name(dep))
+            enabled = "require" in dep and getattr(self.options, _option_name(dep))
             cmake.definitions["GDAL_USE_" + upper] = enabled
-            if enabled and "targets" in dep:
-                cmake.definitions["GDAL_CHECK_PACKAGE_" + upper + "_TARGETS"] = dep["targets"]
+            if enabled:
+                cmake.definitions["GDAL_CONAN_PACKAGE_FOR_" + upper] = \
+                       _strip_version(dep["require"])
+            else:
+                cmake.definitions[dep['dep'] + "_FOUND"] = False
+
 
 
         for k, v in cmake.definitions.items():
@@ -310,6 +338,7 @@ class GdalConan(ConanFile):
         return cmake
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
 
         cmake.build()
@@ -338,7 +367,11 @@ class GdalConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
         self.cpp_info.includedirs.append(os.path.join("include", "gdal"))
 
-        self.cpp_info.libs = ["gdal"]
+        self.cpp_info.libs.append("gdal")
+
+        for dep in self.gdal_deps:
+            if "require" in dep and getattr(self.options, _option_name(dep)):
+                    self.cpp_info.requires.append(_component(dep))
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
         self.output.info("Prepending to GDAL_DATA environment variable: {}".format(gdal_data_path))
