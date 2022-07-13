@@ -296,7 +296,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
-            self.requires("grpc/1.45.2")
+            self.requires("grpc/1.47.0")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
@@ -304,11 +304,11 @@ class ArrowConan(ConanFile):
         if self._with_openssl():
             # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
             if self.options.with_s3:
-                self.requires("openssl/1.1.1o")
+                self.requires("openssl/1.1.1q")
             else:
-                self.requires("openssl/3.0.3")
+                self.requires("openssl/3.0.5")
         if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.4.0")
+            self.requires("opentelemetry-cpp/1.4.1")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
