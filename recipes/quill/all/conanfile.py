@@ -83,7 +83,6 @@ class QuillConan(ConanFile):
 
     def requirements(self):
         if tools.Version(self.version) >= "1.6.3":
-            # self.requires("fmt/8.1.1")
             self.requires("fmt/9.0.0")
         else:
             self.requires("fmt/7.1.3")
