@@ -58,7 +58,12 @@ class DiligentToolsConan(ConanFile):
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
 
     def requirements(self):
-        if self.version >= "2.5.2":
+    
+        if self.version == "cci.20220713":
+            self.requires("diligent-core/cci.20220713")
+            self.requires('taywee-args/6.3.0')
+            self.requires("imgui/1.85")    
+        elif self.version >= "2.5.2":
             self.requires("diligent-core/2.5.2")
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
@@ -115,6 +120,10 @@ class DiligentToolsConan(ConanFile):
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
+        
+        self.copy(pattern="HLSL2GLSLConverter", src=self._build_subfolder, dst="bin", keep_path=False)
+        self.copy(pattern="HLSL2GLSLConverter.exe", src=self._build_subfolder, dst="bin", keep_path=False)
+
         tools.rmdir(os.path.join(self.package_folder, "Licenses"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 

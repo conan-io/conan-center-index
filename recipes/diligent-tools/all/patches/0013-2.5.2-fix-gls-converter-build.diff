@@ -1,0 +1,50 @@
+commit 968a34deac0f26de29374966d3e772d05370e368
+diff --git a/HLSL2GLSLConverter/CMakeLists.txt b/HLSL2GLSLConverter/CMakeLists.txt
+index 5f800f3..2245d36 100644
+--- a/HLSL2GLSLConverter/CMakeLists.txt
++++ b/HLSL2GLSLConverter/CMakeLists.txt
+@@ -25,10 +25,6 @@ endif()
+ 
+ set_common_target_properties(HLSL2GLSLConverter)
+ 
+-target_include_directories(HLSL2GLSLConverter PRIVATE
+-    ../../DiligentCore/Graphics/HLSL2GLSLConverterLib/include
+-)
+-
+ target_compile_definitions(HLSL2GLSLConverter PRIVATE UNICODE)
+ 
+ target_link_libraries(HLSL2GLSLConverter 
+diff --git a/HLSL2GLSLConverter/src/HLSL2GLSLConverterApp.cpp b/HLSL2GLSLConverter/src/HLSL2GLSLConverterApp.cpp
+index badca52..6b4d9a3 100644
+--- a/HLSL2GLSLConverter/src/HLSL2GLSLConverterApp.cpp
++++ b/HLSL2GLSLConverter/src/HLSL2GLSLConverterApp.cpp
+@@ -28,7 +28,7 @@
+ #include "HLSL2GLSLConverterApp.h"
+ 
+ #include "Errors.hpp"
+-#include "HLSL2GLSLConverterImpl.hpp"
++#include "HLSL2GLSLConverter.h"
+ #include "RefCntAutoPtr.hpp"
+ #include "Errors.hpp"
+ #include "EngineFactoryOpenGL.h"
+@@ -174,10 +174,17 @@ int HLSL2GLSLConverterApp::Convert(IRenderDevice* pDevice)
+     auto* HLSLSource = reinterpret_cast<char*>(pHLSLSourceBlob->GetDataPtr());
+     auto  SourceLen  = static_cast<Int32>(pHLSLSourceBlob->GetSize());
+ 
+-    const auto&                               Converter = HLSL2GLSLConverterImpl::GetInstance();
++    RefCntAutoPtr<IHLSL2GLSLConverter> pConverter;
++    CreateHLSL2GLSLConverter(&pConverter);
++    if (!pConverter)
++    {
++        LOG_ERROR_MESSAGE("Failed to create HLSL2GLSL converter");
++        return -1;
++    }
++
+     RefCntAutoPtr<IHLSL2GLSLConversionStream> pStream;
+-    Converter.CreateStream(m_InputPath.c_str(), pShaderSourceFactory, HLSLSource, SourceLen, &pStream);
+-    RefCntAutoPtr<Diligent::IDataBlob> pGLSLSourceBlob;
++    pConverter->CreateStream(m_InputPath.c_str(), pShaderSourceFactory, HLSLSource, SourceLen, &pStream);
++    RefCntAutoPtr<IDataBlob> pGLSLSourceBlob;
+     pStream->Convert(m_EntryPoint.c_str(), m_ShaderType, m_IncludeGLSLDefintions, "_sampler", m_UseInOutLocations, &pGLSLSourceBlob);
+     if (!pGLSLSourceBlob) return -1;
+ 

@@ -1,0 +1,32 @@
+commit 2193e256cb97219485e4a278e09393edc6a4346b
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Fri May 13 11:16:05 2022 +0200
+
+    0012
+
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index c2b0f44..f145ae8 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -33,13 +33,8 @@ endif()
+ if (NOT EXISTS "${DILIGENT_ARGS_DIR}/args.hxx")
+     message(FATAL_ERROR "${DILIGENT_ARGS_DIR}/args.hxx does not exist. This indicates that args submodule is not checked out or DILIGENT_ARGS_DIR variable contains invalid path.")
+ endif()
+-install(FILES "${DILIGENT_ARGS_DIR}/LICENSE" DESTINATION ${LICENSE_INSTALL_PATH} RENAME args-license.txt)
+ 
+ 
+-install(FILES tinygltf/LICENSE DESTINATION ${LICENSE_INSTALL_PATH} RENAME tinygltf-license.txt)
+-install(FILES imGuIZMO.quat/license.txt DESTINATION ${LICENSE_INSTALL_PATH} RENAME imGuIZMO.quat-license.txt)
+-install(FILES stb/LICENSE.txt DESTINATION "${LICENSE_INSTALL_PATH}" RENAME stb-license.txt)
+-install(FILES json/LICENSE.MIT DESTINATION ${LICENSE_INSTALL_PATH} RENAME json-license.txt)
+ 
+ if (NOT DILIGENT_DEAR_IMGUI_PATH)
+     set(DILIGENT_DEAR_IMGUI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/imgui" CACHE PATH "imgui source directory")
+@@ -47,7 +42,6 @@ endif()
+ if (NOT EXISTS "${DILIGENT_DEAR_IMGUI_PATH}/imgui.h")
+     message(FATAL_ERROR "${DILIGENT_DEAR_IMGUI_PATH}/imgui.h does not exist. This inidcates that imgui submodule is not checked out or DILIGENT_DEAR_IMGUI_PATH variable contains invalid path.")
+ endif()
+-install(FILES "${DILIGENT_DEAR_IMGUI_PATH}/LICENSE.txt" DESTINATION ${LICENSE_INSTALL_PATH} RENAME imgui-license.txt)
+ 
+ if(DILIGENT_INSTALL_TOOLS)
+     install(TARGETS ${THIRD_PARTY_TARGETS}

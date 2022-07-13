@@ -1,0 +1,19 @@
+commit 28544e2cf0ac3277d24bcc3c1be55be5c8248ba6
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Thu May 12 13:08:20 2022 +0200
+
+    0009
+
+diff --git a/Imgui/src/ImGuiImplWin32.cpp b/Imgui/src/ImGuiImplWin32.cpp
+index d5f4767..b7cefb2 100644
+--- a/Imgui/src/ImGuiImplWin32.cpp
++++ b/Imgui/src/ImGuiImplWin32.cpp
+@@ -32,7 +32,7 @@
+ #include "GraphicsTypes.h"
+ #include "imgui.h"
+ #include "ImGuiImplWin32.hpp"
+-#include "backends/imgui_impl_win32.h"
++#include "../res/bindings/imgui_impl_win32.h"
+ #include "DebugUtilities.hpp"
+ 
+ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

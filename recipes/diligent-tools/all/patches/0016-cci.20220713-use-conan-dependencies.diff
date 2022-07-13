@@ -1,0 +1,24 @@
+commit 0d2f83b13712019021e4e4e0dbb1bac61ab4a311
+Author: andrei malashkin <andrei.malashkin@reactivereality.com>
+Date:   Wed May 11 10:47:25 2022 +0200
+
+    0008
+
+diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
+index 362e209..256b352 100644
+--- a/TextureLoader/CMakeLists.txt
++++ b/TextureLoader/CMakeLists.txt
+@@ -47,12 +47,7 @@ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(Diligent-TextureLoader 
+ PRIVATE 
+-    Diligent-BuildSettings 
+-    Diligent-Common 
+-    Diligent-PlatformInterface 
+-    Diligent-GraphicsEngineInterface 
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
++    diligent-core::diligent-core
+     PNG::PNG 
+     TIFF::TIFF
+     ZLIB::ZLIB
