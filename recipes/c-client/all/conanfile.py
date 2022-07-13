@@ -53,7 +53,7 @@ class CclientConan(ConanFile):
 
     def requirements(self):
         if not self._is_msvc:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
