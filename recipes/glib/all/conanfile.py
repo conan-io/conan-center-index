@@ -72,7 +72,10 @@ class GLibConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
-            self.requires("pcre/8.45")
+            if tools.Version(self.version) >= "2.73.2":
+                self.requires("pcre2/10.40")
+            else:
+                self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
@@ -239,7 +242,10 @@ class GLibConan(ConanFile):
             os.path.join("lib", "glib-2.0", "include")
         )
         if self.options.with_pcre:
-            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+            if tools.Version(self.version) >= "2.73.2":
+                self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
+            else:
+                self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append(
                 "libgettext::libgettext"
