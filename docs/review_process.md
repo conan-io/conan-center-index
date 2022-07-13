@@ -105,8 +105,9 @@ The list includes conan-center-index contributors who are very active and proven
 - [@MartinDelille](https://github.com/MartinDelille)
 - [@dmn-star](https://github.com/dmn-star)
 
-The list is not constant and will change periodically based on contribution.
-That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
+The list, located [here](https://github.com/conan-io/conan-center-index/blob/master/.c3i/reviewers.yml),
+is not constant and will change periodically based on contribution.
+That also means **you can be included in this list** as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
 
 ### Rule of 2 reviews
 
