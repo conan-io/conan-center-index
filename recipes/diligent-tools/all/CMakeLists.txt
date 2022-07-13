@@ -3,6 +3,12 @@ project(cmake_wrapper)
 
 include(BuildUtils.cmake)
 
+set(GL_SUPPORTED TRUE)
+set(GLES_SUPPORTED TRUE)
+set(VULKAN_SUPPORTED TRUE)
+set(METAL_SUPPORTED TRUE)
+set(ARCHIVER_SUPPORTED TRUE)
+
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 

@@ -1,0 +1,13 @@
+diff --git a/RenderStatePackager/CMakeLists.txt b/RenderStatePackager/CMakeLists.txt
+index 154e89a..a58d2b1 100644
+--- a/RenderStatePackager/CMakeLists.txt
++++ b/RenderStatePackager/CMakeLists.txt
+@@ -49,8 +49,6 @@ set_common_target_properties(Diligent-RenderStatePackager)
+ 
+ target_link_libraries(Diligent-RenderStatePackager
+ PRIVATE
+-    Diligent-BuildSettings
+-    Diligent-Common
+     Diligent-RenderStatePackagerLib
+ )
+ target_include_directories(Diligent-RenderStatePackager
