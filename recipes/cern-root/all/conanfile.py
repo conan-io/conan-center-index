@@ -77,25 +77,25 @@ class CernRootConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cfitsio/4.0.0")
+        self.requires("cfitsio/4.1.0")
         self.requires("fftw/3.3.9")
         self.requires("giflib/5.2.1")
         self.requires("glew/2.2.0")
         self.requires("glu/system")
-        self.requires("libcurl/7.78.0")
+        self.requires("libcurl/7.83.1")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
-        self.requires("libxml2/2.9.12")
+        self.requires("libxml2/2.9.14")
         self.requires("lz4/1.9.3")
         self.requires("opengl/system")
-        self.requires("openssl/1.1.1l")
-        self.requires("pcre/8.44")
-        self.requires("sqlite3/3.36.0")
+        self.requires("openssl/1.1.1q")
+        self.requires("pcre/8.45")
+        self.requires("sqlite3/3.39.0")
         self.requires("tbb/2020.3")
         self.requires("xorg/system")
-        self.requires("xxhash/0.8.0")
+        self.requires("xxhash/0.8.1")
         self.requires("xz_utils/5.2.5")
-        self.requires("zstd/1.5.0")
+        self.requires("zstd/1.5.2")
 
     def validate(self):
         self._enforce_minimum_compiler_version()
