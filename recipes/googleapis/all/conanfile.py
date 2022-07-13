@@ -6,6 +6,7 @@ from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
 from conan.tools.layout import cmake_layout
+from conans.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
 
@@ -48,6 +49,8 @@ class GoogleAPIS(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "5":
+            raise ConanInvalidConfiguration("Build with GCC 5 fails")
 
     def requirements(self):
         self.requires('protobuf/3.21.1')
