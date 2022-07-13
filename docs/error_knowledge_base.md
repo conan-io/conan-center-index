@@ -443,7 +443,7 @@ https://github.com/conan-io/hooks/commit/3e7e77fa5d14ee53dc1ad6b10d85358871fdd03
              
 #### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
 
-It's erroneous to leave the default `include` directory when it's no present. Consider adding:
+It's erroneous to leave the default `include` directory when it's not present. Consider adding:
 
 ```python
 def package_info(self):
