@@ -36,13 +36,16 @@ class _ProtoLibrary:
 
     @property
     def cmake_target(self):
-        return f'{self.qname.replace("/", "_")}_{self.name}'
+        qname = self.qname
+        if self.qname.startswith("//"):
+            qname = qname[2:]
+        return f'{qname.replace("/", "_")}_{self.name}'
 
     @property
     def cmake_deps(self):
         def to_cmake_target(item):
             if item.startswith("//"):
-                return item.replace("/", "_").replace(":", "_")
+                return item[2:].replace("/", "_").replace(":", "_")
             return item
         return [to_cmake_target(it) for it in self.deps]
 
