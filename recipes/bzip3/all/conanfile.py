@@ -71,5 +71,7 @@ class BZip3Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["bzip3"]
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.get_safe("with_thread", False):
-            self.cpp_info.system_libs.append("pthread")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            if self.options.get_safe("with_thread", False):
+                self.cpp_info.system_libs.append("pthread")
