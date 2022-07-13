@@ -1,7 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 59f53e55..5baa9c83 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -491,7 +491,7 @@ add_subdirectory(Primitives)
+@@ -455,7 +455,7 @@ add_subdirectory(Primitives)
  add_subdirectory(Platforms)
  add_subdirectory(Common)
  add_subdirectory(Graphics)
