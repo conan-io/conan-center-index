@@ -4,7 +4,6 @@ import os
 
 required_conan_version = ">=1.43.0"
 
-
 class RotorConan(ConanFile):
     name = "rotor"
     license = "MIT"
@@ -21,15 +20,17 @@ class RotorConan(ConanFile):
         "shared": [True, False],
         "enable_asio": [True, False],
         "enable_thread": [True, False],
+        "multithreading": [True, False],  # enables multithreading support
     }
     default_options = {
         "fPIC": True,
         "shared": False,
         "enable_asio": False,
         "enable_thread": False,
+        "multithreading": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -50,7 +51,7 @@ class RotorConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.69.0")
+        self.requires("boost/1.79.0")
 
 
     def validate(self):
@@ -75,8 +76,8 @@ class RotorConan(ConanFile):
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-        if self.options.shared:
-            raise ConanInvalidConfiguration("shared option is currently not supported")
+        if self.options.shared and tools.Version(self.version) < "0.23":
+            raise ConanInvalidConfiguration("shared option is available from v0.23")
 
 
     def _configure_cmake(self):
@@ -86,11 +87,14 @@ class RotorConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_BOOST_ASIO"] = self.options.enable_asio
         self._cmake.definitions["BUILD_THREAD"] = self.options.enable_thread
+        self._cmake.definitions["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -108,6 +112,9 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].libs = ["rotor"]
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
+
+        if not self.options.multithreading:
+            self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE")
 
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]

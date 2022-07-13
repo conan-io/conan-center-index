@@ -55,8 +55,8 @@ class UwebsocketsConan(ConanFile):
 
         minimal_version = {
             "Visual Studio": "15",
-            "gcc": "7",
-            "clang": "5",
+            "gcc": "7" if tools.Version(self.version) < "20.11.0" else "8",
+            "clang": "5" if tools.Version(self.version) < "20.11.0" else "7",
             "apple-clang": "10",
         }
 
@@ -78,6 +78,9 @@ class UwebsocketsConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s"
                 % (self.name, minimal_cpp_standard)
             )
+
+        if tools.Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
+            raise ConanInvalidConfiguration("{} needs recent libstdc++ with charconv.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)

@@ -3,7 +3,6 @@ import os
 
 required_conan_version = ">=1.35.0"
 
-
 class GeotransConan(ConanFile):
     name = "geotrans"
     license = (
@@ -34,7 +33,6 @@ class GeotransConan(ConanFile):
     }
 
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
     _cmake = None
 
     @property
@@ -44,6 +42,11 @@ class GeotransConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -69,6 +72,8 @@ class GeotransConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -88,6 +93,7 @@ class GeotransConan(ConanFile):
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["dtcc"].system_libs.append("pthread")
+            self.cpp_info.components["dtcc"].system_libs.append("m")
 
         self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
         self.cpp_info.components["ccs"].requires = ["dtcc"]

@@ -83,8 +83,8 @@ class MoltenVKConan(ConanFile):
 
     def package_id(self):
         # MoltenVK >=1.O.42 requires at least XCode 12.0 (11.4 actually) at build
-        # time but can be consumed by older compiler versions
-        if tools.Version(self.version) >= "1.0.42":
+        # time but can be consumed by older compiler versions if shared
+        if tools.Version(self.version) >= "1.0.42" and self.options.shared:
             if tools.Version(self.settings.compiler.version) < "12.0":
                 compatible_pkg = self.info.clone()
                 compatible_pkg.settings.compiler.version = "12.0"

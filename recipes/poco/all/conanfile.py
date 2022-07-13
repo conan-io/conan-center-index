@@ -25,11 +25,13 @@ class PocoConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_fork": [True, False],
+        "enable_active_record": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
+        "enable_active_record": "deprecated",
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
@@ -61,7 +63,8 @@ class PocoConan(ConanFile):
         "Util": _PocoComponent("enable_util", True, ["Foundation", "XML", "JSON"], [], True),
         "XML": _PocoComponent("enable_xml", True, ["Foundation"], ["expat::expat"], True),
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
-        "ActiveRecord": _PocoComponent("enable_active_record", True, ["Foundation", "Data"], [], True),
+        "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
+        "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", False, ["Util", "XML"], [], False),
     }
 
     for comp in _poco_component_tree.values():
@@ -102,9 +105,12 @@ class PocoConan(ConanFile):
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
         if tools.Version(self.version) < "1.11":
-            del self.options.enable_active_record
+            del self.options.enable_activerecord
+            del self.options.enable_activerecord_compiler
 
     def configure(self):
+        if self.options.enable_active_record != "deprecated":
+            self.output.warn("enable_active_record option is deprecated, use 'enable_activerecord' instead")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.enable_xml:
@@ -113,26 +119,32 @@ class PocoConan(ConanFile):
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
+        if tools.Version(self.version) >= "1.12":
+            foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
+            self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
 
     def requirements(self):
-        self.requires("pcre/8.45")
+        if tools.Version(self.version) < "1.12":
+            self.requires("pcre/8.45")
+        else:
+            self.requires("pcre2/10.40")
         self.requires("zlib/1.2.12")
         if self.options.enable_xml:
             self.requires("expat/2.4.8")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.38.1")
+            self.requires("sqlite3/3.38.5")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1o")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql"):
             self.requires("libpq/14.2")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
 
     def validate(self):
         if self.options.enable_apacheconnector:
@@ -205,6 +217,9 @@ class PocoConan(ConanFile):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def package_id(self):
+        del self.info.options.enable_active_record
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

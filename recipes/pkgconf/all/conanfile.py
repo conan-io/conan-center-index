@@ -1,5 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">= 1.36.0"
@@ -17,13 +18,13 @@ class PkgConfConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_lib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_lib": False,
     }
-
-    _meson = None
 
     @property
     def _is_clang_cl(self):
@@ -51,7 +52,10 @@ class PkgConfConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        if not self.options.enable_lib:
+            del self.options.fPIC
+            del self.options.shared
+        elif self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -61,7 +65,7 @@ class PkgConfConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building is not implemented in the recipe")
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.62.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -70,19 +74,20 @@ class PkgConfConan(ConanFile):
     def _sharedstatedir(self):
         return os.path.join(self.package_folder, "bin", "share")
 
+    @functools.lru_cache(1)
     def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.options["tests"] = False
-        self._meson.options["sharedstatedir"] = self._sharedstatedir
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._meson
+        meson = Meson(self)
+        meson.options["tests"] = False
+        meson.options["sharedstatedir"] = self._sharedstatedir
+        if not self.options.enable_lib:
+            meson.options["default_library"] = "static"
+        meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return meson
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if not self.options.shared:
+        if not self.options.get_safe("shared", False):
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                   "'-DLIBPKGCONF_EXPORT'",
                                   "'-DPKGCONFIG_IS_STATIC'")
@@ -104,9 +109,13 @@ class PkgConfConan(ConanFile):
 
         if self._is_msvc:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-            if not self.options.shared:
+            if self.options.enable_lib and not self.options.shared:
                 os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
+        
+        if not self.options.enable_lib:
+            tools.rmdir(os.path.join(self.package_folder, "lib"))
+            tools.rmdir(os.path.join(self.package_folder, "include"))
 
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
@@ -114,13 +123,21 @@ class PkgConfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def package_id(self):
+        if not self.options.enable_lib:
+            del self.info.settings.compiler
+
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libpkgconf")
-        if tools.Version(self.version) >= "1.7.4":
-            self.cpp_info.includedirs.append(os.path.join("include", "pkgconf"))
-        self.cpp_info.libs = ["pkgconf"]
-        if not self.options.shared:
-            self.cpp_info.defines = ["PKGCONFIG_IS_STATIC"]
+        if self.options.enable_lib:
+            self.cpp_info.set_property("pkg_config_name", "libpkgconf")
+            if tools.Version(self.version) >= "1.7.4":
+                self.cpp_info.includedirs.append(os.path.join("include", "pkgconf"))
+            self.cpp_info.libs = ["pkgconf"]
+            if not self.options.shared:
+                self.cpp_info.defines = ["PKGCONFIG_IS_STATIC"]
+        else:
+            self.cpp_info.includedirs = []
+            self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var: {}".format(bindir))
@@ -138,4 +155,5 @@ class PkgConfConan(ConanFile):
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes) # remove in conan v2?
 
         # TODO: to remove in conan v2 once pkg_config generator removed
-        self.cpp_info.names["pkg_config"] = "libpkgconf"
+        if self.options.enable_lib:
+            self.cpp_info.names["pkg_config"] = "libpkgconf"

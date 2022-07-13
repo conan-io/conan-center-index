@@ -1,17 +1,18 @@
 from conans import ConanFile, tools, CMake
-import os
+import functools
+
+required_conan_version = ">=1.33.0"
 
 
 class HttpParserConan(ConanFile):
     name = "http_parser"
-    description = "http request/response parser for c "
-    topics = ("conan", "http", "parser")
+    description = "http request/response parser for c"
+    topics = ("http", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nodejs/http-parser"
-    license = ("MIT",)
-    exports_sources = "CMakeLists.txt",
-    generators = "cmake",
-    settings = "os", "compiler", "build_type", "arch"
+    license = "MIT"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -20,8 +21,9 @@ class HttpParserConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    
-    _cmake = None
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -37,25 +39,22 @@ class HttpParserConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "http-parser-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE-MIT", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+        self.copy("LICENSE-MIT", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 

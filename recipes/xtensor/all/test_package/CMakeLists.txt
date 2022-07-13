@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
 
 include(CheckCXXCompilerFlag)
@@ -10,7 +10,7 @@ find_package(xtensor REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} xtensor)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 
 foreach(flag "-march=native" "-mtune=native")
   check_cxx_compiler_flag(${flag} COMPILER_SUPPORTS_MARCH_NATIVE)

@@ -59,7 +59,7 @@ class XkbcommonConan(ConanFile):
     def requirements(self):
         self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.20.0")
             self.requires("wayland-protocols/1.24")  # FIXME: This should be a build-requires

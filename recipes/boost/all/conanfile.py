@@ -100,6 +100,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": [True, False],
         "buildid": "ANY",
         "python_buildid": "ANY",
+        "system_use_utf8": [True, False],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -136,6 +137,7 @@ class BoostConan(ConanFile):
         "with_stacktrace_backtrace": True,
         "buildid": None,
         "python_buildid": None,
+        "system_use_utf8": False,
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -314,6 +316,28 @@ class BoostConan(ConanFile):
                 elif tools.Version(self.settings.compiler.version) < min_compiler_version:
                     disable_math()
 
+        if tools.Version(self.version) >= "1.79.0":
+            # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_wave():
+                super_modules = self._all_super_modules("wave")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, "without_{}".format(smod), True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.cppstd:
+                if not tools.valid_min_cppstd(self, 11):
+                    disable_wave()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx11
+                if min_compiler_version is None:
+                    self.output.warn("Assuming the compiler supports c++11 by default")
+                elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_wave()
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -445,6 +469,17 @@ class BoostConan(ConanFile):
                     if min_compiler_version is not None:
                         if tools.Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Math requires (boost:)cppstd>=11 (current one is lower)")
+
+        if tools.Version(self.version) >= "1.79.0":
+            # Starting from 1.79.0, Boost.Wave requires a compiler with c++ standard 11 or higher
+            if not self.options.without_wave:
+                if self.settings.compiler.cppstd:
+                    tools.check_min_cppstd(self, 11)
+                else:
+                    min_compiler_version = self._min_compiler_version_default_cxx11
+                    if min_compiler_version is not None:
+                        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                            raise ConanInvalidConfiguration("Boost.Wave requires (boost:)cppstd>=11 (current one is lower)")
 
     def _with_dependency(self, dependency):
         """
@@ -1041,6 +1076,8 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.system_use_utf8:
+            flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
             flags.extend(["segmented-stacks=on",
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
@@ -1398,6 +1435,9 @@ class BoostConan(ConanFile):
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            
+        if self.options.system_use_utf8:
+            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_USE_UTF8")
 
         if self.options.buildid:
             # If you built Boost using the --buildid option then set this macro to the same value
@@ -1428,7 +1468,9 @@ class BoostConan(ConanFile):
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["pkg_config"] = "boost_diagnostic_definitions"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
+            # I would assume headers also need the define BOOST_LIB_DIAGNOSTIC, as a header can trigger an autolink,
+            # and this definition triggers a print out of the library selected.  See notes below on autolink and headers.
+            self.cpp_info.components["headers"].requires.append("diagnostic_definitions")
             if self.options.diagnostic_definitions:
                 self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
 
@@ -1437,13 +1479,33 @@ class BoostConan(ConanFile):
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
+
+            # Even headers needs to know the flags for disabling autolinking ...
+            # magic_autolink is an option in the recipe, so if a consumer wants this version of boost,
+            # then they should not get autolinking.
+            # Note that autolinking can sneak in just by some file #including a header with (eg) boost/atomic.hpp,
+            # even if it doesn't use any part that requires linking with libboost_atomic in order to compile.
+            # So a boost-header-only library that links to Boost::headers needs to see BOOST_ALL_NO_LIB
+            # in order to avoid autolinking to libboost_atomic
+
+            # This define is already imported into all of the _libboost libraries from this recipe anyway,
+            # so it would be better to be consistent and ensure ANYTHING using boost (headers or libs) has consistent #defines.
+
+            # Same applies for for BOOST_AUTO_LINK_{layout}:
+            # consumer libs that use headers also need to know what is the layout/filename of the libraries.
+            #
+            # eg, if using the "tagged" naming scheme, and a header triggers an autolink,
+            # then that header's autolink request had better be configured to request the "tagged" library name.
+            # Otherwise, the linker will be looking for a (eg) "versioned" library name, and there will be a link error.
+
+            # Note that "_libboost" requires "headers" so these defines will be applied to all the libraries too.
+            self.cpp_info.components["headers"].requires.append("disable_autolinking")
             if self._is_msvc or self._is_clang_cl:
                 if self.options.magic_autolink:
                     if self.options.layout == "system":
-                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_SYSTEM")
+                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_SYSTEM")
                     elif self.options.layout == "tagged":
-                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_TAGGED")
+                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_TAGGED")
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
                 else:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
@@ -1455,7 +1517,11 @@ class BoostConan(ConanFile):
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
-            self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
+            # A library that only links to Boost::headers can be linked into another library that links a Boost::library,
+            # so for this reasons, the header-only library should know the BOOST_ALL_DYN_LINK definition as it will likely
+            # change some important part of the boost code and cause linking errors downstream.
+            # This is in the same theme as the notes above, re autolinking.
+            self.cpp_info.components["headers"].requires.append("dynamic_linking")
             if self._shared:
                 # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
                 self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]

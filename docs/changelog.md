@@ -1,5 +1,68 @@
 # Changelog
 
+### 06-July-2022 - 14:28 CEST
+
+- [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
+- [fix]: Improve Conan v2 export message.
+- [fix]: Fix config parameters for RelaunchUnexpected job
+- [fix]: Make AccessRequest job open PR against cci repo.
+- [fix]: DSL: Remove old jobs by date only
+- [refactor]: Refactor GitHub-related code utilities.
+
+### 27-June-2022 - 17:29 CEST
+
+- [fix] Fix "no changes detected" issue in some pull-requests.
+- [fix] Avoid static builds with static runtime in MSVC compiler.
+- [fix] Fix Conan v2 export checkout of sources.
+- [fix] Conan v2: Avoid reading configuration entries that do not exist.
+- [feature] Avoid failure in some jobs when the system is under maintenance.
+- [feature] ValidateInfrastructure job now works for `msvc` & Visual Studio 2022.
+- [feature] Conan v2: support hooks installation.
+- [feature] Add more parameters to DSL scripts.
+
+### 08-June-2022 - 16:29 CEST
+
+- [feature] Allow changes in multiple folders (except for the `recipes` one).
+- [feature] Detect changes made in a future `linters` folder.
+- [feature] Validate configuration files in pull-requests that modifies them.
+- [feature] Add support for more Conan v2 commands.
+- [feature] DSL: Parameterize jenkinsfile path.
+- [fix] DSL: Discard old builds to avoid consuming all inodes.
+- [fix] Remove `under maintenance` label in pull requests.
+- [fix] Add a detailed message for Conan v2 export.
+- [fix] Abort `RelaunchUnexpectedError` job when the system is under maintenance.
+
+### 19-May-2022 - 15:52 CEST
+
+- [feature] Add Conan v2 export extra step in pull-request job.
+- [feature] Tag pull-requests as "under maintenance" when the build service is not available.
+- [config] Update Conan version to 1.47.0.
+- [feature] Check right WinSDK in ValidateInfrastructure job.
+- [fix] Fix access request job for authorized users.
+- [feature] New Conan v2 commands: info and recipe revision.
+- [feature] Store package ID cache at job level.
+
+### 10-May-2022 - 17:05 CEST
+
+- [fix] Exclude `shared=True` and runtime `MT/MTd` profile configuration from builds.
+- [job] RelaunchUnexpectedError: a new job to automatically retrigger failed jobs.
+- [feature] Ability to load the configuration file from an external source.
+- [feature] Allow changes to files in the `.c3i` folder.
+- [config] Move reviewers and approved users to configuration files.
+- [config] Move automatic merge parameters to the configuration file.
+- [config] Move GitHub activation to configuration file.
+- [config] Remove default configuration.
+- [feature] Added compatibility for more Conan 2 commands.
+- [fix] Avoid regeneration of folder and multibranch jobs by the DSL cron job.
+
+### 28-April-2022 - 9:56 CEST
+
+- [config] Update Conan client to 1.46.2
+- [fix] Do not create GitHub pull-request statuses in advance.
+- [fix] Move some Conan command calls to the wrapper.
+- [feature] Added compatibility for Conan v2 export command.
+- [config] Changed the required number of reviewers: 1 team and 1 community is enough
+
 ### 21-April-2022 - 13:46 CEST
 
 - [feature] Updated Python version to > 3.7 in all build agents.

@@ -29,6 +29,7 @@ class ConanXOrg(ConanFile):
         include_dirs = [include[2:] for include in pkg_config.cflags_only_I]
         cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
         defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
+        variables = pkg_config.variables
 
         self.cpp_info.components[name].system_libs = libs
         self.cpp_info.components[name].libdirs = lib_dirs
@@ -39,6 +40,10 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].cflags = cflags
         self.cpp_info.components[name].cxxflags = cflags
         self.cpp_info.components[name].version = pkg_config.version[0]
+        self.cpp_info.components[name].set_property("component_version", pkg_config.version[0])
+        self.cpp_info.components[name].set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in variables.items()))
 
     def system_requirements(self):
         packages = []
@@ -46,7 +51,7 @@ class ConanXOrg(ConanFile):
             if tools.os_info.with_apt:
                 packages = ["libx11-dev", "libx11-xcb-dev", "libfontenc-dev", "libice-dev", "libsm-dev", "libxau-dev", "libxaw7-dev",
                             "libxcomposite-dev", "libxcursor-dev", "libxdamage-dev", "libxdmcp-dev", "libxext-dev", "libxfixes-dev", 
-                            "libxft-dev", "libxi-dev", "libxinerama-dev", "libxkbfile-dev", "libxmu-dev", "libxmuu-dev", 
+                            "libxi-dev", "libxinerama-dev", "libxkbfile-dev", "libxmu-dev", "libxmuu-dev",
                             "libxpm-dev", "libxrandr-dev", "libxrender-dev", "libxres-dev", "libxss-dev", "libxt-dev", "libxtst-dev", 
                             "libxv-dev", "libxvmc-dev", "libxxf86vm-dev", "xtrans-dev", "libxcb-render0-dev",
                             "libxcb-render-util0-dev", "libxcb-xkb-dev", "libxcb-icccm4-dev", "libxcb-image0-dev",
@@ -58,27 +63,25 @@ class ConanXOrg(ConanFile):
                     packages.append( "libxcb-util0-dev" )
                 else:
                     packages.append( "libxcb-util-dev" )
-            elif tools.os_info.with_yum or tools.os_info.with_dnf:
+            elif tools.os_info.with_yum or tools.os_info.with_dnf or tools.os_info.with_zypper:
                 packages = ["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
-                            "libXcursor-devel", "libXdmcp-devel", "libXft-devel", "libXtst-devel", "libXinerama-devel",
+                            "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
                             "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                            "xkeyboard-config-devel", "xcb-util-devel", "libuuid-devel"]
+                            "xcb-util-devel", "libuuid-devel"]
+                packages.append("xkeyboard-config" if tools.os_info.with_zypper else "xkeyboard-config-devel")
             elif tools.os_info.with_pacman:
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
-                            "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
+                            "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                             "libxss", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image","xcb-util-keysyms", "xcb-util-renderutil",
                             "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "util-linux-libs"]
-            elif tools.os_info.with_zypper:
-                packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel", "libuuid-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
         
         elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
             packages = ["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
-                        "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
+                        "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                         "libXScrnSaver", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                         "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
         if packages:
@@ -87,7 +90,7 @@ class ConanXOrg(ConanFile):
 
     def package_info(self):
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
-                     "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
+                     "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86vm", "xtrans",
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
@@ -95,6 +98,8 @@ class ConanXOrg(ConanFile):
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
                      "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             self._fill_cppinfo_from_pkgconfig(name)
+            self.cpp_info.components[name].set_property("pkg_config_name", name)
+        
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")
 

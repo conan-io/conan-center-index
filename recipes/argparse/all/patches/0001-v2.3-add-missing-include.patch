@@ -1,0 +1,12 @@
+diff --git a/include/argparse/argparse.hpp b/include/argparse/argparse.hpp
+index 55828ed..112534b 100644
+--- a/include/argparse/argparse.hpp
++++ b/include/argparse/argparse.hpp
+@@ -48,6 +48,7 @@ SOFTWARE.
+ #include <string_view>
+ #include <tuple>
+ #include <type_traits>
++#include <utility>
+ #include <variant>
+ #include <vector>
+ 

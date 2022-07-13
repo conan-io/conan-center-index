@@ -22,7 +22,6 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
-        "with_jasper": [True, False],
         "with_introspection": [True, False],
     }
     default_options = {
@@ -31,11 +30,11 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": True,
         "with_libtiff": True,
         "with_libjpeg": "libjpeg",
-        "with_jasper": False,
         "with_introspection": False,
     }
 
     generators = "pkg_config"
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -48,14 +47,14 @@ class GdkPixbufConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "2.42.0":
-            del self.options.with_jasper
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            self.options["glib"].shared = True
 
     def requirements(self):
         if self.settings.compiler == "clang":
@@ -63,7 +62,7 @@ class GdkPixbufConan(ConanFile):
             # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
             self.requires("glib/2.70.4")
         else:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.73.0")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
@@ -72,10 +71,12 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.2")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
-        if self.options.get_safe("with_jasper"):
-            self.requires("jasper/2.0.33")
 
     def validate(self):
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
         if self.settings.os == "Macos":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
@@ -92,6 +93,9 @@ class GdkPixbufConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         meson_build = os.path.join(self._source_subfolder, "meson.build")
         tools.replace_in_file(meson_build, "subdir('tests')", "#subdir('tests')")
         tools.replace_in_file(meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
@@ -114,13 +118,15 @@ class GdkPixbufConan(ConanFile):
         defs["docs"] = "false"
         defs["man"] = "false"
         defs["installed_tests"] = "false"
-        defs["png"] = "true" if self.options.with_libpng else "false"
-        defs["tiff"] = "true" if self.options.with_libtiff else "false"
-        defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
-        if "with_jasper" in self.options:
-            defs["jasper"] = "true" if self.options.with_jasper else "false"
-        if tools.Version(self.version) < "2.42.0":
-            defs["x11"] = "false"
+        if tools.Version(self.version) >= "2.42.8":
+            defs["png"] = "enabled" if self.options.with_libpng else "disabled"
+            defs["tiff"] = "enabled" if self.options.with_libtiff else "disabled"
+            defs["jpeg"] = "enabled" if self.options.with_libjpeg else "disabled"
+        else:
+            defs["png"] = "true" if self.options.with_libpng else "false"
+            defs["tiff"] = "true" if self.options.with_libtiff else "false"
+            defs["jpeg"] = "true" if self.options.with_libjpeg else "false"
+
         defs["builtin_loaders"] = "all"
         defs["gio_sniffing"] = "false"
         defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
@@ -132,7 +138,7 @@ class GdkPixbufConan(ConanFile):
     def build(self):
         self._patch_sources()
         if self.options.with_libpng:
-            shutil.move("libpng.pc", "libpng16.pc")
+            shutil.copy("libpng.pc", "libpng16.pc")
         meson = self._configure_meson()
         meson.build()
 
@@ -162,3 +168,6 @@ class GdkPixbufConan(ConanFile):
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         self.cpp_info.names["pkg_config"] = "gdk-pixbuf-2.0"
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

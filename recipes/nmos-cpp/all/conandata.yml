@@ -12,3 +12,9 @@ sources:
   "cci.20220208":
     url: "https://github.com/sony/nmos-cpp/archive/7ca64c4fb5604fb8a3e0c05db2e8f8ffe7ef3857.tar.gz"
     sha256: "751e7a35501cdada0e3943dcfd23a4e4f5caa02661d7f961204e8f9fea567c42"
+  "cci.20220428":
+    url: "https://github.com/sony/nmos-cpp/archive/07b8742d5e3413c903a0b0e74d0c87a76e9ecdfa.tar.gz"
+    sha256: "be305ea343822f0aa76376955b7adcbf61807b2fe54084c067daa837ef37b0cd"
+  "cci.20220620":
+    url: "https://github.com/sony/nmos-cpp/archive/3a904a3fcc39057a8db74656a697f0d97d8a3651.tar.gz"
+    sha256: "49a16ad5c8b1cf45cd519b96c880340b369a737c6814f8c533fff1cf49439fda"

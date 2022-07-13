@@ -1,4 +1,13 @@
 sources:
+  "0.3.7":
+    url: https://github.com/ericniebler/range-v3/archive/refs/tags/0.3.7.tar.gz
+    sha256: e6b0fb33bfd07ec32d54bcddd3e8d62e995a3cf0b64b34788ec264da62581207
+  "0.4.0":
+    url: https://github.com/ericniebler/range-v3/archive/refs/tags/0.4.0.tar.gz
+    sha256: 5dbc878b7dfc500fb04b6b9f99d63993a2731ea34b0a4b8d5f670a5a71a18e39
+  "0.5.0":
+    url: https://github.com/ericniebler/range-v3/archive/refs/tags/0.5.0.tar.gz
+    sha256: 32e30b3be042246030f31d40394115b751431d9d2b4e0f6d58834b2fd5594280
   "0.9.1":
     url: https://github.com/ericniebler/range-v3/archive/0.9.1.tar.gz
     sha256: 2b5b442d572b5978ea51c650adfaf0796f39f326404d09b83d846e04f571876b
@@ -8,3 +17,6 @@ sources:
   "0.11.0":
     url: https://github.com/ericniebler/range-v3/archive/0.11.0.tar.gz
     sha256: 376376615dbba43d3bef75aa590931431ecb49eb36d07bb726a19f680c75e20c
+  "0.12.0":
+    url: https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz
+    sha256: 015adb2300a98edfceaf0725beec3337f542af4915cec4d0b89fa0886f4ba9cb

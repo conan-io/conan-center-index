@@ -1,14 +1,18 @@
-import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import functools
+
+required_conan_version = ">=1.33.0"
 
 class FlatccConan(ConanFile):
     name = "flatcc"
     description = "C language binding for Flatbuffers, an efficient cross platform serialization library"
-    topics = ("conan", "flatbuffers", "serialization")
+    license = "Apache-2.0"
+    topics = ("flatbuffers", "serialization")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dvidelabs/flatcc"
-    license = "Apache-2.0"
+    settings = "os", "arch", "compiler", "build_type"
     options = { "shared": [True, False],
                 "fPIC": [True, False],
                 "portable": [True, False],
@@ -33,12 +37,8 @@ class FlatccConan(ConanFile):
                         "fast_double": False,
                         "ignore_const_condition": False
     }
-    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
-
-    _cmake = None
-
 
     @property
     def _source_subfolder(self):
@@ -53,42 +53,43 @@ class FlatccConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio" and self.options.shared:
                 #Building flatcc shared libs with Visual Studio is broken
                 raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
-            if self.settings.compiler == "gcc":
+            if tools.Version(self.version) == "0.6.0" and self.settings.compiler == "gcc":
                 raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["FLATCC_PORTABLE"] = self.options.portable
-            self._cmake.definitions["FLATCC_GNU_POSIX_MEMALIGN"] = self.options.gnu_posix_memalign
-            self._cmake.definitions["FLATCC_RTONLY"] = self.options.runtime_lib_only
-            self._cmake.definitions["FLATCC_INSTALL"] = True
-            self._cmake.definitions["FLATCC_COVERAGE"] = False
-            self._cmake.definitions["FLATCC_DEBUG_VERIFY"] = self.options.verify_assert
-            self._cmake.definitions["FLATCC_TRACE_VERIFY"] = self.options.verify_trace
-            self._cmake.definitions["FLATCC_REFLECTION"] = self.options.reflection
-            self._cmake.definitions["FLATCC_NATIVE_OPTIM"] = self.options.native_optim
-            self._cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
-            self._cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
-            self._cmake.definitions["FLATCC_TEST"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["FLATCC_PORTABLE"] = self.options.portable
+        cmake.definitions["FLATCC_GNU_POSIX_MEMALIGN"] = self.options.gnu_posix_memalign
+        cmake.definitions["FLATCC_RTONLY"] = self.options.runtime_lib_only
+        cmake.definitions["FLATCC_INSTALL"] = True
+        cmake.definitions["FLATCC_COVERAGE"] = False
+        cmake.definitions["FLATCC_DEBUG_VERIFY"] = self.options.verify_assert
+        cmake.definitions["FLATCC_TRACE_VERIFY"] = self.options.verify_trace
+        cmake.definitions["FLATCC_REFLECTION"] = self.options.reflection
+        cmake.definitions["FLATCC_NATIVE_OPTIM"] = self.options.native_optim
+        cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
+        cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
+        cmake.definitions["FLATCC_TEST"] = False
+        cmake.definitions["FLATCC_ALLOW_WERROR"] = False
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-
 
     def package(self):
         cmake = self._configure_cmake()
