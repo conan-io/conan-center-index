@@ -73,9 +73,9 @@ class AprUtilConan(ConanFile):
         self.requires("apr/1.7.0")
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
         if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
@@ -98,13 +98,13 @@ class AprUtilConan(ConanFile):
             # self.requires("ldap/x.y.z")
             raise ConanInvalidConfiguration("CCI has no ldap recipe (yet)")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.39.0")
         if self.options.with_expat:
-            self.requires("expat/2.4.1")
+            self.requires("expat/2.4.8")
         if self.options.with_postgresql:
-            self.requires("libpq/13.2")
+            self.requires("libpq/14.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
