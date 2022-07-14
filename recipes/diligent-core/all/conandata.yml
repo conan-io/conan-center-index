@@ -17,8 +17,6 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0020-252003-dont-install-3d-party-license.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0021-252003-fix-glslang-usage.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0022-252003-fix-glslang-include.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
