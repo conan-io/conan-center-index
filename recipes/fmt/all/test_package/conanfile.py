@@ -1,10 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-try:
-    from conan.tools.build import cross_building as tools_cross_building
-except ImportError:
-    from conan.tools.cross_building import cross_building as tools_cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
 
 required_conan_version = ">=1.43.0"
@@ -30,6 +27,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools_cross_building(self):
+        if can_run(self):
             self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")
             self.run(os.path.join(self.cpp.build.bindirs[0], "test_ranges"), env="conanrun")
