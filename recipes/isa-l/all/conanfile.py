@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans import tools
+from conans.errors import ConanInvalidConfiguration
+
 import os
 
 required_conan_version = ">=1.33.0"
@@ -28,6 +29,12 @@ class LibisalConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.settings.arch not in [ "x86", "x86_64", "armv8" ]:
+            raise ConanInvalidConfiguration("CPU Architecture not supported")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos builds not supported")
 
     def configure(self):
         del self.settings.compiler.libcxx
