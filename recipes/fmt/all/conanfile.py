@@ -80,6 +80,7 @@ class FmtConan(ConanFile):
         if not self.options.header_only:
             cmake = CMake(self)
             # FIXME : https://github.com/conan-io/conan/issues/11476
+            # can be replaced by https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html#cache-variables in 1.50
             cache_entries = {
                 "FMT_DOC": "False",
                 "FMT_TEST": "False",
