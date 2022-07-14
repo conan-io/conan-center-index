@@ -71,6 +71,10 @@ class GTestConan(ConanFile):
                 "apple-clang": "9.1"
             }
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -90,7 +94,7 @@ class GTestConan(ConanFile):
         del self.info.options.no_main
 
     def validate(self):
-        if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
+        if self.options.shared and (is_msvc(self) or self._is_clang_cl) and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(
                 "gtest:shared=True with compiler=\"Visual Studio\" is not "
                 "compatible with compiler.runtime=MT/MTd"
@@ -133,7 +137,7 @@ class GTestConan(ConanFile):
         cmake = CMake(self)
         if self.settings.build_type == "Debug":
             cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             cmake.definitions["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
         cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
