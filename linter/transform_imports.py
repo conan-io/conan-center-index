@@ -1,0 +1,25 @@
+
+import astroid
+from pylint.lint import PyLinter
+
+"""
+Here we are transforming the imports to mimic future Conan v2 release. With
+these changes, built-in checks in Pylint will raise with different errors, so
+we are modifying the messages to point users in the right direction.
+"""
+
+
+def register(linter: PyLinter):
+    msge1101 = linter.msgs_store._messages_definitions["E1101"]
+    msge1101.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
+    linter.msgs_store.register_message(msge1101)
+
+def transform_tools(module):
+    """ Transform import module """
+    if 'cross_building' in module.locals:
+        del module.locals['cross_building']
+
+
+astroid.MANAGER.register_transform(
+    astroid.Module, transform_tools,
+    lambda node: node.qname() == "conans.tools")
