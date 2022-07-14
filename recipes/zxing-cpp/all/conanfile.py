@@ -9,7 +9,7 @@ required_conan_version = ">=1.43.0"
 
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
-    description = "c++14 port of ZXing, a barcode scanning library"
+    description = "C++ port of ZXing, a barcode scanning library"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nu-book/zxing-cpp"
