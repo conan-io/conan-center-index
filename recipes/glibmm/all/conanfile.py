@@ -40,6 +40,11 @@ class GlibmmConan(ConanFile):
                 tools.check_min_cppstd(self, 17)
             else:
                 tools.check_min_cppstd(self, 11)
+        if self.options.shared and not self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
 
     @property
     def _source_subfolder(self):
@@ -58,7 +63,7 @@ class GlibmmConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("glib/2.72.1")
+        self.requires("glib/2.73.0")
 
         if self._abi_version() == "2.68":
             self.requires("libsigcpp/3.0.7")
@@ -101,15 +106,7 @@ class GlibmmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.shared and is_msvc(self):
-            # Two shared libraries are created: glibmm and giomm
-            # On Windows: if glib is a static library, then each one of them
-            # will get its own version of glib, with its own version of static
-            # global variables
-            # A possible solution would be to make glibmm link against glib
-            # and giomm link against glibmm only, so that they share the same glib
-            # But this won't work since msvc does not export any symbols linked
-            # from static libraries so giomm wouldn't know about glib's symbols
+        if self.options.shared:
             self.options["glib"].shared = True
 
     def build(self):
@@ -239,3 +236,6 @@ class GlibmmConan(ConanFile):
             self.cpp_info.components["giomm-2.4"].requires = [
                 "glibmm-2.4", "glib::gio-2.0"
             ]
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()

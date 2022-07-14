@@ -2,3 +2,7 @@ sources:
   "3.8":
     url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/geotrans/geotrans-3.8.tgz"
     sha256: "BAA72D3B1AE12F237A8AD30F2DEB3FED2B80FEB759528EA0A72B4B42CB77C565"
+patches:
+  "3.8":
+    - patch_file: "patches/3.8-fix-for-cxx20.patch"
+      base_path: "source_subfolder"

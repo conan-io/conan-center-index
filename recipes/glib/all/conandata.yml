@@ -83,3 +83,10 @@ sources:
   "2.73.0":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.73.0/glib-2.73.0.tar.gz"
     sha256: "3f573319adbdf572d79255e8bae85c7e2902d1aa6177d2646605a00c0a607eca"
+  "2.73.1":
+    url: "https://download.gnome.org/sources/glib/2.73/glib-2.73.1.tar.xz"
+    sha256: "77b21da5bd195a8e5f751206a2acab477636e3d02fe4f3796ede5788255382ae"
+patches:
+  "2.73.1":
+    - patch_file: "patches/f2ea67ae441bc6059b43a1051dd0b750fe5f6301.patch"
+      base_path: "source_subfolder"
