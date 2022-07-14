@@ -1,6 +1,6 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import copy, patch, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, patch, rmdir
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 import os
@@ -79,8 +79,7 @@ class ExpatConan(ConanFile):
         tc.generate()
 
     def build(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**p)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

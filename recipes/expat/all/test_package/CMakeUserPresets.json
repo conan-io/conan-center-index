@@ -1,9 +1,0 @@
-{
-    "version": 4,
-    "include": [
-        "C:\\Users\\danimtb\\repos\\conan-center-index\\recipes\\expat\\all\\test_package\\test_output\\build/generators\\CMakePresets.json"
-    ],
-    "vendor": {
-        "conan": {}
-    }
-}
