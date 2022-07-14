@@ -1,5 +1,5 @@
-from conan.tools.files import apply_conandata_patches
 from conan import ConanFile
+from conan.tools.files import apply_conandata_patches
 from conan.tools.cmake import CMakeToolchain, cmake_layout
 from conans import CMake, tools
 import os

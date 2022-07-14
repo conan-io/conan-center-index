@@ -4,6 +4,8 @@ project(gdal_cmake_wrapper)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
+include(CMakePushCheckState)
+
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 if (${GDAL_USE_Poppler})
