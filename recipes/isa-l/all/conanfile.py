@@ -33,8 +33,8 @@ class LibisalConan(ConanFile):
     def validate(self):
         if self.settings.arch not in [ "x86", "x86_64", "armv8" ]:
             raise ConanInvalidConfiguration("CPU Architecture not supported")
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos builds not supported")
+        if self.settings.os in ["Macos", "Windows"]:
+            raise ConanInvalidConfiguration("Macos and Windows builds not supported")
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -43,34 +43,23 @@ class LibisalConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_thread
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    def _posix_build(self):
-        self.run("./autogen.sh")
-        tools.mkdir("_build")
-        with tools.chdir("_build"):
-            env_build = AutoToolsBuildEnvironment(self)
-            extra_args = list()
-            if self.options.shared:
-                extra_args.extend(('--enable-static=no',))
-            else:
-                extra_args.extend(('--enable-shared=no',))
-            env_build.configure("../", args=extra_args, build=False, host=False, target=False)
-            env_build.make()
-
-    def _windows_build(self):
-        self.run("nmake -f Makefile.nmake")
-
     def build(self):
         with tools.chdir(self._source_subfolder):
-            if self.settings.os == "Windows":
-                self._windows_build()
-            else:
-                self._posix_build()
+            self.run("./autogen.sh")
+            tools.mkdir("_build")
+            with tools.chdir("_build"):
+                env_build = AutoToolsBuildEnvironment(self)
+                extra_args = list()
+                if self.options.shared:
+                    extra_args.extend(('--enable-static=no',))
+                else:
+                    extra_args.extend(('--enable-shared=no',))
+                env_build.configure("../", args=extra_args, build=False, host=False, target=False)
+                env_build.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
