@@ -61,9 +61,9 @@ class XmlSecConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libxml2/2.9.12")
+        self.requires("libxml2/2.9.14")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
 
