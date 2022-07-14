@@ -101,6 +101,8 @@ class GdalConan(ConanFile):
         "dep": "Crnlib",
         "descr": "enable gdal_DDS driver"
     }, {
+        "require": "cryptopp/8.6.0",
+        "conan_dep": "cryptopp::libcryptopp",
         "dep": "CryptoPP",
         "descr": "Use crypto++ library for CPL."
     }, {
@@ -148,10 +150,9 @@ class GdalConan(ConanFile):
         "dep": "HDF4",
         "descr": "Enable HDF4 driver"
     }, {
+        "require": "hdf5/1.13.1",
+        "conan_dep": "hdf5::hdf5_c",
         "dep": "HDF5",
-        "descr": 'Enable HDF5" COMPONENTS "C" "CXX'
-    }, {
-        "dep": "HDFS",
         "descr": "Enable Hadoop File System through native library"
     }, {
         "dep": "HEIF",
@@ -412,6 +413,10 @@ class GdalConan(ConanFile):
 
         cmake.definitions["SQLite3_HAS_RTREE"] = self.options[
             "sqlite3"].enable_rtree
+
+        if self.options.with_hdf5:
+            cmake.definitions["HDF5_C_LIBRARIES"] = "HDF5::C"
+            cmake.definitions["HDF5_BUILD_SHARED_LIBS"] = self.options["hdf5"].shared
 
         for dep in self.gdal_deps:
             upper = dep["dep"].upper()
