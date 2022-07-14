@@ -9,9 +9,9 @@ class UserspaceRCUConan(ConanFile):
     name = "userspace-rcu"
     homepage ="https://liburcu.org/"
     description = "Userspace RCU (read-copy-update) library"
-    topics = ("conan", "urcu")
+    topics = ("urcu")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "LGPLv2.1"
+    license = "LGPL-2.1"
 
     @property
     def _source_subfolder(self):
