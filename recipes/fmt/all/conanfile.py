@@ -4,7 +4,7 @@ import shutil
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, copy
+from conan.tools.files import get, apply_conandata_patches, copy, rmdir
 
 
 required_conan_version = ">=1.43.0"
@@ -91,10 +91,6 @@ class FmtConan(ConanFile):
             cmake.configure(variables=cache_entries)
             cmake.build()
 
-    @staticmethod
-    def _rm_folder(folder):
-        shutil.rmtree(folder, ignore_errors=True)
-
     def package(self):
         copy(self, pattern="*LICENSE.rst", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
@@ -102,10 +98,10 @@ class FmtConan(ConanFile):
         else:
             cmake = CMake(self)
             cmake.install()
-            self._rm_folder(os.path.join(self.package_folder, "lib", "cmake"))
-            self._rm_folder(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            self._rm_folder(os.path.join(self.package_folder, "res"))
-            self._rm_folder(os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "res"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fmt"
