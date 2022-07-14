@@ -49,19 +49,28 @@ class LibisalConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    def _posix_build(self):
+        self.run("./autogen.sh")
+        tools.mkdir("_build")
+        with tools.chdir("_build"):
+            env_build = AutoToolsBuildEnvironment(self)
+            extra_args = list()
+            if self.options.shared:
+                extra_args.extend(('--enable-static=no',))
+            else:
+                extra_args.extend(('--enable-shared=no',))
+            env_build.configure("../", args=extra_args, build=False, host=False, target=False)
+            env_build.make()
+
+    def _windows_build(self):
+        self.run("nmake -f Makefile.nmake")
+
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("./autogen.sh")
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
-                env_build = AutoToolsBuildEnvironment(self)
-                extra_args = list()
-                if self.options.shared:
-                    extra_args.extend(('--enable-static=no',))
-                else:
-                    extra_args.extend(('--enable-shared=no',))
-                env_build.configure("../", args=extra_args, build=False, host=False, target=False)
-                env_build.make()
+            if self.settings.os == "Windows":
+                self._windows_build()
+            else:
+                self._posix_build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
