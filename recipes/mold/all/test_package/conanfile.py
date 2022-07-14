@@ -1,5 +1,4 @@
 import os
-from six import StringIO
 from conans import ConanFile, tools
 
 

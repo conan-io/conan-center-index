@@ -15,7 +15,6 @@ class MoldConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     generators = "make"
-    exports_sources = ["patches/**"]
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -43,6 +42,8 @@ class MoldConan(ConanFile):
         openssl_include_path = os.path.join(openssl_include_path, "include")
 
         tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-Ithird-party/xxhash -I{} -I{}".format(zlib_include_path, openssl_include_path))
+    def package_id(self):
+        del self.info.settings.compiler
 
     def requirements(self):
         self.requires("zlib/1.2.12")
