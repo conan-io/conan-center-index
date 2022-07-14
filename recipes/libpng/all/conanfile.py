@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
 import os
+from conan import ConanFile
+from conan.tools import CMake, cross_building
 
 required_conan_version = ">=1.43.0"
 
@@ -139,7 +140,7 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
-        if tools.cross_building(self):
+        if cross_building(self):
             self._cmake.definitions["CONAN_LIBPNG_SYSTEM_PROCESSOR"] = self._libpng_cmake_system_processor
         if self._has_neon_support:
             self._cmake.definitions["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
