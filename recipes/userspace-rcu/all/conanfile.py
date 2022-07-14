@@ -77,7 +77,7 @@ class UserspaceRCUConan(ConanFile):
             lib_name = 'liburcu-bp'
         if self.options.shared:
             self.copy("*{}.dll".format(lib_name), dst="bin", keep_path=False)
-            self.copy("*{}.so*".format(lib_name), dst="lib", keep_path=False)
+            self.copy("*{}.so*".format(lib_name), dst="lib", keep_path=False, symlinks=True)
             self.copy("*{}.dylib".format(lib_name), dst="lib", keep_path=False)
         else:
             self.copy("*{}.a".format(lib_name), dst="lib", keep_path=False)
