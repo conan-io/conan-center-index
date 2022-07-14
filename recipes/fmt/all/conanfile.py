@@ -56,15 +56,12 @@ class FmtConan(ConanFile):
             self.options.with_os_api = False
 
     def configure(self):
-        try:
-            if self.options.header_only:
-                del self.options.fPIC
-                del self.options.shared
-                del self.options.with_os_api
-            elif self.options.shared:
-                del self.options.fPIC
-        except Exception:
-            pass
+        if self.options.header_only:
+            del self.options.fPIC
+            del self.options.shared
+            del self.options.with_os_api
+        elif self.options.shared:
+            del self.options.fPIC
 
     def package_id(self):
         if self.info.options.header_only:  # might be changed to self.info.header_only() in 1.50
