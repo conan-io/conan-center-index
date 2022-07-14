@@ -28,10 +28,10 @@ class ExpatConan(ConanFile):
     }
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"],
-                 os.path.join(self.folders.recipe_folder, "patches"),
-                 os.path.join(self.folders.expor_sources_folder, "patches"))
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"],
+                 os.path.join(self.recipe_folder, "patches"),
+                 os.path.join(self.export_sources_folder, "patches"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,8 +79,8 @@ class ExpatConan(ConanFile):
         tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(**p)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
