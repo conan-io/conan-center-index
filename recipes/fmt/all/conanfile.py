@@ -5,8 +5,6 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy
-from conan.tools.microsoft.visual import is_msvc, msvc_runtime_flag
-from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.43.0"
