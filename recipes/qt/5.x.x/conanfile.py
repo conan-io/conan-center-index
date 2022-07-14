@@ -153,8 +153,6 @@ class QtConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def build_requirements(self):
-        if self.settings.os == "Linux":
-            self.build_requires("binutils/2.38")
         if self._settings_build.os == "Windows" and self._is_msvc:
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
