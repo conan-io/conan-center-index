@@ -26,6 +26,7 @@ class PdfiumConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "pkg_config"
+    short_paths = True
 
     _cmake = None
 
