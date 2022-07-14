@@ -22,7 +22,7 @@ class LibisalConan(ConanFile):
     }
     build_requires = (
         "libtool/2.4.6",
-        "yasm/1.3.0",
+        "nasm/2.15.05",
     )
 
     @property
@@ -60,7 +60,7 @@ class LibisalConan(ConanFile):
         self.copy("*.h", dst="include/isa-l", src="%s/include" % (self._source_subfolder) , keep_path=False)
         if self.options.shared:
             self.copy("*.dll", dst="bin", keep_path=False)
-            self.copy("*.so", dst="lib", keep_path=False)
+            self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
             self.copy("*.dylib", dst="lib", keep_path=False)
         else:
             self.copy("*.a", dst="lib", keep_path=False)
