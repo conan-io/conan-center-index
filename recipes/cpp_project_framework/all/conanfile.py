@@ -41,16 +41,24 @@ class CppProjectFrameworkConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
         if self.settings.os != "Linux" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration(f"{self.name} is just supported for Linux and Windows")
+
+        compiler = self.settings.compiler
+
+        if compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if compiler == "gcc" or compiler == "clang":
+            if compiler.get_safe("libcxx") == "libstdc++11":
+                raise ConanInvalidConfiguration(f"{compiler} with libstdc++11 not supported")
+
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if not min_version:
+            self.output.warn(f"{self.name} recipe lacks information about the {compiler} compiler support.")
+        else:
+            if tools.Version(compiler.version) < min_version:
+                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {compiler} {compiler.version} does not support it.")
 
     @property
     def _source_subfolder(self):
