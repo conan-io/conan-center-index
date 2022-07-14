@@ -73,7 +73,7 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
