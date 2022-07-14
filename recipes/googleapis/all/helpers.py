@@ -101,7 +101,7 @@ def parse_proto_libraries(filename, source_folder, error):
         elif line.startswith("@com_google_googleapis//"):
             proto_library.deps.add(line[len("@com_google_googleapis"):])
         elif line.startswith(":"):
-            proto_library.deps.add(f"//{os.path.relpath(basedir, source_folder)}{line}")
+            proto_library.deps.add(f"//{os.path.relpath(basedir, source_folder).replace('\\', '/')}{line}")
         elif line.startswith("//google/"):
             proto_library.deps.add(line)
         elif line.startswith("//grafeas/"):
@@ -137,7 +137,7 @@ def parse_proto_libraries(filename, source_folder, error):
             elif proto_library != None:
                 if line.startswith("name ="):
                     proto_library.name = re_name.search(line).group(1)
-                    proto_library.qname = f"//{os.path.relpath(basedir, source_folder)}"
+                    proto_library.qname = f"//{os.path.relpath(basedir, source_folder).replace('\\', '/')}"
                 elif line.startswith("srcs = "):
                     m = re_srcs_oneline.search(line)
                     if m:
