@@ -113,14 +113,17 @@ class GoogleAPIS(ConanFile):
             activate_library(it)
 
         # Tweaks
+        def deactivate_library(key):
+            if key in all_dict:
+                all_dict[key].is_used = False
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
         if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.2" and self.settings.os == "Macos":
-            all_dict["//google/storagetransfer/v1:storagetransfer_proto"].is_used = False
+            deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
-            all_dict["//google/cloud/channel/v1:channel_proto"].is_used = False
-            all_dict["//google/cloud/channel/v1:channel_cc_proto"].is_used = False
+            deactivate_library("//google/cloud/channel/v1:channel_proto")
+            deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
 
         return proto_libraries
 
