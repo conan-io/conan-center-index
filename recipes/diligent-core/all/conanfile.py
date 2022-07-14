@@ -131,6 +131,8 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
+        self._cmake.definitions["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        self._cmake.definitions["DILIGENT_MSVC_COMPILE_OPTIONS"] = "/W0"
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
