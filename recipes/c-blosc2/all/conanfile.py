@@ -58,6 +58,9 @@ class CBlosc2Conan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        # c-blosc2 uses zlib-ng with zlib compat options.
+        if self.options.with_zlib == "zlib-ng":
+            self.options["zlib-ng"].zlib_compat = True
 
     def requirements(self):
         if self.options.with_lz4:
