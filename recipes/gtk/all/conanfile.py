@@ -238,12 +238,13 @@ class GtkConan(ConanFile):
             "glib::glib",
             "graphene::graphene",
             "fribidi::fribidi",
+            "libepoxy::libepoxy",
             "libpng::libpng",
             "libtiff::libtiff",
             "libjpeg::libjpeg"
         ]
         if self.settings.os == "Linux":
-            requirements += ["xkbcommon::xkbcommon", "libepoxy::libepoxy"]
+            requirements.append("xkbcommon::xkbcommon")
             if self.options.with_wayland:
                 requirements.append("wayland::wayland")
             if self.options.with_x11:
