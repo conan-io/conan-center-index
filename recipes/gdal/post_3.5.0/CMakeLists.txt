@@ -6,6 +6,11 @@ conan_basic_setup(TARGETS)
 
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
+if (${GDAL_USE_Poppler})
+    find_package(poppler)
+    set(Poppler_VERSION_STRING ${poppler_VERSION})
+endif()
+
 file(GLOB CONAN_GENERATED_CMAKE_FILES "${CMAKE_BINARY_DIR}/Find*.cmake")
 foreach(CMAKE_FILE ${CONAN_GENERATED_CMAKE_FILES})
     include(${CMAKE_FILE})
