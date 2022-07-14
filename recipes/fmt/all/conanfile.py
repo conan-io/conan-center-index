@@ -2,30 +2,14 @@ import os
 import shutil
 
 from conan import ConanFile
-try:
-    from conan.tools.scm import Version
-except ImportError:
-    from conans.tools import Version
+from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-try:
-    from conan.tools.files import get, apply_conandata_patches
-except ImportError:
-    from conans.tools import get, apply_conandata_patches
+from conan.tools.files import get, apply_conandata_patches, copy
 from conan.tools.microsoft.visual import is_msvc, msvc_runtime_flag
-try:
-    from conan.errors import ConanInvalidConfiguration
-except ImportError:
-    from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.43.0"
-
-def copy(conanfile, *args, **kwargs):
-    if hasattr(conanfile, 'copy'):
-        conanfile.copy(*args, **kwargs)
-    else:
-        from conan.tools import files
-        files.copy(conanfile, *args, **kwargs)
 
 
 class FmtConan(ConanFile):
