@@ -5,6 +5,7 @@ import functools
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import cross_building
 
 required_conan_version = ">=1.45.0"
 
@@ -291,7 +292,7 @@ class LibcurlConan(ConanFile):
                                       "noinst_LTLIBRARIES = libcurl.la")
                 # add directives to build dll
                 # used only for native mingw-make
-                if not tools.cross_building(self.settings):
+                if not cross_building(self):
                     added_content = tools.load("lib_Makefile_add.am")
                     tools.save(lib_makefile, added_content, append=True)
 
@@ -433,7 +434,7 @@ class LibcurlConan(ConanFile):
             params.append("--with-ca-path=" + str(self.options.with_ca_path))
 
         # Cross building flags
-        if tools.cross_building(self.settings):
+        if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
                 params.append("--host=%s" % self._get_linux_arm_host())
             elif self.settings.os == "iOS":
@@ -506,7 +507,7 @@ class LibcurlConan(ConanFile):
         if self._is_mingw:
             autotools.defines.append("_AMD64_")
 
-        if tools.cross_building(self) and tools.is_apple_os(self.settings.os):
+        if cross_building(self) and tools.is_apple_os(self.settings.os):
             autotools.defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
         configure_args = self._get_configure_command_args()
