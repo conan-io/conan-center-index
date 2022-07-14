@@ -431,7 +431,8 @@ See also: [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/wind
 
 #### **<a name="KB-H068">#KB-H068</a>: "TEST_TYPE MANAGEMENT"**
 
-https://github.com/conan-io/hooks/commit/ad867ad0a3656fe77ecc964e9b8f3657995f0d5d
+https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#changes-in-the-test-package-recipe
+In Conan 2.0, the `test_package/conanfile.py` needs to declare the requirement being tested explicitly. To be prepared you have to set the attribute `test_type="explicit"` (this will be ignored in 2.0) to make Conan activate the explicit mode, then declaring the requirement using the `self.tested_reference_str` that contains the reference being tested.
 
 #### **<a name="KB-H069">#KB-H069</a>: "TEST PACKAGE - NO DEFAULT OPTIONS"**
 
