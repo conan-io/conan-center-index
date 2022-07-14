@@ -436,7 +436,7 @@ In Conan 2.0, the `test_package/conanfile.py` needs to declare the requirement b
 
 #### **<a name="KB-H069">#KB-H069</a>: "TEST PACKAGE - NO DEFAULT OPTIONS"**
 
-https://github.com/conan-io/hooks/commit/7349d593d0728ae665dcb2c92ed3038b3cbb8ee5
+This is to ensure the exact package that is built and uploaded is tested against. When `options` of `default_options` are modified in a `test_package` it can possibly result in the graph being modified. The objective is to enforce quality of the packages and to avoid confusing "missing packages" errors.
 
 #### **<a name="KB-H070">#KB-H070</a>: "MANDATORY SETTINGS"**
 
