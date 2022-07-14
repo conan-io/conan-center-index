@@ -11,5 +11,6 @@ find_package(volk REQUIRED CONFIG)
 find_package(xxHash REQUIRED CONFIG)
 
 add_library(glslang ALIAS glslang::glslang)
+add_library(SPIRV ALIAS glslang::SPIRV)
 
 add_subdirectory(source_subfolder)
