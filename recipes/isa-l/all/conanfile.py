@@ -43,6 +43,8 @@ class LibisalConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_thread
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
