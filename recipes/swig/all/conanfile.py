@@ -149,7 +149,10 @@ class SwigConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "SWIG"
         self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
         self.cpp_info.builddirs = [self._module_subfolder]
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = \
+            [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = \
+            [os.path.join(self._module_subfolder, self._module_file)]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
