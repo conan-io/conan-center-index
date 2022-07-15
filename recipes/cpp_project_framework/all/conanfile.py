@@ -49,8 +49,8 @@ class CppProjectFrameworkConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
         if compiler == "gcc" or compiler == "clang":
-            if compiler.get_safe("libcxx") == "libstdc++11":
-                raise ConanInvalidConfiguration(f"{compiler} with libstdc++11 not supported")
+            if compiler.get_safe("libcxx") != "libstdc++":
+                raise ConanInvalidConfiguration(f"only supported {compiler} with libstdc++")
 
         min_version = self._minimum_compilers_version.get(str(compiler))
         if not min_version:
