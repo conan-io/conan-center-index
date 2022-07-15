@@ -1,5 +1,4 @@
 diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index f0183b05..dd7d2e3d 100644
 --- a/ThirdParty/CMakeLists.txt
 +++ b/ThirdParty/CMakeLists.txt
 @@ -26,7 +26,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
@@ -25,7 +24,7 @@ index f0183b05..dd7d2e3d 100644
 -        install(FILES "${spirv-tools_SOURCE_DIR}/LICENSE" DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Tools-License.txt)
      endif()
  
-     if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang::glslang))
+     if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang))
 @@ -101,7 +98,6 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
              list(APPEND THIRD_PARTY_LIBS spirv-cross-msl spirv-cross-glsl)
          endif()
