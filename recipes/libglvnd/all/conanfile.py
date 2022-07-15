@@ -81,16 +81,16 @@ class LibGlvndConan(ConanFile):
     
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["asm"] = self.options.asm
-        tc.project_options["x11"] = self.options.x11
+        tc.project_options["asm"] = "enabled" if self.options.asm else "disabled"
+        tc.project_options["x11"] = "enabled" if self.options.x11 else "disabled"
         tc.project_options["egl"] = self.options.egl
-        tc.project_options["glx"] = self.options.glx
+        tc.project_options["glx"] = "enabled" if self.options.glx else "disabled"
         tc.project_options["gles1"] = self.options.gles1
         tc.project_options["gles2"] = self.options.gles2
         tc.project_options["tls"] = self.options.tls
         tc.project_options["dispatch-tls"] = self.options.dispatch_tls
         tc.project_options["headers"] = self.options.headers
-        tc.project_options["entrypoint-patching"] = self.options.entrypoint_patching
+        tc.project_options["entrypoint-patching"] = "enabled" if self.options.entrypoint_patching else "disabled"
         tc.generate()
 
     def build(self):
