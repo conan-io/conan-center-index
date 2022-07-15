@@ -92,7 +92,7 @@ def parse_proto_libraries(filename, source_folder, error):
     proto_library = None
     
     def parsing_sources(line):
-        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), source_folder)
+        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), source_folder).replace('\\', '/')
         proto_library.srcs.append(proto_path)
 
     def parsing_deps(line):
