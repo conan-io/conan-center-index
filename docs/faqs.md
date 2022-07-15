@@ -175,7 +175,7 @@ No. Some projects provide more than a simple library, but also applications. For
 ## What license should I use for a custom project specific license?
 
 When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
-See [the reviewing guidlines](https://github.com/conan-io/conan-center-index/blob/master/docs/reviewing.md#license-attribute) for more details.
+See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
 
 ## Why is a `tools.check_min_cppstd` call not enough?
 
