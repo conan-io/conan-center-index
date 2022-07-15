@@ -184,29 +184,29 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_jpeg2000") == "jasper":
             self.requires("jasper/2.0.33")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.1.5")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/5.0")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2021.3.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
             self.requires("libwebp/1.2.2")
         if self.options.get_safe("contrib_freetype"):
-            self.requires("freetype/2.11.1")
-            self.requires("harfbuzz/3.2.0")
+            self.requires("freetype/2.12.1")
+            self.requires("harfbuzz/4.4.1")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.5.0")
+            self.requires("glog/0.6.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
