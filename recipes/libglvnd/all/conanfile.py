@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conans import Meson, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.files import get, rmdir, save
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -40,7 +40,7 @@ class LibGlvndConan(ConanFile):
         "entrypoint_patching": True,
     }
 
-    generators = "pkg_config"
+    generators = "PkgConfigDeps"
 
 
     @property
@@ -80,38 +80,37 @@ class LibGlvndConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {}
-        defs["asm"] = self.options.asm
-        defs["x11"] = self.options.x11
-        defs["egl"] = self.options.egl
-        defs["glx"] = self.options.glx
-        defs["gles1"] = self.options.gles1
-        defs["gles2"] = self.options.gles2
-        defs["tls"] = self.options.tls
-        defs["dispatch-tls"] = self.options.dispatch_tls
-        defs["headers"] = self.options.headers
-        defs["entrypoint-patching"] = self.options.entrypoint_patching
-        meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return meson
+    
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["asm"] = self.options.asm
+        tc.project_options["x11"] = self.options.x11
+        tc.project_options["egl"] = self.options.egl
+        tc.project_options["glx"] = self.options.glx
+        tc.project_options["gles1"] = self.options.gles1
+        tc.project_options["gles2"] = self.options.gles2
+        tc.project_options["tls"] = self.options.tls
+        tc.project_options["dispatch-tls"] = self.options.dispatch_tls
+        tc.project_options["headers"] = self.options.headers
+        tc.project_options["entrypoint-patching"] = self.options.entrypoint_patching
+        tc.generate()
 
     def build(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
         meson.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), textwrap.dedent('''\
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), textwrap.dedent('''\
             Copyright (c) 2013, NVIDIA CORPORATION.
 
             Permission is hereby granted, free of charge, to any person obtaining a
