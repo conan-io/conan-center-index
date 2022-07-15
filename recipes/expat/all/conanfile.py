@@ -29,9 +29,7 @@ class ExpatConan(ConanFile):
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"],
-                 os.path.join(self.recipe_folder, "patches"),
-                 os.path.join(self.export_sources_folder, "patches"))
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
