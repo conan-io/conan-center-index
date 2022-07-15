@@ -459,22 +459,29 @@ class SomeRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 ```
 
-For header-only recipes ([example](https://github.com/conan-io/conan-center-index/blob/3a773e2d69ada3bd931252c43a48daf636ddfe87/recipes/eigen/all/conanfile.py#L35-L36)):
+- For header-only recipes ([example](https://github.com/conan-io/conan-center-index/blob/3a773e2d69ada3bd931252c43a48daf636ddfe87/recipes/eigen/all/conanfile.py#L35-L36)):
 
-```python
-    def package_id(self):
-        self.info.header_only()
-```
+    ```python
+        def package_id(self):
+            self.info.header_only()
+    ```
 
-For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)):
+- For "build script" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)):
 
-```python
-    def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.compiler
-        del self.info.settings.build_type
-```
-             
+    ```python
+        def package_id(self):
+            del self.info.settings.arch
+            del self.info.settings.compiler
+            del self.info.settings.build_type
+    ```
+    
+- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/b156608fa08cb368b7111c5558ce6fa4d8339ddb/recipes/make/all/conanfile.py#L30-L31)):
+
+    ```python
+        def package_id(self):
+            del self.info.settings.compiler
+    ```       
+
 #### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
 
 It's erroneous to leave the default `include` directory when it's not present. Consider adding:
