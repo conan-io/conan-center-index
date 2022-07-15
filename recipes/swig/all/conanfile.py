@@ -146,6 +146,7 @@ class SwigConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
+        self.cpp_info.includedirs=[]
         self.cpp_info.names["cmake_find_package"] = "SWIG"
         self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
         self.cpp_info.builddirs = [self._module_subfolder]
