@@ -2,7 +2,7 @@
 
 [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/) file to provide declarative data for the recipe (which is imperative).
 
-`conandata.yml` is built-in conan feature available since 1.22.0, but conan-center-index uses it for its own purposes.
+`conandata.yml` is a built-in Conan feature (available since 1.22.0) without a fixed structure, but conan-center-index uses it for its own purposes.
 
 ## sources
 
@@ -10,30 +10,31 @@
 
 ### url
 
-`url` contains a string specifiying [URI](https://tools.ietf.org/html/rfc3986) where to download released sources.
-usually, `url` has a [https](https://tools.ietf.org/html/rfc2660) scheme, but other schemes, such as [ftp](https://tools.ietf.org/html/rfc959) are accepted as well.
+`url` contains a string specifying [URI](https://tools.ietf.org/html/rfc3986) where to download released sources.
+Usually, `url` has a [https](https://tools.ietf.org/html/rfc2660) scheme, but other schemes, such as [ftp](https://tools.ietf.org/html/rfc959) are accepted as well.
 
 ### sha256
 
-[sha256](https://tools.ietf.org/html/rfc6234) is a preferred method to specify hash sum for the released sources. it allows to check the integrity of sources downloaded.
-you may use an [online service](https://hash.online-convert.com/sha256-generator) to compute `sha256` sum for the given `url`.
-also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](http://www.labtestproject.com/files/win/sha256sum/sha256sum.exe)).
+[sha256](https://tools.ietf.org/html/rfc6234) is a preferred method to specify hash sum for the released sources. It allows to check the integrity of sources downloaded.
+You may use an [online service](https://hash.online-convert.com/sha256-generator) to compute `sha256` sum for the given `url`.
+Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](http://www.labtestproject.com/files/win/sha256sum/sha256sum.exe)).
 
 ### sha1
 
-[sha1](https://tools.ietf.org/html/rfc3174) is an alternate method to specify hash sum, it's usage is strongly discouraged in CCI. prefer `sha256`.
+[sha1](https://tools.ietf.org/html/rfc3174) is an alternate method to specify hash sum. It's usage is discouraged and `sha256` is preferred.
 
 ### md5
 
-[md5](https://tools.ietf.org/html/rfc1321) is an alternate method to specify hash sum, it's usage is strongly discouraged in CCI. prefer `sha256`.
+[md5](https://tools.ietf.org/html/rfc1321) is an alternate method to specify hash sum. It's usage is discouraged and `sha256` is preferred.
 
-### sources - use cases
+### sources - Different use cases
 
-there are several major ways to specify sources.
+There are several ways to specify sources.
 
-#### single source
+#### Single source
 
-the most straighforward format:
+This is the most straightforward format:
+
 ```
 sources:
   "1.18.0":
@@ -41,9 +42,10 @@ sources:
     url: https://github.com/chriskohlhoff/asio/archive/asio-1-18-0.tar.gz
 ```
 
-#### single source with download mirror
+#### Single source with download mirror
 
-sometimes it's a good idea to specify several download mirrors - some hosts are known to be unreliable or banned in certain countries:
+Sometimes it's a good idea to specify several download mirrors, as some hosts are known to be unreliable or banned in certain countries:
+
 ```
 sources:
   "1.2.11":
@@ -53,11 +55,13 @@ sources:
        ]
     sha256: "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1"
 ```
-keep in mind all the mirrors have to provide the exactly same source (e.g. no repackaging), thus using the same hash sum.
 
-#### source code + license
+Keep in mind all the mirrors have to provide the exactly same source (e.g. no repackaging), thus using the same hash sum.
 
-certain projects provide license on its own, and released artifacts do not include it already:
+#### Source code + license
+
+Certain projects provide license on its own, and released artifacts do not include it. In this case, a license URL can be provided separately:
+
 ```
 sources:
   8.0.0:
@@ -67,9 +71,10 @@ sources:
       sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
 ```
 
-#### several source code archives
+#### Several source code archives
 
-certain projects may include multiple tarballs as a part of release, [OpenCV](https://opencv.org/) is an example which includes auxillary [contrib](https://github.com/opencv/opencv_contrib) archive:
+Some projects may include multiple tarballs as a part of release, [OpenCV](https://opencv.org/) is an example which includes auxiliary [contrib](https://github.com/opencv/opencv_contrib) archive:
+
 ```
 sources:
   "4.5.0":
@@ -79,9 +84,9 @@ sources:
       url: https://github.com/opencv/opencv_contrib/archive/4.5.0.tar.gz
 ```
 
-#### different source code archives per configuration
+#### Different source code archives per configuration
 
-this is the most advanced and sophisticated use-case, fortunately, rarely encountered in the wild. project may provide different sources for different platforms for awkward reasons, it could be expressed as:
+This is the most advanced and sophisticated use-case, but no so common. Some projects may provide different sources for different platforms for awkward reasons, it could be expressed as:
 
 ```
 sources:
@@ -96,40 +101,40 @@ sources:
             sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-this approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
+This approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
 
 ## patches
 
-sometimes sources provided by project require patching for various reasons. `conandata.yml` may include information about patches.
+Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
 ### patch_file
 
-patch file might be committed to the conan-center-index, near to the conanfile (usually, into the `patches` sub-directory). Such patch files usually have either `.diff` or `.patch` extension.
-the recommented way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). the path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
+Patch file might be committed to the conan-center-index, near to the conanfile (usually, into the `patches` sub-directory). Such patch files usually have either `.diff` or `.patch` extension.
+The recommended way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). The path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
 
 ### base_path
 
-specifies a sub-directory in project's sources to apply patch. directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for the submodule),
+Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
 
 ### url
 
-the patch could be taken from the existing resource (e.g. some patches are distributed alongside the source tarball). see `url` section of the `sources`.
+The patch could be taken from the existing resource (e.g. some patches are distributed alongside the source tarball). See `url` section of the `sources`.
 
 ### sha256
 
-for the patch downloaded from the Internet, provides a hashsum. see `sha256` section of the `sources`.
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
 
 ### sha1
 
-for the patch downloaded from the Internet, provides a hashsum. see `sha1` section of the `sources`.
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
 
 ### md5
 
-for the patch downloaded from the Internet, provides a hashsum. see `md5` section of the `sources`.
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
 
 ### patch_type
 
-the `patch_type` field specifies the type of the patch. in conan-center-index we currently accept only several kind of patches.
+The `patch_type` field specifies the type of the patch. In conan-center-index we currently accept only several kind of patches:
 
 #### official
 
@@ -138,58 +143,59 @@ the `patch_type` field specifies the type of the patch. in conan-center-index we
 
 #### vulnerability
 
-`patch_type: vulnerability` indicatea the patch that addresses the security issue. the patch description should include the index of CVE or CWE the patch addresses.
-usually, upstream does new releases for vulnerabilities itself, but some projects are either abandoned or inactive.
+`patch_type: vulnerability`: Indicates a patch that addresses the security issue. The patch description
+should include the index of CVE or CWE the patch addresses.
+Usually, original library projects do new releases fixing vulnerabilities this kind of issues, but in some cases they are either abandoned or inactive.
 
 #### backport
 
-`patch_type: backport` indicates the patch backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). the patch address may be a pull request, or bug within the project's issue tracker.
-backports are accepted only for bugs, but not for feature requests. usually, the following kind of problems are good candidates for backports:
+`patch_type: backport`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The patch source may be a pull request, or bug within the project's issue tracker.
+Backports are accepted only for bugs, but not for feature requests.
+Usually, the following kind of problems are good candidates for backports:
 
-- program doesn't start at all
-- crash, such as segmentation fault or access violation
-- hang up or deadlock
-- memory leak or resource leak in general
-- garbage output
-- abnormal termination without a crash (e.g. just exit 1 at very beginning of the execution)
-- data corruption
-- use of outdated or deprecated API or library
+- Program doesn't start at all.
+- Crash (segmentation fault or access violation).
+- Hang up or deadlock.
+- Memory leak or resource leak in general.
+- Garbage output.
+- Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
+- Data corruption.
+- Use of outdated or deprecated API or library.
 
-as sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong).
-therefore, it's required to introduce a new `cci.` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
+As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<date>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 #### portability
 
-`patch_type: portability` indicates the patch improves the portability of the library, e.g. adding supports of new architectures (ARM, Sparc, etc.), operation systems (FreeBSD, Android, etc.), compilers (Intel, MinGW, etc.), and other types of configurations which are not originally supported by the project.
-in such cases, the patch could be adopted from another package repository (e.g. MSYS packages, Debian packages, Homebrew, FreeBSD ports, etc.).
-patches of this kind are preferred to be submitted upstream first (in contrast to patch_type: conan), but it's not always possible.
-some projects simply do not accept patches for platforms they don't have a build/test infrastracture. some projects are just either abandoned or inactive.
+`patch_type: portability`: Indicates a patch that improves the portability of the library, e.g. adding supports of new architectures (ARM, Sparc, etc.), operating systems (FreeBSD, Android, etc.), compilers (Intel, MinGW, etc.), and other types of configurations which are not originally supported by the project.
+In such cases, the patch could be adopted from another package repository (e.g. MSYS packages, Debian packages, Homebrew, FreeBSD ports, etc.).
+Patches of this kind are preferred to be submitted upstream to the original project repository first, but it's not always possible.
+Some projects simply do not accept patches for platforms they don't have a build/test infrastructure, or maybe they are just either abandoned or inactive.
 
 #### conan
 
-`patch_type: conan` indicates the patch that is conan-specific, patches of such kind are usually not welcomed upstream at all, because they provide zero value outside of conan.
-examples of such a patches may include modifications of build system files to allow dependencies provided by conan instead of dependencies provided by projects themselves (e.g. as submodule or just 3rd-party sub-directory) or by the system package manager (rpm/deb).
-such patches, for instance, may contain variables and targets generated only by conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
+`patch_type: conan`: Indicates a patch that is Conan-specific, patches of such kind are usually not welcomed upstream at all, because they provide zero value outside of Conan.
+Examples of such a patches may include modifications of build system files to allow dependencies provided by Conan instead of dependencies provided by projects themselves (e.g. as submodule or just 3rd-party sub-directory) or by the system package manager (rpm/deb).
+Such patches may contain variables and targets generated only by Conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
 
 ### patch_source
 
-`patch_source` is an URL from where patch was taken from, https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. what could be a patch source?
+`patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
 
-- link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc
-- link to the Pull Request or equivalent (e.g. gerrit review)
-- link to the bug tracker (such as JIRA, BugZilla, etc.)
-- link to the mail list discussion
-- link to the patch itself in another repository (e.g. MSYS, Debian, etc.)
+- Link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc.
+- Link to the Pull Request or equivalent (e.g. gerrit review).
+- Link to the bug tracker (such as JIRA, BugZilla, etc.).
+- Link to the mail list discussion.
+- Link to the patch itself in another repository (e.g. MSYS, Debian, etc.).
 
-for the `patch_type: portability` there might be no patch source matching the definition above. although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained), in such case link to the conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
-for the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
+For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
+For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
 
 ### patch_description
 
 `patch_description` is an arbitrary text describing the following aspects of the patch:
 
-- what does patch do (example - `add missing unistd.h header`)
-- why is it necessary (example - `port to Android`)
-- how exactly does patch achieve that (example - `update configure.ac`)
+- What does patch do (example - `add missing unistd.h header`)
+- Why is it necessary (example - `port to Android`)
+- How exactly does patch achieve that (example - `update configure.ac`)
 
-therefore, the full description may look like: `port to Android: update configure.ac adding missing unistd.h header`
+An example of a full patch description could be: `port to Android: update configure.ac adding missing unistd.h header`.
