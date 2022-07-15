@@ -109,11 +109,12 @@ class XorgProtoConan(ConanFile):
 
     def package_info(self):
         for filename, name_version in yaml.safe_load(open(self._pc_data_path)).items():
-            # FIXME: generated .pc files contain `Name: xorg-proto-Xproto`, it should be `Name: Xproto`
             self.cpp_info.components[filename].filenames["pkg_config"] = filename
             self.cpp_info.components[filename].libdirs = []
             if hasattr(self, "settings_build"):
                 self.cpp_info.components[filename].requires = ["xorg-macros::xorg-macros"]
             self.cpp_info.components[filename].version = name_version["version"]
+            assert filename.startswith("xorg-proto-")
+            self.cpp_info.components[filename].set_property("pkg_config_name", filename[11:])
 
         self.cpp_info.components["xproto"].includedirs.append(os.path.join("include", "X11"))
