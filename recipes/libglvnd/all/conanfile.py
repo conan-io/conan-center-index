@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import get, rmdir, save
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.layout import basic_layout
 import os
 import textwrap
 
@@ -42,15 +43,6 @@ class LibGlvndConan(ConanFile):
 
     generators = "PkgConfigDeps"
 
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     # don't use self.settings_build
     @property
     def _settings_build(self):
@@ -79,9 +71,12 @@ class LibGlvndConan(ConanFile):
         self.build_requires("meson/0.62.2")
         self.build_requires("pkgconf/1.7.4")
 
+    def layout(self):
+        basic_layout(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  strip_root=True)
 
     
     def generate(self):
