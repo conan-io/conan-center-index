@@ -1,4 +1,4 @@
-import os, glob
+import os
 from conans import CMake, ConanFile, tools
 
 required_conan_version = ">=1.43.0"
@@ -34,8 +34,5 @@ class MdnsConan(ConanFile):
         if str(self.settings.os) in ["Linux", "Android"]:
             self.cpp_info.system_libs.append('pthread')
 
+        self.cpp_info.set_property("cmake_file_name", "mdns")
         self.cpp_info.set_property("cmake_target_name", "mdns::mdns")
-
-        # TODO: to remove in conan v2 once cmake_find_package generators are removed
-        self.cpp_info.names["cmake_find_package"] = "mdns"
-        self.cpp_info.names["cmake_find_package_multi"] = "mdns"
