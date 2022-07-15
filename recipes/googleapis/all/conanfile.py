@@ -28,6 +28,7 @@ class GoogleAPIS(ConanFile):
         "fPIC": True
         }
     exports = "helpers.py"
+    short_paths = True
 
     def layout(self):
         cmake_layout(self)
