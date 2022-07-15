@@ -32,7 +32,7 @@ class ConanXOrg(ConanFile):
                      "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev", "libxcb-sync-dev", "libxcb-xfixes0-dev",
                      "libxcb-xinerama0-dev", "xkb-data", "libxcb-dri3-dev", "uuid-dev"], update=True, check=True)
         apt.install_substitutes(
-            [["libxcb-util-dev"], ["libxcb-util0-dev"]], update=True, check=True)
+            ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
 
         Yum(self).install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                            "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
