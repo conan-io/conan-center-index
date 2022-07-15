@@ -41,7 +41,7 @@ class LibGlvndConan(ConanFile):
         "entrypoint_patching": True,
     }
 
-    generators = "PkgConfigDeps"
+    generators = "pkg_config"
 
     # don't use self.settings_build
     @property
