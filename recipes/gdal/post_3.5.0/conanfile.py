@@ -463,7 +463,6 @@ class GdalConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
-        self.cpp_info.includedirs.append(os.path.join("include", "gdal"))
 
         self.cpp_info.libs = tools.collect_libs(self)
 
