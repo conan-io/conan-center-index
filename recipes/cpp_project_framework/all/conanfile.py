@@ -15,11 +15,9 @@ class CppProjectFrameworkConan(ConanFile):
     topics = ("c++", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
     generators = "cmake"
@@ -71,10 +69,6 @@ class CppProjectFrameworkConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
