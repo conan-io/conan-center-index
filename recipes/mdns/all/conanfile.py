@@ -33,7 +33,6 @@ class MdnsConan(ConanFile):
             self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
         if str(self.settings.os) in ["Linux", "Android"]:
             self.cpp_info.system_libs.append('pthread')
-                self.cpp_info.libs = ["nfnetlink"]
 
         self.cpp_info.set_property("cmake_target_name", "mdns::mdns")
 
