@@ -475,7 +475,7 @@ class SomeRecipe(ConanFile):
             del self.info.settings.build_type
     ```
     
-- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/b156608fa08cb368b7111c5558ce6fa4d8339ddb/recipes/make/all/conanfile.py#L30-L31)):
+- For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)):
 
     ```python
         def package_id(self):
