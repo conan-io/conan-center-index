@@ -1,11 +1,11 @@
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.45.0"
 
 
 class XmlSecConan(ConanFile):
@@ -43,10 +43,6 @@ class XmlSecConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -78,7 +74,7 @@ class XmlSecConan(ConanFile):
             raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
 
     def build_requirements(self):
-        if not self._is_msvc:
+        if not is_msvc(self):
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -178,7 +174,7 @@ class XmlSecConan(ConanFile):
         return autotools
 
     def build(self):
-        if self._is_msvc:
+        if is_msvc(self):
             self._build_msvc()
         else:
             with tools.chdir(self._source_subfolder):
@@ -191,7 +187,7 @@ class XmlSecConan(ConanFile):
     def package(self):
         self.copy("Copyright", src=self._source_subfolder, dst="licenses")
 
-        if self._is_msvc:
+        if is_msvc(self):
             self._package_msvc()
             if not self.options.shared:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
@@ -207,14 +203,17 @@ class XmlSecConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "xmlsec1Conf.sh"))
 
     def package_info(self):
-        prefix = "lib" if self._is_msvc else ""
-        infix = "" if self._is_msvc else str(tools.Version(self.version).major)
-        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+        prefix = "lib" if is_msvc(self) else ""
+        infix = "" if is_msvc(self) else str(tools.Version(self.version).major)
+        suffix = "_a" if is_msvc(self) and not self.options.shared else ""
 
         get_libname = lambda libname: prefix + "xmlsec" + infix + (("-" + libname) if libname else "") + suffix
 
         self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
-        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
+        if is_msvc(self):
+            self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec"))
+        else:
+            self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
         self.cpp_info.components["libxmlsec"].set_property(
             "pkg_config_name", "xmlsec{}".format(tools.Version(self.version).major)
