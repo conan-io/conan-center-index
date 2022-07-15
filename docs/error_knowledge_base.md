@@ -444,7 +444,36 @@ This is to ensure the exact package that is built and uploaded is tested against
 
 #### **<a name="KB-H070">#KB-H070</a>: "MANDATORY SETTINGS"**
 
-https://github.com/conan-io/hooks/commit/3e7e77fa5d14ee53dc1ad6b10d85358871fdd037
+> :information_source: This rule was put in place as it was deemed safe for evaluation however there is room for improvement
+
+ConanCenter operates is profiles with a predefined list of settings, all of these much be present in the recipe to ensure `package_id`s are
+computed correctly. Some libraries, for instance header-only, do not require all the settings and those should be deleted from the `package_id`.
+This approach ensure consistency and reduces the learning curve.
+
+Recipes should include:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    settings = "os", "compiler", "build_type", "arch"
+```
+
+For header-only recipes ([example](https://github.com/conan-io/conan-center-index/blob/3a773e2d69ada3bd931252c43a48daf636ddfe87/recipes/eigen/all/conanfile.py#L35-L36)):
+
+```python
+    def package_id(self):
+        self.info.header_only()
+```
+
+For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)):
+
+```python
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+```
              
 #### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
 
