@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple.apple import is_apple_os
-from conan.tools.files import get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save
 from conans import CMake
 from conans.tools import remove_files_by_mask
 
@@ -34,7 +34,7 @@ class DbusConan(ConanFile):
         "with_selinux": False,
     }
 
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "VirtualBuildEnv", "VirtualRunEnv"
     _cmake = None
 
     @property
@@ -61,6 +61,11 @@ class DbusConan(ConanFile):
             self.requires("selinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
+    
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -89,11 +94,7 @@ class DbusConan(ConanFile):
         return self._cmake
 
     def build(self):
-        replace_in_file(
-            self,
-            os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
-            "project(dbus)",
-            "project(dbus)\ninclude(../../conanbuildinfo.cmake)\nconan_basic_setup()")
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 

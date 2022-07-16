@@ -1,0 +1,26 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 3ac71a5a..f791ef31 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+ 
+ # we do not need to have WIN32 defined
+ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+diff --git a/cmake/modules/CPackInstallConfig.cmake b/cmake/modules/CPackInstallConfig.cmake
+index 46e8fb6d..270cecb8 100644
+--- a/cmake/modules/CPackInstallConfig.cmake
++++ b/cmake/modules/CPackInstallConfig.cmake
+@@ -9,8 +9,8 @@ endif (DBUS_INSTALL_SYSTEM_LIBS)
+ 
+ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "D-BUS For Windows")
+ SET(CPACK_PACKAGE_VENDOR "D-BUS Windows Team")
+-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/../README")
+-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/../COPYING")
++SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README")
++SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../COPYING")
+ # duplicated from VERSION
+ SET(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
+ SET(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})

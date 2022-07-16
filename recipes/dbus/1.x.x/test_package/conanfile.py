@@ -7,7 +7,7 @@ from conans import CMake
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi", "VirtualBuildEnv", "VirtualRunEnv"
 
     def build(self):
         cmake = CMake(self)
