@@ -1,6 +1,9 @@
 Linter to help migration to Conan v2
 ====================================
 
+<!-- toc -->
+<!-- endToc -->
+
 On our [path to Conan v2](v2_roadmap.md) we are leveraging on custom Pylint rules. This
 linter will run for every pull-request that is submitted to the repository and will
 raise some warnings and errors that should be addressed in order to migrate the
@@ -41,4 +44,19 @@ class Recipe(ConanFile):
     def test(self):
         if not cross_building(self):
             pass
+```
+
+# Disable linter for `test_v1_*/conanfile.py`
+
+Using the pattern `test_v1_*/conanfile.py` you can write a test that will be executed using only Conan v1,
+you probably don't want v2-migration linter to check this file, as it will likely contain syntax that is
+specific to Conan v1.
+
+To skip the file you just need to add the following comment to the file and `pylint` will skip it:
+
+**`test_v1_*/conanfile.py`**
+```python
+# pylint: skip-file
+from conans import ConanFile, CMake, tools
+...
 ```
