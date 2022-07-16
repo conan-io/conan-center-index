@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import ConanInvalidConfiguration
 import os
 import functools
 
@@ -38,6 +39,27 @@ class PlayrhoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    @property
+    def _compilers_minimum_versions(self):
+        return {
+            "gcc": "8",
+            "Visual Studio": "16",
+            "clang": "7",
+            "apple-clang": "12",
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+
+        compilers_minimum_version = self._compilers_minimum_versions
+        minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+        else:
+            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
