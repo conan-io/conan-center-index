@@ -1,0 +1,13 @@
+diff --git a/PlayRho/CMakeLists.txt b/PlayRho/CMakeLists.txt
+index 423a8ac..4a8d69f 100644
+--- a/PlayRho/CMakeLists.txt
++++ b/PlayRho/CMakeLists.txt
+@@ -90,7 +90,7 @@ if(PLAYRHO_BUILD_SHARED)
+ 		${PLAYRHO_Rope_SRCS}
+ 		${PLAYRHO_Rope_HDRS}
+ 	)
+-	target_compile_features(PlayRho PUBLIC cxx_std_17)
++	target_compile_features(PlayRho_shared PUBLIC cxx_std_17)
+ 	set_target_properties(PlayRho_shared PROPERTIES
+ 		OUTPUT_NAME "PlayRho"
+ 		CLEAN_DIRECT_OUTPUT 1

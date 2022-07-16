@@ -28,6 +28,8 @@ class PlayrhoConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,9 +53,8 @@ class PlayrhoConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "PlayRho", "CMakeLists.txt"),
-            "target_compile_features(PlayRho PUBLIC cxx_std_17)",
-            "target_compile_features(PlayRho_shared PUBLIC cxx_std_17)")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
