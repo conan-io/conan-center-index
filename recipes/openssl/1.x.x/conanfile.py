@@ -178,12 +178,6 @@ class OpenSSLConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
-        if self._full_version >= "1.1.0":
-            del self.options.no_md2
-            del self.options.no_rc4
-            del self.options.no_rc5
-            del self.options.no_zlib
-
         if self._full_version < "1.1.0":
             del self.options.no_camellia
             del self.options.no_cast
