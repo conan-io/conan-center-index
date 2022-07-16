@@ -105,15 +105,25 @@ class FmtConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "fmt"
         self.cpp_info.names["cmake_find_package_multi"] = "fmt"
         self.cpp_info.names["pkg_config"] = "fmt"
+
+        target = "fmt-header-only" if self.options.header_only else "fmt"
+        self.cpp_info.set_property("cmake_target_name", "fmt::{}".format(target))
+
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.header_only:
-            self.cpp_info.components["fmt-header-only"].includedirs.extend(["include"])
-            self.cpp_info.components["fmt-header-only"].defines.append("FMT_HEADER_ONLY=1")
+            self.cpp_info.components["_fmt"].includedirs.extend(["include"])
+            self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
             if self.options.with_fmt_alias:
-                self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
+                self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.libs = ["fmt" + postfix]
+            self.cpp_info.components["_fmt"].libs = ["fmt" + postfix]
             if self.options.with_fmt_alias:
-                self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
+                self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
-                self.cpp_info.defines.append("FMT_SHARED")
+                self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
+        self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["_fmt"].set_property("cmake_target_name", "fmt::{}".format(target))
