@@ -1,22 +1,28 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake
+from conan.tools.gnu import PkgConfig
+from conan.tools.layout import cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
+    generators = "CMakeToolchain", "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if not tools.cross_building(self, skip_x64_x86=True):
-            with tools.environment_append({'PKG_CONFIG_PATH': "."}):
-                pkg_config = tools.PkgConfig("wayland-scanner")
-                self.run('%s --version' % pkg_config.variables["wayland_scanner"], run_environment=True)
+        if not cross_building(self):
+            pkg_config = PkgConfig(self, "wayland-scanner", self.generators_folder)
+            self.run('%s --version' % pkg_config.variables["wayland_scanner"], env="conanrun")
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
-
+        if not cross_building(self):
+            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(cmd, env="conanrun")
