@@ -1,3 +1,4 @@
+from conan.tools.build import cross_building
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -612,7 +613,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-            (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+            (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     @property
     def _make_program(self):
