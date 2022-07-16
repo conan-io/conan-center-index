@@ -19,6 +19,7 @@ class DbusConan(ConanFile):
     topics = ("dbus")
 
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["CMakeLists.txt"]
     options = {
         "system_socket": "ANY",
         "system_pid_file": "ANY",
@@ -82,18 +83,10 @@ class DbusConan(ConanFile):
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
 
-            path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
-
-            self._cmake.configure(source_folder=path_to_cmake_lists,
-                                  build_folder=self._build_subfolder)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        replace_in_file(
-            self,
-            os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt"),
-            "project(dbus)",
-            "project(dbus)\ninclude(../../conanbuildinfo.cmake)\nconan_basic_setup()")
         cmake = self._configure_cmake()
         cmake.build()
 
