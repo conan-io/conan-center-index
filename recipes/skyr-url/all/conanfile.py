@@ -53,6 +53,8 @@ class SkyrUrlConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -103,12 +105,8 @@ class SkyrUrlConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-            "add_library(skyr-url STATIC)",
-            "add_library(skyr-url)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-            "        range-v3",
-            "        range-v3::range-v3")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -125,6 +123,6 @@ class SkyrUrlConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "skyr"
         self.cpp_info.components["url"].name = "skyr-url"
         self.cpp_info.components["url"].libs = tools.collect_libs(self)
-        self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3" ]
+        self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3"]
         if self.options.with_json:
             self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")
