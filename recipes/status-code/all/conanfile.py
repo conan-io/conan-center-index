@@ -19,7 +19,11 @@ class StatusCodeConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _compiler_required_cpp17(self):
+    def _cppstd_required_version(self):
+        return 11
+
+    @property
+    def _compiler_required_version(self):
         return {
             # Their README says gcc 5, but in testing only >=7 worked
             "gcc": "7",
@@ -29,11 +33,14 @@ class StatusCodeConan(ConanFile):
         }
 
     def validate(self):
-        try:
-            minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
-            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, _cppstd_required_version)
+
+        min_version = self._compiler_required_version.get(str(self.settings.compiler))
+        if min_version:
+            if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("This package requires c++11 support. The current compiler does not support it.")
-        except KeyError:
+        else:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def package_id(self):
@@ -49,6 +56,7 @@ class StatusCodeConan(ConanFile):
         self.copy("*.ipp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        # See https://github.com/ned14/status-code/blob/38e1e862386cb38d577664fd681ef829b0e03fba/CMakeLists.txt#L126
         self.cpp_info.set_property("cmake_file_name", "status-code")
         self.cpp_info.set_property("cmake_target_name", "status-code::hl")
 
