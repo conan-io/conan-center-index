@@ -76,6 +76,8 @@ class SkyrUrlConan(ConanFile):
 
         if self.options.with_fs and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang currently does not support with filesystem")
+        if self.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration("{} supports only libstdc++'s new ABI".format(self.name))
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
