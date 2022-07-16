@@ -188,6 +188,10 @@ project files as simple as possible, without the need of extra logic to handle d
 The CI will explore all the folders and run the tests for the ones matching `test_*/conanfile.py` pattern. You can find the output of all
 of them together in the testing logs.
 
+> **Note.-** If, for any reason, it is useful to write a test that should only be checked using Conan v1, you can do so by using the pattern
+> `test_v1_*/conanfile.py` for the folder. Please, have a look to [linter notes](v2_linter.md) to know how to prevent the linter from
+> checking these files.
+
 > Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
 > it will fail in crossbuilding scenarios.
 
