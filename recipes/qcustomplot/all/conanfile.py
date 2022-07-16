@@ -60,6 +60,8 @@ class QcustomplotConan(ConanFile):
             tools.check_min_cppstd(self, min_cppstd)
         if not (self.options["qt"].gui and self.options["qt"].widgets):
             raise ConanInvalidConfiguration("qcustomplot requires qt gui and widgets")
+        if self.options.with_opengl and self.options["qt"].opengl == "no":
+            raise ConanInvalidConfiguration("qcustomplot with opengl requires Qt with opengl enabled")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
