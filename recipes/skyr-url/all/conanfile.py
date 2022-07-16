@@ -117,12 +117,18 @@ class SkyrUrlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "skyr-url"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "skyr-url"
-        self.cpp_info.names["cmake_find_package"] = "skyr"
-        self.cpp_info.names["cmake_find_package_multi"] = "skyr"
+        self.cpp_info.set_property("cmake_file_name", "skyr-url")
+        self.cpp_info.set_property("cmake_target_name", "skyr::skyr-url")
+
         self.cpp_info.components["url"].name = "skyr-url"
         self.cpp_info.components["url"].libs = tools.collect_libs(self)
         self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3"]
         if self.options.with_json:
             self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["url"].system_libs.append("m")
+
+        self.cpp_info.filenames["cmake_find_package"] = "skyr-url"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "skyr-url"
+        self.cpp_info.names["cmake_find_package"] = "skyr"
+        self.cpp_info.names["cmake_find_package_multi"] = "skyr"
