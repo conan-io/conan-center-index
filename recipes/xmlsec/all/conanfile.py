@@ -59,7 +59,7 @@ class XmlSecConan(ConanFile):
     def requirements(self):
         self.requires("libxml2/2.9.14")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1p")
+            self.requires("openssl/1.1.1m")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
 
