@@ -59,7 +59,7 @@ class XmlSecConan(ConanFile):
     def requirements(self):
         self.requires("libxml2/2.9.14")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
 
@@ -237,3 +237,8 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["openssl"].set_property(
                 "pkg_config_name", "xmlsec{}-openssl".format(tools.Version(self.version).major)
             )
+            if is_msvc(self):
+                if tools.Version(self.settings.compiler.version) < "16.5":
+                    self.cpp_info.components["openssl"].cflags = ["/experimental:preprocessor"]
+                else:
+                    self.cpp_info.components["openssl"].cflags = ["/Zc:preprocessor"]
