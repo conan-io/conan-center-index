@@ -1,6 +1,8 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
+from conan.tools.build import cross_building
 
 
 class HsmTestConan(ConanFile):
@@ -14,6 +16,6 @@ class HsmTestConan(ConanFile):
 
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)
