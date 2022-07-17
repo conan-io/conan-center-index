@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_DBO"] = self.options["wt"].with_dbo
         cmake.configure()
         cmake.build()
 
