@@ -1,6 +1,5 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 import os
@@ -37,7 +36,7 @@ class HsmConan(ConanFile):
         cmake.configure()
 
     def package(self):
-        cmake = CMake(self)    
+        cmake = CMake(self) 
         cmake.install()
         tools.files.rmdir(conanfile=self, path=os.path.join(self.package_folder, "lib", "cmake"))
         self.copy("LICENSE", src=self.source_folder, dst="licenses")
