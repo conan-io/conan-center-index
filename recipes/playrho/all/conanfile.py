@@ -85,10 +85,10 @@ class PlayrhoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "PlayRho"))
 
     def package_info(self):
         self.cpp_info.libs = ["PlayRho"]
-        self.cpp_info.builddirs = os.path.join(self.package_folder, "lib", "PlayRho")
 
         self.cpp_info.set_property("cmake_file_name", "PlayRho")
         self.cpp_info.set_property("cmake_target_name", "PlayRho::PlayRho")
