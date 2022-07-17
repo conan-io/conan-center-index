@@ -1,0 +1,15 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2c7ee5e0..e66a727f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -55,8 +55,8 @@ if(ENABLE_SHM)
+   else()
+     set(iceoryx_required QUIET)
+   endif()
+-  find_package(iceoryx_binding_c ${iceoryx_required})
+-  set(ENABLE_SHM ${iceoryx_binding_c_FOUND} CACHE STRING "" FORCE)
++  find_package(iceoryx ${iceoryx_required})
++  set(ENABLE_SHM ${iceoryx_FOUND} CACHE STRING "" FORCE)
+ endif()
+ 
+ # ones that linger in the sources
