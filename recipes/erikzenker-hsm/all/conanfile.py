@@ -17,6 +17,7 @@ class HsmConan(ConanFile):
     requires = "boost/1.79.0"
     no_copy_source = True
     settings = "os", "arch", "build_type", "compiler"
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
         cmake_layout(self)
@@ -47,3 +48,5 @@ class HsmConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "hsm"
         self.cpp_info.names["cmake_find_package_multi"] = "hsm"
+        self.cpp_info.set_property("cmake_file_name", "hsm")
+        self.cpp_info.set_property("cmake_target_name", "hsm::hsm")
