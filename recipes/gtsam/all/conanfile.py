@@ -123,7 +123,7 @@ class GtsamConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= '4.1' \
                 and self.options.shared:
-            raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC")
+            raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC. see https://github.com/borglab/gtsam/issues/1087")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
