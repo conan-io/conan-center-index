@@ -1,4 +1,7 @@
 sources:
+  "1.2.34":
+    url: "https://github.com/lsh123/xmlsec/archive/xmlsec-1_2_34.tar.gz"
+    sha256: "c172b6a1c114ccbeae1d3edcbd0dcc8e2a2ab54217b5cb5e040eecd6fcbe0fa7"
   "1.2.32":
     url: "https://github.com/lsh123/xmlsec/archive/xmlsec-1_2_32.tar.gz"
     sha256: "e33e551fb9f6da5576b1a55ce962048adf337332c27e6be9dba04d360b6a5584"
