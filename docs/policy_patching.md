@@ -53,7 +53,7 @@ are the rules for this exceptional scenario:
  * **new release**, based on some official release and clearly identificable will
  be create to apply these patches to: PLACEHOLDER_FOR_RELEASE_FORMAT.
  * **only patches backporting bugfixes** will be accepted after they have
- been submitted to the upstream and there is a consensous that it's a bug and the patch is the solution.
+ been submitted to the upstream and there is a consensus that it's a bug and the patch is the solution.
 
 ConanCenter will build this patched release and serve its binaries like it does with
 any other Conan reference.

@@ -71,7 +71,7 @@ There are other ways to specify sources to cover other cases.
 
 #### Source code & license
 
-Certain projects provide license on its own, and released artifacts do not include it. In this case, a license URL can be provided separately:
+Certain projects provide license on their own, and released artifacts do not include it. In this case, a license URL can be provided separately:
 
 ```
 sources:
@@ -172,7 +172,7 @@ The `patch_type` field specifies the type of the patch. In conan-center-index we
 
 `patch_type: vulnerability`: Indicates a patch that addresses the security issue. The patch description
 should include the index of CVE or CWE the patch addresses.
-Usually, original library projects do new releases fixing vulnerabilities this kind of issues, but in some cases they are either abandoned or inactive.
+Usually, original library projects do new releases fixing vulnerabilities for this kind of issues, but in some cases they are either abandoned or inactive.
 
 ##### backport
 
