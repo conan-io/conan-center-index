@@ -9,4 +9,3 @@ patches:
   "1.9.0":
     - patch_file: "patches/0002-Add-runtime-export-to-install.patch"
       base_path: "source_subfolder"
-
