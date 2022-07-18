@@ -106,9 +106,11 @@ class Iir1Conan(ConanFile):
         name = "iir" if self.options.shared else "iir_static"
         self.cpp_info.set_property("cmake_file_name", "iir")
         self.cpp_info.set_property("cmake_target_name", "iir::{}".format(name))
+        self.cpp_info.set_property("pkg_config_name", "iir")
 
         self.cpp_info.names["cmake_find_package"] = "iir"
         self.cpp_info.names["cmake_find_package_multi"] = "iir"
+        self.cpp_info.names["pkg_config"] = "iir"
         self.cpp_info.components["iir"].names["cmake_find_package"] = name
         self.cpp_info.components["iir"].names["cmake_find_package_multi"] = name
         self.cpp_info.components["iir"].set_property("cmake_target_name", "iir::{}".format(name))
