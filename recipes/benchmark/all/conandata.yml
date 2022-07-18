@@ -23,3 +23,6 @@ sources:
   "1.6.1":
     url: "https://github.com/google/benchmark/archive/v1.6.1.tar.gz"
     sha256: "6132883bc8c9b0df5375b16ab520fac1a85dc9e4cf5be59480448ece74b278d4"
+  "1.6.2":
+    url: "https://github.com/google/benchmark/archive/v1.6.2.tar.gz"
+    sha256: "6adf850c2be6aa15843c94ac63d0819d5bf9f5678ae41244f25a1f4bf9480827"
