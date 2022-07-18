@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
+from conan.tools.build import cross_building
 
 required_conan_version = ">=1.33.0"
 
@@ -101,7 +102,7 @@ class DiligentCoreConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            if not tools.cross_building(self, skip_x64_x86=True):
+            if not cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.4.1")
 
     def _diligent_platform(self):
