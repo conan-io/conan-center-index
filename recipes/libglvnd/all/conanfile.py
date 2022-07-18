@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.51.0"
 
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
