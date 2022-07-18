@@ -13,8 +13,6 @@ sources:
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
   "api.252003":
-    - patch_file: "patches/0019-252003-exclude-tests.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
       base_path: "source_subfolder"
   "2.5.2":
