@@ -5,7 +5,6 @@ from io import StringIO
 from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
-from conan.tools.layout import cmake_layout
 from conans.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
@@ -18,7 +17,7 @@ class GoogleAPIS(ConanFile):
     homepage = "https://github.com/googleapis/googleapis"
     topics = "google", "protos", "api"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
     options = {
         "shared": [True, False], 
         "fPIC": [True, False]
@@ -29,9 +28,6 @@ class GoogleAPIS(ConanFile):
         }
     exports = "helpers.py"
     short_paths = True
-
-    def layout(self):
-        cmake_layout(self)
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
