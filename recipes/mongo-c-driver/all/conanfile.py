@@ -5,6 +5,7 @@ import functools
 
 required_conan_version = ">=1.43.0"
 
+
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
     description = "A Cross Platform MongoDB Client Library for C"
@@ -12,6 +13,7 @@ class MongoCDriverConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mongoc.org/"
     topics = ("libbson", "libmongoc", "mongo", "mongodb", "database", "db")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,6 +37,7 @@ class MongoCDriverConan(ConanFile):
         "with_icu": True,
         "srv": True,
     }
+
     short_paths = True
     generators = "cmake", "cmake_find_package", "pkg_config"
 
@@ -64,7 +67,7 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
@@ -85,8 +88,6 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")
         if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
-        if tools.Version(self.version) >= "1.21.0" and self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration("shared build doesn't allow on Windows after 1.21.0")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
@@ -111,6 +112,9 @@ class MongoCDriverConan(ConanFile):
         for old_new in to_replace_old_new:
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
                                   old_new["old"], old_new["new"])
+        # cleanup rpath
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")
 
     @property
     def _ssl_cmake_value(self):
@@ -161,9 +165,9 @@ class MongoCDriverConan(ConanFile):
         cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
             cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-
+        if tools.Version(self.version) >= "1.20.0":
+            cmake.definitions["MONGO_USE_CCACHE"] = False
         cmake.configure(build_folder=self._build_subfolder)
-
         return cmake
 
     def build(self):
