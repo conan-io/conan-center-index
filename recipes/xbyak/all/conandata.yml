@@ -1,4 +1,7 @@
 sources:
+  "6.60.2":
+    url: "https://github.com/herumi/xbyak/archive/v6.60.2.tar.gz"
+    sha256: "c7fd461cf8e0e1acec13970681f5e7b073a2e63f59841252fb298c3c3a09a395"
   "6.60":
     url: "https://github.com/herumi/xbyak/archive/v6.60.tar.gz"
     sha256: "fb478da9d66fabe155d54436645ffbbdc44b513027391c4662983d44ea483d59"
