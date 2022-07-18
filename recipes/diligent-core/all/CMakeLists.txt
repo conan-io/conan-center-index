@@ -10,12 +10,6 @@ find_package(glslang REQUIRED CONFIG)
 find_package(volk REQUIRED CONFIG)
 find_package(xxHash REQUIRED CONFIG)
 
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-
 add_library(glslang INTERFACE)
 target_link_libraries(glslang INTERFACE glslang::glslang)
 target_include_directories(glslang INTERFACE ${CONAN_INCLUDE_DIRS_GLSLANG}/glslang)
