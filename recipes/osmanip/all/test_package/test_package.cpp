@@ -8,6 +8,11 @@
 #include "osmanip/utility/windows.hpp"
 #endif
 
+// Since 4.1.0, options.hpp for `osm::OPTION` is added.
+#if __has_include("osmanip/utility/options.hpp")
+#  include "osmanip/utility/options.hpp"
+#endif
+
 // STD headers
 #include <chrono>
 #include <iostream>
