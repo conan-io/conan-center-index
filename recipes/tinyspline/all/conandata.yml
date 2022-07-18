@@ -1,4 +1,7 @@
 sources:
+  "0.5.0":
+    url: "https://github.com/msteinbeck/tinyspline/archive/v0.5.0.tar.gz"
+    sha256: "cf7a6de40a5456b6791bc043d978b134c54e0404129a05846b803ccd45db366b"
   "0.4.0":
     url: "https://github.com/msteinbeck/tinyspline/archive/refs/tags/v0.4.0.tar.gz"
     sha256: "819db7f8b09c68b701b54232f08d35210599353703934c61e03555c3c059a0db"
