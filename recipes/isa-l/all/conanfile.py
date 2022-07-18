@@ -10,7 +10,7 @@ class LibisalConan(ConanFile):
     description = "Intel's Intelligent Storage Acceleration Library"
     license = "BSD-3"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/01org/isa-l"
+    homepage = "https://github.com/intel/isa-l"
     topics = ("isa-l", "compression")
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -33,16 +33,14 @@ class LibisalConan(ConanFile):
     def validate(self):
         if self.settings.arch not in [ "x86", "x86_64", "armv8" ]:
             raise ConanInvalidConfiguration("CPU Architecture not supported")
-        if self.settings.os in ["Macos", "Windows"]:
-            raise ConanInvalidConfiguration("Macos and Windows builds not supported")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Only Linux and FreeBSD builds are supported")
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_thread
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -50,16 +48,14 @@ class LibisalConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             self.run("./autogen.sh")
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
-                env_build = AutoToolsBuildEnvironment(self)
-                extra_args = list()
-                if self.options.shared:
-                    extra_args.extend(('--enable-static=no',))
-                else:
-                    extra_args.extend(('--enable-shared=no',))
-                env_build.configure("../", args=extra_args, build=False, host=False, target=False)
-                env_build.make()
+            env_build = AutoToolsBuildEnvironment(self)
+            extra_args = list()
+            if self.options.shared:
+                extra_args.extend(('--enable-static=no',))
+            else:
+                extra_args.extend(('--enable-shared=no',))
+            env_build.configure(".", args=extra_args, build=False, host=False, target=False)
+            env_build.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
