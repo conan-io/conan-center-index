@@ -1,25 +1,22 @@
-diff --git a/src/libbson/CMakeLists.txt b/src/libbson/CMakeLists.txt
-index d6df66f..72fcf47 100644
 --- a/src/libbson/CMakeLists.txt
 +++ b/src/libbson/CMakeLists.txt
-@@ -230,6 +230,8 @@ target_include_directories (
-       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/../../src>
-       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/../../src/common>
+@@ -209,6 +209,7 @@ set (HEADERS_FORWARDING
+    ${PROJECT_SOURCE_DIR}/src/bson/forwarding/bson.h
  )
-+
-+if (NOT MONGOC_ENABLE_STATIC_BUILD)
- set_target_properties (bson_shared PROPERTIES VERSION 0.0.0 SOVERSION 0)
- set_target_properties (bson_shared PROPERTIES OUTPUT_NAME "${BSON_OUTPUT_BASENAME}-${BSON_API_VERSION}")
  
-@@ -275,6 +277,7 @@ if (WIN32)
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ add_library (bson_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+ set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+ target_compile_definitions (bson_shared
+@@ -275,6 +276,7 @@ if (WIN32)
     # must be handled specially since we can't resolve them
     set (BSON_SYSTEM_LIBRARIES ${BSON_SYSTEM_LIBRARIES} ws2_32)
  endif ()
-+endif ()
++endif()
  
  if (MONGOC_ENABLE_STATIC_BUILD)
     add_library (bson_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
-@@ -349,7 +352,7 @@ set (BSON_HEADER_INSTALL_DIR
+@@ -349,7 +351,7 @@ set (BSON_HEADER_INSTALL_DIR
  )
  
  if (MONGOC_ENABLE_STATIC_INSTALL)
@@ -28,8 +25,6 @@ index d6df66f..72fcf47 100644
  else ()
     set (TARGETS_TO_INSTALL bson_shared)
  endif ()
-diff --git a/src/libmongoc/CMakeLists.txt b/src/libmongoc/CMakeLists.txt
-index f14ad6b..3a056ce 100644
 --- a/src/libmongoc/CMakeLists.txt
 +++ b/src/libmongoc/CMakeLists.txt
 @@ -758,6 +758,7 @@ if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
@@ -60,7 +55,7 @@ index f14ad6b..3a056ce 100644
        PUBLIC_HEADER "${HEADERS}"
     )
  endif ()
-+endif ()
++endif()
  
  add_executable (mongoc-stat ${PROJECT_SOURCE_DIR}/../../src/tools/mongoc-stat.c)
 +if (NOT MONGOC_ENABLE_STATIC_BUILD)
