@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 import os
 import textwrap
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.49.0"
 
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
@@ -90,6 +90,7 @@ class LibGlvndConan(ConanFile):
         tc.project_options["dispatch-tls"] = self.options.dispatch_tls
         tc.project_options["headers"] = self.options.headers
         tc.project_options["entrypoint-patching"] = "enabled" if self.options.entrypoint_patching else "disabled"
+        tc.project_options["libdir"] = "lib"
         tc.generate()
 
     def build(self):
