@@ -53,6 +53,9 @@ class GoogleAPIS(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
+
+        if self.settings.compiler in ["Visual Studio", "msvc"] and self.options.shared:
+            raise ConanInvalidConfiguration("Source code generated from protos is missing some export macro")
         if self.options.shared and not self.options["protobuf"].shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
