@@ -19,8 +19,6 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0025-252003-fix-warning-as-error-win.patch"
-      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0014-252-exclude-tests.patch"
       base_path: "source_subfolder"
