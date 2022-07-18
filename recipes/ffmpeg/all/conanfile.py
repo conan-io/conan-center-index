@@ -6,6 +6,7 @@ import contextlib
 import glob
 import shutil
 import re
+from conan.tools.build import cross_building
 
 required_conan_version = ">=1.36.0"
 
@@ -389,7 +390,7 @@ class FFMpegConan(ConanFile):
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
-            opt_enable_disable("cross-compile", tools.cross_building(self)),
+            opt_enable_disable("cross-compile", cross_building(self)),
             opt_enable_disable("asm", self.options.with_asm),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
@@ -550,7 +551,7 @@ class FFMpegConan(ConanFile):
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
-        if tools.cross_building(self):
+        if cross_building(self):
             if self._target_os == "emscripten":
                 args.append("--target-os=none")
             else:
