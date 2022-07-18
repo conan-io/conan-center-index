@@ -15,13 +15,9 @@ patches:
   "api.252003":
     - patch_file: "patches/0019-252003-exclude-tests.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0020-252003-dont-install-3d-party-license.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0022-252003-fix-glslang-include.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0024-252003-dont-install-3d-party-license.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0025-252003-fix-warning-as-error-win.patch"
       base_path: "source_subfolder"

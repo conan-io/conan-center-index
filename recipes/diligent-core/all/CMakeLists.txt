@@ -12,5 +12,6 @@ find_package(xxHash REQUIRED CONFIG)
 
 add_library(glslang ALIAS glslang::glslang)
 add_library(SPIRV ALIAS glslang::SPIRV)
+add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 
 add_subdirectory(source_subfolder)
