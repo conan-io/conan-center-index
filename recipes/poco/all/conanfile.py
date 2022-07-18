@@ -65,6 +65,7 @@ class PocoConan(ConanFile):
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
         "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
         "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", False, ["Util", "XML"], [], False),
+        "Prometheus": _PocoComponent("enable_prometheus", False, ["Foundation", "Net"], [], True),
     }
 
     for comp in _poco_component_tree.values():
@@ -107,6 +108,8 @@ class PocoConan(ConanFile):
         if tools.Version(self.version) < "1.11":
             del self.options.enable_activerecord
             del self.options.enable_activerecord_compiler
+        if tools.Version(self.version) < "1.12":
+            del self.options.enable_prometheus
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
