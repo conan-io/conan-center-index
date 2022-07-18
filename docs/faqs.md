@@ -172,6 +172,11 @@ No. Some projects provide more than a simple library, but also applications. For
 
 [The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
 
+## What license should I use for a custom project specific license?
+
+When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
+See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
+
 ## Why is a `tools.check_min_cppstd` call not enough?
 
 Very often C++ projects require a minimum standard version, such as 14 or 17, in order to compile. Conan offers tools which enable checking the relevant setting is enabled and above this support for a certain version is present. Otherwise, it uses the compiler's default.
