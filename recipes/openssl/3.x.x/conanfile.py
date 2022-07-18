@@ -393,6 +393,9 @@ class OpenSSLConan(ConanFile):
             "no-tests",
             "--debug" if self.settings.build_type == "Debug" else "--release",
         ]
+        #if not self.options.no_legacy:
+        #    # directly link provider modules
+        #    args.append("no-module")
 
         if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
