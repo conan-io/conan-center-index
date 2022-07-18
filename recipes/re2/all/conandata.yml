@@ -1,4 +1,7 @@
 sources:
+  "20220601":
+    url: "https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"
+    sha256: "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f"
   "20220201":
     url: "https://github.com/google/re2/archive/refs/tags/2022-02-01.tar.gz"
     sha256: "9c1e6acfd0fed71f40b025a7a1dabaf3ee2ebb74d64ced1f9ee1b0b01d22fd27"
