@@ -8,3 +8,4 @@ conan_basic_setup(TARGETS)
 
 find_package(Protobuf REQUIRED)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
