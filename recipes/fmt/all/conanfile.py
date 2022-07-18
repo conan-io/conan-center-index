@@ -122,6 +122,7 @@ class FmtConan(ConanFile):
             # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
             # from that version components don't have empty libdirs by default
             self.cpp_info.components["_fmt"].libdirs.extend(["lib"])
+            self.cpp_info.components["_fmt"].bindirs.extend(["bin"])
             if self.options.with_fmt_alias:
                 self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
