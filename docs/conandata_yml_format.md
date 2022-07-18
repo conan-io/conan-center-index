@@ -60,7 +60,7 @@ Keep in mind all the mirrors have to provide the exactly same source (e.g. no re
 
 #### Source code + license
 
-Certain projects provide license on its own, and released artifacts do not include it. In this case, a license URL can be provided separately:
+Certain projects provide license on their own, and released artifacts do not include it. In this case, a license URL can be provided separately:
 
 ```
 sources:
