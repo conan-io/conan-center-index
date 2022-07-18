@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import get, rmdir, save, rm
+from conan.tools.files import get, rmdir, save
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 import os
@@ -102,7 +102,7 @@ class LibGlvndConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        rm(self, "*.pc", os.path.join(self.package_folder, "lib"), recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), textwrap.dedent('''\
