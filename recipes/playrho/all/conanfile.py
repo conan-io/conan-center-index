@@ -8,7 +8,7 @@ required_conan_version = ">=1.43.0"
 class PlayrhoConan(ConanFile):
     name = "playrho"
     description = "Real-time oriented physics engine and library that's currently best suited for 2D games. "
-    license = "zlib"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/louis-langholtz/PlayRho/"
     topics = ("physics-engine", "collision-detection", "box2d")
