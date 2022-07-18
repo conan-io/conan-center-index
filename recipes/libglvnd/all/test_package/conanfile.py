@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conans import CMake
 from conan.tools.build import cross_building
+from conans import CMake
 import os
 
 
