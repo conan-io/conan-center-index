@@ -100,7 +100,7 @@ class SkyrUrlConan(ConanFile):
         cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
         cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
         if is_msvc(self):
-            cmake.definitions["skyr_USE_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+            cmake.definitions["skyr_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
