@@ -78,7 +78,6 @@ class LibGlvndConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True)
 
-    
     def generate(self):
         tc = MesonToolchain(self)
         tc.project_options["asm"] = "enabled" if self.options.asm else "disabled"
@@ -159,7 +158,7 @@ class LibGlvndConan(ConanFile):
             self.cpp_info.components['gles1'].libs = ["GLESv1_CM"]
             self.cpp_info.components['gles1'].requires.extend(["gldispatch"])
             self.cpp_info.components['gles1'].set_property("pkg_config_name", "glesv1_cm")
-            
+
         if self.options.gles2:
             self.cpp_info.components['gles2'].libs = ["GLESv2"]
             self.cpp_info.components['gles2'].requires.extend(["gldispatch"])
