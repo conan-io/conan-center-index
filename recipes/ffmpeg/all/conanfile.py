@@ -255,7 +255,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_libiconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_freetype:
             self.requires("freetype/2.11.1")
         if self.options.with_openjpeg:
@@ -283,7 +283,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.2")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
