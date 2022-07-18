@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.13)
 project(osmanip LANGUAGES CXX)
 
 include(conanbuildinfo.cmake)
@@ -6,25 +6,22 @@ conan_basic_setup(KEEP_RPATHS)
 
 find_package(arsenalgear REQUIRED CONFIG)
 
-set(osmanip_src
+add_library(osmanip)
+target_sources(osmanip PRIVATE
     source_subfolder/src/graphics/canvas.cpp
     source_subfolder/src/graphics/plot_2D.cpp
-    source_subfolder/src/manipulators/csmanip.cpp
+    $<$<VERSION_EQUAL:${OSMANIP_VERSION},4.0.0>:
+        source_subfolder/src/manipulators/csmanip.cpp
+    >
+    $<$<VERSION_GREATER:${OSMANIP_VERSION},4.0.0>:
+        source_subfolder/src/manipulators/printer.cpp
+        source_subfolder/src/manipulators/cursor.cpp
+        source_subfolder/src/manipulators/common.cpp
+        source_subfolder/src/manipulators/colsty.cpp
+    >
     source_subfolder/src/progressbar/progress_bar.cpp
     source_subfolder/src/utility/windows.cpp
 )
-
-set(osmanip_inc
-    source_subfolder/include/graphics/canvas.hpp
-    source_subfolder/include/graphics/plot_2D.hpp
-    source_subfolder/include/manipulators/csmanip.hpp
-    source_subfolder/include/progressbar/multi_progress_bar.hpp
-    source_subfolder/include/progressbar/progress_bar.hpp
-    source_subfolder/include/utility/windows.hpp
-)
-
-
-add_library(osmanip ${osmanip_src})
 target_include_directories(osmanip PUBLIC source_subfolder/include/)
 target_compile_features(osmanip PUBLIC cxx_std_17)
 set_target_properties(osmanip PROPERTIES
