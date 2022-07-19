@@ -466,7 +466,7 @@ class SomeRecipe(ConanFile):
             self.info.header_only()
     ```
 
-- For "build script" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)):
+- For "build script" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)) that provide only scripts (e.g. for the build system) and **no binaries** may have something similar to:
 
     ```python
         def package_id(self):
