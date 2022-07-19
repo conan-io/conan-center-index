@@ -125,14 +125,10 @@ class GoogleAPIS(ConanFile):
         if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.2" and self.settings.os == "Macos":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
-        if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+        if (self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++") or \
+            self.settings.compiler in ["Visual Studio", "msvc"]:
             deactivate_library("//google/cloud/channel/v1:channel_proto")
             deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
-        if self.version in ["cci.20220711", "cci.20220531"]:
-            #  - Inconvenient macro names from '10.0.17763.0\ucrt\corecrt_math.h' : DOMAIN
-            if self.settings.compiler in ["Visual Studio", "msvc"]:
-                deactivate_library("//google/cloud/channel/v1:channel_proto")
-                deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
 
         return proto_libraries
 
