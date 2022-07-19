@@ -130,21 +130,20 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = lib_name
         self.cpp_info.names["cmake_find_package_multi"] = lib_name
         self.cpp_info.set_property("cmake_file_name", "ignition-tools")
-        self.cpp_info.components["core"].names["cmake_find_package"] = "core"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
-        self.cpp_info.components["core"].names["cmake_paths"] = "core"
-        self.cpp_info.components["core"].bindirs = ["bin"]
+        self.cpp_info.components["backward"].names["cmake_find_package"] = "backward"
+        self.cpp_info.components["backward"].names["cmake_find_package_multi"] = "backward"
+        self.cpp_info.components["backward"].names["cmake_paths"] = "backward"
+        self.cpp_info.components["backward"].bindirs = ["bin"]
 
-        self.cpp_info.components["core"].libs = []
-        self.cpp_info.components["core"].includedirs = []
+        self.cpp_info.components["backward"].libs = []
+        self.cpp_info.components["backward"].includedirs = []
         if int(tools.Version(self.version).minor) > 2:
-            self.cpp_info.components["core"].libs.append(lib_name +"-backward")
-
-        self.cpp_info.components["core"].builddirs.append(self._module_dir_rel_path)
+            self.cpp_info.components["backward"].libs.append(lib_name +"-backward")
+        self.cpp_info.components["backward"].builddirs.append(self._module_dir_rel_path)
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-        self.cpp_info.components["core"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["core"].build_modules["cmake_paths"] = [self._module_file_rel_path]
+        self.cpp_info.components["backward"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["backward"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["backward"].build_modules["cmake_paths"] = [self._module_file_rel_path]
 
     @property
     def _module_dir_rel_path(self):
