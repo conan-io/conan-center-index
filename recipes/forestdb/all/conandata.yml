@@ -1,0 +1,4 @@
+sources:
+  "cci.20220708":
+    url: "https://github.com/ForestDB-KVStore/Simple-ForestDB/archive/3291acc3ba697c7222813422fde41cff59fe0cb5.tar.gz"
+    sha256: 341d754bffc36255089433723400d340d086a843b1472e064019f5ee16aea48b
