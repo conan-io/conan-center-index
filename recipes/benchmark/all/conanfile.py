@@ -65,7 +65,7 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
 
         if self.settings.os != "Windows":
-            if tools.cross_building(self.settings):
+            if tools.cross_building(self):
                 self._cmake.definitions["HAVE_STD_REGEX"] = False
                 self._cmake.definitions["HAVE_POSIX_REGEX"] = False
                 self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
