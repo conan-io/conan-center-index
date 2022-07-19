@@ -66,9 +66,9 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
         elif self.options.crypto_library == "libressl":
-            self.requires("libressl/3.4.3")
+            self.requires("libressl/3.5.3")
 
     def validate(self):
         if self.options.crypto_library == "commoncrypto" and not tools.is_apple_os(self.settings.os):
@@ -77,7 +77,7 @@ class SqlcipherConan(ConanFile):
     def build_requirements(self):
         self.build_requires("tcl/8.6.11")
         if not self._is_msvc:
-            self.build_requires("gnu-config/cci.20201022")
+            self.build_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
