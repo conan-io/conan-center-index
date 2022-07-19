@@ -130,7 +130,7 @@ class GoogleAPIS(ConanFile):
             deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
         if self.version == "cci.20220711":
             #  - Inconvenient macro names from '10.0.17763.0\ucrt\corecrt_math.h' : DOMAIN
-            if self.settings.compiler in ["Visual Studio"] and self.settings.compiler.version == "16":
+            if self.settings.compiler in ["Visual Studio", "msvc"]:
                 deactivate_library("//google/cloud/channel/v1:channel_proto")
                 deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
 
