@@ -1,0 +1,4 @@
+sources:
+  "2022.07.09":
+    url: "https://github.com/ForestDB-KVStore/Simple-ForestDB.git"
+    branch: "3291acc3ba697c7222813422fde41cff59fe0cb5"
