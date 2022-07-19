@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 import os
 import functools
@@ -134,8 +135,11 @@ class CprConan(ConanFile):
         if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+        if is_msvc(self) and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+
+        if tools.Version(self.version) == "1.9.0" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("{}/{} doesn't support gcc < 6".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
