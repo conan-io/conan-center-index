@@ -45,10 +45,6 @@ class GoogleAPIS(ConanFile):
             self.options["protobuf"].shared = True
 
     def validate(self):
-        # TODO: Remove, just for testing configurations in CCI
-        if self.settings.os in ["Linux", "Macos"]:
-            raise ConanInvalidConfiguration("REMOVE!! Building just Windows")
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "5":
