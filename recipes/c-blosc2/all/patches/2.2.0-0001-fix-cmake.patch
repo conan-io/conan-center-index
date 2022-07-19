@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index bd8cb34..cb744c5 100644
+index bd8cb34..dfd22a7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -68,7 +68,8 @@ if(NOT WIN32)
@@ -12,7 +12,7 @@ index bd8cb34..cb744c5 100644
  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.4)
    cmake_policy(SET CMP0063 NEW)
  endif()
-@@ -144,14 +145,14 @@ if(BUILD_LITE)
+@@ -144,26 +145,21 @@ if(BUILD_LITE)
  endif()
  
  if(PREFER_EXTERNAL_LZ4)
@@ -25,11 +25,25 @@ index bd8cb34..cb744c5 100644
  if(NOT DEACTIVATE_ZLIB)
      if(PREFER_EXTERNAL_ZLIB)
 -        find_package(ZLIB_NG)
-+        find_package(zlib-ng)
-         if (ZLIB_NG_FOUND)
-             set(HAVE_ZLIB_NG TRUE)
-         else()
-@@ -184,7 +185,7 @@ endif()
+-        if (ZLIB_NG_FOUND)
+-            set(HAVE_ZLIB_NG TRUE)
+-        else()
+-            find_package(ZLIB)
+-        endif()
++        find_package(zlib)
+ 
+-        if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++        if(NOT zlib_FOUND)
+             message(STATUS "No ZLIB found.  Using ZLIB-NG internal sources.")
+         endif()
+     endif()
+ 
+-    if (NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++    if (0)
+         message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
+         set(HAVE_ZLIB_NG TRUE)
+         add_definitions(-DZLIB_COMPAT)
+@@ -184,7 +180,7 @@ endif()
  
  if(NOT DEACTIVATE_ZSTD)
      if(PREFER_EXTERNAL_ZSTD)
