@@ -31,6 +31,10 @@ class ForestDBConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def requirements(self):
+        if self.options.with_snappy:
+            self.requires("snappy/1.1.9")
+
     def source(self):
         tools.Git(folder=self._source_subfolder).clone(**self.conan_data["sources"][self.version], shallow=True)
 
