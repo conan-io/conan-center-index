@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir
 
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class FmtConan(ConanFile):
