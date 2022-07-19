@@ -177,7 +177,7 @@ Usually, original library projects do new releases fixing vulnerabilities for th
 ##### backport
 
 `patch_type: backport`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The patch source may be a pull request, or bug within the project's issue tracker.
-Backports are accepted only for bugs, but not for feature requests.
+Backports are accepted only for bugs that break normal execution flow, never for feature requests.
 Usually, the following kind of problems are good candidates for backports:
 
 - Program doesn't start at all.
