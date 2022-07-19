@@ -119,6 +119,8 @@ class FmtConan(ConanFile):
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
             self.cpp_info.components["_fmt"].libs = [libname]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["_fmt"].system_libs.extend(["m"])
             # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
             # from that version components don't have empty libdirs by default
             self.cpp_info.components["_fmt"].libdirs.extend(["lib"])
