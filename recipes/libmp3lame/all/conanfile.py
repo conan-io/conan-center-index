@@ -91,7 +91,7 @@ class LibMP3LameConan(ConanFile):
             tools.replace_in_file("Makefile.MSVC", " /GL", "")
             tools.replace_in_file("Makefile.MSVC", " /LTCG", "")
             tools.replace_in_file("Makefile.MSVC", "ADDL_OBJ = bufferoverflowU.lib", "")
-            command = "nmake -f Makefile.MSVC comp=msvc asm=yes"
+            command = "nmake -f Makefile.MSVC comp=msvc"
             if self._is_clang_cl:
                 cl = os.environ.get('CC', "clang-cl")
                 link = os.environ.get("LD", 'lld-link')
@@ -103,7 +103,12 @@ class LibMP3LameConan(ConanFile):
                 tools.replace_in_file('Makefile.MSVC', '/GAy', '/GA')
             if self.settings.arch == "x86_64":
                 tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")
+                command += " MSVCVER=Win64 asm=yes"
+            elif self.settings.arch == "armv8":
+                tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:ARM64")
                 command += " MSVCVER=Win64"
+            else:
+                command += " asm=yes"
             command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
             self.run(command)
 
