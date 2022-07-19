@@ -97,11 +97,16 @@ class RubyConan(ConanFile):
         td.generate()
 
         tc = AutotoolsToolchain(self)
+        # TODO: removed in conan 1.49
         tc.default_configure_install_args = True
-        tc.configure_args = ["--disable-install-doc"]
+
+        tc.configure_args.append("--disable-install-doc")
         if self.options.shared and not is_msvc(self):
-            tc.configure_args.append("--enable-shared")
+            # Force fPIC
             tc.fpic = True
+            if "--enable-shared" not in tc.configure_args:
+                tc.configure_args.append("--enable-shared")
+
         if cross_building(self) and is_apple_os(self.settings.os):
             apple_arch = to_apple_arch(self.settings.arch)
             if apple_arch:
@@ -114,6 +119,7 @@ class RubyConan(ConanFile):
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 tc.ldflags.append("-debug")
             tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
+
         tc.generate()
 
     def build(self):
