@@ -54,19 +54,6 @@ class Ezc3dConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # don't force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        # fix install
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER Lib",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME}",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME}",
-                              "set(${PROJECT_NAME}_BIN_FOLDER bin")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -74,6 +61,8 @@ class Ezc3dConan(ConanFile):
         cmake.definitions["USE_MATRIX_FAST_ACCESSOR"] = True
         cmake.definitions["BINDER_PYTHON3"] = False
         cmake.definitions["BINDER_MATLAB"] = False
+        if tools.Version(self.version) >= "1.4.3":
+            cmake.definitions["BINDER_OCTAVE"] = False
         cmake.definitions["BUILD_EXAMPLE"] = False
         cmake.definitions["BUILD_DOC"] = False
         cmake.definitions["GET_OFFICIAL_DOCUMENTATION"] = False
