@@ -65,6 +65,7 @@ class PocoConan(ConanFile):
         "Zip": _PocoComponent("enable_zip", True, ["Util", "XML"], [], True),
         "ActiveRecord": _PocoComponent("enable_activerecord", True, ["Foundation", "Data"], [], True),
         "ActiveRecordCompiler": _PocoComponent("enable_activerecord_compiler", False, ["Util", "XML"], [], False),
+        "Prometheus": _PocoComponent("enable_prometheus", False, ["Foundation", "Net"], [], True),
     }
 
     for comp in _poco_component_tree.values():
@@ -107,6 +108,8 @@ class PocoConan(ConanFile):
         if tools.Version(self.version) < "1.11":
             del self.options.enable_activerecord
             del self.options.enable_activerecord_compiler
+        if tools.Version(self.version) < "1.12":
+            del self.options.enable_prometheus
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
@@ -119,9 +122,15 @@ class PocoConan(ConanFile):
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
+        if tools.Version(self.version) >= "1.12":
+            foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
+            self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
 
     def requirements(self):
-        self.requires("pcre/8.45")
+        if tools.Version(self.version) < "1.12":
+            self.requires("pcre/8.45")
+        else:
+            self.requires("pcre2/10.40")
         self.requires("zlib/1.2.12")
         if self.options.enable_xml:
             self.requires("expat/2.4.8")

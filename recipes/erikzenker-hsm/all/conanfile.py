@@ -1,6 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.43.0"
@@ -14,32 +15,31 @@ class HsmConan(ConanFile):
     topics = ("state-machine", "template-meta-programming")
     requires = "boost/1.79.0"
     no_copy_source = True
-    generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
+    generators = "CMakeDeps", "CMakeToolchain"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self)
 
     def validate(self):
         # https://github.com/erikzenker/hsm#dependencies
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 8:
+        if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) < '8':
             raise ConanInvalidConfiguration("clang 8+ is required")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 8:
+        if self.settings.compiler == "gcc" and Version(str(self.settings.compiler.version)) < '8':
             raise ConanInvalidConfiguration("GCC 8+ is required")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.files.get(**self.conan_data["sources"][self.version], conanfile=self, destination=self.source_folder, strip_root=True)
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
 
     def package(self):
-        cmake = CMake(self)    
+        cmake = CMake(self) 
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        tools.files.rmdir(conanfile=self, path=os.path.join(self.package_folder, "lib", "cmake"))
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
 
     def package_id(self):
         self.info.header_only()
@@ -47,3 +47,5 @@ class HsmConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "hsm"
         self.cpp_info.names["cmake_find_package_multi"] = "hsm"
+        self.cpp_info.set_property("cmake_file_name", "hsm")
+        self.cpp_info.set_property("cmake_target_name", "hsm::hsm")

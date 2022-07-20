@@ -138,6 +138,7 @@ class OpenSSLConan(ConanFile):
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
+    default_options["no_md2"] = True
     default_options["openssldir"] = None
 
     _env_build = None
@@ -517,6 +518,9 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
+
+        args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
+
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
         if self._is_clangcl:
@@ -547,7 +551,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
+            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng", "no_md2"]:
                 self.output.info("activated option: %s" % option_name)
                 args.append(option_name.replace("_", "-"))
         return args

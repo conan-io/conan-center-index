@@ -1,9 +1,15 @@
 sources:
+  "5.0.1":
+    url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/5.0.1/libxml++-5.0.1.tar.xz"
+    sha256: "15c38307a964fa6199f4da6683a599eb7e63cc89198545b36349b87cf9aa0098"
   "2.42.1":
     url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/2.42.1/libxml++-2.42.1.tar.xz"
     sha256: "9b59059abe5545d28ceb388a55e341095f197bd219c73e6623aeb6d801e00be8"
 
 patches:
+  "5.0.1":
+    - patch_file: "patches/5.0.1-0001-enable_static_builds_on_msvc.patch"
+      base_path: "source_subfolder"
   "2.42.1":
-    - patch_file: "patches/enable_static_builds_on_msvc.patch"
+    - patch_file: "patches/2.42.1-0001-enable_static_builds_on_msvc.patch"
       base_path: "source_subfolder"
