@@ -147,6 +147,9 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
+    def package_id(self):
+        self.info.requires["protobuf"].full_package_mode()
+
     def package_info(self):
         # We are not creating components, we can just collect the libraries
         self.cpp_info.libs = tools.collect_libs(self)
