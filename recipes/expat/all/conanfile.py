@@ -5,7 +5,7 @@ from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class ExpatConan(ConanFile):
@@ -85,7 +85,6 @@ class ExpatConan(ConanFile):
     def package(self):
         copy(self, "COPYING", self.build_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.configure()
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
