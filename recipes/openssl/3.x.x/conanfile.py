@@ -80,6 +80,16 @@ class OpenSSLConan(ConanFile):
         "no_ts": [True, False],
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
+        "no_afalgeng": [True, False],
+        "no_autoalginit": [True, False],
+        "no_autoerrinit": [True, False],
+        "no_ssl_trace": [True, False],
+        "no_static_engine": [True, False],
+        "no_err": [True, False],
+        "no_makedepend": [True, False],
+        "no_padlockeng": [True, False],
+        "no_ui_console": [True, False],
+        "no_uplink": [True, False],
         "openssldir": "ANY",
     }
     default_options = {key: False for key in options.keys()}
