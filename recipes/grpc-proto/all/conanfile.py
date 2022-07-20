@@ -62,12 +62,34 @@ class GRPCProto(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["GOOGLEAPIS_PROTO_DIRS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
         cmake.configure()
         return cmake
 
     @functools.lru_cache(1)
     def _parse_proto_libraries(self):
-        pass
+        # Generate the libraries to build dynamically
+        proto_libraries = parse_proto_libraries(os.path.join(self.source_folder, 'BUILD.bazel'), self.source_folder, self.output.error)
+        
+        # Validate that all files exist and all dependencies are found
+        all_deps = [it.name for it in proto_libraries]
+        all_deps += ["googleapis::googleapis", "protobuf::libprotobuf"]
+        for it in proto_libraries:
+            it.validate(self.source_folder, all_deps)
+
+        # Mark the libraries we need recursively (C++ context)
+        all_dict = {it.name: it for it in proto_libraries}
+        def activate_library(proto_library):
+            proto_library.is_used = True
+            for it_dep in proto_library.deps:
+                if it_dep in ["googleapis::googleapis", "protobuf::libprotobuf"]:
+                    continue
+                activate_library(all_dict[it_dep])
+
+        for it in filter(lambda u: u.is_used, proto_libraries):
+            activate_library(it)
+
+        return proto_libraries
 
     def build(self):
         proto_libraries = self._parse_proto_libraries()
