@@ -1,0 +1,92 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d2ae987..466345b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,10 +21,12 @@ cmake_minimum_required(VERSION 2.8)
+ set (PACKAGE_NAME opencc)
+ project (${PACKAGE_NAME} CXX)
+ include (CTest)
++include (GNUInstallDirs)
+ 
+ ######## Options
+ option(BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentation" OFF)
+ option(BUILD_SHARED_LIBS "Build opencc as shared library" ON)
++option(BUILD_TOOLS "Build opencc tools" ON)
+ option(ENABLE_GTEST "Build all tests." OFF)
+ option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
+ option(ENABLE_DARTS "Build DartsDict (ocd format)." ON)
+@@ -77,10 +79,11 @@ endif()
+ ######## Directory
+ 
+ set (DIR_PREFIX ${CMAKE_INSTALL_PREFIX})
+-set (DIR_INCLUDE ${DIR_PREFIX}/include/)
+-set (DIR_SHARE ${DIR_PREFIX}/share/)
+-set (DIR_ETC ${DIR_PREFIX}/etc/)
+-set (DIR_LIBRARY ${DIR_PREFIX}/lib${LIB_SUFFIX}/)
++set (DIR_INCLUDE ${CMAKE_INSTALL_INCLUDEDIR})
++set (DIR_BIN ${CMAKE_INSTALL_BINDIR})
++set (DIR_SHARE ${CMAKE_INSTALL_DATADIR})
++set (DIR_ETC ${CMAKE_INSTALL_SYSCONFDIR})
++set (DIR_LIBRARY ${CMAKE_INSTALL_LIBDIR})
+ 
+ if (DEFINED SHARE_INSTALL_PREFIX)
+   set (DIR_SHARE ${SHARE_INSTALL_PREFIX})
+@@ -111,7 +114,7 @@ configure_file(
+ 
+ install(
+   FILES
+-    ${CMAKE_BINARY_DIR}/opencc.pc
++    ${CMAKE_CURRENT_BINARY_DIR}/opencc.pc
+   DESTINATION
+     ${DIR_LIBRARY}/pkgconfig
+ )
+diff --git a/opencc.pc.in b/opencc.pc.in
+index 93ff260..188609e 100644
+--- a/opencc.pc.in
++++ b/opencc.pc.in
+@@ -8,4 +8,4 @@ Description: Open Chinese Convert
+ Version: @OPENCC_VERSION@
+ Requires:
+ Libs: -L${libdir} -lopencc
+-Cflags: -I${includedir}/opencc
++Cflags: -I${includedir}
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 11d14e4..b560f5d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -5,12 +5,18 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
+ 
+ if(NOT USE_SYSTEM_MARISA)
+   include_directories(../deps/marisa-0.2.6/include)
++else()
++  find_package(marisa REQUIRED)
+ endif()
+ if(NOT USE_SYSTEM_RAPIDJSON)
+   include_directories(../deps/rapidjson-1.1.0)
++else()
++  find_package(rapidjson REQUIRED)
+ endif()
+ if(NOT USE_SYSTEM_TCLAP)
+   include_directories(../deps/tclap-1.2.2)
++else()
++  find_package(tclap REQUIRED)
+ endif()
+ 
+ # Library
+@@ -143,7 +149,7 @@ install(
+   TARGETS libopencc
+   LIBRARY DESTINATION ${DIR_LIBRARY}
+   ARCHIVE DESTINATION ${DIR_LIBRARY}
+-  RUNTIME DESTINATION bin
++  RUNTIME DESTINATION ${DIR_BIN}
+ )
+ 
+ install(
+@@ -185,4 +191,6 @@ endif()
+ 
+ # Subdir
+ 
+-add_subdirectory(tools)
++if(BUILD_TOOLS)
++  add_subdirectory(tools)
++endif()
