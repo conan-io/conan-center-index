@@ -107,7 +107,7 @@ class WaylandConan(ConanFile):
 
         self.cpp_info.components["wayland-scanner"].includedirs = []
         self.cpp_info.components["wayland-scanner"].libdirs = []
-        self.cpp_info.components["wayland-scanner"].version = self.version
+        self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
 
         self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
         if self.options.enable_dtd_validation:
@@ -135,7 +135,7 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-server"].resdirs = ["res"]
             if self.version >= Version("1.21.0") and self.settings.os == "Linux":
                 self.cpp_info.components["wayland-server"].system_libs += ["rt"]
-            self.cpp_info.components["wayland-server"].version = self.version
+            self.cpp_info.components["wayland-server"].set_property("component_version", self.version)
 
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-server"].includedirs = ["include"]
@@ -157,7 +157,7 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-client"].resdirs = ["res"]
             if self.version >= Version("1.21.0") and self.settings.os == "Linux":
                 self.cpp_info.components["wayland-client"].system_libs += ["rt"]
-            self.cpp_info.components["wayland-client"].version = self.version
+            self.cpp_info.components["wayland-client"].set_property("component_version", self.version)
 
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-client"].includedirs = ["include"]
@@ -175,7 +175,7 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-cursor"].set_property("pkg_config_name", "wayland-cursor")
             self.cpp_info.components["wayland-cursor"].names["pkg_config"] = "wayland-cursor"
             self.cpp_info.components["wayland-cursor"].requires = ["wayland-client"]
-            self.cpp_info.components["wayland-cursor"].version = self.version
+            self.cpp_info.components["wayland-cursor"].set_property("component_version", self.version)
 
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-cursor"].includedirs = ["include"]
@@ -185,7 +185,7 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-egl"].set_property("pkg_config_name", "wayland-egl")
             self.cpp_info.components["wayland-egl"].names["pkg_config"] = "wayland-egl"
             self.cpp_info.components["wayland-egl"].requires = ["wayland-client"]
-            self.cpp_info.components["wayland-egl"].version = "18.1.0"
+            self.cpp_info.components["wayland-egl"].set_property("component_version", "18.1.0")
 
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-egl"].includedirs = ["include"]
@@ -193,7 +193,7 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].names["pkg_config"] = "wayland-egl-backend"
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
-            self.cpp_info.components["wayland-egl-backend"].version = "3"
+            self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
 
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-egl-backend"].includedirs = ["include"]
