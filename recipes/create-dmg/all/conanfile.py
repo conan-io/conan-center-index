@@ -13,6 +13,7 @@ class CreateDmgConan(ConanFile):
     homepage = "https://github.com/create-dmg/create-dmg"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    exports = 'patches/**'
 
     @property
     def _source_subfolder(self):
