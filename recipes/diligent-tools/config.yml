@@ -1,4 +1,6 @@
 versions:
+  "api.252004":
+    folder: "all"
   "cci.20211009":
     folder: "all"
   "2.5.2":
