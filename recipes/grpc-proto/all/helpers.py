@@ -32,7 +32,7 @@ class _ProtoLibrary:
 
     @property
     def cmake_target(self):
-        return self.name
+        return f"grpc_{self.name}"
 
     @property
     def cmake_deps(self):
