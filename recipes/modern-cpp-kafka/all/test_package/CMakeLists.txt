@@ -6,8 +6,7 @@ conan_basic_setup()
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(RdKafka REQUIRED CONFIG)
 find_package(ModernCppKafka REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} RdKafka::rdkafka ModernCppKafka::ModernCppKafka)
+target_link_libraries(${PROJECT_NAME} ModernCppKafka::ModernCppKafka)

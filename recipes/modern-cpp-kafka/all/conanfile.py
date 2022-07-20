@@ -14,12 +14,19 @@ class ModernCppKafkaConan(ConanFile):
     settings = "arch", "build_type", "compiler", "os"
     no_copy_source = True
 
+    def requirements(self):
+        self.requires("librdkafka/1.8.2")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
