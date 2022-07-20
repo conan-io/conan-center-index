@@ -126,7 +126,7 @@ class SDLConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
             if self.options.alsa:
                 self.requires("libalsa/1.2.5.1")
