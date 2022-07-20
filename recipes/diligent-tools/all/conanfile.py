@@ -61,10 +61,10 @@ class DiligentToolsConan(ConanFile):
         if self.version == "cci.20211009":
             self.requires("diligent-core/2.5.1")
             self.requires("imgui/1.87")
-
-        self.requires("diligent-core/{}".format(self.version))
-        self.requires('taywee-args/6.3.0')
-        self.requires("imgui/1.88")
+        else:
+            self.requires("diligent-core/{}".format(self.version))
+            self.requires('taywee-args/6.3.0')
+            self.requires("imgui/1.88")
 
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
