@@ -91,3 +91,7 @@ class UserspaceRCUConan(ConanFile):
             self.cpp_info.components[component_name].libdirs = ["lib"]
             if self.settings.os == "Linux":
                 self.cpp_info.components[component_name].system_libs = ["pthread"]
+
+        # Some definitions needed for MB and Signal variants
+        self.cpp_info.components["urcu-mb"].cxxflags.append("-DRCU_MB")
+        self.cpp_info.components["urcu-signal"].cxxflags.append("-DRCU_SIGNAL")
