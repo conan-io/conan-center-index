@@ -18,16 +18,9 @@ class CreateDmgConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
     def validate(self):
         if self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"{self.name} works only on MacOS")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         tools.get(**self.conan_data["sources"][self.version],
