@@ -78,7 +78,7 @@ class WaylandProtocolsConan(ConanFile):
         }
         self.cpp_info.set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items() if key not in ["pcfiledir","prefix"]))
         
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
