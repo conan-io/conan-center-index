@@ -195,7 +195,6 @@ class OpenCVConan(ConanFile):
             self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/5.0")
-            self.requires("libiconv/1.17", override=True)
         if self.options.parallel == "tbb":
             self.requires("onetbb/2021.3.0")
         if self.options.with_ipp == "intel-ipp":
