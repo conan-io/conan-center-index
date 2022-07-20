@@ -1,4 +1,7 @@
 sources:
+  "api.252004":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/API252004.tar.gz"
+    sha256: "28caa91bc1a7d8b1e7bf0198da23c74a8ea0cfda447c72eeb39b5766d01a754a"
   "2.5.2":
     url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "6519f3d5871a1119876928531d249c45ef46392237ab7bacc6531b4d538551ca"
@@ -6,6 +9,11 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentTools/archive/846ffbe83ac5ae0c96135f5a772d0077d0d086a8.tar.gz"
     sha256: "12ec01e730aefd64ca0d335b5ac6af47279f5e58617f37bc062cd83422f81703"
 patches:
+  "api.252004":
+    - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
@@ -28,4 +36,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-include-path.diff"
       base_path: "source_subfolder"
-
