@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cb7c5f0..c6c19e4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -162,6 +162,8 @@ endif()
+ 
+ # Curl configuration
+ if(CPR_FORCE_USE_SYSTEM_CURL)
++    find_package(CURL REQUIRED)
++    if(0)
+     if(CPR_ENABLE_SSL)
+         find_package(CURL COMPONENTS HTTP HTTPS)
+         if(CURL_FOUND)
+@@ -186,6 +188,7 @@ if(CPR_FORCE_USE_SYSTEM_CURL)
+             message(FATAL_ERROR "Curl not found on this system. To use the build in version set CPR_FORCE_USE_SYSTEM_CURL to OFF.")
+         endif()
+     endif()
++    endif()
+ else()
+     message(STATUS "Configuring build in curl...")
+ 
