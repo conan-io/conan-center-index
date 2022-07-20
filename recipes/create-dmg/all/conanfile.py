@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -26,8 +27,7 @@ class CreateDmgConan(ConanFile):
     def build(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
