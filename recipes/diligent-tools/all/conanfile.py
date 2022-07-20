@@ -64,7 +64,7 @@ class DiligentToolsConan(ConanFile):
         else:
             self.requires("diligent-core/{}".format(self.version))
             self.requires('taywee-args/6.3.0')
-            self.requires("imgui/1.88")
+            self.requires("imgui/1.85")
 
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
