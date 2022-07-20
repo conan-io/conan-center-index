@@ -23,8 +23,6 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration('Use Gcc compiler version higher than 9')
         if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and tools.Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration('Use Clang compiler version higher than 11')
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) == "12":
-            raise ConanInvalidConfiguration('Disabled due to conan-center CI. https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1184808100')
         if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch :
             raise ConanInvalidConfiguration('Use apple-clang does not work on ARM with this recipe')
 
@@ -46,7 +44,7 @@ class MoldConan(ConanFile):
         tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-Ithird-party/xxhash -I{} -I{}".format(zlib_include_path, openssl_include_path))
 
     def package_id(self):
-        del self.info.settings.compiler
+        self.info.settings.compiler.libcxx = self.settings.compiler.libcxx
 
     def requirements(self):
         self.requires("zlib/1.2.12")
