@@ -61,10 +61,6 @@ class CgnsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.options.parallel and self.options.with_hdf5:
-            self.options["hdf5"].parallel = True
-            self.options["hdf5"].enable_cxx = False # can't enable this with parallel
-
     def requirements(self):
         if self.options.with_hdf5:
             self.requires("hdf5/1.13.1")
