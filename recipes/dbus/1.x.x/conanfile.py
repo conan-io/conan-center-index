@@ -87,9 +87,7 @@ class DbusConan(ConanFile):
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
 
-            path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
-
-            self._cmake.configure(source_folder=path_to_cmake_lists,
+            self._cmake.configure(source_folder=self.source_folder,
                                   build_folder=self._build_subfolder)
         return self._cmake
 
