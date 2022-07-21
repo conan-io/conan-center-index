@@ -4,6 +4,8 @@ project(conan_wrapper CXX)
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS KEEP_RPATHS)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 add_subdirectory(source_subfolder)
 
 ## installer
