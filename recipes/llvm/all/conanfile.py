@@ -44,8 +44,9 @@ class Llvm(ConanFile):
     settings = 'os', 'arch', 'compiler', 'build_type'
 
     no_copy_source = True
-    _source_subfolder = 'source_subfolder'
+    _source_subfolder = 'source'
     short_paths = True
+    exports_sources = 'patches/**/*'
 
     options = {
         **{'with_project_' + project: [True, False]
@@ -125,6 +126,7 @@ class Llvm(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'llvm-project-llvmorg-' + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        self._patch_sources()
 
     def build_requirements(self):
         self.build_requires("cmake/3.21.3")
@@ -136,6 +138,10 @@ class Llvm(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '14')
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get('patches', {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _cmake_configure(self):
         enabled_projects = [
@@ -151,7 +157,7 @@ class Llvm(ConanFile):
         self.output.info('Enabled LLVM runtimes: {}'.format(
             ', '.join(enabled_runtimes)))
 
-        cmake = CMake(self, parallel=False)
+        cmake = CMake(self, generator="Ninja", parallel=False)
         cmake.configure(defs={
             'BUILD_SHARED_LIBS': False,
             'CMAKE_SKIP_RPATH': True,
