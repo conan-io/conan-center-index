@@ -1,4 +1,4 @@
-from conans import ConanFile
+from conan import ConanFile
 try:
     from conan.tools.build import check_min_cppstd
 except ImportError:
