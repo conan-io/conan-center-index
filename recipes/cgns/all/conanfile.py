@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
-from conans import CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import tools, CMake
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.33.0"
@@ -116,6 +116,23 @@ class CgnsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["cgnsdll" if self.settings.os == "Windows" and self.options.shared else "cgns"]
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines = ["CGNSDLL=__declspec(dllimport)"] # we could instead define USE_DLL but it's too generic
+        self.cpp_info.set_property("cmake_file_name", "CGNS")
+        self.cpp_info.set_property("cmake_target_name", "CGNS::CGNS")
+
+        if self.options.shared:
+            self.cpp_info.components["cgns_shared"].set_property("cmake_target_name", "CGNS::cgns_shared")
+            self.cpp_info.components["cgns_shared"].libs = ["cgnsdll" if self.settings.os == "Windows" else "cgns"]
+            if self.options.with_hdf5:
+                self.cpp_info.components["cgns_shared"].requires = ["hdf5"]
+            if self.settings.os == "Windows":
+                # we could instead define USE_DLL but it's too generic
+                self.cpp_info.components["cgns_shared"].defines = ["CGNSDLL=__declspec(dllimport)"]
+        else:
+            self.cpp_info.components["cgns_static"].set_property("cmake_target_name", "CGNS::cgns_static")
+            self.cpp_info.components["cgns_static"].libs = ["cgns"]
+            if self.options.with_hdf5:
+                self.cpp_info.components["cgns_static"].requires = ["hdf5"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "CGNS"
+        self.cpp_info.names["cmake_find_package_multi"] = "CGNS"
