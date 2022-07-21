@@ -1,16 +1,8 @@
 # GDAL 3.5+ CMake conan recipe
 
-## Remaining package issues:
 
-- test package does not link with `-o gdal:shared=False`
-- `gdal:with_libiconv` produce link errors
+Here's a typical set of options for a shared version of gdal that can used to test the package.
 
-## Dependency issues
-
-- if `armadillo:use_hdf5=True`, there is an include error
-- `with_poppler` and `with_kml` have a boost version conflict
-
-# Testing
 
 ```
 conan create \
@@ -36,5 +28,6 @@ conan create \
   -o gdal:with_pg=True \
   -o gdal:with_poppler=True \
   -o gdal:with_zstd=True \
+  -o gdal:with_libiconv=True \
   . "gdal/3.5.1@"  --build=missing
 ```
