@@ -42,7 +42,8 @@ def _components(gdal_dep):
     if "conan_dep" in gdal_dep:
         d = gdal_dep["conan_dep"]
         return d if isinstance(d, list) else [d]
-    return [ _strip_version(gdal_dep["require"]) ]
+    package = _strip_version(gdal_dep["require"])
+    return [ f"{package}::{package}" ]
 
 
 class GdalConan(ConanFile):
