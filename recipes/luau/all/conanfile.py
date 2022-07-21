@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.microsoft import is_msvc
 import os
 import functools
 
@@ -63,6 +64,9 @@ class LuauConan(ConanFile):
         else:
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+        if is_msvc(self) and self.options.shard:
+            raise tools.ConanInvalidConfiguration("{} does not support shared build in MSVC".format(self.name))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -114,6 +118,10 @@ class LuauConan(ConanFile):
         self.cpp_info.components["Compiler"].libs = ["Luau.Compiler"]
         self.cpp_info.components["Compiler"].set_property("cmake_target_name", "Luau::Compiler")
         self.cpp_info.components["Compiler"].requires = ["Ast"]
+
+        self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
+        self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")
+        self.cpp_info.components["CodeGen"].requires = ["Ast"]
 
         if self.options.with_cli:
             bin_path = os.path.join(self.package_folder, "bin")
