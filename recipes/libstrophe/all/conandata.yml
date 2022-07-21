@@ -1,0 +1,4 @@
+sources:
+  "0.12.1":
+    url: "https://github.com/strophe/libstrophe/releases/download/0.12.1/libstrophe-0.12.1.tar.gz"
+    sha256: "7b78202d88bf7e4c1f86eb547300e90587d09d22ed2724e47183ca677080175a"
