@@ -364,6 +364,9 @@ class GdalConan(ConanFile):
         if self.options.with_sqlite3:
             self.options["sqlite3"].enable_column_metadata = True
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
 
         for dep in self.gdal_deps:
