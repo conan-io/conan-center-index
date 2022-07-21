@@ -99,10 +99,10 @@ class GStPluginsBaseConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("glib/2.72.0")
+        self.requires("glib/2.73.2")
         self.requires("gstreamer/1.19.2")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.5.1")
+            self.requires("libalsa/1.2.7.1")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system")
         if self.options.with_gl:
@@ -113,7 +113,7 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.get_safe("with_egl"):
                 self.requires("egl/system")
             if self.options.get_safe("with_wayland"):
-                self.requires("wayland/1.20.0")
+                self.requires("wayland/1.21.0")
                 self.requires("wayland-protocols/1.25")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
@@ -122,7 +122,7 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.with_libjpeg == "libjpeg":
                 self.requires("libjpeg/9d")
             elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.2")
+                self.requires("libjpeg-turbo/2.1.3")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
@@ -132,10 +132,10 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_pango:
-            self.requires("pango/1.49.3")
+            self.requires("pango/1.50.8")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.63.0")
         if not tools.which("pkg-config"):
             self.build_requires("pkgconf/1.7.4")
         if self.settings.os == 'Windows':
@@ -144,7 +144,7 @@ class GStPluginsBaseConan(ConanFile):
             self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.70.0")
+            self.build_requires("gobject-introspection/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
