@@ -1,4 +1,5 @@
 from conan.tools.files import rename
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -57,10 +58,9 @@ class OpenSSLVersion(object):
             other = OpenSSLVersion(other)
         if self.as_list == other.as_list:
             return 0
-        elif self.as_list < other.as_list:
+        if self.as_list < other.as_list:
             return -1
-        else:
-            return 1
+        return 1
 
 
 class OpenSSLConan(ConanFile):
@@ -173,7 +173,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-               (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+               (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -231,7 +231,7 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
+        if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             self.requires("zlib/1.2.12")
 
     def validate(self):
@@ -283,7 +283,7 @@ class OpenSSLConan(ConanFile):
                     "armv8_32": "ios64",
                     "armv8.3": "ios64",
                     "armv7k": "ios32"}.get(the_arch, None)
-        elif the_os == "Android":
+        if the_os == "Android":
             return {"armv7": "void",
                     "armv8": "linux64",
                     "mips": "o32",
@@ -321,6 +321,7 @@ class OpenSSLConan(ConanFile):
                 "s390": "s390x_asm",
                 "s390x": "s390x_asm"
             }.get(the_os, None)
+        return None
 
     @property
     def _targets(self):
@@ -667,7 +668,7 @@ class OpenSSLConan(ConanFile):
             # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
             if "strawberryperl" in self.deps_cpp_info.deps:
                 return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
-            elif hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
+            if hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
                 return self.user_info_build["strawberryperl"].perl
         return "perl"
 
@@ -725,9 +726,9 @@ class OpenSSLConan(ConanFile):
             return os.environ["CC"]
         if self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).find("clang")
-        elif self.settings.compiler == "clang":
+        if self.settings.compiler == "clang":
             return "clang"
-        elif self.settings.compiler == "gcc":
+        if self.settings.compiler == "gcc":
             return "gcc"
         return "cc"
 
