@@ -68,16 +68,16 @@ class ZbarConan(ConanFile):
         if self.options.with_imagemagick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_gtk:
-            self.requires("gtk/4.4.0")
+            self.requires("gtk/4.7.0")
         if self.options.with_qt:
-            self.requires("qt/5.15.2")
+            self.requires("qt/5.15.5")
         if tools.Version(self.version) >= "0.22":
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20210814")
         if tools.Version(self.version) >= "0.22":
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.5")
             self.build_requires("gettext/0.21")
             self.build_requires("pkgconf/1.7.4")
             self.build_requires("libtool/2.4.6")
