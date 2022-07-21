@@ -1,0 +1,8 @@
+sources:
+  "4.4.3":
+    url: "https://github.com/mistydemeo/eb/archive/refs/tags/v4.4.3.tar.gz"
+    sha256: "74448639360a35098f2645c934e4fa77008086938fc15587b26cb36a6365aecb"
+patches:
+  "4.4.3":
+    - patch_file: "patches/0001-ebrefile-wrong-include.patch"
+      base_path: "source_subfolder"
