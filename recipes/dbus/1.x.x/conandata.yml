@@ -6,3 +6,5 @@ patches:
   "1.12.20":
     - patch_file: "patches/cmake_current_source_dir.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/cmake_have_cmsgcred.patch"
+      base_path: "source_subfolder"
