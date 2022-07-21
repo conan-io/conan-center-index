@@ -1,5 +1,7 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
+from conan import ConanFile
+from conan.tools.files import get, chdir, rm, rmdir
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.29.1"
@@ -46,7 +48,7 @@ class OpenMPIConan(ConanFile):
         self.requires("libpciaccess/0.16")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -70,19 +72,19 @@ class OpenMPIConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
+        rm(self, pattern="*.la", folder=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ['mpi', 'open-rte', 'open-pal']
