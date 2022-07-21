@@ -39,8 +39,11 @@ class OpenMPIConan(ConanFile):
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
     def requirements(self):
-        # FIXME : self.requires("libevent/2.1.12") - try to use libevent from conan
+        self.requires("libevent/2.1.12")
         self.requires("zlib/1.2.11")
+        # used for hwloc component...
+        self.requires("libudev/system")
+        self.requires("libpciaccess/0.16")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -84,7 +87,7 @@ class OpenMPIConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ['mpi', 'open-rte', 'open-pal']
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread", "rt", "util", "udev", "pciaccess"]
+            self.cpp_info.system_libs = ["m", "dl", "pthread", "rt", "util"]
 
         self.output.info("Creating MPI_HOME environment variable: {}".format(self.package_folder))
         self.env_info.MPI_HOME = self.package_folder
