@@ -1,0 +1,109 @@
+diff --git a/eb/build-post.h.in b/eb/build-post.h.in
+index 408cd4e..eb640e3 100644
+--- a/eb/build-post.h.in
++++ b/eb/build-post.h.in
+@@ -29,7 +29,11 @@
+ #ifndef EB_BUILD_POST_H
+ #define EB_BUILD_POST_H
+ 
++#ifdef EB_BUILD_LIBRARY
+ #include "defs.h"
++#else
++#include <eb/defs.h>
++#endif
+ 
+ /*
+  * Text domain name.
+diff --git a/ebrefile/Makefile.am b/ebrefile/Makefile.am
+index 8dd0d97..7b2b360 100644
+--- a/ebrefile/Makefile.am
++++ b/ebrefile/Makefile.am
+@@ -10,5 +10,5 @@ ebrefile_LDADD = $(LIBEBUTILS) $(LIBEB) $(ZLIBLIBS) $(INTLLIBS) $(ICONVLIBS)
+ ebrefile_DEPENDENCIES = $(LIBEBUTILS) $(LIBEB) $(ZLIBDEPS) $(INTLDEPS) \
+ 	$(ICONVDEPS)
+ 
+-INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils \
+-	-I../eb -I$(top_srcdir)/eb $(INTLINCS)
++INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils -I$(top_srcdir) \
++	$(INTLINCS)
+diff --git a/ebrefile/Makefile.in b/ebrefile/Makefile.in
+index d1a138e..28e1c7a 100644
+--- a/ebrefile/Makefile.in
++++ b/ebrefile/Makefile.in
+@@ -216,8 +216,8 @@ ebrefile_LDADD = $(LIBEBUTILS) $(LIBEB) $(ZLIBLIBS) $(INTLLIBS) $(ICONVLIBS)
+ ebrefile_DEPENDENCIES = $(LIBEBUTILS) $(LIBEB) $(ZLIBDEPS) $(INTLDEPS) \
+ 	$(ICONVDEPS)
+ 
+-INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils \
+-	-I../eb -I$(top_srcdir)/eb $(INTLINCS)
++INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils -I$(top_srcdir) \
++	$(INTLINCS)
+ 
+ all: all-am
+ 
+diff --git a/ebrefile/ebrefile.c b/ebrefile/ebrefile.c
+index 078c9c1..25dbb5f 100644
+--- a/ebrefile/ebrefile.c
++++ b/ebrefile/ebrefile.c
+@@ -89,9 +89,9 @@ int strncasecmp(const char *, const char *, size_t);
+     (MoveFileEx((old), (new), MOVEFILE_REPLACE_EXISTING) ? 0 : -1)
+ #endif
+ 
+-#include "eb.h"
+-#include "error.h"
+-#include "build-post.h"
++#include "eb/eb.h"
++#include "eb/error.h"
++#include "eb/build-post.h"
+ 
+ #include "ebutils.h"
+ 
+diff --git a/ebzip/Makefile.am b/ebzip/Makefile.am
+index d564c36..8bf4dae 100644
+--- a/ebzip/Makefile.am
++++ b/ebzip/Makefile.am
+@@ -13,8 +13,8 @@ ebzip_LDADD = $(LIBEBUTILS) $(LIBEB) $(ZLIBLIBS) $(INTLLIBS) $(ICONVLIBS)
+ ebzip_DEPENDENCIES = $(LIBEB) $(LIBEBUTILS) $(ZLIBDEPS) $(INTLDEPS) \
+ 	$(ICONVDEPS)
+ 
+-INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils \
+-	-I../eb -I$(top_srcdir)/eb $(INTLINCS) $(ZLIBINCS)
++INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils -I$(top_srcdir) \
++	$(INTLINCS)
+ 
+ # Shorten command name `ebzipinfo' for DOS & Win32.
+ if EXEEXT_EXE
+diff --git a/ebzip/Makefile.in b/ebzip/Makefile.in
+index d02740a..31ee0f5 100644
+--- a/ebzip/Makefile.in
++++ b/ebzip/Makefile.in
+@@ -226,8 +226,8 @@ ebzip_LDADD = $(LIBEBUTILS) $(LIBEB) $(ZLIBLIBS) $(INTLLIBS) $(ICONVLIBS)
+ ebzip_DEPENDENCIES = $(LIBEB) $(LIBEBUTILS) $(ZLIBDEPS) $(INTLDEPS) \
+ 	$(ICONVDEPS)
+ 
+-INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils \
+-	-I../eb -I$(top_srcdir)/eb $(INTLINCS) $(ZLIBINCS)
++INCLUDES = -I../libebutils -I$(top_srcdir)/libebutils -I$(top_srcdir) \
++	$(INTLINCS)
+ 
+ @EXEEXT_EXE_FALSE@ebzipinfo = ebzipinfo
+ 
+diff --git a/ebzip/ebzip.h b/ebzip/ebzip.h
+index ee29994..c823464 100644
+--- a/ebzip/ebzip.h
++++ b/ebzip/ebzip.h
+@@ -88,10 +88,10 @@ int strncasecmp(const char *, const char *, size_t);
+ #endif /* not MAXPATHLEN */
+ #endif /* not PATH_MAX */
+ 
+-#include "eb.h"
+-#include "error.h"
+-#include "font.h"
+-#include "build-post.h"
++#include "eb/eb.h"
++#include "eb/error.h"
++#include "eb/font.h"
++#include "eb/build-post.h"
+ 
+ #include "getopt.h"
+ #include "getumask.h"
