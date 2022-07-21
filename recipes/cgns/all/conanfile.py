@@ -61,7 +61,7 @@ class CgnsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.options.parallel and self.options.with_hdf:
+        if self.options.parallel and self.options.with_hdf5:
             self.options["hdf5"].parallel = True
             self.options["hdf5"].enable_cxx = False # can't enable this with parallel
 
@@ -125,7 +125,7 @@ class CgnsConan(ConanFile):
             self.cpp_info.components["cgns_shared"].set_property("cmake_target_name", "CGNS::cgns_shared")
             self.cpp_info.components["cgns_shared"].libs = ["cgnsdll" if self.settings.os == "Windows" else "cgns"]
             if self.options.with_hdf5:
-                self.cpp_info.components["cgns_shared"].requires = ["hdf5"]
+                self.cpp_info.components["cgns_shared"].requires = ["hdf5::hdf5"]
             if self.settings.os == "Windows":
                 # we could instead define USE_DLL but it's too generic
                 self.cpp_info.components["cgns_shared"].defines = ["CGNSDLL=__declspec(dllimport)"]
@@ -133,7 +133,7 @@ class CgnsConan(ConanFile):
             self.cpp_info.components["cgns_static"].set_property("cmake_target_name", "CGNS::cgns_static")
             self.cpp_info.components["cgns_static"].libs = ["cgns"]
             if self.options.with_hdf5:
-                self.cpp_info.components["cgns_static"].requires = ["hdf5"]
+                self.cpp_info.components["cgns_static"].requires = ["hdf5::hdf5"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "CGNS"
