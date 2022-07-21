@@ -87,6 +87,10 @@ class DbusConan(ConanFile):
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
 
+            # Credentials support on FreeBSD is not properly detected by D-Bus's CMake build system.
+            if self.settings.os == "FreeBSD":
+                self._cmake.definitions["HAVE_CMSGCRED"] = True
+
             path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
 
             self._cmake.configure(source_folder=path_to_cmake_lists,
