@@ -102,7 +102,7 @@ class GStPluginsBaseConan(ConanFile):
         self.requires("glib/2.73.2")
         self.requires("gstreamer/1.19.2")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.7.1")
+            self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system")
         if self.options.with_gl:
