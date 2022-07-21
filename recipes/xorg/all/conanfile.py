@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.32"
 
@@ -30,6 +29,7 @@ class ConanXOrg(ConanFile):
         include_dirs = [include[2:] for include in pkg_config.cflags_only_I]
         cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
         defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
+        variables = pkg_config.variables
 
         self.cpp_info.components[name].system_libs = libs
         self.cpp_info.components[name].libdirs = lib_dirs
@@ -40,6 +40,10 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].cflags = cflags
         self.cpp_info.components[name].cxxflags = cflags
         self.cpp_info.components[name].version = pkg_config.version[0]
+        self.cpp_info.components[name].set_property("component_version", pkg_config.version[0])
+        self.cpp_info.components[name].set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in variables.items()))
 
     def system_requirements(self):
         packages = []
@@ -94,6 +98,8 @@ class ConanXOrg(ConanFile):
                      "xcb-xinerama", "xcb", "xkeyboard-config", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
                      "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             self._fill_cppinfo_from_pkgconfig(name)
+            self.cpp_info.components[name].set_property("pkg_config_name", name)
+        
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")
 

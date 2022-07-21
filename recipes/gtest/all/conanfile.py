@@ -1,18 +1,18 @@
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class GTestConan(ConanFile):
     name = "gtest"
     description = "Google's C++ test framework"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
-    license = "BSD-3-Clause"
     topics = ("testing", "google-testing", "unit-test")
 
     settings = "os", "arch", "compiler", "build_type"
@@ -42,10 +42,6 @@ class GTestConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _minimum_cpp_standard(self):
@@ -90,8 +86,11 @@ class GTestConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def package_id(self):
+        del self.info.options.no_main
+
     def validate(self):
-        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
+        if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(
                 "gtest:shared=True with compiler=\"Visual Studio\" is not "
                 "compatible with compiler.runtime=MT/MTd"
@@ -115,9 +114,6 @@ class GTestConan(ConanFile):
                 )
             )
 
-    def package_id(self):
-        del self.info.options.no_main
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -129,14 +125,15 @@ class GTestConan(ConanFile):
         internal_utils = os.path.join(self._source_subfolder, "googletest",
                                       "cmake", "internal_utils.cmake")
         tools.replace_in_file(internal_utils, "-WX", "")
-        tools.replace_in_file(internal_utils, "-Werror", "")
+        if self.version == "cci.20210126" or tools.Version(self.version) < "1.12.0":
+            tools.replace_in_file(internal_utils, "-Werror", "")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         if self.settings.build_type == "Debug":
             cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
-        if self._is_msvc:
+        if is_msvc(self):
             cmake.definitions["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
         cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
@@ -160,6 +157,9 @@ class GTestConan(ConanFile):
 
     @property
     def _postfix(self):
+        # In 1.12.0, gtest remove debug postfix.
+        if self.version != "cci.20210126" and tools.Version(self.version) >= "1.12.0":
+            return ""
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
     def package_info(self):

@@ -105,8 +105,9 @@ The list includes conan-center-index contributors who are very active and proven
 - [@MartinDelille](https://github.com/MartinDelille)
 - [@dmn-star](https://github.com/dmn-star)
 
-The list is not constant and will change periodically based on contribution.
-That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
+The list, located [here](https://github.com/conan-io/conan-center-index/blob/master/.c3i/reviewers.yml),
+is not constant and will change periodically based on contribution.
+That also means **you can be included in this list** as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
 
 ### Rule of 2 reviews
 
@@ -137,7 +138,7 @@ PR is selected for the merge only if:
 - PR is not a Draft.
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.
-- PR has 3 approved reviews (as described above).
+- PR has approved reviews (as described above).
 - PR does not have any [official reviewers](#official-reviewers) requesting changes
 - Master build is not running already (see below)
 

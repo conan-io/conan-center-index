@@ -360,8 +360,9 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which no exclusive intellectual property rights apply.
-If a project is under Public Domain and there is no license listed, the [Unlicense](https://spdx.org/licenses/Unlicense) should be used.
+[Public Domain](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) is not a license by itself, but consists of all the creative work to which
+no exclusive intellectual property rights apply. If a project is under Public Domain and there is no license listed, the
+[Unlicense](https://spdx.org/licenses/Unlicense) should be used as described in the [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 

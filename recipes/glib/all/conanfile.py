@@ -46,6 +46,11 @@ class GLibConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,7 +72,10 @@ class GLibConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
-            self.requires("pcre/8.45")
+            if tools.Version(self.version) >= "2.73.2":
+                self.requires("pcre2/10.40")
+            else:
+                self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
@@ -130,7 +138,9 @@ class GLibConan(ConanFile):
         return meson
 
     def _patch_sources(self):
-        if self.version < "2.67.2":
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if tools.Version(self.version) < "2.67.2":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
                 "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())",
@@ -141,19 +151,23 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        for filename in [
-            os.path.join(self._source_subfolder, "meson.build"),
-            os.path.join(self._source_subfolder, "glib", "meson.build"),
-            os.path.join(self._source_subfolder, "gobject", "meson.build"),
-            os.path.join(self._source_subfolder, "gio", "meson.build"),
-        ]:
-            tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
-        # allow to find gettext
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "meson.build"),
-            "libintl = cc.find_library('intl', required : false)",
-            "libintl = cc.find_library('gnuintl', required : false)",
-        )
+        if tools.Version(self.version) < "2.73.2":
+            for filename in [
+                os.path.join(self._source_subfolder, "meson.build"),
+                os.path.join(self._source_subfolder, "glib", "meson.build"),
+                os.path.join(self._source_subfolder, "gobject", "meson.build"),
+                os.path.join(self._source_subfolder, "gio", "meson.build"),
+            ]:
+                tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
+        if self.settings.os != "Linux":
+            # allow to find gettext
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "meson.build"),
+                "libintl = cc.find_library('intl', required : false)" if tools.Version(self.version) < "2.73.1" \
+                else "libintl = dependency('intl', required: false)",
+                "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
+            )
+            
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
@@ -229,7 +243,10 @@ class GLibConan(ConanFile):
             os.path.join("lib", "glib-2.0", "include")
         )
         if self.options.with_pcre:
-            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+            if tools.Version(self.version) >= "2.73.2":
+                self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
+            else:
+                self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append(
                 "libgettext::libgettext"

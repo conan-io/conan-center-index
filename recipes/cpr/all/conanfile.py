@@ -1,8 +1,11 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
+from conan.tools.build import cross_building
 import os
+import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class CprConan(ConanFile):
@@ -11,10 +14,10 @@ class CprConan(ConanFile):
 
     name = "cpr"
     description = "C++ Requests: Curl for People, a spiritual port of Python Requests"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://docs.libcpr.org/"
-    license = "MIT"
-    topics = ("cpr", "requests", "web", "curl")
+    topics = ("requests", "web", "curl")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -132,8 +135,11 @@ class CprConan(ConanFile):
         if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+        if is_msvc(self) and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+
+        if tools.Version(self.version) == "1.9.0" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("{}/{} doesn't support gcc < 6".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -159,40 +165,40 @@ class CprConan(ConanFile):
         else:
             return option
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions[self._get_cmake_option("CPR_FORCE_USE_SYSTEM_CURL")] = True
-            self._cmake.definitions[self._get_cmake_option("CPR_BUILD_TESTS")] = False
-            self._cmake.definitions[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
-            self._cmake.definitions[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
-            self._cmake.definitions["CPR_CURL_NOSIGNAL"] = not self.options.signal
+        cmake = CMake(self)
+        cmake.definitions[self._get_cmake_option("CPR_FORCE_USE_SYSTEM_CURL")] = True
+        cmake.definitions[self._get_cmake_option("CPR_BUILD_TESTS")] = False
+        cmake.definitions[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
+        cmake.definitions[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
+        cmake.definitions["CPR_CURL_NOSIGNAL"] = not self.options.signal
 
-            ssl_value = str(self.options.get_safe("with_ssl"))
-            SSL_OPTIONS = {
-                "CPR_FORCE_DARWINSSL_BACKEND": ssl_value == "darwinssl",
-                "CPR_FORCE_OPENSSL_BACKEND": ssl_value == "openssl",
-                "CPR_FORCE_WINSSL_BACKEND": ssl_value == "winssl",
-                "CMAKE_USE_OPENSSL": ssl_value == "openssl"
-            }
+        ssl_value = str(self.options.get_safe("with_ssl"))
+        SSL_OPTIONS = {
+            "CPR_FORCE_DARWINSSL_BACKEND": ssl_value == "darwinssl",
+            "CPR_FORCE_OPENSSL_BACKEND": ssl_value == "openssl",
+            "CPR_FORCE_WINSSL_BACKEND": ssl_value == "winssl",
+            "CMAKE_USE_OPENSSL": ssl_value == "openssl"
+        }
 
-            for cmake_option, value in SSL_OPTIONS.items():
-                self._cmake.definitions[self._get_cmake_option(cmake_option)] = value
+        for cmake_option, value in SSL_OPTIONS.items():
+            cmake.definitions[self._get_cmake_option(cmake_option)] = value
 
-            # If we are on a version where disabling SSL requires a cmake option, disable it
-            if not self._uses_old_cmake_options and str(self.options.get_safe("with_ssl")) == CprConan._NO_SSL:
-                self._cmake.definitions["CPR_ENABLE_SSL"] = False
+        # If we are on a version where disabling SSL requires a cmake option, disable it
+        if not self._uses_old_cmake_options and str(self.options.get_safe("with_ssl")) == CprConan._NO_SSL:
+            cmake.definitions["CPR_ENABLE_SSL"] = False
 
-            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-                self._cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE"] = 1
-                self._cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
-                self._cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE"] = 1
-                self._cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
-                self._cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE"] = 1
-                self._cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE"] = 1
+            cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
+            cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE"] = 1
+            cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
+            cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE"] = 1
+            cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
 
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     # Check if the system supports the given ssl library
     def _supports_ssl_library(self, library):
@@ -223,6 +229,12 @@ class CprConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.libs = ["cpr"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
+        self.cpp_info.set_property("cmake_target_name", "cpr::cpr")
+
         self.cpp_info.names["cmake_find_package"] = "cpr"
         self.cpp_info.names["cmake_find_package_multi"] = "cpr"
-        self.cpp_info.libs = ["cpr"]
