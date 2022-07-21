@@ -5,6 +5,3 @@ sources:
   0.1.1:
     url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.1/main.tar.gz
     sha256: a9ea899315851bfacdb234b7acc917b1a9c67593f0d68e1920321a8f6fa2cfbf
-  "0.2.2":
-    url: "https://github.com/foxglove/mcap/archive/releases/typescript/core/v0.2.2.tar.gz"
-    sha256: "39a2ebf458a112410febd9ae579dd18aeb27b9281c703ca4ce246baa9582dea1"
