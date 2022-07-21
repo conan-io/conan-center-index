@@ -117,7 +117,7 @@ class LibMysqlClientCConan(ConanFile):
     def build_requirements(self):
         if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
-            self.build_requires("cmake/3.22.0")
+            self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":
             self.build_requires("pkgconf/1.7.4")
 
