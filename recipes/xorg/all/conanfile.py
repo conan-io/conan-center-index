@@ -76,7 +76,7 @@ class ConanXOrg(ConanFile):
                      "xcb-dri3"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
-                self.cpp_info.components[name], is_system=True)
+                self.cpp_info.components[name], is_system=False)
             self.cpp_info.components[name].version = pkg_config.version
             self.cpp_info.components[name].set_property(
                 "pkg_config_name", name)
