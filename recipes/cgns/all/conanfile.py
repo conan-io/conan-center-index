@@ -50,8 +50,10 @@ class CgnsConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.parallel and not self.options.with_hdf5:
-            raise ConanInvalidConfiguration("Parallel requires HDF5 with parallel enabled")
+        if self.options.parallel and not (self.options.with_hdf5 and self.options["hdf5"].parallel):
+            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with parallel=True")
+        if self.options.parallel and self.options.with_hdf5 and self.options["hdf5"].enable_cxx:
+            raise ConanInvalidConfiguration("The option 'parallel' requires HDF5 with enable_cxx=False")
 
     def configure(self):
         if self.options.shared:
@@ -59,7 +61,7 @@ class CgnsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.options.parallel:
+        if self.options.parallel and self.options.with_hdf:
             self.options["hdf5"].parallel = True
             self.options["hdf5"].enable_cxx = False # can't enable this with parallel
 
