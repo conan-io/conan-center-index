@@ -93,5 +93,5 @@ class UserspaceRCUConan(ConanFile):
                 self.cpp_info.components[component_name].system_libs = ["pthread"]
 
         # Some definitions needed for MB and Signal variants
-        self.cpp_info.components["urcu-mb"].cxxflags.append("-DRCU_MB")
-        self.cpp_info.components["urcu-signal"].cxxflags.append("-DRCU_SIGNAL")
+        self.cpp_info.components["urcu-mb"].defines = ["RCU_MB"]
+        self.cpp_info.components["urcu-signal"].defines = ["RCU_SIGNAL"]
