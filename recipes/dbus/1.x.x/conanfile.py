@@ -1,10 +1,10 @@
 import os
 import textwrap
 
-from conan import ConanFile
 from conan.tools.apple.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save
-from conans import CMake
+
+from conans import ConanFile, CMake
 from conans.tools import remove_files_by_mask
 
 required_conan_version = ">=1.43.0"
@@ -34,7 +34,7 @@ class DbusConan(ConanFile):
         "with_selinux": False,
     }
 
-    generators = "cmake", "cmake_find_package", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
