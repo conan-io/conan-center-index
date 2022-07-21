@@ -98,13 +98,14 @@ class LuauConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Luau"
         self.cpp_info.names["cmake_find_package"] = "Luau"
 
-        self.cpp_info.components["VM"].libs = ["Luau.VM"]
-        self.cpp_info.components["VM"].set_property("cmake_target_name", "Luau::VM")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["VM"].system_libs = ["m"]
-
         self.cpp_info.components["Ast"].libs = ["Luau.Ast"]
         self.cpp_info.components["Ast"].set_property("cmake_target_name", "Luau::Ast")
+
+        self.cpp_info.components["VM"].libs = ["Luau.VM"]
+        self.cpp_info.components["VM"].set_property("cmake_target_name", "Luau::VM")
+        self.cpp_info.components["VM"].requires = ["Ast"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["VM"].system_libs = ["m"]
 
         self.cpp_info.components["Analysis"].libs = ["Luau.Analysis"]
         self.cpp_info.components["Analysis"].set_property("cmake_target_name", "Luau::Analysis")
