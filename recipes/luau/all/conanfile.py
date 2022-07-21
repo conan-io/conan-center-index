@@ -64,7 +64,7 @@ class LuauConan(ConanFile):
         else:
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
-        if is_msvc(self) and self.options.shard:
+        if is_msvc(self) and self.options.shared:
             raise tools.ConanInvalidConfiguration("{} does not support shared build in MSVC".format(self.name))
 
     def source(self):
