@@ -1,5 +1,7 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import cross_building
 import os
 import shutil
 
@@ -89,7 +91,7 @@ class ZbarConan(ConanFile):
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
-        if tools.Version(self.version) >= "0.22" and tools.cross_building(self.settings):
+        if tools.Version(self.version) >= "0.22" and cross_building(self):
             raise ConanInvalidConfiguration("{} can't be built on cross building environment currently because autopoint(part of gettext) doesn't execute correctly.".format(self.name))
 
     def source(self):
