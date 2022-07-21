@@ -84,6 +84,9 @@ class grpcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            self.options["protobuf"].shared = True
+            self.options["googleapis"].shared = True
+            self.options["grpc-proto"].shared = True
 
     def requirements(self):
         self.requires("abseil/20211102.0")
@@ -92,7 +95,7 @@ class grpcConan(ConanFile):
         self.requires("protobuf/3.21.1")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
-        self.requires("googleapis/cci.20220531")
+        self.requires("googleapis/cci.20220711")
         self.requires("grpc-proto/cci.20220627")
 
     def validate(self):
@@ -113,8 +116,12 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._cxxstd_required)
 
+        if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared or not self.options["grpc-proto"].shared):
+            raise ConanInvalidConfiguration("If built as shared, protobuf, googleapis and grpc-proto must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True` and `grpc-proto:shared=True`")
+
     def package_id(self):
         del self.info.options.secure
+        self.info.requires["protobuf"].full_package_mode()
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
