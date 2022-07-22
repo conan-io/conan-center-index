@@ -32,3 +32,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/21/0007-cmake-use_conan_qt.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/21/0008-disable-qt-tests-and-demos.patch"
+      base_path: "source_subfolder"
