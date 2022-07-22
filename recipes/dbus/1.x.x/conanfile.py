@@ -65,7 +65,7 @@ class DbusConan(ConanFile):
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, self._source_subfolder))
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -87,7 +87,7 @@ class DbusConan(ConanFile):
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             self._cmake.definitions["EXPAT_LIBRARIES"] = "expat::expat"
 
-            self._cmake.configure(source_folder=self.source_folder,
+            self._cmake.configure(source_folder=self._source_subfolder,
                                   build_folder=self._build_subfolder)
         return self._cmake
 
