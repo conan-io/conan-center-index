@@ -1,0 +1,11 @@
+sources:
+  "0.536":
+    url: "https://github.com/Roblox/luau/archive/refs/tags/0.536.tar.gz"
+    sha256: "e6de36e83e9c537d92bcc94852ab498e3c15a310fd2c4cc4e21c616d8ae1a84f"
+
+patches:
+  "0.536":
+    - patch_file: "patches/0.536-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      base_path: "source_subfolder"
