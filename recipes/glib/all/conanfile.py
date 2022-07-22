@@ -114,7 +114,7 @@ class GLibConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_meson(self):
         meson = Meson(self)
-        defs = dict()
+        defs = {}
         if tools.is_apple_os(self.settings.os):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
@@ -169,7 +169,7 @@ class GLibConan(ConanFile):
                 else "libintl = dependency('intl', required: false)",
                 "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
             )
-            
+
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
@@ -201,7 +201,7 @@ class GLibConan(ConanFile):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    self.output.info(f"rename {filename_old} into {filename_new}")
                     shutil.move(filename_old, filename_new)
 
     def package(self):
@@ -341,7 +341,7 @@ class GLibConan(ConanFile):
             )  # this is actually an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with: {}".format(bin_path))
+        self.output.info(f"Appending PATH env var with: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
         pkgconfig_variables = {
@@ -360,7 +360,7 @@ class GLibConan(ConanFile):
         }
         self.cpp_info.components["gio-2.0"].set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
 
         pkgconfig_variables = {
             'bindir': '${prefix}/bin',
