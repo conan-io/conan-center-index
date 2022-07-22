@@ -1,0 +1,67 @@
+commit 2b9af0312a19b41da03130b300b95f1fd51b747c
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Jul 22 14:36:30 2022 +0200
+
+    CMake use CONAN_PKG-targets
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 23edb8a6..21a60bb0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -257,7 +257,7 @@ if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
+ endif()
+ set(WITH_OPENJPEG FALSE)
+ if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
+-  find_package(OpenJPEG)
++  find_package(OpenJPEG REQUIRED)
+   set(WITH_OPENJPEG ${OpenJPEG_FOUND})
+   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
+     message(STATUS "Could NOT find openjpeg2.")
+@@ -278,13 +278,13 @@ else()
+ endif()
+ set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
+ if(ENABLE_CMS STREQUAL "lcms2")
+-  find_package(LCMS2)
++  find_package(LCMS2 REQUIRED)
+   set(USE_CMS ${LCMS2_FOUND})
+ elseif(NOT ENABLE_CMS STREQUAL "none")
+   message(FATAL_ERROR "Invalid ENABLE_CMS value: ${ENABLE_CMS}")
+ endif()
+ if(ENABLE_LIBCURL)
+-  find_package(CURL)
++  find_package(CURL REQUIRED)
+   if(CURL_FOUND)
+     set(POPPLER_HAS_CURL_SUPPORT ON)
+   else()
+@@ -458,14 +458,14 @@ set(poppler_SRCS
+   splash/SplashXPath.cc
+   splash/SplashXPathScanner.cc
+ )
+-set(poppler_LIBS Freetype::Freetype)
+-if(FONTCONFIG_FOUND)
++set(poppler_LIBS CONAN_PKG::freetype)
++if(WITH_FONTCONFIGURATION_FONTCONFIG)
++  set(poppler_LIBS ${poppler_LIBS} CONAN_PKG::fontconfig)
+   add_definitions(${FONTCONFIG_DEFINITIONS})
+   include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
+-  set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
+ endif()
+ 
+-if(JPEG_FOUND)
++if(ENABLE_JPEG)
+   set(poppler_SRCS ${poppler_SRCS}
+     poppler/DCTStream.cc
+   )
+diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
+index daf7e5c8..55bcaddf 100644
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -31,7 +31,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
+     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
++target_link_libraries(poppler-cpp poppler CONAN_PKG::libiconv)
+ install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ install(FILES
