@@ -61,8 +61,6 @@ class OpenGrmConan(conan.ConanFile):
             "clang": "7",
         }
 
-        if self.settings.compiler.cppstd:
-            conan.tools.build.check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
             if self.settings.compiler.version < minimum_compiler:
@@ -111,7 +109,7 @@ class OpenGrmConan(conan.ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        conan.tools.files.rmdir(Path(self.package_folder) / "share")
+        conan.tools.files.rmdir(self, Path(self.package_folder) / "share")
         for f in glob.glob(Path(self.package_folder) / "lib" / "*.la"):
             os.remove(f)
 
