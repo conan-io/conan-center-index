@@ -41,7 +41,16 @@ class OpenMPIConan(ConanFile):
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
     def requirements(self):
-        self.requires("libevent/2.1.12")
+        # TODO FIX :
+        #  OpenMPI will compile with this, but,
+        #  hdf5 (as a consumer) wont compile with this enabled,
+        #   find_package(MPI) fails, probably because the configure test
+        #   tries to link to the mpi libs, but probably doesn't also
+        #   link in the required libevent libraries ...
+        #   I was not able to confirm this theory.
+        # self.requires("libevent/2.1.12")
+        # -------------------------------------
+
         self.requires("zlib/1.2.11")
         # used for hwloc component...
         self.requires("libudev/system")
