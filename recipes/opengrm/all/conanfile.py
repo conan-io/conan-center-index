@@ -1,7 +1,10 @@
 from conan import ConanFile, AutoToolsBuildEnvironment, tools
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+
 import functools
 import os
+from packaging.version import Version
 
 required_conan_version = ">=1.33.0"
 
@@ -59,10 +62,10 @@ class OpenGrmConan(ConanFile):
         }
 
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
-            if tools.Version(self.settings.compiler.version) < minimum_compiler:
+            if Version(self.settings.compiler.version) < minimum_compiler:
                 raise ConanInvalidConfiguration(f"{self.name} requires c++17, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
