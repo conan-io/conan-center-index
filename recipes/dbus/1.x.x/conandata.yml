@@ -6,5 +6,10 @@ patches:
   "1.12.20":
     - patch_file: "patches/cmake_current_source_dir.patch"
       base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/332"
     - patch_file: "patches/cmake_configure_checks_list_separator.patch"
       base_path: "source_subfolder"
+      patch_type: "portability"
+      url: "https://gitlab.freedesktop.org/dbus/dbus/-/commit/8cd1c2155252938ed38d2612e4d054c7fc0244c3.patch"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/issues/324"
