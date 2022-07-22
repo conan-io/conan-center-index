@@ -331,46 +331,46 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.openssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         if self.options.with_pcre2:
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.211.0")
+            self.requires("vulkan-loader/1.3.221.0")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.9")
+                self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
-            self.requires("glib/2.72.1")
+            self.requires("glib/2.73.2")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/4.3.0")
+            self.requires("harfbuzz/4.4.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.2")
+                self.requires("libjpeg-turbo/2.1.3")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.39.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
         if self.options.with_pq:
             self.requires("libpq/14.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.21.1")
+            self.requires("openal/1.22.1")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.5.1")
+            self.requires("libalsa/1.2.7.2")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("xkbcommon/1.4.1")
@@ -379,7 +379,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwayland:
-            self.requires("wayland/1.20.0")
+            self.requires("wayland/1.21.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
@@ -401,8 +401,8 @@ class QtConan(ConanFile):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.1")
-        self.build_requires("ninja/1.10.2")
+        self.build_requires("cmake/3.23.2")
+        self.build_requires("ninja/1.11.0")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.os == "Windows":
             self.build_requires('strawberryperl/5.30.0.1')
@@ -418,7 +418,7 @@ class QtConan(ConanFile):
                 self.build_requires("winflexbison/2.5.24")
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.20.0")
+            self.build_requires("wayland/1.21.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
