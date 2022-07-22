@@ -1,12 +1,17 @@
-from conan import ConanFile, AutoToolsBuildEnvironment, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.files import patch
+from conan.tools.files import rmdir
+from conan.tools.gnu import Autotools
 
 import functools
 import os
+import glob
+from pathlib import Path
 from packaging.version import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class OpenGrmConan(ConanFile):
@@ -72,24 +77,26 @@ class OpenGrmConan(ConanFile):
 
         # Check stdlib ABI compatibility
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
-        elif self.settings.compiler == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
-                                            ' or "compiler.libcxx=libc++"' % self.name)
+            raise ConanInvalidConfiguration(f'Using {self.name} with GCC requires "compiler.libcxx=libstdc++11"')
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration(f'Using {self.name} with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"')
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        
+    @staticmethod
+    def _yes_no(v):
+        return "yes" if v else "no"
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
-        yes_no = lambda v: "yes" if v else "no"
+        autotools = Autotools(self)
         args = [
-            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-bin={}".format(yes_no(self.options.enable_bin)),
+            f"--with-pic={_yes_no(self.options.get_safe("fPIC", True))}",
+            f"--enable-shared={_yes_no(self.options.shared)}",
+            f"--enable-static={_yes_no(not self.options.shared)}",
+            f"--enable-bin={_yes_no(self.options.enable_bin)}",
             "LIBS=-lpthread",
         ]
         autotools.configure(args=args, configure_dir=self._source_subfolder)
@@ -97,7 +104,7 @@ class OpenGrmConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            patch(**patch)
 
     def build(self):
         self._patch_sources()
@@ -109,8 +116,9 @@ class OpenGrmConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(Path(self.package_folder) / "share")
+        for f in glob.glob(Path(self.package_folder) / "lib" / "*.la"):
+            os.remove(f)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenGrm")
@@ -123,7 +131,7 @@ class OpenGrmConan(ConanFile):
 
         if self.options.enable_bin:
             bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment var: {}".format(bindir))
+            self.output.info(f"Appending PATH environment var: {bindir}")
             self.env_info.PATH.append(bindir)
 
         self.cpp_info.system_libs = ["pthread", "dl", "m"]
