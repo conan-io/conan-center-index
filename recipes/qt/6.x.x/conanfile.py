@@ -296,7 +296,7 @@ class QtConan(ConanFile):
                 # >= 2.7.5 & < 3
                 v_min = "2.7.5"
                 v_max = "3.0.0"
-                if (version >= v_min) and (version < v_max):
+                if v_min <= version < v_max:
                     msg = ("Found valid Python 2 required for QtWebengine:"
                            " version={}, path={}".format(mybuf.getvalue(), python_exe))
                     self.output.success(msg)
@@ -469,10 +469,10 @@ class QtConan(ConanFile):
                         "armv7": "linux-arm-gnueabi-g++",
                         "armv7hf": "linux-arm-gnueabi-g++",
                         "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
-            elif self.settings.compiler == "clang":
+            if self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
                     return "linux-clang-libc++-32" if self.settings.compiler.libcxx == "libc++" else "linux-clang-32"
-                elif self.settings.arch == "x86_64":
+                if self.settings.arch == "x86_64":
                     return "linux-clang-libc++" if self.settings.compiler.libcxx == "libc++" else "linux-clang"
 
         elif self.settings.os == "Macos":
@@ -567,7 +567,7 @@ class QtConan(ConanFile):
             build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
-                if not "PATH" in build_env:
+                if "PATH" not in build_env:
                     build_env["PATH"] = []
                 build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
             if self._is_msvc:
@@ -656,7 +656,7 @@ class QtConan(ConanFile):
             else:
                 cmake.definitions["FEATURE_%s" % conf_arg] = "OFF"
                 cmake.definitions["FEATURE_system_%s" % conf_arg] = "OFF"
-                
+
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
@@ -713,9 +713,9 @@ class QtConan(ConanFile):
         except:
             cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
             cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
-            if (os.path.isfile(cmake_err_log)):
+            if os.path.isfile(cmake_err_log):
                 self.output.info(tools.load(cmake_err_log))
-            if (os.path.isfile(cmake_out_log)):
+            if os.path.isfile(cmake_out_log):
                 self.output.info(tools.load(cmake_out_log))
             raise
         return cmake
@@ -740,7 +740,7 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 " IMPORTED)\n",
                 " IMPORTED GLOBAL)\n", strict=False)
-            
+
         with self._build_context():
             cmake = self._configure_cmake()
             if tools.os_info.is_macos:
