@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
-from itertools import product
 import os
 
 required_conan_version = ">=1.33.0"
@@ -25,7 +24,6 @@ class OpenGrmConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "enable_bin": True,
-        "openfst:enable_grm": True,
     }
 
     def requirements(self):
@@ -46,11 +44,14 @@ class OpenGrmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        self.options["openfst"].enable_grm = True
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "OpenGrm is only supported on linux")
+            raise ConanInvalidConfiguration("OpenGrm is only supported on linux")
+
+        if not self.options["openfst"].enable_grm:
+            raise ConanInvalidConfiguration("OpenGrm requires OpenFst with enable_grm enabled.")
 
         compilers = {
             "gcc": "8",
