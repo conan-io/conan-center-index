@@ -1,6 +1,8 @@
+from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, RunEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conans import tools, RunEnvironment
 from conans.model import Generator
 import configparser
 import glob
@@ -304,7 +306,7 @@ class QtConan(ConanFile):
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative, qt:qtlocation and qt:qtwebchannel")
 
-            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
@@ -704,7 +706,7 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                if not tools.cross_building(self, skip_x64_x86=True):
+                if not cross_building(self, skip_x64_x86=True):
                     args += ["-platform %s" % xplatform_val]
                 else:
                     args += ["-xplatform %s" % xplatform_val]
