@@ -280,3 +280,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/1.79.0-geometry_no_rtti.patch"
       base_path: "source_subfolder"
+      patch_type: "portability"
+      url: "https://github.com/boostorg/geometry/commit/b354162798749b3aaa539755e7b9be49d2b9a9c4.patch"
+      patch_source: "https://github.com/boostorg/geometry/discussions/1041"
+      patch_description: "Allows using Boost Geometry without requiring the use of RTTI"
