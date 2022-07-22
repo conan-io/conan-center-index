@@ -1,0 +1,24 @@
+diff --git a/qt5/CMakeLists.txt b/qt5/CMakeLists.txt
+index 64e81601..80bd001a 100644
+--- a/qt5/CMakeLists.txt
++++ b/qt5/CMakeLists.txt
+@@ -9,5 +9,5 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050900)
+ add_definitions(-DQT_NO_DEPRECATED_WARNINGS)
+ 
+ add_subdirectory(src)
+-add_subdirectory(tests)
+-add_subdirectory(demos)
++#add_subdirectory(tests)
++#add_subdirectory(demos)
+diff --git a/qt6/CMakeLists.txt b/qt6/CMakeLists.txt
+index 89e612d1..b6e8a876 100644
+--- a/qt6/CMakeLists.txt
++++ b/qt6/CMakeLists.txt
+@@ -7,5 +7,5 @@ endif()
+ 
+ add_subdirectory(src)
+ 
+-add_subdirectory(tests)
+-add_subdirectory(demos)
++#add_subdirectory(tests)
++#add_subdirectory(demos)
