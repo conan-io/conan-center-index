@@ -1,6 +1,8 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
+from conans import tools, Meson, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 import glob
@@ -90,7 +92,7 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, 'settings_build') and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
