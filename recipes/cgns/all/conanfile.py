@@ -1,7 +1,8 @@
 import os
 from conan import ConanFile
-from conans import tools, CMake
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir, apply_conandata_patches
 
 
 required_conan_version = ">=1.33.0"
@@ -66,7 +67,7 @@ class CgnsConan(ConanFile):
             self.requires("hdf5/1.13.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                 strip_root=True,
                 destination=self._source_subfolder)
 
@@ -95,11 +96,7 @@ class CgnsConan(ConanFile):
         return self._cmake
 
     def build(self):
-        # conan complains about CRLF in this file, so fix it up
-        tools.dos2unix(os.path.join(self.source_folder,self._source_subfolder,"src","cgnstools","common", "winhtml.c"))
-
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         cmake = self._configure_cmake()
         cmake.build(target="cgns_shared" if self.options.shared else "cgns_static")
@@ -111,7 +108,7 @@ class CgnsConan(ConanFile):
         cmake.install()
 
         os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CGNS")
