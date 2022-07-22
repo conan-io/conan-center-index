@@ -370,4 +370,4 @@ class GLibConan(ConanFile):
         }
         self.cpp_info.components["glib-2.0"].set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
