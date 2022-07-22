@@ -1,0 +1,25 @@
+commit 9072fc1b7160fd67123a39cf9590db5133de51ec
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Jul 22 10:21:54 2022 +0200
+
+    Define cpp standard only if not defined
+
+diff --git a/QXlsx/CMakeLists.txt b/QXlsx/CMakeLists.txt
+index 527866c..7e59cc5 100644
+--- a/QXlsx/CMakeLists.txt
++++ b/QXlsx/CMakeLists.txt
+@@ -16,10 +16,12 @@ include(GNUInstallDirs)
+ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui REQUIRED)
+ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
+ 
+-if (QT_MAJOR_VERSION EQUAL 6)
++if(NOT CMAKE_CXX_STANDARD)
++  if (QT_MAJOR_VERSION EQUAL 6)
+     set(CMAKE_CXX_STANDARD 17)
+-else()
++  else()
+     set(CMAKE_CXX_STANDARD 11)
++  endif()
+ endif()
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 

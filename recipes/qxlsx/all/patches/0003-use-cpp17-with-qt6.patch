@@ -1,0 +1,32 @@
+commit e53efc535340dc74120c53b83b6462ae9144e39d
+Author: Martin Delille <martin@delille.org>
+Date:   Tue Jul 5 10:33:47 2022 +0200
+
+    Use c++17 when using Qt 6
+
+diff --git a/QXlsx/CMakeLists.txt b/QXlsx/CMakeLists.txt
+index d82b479..527866c 100644
+--- a/QXlsx/CMakeLists.txt
++++ b/QXlsx/CMakeLists.txt
+@@ -11,14 +11,18 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ 
+ set(CMAKE_AUTOMOC ON)
+ 
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-
+ include(GNUInstallDirs)
+ 
+ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui REQUIRED)
+ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
+ 
++if (QT_MAJOR_VERSION EQUAL 6)
++    set(CMAKE_CXX_STANDARD 17)
++else()
++    set(CMAKE_CXX_STANDARD 11)
++endif()
++set(CMAKE_CXX_STANDARD_REQUIRED ON)
++
+ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+ 
+ if(NOT DEFINED ${QXLSX_PARENTPATH})

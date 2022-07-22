@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import CMake, ConanFile, tools
 import functools
 import os
@@ -12,7 +13,7 @@ class QXlsxConan(ConanFile):
     topics = ("qxlsx", "excel", "xlsx")
     homepage = "https://github.com/QtExcel/QXlsx"
     url = "https://github.com/conan-io/conan-center-index"
-
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,15 +29,6 @@ class QXlsxConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _qt_major(self):
-        return tools.Version(self.deps_cpp_info["qt"].version).major
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,16 +48,12 @@ class QXlsxConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["QT_VERSION_MAJOR"] = self._qt_major
+        cmake.definitions["QT_VERSION_MAJOR"] = tools.Version(self.deps_cpp_info["qt"].version).major
         cmake.configure()
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self._qt_major != "5":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "QXlsx", "CMakeLists.txt"),
-                    "CMAKE_CXX_STANDARD 11", "CMAKE_CXX_STANDARD 17")
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
