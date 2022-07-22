@@ -93,7 +93,7 @@ class OpenGrmConan(ConanFile):
     def _configure_autotools(self):
         autotools = Autotools(self)
         args = [
-            f"--with-pic={_yes_no(self.options.get_safe("fPIC", True)}",
+            f"--with-pic={_yes_no(self.options.get_safe('fPIC', True)}",
             f"--enable-shared={_yes_no(self.options.shared)}",
             f"--enable-static={_yes_no(not self.options.shared)}",
             f"--enable-bin={_yes_no(self.options.enable_bin)}",
