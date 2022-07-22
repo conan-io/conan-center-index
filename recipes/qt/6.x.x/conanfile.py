@@ -6,8 +6,10 @@ import glob
 import os
 import textwrap
 
+from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, RunEnvironment, CMake
+from conans import tools, RunEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
@@ -266,7 +268,7 @@ class QtConan(ConanFile):
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
 
-            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
             if tools.Version(self.version) < "6.3.0":
