@@ -30,6 +30,8 @@ class OpenGrmConan(conan.ConanFile):
         "enable_bin": True,
     }
 
+    generators = "AutotoolsToolchain"
+
     def requirements(self):
         self.requires("openfst/1.8.2")
 
