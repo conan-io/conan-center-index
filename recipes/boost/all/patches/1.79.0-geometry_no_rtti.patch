@@ -1,3 +1,16 @@
+From 379f0c364a5ef3e6d57021ab815ea603ab3f1178 Mon Sep 17 00:00:00 2001
+From: Adam Wulkiewicz <adam.wulkiewicz@gmail.com>
+Date: Tue, 19 Jul 2022 22:52:09 +0200
+Subject: [PATCH] [index] Fix and improve rtree experimental features
+
+Fix access specifier preventing use of experimental iterators.
+Allow more granular control over enabled experimental features.
+---
+ .../geometry/index/distance_predicates.hpp     | 12 +++++++++---
+ include/boost/geometry/index/predicates.hpp    | 16 +++++++++++-----
+ include/boost/geometry/index/rtree.hpp         | 18 ++++++++++++++----
+ 3 files changed, 34 insertions(+), 12 deletions(-)
+
 diff --git a/boost/geometry/index/distance_predicates.hpp b/boost/geometry/index/distance_predicates.hpp
 index 59b32af4753..00fc663cb38 100644
 --- a/boost/geometry/index/distance_predicates.hpp
