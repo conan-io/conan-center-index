@@ -15,6 +15,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         meson = Meson(self)
+        env_build = tools.RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
             meson.configure()
             meson.build()
 
