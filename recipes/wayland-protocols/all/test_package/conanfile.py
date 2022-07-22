@@ -1,4 +1,6 @@
-from conans import ConanFile, Meson, tools
+from conans import Meson, tools
+from conan import ConanFile
+from conan.tools.build import cross_building
 import os
 
 
@@ -21,5 +23,5 @@ class TestPackageConan(ConanFile):
             meson.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not cross_building(self):
             self.run(os.path.join(".", "test_package"), run_environment=True)
