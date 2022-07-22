@@ -87,7 +87,7 @@ class GLibConan(ConanFile):
             self.requires("libgettext/0.21")
 
         if tools.is_apple_os(self.settings.os):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
 
     def validate(self):
         if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
