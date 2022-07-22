@@ -6,7 +6,7 @@ import os
 import glob
 from pathlib import Path
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.49.0"
 
 
 class OpenGrmConan(conan.ConanFile):
