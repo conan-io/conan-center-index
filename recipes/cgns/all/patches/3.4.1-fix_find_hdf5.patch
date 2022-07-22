@@ -10,7 +10,7 @@ In order to link to the correct libraries provided by conan, the whole logic is 
 -if (CGNS_ENABLE_HDF5)
 -
 +include_directories(${CONAN_INCLUDE_DIRS})
-+set(HDF5_LIBRARY CONAN_PKG::hdf5)
++set(HDF5_LIBRARY hdf5::hdf5)
 +# All this logic is useless for conan
 +# (but don't forget to handle HDF5_NEED_MPI cache variable when we could use openmpi in hdf5)
 +if(0)
