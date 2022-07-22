@@ -1,6 +1,6 @@
 import os
 from conan import ConanFile
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, rmdir, apply_conandata_patches
 
@@ -17,7 +17,6 @@ class CgnsConan(ConanFile):
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -71,40 +70,36 @@ class CgnsConan(ConanFile):
                 strip_root=True,
                 destination=self._source_subfolder)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["CGNS_ENABLE_TESTS"] = False
-        self._cmake.definitions["CGNS_BUILD_TESTING"] = False
-        self._cmake.definitions["CGNS_ENABLE_FORTRAN"] = False
-        self._cmake.definitions["CGNS_ENABLE_HDF5"] = self.options.with_hdf5
-        self._cmake.definitions["CGNS_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["CGNS_USE_SHARED"] = self.options.shared
-        self._cmake.definitions["CGNS_ENABLE_PARALLEL"] = self.options.parallel
-        self._cmake.definitions["CGNS_BUILD_CGNSTOOLS"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CGNS_ENABLE_TESTS"] = False
+        tc.variables["CGNS_BUILD_TESTING"] = False
+        tc.variables["CGNS_ENABLE_FORTRAN"] = False
+        tc.variables["CGNS_ENABLE_HDF5"] = self.options.with_hdf5
+        tc.variables["CGNS_BUILD_SHARED"] = self.options.shared
+        tc.variables["CGNS_USE_SHARED"] = self.options.shared
+        tc.variables["CGNS_ENABLE_PARALLEL"] = self.options.parallel
+        tc.variables["CGNS_BUILD_CGNSTOOLS"] = False
         # CMAKE_BUILD_TYPE is not set by all the CMake generators, but cgns needs it
-        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        self._cmake.configure()
+        tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
+        tc.generate()
 
         # Other flags, seen in appveyor.yml in source code, not currently managed.
         # CGNS_ENABLE_LFS:BOOL=OFF       --- note in code: needed on 32 bit systems
         # CGNS_ENABLE_SCOPING:BOOL=OFF   --- disabled in VTK's bundle
         # HDF5_NEED_ZLIB:BOOL=ON -- should be dealt with by cmake auto dependency management or something?
 
-        return self._cmake
-
     def build(self):
         apply_conandata_patches(self)
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build(target="cgns_shared" if self.options.shared else "cgns_static")
 
     def package(self):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
         os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
