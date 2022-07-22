@@ -1,5 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
+from conan.tools.build import cross_building
 import contextlib
 import os
 
@@ -34,11 +36,18 @@ class LibstropheConan(ConanFile):
         "xml_parser": "libexpat",
         "disable_getrandom": True,
     }
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _use_winbash(self):
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or cross_building(self))
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -50,17 +59,43 @@ class LibstropheConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                    "AR": "lib",
-                    "LD": "link -nologo",
-                }
-                with tools.environment_append(env):
+        env_vars = {}
+        if is_msvc(self) or self._is_clang_cl:
+            cc = "cl" if is_msvc(self) else os.environ.get("CC", "clang-cl")
+            cxx = "cl" if is_msvc(self) else os.environ.get("CXX", "clang-cl")
+            lib = "lib" if is_msvc(self) else os.environ.get("AR", "llvm-lib")
+            build_aux_path = os.path.join(
+                self.build_folder, self._source_subfolder, "build-aux")
+            lt_compile = tools.unix_path(
+                os.path.join(build_aux_path, "compile"))
+            lt_ar = tools.unix_path(os.path.join(build_aux_path, "ar-lib"))
+            env_vars.update({
+                "CC": "{} {} -nologo".format(lt_compile, cc),
+                "CXX": "{} {} -nologo".format(lt_compile, cxx),
+                "LD": "link",
+                "STRIP": ":",
+                "AR": "{} {}".format(lt_ar, lib),
+                "RANLIB": ":",
+                "NM": "dumpbin -symbols"
+            })
+            env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
+
+        if not cross_building(self) or is_msvc(self) or self._is_clang_cl:
+            rc = None
+            if self.settings.arch == "x86":
+                rc = "windres --target=pe-i386"
+            elif self.settings.arch == "x86_64":
+                rc = "windres --target=pe-x86-64"
+            if rc:
+                env_vars["RC"] = rc
+                env_vars["WINDRES"] = rc
+        if self._use_winbash:
+            env_vars["RANLIB"] = ":"
+
+        with tools.vcvars(self.settings) if (is_msvc(self) or self._is_clang_cl) else tools.no_op():
+            with tools.chdir(self._source_subfolder):
+                with tools.environment_append(env_vars):
                     yield
-        else:
-            yield
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,10 +108,12 @@ class LibstropheConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("gettext/0.21")
-        self.build_requires("libtool/2.4.6")
+        if not is_msvc(self):
+            self.build_requires("libtool/2.4.6")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.5")
 
     def requirements(self):
         if self.options.xml_parser == "libxml2":
@@ -106,16 +143,20 @@ class LibstropheConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=self._settings_build.os == "Windows")
-        self._autotools.libs = []
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
+        host = None
+        build = None
+        if is_msvc(self) or self._is_clang_cl:
+            build = False
+            if self.settings.arch == "x86":
+                host = "i686-w64-mingw32"
+            elif self.settings.arch == "x86_64":
+                host = "x86_64-w64-mingw32"
+
+        autotools = AutoToolsBuildEnvironment(
+            self, win_bash=tools.os_info.is_windows)
 
         def yes_no(v): return "yes" if v else "no"
-        args = [
+        configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-examples",
@@ -124,7 +165,7 @@ class LibstropheConan(ConanFile):
         if not self.options.disable_tls:
             if self.options.with_schannel:
                 if self._settings_build.os == "Windows":
-                    args.append("--with-schannel")
+                    configure_args.append("--with-schannel")
                 else:
                     raise ConanInvalidConfiguration(
                         "libstrophe with schannel is only supported on Windows")
@@ -132,17 +173,20 @@ class LibstropheConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "libstrophe with gnutls not supported yet in this recipe")
         else:
-            args.append("--disable-tls")
+            configure_args.append("--disable-tls")
         if self.options.enable_cares:
-            args.append("--enable-cares")
+            configure_args.append("--enable-cares")
         if self.options.disable_getrandom:
-            args.append("--disable-getrandom")
+            configure_args.append("--disable-getrandom")
         if self.options.xml_parser == "libxml2":
-            args.append("--with-libmxl2")
+            configure_args.append("--with-libmxl2")
 
-        self._autotools.configure(
-            args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        if (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12") or \
+                self.settings.compiler == "msvc":
+            autotools.flags.append("-FS")
+
+        autotools.configure(args=configure_args, host=host, build=build)
+        return autotools
 
     def build(self):
         with self._build_context():
