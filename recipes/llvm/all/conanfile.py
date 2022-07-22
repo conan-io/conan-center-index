@@ -231,12 +231,14 @@ class Llvm(ConanFile):
         cmake = self._cmake_configure()
         cmake.install()
 
-        self.copy('LICENSE.TXT',
-                  src=self.project_folder('clang'),
-                  dst='licenses',
-                  keep_path=False)
+        self.copy(
+            "LICENSE.TXT",
+            src=os.path.join(self._source_subfolder, "clang"),
+            dst="licenses",
+            keep_path=False,
+        )
 
-        ignore = ['share', 'libexec', '**/Find*.cmake', '**/*Config.cmake']
+        ignore = ["share", "libexec", "**/Find*.cmake", "**/*Config.cmake"]
 
         for ignore_entry in ignore:
             ignore_glob = os.path.join(self.package_folder, ignore_entry)
@@ -244,7 +246,9 @@ class Llvm(ConanFile):
             for ignore_path in glob.glob(ignore_glob, recursive=True):
                 self.output.info(
                     'Remove ignored file/directory "{}" from package'.format(
-                        ignore_path))
+                        ignore_path
+                    )
+                )
 
                 if os.path.isfile(ignore_path):
                     os.remove(ignore_path)
@@ -273,63 +277,5 @@ class Llvm(ConanFile):
                 "Set the 'enable_debug' option to allow debug builds")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "LLVM")
-
-        if self.options.shared:
-            self.cpp_info.libs = tools.collect_libs(self)
-            if self.settings.os == 'Linux':
-                self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
-            elif self.settings.os == 'Macos':
-                self.cpp_info.system_libs = ['m']
-            return
-
-        components_path = \
-            os.path.join(self.package_folder, 'lib', 'components.json')
-        with open(components_path, 'r') as components_file:
-            components = json.load(components_file)
-
-        dependencies = ['ffi', 'z', 'iconv', 'xml2']
-        targets = {
-            'ffi': 'libffi::libffi',
-            'z': 'zlib::zlib',
-            'xml2': 'libxml2::libxml2'
-        }
-
-        for component, deps in components.items():
-            self.cpp_info.components[component].libs = [component]
-            self.cpp_info.components[component].requires.extend(dep for dep in deps if dep.startswith('LLVM'))
-
-            for lib, target in targets.items():
-                if lib in deps:
-                    self.cpp_info.components[component].requires.append(target)
-
-            self.cpp_info.components[component].system_libs = [
-                dep for dep in deps
-                if not dep.startswith('LLVM') and dep not in dependencies
-            ]
-
-            self.cpp_info.components[component].set_property("cmake_target_name", component)
-            self.cpp_info.components[component].builddirs.append(self._module_subfolder)
-
-            self.cpp_info.components[component].names["cmake_find_package"] = component
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = component
-            self.cpp_info.components[component].build_modules["cmake_find_package"].extend([
-                self._alias_module_file_rel_path,
-                self._old_alias_module_file_rel_path,
-            ])
-            self.cpp_info.components[component].build_modules["cmake_find_package_multi"].extend([
-                self._alias_module_file_rel_path,
-                self._old_alias_module_file_rel_path,
-            ])
-
-            if self.options.use_llvm_cmake_files:
-                self.cpp_info.components[component].build_modules["cmake_find_package"].append(
-                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
-                )
-                self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(
-                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
-                )
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "LLVM"
-        self.cpp_info.names["cmake_find_package_multi"] = "LLVM"
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.builddirs = ["lib/cmake"]
