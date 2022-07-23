@@ -4,9 +4,10 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     def build(self):
+        self.run("pkg-config --validate ./uuid.pc")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
