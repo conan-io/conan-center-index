@@ -20,7 +20,6 @@ class OpenGrmConan(conan.ConanFile):
     license = "Apache-2.0"
 
     settings = "os", "arch", "compiler", "build_type"
-    generators = "AutotoolsDeps", "AutotoolsToolchain"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -91,24 +90,26 @@ class OpenGrmConan(conan.ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             conan.tools.files.patch(**patch)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = Autotools(self)
-        args = [
+    def generate(self):
+        tc = AutotoolsDeps(self)
+        tc.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             f"--enable-bin={self._yes_no(self.options.enable_bin)}",
             "LIBS=-lpthread",
-        ]
-        autotools.configure(build_script_folder=self._source_subfolder, args=args)
-        return autotools
+        ])
+        tc.make_args.append("-j1")
+        tc.generate()
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
-        autotools.make(args=["-j1"])
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self._source_subfolder)
+        autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
 
         conan.tools.files.rmdir(self, Path(self.package_folder) / "share")
