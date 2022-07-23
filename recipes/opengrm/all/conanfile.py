@@ -89,9 +89,6 @@ class OpenGrmConan(conan.ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
-            f"--with-pic={self._yes_no(self.options.get_safe('fPIC', True))}",
-            f"--enable-shared={self._yes_no(self.options.shared)}",
-            f"--enable-static={self._yes_no(not self.options.shared)}",
             f"--enable-bin={self._yes_no(self.options.enable_bin)}",
             "LIBS=-lpthread",
         ])
@@ -105,7 +102,7 @@ class OpenGrmConan(conan.ConanFile):
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = Autotools(self)
-        autotools.configure()
+        autotools.configure(build_script_folder=self._source_subfolder)
         return autotools
 
     def build(self):
