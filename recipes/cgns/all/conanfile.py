@@ -48,11 +48,9 @@ class CgnsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        try:
-            # In windows, with msvc, the compiler.libcxx doesn't exist, so it will raise.
+        # In windows, with msvc, the compiler.libcxx doesn't exist, so check if the attribute exists
+        if hasattr(self.settings.compiler, 'libcxx'):
             del self.settings.compiler.libcxx
-        except Exception:
-            pass
         del self.settings.compiler.cppstd
 
     def requirements(self):
