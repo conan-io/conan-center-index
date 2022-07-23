@@ -4,6 +4,8 @@ from conan import ConanFile
 from conans.tools import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.47.0"
 
@@ -22,6 +24,19 @@ class SamariumConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [
         True, False], "build_tests": [True, False]}
     default_options = {"shared": False, "fPIC": True, "build_tests": False}
+
+    @property
+    def _min_cppstd(self):
+        return "20"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11.0",
+            "Visual Studio": "16.9",
+            "clang": "13",
+            "apple-clang": "13",
+        }
 
     def source(self):
         get(self, **self.conan_data["sources"]
@@ -47,7 +62,18 @@ class SamariumConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "20")
+            check_min_cppstd(self, self._min_cppstd)
+
+        compiler = str(self.settings.compiler)
+        if compiler not in self._compilers_minimum_version:
+            self.output.warn(
+                "Unknown compiler, assuming it supports at least C++20")
+            return
+
+        version = Version(self.settings.compiler.version)
+        if version < self._compilers_minimum_version[compiler]:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires a compiler that supports at least C++20")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
