@@ -78,7 +78,7 @@ class OpenGrmConan(conan.ConanFile):
                                             ' or "compiler.libcxx=libc++"')
 
     def source(self):
-        conan.tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        conan.tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @staticmethod
     def _yes_no(v):
