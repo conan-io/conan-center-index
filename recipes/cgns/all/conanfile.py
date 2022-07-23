@@ -7,7 +7,6 @@ from conan.tools.files import get, copy, rmdir, apply_conandata_patches
 
 required_conan_version = ">=1.43.0"
 
-
 class CgnsConan(ConanFile):
     name = "cgns"
     description = "Standard for data associated with the numerical solution " \
