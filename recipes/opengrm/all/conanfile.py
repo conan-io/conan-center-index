@@ -106,7 +106,8 @@ class OpenGrmConan(conan.ConanFile):
     def build(self):
         self._patch_sources()
         autotools = self._configure_autotools()
-        autotools.make()
+        with tools.environment_append(autotools.vars):
+            self.run("make")
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
