@@ -1,5 +1,6 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
 from conans.tools import Version
 
 import functools
@@ -29,8 +30,6 @@ class OpenGrmConan(conan.ConanFile):
         "fPIC": True,
         "enable_bin": True,
     }
-
-    generators = "AutotoolsToolchain"
 
     def requirements(self):
         self.requires("openfst/1.8.2")
@@ -87,7 +86,7 @@ class OpenGrmConan(conan.ConanFile):
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        autotools = conan.tools.gnu.Autotools(self)
+        autotools = AutoToolsBuildEnvironment(self)
         args = [
             f"--with-pic={self._yes_no(self.options.get_safe('fPIC', True))}",
             f"--enable-shared={self._yes_no(self.options.shared)}",
