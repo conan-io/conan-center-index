@@ -1,3 +1,4 @@
+from conan.tools.build import cross_building
 from conan.tools.files import rename
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
@@ -816,7 +817,7 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
-        if tools.cross_building(self, skip_x64_x86=True):
+        if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
                                   "$(>) > $(<)",
@@ -1143,7 +1144,7 @@ class BoostConan(ConanFile):
     @property
     def _build_cross_flags(self):
         flags = []
-        if not tools.cross_building(self):
+        if not cross_building(self):
             return flags
         arch = self.settings.get_safe("arch")
         self.output.info("Cross building, detecting compiler...")
