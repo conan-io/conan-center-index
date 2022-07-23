@@ -1,7 +1,7 @@
 from os import path
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build.cppstd import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import get, copy
 
@@ -46,7 +46,8 @@ class SamariumConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        check_min_cppstd(self, "20")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "20")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
