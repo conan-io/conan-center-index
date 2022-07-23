@@ -48,7 +48,7 @@ class PlatformInterfacesConan(ConanFile):
         return 20
 
     def requirements(self):
-    		if tools.Version(self.version) >= "0.3.0":
+    		if Version(self.version) >= "0.3.0":
         		self.requires("platform.delegates/0.2.7")
 
     def validate(self):
