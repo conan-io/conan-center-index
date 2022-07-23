@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, apply_conandata_patches
 
 
@@ -16,7 +16,6 @@ class CgnsConan(ConanFile):
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -66,6 +65,9 @@ class CgnsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        cmake = CMakeDeps(self)
+        cmake.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["CGNS_ENABLE_TESTS"] = False
         tc.variables["CGNS_BUILD_TESTING"] = False
