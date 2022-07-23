@@ -1,4 +1,5 @@
 from conan.tools.files import rename
+from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
@@ -558,8 +559,7 @@ class BoostConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     ##################### BUILDING METHODS ###########################
 
