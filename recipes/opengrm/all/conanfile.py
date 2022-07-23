@@ -1,7 +1,7 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
-from conans.tools import Version
+from conans.tools import Version, check_min_cppstd
 
 import functools
 import os
@@ -63,6 +63,8 @@ class OpenGrmConan(conan.ConanFile):
             "clang": "7",
         }
 
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
             if Version(self.settings.compiler.version) < minimum_compiler:
