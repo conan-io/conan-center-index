@@ -1,6 +1,5 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
-from conans import AutoToolsBuildEnvironment
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conans.tools import Version, check_min_cppstd
 
@@ -102,12 +101,16 @@ class OpenGrmConan(conan.ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             conan.tools.files.patch(**patch)
+            
+    @functools.lru_cache(1)
+    def _configure_autotools(self):
+        autotools = Autotools(self)
+        autotools.configure()
+        return autotools
 
     def build(self):
         self._patch_sources()
-        
-        autotools = Autotools(self)
-        autotools.configure()
+        autotools = self._configure_autotools()
         autotools.make()
 
     def package(self):
