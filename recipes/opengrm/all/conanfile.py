@@ -94,7 +94,7 @@ class OpenGrmConan(conan.ConanFile):
             f"--enable-bin={self._yes_no(self.options.enable_bin)}",
             "LIBS=-lpthread",
         ]
-        autotools.configure(build_script_folder=self._source_subfolder, args=args)
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return autotools
 
     def _patch_sources(self):
