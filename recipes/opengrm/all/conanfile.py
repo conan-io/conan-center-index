@@ -1,6 +1,7 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conans.tools import Version, check_min_cppstd
 
 import functools
@@ -86,18 +87,17 @@ class OpenGrmConan(conan.ConanFile):
     def _yes_no(v):
         return "yes" if v else "no"
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
-        args = [
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             f"--with-pic={self._yes_no(self.options.get_safe('fPIC', True))}",
             f"--enable-shared={self._yes_no(self.options.shared)}",
             f"--enable-static={self._yes_no(not self.options.shared)}",
             f"--enable-bin={self._yes_no(self.options.enable_bin)}",
             "LIBS=-lpthread",
-        ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
+        ])
+        tc.make_args.append("-j1")
+        tc.generate()
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -105,9 +105,10 @@ class OpenGrmConan(conan.ConanFile):
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
-        with tools.environment_append(autotools.vars):
-            self.run("make")
+        
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
