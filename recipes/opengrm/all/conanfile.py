@@ -1,6 +1,6 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
 from conans.tools import Version, check_min_cppstd
 
 import functools
