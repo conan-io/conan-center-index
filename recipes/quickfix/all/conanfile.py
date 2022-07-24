@@ -36,13 +36,13 @@ class QuickfixConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
 
         if self.options.with_postgres:
-            self.requires("libpq/13.2")
+            self.requires("libpq/14.2")
 
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
 
     def config_options(self):
         if self.settings.os == "Windows":
