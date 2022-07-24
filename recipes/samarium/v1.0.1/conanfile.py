@@ -1,7 +1,7 @@
 from os import path
 
 from conan import ConanFile
-from conans.tools import check_min_cppstd
+from conans.tools import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import get, copy
 from conan.tools.scm import Version
@@ -61,6 +61,9 @@ class SamariumConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building currently not supported")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
