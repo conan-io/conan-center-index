@@ -1,7 +1,6 @@
 from os import path
 
 from conan import ConanFile
-from conans.tools import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import get, copy
 from conan.tools.scm import Version
