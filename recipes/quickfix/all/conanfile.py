@@ -99,5 +99,5 @@ class QuickfixConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])
-        elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "m"])
