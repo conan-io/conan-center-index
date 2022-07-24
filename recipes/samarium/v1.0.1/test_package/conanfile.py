@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake
+from conan.tools.build import cross_building
 
 
 class TestPackageConan(ConanFile):
@@ -14,5 +15,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.abspath("test_package")
-        self.run(bin_path)
+        if not cross_building(self):
+            bin_path = os.path.abspath("test_package")
+            self.run(bin_path, run_environment=True)
