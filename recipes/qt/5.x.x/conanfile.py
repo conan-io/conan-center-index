@@ -1,6 +1,8 @@
+from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, RunEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conans import tools, RunEnvironment
 from conans.model import Generator
 import configparser
 import glob
@@ -156,7 +158,7 @@ class QtConan(ConanFile):
         if self._settings_build.os == "Windows" and self._is_msvc:
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
-            self.build_requires("ninja/1.10.2")
+            self.build_requires("ninja/1.11.0")
             self.build_requires("nodejs/16.3.0")
             self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
@@ -202,7 +204,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.20.0")
+            self.build_requires("wayland/1.21.0")
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -304,7 +306,7 @@ class QtConan(ConanFile):
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative, qt:qtlocation and qt:qtwebchannel")
 
-            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
@@ -343,48 +345,48 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.openssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.39")
+            self.requires("pcre2/10.40")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.204.1")
+            self.requires("vulkan-loader/1.3.221")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.8")
+                self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
-            self.requires("glib/2.72.0")
+            self.requires("glib/2.73.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion:
             self.requires("double-conversion/3.2.0")
         if self.options.get_safe("with_freetype", False):
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/71.1")
         if self.options.get_safe("with_harfbuzz", False):
-            self.requires("harfbuzz/4.2.0")
+            self.requires("harfbuzz/4.4.1")
         if self.options.get_safe("with_libjpeg", False):
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.2")
+                self.requires("libjpeg-turbo/2.1.3")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False):
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.1")
+            self.requires("sqlite3/3.39.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.25")
+            self.requires("libmysqlclient/8.0.29")
         if self.options.with_pq:
             self.requires("libpq/14.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.21.1")
+            self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.5.1")
+            self.requires("libalsa/1.2.7.2")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("xkbcommon/1.4.1")
@@ -397,7 +399,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.76")
+            self.requires("nss/3.77")
             self.requires("libdrm/2.4.109")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -406,11 +408,11 @@ class QtConan(ConanFile):
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
         if self.options.qtwayland:
-            self.requires("wayland/1.20.0")
+            self.requires("wayland/1.21.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.44.0")
+            self.requires("at-spi2-core/2.45.1")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -704,7 +706,7 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                if not tools.cross_building(self, skip_x64_x86=True):
+                if not cross_building(self, skip_x64_x86=True):
                     args += ["-platform %s" % xplatform_val]
                 else:
                     args += ["-xplatform %s" % xplatform_val]
