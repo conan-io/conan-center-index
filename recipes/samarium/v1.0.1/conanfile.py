@@ -26,10 +26,6 @@ class SamariumConan(ConanFile):
     default_options = {"shared": False, "fPIC": True, "build_tests": False}
 
     @property
-    def _min_cppstd(self):
-        return "20"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "11.0",
@@ -61,9 +57,6 @@ class SamariumConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
         compiler = str(self.settings.compiler)
         if compiler not in self._compilers_minimum_version:
             self.output.warn(
