@@ -43,7 +43,7 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].set_property("component_version", pkg_config.version[0])
         self.cpp_info.components[name].set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in variables.items() if key not in ["pcfiledir","prefix"]))
+            "\n".join(f"{key}={value}" for key,value in variables.items() if key not in ["pcfiledir","prefix", "includedir"]))
 
     def system_requirements(self):
         packages = []
