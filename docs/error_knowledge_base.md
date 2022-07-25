@@ -466,6 +466,8 @@ class SomeRecipe(ConanFile):
             self.info.header_only()
     ```
     
+There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
+    
 - For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
 
     ```python
