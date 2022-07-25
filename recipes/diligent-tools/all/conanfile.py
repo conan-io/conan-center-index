@@ -13,9 +13,11 @@ class DiligentToolsConan(ConanFile):
     topics = ("graphics", "texture", "gltf", "draco", "imgui")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
-               "fPIC": [True, False]}
+               "fPIC": [True, False],
+               "with_render_state_packager": [True, False]}
     default_options = {"shared": False, 
-                       "fPIC": True}
+                       "fPIC": True,
+                       "with_render_state_packager": False}
     generators = "cmake_find_package", "cmake"
     _cmake = None
     exports_sources = ["CMakeLists.txt", "patches/**", "BuildUtils.cmake"]
@@ -99,6 +101,7 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
+        self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
 
         self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)

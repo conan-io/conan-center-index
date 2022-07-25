@@ -14,8 +14,6 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0013-api.252004-fix_pip3_modules_install.diff"
-      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
