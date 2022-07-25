@@ -89,7 +89,7 @@ class PopplerConan(ConanFile):
             del self.options.with_libiconv
 
     def requirements(self):
-        self.requires("poppler-data/0.4.10")
+        self.requires("poppler-data/0.4.11")
         self.requires("freetype/2.12.1")
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.17")
