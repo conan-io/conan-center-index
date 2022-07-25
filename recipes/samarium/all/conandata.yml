@@ -8,3 +8,5 @@ sources:
 patches:
   "1.0.0":
     - patch_file: "patches/1.0.0-updated-cmake.patch"
+    - patch_file: "patches/1.0.0-RandomGenerator.hpp-link.patch"
+    - patch_file: "patches/1.0.0-RandomGenerator.cpp-link.patch"
