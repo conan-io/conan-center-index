@@ -465,15 +465,6 @@ class SomeRecipe(ConanFile):
         def package_id(self):
             self.info.header_only()
     ```
-
-- For "build script" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e1b9759bfc2b4625e9ba796499f743ca588d7866/recipes/automake/all/conanfile.py#L47-L50)) that provide only scripts (e.g. for the build system) and **no binaries** may have something similar to:
-
-    ```python
-        def package_id(self):
-            del self.info.settings.arch
-            del self.info.settings.compiler
-            del self.info.settings.build_type
-    ```
     
 - For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packing policy](packaging_policy.md#settings) for more, should do as follows:
 
