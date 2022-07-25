@@ -1,4 +1,10 @@
 sources:
   "1.0.0":
-    sha256: 943de75803f492f78c5d55fe43be298fbb66156cc22946a3c6cc6b0634efc2e2
-    url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.0.tar.gz
+      sha256: 943de75803f492f78c5d55fe43be298fbb66156cc22946a3c6cc6b0634efc2e2
+      url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.0.tar.gz
+  "1.0.1":
+    sha256: 5c806a5e0038d792dd46919fde2ab78afa4e2211563fdb76961aa36a946b56be
+    url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.1.tar.gz
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-updated-cmake.patch"
