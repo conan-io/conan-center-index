@@ -75,7 +75,7 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
 
-    generators = ["cmake", "pkg_config"]
+    generators = "cmake", "pkg_config", "VirtualBuildEnv"
 
     @property
     def _source_subfolder(self):
