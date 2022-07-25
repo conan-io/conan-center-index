@@ -34,22 +34,29 @@ class MoldConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _get_include_path(self, dependency):
+        include_path = self.deps_cpp_info[dependency].rootpath
+        include_path = os.path.join(include_path, "include")
+        return include_path
+
     def _patch_sources(self):
-        zlib_include_path = self.deps_cpp_info["zlib"].rootpath
-        zlib_include_path = os.path.join(zlib_include_path, "include")
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{}".format(
+        self._get_include_path("zlib"),
+        self._get_include_path("openssl"),
+        self._get_include_path("xxhash")))
 
-        openssl_include_path = self.deps_cpp_info["openssl"].rootpath
-        openssl_include_path = os.path.join(openssl_include_path, "include")
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/mimalloc/include", "-I{}".format(
+        self._get_include_path("mimalloc")))
 
-        xxhash_include_path = self.deps_cpp_info["xxhash"].rootpath
-        xxhash_include_path = os.path.join(xxhash_include_path, "include")
-
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{}".format(xxhash_include_path, zlib_include_path, openssl_include_path))
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/tbb/include", "-I{}".format(
+        self._get_include_path("onetbb")))
 
     def requirements(self):
         self.requires("zlib/1.2.12")
         self.requires("openssl/1.1.1q")
         self.requires("xxhash/0.8.1")
+        self.requires("onetbb/2021.3.0")
+        self.requires("mimalloc/2.0.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
