@@ -125,12 +125,9 @@ class PopplerConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         # Poppler requires C++14
-        minGccVersion = "6"
-        if tools.Version(self.version) < "22.07.0":
-            minGccVersion = "5"
         return {
             "Visual Studio": "15",
-            "gcc": minGccVersion,
+            "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1"
         }
