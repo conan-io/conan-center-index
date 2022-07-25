@@ -166,7 +166,12 @@ class GdalConan(ConanFile):
         "dep": "Iconv",
         "descr": "Character set recoding (used in GDAL portability library)"
     }, {
+        "dep": "OPENJPEG",
+        "require": "openjpeg/2.5.0",
+        "descr": "JPEG2000 driver based on OpenJPEG library"
+    }, {
         "dep": "JPEG",
+        "require": "libjpeg/9d",
         "descr": "JPEG compression library (external)"
     }, {
         "require": "json-c/0.15",
@@ -374,7 +379,8 @@ class GdalConan(ConanFile):
                 self.requires(dep["require"])
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
