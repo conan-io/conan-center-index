@@ -20,9 +20,9 @@ class MoldConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration('{} can\'t be built on {}.'.format(self.name, self.settings.os))
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "10":
-            raise ConanInvalidConfiguration('Use Gcc compiler version higher than 10')
+            raise ConanInvalidConfiguration("GCC version 10 or higher required")
         if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and tools.Version(self.settings.compiler.version) <= "11":
-            raise ConanInvalidConfiguration('Use Clang compiler version higher than 11')
+            raise ConanInvalidConfiguration("Clang version 11 or higher required")
         if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch :
             raise ConanInvalidConfiguration('Use apple-clang does not work on ARM with this recipe')
 
