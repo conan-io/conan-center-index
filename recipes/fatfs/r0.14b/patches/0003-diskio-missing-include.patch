@@ -1,0 +1,11 @@
+--- a/source/diskio.h
++++ b/source/diskio.h
+@@ -5,6 +5,8 @@
+ #ifndef _DISKIO_DEFINED
+ #define _DISKIO_DEFINED
+ 
++#include "ff.h"
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif

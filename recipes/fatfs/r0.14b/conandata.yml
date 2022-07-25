@@ -1,0 +1,12 @@
+sources:
+  "r0.14b":
+    url: "http://elm-chan.org/fsw/ff/arc/ff14b.zip"
+    sha256: "d4605ab7c418fc4cc4cb555c8129482873add6f5ca5f25810e7ca8cfd57d07cb"
+patches:
+  "r0.14b":
+    - patch_file: "patches/0001-string-functions.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-mkfs-exfat.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-diskio-missing-include.patch"
+      base_path: "source_subfolder"
