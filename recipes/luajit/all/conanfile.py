@@ -73,7 +73,10 @@ class LuajitConan(ConanFile):
                 # is not set then it's forced to 10.4, which breaks compile on Mojave.
                 version = self.settings.get_safe("os.version")
                 if not version and platform.system() == "Darwin":
-                    major, minor, _ = platform.mac_ver()[0].split(".")
+                    platform.mac_ver
+                    listversion = platform.mac_ver()[0].split(".")
+                    major = listversion[0]
+                    minor = listversion[1]
                     version = "%s.%s" % (major, minor)
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
             with tools.chdir(self._source_subfolder), tools.environment_append(env):
