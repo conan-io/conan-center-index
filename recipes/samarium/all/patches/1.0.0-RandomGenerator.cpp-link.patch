@@ -1,5 +1,5 @@
 --- ./src/samarium/util/RandomGenerator.cpp
-+++ /home/jb/sm/src/samarium/util/RandomGenerator.cpp
++++ ./src/samarium/util/RandomGenerator.cpp
 @@ -75,17 +75,6 @@
      ranges::generate(cache, [this] { return this->next_scaled(); });
  }

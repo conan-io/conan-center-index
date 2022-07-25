@@ -1,5 +1,5 @@
 --- ./src/samarium/util/RandomGenerator.hpp
-+++ /home/jb/sm/src/samarium/util/RandomGenerator.hpp
++++ ./src/samarium/util/RandomGenerator.hpp
 @@ -49,14 +49,27 @@
          }
          state = new_state * magic_number + (new_inc | 1);
