@@ -1,6 +1,7 @@
 from conan.tools.files import apply_conandata_patches
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 import os
 
 required_conan_version = ">=1.33.0"
@@ -224,7 +225,7 @@ class PopplerConan(ConanFile):
 
         # Workaround for cross-build to at least iOS/tvOS/watchOS,
         # when dependencies are found with find_path() and find_library()
-        if tools.cross_building(self):
+        if cross_building(self):
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
             self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
 
