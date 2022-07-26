@@ -124,42 +124,37 @@ This section follows the same pattern as the `sources` above: one entry per vers
 patches:
   "1.2.0":
     - patch_file: "patches/1.2.0-002-link-core-with-find-library.patch"
-      base_path: "source_subfolder"
-      url: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
-      sha256: "qafe4rq54533qa43esdaq53ewqa5"
-      patch_type: "portability"
-      patch_source: ...
       patch_description: "Link CoreFoundation and CoreServices with find_library"
+      patch_type: "portability"
+      base_path: "source_subfolder"
+      patch_source: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
+      sha256: "qafe4rq54533qa43esdaq53ewqa5"
 ```
 
 ### Patches fields
 
 #### patch_file
 
+_Required_
+
 Patch file might be committed to the conan-center-index, near to the conanfile (usually, into the `patches` sub-directory). Such patch files usually have either `.diff` or `.patch` extension.
 The recommended way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). The path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
 
-#### base_path
+#### patch_description
 
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
+_Required_
 
-#### url
+`patch_description` is an arbitrary text describing the following aspects of the patch:
 
-The patch could be taken from the existing resource (e.g. some patches are distributed alongside the source tarball). See `url` section of the `sources`.
+- What does patch do (example - `add missing unistd.h header`)
+- Why is it necessary (example - `port to Android`)
+- How exactly does patch achieve that (example - `update configure.ac`)
 
-#### sha256
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.
-
-#### sha1
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.
-
-#### md5
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.
+An example of a full patch description could be: `port to Android: update configure.ac adding missing unistd.h header`.
 
 #### patch_type
+
+_Required_
 
 The `patch_type` field specifies the type of the patch. In conan-center-index we currently accept only several kind of patches:
 
@@ -206,6 +201,8 @@ Such patches may contain variables and targets generated only by Conan, but not 
 
 #### patch_source
 
+_Optional_
+
 `patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
 
 - Link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc.
@@ -217,12 +214,26 @@ Such patches may contain variables and targets generated only by Conan, but not 
 For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
 
-#### patch_description
+#### base_path
 
-`patch_description` is an arbitrary text describing the following aspects of the patch:
+_Optional_
 
-- What does patch do (example - `add missing unistd.h header`)
-- Why is it necessary (example - `port to Android`)
-- How exactly does patch achieve that (example - `update configure.ac`)
+Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
 
-An example of a full patch description could be: `port to Android: update configure.ac adding missing unistd.h header`.
+#### sha256
+
+_Optional_
+
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
+
+#### sha1
+
+_Optional_
+
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
+
+#### md5
+
+_Optional_
+
+This is the hash for the patch itself, in the same way this field is used in the `sources` section.
