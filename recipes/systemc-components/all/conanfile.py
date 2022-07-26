@@ -1,11 +1,5 @@
-from conans import tools, CMake
-from conan import ConanFile
+from conans import ConanFile, tools, CMake
 from conan.errors import ConanInvalidConfiguration
-import functools
-
-
-required_conan_version = ">=1.43.0"
-
 
 class SystemcComponentsConan(ConanFile):
     name = "systemc-components"
@@ -17,11 +11,15 @@ class SystemcComponentsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "SC_WITH_PHASE_CALLBACKS": [True, False],
+        "SC_WITH_PHASE_CALLBACK_TRACING": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "SC_WITH_PHASE_CALLBACKS": False,
+        "SC_WITH_PHASE_CALLBACK_TRACING": False
     }
     generators = "cmake", "cmake_find_package_multi"
 
@@ -32,28 +30,20 @@ class SystemcComponentsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("systemc/2.3.3")
-        self.requires("systemc-cci/1.0.0")
-        self.requires("doxygen/1.9.4")
-        self.requires("fmt/8.0.1")
-
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        self.run("git clone --recursive --branch develop https://github.com/Minres/SystemC-Components.git")
+#        tools.get(**self.conan_data["sources"][self.version])
 
-    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
+        cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
+        cmake.configure(source_folder="SystemC-Components")
         cmake.verbose = True
-        cmake.configure()
         return cmake
 
     def build(self):
@@ -61,8 +51,7 @@ class SystemcComponentsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
         cmake = self._configure_cmake()
         cmake.install()
 
