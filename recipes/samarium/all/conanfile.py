@@ -57,6 +57,9 @@ class SamariumConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        if self.version == "1.0.0" and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos not supported for v1.0.0")
+
         compiler = str(self.settings.compiler)
         if compiler not in self._compilers_minimum_version:
             self.output.warn(
