@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import conan.tools.files
 import textwrap
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.43.0"
 
 
 class IgnitionToolsConan(ConanFile):
@@ -63,9 +63,6 @@ class IgnitionToolsConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
-
-    def requirements(self):
-        pass
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], 
