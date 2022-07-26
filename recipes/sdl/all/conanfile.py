@@ -349,7 +349,8 @@ class SDLConan(ConanFile):
     def build(self):
         self._patch_sources()
         lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
-        with tools.environment_append({"LIBRARY_PATH": os.pathsep.join(lib_paths)}):
+        with tools.environment_append({"LIBRARY_PATH": os.pathsep.join(lib_paths)}), \
+             tools.run_environment(self):
             cmake = self._configure_cmake()
             cmake.build()
 
