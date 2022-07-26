@@ -40,16 +40,19 @@ class MoldConan(ConanFile):
         return include_path
 
     def _patch_sources(self):
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{}".format(
+        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
         self._get_include_path("zlib"),
         self._get_include_path("openssl"),
-        self._get_include_path("xxhash")))
+        self._get_include_path("xxhash"),
+        self._get_include_path("mimalloc"),
+        self._get_include_path("onetbb")
+        ))
 
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/mimalloc/include", "-I{}".format(
-        self._get_include_path("mimalloc")))
+        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -ltbb", "MOLD_LDFLAGS += -L{} -ltbb".format(
+            self.deps_cpp_info["onetbb"].lib_paths[0]))
 
-        tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/tbb/include", "-I{}".format(
-        self._get_include_path("onetbb")))
+        tools.replace_in_file("source_subfolder/Makefile", "MOLD_LDFLAGS += -lmimalloc", "MOLD_LDFLAGS += -L{} -lmimalloc".format(
+            self.deps_cpp_info["mimalloc"].lib_paths[0]))
 
     def requirements(self):
         self.requires("zlib/1.2.12")
@@ -66,7 +69,7 @@ class MoldConan(ConanFile):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
-            autotools.make(target="mold")
+            autotools.make(target="mold", args=['SYSTEM_TBB=1', 'SYSTEM_MIMALLOC=1'])
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
