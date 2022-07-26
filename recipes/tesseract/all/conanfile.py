@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 import os
 import textwrap
 import functools
@@ -130,7 +131,7 @@ class TesseractConan(ConanFile):
             cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
             cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
-        if tools.cross_building(self):
+        if cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
