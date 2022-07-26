@@ -42,6 +42,7 @@ class SystemcComponentsConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
         cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
+        cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
         cmake.verbose = True
         cmake.configure()
         return cmake
