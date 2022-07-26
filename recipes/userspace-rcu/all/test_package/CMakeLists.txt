@@ -1,10 +1,15 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(userspace-rcu COMPONENTS urcu REQUIRED)
 
-find_package(userspace-rcu REQUIRED CONFIG)
+set(TEST_SRC test_urcu_fork.c tap.c)
 
-add_executable(${PROJECT_NAME} test_urcu_fork.c tap.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} ${TEST_SRC})
+target_link_libraries(${PROJECT_NAME} userspace-rcu::urcu)
+
+add_executable(${PROJECT_NAME}-mb ${TEST_SRC})
+target_link_libraries(${PROJECT_NAME}-mb userspace-rcu::urcu-mb)
+
+add_executable(${PROJECT_NAME}-signal ${TEST_SRC})
+target_link_libraries(${PROJECT_NAME}-signal userspace-rcu::urcu-signal)

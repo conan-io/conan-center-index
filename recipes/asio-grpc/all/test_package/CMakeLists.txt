@@ -14,6 +14,10 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_compile_definitions(${PROJECT_NAME}
                            PRIVATE BOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
 
+if(${asio-grpc_VERSION} VERSION_GREATER_EQUAL 2)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE ASIO_GRPC_V2)
+endif()
+
 if(CMAKE_CROSSCOMPILING)
   # Assuming protoc plugins needed by `asio_grpc_protobuf_generate` are not
   # available when cross compiling

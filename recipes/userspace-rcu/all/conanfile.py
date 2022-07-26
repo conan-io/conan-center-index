@@ -1,6 +1,8 @@
+import os
+
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-import os
+from conan.tools.gnu.pkgconfigdeps.pc_files_creator import get_pc_files_and_content
 
 required_conan_version = ">=1.33.0"
 
@@ -13,6 +15,8 @@ class UserspaceRCUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1"
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -22,16 +26,16 @@ class UserspaceRCUConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "model": ["generic", "mb", "signal", "bp"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "model": "generic",
     }
     build_requires = (
         "libtool/2.4.6",
     )
+
+    generators = "PkgConfigDeps"
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -47,48 +51,47 @@ class UserspaceRCUConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        conf_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return self._autotools
+
+
     def build(self):
         with tools.chdir(self._source_subfolder):
             self.run("./bootstrap")
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
-                env_build = AutoToolsBuildEnvironment(self)
-                extra_args = list()
-                if self.options.shared:
-                    extra_args.append('--enable-static=no')
-                else:
-                    extra_args.append('--enable-shared=no')
-                env_build.configure("../", args=extra_args, build=False, host=False, target=False)
-                env_build.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", excludes=("*_build/*", "*doc/*", "*tests/*"), src="{}/src".format(self._source_subfolder), dst="include/", keep_path=True)
-        self.copy("*.h", excludes=("*_build/*", "*doc/*", "*tests/*"), src="{}/include".format(self._source_subfolder), dst="include/", keep_path=True)
-        self.copy("*.h", src="{}/_build/include/urcu/".format(self._source_subfolder), dst="include/urcu", keep_path=False)
-        lib_name = ''
-        if self.options.model == "generic":
-            lib_name = 'liburcu'
-        elif self.options.model == "mb":
-            lib_name = 'liburcu-mb'
-        elif self.options.model == "signal":
-            lib_name = 'liburcu-signal'
-        else:
-            lib_name = 'liburcu-bp'
-        if self.options.shared:
-            self.copy("*{}.dll".format(lib_name), dst="bin", keep_path=False)
-            self.copy("*{}.so*".format(lib_name), dst="lib", keep_path=False, symlinks=True)
-            self.copy("*{}.dylib".format(lib_name), dst="lib", keep_path=False)
-        else:
-            self.copy("*{}.a".format(lib_name), dst="lib", keep_path=False)
+        autotools = self._configure_autotools()
+        autotools.install()
+
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.options.model == "mb":
-            self.cpp_info.cxxflags = ["-DRCU_MB"]
-        elif self.options.model == "signal":
-            self.cpp_info.cxxflags = ["-DRCU_SIGNAL"]
-        elif self.options.model == "bp":
-            self.cpp_info.cxxflags = ["-DRCU_BP"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "pthread"])
+        for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-signal"]:
+            component_name = "urcu{}".format(lib_type)
+            self.cpp_info.components[component_name].libs = ["urcu-common", component_name]
+            self.cpp_info.components[component_name].set_property("pkg_config_name", component_name)
+            self.cpp_info.components[component_name].names["pkg_config"] = component_name
+            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
+            self.cpp_info.components[component_name].includedirs = ["include"]
+            self.cpp_info.components[component_name].libdirs = ["lib"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components[component_name].system_libs = ["pthread"]
+
+        # Some definitions needed for MB and Signal variants
+        self.cpp_info.components["urcu-mb"].defines = ["RCU_MB"]
+        self.cpp_info.components["urcu-signal"].defines = ["RCU_SIGNAL"]

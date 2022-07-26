@@ -47,7 +47,7 @@
 /* We generate children 3 levels deep */
 #define FORK_DEPTH	3
 /* Each generation spawns 10 children */
-#define NR_FORK		10
+#define NR_FORK		4
 
 #define NR_TESTS	NR_FORK
 
