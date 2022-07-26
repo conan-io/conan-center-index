@@ -51,6 +51,9 @@ class MoldConan(ConanFile):
         tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/tbb/include", "-I{}".format(
         self._get_include_path("onetbb")))
 
+def package_id(self):
+   del self.info.settings.compiler
+
     def requirements(self):
         self.requires("zlib/1.2.12")
         self.requires("openssl/1.1.1q")
