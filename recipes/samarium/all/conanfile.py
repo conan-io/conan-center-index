@@ -17,10 +17,11 @@ class SamariumConan(ConanFile):
     license = "MIT"
     topics = ("cpp20", "physics", "2d", "simulation")
     generators = "CMakeDeps", "CMakeToolchain"
+    requires = "fmt/9.0.0", "sfml/2.5.1", "range-v3/0.12.0", "stb/cci.20210910"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [
-        True, False], "build_tests": [True, False]}
+        True, False]}
     default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "patches/*"
@@ -37,12 +38,6 @@ class SamariumConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"]
             [str(self.version)], strip_root=True)
-
-    def requirements(self):
-        self.requires("fmt/9.0.0")
-        self.requires("sfml/2.5.1")
-        self.requires("range-v3/0.12.0")
-        self.requires("stb/cci.20210910")
 
     def configure(self):
         if self.options.shared:
