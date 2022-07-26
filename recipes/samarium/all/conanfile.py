@@ -21,7 +21,7 @@ class SamariumConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [
         True, False], "build_tests": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "build_tests": False}
+    default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "patches/*"
 
@@ -43,10 +43,6 @@ class SamariumConan(ConanFile):
         self.requires("sfml/2.5.1")
         self.requires("range-v3/0.12.0")
         self.requires("stb/cci.20210910")
-
-        if self.options.build_tests:
-            self.requires('catch2/3.0.1')
-            self.requires('benchmark/1.6.1')
 
     def configure(self):
         if self.options.shared:
