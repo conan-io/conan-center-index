@@ -35,15 +35,15 @@ class SystemcComponentsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
 
     def source(self):
-        self.run("git clone --recursive --branch develop https://github.com/Minres/SystemC-Components.git")
+        self.run("git clone --recursive --branch develop https://github.com/Minres/SystemC-Components.git scc")
 #        tools.get(**self.conan_data["sources"][self.version])
 
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
         cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
-        cmake.configure(source_folder="SystemC-Components")
         cmake.verbose = True
+        cmake.configure()
         return cmake
 
     def build(self):

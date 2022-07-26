@@ -4,4 +4,4 @@ project(scc)
 include(${CMAKE_CURRENT_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_subdirectory(SystemC-Components)
+add_subdirectory(scc)
