@@ -8,7 +8,7 @@ class MoldConan(ConanFile):
     name = "mold"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rui314/mold/"
-    license = "Zlib"
+    license = "AGPL-3.0"
     description = ("mold is a faster drop-in replacement for existing Unix linkers. It is several times faster than the LLVM lld linker")
     topics = ("mold", "ld", "linkage", "compilation")
 
