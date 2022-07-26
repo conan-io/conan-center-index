@@ -121,7 +121,6 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ignition-tools")
         self.cpp_info.components["backward"].names["cmake_find_package"] = "backward"
         self.cpp_info.components["backward"].names["cmake_find_package_multi"] = "backward"
-        self.cpp_info.components["backward"].names["cmake_paths"] = "backward"
         self.cpp_info.components["backward"].bindirs = ["bin"]
 
         self.cpp_info.components["backward"].libs = []
@@ -132,7 +131,6 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["backward"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["backward"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["backward"].build_modules["cmake_paths"] = [self._module_file_rel_path]
 
     @property
     def _module_dir_rel_path(self):
