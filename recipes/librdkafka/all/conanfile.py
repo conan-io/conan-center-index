@@ -7,15 +7,14 @@ required_conan_version = ">=1.43.0"
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    license = "BSD-2-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/edenhill/librdkafka"
     description = (
         "Librdkafka is an Apache Kafka C/C++ library designed with message "
         "delivery reliability and high performance in mind."
     )
-    topics = ("kafka", "librdkafka")
-
+    license = "BSD-2-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/edenhill/librdkafka"
+    topics = ("kafka", "consumer", "producer")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,6 +24,7 @@ class LibrdkafkaConan(ConanFile):
         "plugins": [True, False],
         "ssl": [True, False],
         "sasl": [True, False],
+        "curl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,9 +34,10 @@ class LibrdkafkaConan(ConanFile):
         "plugins": False,
         "ssl": False,
         "sasl": False,
+        "curl": False,
     }
 
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     @property
     def _source_subfolder(self):
@@ -54,6 +55,8 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if tools.Version(self.version) < "1.9.0":
+            del self.options.curl
 
     def requirements(self):
         self.requires("lz4/1.9.3")
@@ -62,9 +65,11 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zstd:
             self.requires("zstd/1.5.2")
         if self.options.ssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
+        if self.options.get_safe("curl", False):
+            self.requires("libcurl/7.84.0")
 
     def build_requirements(self):
         if self.options.sasl and self.settings.os != "Windows":
@@ -94,6 +99,9 @@ class LibrdkafkaConan(ConanFile):
         cmake.definitions["WITH_SSL"] = self.options.ssl
         cmake.definitions["WITH_SASL"] = self.options.sasl
         cmake.definitions["ENABLE_LZ4_EXT"] = True
+        if tools.Version(self.version) >= "1.9.0":
+            cmake.definitions["WITH_CURL"] = self.options.curl
+
         cmake.configure()
         return cmake
 
@@ -133,6 +141,8 @@ class LibrdkafkaConan(ConanFile):
             self.cpp_info.components["rdkafka"].requires.append("openssl::openssl")
         if self.options.sasl and self.settings.os != "Windows":
             self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
+        if self.options.get_safe("curl", False):
+            self.cpp_info.components["rdkafka"].requires.append("libcurl::libcurl")
         if self.settings.os == "Windows":
             self.cpp_info.components["rdkafka"].system_libs = ["ws2_32", "secur32"]
             if self.options.ssl:
