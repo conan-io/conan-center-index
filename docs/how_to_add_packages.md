@@ -31,7 +31,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
 
 ## Request access
 
-:one: The first steps to add packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
+:one: The first step to add packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
 requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
 your motivation to join ConanCenter.
 
