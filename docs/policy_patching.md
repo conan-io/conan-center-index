@@ -50,7 +50,7 @@ Exceptionally, we might find libraries that aren't actively developed and consum
 might benefit from having some bugfixes applied to previous versions while
 waiting for the next release, or because the library is no longer maintained. These
 are the rules for this exceptional scenario:
- * **new release**, based on some official release and clearly identificable will
+ * **new release**, based on some official release and clearly identifiable will
  be create to apply these patches to: PLACEHOLDER_FOR_RELEASE_FORMAT.
  * **only patches backporting bugfixes** will be accepted after they have
  been submitted to the upstream and there is a consensus that it's a bug and the patch is the solution.
@@ -69,8 +69,3 @@ them carefully in your projects.
 Patches are preferred over `replace_in_file` statement. Patches should always include
 a link to the origin where it's taken from (it doesn't apply to build system patches).
 They will be listed in `conandata.yml` file and exported together with the recipe.
-
-TO BE DEFINED.- We will propose some guidelines (and hooks) to define the format to
-use when listing patches in `conandata.yml` file and how to add metadata in the same
-place, it will help consumers to know and track in an easy way which patches
-are applied.
