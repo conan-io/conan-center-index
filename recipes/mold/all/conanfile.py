@@ -17,6 +17,8 @@ class MoldConan(ConanFile):
     generators = "make"
 
     def validate(self):
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile')
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= "10":
