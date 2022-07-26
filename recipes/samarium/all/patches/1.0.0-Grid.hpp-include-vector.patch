@@ -1,5 +1,7 @@
---- src/samarium/graphics/Grid.hpp
-+++ src/samarium/graphics/Grid.hpp
+diff --git a/src/samarium/graphics/Grid.hpp b/src/samarium/graphics/Grid.hpp
+index 25ba647..0f0ccac 100644
+--- a/src/samarium/graphics/Grid.hpp
++++ b/src/samarium/graphics/Grid.hpp
 @@ -10,6 +10,7 @@
  #include <compare>
  #include <functional>

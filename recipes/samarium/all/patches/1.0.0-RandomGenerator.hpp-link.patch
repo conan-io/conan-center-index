@@ -1,6 +1,8 @@
---- ./src/samarium/util/RandomGenerator.hpp
-+++ ./src/samarium/util/RandomGenerator.hpp
-@@ -49,14 +49,27 @@
+diff --git a/src/samarium/util/RandomGenerator.hpp b/src/samarium/util/RandomGenerator.hpp
+index b86224f..4f48424 100644
+--- a/src/samarium/util/RandomGenerator.hpp
++++ b/src/samarium/util/RandomGenerator.hpp
+@@ -49,14 +49,27 @@ struct RandomGenerator
          }
          state = new_state * magic_number + (new_inc | 1);
  
