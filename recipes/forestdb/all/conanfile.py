@@ -38,6 +38,10 @@ class ForestDBConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
 
+    def validate(self):
+        if self.settings.compiler.libcxx == "libc++" and self.options.shared == False:
+            raise ConanInvalidConfiguration("LibC++ Static Builds not Supported")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -53,20 +57,21 @@ class ForestDBConan(ConanFile):
         if self.options.with_snappy:
             cmake.definitions["SNAPPY_OPTION"] = "Enable"
         cmake.configure()
-        cmake.build()
+        lib_target = "forestdb"
+        if not self.options.shared:
+            lib_target = "static_lib"
+        cmake.build(target=lib_target)
 
     def package(self):
         self.copy("LICENSE", dst="licenses/", src=self._source_subfolder )
         # Parent Build system does not support library type selection
         # and will only install the shared object from cmake; so we must
         # handpick our libraries.
-        if not self.options.shared:
-            self.copy("*.a*", dst="lib", src="lib")
-            self.copy("*.lib", dst="lib", src="lib")
-        else:
-            self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-            self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-            self.copy("*.dll*", dst="lib", src="lib")
+        self.copy("*.a*", dst="lib", src="lib")
+        self.copy("*.lib", dst="lib", src="lib")
+        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
+        self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
+        self.copy("*.dll*", dst="lib", src="lib")
         self.copy("*.h", dst="include/", src="{}/include".format(self._source_subfolder), keep_path=True)
 
     def package_info(self):
