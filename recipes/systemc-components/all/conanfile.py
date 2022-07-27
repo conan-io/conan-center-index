@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conan.errors import ConanInvalidConfiguration
+import functools
 
 class SystemcComponentsConan(ConanFile):
     name = "systemc-components"
@@ -23,6 +24,10 @@ class SystemcComponentsConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package_multi"
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
 
@@ -35,16 +40,16 @@ class SystemcComponentsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
 
     def source(self):
-#        self.run("git clone --recursive --branch develop https://github.com/Minres/SystemC-Components.git scc")
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
         cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
         cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
         cmake.verbose = True
-        cmake.configure(source_folder="scc")
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
@@ -52,7 +57,7 @@ class SystemcComponentsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
