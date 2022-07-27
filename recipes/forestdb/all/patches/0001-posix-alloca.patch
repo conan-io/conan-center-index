@@ -1,0 +1,15 @@
+diff --git a/src/hbtrie.cc b/src/hbtrie.cc
+index ab79f75..984ae6d 100644
+--- a/src/hbtrie.cc
++++ b/src/hbtrie.cc
+@@ -1487,8 +1487,10 @@ static hbtrie_result _hbtrie_find(struct hbtrie *trie, void *key, int keylen,
+                                 btree->root_bid,
+                                 trie->root_bid,
+                                 offset);
++#if defined(WIN32) || defined(_WIN32)
+                         free(docrawkey);
+                         free(dockey);
++#endif
+                         return HBTRIE_RESULT_INDEX_CORRUPTED;
+                     }
+ 

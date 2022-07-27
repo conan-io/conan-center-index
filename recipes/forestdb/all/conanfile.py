@@ -25,19 +25,20 @@ class ForestDBConan(ConanFile):
 
     generators = "cmake"
 
-    exports_sources = ["CMakeLists.txt"]
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
 
@@ -45,6 +46,8 @@ class ForestDBConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = CMake(self)
         cmake.definitions["SNAPPY_OPTION"] = "Disable"
         if self.options.with_snappy:
