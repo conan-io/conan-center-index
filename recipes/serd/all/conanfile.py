@@ -60,7 +60,8 @@ class Recipe(ConanFile):
 
     def validate(self):
         if Version(self.version) > Version("0.30.12"):
-            pass
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < 12:
+                raise ConanInvalidConfiguration("apple-clang < 12 is not supported")
         else:
             if cross_building(self):
                 raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
