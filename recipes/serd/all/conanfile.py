@@ -1,5 +1,6 @@
 import os
 
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, Meson
 from conans.errors import ConanInvalidConfiguration
@@ -60,7 +61,7 @@ class Recipe(ConanFile):
         if Version(self.version) > Version("0.30.12"):
             pass
         else:
-            if tools.cross_building(self):
+            if cross_building()(self):
                 raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
 
             if is_msvc(self):
