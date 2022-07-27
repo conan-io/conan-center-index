@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bd2649d..5abcc97 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -792,7 +792,7 @@ if(OpenCL_FOUND)
+   target_link_libraries(libtesseract PUBLIC OpenCL::OpenCL)
+ endif()
+ if(LibArchive_FOUND)
+-  target_link_libraries(libtesseract PUBLIC ${LibArchive_LIBRARIES})
++  target_link_libraries(libtesseract PUBLIC LibArchive::LibArchive)
+ endif(LibArchive_FOUND)
+ if(CURL_FOUND)
+   if(NOT CURL_LIBRARIES)
+@@ -827,7 +827,7 @@ if(SW_BUILD)
+     FILE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake
+     NAMESPACE Tesseract::)
+ else()
+-  target_link_libraries(libtesseract PUBLIC ${Leptonica_LIBRARIES})
++  target_link_libraries(libtesseract PUBLIC leptonica)
+   export(
+     TARGETS libtesseract
+     FILE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake
