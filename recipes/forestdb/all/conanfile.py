@@ -39,8 +39,9 @@ class ForestDBConan(ConanFile):
             self.requires("snappy/1.1.9")
 
     def validate(self):
-        if self.settings.compiler.libcxx == "libc++" and self.options.shared == False:
-            raise ConanInvalidConfiguration("LibC++ Static Builds not Supported")
+        if self.settings.compiler == "clang":
+            if self.settings.compiler.libcxx == "libc++" and self.options.shared == False:
+                raise ConanInvalidConfiguration("LibC++ Static Builds not Supported")
 
     def configure(self):
         if self.options.shared:
