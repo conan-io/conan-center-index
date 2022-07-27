@@ -225,15 +225,3 @@ Specifies a sub-directory in project's sources to apply patch. This directory is
 _Optional_
 
 This is the hash for the patch itself, in the same way this field is used in the `sources` section.
-
-#### sha1
-
-_Optional_
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.
-
-#### md5
-
-_Optional_
-
-This is the hash for the patch itself, in the same way this field is used in the `sources` section.
