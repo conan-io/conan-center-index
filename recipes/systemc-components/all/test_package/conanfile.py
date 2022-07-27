@@ -9,10 +9,13 @@ class SystemcComponentsTestConan(ConanFile):
 
     def requirements(self):
         self.requires("systemc/2.3.3")
+        self.requires("systemc-cci/1.0.0")
+        self.requires("zlib/1.2.11")
+        self.requires("fmt/8.0.1")
+        self.requires("boost/1.75.0")
         
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
