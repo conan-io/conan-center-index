@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, CMake
 from conan.errors import ConanInvalidConfiguration
 import functools
+import os
+import shutil
 
 class SystemcComponentsConan(ConanFile):
     name = "systemc-components"
@@ -48,7 +50,6 @@ class SystemcComponentsConan(ConanFile):
         cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
         cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
         cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
-        cmake.verbose = True
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
@@ -61,5 +62,16 @@ class SystemcComponentsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        libs = os.listdir(os.path.join(self.package_folder, "lib", "static"))
+        for file_name in libs:
+            shutil.move(os.path.join(self.package_folder, "lib", "static", file_name), 
+                        os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
+
     def package_info(self):
-        self.cpp_info.libs = ["scc"]
+        self.cpp_info.components["busses"].libs = ["busses"]
+        self.cpp_info.components["scc-sysc"].libs = ["scc-sysc"]
+        self.cpp_info.components["scc-util"].libs = ["scc-util"]
+        self.cpp_info.components["scv-tr"].libs = ["scv-tr"]
+        self.cpp_info.components["tlm-interfaces"].libs = ["tlm-interfaces"]
+

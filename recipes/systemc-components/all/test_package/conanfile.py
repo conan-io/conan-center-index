@@ -7,8 +7,12 @@ class SystemcComponentsTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
+    def requirements(self):
+        self.requires("systemc/2.3.3")
+        
     def build(self):
         cmake = CMake(self)
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 

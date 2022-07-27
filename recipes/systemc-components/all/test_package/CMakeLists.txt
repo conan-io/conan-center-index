@@ -5,6 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(systemc-components REQUIRED CONFIG)
+find_package(SystemCLanguage REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} example.cpp)
-target_link_libraries(${PROJECT_NAME} systemc-components::systemc-components)
+target_link_libraries(${PROJECT_NAME} SystemC::systemc systemc-components::systemc-components)
