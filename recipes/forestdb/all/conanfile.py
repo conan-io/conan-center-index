@@ -44,7 +44,7 @@ class ForestDBConan(ConanFile):
                 raise ConanInvalidConfiguration("LibC++ Static Builds not Supported")
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared or self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
