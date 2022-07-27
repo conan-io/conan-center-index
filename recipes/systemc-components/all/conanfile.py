@@ -30,9 +30,6 @@ class SystemcComponentsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
