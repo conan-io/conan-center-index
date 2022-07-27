@@ -62,7 +62,7 @@ class Recipe(ConanFile):
         if Version(self.version) > Version("0.30.12"):
             pass
         else:
-            if cross_building()(self):
+            if cross_building(self):
                 raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
 
             if is_msvc(self):
