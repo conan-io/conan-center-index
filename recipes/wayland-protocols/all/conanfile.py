@@ -1,5 +1,6 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conans import Meson, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -27,13 +28,13 @@ class WaylandProtocolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Wayland-protocols can be built on Linux only")
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.63.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -56,7 +57,7 @@ class WaylandProtocolsConan(ConanFile):
                 source_folder=self._source_subfolder,
                 build_folder=self._build_subfolder,
                 defs=defs,
-                args=['--datadir=%s' % os.path.join(self.package_folder, "res")],
+                args=[f'--datadir={self.package_folder}/res'],
             )
         return self._meson
 
@@ -78,8 +79,8 @@ class WaylandProtocolsConan(ConanFile):
         }
         self.cpp_info.set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
-        
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.bindirs = []
