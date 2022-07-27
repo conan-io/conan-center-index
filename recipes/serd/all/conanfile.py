@@ -45,6 +45,7 @@ class Recipe(ConanFile):
                       strip_root=True)
 
     def build_requirements(self):
+        self.build_requires("pkgconf/1.7.4")
         self.build_requires("meson/0.63.0")
 
     def config_options(self):
