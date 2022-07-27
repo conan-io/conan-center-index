@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(gdal_cmake_wrapper)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 include(CMakePushCheckState)
 
-set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 if (${GDAL_USE_POPPLER})
     find_package(poppler)
@@ -14,7 +14,7 @@ if (${GDAL_USE_POPPLER})
     add_library(Poppler::Poppler ALIAS CONAN_PKG::poppler)
 endif()
 
-file(GLOB CONAN_GENERATED_CMAKE_FILES "${CMAKE_BINARY_DIR}/Find*.cmake")
+file(GLOB CONAN_GENERATED_CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Find*.cmake")
 foreach(CMAKE_FILE ${CONAN_GENERATED_CMAKE_FILES})
     include(${CMAKE_FILE})
 endforeach()

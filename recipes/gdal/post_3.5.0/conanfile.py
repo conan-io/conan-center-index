@@ -356,6 +356,10 @@ class GdalConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build"
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -433,7 +437,7 @@ class GdalConan(ConanFile):
         for k, v in cmake.definitions.items():
             print(k, " = ", v)
 
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
