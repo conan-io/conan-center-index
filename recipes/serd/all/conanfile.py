@@ -75,11 +75,11 @@ class Recipe(ConanFile):
         if self._meson:
             return self._meson
         self._meson = Meson(self)
-        args = []
-        args += ["-Ddocs=disabled", "-Dtests=disabled", "-Dtools=disabled", ]
+        args = ["--wrap-mode=nofallback"]
+        defs = {"docs": "disabled", "tests": "disabled", "tools": "disabled"}
         self._meson.configure(source_folder=self.folders.source_folder,
                               build_folder=os.path.join(self.package_folder, "build"),
-                              args=args)
+                              args=args, defs=defs)
         return self._meson
 
     def build(self):
