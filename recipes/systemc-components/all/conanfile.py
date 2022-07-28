@@ -40,6 +40,8 @@ class SystemcComponentsConan(ConanFile):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(
                 f"{self.name} is not suppported on {self.settings.os}.")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
