@@ -1,3 +1,4 @@
+import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -9,7 +10,7 @@ class ForestDBConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ForestDB-KVStore/forestdb"
-    topics = ("forestdb", "kv store")
+    topics = ("kv-store", "mvcc", "wal")
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -44,6 +45,8 @@ class ForestDBConan(ConanFile):
         if self.settings.compiler == "clang":
             if self.settings.compiler.libcxx == "libc++" and self.options.shared == False:
                 raise ConanInvalidConfiguration("LibC++ Static Builds Unsupported")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
@@ -78,6 +81,6 @@ class ForestDBConan(ConanFile):
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["forestdb"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
