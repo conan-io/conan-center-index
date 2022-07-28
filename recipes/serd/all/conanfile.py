@@ -62,6 +62,8 @@ class Recipe(ConanFile):
         if Version(self.version) > Version("0.30.12"):
             if cross_building(self):
                 raise ConanInvalidConfiguration("Cross compiling is not working.")
+            if is_msvc(self):
+                raise ConanInvalidConfiguration("Meson packaging is broken for MSVC.")
         else:
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < 12:
                 raise ConanInvalidConfiguration("apple-clang < 12 is not supported")
@@ -82,15 +84,6 @@ class Recipe(ConanFile):
                               build_folder=os.path.join(self.package_folder, "build"),
                               args=args, defs=defs)
         return self._meson
-
-    def _fix_library_names(self):
-        if is_msvc(self):
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                import glob
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    tools.rename(filename_old, filename_new)
 
     def build(self):
         if Version(self.version) > Version("0.30.12"):
@@ -134,10 +127,7 @@ class Recipe(ConanFile):
 
     def package_info(self):
         libname = f"{self.name}-0"
-        if is_msvc(self):
-            self.cpp_info.libs = tools.collect_libs(self)
-        else:
-            self.cpp_info.libs = [libname]
+        self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [os.path.join("include", libname)]
         self.cpp_info.set_property("pkg_config_name", libname)
 
