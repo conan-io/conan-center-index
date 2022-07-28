@@ -17,21 +17,30 @@ class SystemcComponentsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "SC_WITH_PHASE_CALLBACKS": [True, False],
-        "SC_WITH_PHASE_CALLBACK_TRACING": [True, False]
+        "sc_with_phases_callbacks": [True, False],
+        "sc_with_phases_callback_tracing": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "SC_WITH_PHASE_CALLBACKS": False,
-        "SC_WITH_PHASE_CALLBACK_TRACING": False
+        "sc_with_phases_callbacks": False,
+        "sc_with_phases_callback_tracing": False
     }
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    # no exports_sources attribute, but export_sources(self) method instead
+    # this allows finer grain exportation of patches per version
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+            
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,6 +50,8 @@ class SystemcComponentsConan(ConanFile):
             del self.options.fPIC
             
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(
                 f"{self.name} is not suppported on {self.settings.os}.")
@@ -50,6 +61,10 @@ class SystemcComponentsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        tools.replace_in_file("source_subfolder/CMakeLists.txt", "conan_setup(TARGETS)",
+                              '''conan_setup(TARGETS)
+    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()''')
 
     def build_requirements(self):
         self.build_requires("cmake/3.16.2")
@@ -57,10 +72,10 @@ class SystemcComponentsConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.SC_WITH_PHASE_CALLBACKS
-        cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.SC_WITH_PHASE_CALLBACK_TRACING
+        cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.sc_with_phases_callbacks
+        cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.sc_with_phases_callback_tracing
         cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
@@ -84,5 +99,4 @@ class SystemcComponentsConan(ConanFile):
         self.cpp_info.components["scc-sysc"].libs = ["scc-sysc"]
         self.cpp_info.components["scc-util"].libs = ["scc-util"]
         self.cpp_info.components["scv-tr"].libs = ["scv-tr"]
-        self.cpp_info.components["fstapi"].libs = ["fstapi"]
         self.cpp_info.components["tlm-interfaces"].libs = ["tlm-interfaces"]
