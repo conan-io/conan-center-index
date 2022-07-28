@@ -75,7 +75,7 @@ class ForestDBConan(ConanFile):
         self.copy("*.so*", dst="lib", src="lib", symlinks=True)
         self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
         self.copy("*.dll*", dst="lib", src="lib")
-        self.copy("*.h", dst="include/", src="{}/include".format(self._source_subfolder), keep_path=True)
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
