@@ -4,6 +4,7 @@ import functools
 import os
 import shutil
 
+
 class SystemcComponentsConan(ConanFile):
     name = "systemc-components"
     description = """A light weight productivity library for SystemC and TLM 2.0"""
@@ -36,10 +37,12 @@ class SystemcComponentsConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
+            raise ConanInvalidConfiguration(
+                f"{self.name} is not suppported on {self.settings.os}.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -55,13 +58,14 @@ class SystemcComponentsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
         libs = os.listdir(os.path.join(self.package_folder, "lib", "static"))
         for file_name in libs:
-            shutil.move(os.path.join(self.package_folder, "lib", "static", file_name), 
+            shutil.move(os.path.join(self.package_folder, "lib", "static", file_name),
                         os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
 
@@ -71,4 +75,3 @@ class SystemcComponentsConan(ConanFile):
         self.cpp_info.components["scc-util"].libs = ["scc-util"]
         self.cpp_info.components["scv-tr"].libs = ["scv-tr"]
         self.cpp_info.components["tlm-interfaces"].libs = ["tlm-interfaces"]
-
