@@ -1,12 +1,8 @@
 sources:
-  "cci.20220708":
-    url: "https://github.com/ForestDB-KVStore/Simple-ForestDB/archive/3291acc3ba697c7222813422fde41cff59fe0cb5.tar.gz"
-    sha256: 341d754bffc36255089433723400d340d086a843b1472e064019f5ee16aea48b
+  "cci.20220727":
+    url: "https://github.com/ForestDB-KVStore/Simple-ForestDB/archive/123dc7b2e4e99f85df6ed7a5b995393ec2197b09.tar.gz"
+    sha256: f847321479b525dccd9918799d9672d16140de65a3e07b8a2cc1cf92ff41bb65
 patches:
-  "cci.20220708":
-    - patch_file: "patches/0001-posix-alloca.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-std-include.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-proper-cxx-std-flag.patch"
+  "cci.20220727":
+    - patch_file: "patches/0001-proper-cxx-std-flag.patch"
       base_path: "source_subfolder"
