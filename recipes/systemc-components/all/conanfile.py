@@ -36,6 +36,10 @@ class SystemcComponentsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+            
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(
@@ -80,4 +84,5 @@ class SystemcComponentsConan(ConanFile):
         self.cpp_info.components["scc-sysc"].libs = ["scc-sysc"]
         self.cpp_info.components["scc-util"].libs = ["scc-util"]
         self.cpp_info.components["scv-tr"].libs = ["scv-tr"]
+        self.cpp_info.components["fstapi"].libs = ["fstapi"]
         self.cpp_info.components["tlm-interfaces"].libs = ["tlm-interfaces"]
