@@ -61,6 +61,7 @@ class SystemcComponentsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        # workaround will be fixed in the next release
         tools.replace_in_file("source_subfolder/CMakeLists.txt", "conan_setup(TARGETS)",
                               '''conan_setup(TARGETS)
     include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)

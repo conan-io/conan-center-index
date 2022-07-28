@@ -6,12 +6,6 @@ from conan.tools.build import cross_building
 class SystemcComponentsTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
-
-    def requirements(self):
-        self.requires("systemc/2.3.3")
-        self.requires("systemc-cci/1.0.0")
-        self.requires("zlib/1.2.11")
-        self.requires("boost/1.75.0")
         
     def build(self):
         cmake = CMake(self)
