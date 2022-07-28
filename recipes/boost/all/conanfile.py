@@ -18,7 +18,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 # When adding (or removing) an option, also add this option to the list in
