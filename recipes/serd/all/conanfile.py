@@ -115,7 +115,6 @@ class Recipe(ConanFile):
         if Version(self.version) > Version("0.30.12"):
             meson = self._configure_meson()
             meson.install()
-            self._fix_library_names()
             rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(os.path.join(self.package_folder, "build"))
             self.copy("COPYING", src=self.folders.base_source, dst="licenses")
