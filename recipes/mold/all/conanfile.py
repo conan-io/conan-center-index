@@ -44,6 +44,9 @@ class MoldConan(ConanFile):
         return include_path
 
     def _patch_sources(self):
+        if self.settings.compiler == "apple-clang":
+            tools.replace_in_file("source_subfolder/Makefile", "-std=c++20", "-std=c++2a")
+
         tools.replace_in_file("source_subfolder/Makefile", "-Ithird-party/xxhash ", "-I{} -I{} -I{} -I{} -I{}".format(
         self._get_include_path("zlib"),
         self._get_include_path("openssl"),
