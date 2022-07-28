@@ -19,7 +19,7 @@ class MoldConan(ConanFile):
     def validate(self):
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
-        if self.settings.compiler.libcxx != "libstdc++11":
+        if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
