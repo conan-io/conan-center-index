@@ -36,7 +36,7 @@ All v2-compatible tools are available in module `conan.tools` under different su
 should start to import their tools from this new module. Some of the new tools accept new
 argument, please, check the [Conan documentation](https://docs.conan.io/en/latest/reference/conanfile/tools.html).
 
-Here is a list of different imports and their new equivalent:
+Here is a list of different imports and their new equivalent (note that the interface for most of this functions changed, see their respective link to the documentation):
 
 | **Conan v1** | **Conan v2** |
 |---|---|
