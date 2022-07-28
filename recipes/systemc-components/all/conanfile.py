@@ -4,6 +4,7 @@ import functools
 import os
 import shutil
 
+required_conan_version = ">=1.43.0"
 
 class SystemcComponentsConan(ConanFile):
     name = "systemc-components"
@@ -43,6 +44,9 @@ class SystemcComponentsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.16")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
