@@ -82,5 +82,4 @@ class ForestDBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["forestdb"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "dl"])
+        self.cpp_info.system_libs.extend(["pthread", "m", "rt", "dl"])
