@@ -83,6 +83,15 @@ class Recipe(ConanFile):
                               args=args, defs=defs)
         return self._meson
 
+    def _fix_library_names(self):
+        if is_msvc(self):
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                import glob
+                for filename_old in glob.glob("*.a"):
+                    filename_new = filename_old[3:-2] + ".lib"
+                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    tools.rename(filename_old, filename_new)
+
     def build(self):
         if Version(self.version) > Version("0.30.12"):
             meson = self._configure_meson()
@@ -113,7 +122,7 @@ class Recipe(ConanFile):
         if Version(self.version) > Version("0.30.12"):
             meson = self._configure_meson()
             meson.install()
-            print(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            self._fix_library_names()
             rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(os.path.join(self.package_folder, "build"))
             self.copy("COPYING", src=self.folders.base_source, dst="licenses")
