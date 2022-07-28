@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import json
@@ -75,8 +76,7 @@ class AbseilConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         abi_file = _ABIFile("abi.h")
         abi_file.replace_in_options_file(os.path.join(self._source_subfolder, "absl", "base", "options.h"))
