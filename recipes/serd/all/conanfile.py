@@ -134,7 +134,10 @@ class Recipe(ConanFile):
 
     def package_info(self):
         libname = f"{self.name}-0"
-        self.cpp_info.libs = [libname]
+        if is_msvc(self):
+            self.cpp_info.libs = tools.collect_libs(self)
+        else:
+            self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [os.path.join("include", libname)]
         self.cpp_info.set_property("pkg_config_name", libname)
 
