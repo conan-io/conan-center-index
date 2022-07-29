@@ -9,3 +9,6 @@ patches:
   "1.6.37":
     - patch_file: "patches/CMakeLists-zlib.patch"
       base_path: "source_subfolder"
+  "1.5.2":
+    - patch_file: "patches/CMakeLists-symlink.patch"
+      base_path: "source_subfolder"
