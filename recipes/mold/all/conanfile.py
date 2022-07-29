@@ -93,4 +93,4 @@ class MoldConan(ConanFile):
         self.cpp_info.includedirs = []
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m", "pthread", "dl", "z"])
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
