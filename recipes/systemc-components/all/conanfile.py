@@ -1,8 +1,6 @@
 from conans import ConanFile, tools, CMake
 from conan.errors import ConanInvalidConfiguration
 import functools
-import os
-import shutil
 
 required_conan_version = ">=1.43.0"
 
@@ -61,11 +59,6 @@ class SystemcComponentsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        # workaround will be fixed in the next release
-        tools.replace_in_file("source_subfolder/CMakeLists.txt", "conan_setup(TARGETS)",
-                              '''conan_setup(TARGETS)
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()''')
 
     def build_requirements(self):
         self.build_requires("cmake/3.16.2")
@@ -88,12 +81,6 @@ class SystemcComponentsConan(ConanFile):
                   src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
-        libs = os.listdir(os.path.join(self.package_folder, "lib", "static"))
-        for file_name in libs:
-            shutil.move(os.path.join(self.package_folder, "lib", "static", file_name),
-                        os.path.join(self.package_folder, "lib"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
 
     def package_info(self):
         self.cpp_info.components["busses"].libs = ["busses"]
