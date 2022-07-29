@@ -67,7 +67,7 @@ class PangommConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("pango/1.50.7")
+        self.requires("pango/1.50.8")
 
         if self._is_2_48_api:
             self.requires("glibmm/2.72.1")
