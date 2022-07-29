@@ -24,6 +24,8 @@ add_library(Diligent-PlatformInterface       ALIAS diligent-core::diligent-core)
 add_library(Diligent-GraphicsEngineInterface ALIAS diligent-core::diligent-core)
 add_library(Diligent-GraphicsAccessories     ALIAS diligent-core::diligent-core)
 add_library(Diligent-GraphicsTools           ALIAS diligent-core::diligent-core)
-add_library(Diligent-Archiver-static           ALIAS diligent-core::diligent-core)
+add_library(Diligent-Archiver-static         ALIAS diligent-core::diligent-core)
 
 add_subdirectory(source_subfolder)
+set_target_properties(Diligent-RenderStateNotation PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+
