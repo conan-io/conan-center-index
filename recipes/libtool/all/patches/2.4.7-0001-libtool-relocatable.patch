@@ -1,0 +1,39 @@
+- Do not embed build-machine specific paths in the generated sources.
+- Do not regenerate manuals (help2man might not be available on build system)
+
+--- libtoolize.in
++++ libtoolize.in
+@@ -1903,11 +1903,11 @@
+   pkgmacro_files="@pkgmacro_files@"
+
+   # Locations for important files:
+-  prefix="@prefix@"
+-  datadir="@datadir@"
+-  pkgauxdir="@pkgauxdir@"
+-  pkgltdldir="@pkgdatadir@"
+-  aclocaldir="@aclocaldir@"
++  prefix="$LIBTOOL_PREFIX"
++  datadir="$LIBTOOL_DATADIR"
++  pkgauxdir="$LIBTOOL_PKGAUXDIR"
++  pkgltdldir="$LIBTOOL_PKGLTDLDIR"
++  aclocaldir="$LIBTOOL_ACLOCALDIR"
+
+   # Allow the user to override the master libtoolize repository:
+   if test -n "$_lt_pkgdatadir"; then
+--- Makefile.in
++++ Makefile.in
+@@ -2423,10 +2423,10 @@
+ # files created in the build tree, so instead we regenerate the
+ # manual pages if the sources for the build-tree files we want to
+ # run have changed.
+-$(libtool_1): $(ltmain_sh)
+-	$(AM_V_GEN)$(update_mans) --help-option=--help-all libtool
+-$(libtoolize_1): $(libtoolize_in)
+-	$(AM_V_GEN)$(update_mans) libtoolize
++#$(libtool_1): $(ltmain_sh)
++#	$(AM_V_GEN)$(update_mans) --help-option=--help-all libtool
++#$(libtoolize_1): $(libtoolize_in)
++#	$(AM_V_GEN)$(update_mans) libtoolize
+
+ install-data-local: $(lt_Makefile_in) install-scripts-local
+ 	@$(NORMAL_INSTALL)
