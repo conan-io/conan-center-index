@@ -12,3 +12,5 @@ patches:
   "1.5.2":
     - patch_file: "patches/CMakeLists-symlink.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/CMakeLists-ext-zlib.patch"
+      base_path: "source_subfolder"

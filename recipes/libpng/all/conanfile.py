@@ -1,12 +1,9 @@
 import os
 from conan import ConanFile
 from conans import tools, CMake
-try:
-    from conan.tools.cross_building import cross_building
-except ImportError:
-    from conan.tools.build.cross_building import cross_building
+from conan.tools.build.cross_building import cross_building
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class LibpngConan(ConanFile):
@@ -97,14 +94,14 @@ class LibpngConan(ConanFile):
     def _patch(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.version != "1.5.2":
+        if tools.Version(self.version) > "1.5.2":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "find_library(M_LIBRARY m)",
                                 "set(M_LIBRARY m)")
 
         if tools.os_info.is_windows:
             if self._is_msvc:
-                if self.version == "1.5.2":
+                if tools.Version(self.version) <= "1.5.2":
                     tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                           'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
                                           'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
@@ -185,8 +182,7 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        version_list = self.version.split('.')
-        major_min_version = "{}{}".format(version_list[0],version_list[1])
+        major_min_version = "{}{}".format(tools.Version(self.version).major, tools.Version(self.version).minor)
 
         self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
