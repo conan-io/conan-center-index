@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, get
 from conan.tools.files.files import rmdir
+from conan.tools.microsoft import is_msvc
 from conans import CMake
 import os
 import re
