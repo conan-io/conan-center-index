@@ -5,10 +5,7 @@ import functools
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
-try:
-    from conan.tools.cross_building import cross_building
-except ImportError:
-    from conan.tools.build.cross_building import cross_building
+from conan.tools.build.cross_building import cross_building
 
 required_conan_version = ">=1.45.0"
 
