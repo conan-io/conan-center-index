@@ -467,7 +467,13 @@ class GdalConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
 
-        self.cpp_info.libs = ["gdal"]
+        lib_suffix = ""
+        if is_msvc(self):
+            if self.options.shared:
+                lib_suffix += "_i"
+            if self.settings.build_type == "Debug":
+                lib_suffix += "_d"
+        self.cpp_info.libs = ["gdal{}".format(lib_suffix)]
 
         for dep in self.gdal_deps:
             if "require" in dep and getattr(self.options, _option_name(dep)):
