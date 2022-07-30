@@ -44,14 +44,14 @@ class PlatformInterfacesConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 20
 
-    def validate(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
-
     def requirements(self):
         if Version(self.version) >= "0.1.4":
             self.requires("platform.exceptions/0.3.0")
             self.requires("platform.converters/0.3.2")
             self.requires("platform.hashing/0.3.0")
+
+    def validate(self):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
 
         if not minimum_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
