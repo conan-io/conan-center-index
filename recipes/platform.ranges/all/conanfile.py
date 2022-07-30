@@ -47,7 +47,7 @@ class PlatformInterfacesConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "0.1.4":
             self.requires("platform.exceptions/0.3.0")
-            self.requires("platform.converters/0.3.2")
+            self.requires("platform.converters/0.1.0")
             self.requires("platform.hashing/0.3.0")
 
     def validate(self):
