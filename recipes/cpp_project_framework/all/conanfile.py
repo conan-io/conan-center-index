@@ -63,27 +63,12 @@ class CppProjectFrameworkConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        cmake = CMake(self)
-        self.run("conan install conanfile.txt -b missing -s build_type=%s -if ." % cmake.build_type, cwd=self._source_subfolder)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=os.path.join(self._source_subfolder, cmake.build_type))
-        cmake.build()
-
-        # Explicit way:
-        # self.run('cmake %s/cpp_project_framework %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -92,8 +77,3 @@ class CppProjectFrameworkConan(ConanFile):
         self.copy("*.hxx", dst="include/%s" % self.name, src=os.path.join(self._source_subfolder, self.name))
         for resource in self.exports_resources:
             self.copy(resource, dst="res", src=self._source_subfolder)
-
-    def package_info(self):
-        postfix = "_d" if self.settings.build_type == "Debug" else ""
-        name_with_postfix = self.name + postfix
-        self.cpp_info.libs = []
