@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class CppProjectFrameworkConan(ConanFile):
     name = "cpp_project_framework"
-    license = "GNU Affero General Public License v3.0"
+    license = "AGPL-3.0"
     homepage = "https://github.com/sheepgrass/cpp_project_framework"
     url = "https://github.com/conan-io/conan-center-index"  # Package recipe repository url here, for issues about the package
     description = "C++ Project Framework is a framework for creating C++ project."
