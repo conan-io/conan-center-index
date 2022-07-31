@@ -81,6 +81,19 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
+## Exporting Patches
+
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+
+Make sure the `export_sources` attribute is replaced by the following:
+
+```py
+def export_sources(self):
+    self.copy("CMakeLists.txt")
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        self.copy(patch["patch_file"])
+```
+
 ## Applying Patches
 
 Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
