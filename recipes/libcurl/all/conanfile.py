@@ -2,7 +2,7 @@ import glob
 import os
 import re
 import functools
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+from conan import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.build.cross_building import cross_building
