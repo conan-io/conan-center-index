@@ -13,13 +13,11 @@ class SystemcComponentsConan(ConanFile):
     topics = ("systemc", "modeling", "tlm", "scc")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "sc_with_phases_callbacks": [True, False],
         "sc_with_phases_callback_tracing": [True, False]
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "sc_with_phases_callbacks": False,
         "sc_with_phases_callback_tracing": False
@@ -42,17 +40,12 @@ class SystemcComponentsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
             
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(
-                f"{self.name} is not suppported on {self.settings.os}.")
+            raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
