@@ -42,7 +42,7 @@ class FmtConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
-            tc.generate()  
+            tc.generate()
 
     def layout(self):
         cmake_layout(self)
