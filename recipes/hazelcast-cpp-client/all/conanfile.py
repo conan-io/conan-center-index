@@ -2,8 +2,10 @@ from conan import ConanFile
 from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
+from conans.tools import check_min_cppstd
 import os
+
+required_conan_version = ">=1.45.0"
 
 class HazelcastCppClient(ConanFile):
     name = "hazelcast-cpp-client"
