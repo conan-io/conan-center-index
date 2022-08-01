@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools as tools_legacy
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.49.0"
 
 
 class grpcConan(ConanFile):
