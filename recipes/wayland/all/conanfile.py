@@ -125,7 +125,7 @@ class WaylandConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.buildenv_info.prepend_path("PATH", bindir)
         self.runenv_info.prepend_path("PATH", bindir)
-	# TODO: Remove in Conan 2.0 where Environment class will be required.
+        # TODO: Remove in Conan 2.0 where Environment class will be required.
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
