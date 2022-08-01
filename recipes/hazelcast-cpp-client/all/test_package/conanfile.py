@@ -1,10 +1,24 @@
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 import os
 
-from conans import ConanFile, CMake, tools
-
 class TestPackageHazelcastCppClient(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    settings = "os", "arch", "compiler", "build_type"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["HAZELCAST_CPP_CLIENT_VERSION"] = self.dependencies["hazelcast-cpp-client"].ref.version
+        toolchain.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -12,5 +26,5 @@ class TestPackageHazelcastCppClient(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+        if not cross_building(self):
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")

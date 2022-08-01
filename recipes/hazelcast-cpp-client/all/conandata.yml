@@ -20,7 +20,5 @@ sources:
 patches:
   "4.1.0":
     - patch_file: "patches/gcc_4.9_5_fix.patch"
-      base_path: "source_subfolder"
   "4.0.0":
     - patch_file: "patches/cmake_install.patch"
-      base_path: "source_subfolder"
