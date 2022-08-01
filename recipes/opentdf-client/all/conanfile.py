@@ -1,5 +1,4 @@
-from conan import ConanFile, tools
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools, CMake
 import os
 
 required_conan_version = ">=1.40.0"
