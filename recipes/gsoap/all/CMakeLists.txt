@@ -8,6 +8,7 @@ message("Generate gSOAP from sources at ${GSOAP_PATH}")
 
 if(${WITH_OPENSSL})
   find_package(OpenSSL REQUIRED)
+  find_package(ZLIB REQUIRED)
 endif()
 
 # Tools
