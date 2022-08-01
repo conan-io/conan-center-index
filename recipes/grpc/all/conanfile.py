@@ -1,5 +1,5 @@
-from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan import tools
+from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools as tools_legacy
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -68,7 +68,7 @@ class grpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if tools.scm.Version(self.version) >= "1.47" else 11
+        return 14 if Version(self.version) >= "1.47" else 11
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -99,14 +99,14 @@ class grpcConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 vs_ide_version = self.settings.compiler.version
             else:
-                vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            if tools.scm.Version(vs_ide_version) < "14":
+                vs_ide_version = tools.microsoft.visual.msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            if Version(vs_ide_version) < "14":
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
             if self.options.shared:
                 raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
-        if tools.scm.Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "6":
+        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
         if self.settings.compiler.get_safe("cppstd"):
@@ -175,7 +175,7 @@ class grpcConan(ConanFile):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 
-        if self._is_msvc and tools.scm.Version(self.version) >= "1.48":
+        if self._is_msvc and Version(self.version) >= "1.48":
             self._cmake.definitions["CMAKE_HOST_SYSTEM_VERSION"] = "10.0.18362.0"
 
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -192,7 +192,7 @@ class grpcConan(ConanFile):
              src=os.path.join(self.dependencies["googleapis"].cpp_info.resdirs[0], "google", "rpc"),
              dst=status_proto_dir)
 
-        if tools.scm.Version(self.version) >= "1.47":
+        if Version(self.version) >= "1.47":
             # Take googleapis from requirement instead of vendored/hardcoded version
             tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
@@ -211,7 +211,7 @@ class grpcConan(ConanFile):
             "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
             "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
         )
-        if tools.scm.Version(self.version) >= "1.39.0" and tools.scm.Version(self.version) < "1.42.0":
+        if Version(self.version) >= "1.39.0" and Version(self.version) < "1.42.0":
             # Bug introduced in https://github.com/grpc/grpc/pull/26148
             # Reverted in https://github.com/grpc/grpc/pull/27626
             tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
