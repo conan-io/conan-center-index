@@ -1,3 +1,4 @@
+import shutil
 from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.files import rename, copy
 from conans import ConanFile, CMake, tools
@@ -92,9 +93,9 @@ class grpcConan(ConanFile):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
         self.requires("openssl/1.1.1o")
-        self.requires("protobuf/3.21.1")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
+        self.requires("protobuf/3.21.1")
         self.requires("googleapis/cci.20220711")
         self.requires("grpc-proto/cci.20220627")
 
@@ -203,12 +204,13 @@ class grpcConan(ConanFile):
                 "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
-            copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
+            #copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
 
         # Copy from grpc-proto
-        copy(self, "*", 
-             src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
-             dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
+        shutil.rmtree(os.path.join(self._source_subfolder, "src", "proto", "grpc"))
+        #copy(self, "*", 
+        #     src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
+        #     dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         # We are fine with protobuf::protoc coming from conan generated Find/config file
         # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
