@@ -1,12 +1,12 @@
+from conan import ConanFile, tools
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.files import apply_conandata_patches, replace_in_file
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
-import functools
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
-
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.47.0"
 
 class OpenTelemetryCppConan(ConanFile):
     name = "opentelemetry-cpp"
@@ -24,13 +24,12 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    generators = "cmake", "cmake_find_package_multi"
     short_paths = True
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,7 +48,7 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("opentelemetry-proto/0.18.0")
         self.requires("protobuf/3.21.1")
         self.requires("thrift/0.16.0")
-        if tools.Version(self.version) >= "1.3.0":
+        if tools.scm.Version(self.version) >= "1.3.0":
             self.requires("boost/1.79.0")
 
     def validate(self):
@@ -57,7 +56,7 @@ class OpenTelemetryCppConan(ConanFile):
             raise ConanInvalidConfiguration("Architecture not supported")
 
         if (self.settings.compiler == "Visual Studio" and
-           tools.Version(self.settings.compiler.version) < "16"):
+           Version(self.settings.compiler.version) < "16"):
             raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
 
         if self.settings.os != "Linux" and self.options.shared:
@@ -75,65 +74,57 @@ class OpenTelemetryCppConan(ConanFile):
         """)
         tools.save(module_file, content)
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["BUILD_TESTING"] = False
+        toolchain.variables["WITH_ABSEIL"] = True
+        toolchain.variables["WITH_ETW"] = True
+        toolchain.variables["WITH_EXAMPLES"] = False
+        toolchain.variables["WITH_JAEGER"] = True
+        toolchain.variables["WITH_OTLP"] = True
+        toolchain.variables["WITH_ZIPKIN"] = True
+        toolchain.generate()
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def source(self):
-        tools.get(
+        tools.files.get(self,
             **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder,
-            strip_root=True)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        defs = {
-          "BUILD_TESTING": False,
-          "WITH_ABSEIL": True,
-          "WITH_ETW": True,
-          "WITH_EXAMPLES": False,
-          "WITH_JAEGER": True,
-          "WITH_OTLP": True,
-          "WITH_ZIPKIN": True,
-        }
-        cmake.configure(defs=defs, build_folder=self._build_subfolder)
-        return cmake
+            destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         protos_path = self.deps_user_info["opentelemetry-proto"].proto_root.replace("\\", "/")
-        protos_cmake_path = os.path.join(
-            self._source_subfolder,
-            "cmake",
-            "opentelemetry-proto.cmake")
-        if tools.Version(self.version) >= "1.1.0":
-            tools.replace_in_file(
+        protos_cmake_path = os.path.join( self.source_folder, "cmake", "opentelemetry-proto.cmake")
+        if Version(self.version) >= "1.1.0":
+            replace_in_file(
+                self,
                 protos_cmake_path,
                 "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
                 "if(1)")
-        tools.replace_in_file(
+        replace_in_file(
+            self,
             protos_cmake_path,
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
             f"set(PROTO_PATH \"{protos_path}\")")
-        tools.rmdir(os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
+        tools.files.rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
 
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        tools.files.copy("LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._otel_cmake_variables_path)
         )
@@ -144,7 +135,7 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _otel_cmake_variables_path(self):
-        return os.path.join(self._module_subfolder,
+        return os.path.join(self.module_folder,
                             "conan-official-{}-variables.cmake".format(self.name))
 
     @property
@@ -182,8 +173,7 @@ class OpenTelemetryCppConan(ConanFile):
         for lib in self._otel_libraries:
             self.cpp_info.components[lib].libs = [lib]
             self.cpp_info.components[lib].builddirs.append(self._module_subfolder)
-            self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._otel_build_modules
-            self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._otel_build_modules
+            self.cpp_info.components[lib].set_property("cmake_build_modules", self._otel_build_modules)
 
         self.cpp_info.components[self._http_client_name].requires.extend(["libcurl::libcurl"])
 
