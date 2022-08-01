@@ -4,7 +4,7 @@ from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
 from conans import ConanFile, tools, Meson
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import rmdir, Version
+from conans.tools import rmdir
 
 required_conan_version = ">=1.33.0"
 
@@ -29,20 +29,9 @@ class Recipe(ConanFile):
     _meson = None
 
     def source(self):
-        if Version(self.version) > Version("0.30.12"):
-            tools.get(**self.conan_data["sources"][self.version],
-                      destination=self.folders.base_source,
-                      strip_root=True)
-        else:
-            tools.get(**self.conan_data["sources"][self.version]["serd"],
-                      destination=self.folders.base_source,
-                      strip_root=True)
-            # serd comes with its own modification of the waf build system
-            # It seems to be used only by serd and will be replaced in future versions with meson.
-            # So it makes no sense to create a separate conan package for the build system.
-            tools.get(**self.conan_data["sources"][self.version]["autowaf"],
-                      destination=os.path.join(self.folders.base_source, "waflib"),
-                      strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self.folders.base_source,
+                  strip_root=True)
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
@@ -59,20 +48,10 @@ class Recipe(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if Version(self.version) > Version("0.30.12"):
-            if cross_building(self):
-                raise ConanInvalidConfiguration("Cross compiling is not working.")
-            if is_msvc(self):
-                raise ConanInvalidConfiguration("Meson packaging is broken for MSVC.")
-        else:
-            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < 12:
-                raise ConanInvalidConfiguration("apple-clang < 12 is not supported")
-
-            if cross_building(self):
-                raise ConanInvalidConfiguration("Cross compiling is not supported by serd's build system Waf.")
-
-            if is_msvc(self):
-                raise ConanInvalidConfiguration("Don't know how to setup WAF for VS.")
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross compiling is not working.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Meson packaging is broken for MSVC.")
 
     def _configure_meson(self):
         if self._meson:
@@ -86,43 +65,15 @@ class Recipe(ConanFile):
         return self._meson
 
     def build(self):
-        if Version(self.version) > Version("0.30.12"):
-            meson = self._configure_meson()
-            meson.build()
-        else:
-            args = ["--no-utils", " --prefix={}".format(self.folders.package_folder)]
-            if not self.options.shared:
-                args += ["--static", "--no-shared"]
-            args = " ".join(arg for arg in args)
-
-            cflags = []
-            if self.options.get_safe("fPIC"):
-                cflags += ["-fPIC"]
-            if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
-                cflags += ["-g"]
-            if self.settings.build_type in ["Release", "RelWithDebInfo"]:
-                cflags += ["-O3"]
-            if self.settings.build_type in ["Release", "MinSizeRel"]:
-                cflags += ["-DNDEBUG"]
-            if self.settings.build_type == "MinSizeRel":
-                cflags += ["-Os"]
-            cflags = " ".join(cflag for cflag in cflags)
-
-            self.run(f'CFLAGS="{cflags}" ./waf configure {args}', run_environment=True)
-            self.run('./waf build', run_environment=True)
+        meson = self._configure_meson()
+        meson.build()
 
     def package(self):
-        if Version(self.version) > Version("0.30.12"):
-            meson = self._configure_meson()
-            meson.install()
-            rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(os.path.join(self.package_folder, "build"))
-            self.copy("COPYING", src=self.folders.base_source, dst="licenses")
-        else:
-            self.run('./waf install', run_environment=True)
-            rmdir(os.path.join(self.package_folder, "share"))
-            rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            self.copy("COPYING", src=self.folders.base_source, dst="licenses")
+        meson = self._configure_meson()
+        meson.install()
+        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(os.path.join(self.package_folder, "build"))
+        self.copy("COPYING", src=self.folders.base_source, dst="licenses")
 
     def package_info(self):
         libname = f"{self.name}-0"
