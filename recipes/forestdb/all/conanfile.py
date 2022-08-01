@@ -1,3 +1,4 @@
+import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -9,7 +10,7 @@ class ForestDBConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ForestDB-KVStore/forestdb"
-    topics = ("forestdb", "kv store")
+    topics = ("kv-store", "mvcc", "wal")
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -25,39 +26,62 @@ class ForestDBConan(ConanFile):
 
     generators = "cmake"
 
-    exports_sources = ["CMakeLists.txt"]
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows Builds Unsupported")
+        if self.settings.compiler == "clang":
+            if self.settings.compiler.libcxx == "libc++" and self.options.shared == False:
+                raise ConanInvalidConfiguration("LibC++ Static Builds Unsupported")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
-        tools.Git(folder=self._source_subfolder).clone(**self.conan_data["sources"][self.version], shallow=True)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = CMake(self)
         cmake.definitions["SNAPPY_OPTION"] = "Disable"
         if self.options.with_snappy:
             cmake.definitions["SNAPPY_OPTION"] = "Enable"
         cmake.configure()
-        cmake.build()
+        lib_target = "forestdb"
+        if not self.options.shared:
+            lib_target = "static_lib"
+        cmake.build(target=lib_target)
 
     def package(self):
         self.copy("LICENSE", dst="licenses/", src=self._source_subfolder )
-        if not self.options.shared:
-            self.copy("*.a*", dst="lib", src="lib", symlinks=True)
-            self.copy("*.lib", dst="lib", src="lib", symlinks=True)
-        else:
-            self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-            self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-            self.copy("*.dll*", dst="lib", src="lib")
-        self.copy("*.h", dst="include/", src="{}/include".format(self._source_subfolder), keep_path=True)
+        # Parent Build system does not support library type selection
+        # and will only install the shared object from cmake; so we must
+        # handpick our libraries.
+        self.copy("*.a*", dst="lib", src="lib")
+        self.copy("*.lib", dst="lib", src="lib")
+        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
+        self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
+        self.copy("*.dll*", dst="lib", src="lib")
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["forestdb"]
+        self.cpp_info.system_libs.extend(["pthread", "m", "dl"])
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "dl"])
+            self.cpp_info.system_libs.extend(["rt"])

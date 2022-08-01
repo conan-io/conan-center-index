@@ -5,7 +5,7 @@ from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 class ExpatConan(ConanFile):
