@@ -1,4 +1,4 @@
-from conan import ConanFile, CMake, tools
+from conan import ConanFile, tools, tools.file
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -41,18 +41,6 @@ class OpenTDFConan(ConanFile):
             "clang": "12",
             "apple-clang": "12.0.0"
         }
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.files.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe could not find compiler minimum version for {}.".format(
-                self.name, self.settings.compiler))
-        else:
-            if tools.files.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} recipe needs minimum version {} but found tools.files.Version({}) = {}".format(
-                    self.name, min_version, self.settings.compiler.version, tools.files.Version(self.settings.compiler.version) ))
 
     def configure(self):
         if self.options.without_zlib:
