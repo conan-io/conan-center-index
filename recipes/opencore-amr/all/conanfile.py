@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class OpencoreAmrConan(ConanFile):
@@ -93,10 +93,15 @@ class OpencoreAmrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ("opencore-amrwb", "opencore-amrnb"):
-                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
-                             os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
+                tools.files.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
+                                   os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "opencore-amr")
+        self.cpp_info.set_property("cmake_target_name", "opencore-amr::opencore-amr")
         for lib in ("opencore-amrwb", "opencore-amrnb"):
-            self.cpp_info.components[lib].names["pkg_config"] = lib
+            self.cpp_info.components[lib].set_property("cmake_target_name", f'opencore-amr::{lib}')
+            self.cpp_info.components[lib].set_property("pkg_config_name", lib)
             self.cpp_info.components[lib].libs = [lib]
+            # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generator removed
+            self.cpp_info.components[lib].names["pkg_config"] = lib
