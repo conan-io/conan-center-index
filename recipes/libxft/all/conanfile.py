@@ -23,7 +23,7 @@ class libxftConan(ConanFile):
     
     def requirements(self):
         self.requires("xorg/system")
-        self.requires("freetype/2.11.1")
+        self.requires("freetype/2.12.1")
         self.requires("fontconfig/2.13.93")
     
     def build_requirements(self):
