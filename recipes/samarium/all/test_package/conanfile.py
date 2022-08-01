@@ -1,17 +1,21 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import cross_building
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "CMakeToolchain"
     test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+        self.folders.build = "build"
 
     def build(self):
         cmake = CMake(self)

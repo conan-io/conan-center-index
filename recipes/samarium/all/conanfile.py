@@ -17,7 +17,7 @@ class SamariumConan(ConanFile):
     license = "MIT"
     topics = ("cpp20", "physics", "2d", "simulation")
     generators = "CMakeDeps", "CMakeToolchain"
-    requires = "fmt/9.0.0", "sfml/2.5.1", "range-v3/0.12.0", "stb/cci.20210910"
+    requires = "fmt/9.0.0", "sfml/2.5.1", "range-v3/0.12.0", "stb/cci.20210910", "tl-expected/20190710"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [
