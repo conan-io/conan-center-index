@@ -50,7 +50,7 @@ class OpenTDFConan(ConanFile):
             self.options["boost"].without_log = True
 
     def requirements(self):
-        self.requires("openssl/1.1.1o@")
+        self.requires("openssl/1.1.1q@")
         self.requires("boost/1.76.0@")
         self.requires("ms-gsl/2.1.0@")
         self.requires("libxml2/2.9.10@")
@@ -75,7 +75,7 @@ class OpenTDFConan(ConanFile):
             self.output.warn("Building branch_version = {}".format(self.version))
             self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
         else:
-            tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+            tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
