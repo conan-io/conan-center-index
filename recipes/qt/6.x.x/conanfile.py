@@ -1002,10 +1002,6 @@ class QtConan(ConanFile):
                     gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
-            if self.options.with_libjpeg == "libjpeg-turbo":
-                gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
-            if self.options.with_libjpeg == "libjpeg":
-                gui_reqs.append("libjpeg::libjpeg")
             if self.options.with_glib:
                 gui_reqs.append("glib::glib")
             if self.options.with_md4c:
@@ -1039,6 +1035,16 @@ class QtConan(ConanFile):
             elif self.settings.os in ["Linux", "FreeBSD"]:
                 _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
+
+            _create_plugin("QGifPlugin", "qgif", "imageformats", ["Gui"])
+            _create_plugin("QIcoPlugin", "qico", "imageformats", ["Gui"])
+            if self.options.get_safe("with_libjpeg"):
+                jpeg_reqs = ["Gui"]
+                if self.options.with_libjpeg == "libjpeg-turbo": 
+                     jpeg_reqs.append("libjpeg-turbo::libjpeg-turbo") 
+                if self.options.with_libjpeg == "libjpeg": 
+                     jpeg_reqs.append("libjpeg::libjpeg") 
+                _create_plugin("QJpegPlugin", "qjpeg", "imageformats", jpeg_reqs)
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
