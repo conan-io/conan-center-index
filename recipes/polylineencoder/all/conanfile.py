@@ -1,20 +1,18 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy
+import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.45.0"
 
 class PolylineencoderConan(ConanFile):
     name = "polylineencoder"
     description = "Google Encoded Polyline Algorithm Format library"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vahancho/polylineencoder"
-    license = "MIT"
     topics = ("gepaf", "encoded-polyline", "google-polyline")
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/*"
-    _cmake = None
-    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,13 +22,9 @@ class PolylineencoderConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,27 +34,28 @@ class PolylineencoderConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["BUILD_TESTING"] = False
+        toolchain.generate()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def layout(self):
+        cmake_layout(self)
+
+    def source(self):
+        tools.files.get(self,
+            **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
