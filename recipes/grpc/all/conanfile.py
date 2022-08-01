@@ -68,7 +68,7 @@ class grpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+        return 14 if tools.scm.Version(self.version) >= "1.47" else 11
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -106,7 +106,7 @@ class grpcConan(ConanFile):
             if self.options.shared:
                 raise ConanInvalidConfiguration("gRPC shared not supported yet with Visual Studio")
 
-        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+        if tools.scm.Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
         if self.settings.compiler.get_safe("cppstd"):
