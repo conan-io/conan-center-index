@@ -67,7 +67,7 @@ jobs:
           jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
       - name: Create report (test_package)
-        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_test_package.outcome == 'success' && always()
+        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_test_package.outcome != 'skipped' && always()
         run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
           jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}'  test_package.json > test_package2.json
