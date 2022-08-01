@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import copy
 import os
 import shutil
 
@@ -31,11 +30,10 @@ class GsoapConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        copy(self, "*.cmake", os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
-        copy(self, "*.txt", os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
+        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        tools.files.copy(self, "*.cmake", os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
         for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -60,7 +58,6 @@ class GsoapConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # cmake.configure(build_script_folder="..")
         cmake.configure(build_script_folder=".")
         cmake.build()
 
@@ -80,8 +77,8 @@ class GsoapConan(ConanFile):
             self.requires("zlib/1.2.12")
 
     def package(self):
-        tools.files.copy(self, pattern="GPLv2_license.txt", dst="licenses", src=self.source_folder)
-        tools.files.copy(self, pattern="LICENSE.txt", dst="licenses", src=self.source_folder)
+        tools.files.copy(self, "GPLv2_license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        tools.files.copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         shutil.move(os.path.join(self.package_folder, 'import'), os.path.join(self.package_folder, 'bin', 'import'))
