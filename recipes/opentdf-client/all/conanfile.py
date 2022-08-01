@@ -15,6 +15,7 @@ class OpenTDFConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"build_python": [True, False], "fPIC": [True, False], "without_libiconv": [True, False], "without_zlib": [True, False], "branch_version": [True, False]}
+    # Although the default below says otherwise, RECOMMEND that both without_libiconv and without_zlib be set to True as they are not needed
     default_options = {"build_python": False, "fPIC": True, "without_libiconv": False, "without_zlib": False, "branch_version": False}
     exports_sources = ["CMakeLists.txt"]
 
@@ -43,15 +44,15 @@ class OpenTDFConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.files.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe could not find compiler minimum version for {}.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} recipe needs minimum version {} but found tools.Version({}) = {}".format(
-                    self.name, min_version, self.settings.compiler.version, tools.Version(self.settings.compiler.version) ))
+            if tools.files.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} recipe needs minimum version {} but found tools.files.Version({}) = {}".format(
+                    self.name, min_version, self.settings.compiler.version, tools.files.Version(self.settings.compiler.version) ))
 
     def configure(self):
         if self.options.without_zlib:
@@ -72,17 +73,21 @@ class OpenTDFConan(ConanFile):
         # Overriding the version here allows a clean build with the stock build settings.
         if not self.options.without_zlib:
             self.requires("zlib/1.2.12@")
+        # ...and same for libiconv
+        if not self.options.without_libiconv:
+            self.requires("zlib/1.17@")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
+        # If branch_version is TRUE then the version info will be used as a branch to clone, otherwise the conandata.yml info will be used
         if self.options.branch_version:
             self.output.warn("Building branch_version = {}".format(self.version))
             self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
         else:
-            tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+            tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
