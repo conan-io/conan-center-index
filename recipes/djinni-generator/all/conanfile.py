@@ -32,5 +32,6 @@ class Djinni(ConanFile):
         self.copy("LICENSE", dst="licenses", keep_path=False)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 

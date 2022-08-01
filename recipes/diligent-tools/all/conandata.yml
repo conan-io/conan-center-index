@@ -28,4 +28,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-include-path.diff"
       base_path: "source_subfolder"
-

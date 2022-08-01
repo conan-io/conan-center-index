@@ -39,11 +39,13 @@ jobs:
           pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
 
       - name: Execute linter over all recipes in the repository
+        id: linter_recipes
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
           pylint --rcfile=linter/pylintrc_recipe recipes/*/*/conanfile.py --output-format=json --output=recipes.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
 
       - name: Execute linter over all test_package/recipes in the repository
+        id: linter_test_package
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
           pylint --rcfile=linter/pylintrc_testpackage recipes/*/*/test_*/conanfile.py --output-format=json --output=test_package.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
@@ -58,14 +60,14 @@ jobs:
             test_package.json
 
       - name: Create report (recipes)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_recipes.outcome != 'skipped' && always()
         run: |
           echo '## Linter summary (recipes)' >> $GITHUB_STEP_SUMMARY
           jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' recipes.json > recipes2.json
           jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
       - name: Create report (test_package)
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
+        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_test_package.outcome != 'skipped' && always()
         run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
           jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}'  test_package.json > test_package2.json

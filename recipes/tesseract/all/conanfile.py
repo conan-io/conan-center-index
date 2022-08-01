@@ -1,7 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 import os
 import textwrap
+import functools
 
 required_conan_version = ">=1.43.0"
 
@@ -9,10 +11,10 @@ required_conan_version = ">=1.43.0"
 class TesseractConan(ConanFile):
     name = "tesseract"
     description = "Tesseract Open Source OCR Engine"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("ocr", "image", "multimedia", "graphics")
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tesseract-ocr/tesseract"
+    topics = ("ocr", "image", "multimedia", "graphics")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -35,7 +37,6 @@ class TesseractConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -68,10 +69,10 @@ class TesseractConan(ConanFile):
         self.requires("leptonica/1.82.0")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
-            self.requires("libarchive/3.5.2")
+            self.requires("libarchive/3.6.1")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.84.0")
 
     def validate(self):
         # Check compiler version
@@ -103,10 +104,9 @@ class TesseractConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        cmake = self._cmake = CMake(self)
+        cmake = CMake(self)
         cmake.definitions["BUILD_TRAINING_TOOLS"] = self.options.with_training
         cmake.definitions["INSTALL_CONFIGS"] = self.options.with_training
 
@@ -131,12 +131,12 @@ class TesseractConan(ConanFile):
             cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
             cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
-        if tools.cross_building(self):
+        if cross_building(self):
             cmake_system_processor = {
                 "armv8": "aarch64",
                 "armv8.3": "aarch64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CONAN_TESSERACT_SYSTEM_PROCESSOR"] = cmake_system_processor
+            cmake.definitions["CONAN_TESSERACT_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake

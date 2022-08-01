@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.0)
+ # new feature to Cmake Version > 2.8.12
+ # Mac ONLY. Define Relative Path on Mac OS
+ if(NOT DEFINED CMAKE_MACOSX_RPATH)
+-  set(CMAKE_MACOSX_RPATH 0)
+ endif()
+ 
+ # Set the version number for the library
+diff --git a/gtsam/3rdparty/metis/libmetis/CMakeLists.txt b/gtsam/3rdparty/metis/libmetis/CMakeLists.txt
+--- a/gtsam/3rdparty/metis/libmetis/CMakeLists.txt
++++ b/gtsam/3rdparty/metis/libmetis/CMakeLists.txt
+@@ -16,12 +16,6 @@ if(WIN32)
+ 			RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/../../../bin")
+ endif()
+ 
+-if (APPLE)
+-		set_target_properties(metis-gtsam PROPERTIES
+-			INSTALL_NAME_DIR
+-			"${CMAKE_INSTALL_PREFIX}/lib")
+- endif()
+-
+ install(TARGETS metis-gtsam EXPORT GTSAM-exports
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

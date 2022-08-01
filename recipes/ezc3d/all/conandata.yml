@@ -1,23 +1,17 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.5.0.tar.gz"
+    sha256: "8387857d989f5bbb62869ec930b417e6d0a303eef9b39e8b0e6b35437d5809ce"
   "1.4.8":
     url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.4.8.tar.gz"
     sha256: "ebe69a97ba64b463b0d4b0bd1657fa55af9bc17572a3b6bf9e8b321846cd30c8"
-  "1.4.7":
-    url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.4.7.tar.gz"
-    sha256: "b11921ecd9ff5716f19b4a4eeede36f8cfa5ff08e6fd2c9c12e55f83e9d782bd"
-  "1.4.6":
-    url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.4.6.tar.gz"
-    sha256: "bdc75cb2c930f8bd39b7fdb527fa4db79ffa8797496b34525beb88efa7cfda32"
-  "1.4.5":
-    url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.4.5.tar.gz"
-    sha256: "01602b2ccfc0edd88089e89d249e10086022f7ed7ef40caa3eb3b048ccfa40aa"
   "1.3.8":
     url: "https://github.com/pyomeca/ezc3d/archive/Release_1.3.8.tar.gz"
     sha256: "888cb191c7939b31891e93356aa5bfcf21edb8785d3b5d4d9ec215984bc8b83e"
-  "1.3.7":
-    url: "https://github.com/pyomeca/ezc3d/archive/Release_1.3.7.tar.gz"
-    sha256: "17cd3d4e20840710d58b8987c01ef0f880bc0c063ab52e0cb86ba41665ec33a0"
 patches:
-  "1.3.7":
-    - patch_file: "patches/fix-export-symbols.patch"
+  "1.4.8":
+    - patch_file: "patches/0001-fix-cmake-1.4.8.patch"
+      base_path: "source_subfolder"
+  "1.3.8":
+    - patch_file: "patches/0001-fix-cmake-1.3.8.patch"
       base_path: "source_subfolder"

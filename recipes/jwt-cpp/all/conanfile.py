@@ -25,7 +25,7 @@ class JwtCppConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def requirements(self):
-        self.requires("openssl/1.1.1m")
+        self.requires("openssl/1.1.1q")
         if not self._supports_generic_json:
             self.requires("picojson/1.3.0")
 

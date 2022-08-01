@@ -16,8 +16,14 @@ def register(linter: PyLinter):
 
 def transform_tools(module):
     """ Transform import module """
+    if 'get' in module.locals:
+        del module.locals['get']
     if 'cross_building' in module.locals:
         del module.locals['cross_building']
+    if 'rmdir' in module.locals:
+        del module.locals['rmdir']
+    if 'Version' in module.locals:
+        del module.locals['Version']
 
 
 astroid.MANAGER.register_transform(

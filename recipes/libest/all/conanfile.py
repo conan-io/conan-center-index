@@ -39,7 +39,7 @@ class LibEstConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1q")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
