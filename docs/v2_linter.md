@@ -33,21 +33,18 @@ from conan import ConanFile
 ## Import tools from `conan`
 
 All v2-compatible tools are available in module `conan.tools` under different submodules. Recipes
-should start to import their tools from this new module. Some of the new tools accept new 
+should start to import their tools from this new module. Some of the new tools accept new
 argument, please, check the [Conan documentation](https://docs.conan.io/en/latest/reference/conanfile/tools.html).
 
-For example, the `cross_building` tool now should be used like:
+Here is a list of different imports and their new equivalent (note that the interface for most of this functions changed, see their respective link to the documentation):
 
-```python
-from conan.tools.build import cross_building
+| **Conan v1** | **Conan v2** |
+|---|---|
+| conans.tools.get | [conan.tools.files.get](https://docs.conan.io/en/latest/reference/conanfile/tools/files/downloads.html#conan-tools-files-get) |
+| conans.tools.cross_building | [conan.tools.build.cross_building](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-cross-building) |
+| conans.tools.rmdir | [conan.tools.files.rmdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rmdir) |
+| conans.tools.Version | [conans.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) |
 
-...
-class Recipe(ConanFile):
-
-    def test(self):
-        if not cross_building(self):
-            pass
-```
 
 # Disable linter for `test_v1_*/conanfile.py`
 
