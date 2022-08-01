@@ -62,7 +62,7 @@ class OpenTDFConan(ConanFile):
             self.requires("zlib/1.2.12@")
         # ...and same for libiconv
         if not self.options.without_libiconv:
-            self.requires("zlib/1.17@")
+            self.requires("libiconv/1.17@")
 
     def config_options(self):
         if self.settings.os == "Windows":
