@@ -176,6 +176,9 @@ class grpcConan(ConanFile):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 
+        if self._is_msvc and Version(self.version) >= "1.48":
+            self._cmake.definitions["CMAKE_HOST_SYSTEM_VERSION"] = "10.0.18362.0"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
