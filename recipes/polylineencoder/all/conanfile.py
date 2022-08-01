@@ -59,4 +59,9 @@ class PolylineencoderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs.append("polylineencoder")
+        if self.version == "1.0.0":
+            self.cpp_info.libs.append("polylineencoder")
+
+    def package_id(self):
+        if self.version == "1.1.2":
+            self.info.header_only()
