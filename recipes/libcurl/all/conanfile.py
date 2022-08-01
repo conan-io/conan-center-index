@@ -7,7 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.build.cross_building import cross_building
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
 
 
 class LibcurlConan(ConanFile):
