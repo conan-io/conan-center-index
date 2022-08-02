@@ -14,21 +14,12 @@ class CppProjectFrameworkConan(ConanFile):
     description = "C++ Project Framework is a framework for creating C++ project."
     topics = ("c++", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "fPIC": True,
-    }
-    generators = "cmake"
-    short_paths = True
     exports_sources = "%s/*" % name, "test_package/*.*"
     build_requires = "gtest/1.10.0", "doxygen/1.8.20", "benchmark/1.5.1"
-    exports_resources = ".gitignore", "LICENSE", "conanfile.txt", "CMakeLists.txt", "make.bat", "Makefile", "cpp_project_framework_callables.cmake", "cpp_project_framework.cmake"
 
     @property
     def _minimum_cpp_standard(self):
-        return 17
+        return 14
 
     @property
     def _minimum_compilers_version(self):
@@ -63,17 +54,12 @@ class CppProjectFrameworkConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include/%s" % self.name, src=os.path.join(self._source_subfolder, self.name))
-        self.copy("*.hpp", dst="include/%s" % self.name, src=os.path.join(self._source_subfolder, self.name))
-        self.copy("*.hxx", dst="include/%s" % self.name, src=os.path.join(self._source_subfolder, self.name))
-        for resource in self.exports_resources:
-            self.copy(resource, dst="res", src=self._source_subfolder)
+
+    def package_id(self):
+        self.info.header_only()
