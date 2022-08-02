@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-equired_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.0"
 
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
