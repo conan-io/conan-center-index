@@ -47,7 +47,7 @@ class HazelcastCppClient(ConanFile):
             self.requires("openssl/1.1.1q")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
