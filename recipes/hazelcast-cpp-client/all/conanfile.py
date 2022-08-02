@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan import tools
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.scm import Version
 from conans.tools import check_min_cppstd
 import os
@@ -64,6 +64,9 @@ class HazelcastCppClient(ConanFile):
         else:
             toolchain.variables["BUILD_SHARED_LIBS"] = self.options.shared
         toolchain.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         tools.files.apply_conandata_patches(self)
