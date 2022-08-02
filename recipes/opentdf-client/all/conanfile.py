@@ -59,6 +59,7 @@ class OpenTDFConan(ConanFile):
         self.requires("zlib/1.2.11@")
         self.requires("ms-gsl/2.1.0@")
         self.requires("libxml2/2.9.10@")
+        self.requires("libarchive/3.5.1@")
         self.requires("nlohmann_json/3.10.4@")
         self.requires("jwt-cpp/0.4.0@")
         # We do not require zlib but conan-center only allows 'stock' references, and boost+libxml2
