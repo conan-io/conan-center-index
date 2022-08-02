@@ -1,6 +1,7 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.45.0"
@@ -61,7 +62,7 @@ class PolylineencoderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if self.version == "1.0.0":
+        if Version(self.version) == "1.0.0":
             self.cpp_info.libs.append("polylineencoder")
 
     def package_id(self):
