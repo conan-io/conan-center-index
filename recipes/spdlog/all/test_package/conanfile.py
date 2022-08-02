@@ -5,12 +5,9 @@ from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
 
 
-required_conan_version = ">=1.43.0"
-
-
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain"
+    generators = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -31,4 +28,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

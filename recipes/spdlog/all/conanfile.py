@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.1"
 
 
 class SpdlogConan(ConanFile):
@@ -35,7 +35,6 @@ class SpdlogConan(ConanFile):
         "wchar_filenames": False,
         "no_exceptions": False,
     }
-    generators = "CMakeDeps"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,8 +65,7 @@ class SpdlogConan(ConanFile):
         if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self.options.get_safe("shared", False) and is_msvc_static_runtime(self):
-            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
-                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def package_id(self):
         if self.info.options.header_only:
@@ -96,6 +94,8 @@ class SpdlogConan(ConanFile):
                 tc.variables["SPDLOG_NO_TLS"] = True
             tc.variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.generate()
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
 
     def layout(self):
         cmake_layout(self)
