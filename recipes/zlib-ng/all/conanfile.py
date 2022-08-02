@@ -30,7 +30,6 @@ class ZlibNgConan(ConanFile):
                        "with_new_strategies": True,
                        "with_native_instructions": False,
                        "fPIC": True}
-    generators = "CMakeToolchain",
 
     @property
     def _source_subfolder(self):
@@ -62,6 +61,7 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_OPTIM"] = self.options.with_optim
         tc.variables["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -69,7 +69,8 @@ class ZlibNgConan(ConanFile):
         cmake.build()
 
     def package(self):
-        files.copy(self, "LICENSE.md", src=self._source_subfolder, dst="licenses")
+        license_folder = os.path.join(self.package_folder, "licenses")
+        files.copy(self, "LICENSE.md", src=self._source_subfolder, dst=license_folder)
         cmake = CMake(self)
         cmake.install()
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
