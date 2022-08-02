@@ -80,13 +80,13 @@ class OpenTDFConan(ConanFile):
             self.output.warn("Building branch_version = {}".format(self.version))
             self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
         else:
-            tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+            self.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tc.build()
+        self.build()
 
     def package(self):
-        tc.install()
+        self.install()
         self.copy("*", dst="lib", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/lib"))
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/include"))
         self.copy("LICENSE", dst="licenses", src=os.path.join(self._source_subfolder,"tdf-lib-cpp"))
