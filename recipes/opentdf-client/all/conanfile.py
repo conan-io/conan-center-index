@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, tools, os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
 class OpenTDFConan(ConanFile):
