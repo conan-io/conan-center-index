@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
-
 find_package(spdlog REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
@@ -11,4 +9,6 @@ if(SPDLOG_HEADER_ONLY)
 else()
     target_link_libraries(${PROJECT_NAME} spdlog::spdlog)
 endif()
-set_target_properties($${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+                        CXX_STANDARD 11
+                        CMAKE_POLICY_DEFAULT_CMP0091 NEW)
