@@ -17,7 +17,6 @@ class CppProjectFrameworkConan(ConanFile):
     topics = ("c++", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = f"{name}/*", "test_package/*.*"
-    build_requires = "gtest/1.10.0", "doxygen/1.8.20", "benchmark/1.5.1"
 
     @property
     def _minimum_cpp_standard(self):
