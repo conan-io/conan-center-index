@@ -1,17 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES C)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/logo.png
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(zstd REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-if (TARGET zstd::libzstd_shared)
-  target_link_libraries(${PROJECT_NAME} zstd::libzstd_shared)
-else()
-  target_link_libraries(${PROJECT_NAME} zstd::libzstd_static)
-endif()
+
+# Note: assuming that only one of these targets exists
+target_link_libraries(${PROJECT_NAME} $<TARGET_NAME_IF_EXISTS:zstd::libzstd_shared>)
+target_link_libraries(${PROJECT_NAME} $<TARGET_NAME_IF_EXISTS:zstd::libzstd_static>)
