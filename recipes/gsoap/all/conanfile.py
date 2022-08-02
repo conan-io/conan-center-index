@@ -65,7 +65,7 @@ class GsoapConan(ConanFile):
         if tools.build.cross_building(self, skip_x64_x86=True) and hasattr(self, 'settings_build'):
             self.tool_requires("gsoap/{}".format(self.version))
 
-        if hasattr(self, "settings_build") and self.settings_build.os == "Windows":
+        if self.settings.os == "Windows" or (hasattr(self, "settings_build") and self.settings_build.os == "Windows"):
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.7.6")
