@@ -1,4 +1,6 @@
+import os
 from conan import ConanFile, tools
+from conan.tools.scm import Git
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
 class OpenTDFConan(ConanFile):
@@ -54,9 +56,9 @@ class OpenTDFConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        self.copy("*", dst="lib", src=join(self._source_subfolder,"tdf-lib-cpp/lib"))
-        self.copy("*", dst="include", src=join(self._source_subfolder,"tdf-lib-cpp/include"))
-        self.copy("LICENSE", dst="licenses", src=join(self._source_subfolder,"tdf-lib-cpp"))
+        conan.tools.files.copy(self, "*", os.path.join(self._source_subfolder,"tdf-lib-cpp/lib"), "lib")
+        conan.tools.files.copy(self, "*", os.path.join(self._source_subfolder,"tdf-lib-cpp/include"), "include")
+        conan.tools.files.copy(self, "LICENSE", os.path.join(self._source_subfolder,"tdf-lib-cpp"), "licenses")
 
     def package_info(self):
         self.cpp_info.components["libopentdf"].libs = ["opentdf_static"]
