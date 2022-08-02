@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, transitive_headers=True)
+        self.requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)

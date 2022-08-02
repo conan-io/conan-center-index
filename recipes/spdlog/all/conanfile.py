@@ -5,6 +5,8 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.errors import ConanInvalidConfiguration
+# TODO: Need to be ported for Conan 2.0
+from conans import __version__ as conan_version
 import os
 
 
@@ -48,16 +50,18 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        # TODO: Remove in Conan 2.0 - 1.x self.requires does not support transitive_headers
+        requires = lambda ref: self.requires(ref, transitive_headers=True) if Version(conan_version) >= "2.0.0-beta" else self.requires(ref)
         if Version(self.version) >= "1.10.0":
-            self.requires("fmt/8.1.1")
+            requires("fmt/8.1.1")
         elif Version(self.version) >= "1.9.0":
-            self.requires("fmt/8.0.1")
+            requires("fmt/8.0.1")
         elif Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.1.3")
+            requires("fmt/7.1.3")
         elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.1")
+            requires("fmt/6.2.1")
         else:
-            self.requires("fmt/6.0.0")
+            requires("fmt/6.0.0")
 
     def validate_build(self):
         if self.settings.compiler.cppstd:
@@ -113,7 +117,7 @@ class SpdlogConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst="licenses", src=self.source_folder)
         if self.options.header_only:
-            copy(self, pattern="*.h", dst="include", src=os.path.join(self.source_folder, "include"))
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -131,11 +135,16 @@ class SpdlogConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"spdlog::{target}")
         self.cpp_info.set_property("pkg_config_name", "spdlog")
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
         self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target
 
+        self.cpp_info.components["libspdlog"].set_property("cmake_target_name", f"spdlog::{target}")
+
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
+
+        self.cpp_info.components["libspdlog"].includedirs = ["include"]
         if not self.options.header_only:
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
