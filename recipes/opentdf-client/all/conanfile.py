@@ -43,7 +43,7 @@ class OpenTDFConan(ConanFile):
 
     def source(self):
         if self.options.branch_version:
-            git = Git(folder=self._source_subfolder)
+            git = Git(self, folder=self._source_subfolder)
             git.clone("git@github.com:opentdf/client-cpp.git", self.version)
         else:
             tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
