@@ -37,6 +37,8 @@ class PolylineencoderConan(ConanFile):
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["BUILD_TESTING"] = False
+        if self.settings.os == "Windows" and self.options.shared:
+            toolchain.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
         toolchain.generate()
 
     def layout(self):
