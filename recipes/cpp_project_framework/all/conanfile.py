@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
 from conan.tools.files import get
 from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import check_min_cppstd
 import os
 
 required_conan_version = ">=1.33.0"
@@ -16,7 +16,7 @@ class CppProjectFrameworkConan(ConanFile):
     description = "C++ Project Framework is a framework for creating C++ project."
     topics = ("c++", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "%s/*" % name, "test_package/*.*"
+    exports_sources = f"{name}/*", "test_package/*.*"
     build_requires = "gtest/1.10.0", "doxygen/1.8.20", "benchmark/1.5.1"
 
     @property
@@ -33,7 +33,7 @@ class CppProjectFrameworkConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.os != "Linux" and self.settings.os != "Windows":
+        if self.settings.os not in ('Linux', 'Windows'):
             raise ConanInvalidConfiguration(f"{self.name} is just supported for Linux and Windows")
 
         compiler = self.settings.compiler
@@ -41,7 +41,7 @@ class CppProjectFrameworkConan(ConanFile):
         if compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        if compiler == "gcc" or compiler == "clang":
+        if compiler in ('gcc', 'clang'):
             if compiler.get_safe("libcxx") != "libstdc++":
                 raise ConanInvalidConfiguration(f"only supported {compiler} with libstdc++")
 
@@ -61,7 +61,7 @@ class CppProjectFrameworkConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include/%s" % self.name, src=os.path.join(self._source_subfolder, self.name))
+        self.copy("*.h", dst=f"include/{self.name}", src=os.path.join(self._source_subfolder, self.name))
 
     def package_id(self):
         self.info.header_only()
