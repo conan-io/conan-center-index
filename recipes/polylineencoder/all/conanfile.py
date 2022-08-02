@@ -65,5 +65,5 @@ class PolylineencoderConan(ConanFile):
             self.cpp_info.libs.append("polylineencoder")
 
     def package_id(self):
-        if self.version == "1.1.2":
+        if Version(self.version) >= "1.1.2":
             self.info.header_only()
