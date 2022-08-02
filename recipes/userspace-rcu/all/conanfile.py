@@ -38,8 +38,8 @@ class UserspaceRCUConan(ConanFile):
     generators = "PkgConfigDeps"
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Only Linux/FreeBSD supported")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration("Building for {} unsupported".format(self.settings.os))
 
     def configure(self):
         del self.settings.compiler.libcxx
