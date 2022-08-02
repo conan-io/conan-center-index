@@ -43,7 +43,7 @@ class OpenTDFConan(ConanFile):
 
     def source(self):
         if self.options.branch_version:
-            git = tools.Git(folder=self._source_subfolder)
+            git = conan.tools.scm.Git(folder=self._source_subfolder)
             git.clone("git@github.com:opentdf/client-cpp.git", self.version)
         else:
             tools.files.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -56,9 +56,9 @@ class OpenTDFConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        conan.tools.files.copy(self, "*", os.path.join(self._source_subfolder,"tdf-lib-cpp/lib"), "lib")
-        conan.tools.files.copy(self, "*", os.path.join(self._source_subfolder,"tdf-lib-cpp/include"), "include")
-        conan.tools.files.copy(self, "LICENSE", os.path.join(self._source_subfolder,"tdf-lib-cpp"), "licenses")
+        self.copy("*", dst="lib", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/lib"))
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/include"))
+        self.copy("LICENSE", dst="licenses", src=os.path.join(self._source_subfolder,"tdf-lib-cpp"))
 
     def package_info(self):
         self.cpp_info.components["libopentdf"].libs = ["opentdf_static"]
