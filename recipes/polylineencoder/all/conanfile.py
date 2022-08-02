@@ -64,6 +64,8 @@ class PolylineencoderConan(ConanFile):
     def package_info(self):
         if Version(self.version) == "1.0.0":
             self.cpp_info.libs.append("polylineencoder")
+            if self.settings.os == "Linux" and self.options.shared:
+                self.cpp_info.system_libs.append("m")
 
     def package_id(self):
         if Version(self.version) >= "1.1.2":
