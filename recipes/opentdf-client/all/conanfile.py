@@ -48,18 +48,6 @@ class OpenTDFConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe could not find compiler minimum version for {}.".format(
-                self.name, self.settings.compiler))
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} recipe needs minimum version {} but found tools.Version({}) = {}".format(
-                    self.name, min_version, self.settings.compiler.version, tools.Version(self.settings.compiler.version) ))
-
     def configure(self):
         if self.options.without_zlib:
             self.options["libxml2"].zlib = False
