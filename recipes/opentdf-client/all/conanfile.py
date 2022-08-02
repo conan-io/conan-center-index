@@ -1,6 +1,5 @@
-from conan import ConanFile, tools
-from conans import CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 import os
 
 required_conan_version = ">=1.40.0"
@@ -18,8 +17,6 @@ class OpenTDFConan(ConanFile):
     options = {"build_python": [True, False], "fPIC": [True, False], "without_libiconv": [True, False], "without_zlib": [True, False], "branch_version": [True, False]}
     default_options = {"build_python": False, "fPIC": True, "without_libiconv": False, "without_zlib": False, "branch_version": False}
     exports_sources = ["CMakeLists.txt"]
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -41,6 +38,15 @@ class OpenTDFConan(ConanFile):
             "clang": "12",
             "apple-clang": "12.0.0"
         }
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -88,20 +94,11 @@ class OpenTDFConan(ConanFile):
         else:
             tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        tc.build()
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
+        tc.install()
         self.copy("*", dst="lib", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/lib"))
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder,"tdf-lib-cpp/include"))
         self.copy("LICENSE", dst="licenses", src=os.path.join(self._source_subfolder,"tdf-lib-cpp"))
