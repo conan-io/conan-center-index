@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import cross_building
 
 
-class helloTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
