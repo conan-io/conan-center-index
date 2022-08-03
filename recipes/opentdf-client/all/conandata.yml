@@ -16,5 +16,23 @@ sources:
     sha256: "4f4017efad3ef013822c92673f89fcef7f6553f5c78cee930e382a09adad0f23"
 patches:
   "1.1.0":
-     - patch_file: "patches/0001-fstream-missing.patch"
+     - patch_file: "patches/0001-1.1.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-1.1.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-1.1.0-cmake-find-package.patch"
+       base_path: "source_subfolder"
+  "1.0.0":
+     - patch_file: "patches/0001-1.0.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-1.0.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-1.0.0-cmake-find-package.patch"
+       base_path: "source_subfolder"
+  "0.9.0":
+     - patch_file: "patches/0001-0.9.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-0.9.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-0.9.0-cmake-find-package.patch"
        base_path: "source_subfolder"

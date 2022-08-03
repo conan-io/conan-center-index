@@ -19,8 +19,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"build_python": [True, False], "fPIC": [True, False], "with_zlib": [True, False], "with_libiconv": [True, False]}
-    default_options = {"build_python": False, "fPIC": True, "with_zlib": True, "with_libiconv": True}
+    options = {"build_python": [True, False], "fPIC": [True, False]}
+    default_options = {"build_python": False, "fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -68,14 +68,6 @@ class OpenTDFConan(ConanFile):
         self.requires("libarchive/3.6.1")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
-        # We do not require zlib but conan-center only allows 'stock' references, and boost+libxml2
-        # specify differerent versions, which causes a build fail due to the dependency conflict.
-        # Overriding the version here allows a clean build with the stock build settings.
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
-        # ...and same for libiconv
-        if self.options.with_libiconv:
-            self.requires("libiconv/1.17")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,7 +79,6 @@ class OpenTDFConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), 'ms_gsl', 'Microsoft.GSL')
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -119,7 +110,3 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
-        if self.options.with_zlib:
-            self.cpp_info.components["libopentdf"].requires.append("zlib::zlib")
-        if self.options.with_libiconv:
-            self.cpp_info.components["libopentdf"].requires.append("libiconv::libiconv")
