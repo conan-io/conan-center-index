@@ -23,4 +23,3 @@ sources:
 patches:
   "3.3.2":
     - patch_file: "patches/fix-objc-cmake3.19+.patch"
-      base_path: "source_subfolder"

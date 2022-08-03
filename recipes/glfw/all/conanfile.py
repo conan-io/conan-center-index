@@ -1,8 +1,7 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import CMake
-import functools
 import os
 import textwrap
 
@@ -31,14 +30,7 @@ class GlfwConan(ConanFile):
         "vulkan_static": False,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
@@ -59,18 +51,23 @@ class GlfwConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
+    def layout(self):
+        cmake_layout(self)
+        self.folders.source = "src"
+        self.folders.build = "build"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         # don't force PIC
-        replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
-            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
             replace_in_file(self, cmakelists,
                                   'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
                                   "")
@@ -79,28 +76,26 @@ class GlfwConan(ConanFile):
                                   ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
                                    'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
-        cmake.definitions["GLFW_BUILD_TESTS"] = False
-        cmake.definitions["GLFW_BUILD_DOCS"] = False
-        cmake.definitions["GLFW_INSTALL"] = True
-        cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["GLFW_BUILD_EXAMPLES"] = False
+        tc.variables["GLFW_BUILD_TESTS"] = False
+        tc.variables["GLFW_BUILD_DOCS"] = False
+        tc.variables["GLFW_INSTALL"] = True
+        tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
         if is_msvc(self):
-            cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        cmake.configure()
-        return cmake
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE*", src=os.path.join(self.source_folder, self._source_subfolder),
-             dst=os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
