@@ -39,7 +39,7 @@ class LibrdkafkaConan(ConanFile):
         "curl": False,
     }
 
-    generators = "CMakeDeps", "PkgConfigDeps"
+    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
