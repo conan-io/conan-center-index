@@ -42,6 +42,10 @@ class LibrdkafkaConan(ConanFile):
 
     generators = "CMakeDeps", "PkgConfigDeps"
 
+    @property
+    def _depends_on_cyrus_sasl(self):
+        return self.options.sasl and self.settings.os != "Windows"
+
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
@@ -64,13 +68,13 @@ class LibrdkafkaConan(ConanFile):
             self.requires("zstd/1.5.2")
         if self.options.ssl:
             self.requires("openssl/1.1.1q")
-        if self.options.sasl and self.settings.os != "Windows":
+        if self._depends_on_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.27")
         if self.options.get_safe("curl", False):
             self.requires("libcurl/7.84.0")
 
     def build_requirements(self):
-        if self.options.sasl and self.settings.os != "Windows":
+        if self._depends_on_cyrus_sasl:
             self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
@@ -102,7 +106,7 @@ class LibrdkafkaConan(ConanFile):
         tc.generate()
 
         # inject pkgconf env vars in build context
-        if self.options.sasl and self.settings.os != "Windows":
+        if self._depends_on_cyrus_sasl:
             ms = VirtualBuildEnv(self)
             ms.generate(scope="build")
 
@@ -143,7 +147,7 @@ class LibrdkafkaConan(ConanFile):
             self.cpp_info.components["rdkafka"].requires.append("zstd::zstd")
         if self.options.ssl:
             self.cpp_info.components["rdkafka"].requires.append("openssl::openssl")
-        if self.options.sasl and self.settings.os != "Windows":
+        if self._depends_on_cyrus_sasl:
             self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
         if self.options.get_safe("curl", False):
             self.cpp_info.components["rdkafka"].requires.append("libcurl::libcurl")
