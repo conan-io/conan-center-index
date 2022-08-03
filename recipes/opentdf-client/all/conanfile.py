@@ -3,7 +3,8 @@ from conans import CMake, tools
 from conan.tools.files import get, copy, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 # TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
-from conans.tools import check_min_cppstd, Version
+from conans.tools import check_min_cppstd
+from conan.tools.scm import Version
 import functools
 import os
 
@@ -19,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"build_python": [True, False], "fPIC": [True, False]}
-    default_options = {"build_python": False, "fPIC": True}
+    options = {"without_libiconv": [True, False], "fPIC": [True, False]}
+    default_options = {"without_libiconv": False, "fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -56,7 +57,7 @@ class OpenTDFConan(ConanFile):
         if not min_version:
             self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support."
                                                  "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
@@ -68,6 +69,11 @@ class OpenTDFConan(ConanFile):
         self.requires("libarchive/3.6.1")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
+        # We do not require libiconv but conan-center only allows 'stock' references, and boost+libxml2
+        # specify differerent versions, which causes a build fail due to the dependency conflict.
+        # Overriding the version here allows a clean build with the stock build settings.
+        if not self.options.without_libiconv:
+            self.requires("libiconv/1.17@")
 
     def config_options(self):
         if self.settings.os == "Windows":
