@@ -21,7 +21,6 @@ class OpenTDFConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"build_python": [True, False], "fPIC": [True, False], "with_zlib": [True, False], "with_libiconv": [True, False]}
     default_options = {"build_python": False, "fPIC": True, "with_zlib": True, "with_libiconv": True}
-    exports_sources = ["CMakeLists.txt"]
 
     @property
     def _source_subfolder(self):
@@ -44,6 +43,11 @@ class OpenTDFConan(ConanFile):
             "clang": "12",
             "apple-clang": "12.0.0",
         }
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -81,6 +85,8 @@ class OpenTDFConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), 'ms_gsl', 'Microsoft.GSL')
 
     @functools.lru_cache(1)
@@ -112,4 +118,8 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
-        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "zlib::zlib", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        if self.options.with_zlib:
+            self.cpp_info.components["libopentdf"].requires.append("zlib::zlib")
+        if self.options.with_libiconv:
+            self.cpp_info.components["libopentdf"].requires.append("libiconv::libiconv")
