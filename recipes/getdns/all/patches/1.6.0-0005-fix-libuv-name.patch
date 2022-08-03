@@ -8,7 +8,7 @@ index 5420ca2..ce381a2 100644
  if (USE_LIBUV)
 -  find_package(Libuv)
 -  if (Libuv_FOUND)
-+  find_package(libuv)
++  find_package(libuv CONFIG)
 +  if (libuv_FOUND)
      # Check for new-style callbacks.
      try_compile(HAVE_NEW_UV_TIMER_CB
