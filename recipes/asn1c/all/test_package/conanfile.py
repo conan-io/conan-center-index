@@ -14,10 +14,11 @@ class TestPackageConan(ConanFile):
         self.tool_requires(str(self.requires["asn1c"]))
 
     def build(self):
-        copy(self, "MyModule.asn1", src=self.source_folder, dst=self.build_folder)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if not cross_building(self):
+            copy(self, "MyModule.asn1", src=self.source_folder, dst=self.build_folder)
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not cross_building(self):
