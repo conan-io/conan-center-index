@@ -23,36 +23,22 @@ sources:
 patches:
   "1.9.1":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-9-1.patch
-      base_path: source_subfolder
   "1.8.2":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.8.0":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.7.0":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.6.1":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-1.patch
-      base_path: source_subfolder
   "1.6.0":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-0.patch
-      base_path: source_subfolder
   "1.5.3":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-5-2.patch
-      base_path: source_subfolder

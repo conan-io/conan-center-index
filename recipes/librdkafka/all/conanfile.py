@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
-from conans import CMake, tools
-import functools
 import os
 
 required_conan_version = ">=1.47.0"
@@ -40,26 +39,21 @@ class LibrdkafkaConan(ConanFile):
         "curl": False,
     }
 
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    generators = "CMakeDeps", "PkgConfigDeps"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.9.0":
+            del self.options.curl
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if Version(self.version) < "1.9.0":
-            del self.options.curl
 
     def requirements(self):
         self.requires("lz4/1.9.3")
@@ -78,48 +72,44 @@ class LibrdkafkaConan(ConanFile):
         if self.options.sasl and self.settings.os != "Windows":
             self.build_requires("pkgconf/1.7.4")
 
+    def layout(self):
+        cmake_layout(self)
+        self.folders.source = "src"
+        self.folders.build = "build"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
-        cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
-        cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = False
-        cmake.definitions["RDKAFKA_BUILD_TESTS"] = False
-        cmake.definitions["WITHOUT_WIN32_CONFIG"] = True
-        cmake.definitions["WITH_BUNDLED_SSL"] = False
-        cmake.definitions["WITH_ZLIB"] = self.options.zlib
-        cmake.definitions["WITH_ZSTD"] = self.options.zstd
-        cmake.definitions["WITH_PLUGINS"] = self.options.plugins
-        cmake.definitions["WITH_SSL"] = self.options.ssl
-        cmake.definitions["WITH_SASL"] = self.options.sasl
-        cmake.definitions["ENABLE_LZ4_EXT"] = True
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
+        tc.variables["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
+        tc.variables["RDKAFKA_BUILD_STATIC"] = not self.options.shared
+        tc.variables["RDKAFKA_BUILD_EXAMPLES"] = False
+        tc.variables["RDKAFKA_BUILD_TESTS"] = False
+        tc.variables["WITHOUT_WIN32_CONFIG"] = True
+        tc.variables["WITH_BUNDLED_SSL"] = False
+        tc.variables["WITH_ZLIB"] = self.options.zlib
+        tc.variables["WITH_ZSTD"] = self.options.zstd
+        tc.variables["WITH_PLUGINS"] = self.options.plugins
+        tc.variables["WITH_SSL"] = self.options.ssl
+        tc.variables["WITH_SASL"] = self.options.sasl
+        tc.variables["ENABLE_LZ4_EXT"] = True
         if Version(self.version) >= "1.9.0":
-            cmake.definitions["WITH_CURL"] = self.options.curl
-
-        cmake.configure()
-        return cmake
+            tc.variables["WITH_CURL"] = self.options.curl
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        with tools.run_environment(self):
-            cmake = self._configure_cmake()
-            cmake.build()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSES.txt", src=self._source_subfolder, dst="licenses")
-        with tools.run_environment(self):
-            cmake = self._configure_cmake()
-            cmake.install()
-
+        copy(self, "LICENSES.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
