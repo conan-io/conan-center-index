@@ -1,9 +1,15 @@
 sources:
+  "2.3.2":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.3.2.tar.gz"
+    sha256: "12abe6865dd030adfac70c30592eaa25c4e34fa81379e5149b0186282721f40c"
   "2.3.1":
     url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
     sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
 
 patches:
+  "2.3.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.3.1-0001-fix-cmake.patch"
   "2.3.1":
     - base_path: "source_subfolder"
       patch_file: "patches/2.3.1-0001-fix-cmake.patch"

@@ -2,3 +2,7 @@ sources:
   "0.2.0":
     url: https://github.com/linksplatform/Hashing/archive/refs/tags/0.2.0.zip
     sha256: 8e34a10d2768d0f2d9ba0cbb88ce193b32245c5a46f14f7ec860c9fddbe8f39f
+  "0.3.0":
+    url: https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.3.0.zip
+    sha256: 8f7d6d401eaec1a78d1f10bfa3783b31ac6189a6ea8edf1ef7f300c47c0e5cb1
+
