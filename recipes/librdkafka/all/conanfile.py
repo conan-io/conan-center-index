@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -40,8 +40,6 @@ class LibrdkafkaConan(ConanFile):
         "sasl": False,
         "curl": False,
     }
-
-    generators = "CMakeDeps"
 
     @property
     def _depends_on_cyrus_sasl(self):
@@ -105,6 +103,9 @@ class LibrdkafkaConan(ConanFile):
         if Version(self.version) >= "1.9.0":
             tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
         if self._depends_on_cyrus_sasl:
             pc = PkgConfigDeps(self)
