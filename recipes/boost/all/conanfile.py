@@ -151,6 +151,7 @@ class BoostConan(ConanFile):
     short_paths = True
     no_copy_source = True
     _cached_dependencies = None
+    _detected_python = None
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -239,15 +240,6 @@ class BoostConan(ConanFile):
     @property
     def _zip_bzip2_requires_needed(self):
         return not self.options.without_iostreams and not self.options.header_only
-
-    @property
-    def _python_executable(self):
-        """
-        obtain full path to the python interpreter executable
-        :return: path to the python interpreter executable, either set by option, or system default
-        """
-        exe = self.options.python_executable if self.options.python_executable else sys.executable
-        return str(exe).replace("\\", "/")
 
     @property
     def _is_windows_platform(self):
@@ -388,8 +380,8 @@ class BoostConan(ConanFile):
 
         if not self.options.without_python:
             if not self.options.python_version:
-                self.options.python_version = self._detect_python_version()
-                self.options.python_executable = self._python_executable
+                self.options.python_version = self._python.version
+                self.options.python_executable = self._python.executable
         else:
             del self.options.python_buildid
 
@@ -557,7 +549,7 @@ class BoostConan(ConanFile):
             if self.options.without_python:
                 del self.info.options.python_version
             else:
-                self.info.options.python_version = self._python_version
+                self.info.options.python_version = self._python.version
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -570,184 +562,24 @@ class BoostConan(ConanFile):
 
     ##################### BUILDING METHODS ###########################
 
-    def _run_python_script(self, script):
-        """
-        execute python one-liner script and return its output
-        :param script: string containing python script to be executed
-        :return: output of the python script execution, or None, if script has failed
-        """
-        output = StringIO()
-        command = f'"{self._python_executable}" -c "{script}"'
-        self.output.info(f"running {command}")
-        try:
-            self.run(command=command, output=output)
-        except ConanException:
-            self.output.info("(failed)")
-            return None
-        output = output.getvalue()
-        # Conan is broken when run_to_output = True
-        if "\n-----------------\n" in output:
-            output = output.split("\n-----------------\n", 1)[1]
-        output = output.strip()
-        return output if output != "None" else None
-
-    def _get_python_path(self, name):
-        """
-        obtain path entry for the python installation
-        :param name: name of the python config entry for path to be queried (such as "include", "platinclude", etc.)
-        :return: path entry from the sysconfig
-        """
-        # https://docs.python.org/3/library/sysconfig.html
-        # https://docs.python.org/2.7/library/sysconfig.html
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       f"print(sysconfig.get_path('{name}'))")
-
-    def _get_python_sc_var(self, name):
-        """
-        obtain value of python sysconfig variable
-        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
-        :return: value of python sysconfig variable
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       f"print(sysconfig.get_config_var('{name}'))")
-
-    def _get_python_du_var(self, name):
-        """
-        obtain value of python distutils sysconfig variable
-        (sometimes sysconfig returns empty values, while python.sysconfig provides correct values)
-        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
-        :return: value of python sysconfig variable
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import distutils.sysconfig as du_sysconfig; "
-                                       f"print(du_sysconfig.get_config_var('{name}'))")
-
-    def _get_python_var(self, name):
-        """
-        obtain value of python variable, either by sysconfig, or by distutils.sysconfig
-        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
-        :return: value of python sysconfig variable
-
-        NOTE: distutils is deprecated and breaks the recipe since Python 3.10
-        """
-        python_version_parts = self.info.options.python_version.split('.')
-        python_major = int(python_version_parts[0])
-        python_minor = int(python_version_parts[1])
-        if(python_major >= 3 and python_minor >= 10):
-            return self._get_python_sc_var(name)
-
-        return self._get_python_sc_var(name) or self._get_python_du_var(name)
-
-    def _detect_python_version(self):
+    def _detect_python(self):
         """
         obtain version of python interpreter
         :return: python interpreter version, in format major.minor
         """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sys; "
-                                       "print('{}.{}'.format(sys.version_info[0], sys.version_info[1]))")
+        detected = detect_python(context=self)
 
+        if self.options.python_version and detected.version != self.options.python_version:
+            raise ConanInvalidConfiguration(f"detected python version {detected.version} doesn't match conan option {self.options.python_version}")
 
-    @property
-    def _python_version(self):
-        version = self._detect_python_version()
-        if self.options.python_version and version != self.options.python_version:
-            raise ConanInvalidConfiguration(f"detected python version {version} doesn't match conan option {self.options.python_version}")
-        return version
+        return detected
 
     @property
-    def _python_inc(self):
-        """
-        obtain the result of the "sysconfig.get_python_inc()" call
-        :return: result of the "sysconfig.get_python_inc()" execution
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       "print(sysconfig.get_python_inc())")
+    def _python(self):
+        if self._detected_python is None:
+            self._detected_python = self._detect_python()
+        return self._detected_python
 
-    @property
-    def _python_abiflags(self):
-        """
-        obtain python ABI flags, see https://www.python.org/dev/peps/pep-3149/ for the details
-        :return: the value of python ABI flags
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sys; "
-                                       "print(getattr(sys, 'abiflags', ''))")
-
-    @property
-    def _python_includes(self):
-        """
-        attempt to find directory containing Python.h header file
-        :return: the directory with python includes
-        """
-        include = self._get_python_path("include")
-        plat_include = self._get_python_path("platinclude")
-        include_py = self._get_python_var("INCLUDEPY")
-        include_dir = self._get_python_var("INCLUDEDIR")
-        python_inc = self._python_inc
-
-        candidates = [include,
-                      plat_include,
-                      include_py,
-                      include_dir,
-                      python_inc]
-        for candidate in candidates:
-            if candidate:
-                python_h = os.path.join(candidate, 'Python.h')
-                self.output.info(f"checking {python_h}")
-                if os.path.isfile(python_h):
-                    self.output.info(f"found Python.h: {python_h}")
-                    return candidate.replace("\\", "/")
-        raise Exception("couldn't locate Python.h - make sure you have installed python development files")
-
-    @property
-    def _python_library_dir(self):
-        """
-        attempt to find python development library
-        :return: the full path to the python library to be linked with
-        """
-        library = self._get_python_var("LIBRARY")
-        ldlibrary = self._get_python_var("LDLIBRARY")
-        libdir = self._get_python_var("LIBDIR")
-        multiarch = self._get_python_var("MULTIARCH")
-        masd = self._get_python_var("multiarchsubdir")
-        with_dyld = self._get_python_var("WITH_DYLD")
-        if libdir and multiarch and masd:
-            if masd.startswith(os.sep):
-                masd = masd[len(os.sep):]
-            libdir = os.path.join(libdir, masd)
-
-        if not libdir:
-            libdest = self._get_python_var("LIBDEST")
-            libdir = os.path.join(os.path.dirname(libdest), "libs")
-
-        candidates = [ldlibrary, library]
-        library_prefixes = [""] if self._is_msvc else ["", "lib"]
-        library_suffixes = [".lib"] if self._is_msvc else [".so", ".dll.a", ".a"]
-        if with_dyld:
-            library_suffixes.insert(0, ".dylib")
-
-        python_version = self._python_version
-        python_version_no_dot = python_version.replace(".", "")
-        versions = ["", python_version, python_version_no_dot]
-        abiflags = self._python_abiflags
-
-        for prefix in library_prefixes:
-            for suffix in library_suffixes:
-                for version in versions:
-                    candidates.append(f"{prefix}python{version}{abiflags}{suffix}")
-
-        for candidate in candidates:
-            if candidate:
-                python_lib = os.path.join(libdir, candidate)
-                self.output.info(f"checking {python_lib}")
-                if os.path.isfile(python_lib):
-                    self.output.info(f"found python library: {python_lib}")
-                    return libdir.replace("\\", "/")
-        raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
         src = os.path.join(self.source_folder, self._source_subfolder)
@@ -1223,7 +1055,14 @@ class BoostConan(ConanFile):
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
-            contents += f'\nusing python : {self._python_version} : "{self._python_executable}" : "{self._python_includes}" : "{self._python_library_dir}" ;'
+            def create_python_config(python_tool):
+                version = python_tool.version
+                executable = python_tool.executable
+                includes = python_tool.includes
+                library_dir = python_tool.library_dir
+                return f'\nusing python : {version} : "{executable}" : "{includes}" : "{library_dir}" ;'
+
+            contents += create_python_config(self._python)
 
         if not self.options.without_mpi:
             # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
@@ -1369,7 +1208,7 @@ class BoostConan(ConanFile):
                 os.unlink(os.path.join(self.package_folder, "lib", common_lib_fullname))
 
         dll_pdbs = glob.glob(os.path.join(self.package_folder, "lib", "*.dll")) + \
-                    glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"))
+            glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"))
         if dll_pdbs:
             tools.mkdir(os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
@@ -1567,7 +1406,7 @@ class BoostConan(ConanFile):
 
             libformatdata = {}
             if not self.options.without_python:
-                pyversion = Version(self._python_version)
+                pyversion = Version(self._python.version)
                 libformatdata["py_major"] = pyversion.major
                 libformatdata["py_minor"] = pyversion.minor
 
@@ -1689,7 +1528,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
-                pyversion = Version(self._python_version)
+                pyversion = Version(self._python.version)
                 self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
@@ -1724,3 +1563,206 @@ class BoostConan(ConanFile):
                 else:
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
+
+
+def detect_python(context, executable=sys.executable):
+    """
+    Factory method.
+    """
+    exe = executable.replace("\\", "/")
+    version = run_script(
+        context,
+        exe,
+        "from __future__ import print_function; "
+        "import sys; "
+        "print('{}.{}'.format(sys.version_info[0], sys.version_info[1]))",
+    )
+
+    return PythonTool(version, exe, context)
+
+
+def run_script(context, executable, script):
+    """
+    execute python one-liner script and return its output
+    :param context: an object with run() and output() methods
+    :param script: string containing python script to be executed
+    :return: output of the python script execution, or None, if script has failed
+    """
+    output = StringIO()
+    command = f'"{executable}" -c "{script}"'
+    context.output.info(f"running {command}")
+    try:
+        context.run(command=command, output=output)
+    except ConanException:
+        context.output.info("(failed)")
+        return None
+    output = output.getvalue()
+    # Conan is broken when run_to_output = True
+    if "\n-----------------\n" in output:
+        output = output.split("\n-----------------\n", 1)[1]
+    output = output.strip()
+    return output if output != "None" else None
+
+
+class PythonTool:
+    """Encapsulate a python executable"""
+
+    def __init__(self, version, executable, context):
+        self.version = version
+        self.executable = executable.replace("\\", "/")
+        self.context = context
+
+    def _run_script(self, script):
+        return run_script(self.context, self.executable, script)
+
+    def _get_path(self, name):
+        """
+        obtain path entry for the python installation
+        :param name: name of the python config entry for path to be queried (such as "include", "platinclude", etc.)
+        :return: path entry from the sysconfig
+        """
+        # https://docs.python.org/3/library/sysconfig.html
+        # https://docs.python.org/2.7/library/sysconfig.html
+        return self._run_script(
+            "from __future__ import print_function; "
+            "import sysconfig; "
+            f"print(sysconfig.get_path('{name}'))"
+        )
+
+    def _get_sc_var(self, name):
+        """
+        obtain value of python sysconfig variable
+        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
+        :return: value of python sysconfig variable
+        """
+        return self._run_script(
+            "from __future__ import print_function; "
+            "import sysconfig; "
+            f"print(sysconfig.get_config_var('{name}'))"
+        )
+
+    def _get_du_var(self, name):
+        """
+        obtain value of python distutils sysconfig variable
+        (sometimes sysconfig returns empty values, while python.sysconfig provides correct values)
+        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
+        :return: value of python sysconfig variable
+        """
+        return self._run_script(
+            "from __future__ import print_function; "
+            "import distutils.sysconfig as du_sysconfig; "
+            f"print(du_sysconfig.get_config_var('{name}'))"
+        )
+
+    def _get_var(self, name):
+        """
+        obtain value of python variable, either by sysconfig, or by distutils.sysconfig
+        :param name: name of variable to be queried (such as LIBRARY or LDLIBRARY)
+        :return: value of python sysconfig variable
+
+        NOTE: distutils is deprecated and breaks the recipe since Python 3.10
+        """
+        python_version_parts = self.version.split(".")
+        python_major = int(python_version_parts[0])
+        python_minor = int(python_version_parts[1])
+
+        if python_major >= 3 and python_minor >= 10:
+            return self._get_sc_var(name)
+
+        return self._get_sc_var(name) or self._get_du_var(name)
+
+    @property
+    def inc(self):
+        """
+        obtain the result of the "sysconfig.get_python_inc()" call
+        :return: result of the "sysconfig.get_python_inc()" execution
+        """
+        return self._run_script(
+            "from __future__ import print_function; "
+            "import sysconfig; "
+            "print(sysconfig.get_python_inc())",
+        )
+
+    @property
+    def abiflags(self):
+        """
+        obtain python ABI flags, see https://www.python.org/dev/peps/pep-3149/ for the details
+        :return: the value of python ABI flags
+        """
+        return self._run_script(
+            "from __future__ import print_function; "
+            "import sys; "
+            "print(getattr(sys, 'abiflags', ''))",
+        )
+
+    @property
+    def includes(self):
+        """
+        attempt to find directory containing Python.h header file
+        :return: the directory with python includes
+        """
+        include = self._get_path("include")
+        plat_include = self._get_path("platinclude")
+        include_py = self._get_var("INCLUDEPY")
+        include_dir = self._get_var("INCLUDEDIR")
+        python_inc = self.inc
+
+        candidates = [include, plat_include, include_py, include_dir, python_inc]
+        for candidate in candidates:
+            if candidate:
+                python_h = os.path.join(candidate, "Python.h")
+                self.context.output.info(f"checking {python_h}")
+                if os.path.isfile(python_h):
+                    self.context.output.info(f"found Python.h: {python_h}")
+                    return candidate.replace("\\", "/")
+        raise Exception(
+            "couldn't locate Python.h - make sure you have installed python development files"
+        )
+
+    @property
+    def library_dir(self):
+        """
+        attempt to find python development library
+        :return: the full path to the python library to be linked with
+        """
+        library = self._get_var("LIBRARY")
+        ldlibrary = self._get_var("LDLIBRARY")
+        libdir = self._get_var("LIBDIR")
+        multiarch = self._get_var("MULTIARCH")
+        masd = self._get_var("multiarchsubdir")
+        with_dyld = self._get_var("WITH_DYLD")
+        if libdir and multiarch and masd:
+            if masd.startswith(os.sep):
+                masd = masd[len(os.sep) :]
+            libdir = os.path.join(libdir, masd)
+
+        if not libdir:
+            libdest = self._get_var("LIBDEST")
+            libdir = os.path.join(os.path.dirname(libdest), "libs")
+
+        candidates = [ldlibrary, library]
+        library_prefixes = [""] if self.context._is_msvc else ["", "lib"]
+        library_suffixes = [".lib"] if self.context._is_msvc else [".so", ".dll.a", ".a"]
+        if with_dyld:
+            library_suffixes.insert(0, ".dylib")
+
+        python_version = self.version
+        python_version_no_dot = python_version.replace(".", "")
+        versions = ["", python_version, python_version_no_dot]
+        abiflags = self.abiflags
+
+        for prefix in library_prefixes:
+            for suffix in library_suffixes:
+                for version in versions:
+                    candidates.append(f"{prefix}python{version}{abiflags}{suffix}")
+
+        for candidate in candidates:
+            if candidate:
+                python_lib = os.path.join(libdir, candidate)
+                self.context.output.info(f"checking {python_lib}")
+                if os.path.isfile(python_lib):
+                    self.context.output.info(f"found python library: {python_lib}")
+                    return libdir.replace("\\", "/")
+        raise ConanInvalidConfiguration(
+            "couldn't locate python libraries - make sure you have installed python development files"
+        )
