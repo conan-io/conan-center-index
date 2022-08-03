@@ -1,8 +1,11 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, rmdir
+from conan.tools.scm import Version
+from conans import CMake
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class FlecsConan(ConanFile):
@@ -43,8 +46,8 @@ class FlecsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -64,7 +67,7 @@ class FlecsConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         suffix = "" if self.options.shared else "_static"
@@ -80,7 +83,7 @@ class FlecsConan(ConanFile):
         self.cpp_info.components["_flecs"].libs = ["flecs{}".format(suffix)]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
-        if tools.Version(self.version) >= "3.0.0":
+        if Version(self.version) >= "3.0.0":
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["_flecs"].system_libs.append("pthread")
             elif self.settings.os == "Windows":
