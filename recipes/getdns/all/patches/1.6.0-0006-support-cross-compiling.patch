@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 51b7c1e..ac01cc6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -521,9 +521,17 @@ set(STRPTIME_TEST_SOURCE "\n
+   if (!res) return 1; return 0; }")
+ 
+ if (HAVE_STRPTIME)
+-  check_c_source_runs("${STRPTIME_TEST_SOURCE}" STRPTIME_WORKS)
++  if (CMAKE_CROSSCOMPILING)
++    if (NOT FORCE_COMPAT_STRPTIME)
++      message(WARNING "Assuming strptime() is POSIX compliant with %t matching any white space. Specify FORCE_COMPAT_STRPTIME on non-compliant platforms e.g. BSD derived.")
++      set(STRPTIME_WORKS 1)
++    endif ()
++  else ()
++    check_c_source_runs("${STRPTIME_TEST_SOURCE}" STRPTIME_WORKS)
++  endif ()
+ endif ()
+ 
++
+ try_compile(HAVE___FUNC__
+   ${CMAKE_CURRENT_BINARY_DIR}
+   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tests/test___func__.c

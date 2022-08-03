@@ -67,10 +67,6 @@ class GetDnsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if tools.cross_building(self):
-            raise ConanInvalidConfiguration("{} doesn't support cross compiling.".format(self.name))
-
     def requirements(self):
         self.requires("openssl/1.1.1q")
         if self._with_libev:
