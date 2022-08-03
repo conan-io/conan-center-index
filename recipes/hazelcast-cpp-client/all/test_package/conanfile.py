@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualRunEnv
 import os
 
 class TestPackageHazelcastCppClient(ConanFile):
@@ -19,6 +20,9 @@ class TestPackageHazelcastCppClient(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
 
     def build(self):
         cmake = CMake(self)
