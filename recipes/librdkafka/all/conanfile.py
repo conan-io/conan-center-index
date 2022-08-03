@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
@@ -40,7 +41,7 @@ class LibrdkafkaConan(ConanFile):
         "curl": False,
     }
 
-    generators = "CMakeDeps", "PkgConfigDeps"
+    generators = "CMakeDeps"
 
     @property
     def _depends_on_cyrus_sasl(self):
@@ -105,11 +106,13 @@ class LibrdkafkaConan(ConanFile):
             tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
 
-        # inject pkgconf env vars in build context
         if self._depends_on_cyrus_sasl:
+            pc = PkgConfigDeps(self)
+            pc.generate()
+            # inject pkgconf env vars in build context
             ms = VirtualBuildEnv(self)
             ms.generate(scope="build")
-
+            # also need to inject generators folder into PKG_CONFIG_PATH
             env = Environment()
             env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             envvars = env.vars(self, scope="build")
