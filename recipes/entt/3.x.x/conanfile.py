@@ -1,10 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conans import tools as tools_legacy
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.47.0"
 
 
 class EnttConan(ConanFile):
