@@ -33,7 +33,7 @@ class GetDnsConan(ConanFile):
         "with_libuv": True,
         "with_libidn2": True,
     }
-    generators = "cmake", "pkg_config", "cmake_find_package"
+    generators = "cmake", "pkg_config", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
 
@@ -68,13 +68,13 @@ class GetDnsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("openssl/1.1.1j")
+        self.requires("openssl/1.1.1q")
         if self._with_libev:
             self.requires("libev/4.33")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libuv:
-            self.requires("libuv/1.41.0")
+            self.requires("libuv/1.44.1")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
         if self.options.tls == "gnutls":
@@ -86,7 +86,7 @@ class GetDnsConan(ConanFile):
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
