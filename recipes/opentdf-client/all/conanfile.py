@@ -20,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"without_libiconv": [True, False], "fPIC": [True, False]}
-    default_options = {"without_libiconv": False, "fPIC": True}
+    options = {"without_libiconv": [True, False], "without_zlib": [True, False], "without_libarchive": [True, False], "fPIC": [True, False]}
+    default_options = {"without_libiconv": False, "without_zlib": False, "without_libarchive": True, "fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -63,21 +63,33 @@ class OpenTDFConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
-        self.requires("boost/1.79.0")
+        self.requires("boost/1.76.0")
         self.requires("ms-gsl/2.1.0")
         self.requires("libxml2/2.9.14")
-        self.requires("libarchive/3.6.1")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
+        if not self.options.without_libarchive:
+            self.requires("libarchive/3.6.1")
         # We do not require libiconv but conan-center only allows 'stock' references, and boost+libxml2
         # specify differerent versions, which causes a build fail due to the dependency conflict.
         # Overriding the version here allows a clean build with the stock build settings.
         if not self.options.without_libiconv:
             self.requires("libiconv/1.17@")
+        # Same for zlib
+        if not self.options.without_zlib:
+            self.requires("zlib/1.2.12@")
 
     def config_options(self):
+        # Do not require libarchive as of 1.1.0
+        if Version(self.version) < "1.1.0":
+            self.options.without_libarchive = False
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.options.without_zlib:
+            self.options["libxml2"].zlib = False
+        if self.options.without_libiconv:
+            self.options["boost"].without_locale = True
+            self.options["boost"].without_log = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -116,3 +128,9 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        if not self.options.without_libarchive:
+            self.cpp_info.components["libopentdf"].requires.append(["libarchive::libarchive"])
+        if not self.options.without_zlib:
+            self.cpp_info.components["libopentdf"].requires.append(["zlib::zlib"])
+        if not self.options.without_libiconv:
+            self.cpp_info.components["libopentdf"].requires.append(["libiconv::libiconv"])
