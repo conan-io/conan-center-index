@@ -60,6 +60,17 @@ class GlfwConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["GLFW_BUILD_EXAMPLES"] = False
+        tc.variables["GLFW_BUILD_TESTS"] = False
+        tc.variables["GLFW_BUILD_DOCS"] = False
+        tc.variables["GLFW_INSTALL"] = True
+        tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
+        if is_msvc(self):
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.generate()
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         # don't force PIC
@@ -75,17 +86,6 @@ class GlfwConan(ConanFile):
                                   'list(APPEND glfw_PKG_DEPS "vulkan")',
                                   ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
                                    'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["GLFW_BUILD_EXAMPLES"] = False
-        tc.variables["GLFW_BUILD_TESTS"] = False
-        tc.variables["GLFW_BUILD_DOCS"] = False
-        tc.variables["GLFW_INSTALL"] = True
-        tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.generate()
 
     def build(self):
         self._patch_sources()
