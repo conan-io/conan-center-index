@@ -26,11 +26,20 @@ class MDSpanConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "15.1",
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "5.1"
         }
+
+    def _is_msvc(self, compiler_name):
+        return compiler_name == "Visual Studio"
+
+    # According to upstream issue https://github.com/kokkos/mdspan/issues/26 , the MSVC updates to STL has broke the build
+    # since MSVC 16.6; and seems it built successfully on MSVC 17
+    def _msvc_is_supported_version(self, version):
+        return version < "16.6" or version >= "17.0"
+
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -42,13 +51,26 @@ class MDSpanConan(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            compiler_version = tools.Version(self.settings.compiler.version)
+            is_msvc = self._is_msvc(self.settings.compiler)
+
+            if compiler_version < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
                         self.name, self._minimum_cpp_standard,
                         self.settings.compiler,
-                        self.settings.compiler.version))
+                        compiler_version))
+            if is_msvc and not self._msvc_is_supported_version(compiler_version):
+                raise ConanInvalidConfiguration(
+                    "Unsupported MSVC version {} due to upstream bug. The supported MSVC versions are > 15.0 and < 16.6 or >= 17.0."
+                    "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.".format(
+                        compiler_version))
+            if is_msvc and tools.Version(self.version) < "0.4.0" and compiler_version < "17.0":
+                raise ConanInvalidConfiguration(
+                    "Old mdspan versions ( < 0.4.0) doesn't build properly on MSVC version {} due to conflicting upstream and STL type_traits (and another issues)."
+                    "See upstream issue https://github.com/kokkos/mdspan/issues/22 for details.".format(compiler_version))
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
