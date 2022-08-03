@@ -32,6 +32,7 @@ class Asn1cConan(ConanFile):
     def build_requirements(self):
         self.build_requires("bison/3.7.6")
         self.build_requires("flex/2.6.4")
+        self.build_requires("libtool/2.4.7")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -47,7 +48,7 @@ class Asn1cConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
                 "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
         ]
@@ -55,6 +56,8 @@ class Asn1cConan(ConanFile):
         return self._autotools
 
     def build(self):
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
