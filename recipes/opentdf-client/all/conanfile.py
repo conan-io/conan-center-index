@@ -3,7 +3,7 @@ from conans import CMake, tools
 from conan.tools.files import get, copy, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 # TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
-from conans.tools import check_min_cppstd
+from conans.tools import check_min_cppstd, Version
 import functools
 import os
 
@@ -56,7 +56,7 @@ class OpenTDFConan(ConanFile):
         if not min_version:
             self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support."
                                                  "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
