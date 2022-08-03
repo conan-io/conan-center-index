@@ -20,4 +20,3 @@ sources:
 patches:
   "0.2.6":
     - patch_file: "patches/0.2.6-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
