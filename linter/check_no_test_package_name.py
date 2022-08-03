@@ -5,7 +5,7 @@ from astroid import nodes, Const, AssignName
 
 class NoPackageName(BaseChecker):
     """
-       Conanfile used for testing a package should provide a name
+       Conanfile used for testing a package should NOT provide a name
     """
 
     __implements__ = IAstroidChecker
