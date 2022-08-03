@@ -1436,7 +1436,7 @@ class BoostConan(ConanFile):
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
-
+           
         if self.options.system_use_utf8:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_USE_UTF8")
 
