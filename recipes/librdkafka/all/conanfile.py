@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
 required_conan_version = ">=1.47.0"
@@ -103,13 +104,15 @@ class LibrdkafkaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with tools_legacy.environment_append({"PKG_CONFIG_PATH": self.generators_folder}):
+            cmake.configure()
+            cmake.build()
 
     def package(self):
         copy(self, "LICENSES.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.install()
+        with tools_legacy.environment_append({"PKG_CONFIG_PATH": self.generators_folder}):
+            cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
