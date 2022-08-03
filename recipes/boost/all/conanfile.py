@@ -1,10 +1,11 @@
 from conan.tools.build import cross_building
-from conan.tools.files import rename, rmdir, get, copy
+from conan.tools.files import rename, rmdir, get
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
-from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conans import tools
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
 
 import glob
 import os
@@ -151,10 +152,10 @@ class BoostConan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"])
+            self.copy(patch["patch_file"])
 
     def export(self):
-        copy(self, self._dependency_filename, src="dependencies", dst="dependencies")
+        self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
 
     @property
     def _min_compiler_version_default_cxx11(self):
@@ -1355,11 +1356,11 @@ class BoostConan(ConanFile):
     def package(self):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
-        copy(self, "LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
                                                                       self._source_subfolder))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
-            copy(self, pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
+            self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
         if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
