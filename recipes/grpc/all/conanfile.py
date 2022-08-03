@@ -193,9 +193,11 @@ class grpcConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools_legacy.patch(**patch)
 
+        # Clean existing proto files
+        shutil.rmtree(os.path.join(self._source_subfolder, "src", "proto", "grpc"))
+
         # Copy status.proto (TODO: Other protos are used in the test suite)
         status_proto_dir = os.path.join(self._source_subfolder, "src", "proto", "grpc", "status")
-        os.remove(os.path.join(status_proto_dir, "status.proto"))
         tools.files.copy(self, "status.proto", 
              src=os.path.join(self.dependencies["googleapis"].cpp_info.resdirs[0], "google", "rpc"),
              dst=status_proto_dir)
@@ -206,13 +208,12 @@ class grpcConan(ConanFile):
                 "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
-            # tools.files.copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
+            tools.files.copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
 
         # Copy from grpc-proto
-        shutil.rmtree(os.path.join(self._source_subfolder, "src", "proto", "grpc"))
-        #tools.files.copy(self, "*", 
-        #     src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
-        #     dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
+        tools.files.copy(self, "*", 
+             src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
+             dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         # We are fine with protobuf::protoc coming from conan generated Find/config file
         # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
