@@ -93,8 +93,8 @@ class OpencoreAmrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             for lib in ("opencore-amrwb", "opencore-amrnb"):
-                tools.files.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
-                                   os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
+                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
+                             os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "opencore-amr")
