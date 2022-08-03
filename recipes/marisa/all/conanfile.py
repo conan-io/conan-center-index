@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile, tools
+from conan.tools.files import apply_conandata_patches
 from conans import CMake
 
 required_conan_version = ">=1.45.0"
@@ -48,11 +49,7 @@ class MarisaConan(ConanFile):
 
     def source(self):
         tools.files.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+                        destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -66,7 +63,7 @@ class MarisaConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
