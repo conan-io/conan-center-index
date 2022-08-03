@@ -536,7 +536,7 @@ class BoostConan(ConanFile):
         if self._with_icu:
             self.requires("icu/71.1")
         if self._with_iconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
 
     def package_id(self):
         del self.info.options.i18n_backend
@@ -555,7 +555,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.build_requires("b2/4.8.0")
+            self.build_requires("b2/4.9.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -1436,7 +1436,7 @@ class BoostConan(ConanFile):
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
-            
+
         if self.options.system_use_utf8:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_USE_UTF8")
 
