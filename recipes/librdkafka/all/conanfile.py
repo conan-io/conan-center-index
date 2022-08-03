@@ -156,8 +156,10 @@ class LibrdkafkaConan(ConanFile):
 
         # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
         # from that version components don't have empty libdirs by default
+        self.cpp_info.components["rdkafka"].includedirs = ["include"]
         self.cpp_info.components["rdkafka"].libdirs= ["lib"]
         self.cpp_info.components["rdkafka"].bindirs = ["bin"]
+        self.cpp_info.components["rdkafka++"].includedirs = ["include"]
         self.cpp_info.components["rdkafka++"].libdirs = ["lib"]
         self.cpp_info.components["rdkafka++"].bindirs = ["bin"]
 
