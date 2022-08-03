@@ -88,6 +88,7 @@ class DacapClipConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.requires.append("xorg::xcb")
+            self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation']
         elif self.settings.os == "Windows":
