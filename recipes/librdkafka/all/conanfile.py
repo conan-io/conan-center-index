@@ -113,7 +113,7 @@ class LibrdkafkaConan(ConanFile):
             env = Environment()
             env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             envvars = env.vars(self, scope="build")
-            envvars.save_script("buildenv_pkg_conf_path")
+            envvars.save_script("conanbuildenv_pkg_config_path")
 
     def build(self):
         apply_conandata_patches(self)
