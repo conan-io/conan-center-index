@@ -1,8 +1,11 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, rmdir
+from conan.tools.scm import Version
+from conans import CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -55,7 +58,7 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if tools.Version(self.version) < "1.9.0":
+        if Version(self.version) < "1.9.0":
             del self.options.curl
 
     def requirements(self):
@@ -76,8 +79,8 @@ class LibrdkafkaConan(ConanFile):
             self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -99,7 +102,7 @@ class LibrdkafkaConan(ConanFile):
         cmake.definitions["WITH_SSL"] = self.options.ssl
         cmake.definitions["WITH_SASL"] = self.options.sasl
         cmake.definitions["ENABLE_LZ4_EXT"] = True
-        if tools.Version(self.version) >= "1.9.0":
+        if Version(self.version) >= "1.9.0":
             cmake.definitions["WITH_CURL"] = self.options.curl
 
         cmake.configure()
@@ -117,9 +120,9 @@ class LibrdkafkaConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "RdKafka")
