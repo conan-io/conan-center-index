@@ -111,7 +111,7 @@ class LibrdkafkaConan(ConanFile):
             ms.generate(scope="build")
 
             env = Environment()
-            env.define("PKG_CONFIG_PATH", self.generators_folder)
+            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             envvars = env.vars(self, scope="build")
             envvars.save_script("buildenv_pkg_conf_path")
 
