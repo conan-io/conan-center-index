@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conans import CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, rmdir
 import os
 import functools
 
@@ -86,9 +88,9 @@ class SDLMixerConan(ConanFile):
                 self.requires("tinymidi/cci.20130325")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-        tools.rmdir(os.path.join(self._source_subfolder, "external"))
+        rmdir(self, os.path.join(self._source_subfolder, "external"))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
