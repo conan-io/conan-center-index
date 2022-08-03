@@ -3,7 +3,6 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    name = "linter-tell-me-something"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
