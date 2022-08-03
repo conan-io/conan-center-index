@@ -57,6 +57,8 @@ class DacapClipConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_png", False):
             self.requires("libpng/1.6.37")
+        if self.settings.os == "Linux":
+            self.requires("xorg/system")
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -81,8 +83,11 @@ class DacapClipConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["clip"]
 
+        if self.options.get_safe("with_png", False):
+            self.cpp_info.requires.append("libpng::libpng")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("xcb")
+            self.cpp_info.requires.append("xorg::xcb")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation']
         elif self.settings.os == "Windows":
