@@ -80,3 +80,8 @@ class FlecsConan(ConanFile):
         self.cpp_info.components["_flecs"].libs = ["flecs{}".format(suffix)]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
+        if tools.Version(self.version) >= "3.0.0":
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["_flecs"].system_libs.append("pthread")
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32"])
