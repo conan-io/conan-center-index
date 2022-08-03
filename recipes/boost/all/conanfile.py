@@ -1,5 +1,5 @@
 from conan.tools.build import cross_building
-from conan.tools.files import rename
+from conan.tools.files import rename, rmdir, get, copy
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
@@ -151,10 +151,10 @@ class BoostConan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            copy(self, patch["patch_file"])
 
     def export(self):
-        self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
+        copy(self, self._dependency_filename, src="dependencies", dst="dependencies")
 
     @property
     def _min_compiler_version_default_cxx11(self):
@@ -559,7 +559,7 @@ class BoostConan(ConanFile):
             self.build_requires("b2/4.9.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
         apply_conandata_patches(self)
 
@@ -1355,11 +1355,11 @@ class BoostConan(ConanFile):
     def package(self):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
+        copy(self, "LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
                                                                       self._source_subfolder))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
-            self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
+            copy(self, pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
         if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
