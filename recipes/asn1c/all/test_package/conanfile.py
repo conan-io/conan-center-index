@@ -1,5 +1,8 @@
-from conans import ConanFile, CMake, tools
-import os, shutil
+from conans import CMake
+from conan import ConanFile
+from conan.tools.files import copy
+from conan.tools.build import cross_building
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -8,15 +11,15 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build_requirements(self):
-        self.build_requires(str(self.requires["asn1c"]))
+        self.tool_requires(str(self.requires["asn1c"]))
 
     def build(self):
-        shutil.copy(os.path.join(self.source_folder, "MyModule.asn1"), self.build_folder)
+        copy(self, "MyModule.asn1", src=self.source_folder, dst=self.build_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)

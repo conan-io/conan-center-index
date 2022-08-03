@@ -1,8 +1,10 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir, chdir
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class Asn1cConan(ConanFile):
@@ -30,9 +32,9 @@ class Asn1cConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("bison/3.7.6")
-        self.build_requires("flex/2.6.4")
-        self.build_requires("libtool/2.4.7")
+        self.tool_requires("bison/3.7.6")
+        self.tool_requires("flex/2.6.4")
+        self.tool_requires("libtool/2.4.7")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -42,8 +44,8 @@ class Asn1cConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -56,7 +58,7 @@ class Asn1cConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
@@ -65,8 +67,8 @@ class Asn1cConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "res", "doc"))
-        tools.rmdir(os.path.join(self.package_folder, "res", "man"))
+        rmdir(self, os.path.join(self.package_folder, "res", "doc"))
+        rmdir(self, os.path.join(self.package_folder, "res", "man"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
