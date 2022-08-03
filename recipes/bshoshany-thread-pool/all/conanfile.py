@@ -4,6 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
+
 class BShoshanyThreadPoolConan(ConanFile):
     description = "BS::thread_pool: a fast, lightweight, and easy-to-use C++17 thread pool library"
     homepage = "https://github.com/bshoshany/thread-pool"
@@ -16,12 +17,7 @@ class BShoshanyThreadPoolConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "5",
-            "gcc": "8",
-            "Visual Studio": "16"
-        }
+        return {"apple-clang": "10", "clang": "5", "gcc": "8", "Visual Studio": "16"}
 
     @property
     def _minimum_cpp_standard(self):
@@ -33,6 +29,7 @@ class BShoshanyThreadPoolConan(ConanFile):
 
     def package(self):
         self.copy("BS_thread_pool.hpp", src=os.path.join(self._source_subfolder, "./"), dst="include")
+        self.copy("BS_thread_pool_light.hpp", src=os.path.join(self._source_subfolder, "./"), dst="include")
         self.copy("LICENSE.txt", src=os.path.join(self._source_subfolder, "./"), dst="licenses")
 
     def package_id(self):
