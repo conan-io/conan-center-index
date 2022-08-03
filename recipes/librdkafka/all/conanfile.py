@@ -37,7 +37,7 @@ class LibrdkafkaConan(ConanFile):
         "curl": False,
     }
 
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
 
     @property
     def _source_subfolder(self):
