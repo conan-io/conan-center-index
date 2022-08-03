@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
 required_conan_version = ">=1.47.0"
@@ -40,7 +40,7 @@ class LibrdkafkaConan(ConanFile):
         "curl": False,
     }
 
-    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
+    generators = "CMakeDeps", "PkgConfigDeps"
 
     def export_sources(self):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
@@ -71,7 +71,7 @@ class LibrdkafkaConan(ConanFile):
 
     def build_requirements(self):
         if self.options.sasl and self.settings.os != "Windows":
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
         cmake_layout(self)
@@ -101,18 +101,26 @@ class LibrdkafkaConan(ConanFile):
             tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
 
+        # inject pkgconf env vars in build context
+        if self.options.sasl and self.settings.os != "Windows":
+            ms = VirtualBuildEnv(self)
+            ms.generate(scope="build")
+
+            env = Environment()
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+            envvars = env.vars(self, scope="build")
+            envvars.save_script("buildenv_pkg_conf_path")
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        with tools_legacy.environment_append({"PKG_CONFIG_PATH": self.generators_folder}):
-            cmake.configure()
-            cmake.build()
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "LICENSES.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        with tools_legacy.environment_append({"PKG_CONFIG_PATH": self.generators_folder}):
-            cmake.install()
+        cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
