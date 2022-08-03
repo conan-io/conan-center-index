@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conans import CMake, tools
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 # TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
 from conans.tools import check_min_cppstd
@@ -112,9 +112,9 @@ class OpenTDFConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        copy(self, "*", dst="lib", src=os.path.join(self._source_subfolder,"tdf-lib-cpp", "lib"))
-        copy(self, "*", dst="include", src=os.path.join(self._source_subfolder,"tdf-lib-cpp", "include"))
-        copy(self, "LICENSE", dst="licenses", src=os.path.join(self._source_subfolder,"tdf-lib-cpp"))
+        copy(self, "*", dst="lib", src=os.path.join(self._source_subfolder,"tdf-lib-cpp", "lib"), keep_path=False)
+        copy(self, "*", dst="include", src=os.path.join(self._source_subfolder,"tdf-lib-cpp", "include"), keep_path=False)
+        copy(self, "LICENSE", dst="licenses", src=os.path.join(self._source_subfolder,"tdf-lib-cpp"), ignore_case=True, keep_path=False)
 
     # TODO - this only advertises the static lib, add dynamic lib also
     def package_info(self):
