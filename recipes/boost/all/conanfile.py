@@ -59,6 +59,8 @@ CONFIGURE_OPTIONS = (
     "wave",
 )
 
+PYTHON_VERSIONS = ("2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10")
+
 
 class BoostConan(ConanFile):
     name = "boost"
@@ -108,6 +110,8 @@ class BoostConan(ConanFile):
         "system_use_utf8": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
+    # extra boost_python libs to build
+    options.update({f"python{_name.replace('.', '')}_executable": "ANY" for _name in PYTHON_VERSIONS})
 
     default_options = {
         "shared": False,
@@ -147,6 +151,8 @@ class BoostConan(ConanFile):
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
+    # extra boost_python libs to build
+    default_options.update({f"python{_name.replace('.', '')}_executable": "None" for _name in PYTHON_VERSIONS})
 
     short_paths = True
     no_copy_source = True
@@ -1063,6 +1069,11 @@ class BoostConan(ConanFile):
                 return f'\nusing python : {version} : "{executable}" : "{includes}" : "{library_dir}" ;'
 
             contents += create_python_config(self._python)
+
+            for version in PYTHON_VERSIONS:
+                option = self.options.get_safe(f"python{version.replace('.', '')}_executable")
+                if option:
+                    contents += create_python_config(PythonTool(version, option.value, self))
 
         if not self.options.without_mpi:
             # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
