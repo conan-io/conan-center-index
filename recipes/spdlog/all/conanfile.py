@@ -74,8 +74,7 @@ class SpdlogConan(ConanFile):
 
     def package_id(self):
         if self.info.options.header_only:
-            # TODO: Replace by self.info.clear() in Conan 2.0
-            self.info.header_only()
+            self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
