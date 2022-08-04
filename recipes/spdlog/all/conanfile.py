@@ -74,7 +74,8 @@ class SpdlogConan(ConanFile):
 
     def package_id(self):
         if self.info.options.header_only:
-            self.info.clear()
+            # TODO: Replace by self.info.clear() in Conan 2.0
+            self.info.header_only()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -150,6 +151,8 @@ class SpdlogConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
+            self.cpp_info.components["libspdlog"].libdirs = []
+            self.cpp_info.components["libspdlog"].bindirs = []
         if self.options.wchar_support:
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
