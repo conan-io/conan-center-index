@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(RdKafka REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../test_package/test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE RdKafka::rdkafka++)
