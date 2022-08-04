@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 import os
 import re
 import shutil
@@ -132,22 +132,24 @@ class AndroidNDKConan(ConanFile):
                 filename = os.path.join(root, filename)
                 with open(filename, "rb") as f:
                     sig = f.read(4)
-                    if type(sig) is str:
+                    if isinstance(sig, str):
                         sig = [ord(s) for s in sig]
                     else:
-                        sig = [s for s in sig]
+                        sig = list(sig)
                     if len(sig) > 2 and sig[0] == 0x23 and sig[1] == 0x21:
                         self.output.info(f"chmod on script file: '{filename}'")
                         self._chmod_plus_x(filename)
                     elif sig == [0x7F, 0x45, 0x4C, 0x46]:
                         self.output.info(f"chmod on ELF file: '{filename}'")
                         self._chmod_plus_x(filename)
-                    elif sig == [0xCA, 0xFE, 0xBA, 0xBE] or \
-                         sig == [0xBE, 0xBA, 0xFE, 0xCA] or \
-                         sig == [0xFE, 0xED, 0xFA, 0xCF] or \
-                         sig == [0xCF, 0xFA, 0xED, 0xFE] or \
-                         sig == [0xFE, 0xEF, 0xFA, 0xCE] or \
-                         sig == [0xCE, 0xFA, 0xED, 0xFE]:
+                    elif sig in (
+                        [202, 254, 186, 190],
+                        [190, 186, 254, 202],
+                        [254, 237, 250, 207],
+                        [207, 250, 237, 254],
+                        [254, 239, 250, 206],
+                        [206, 250, 237, 254]
+                    ):
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
 
