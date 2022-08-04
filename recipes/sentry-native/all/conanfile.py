@@ -1,4 +1,7 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.scm import Version
+from conans import CMake
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
@@ -107,7 +110,7 @@ class SentryNativeConan(ConanFile):
         if self.options.qt:
             self.requires("qt/5.15.3")
             self.requires("openssl/1.1.1n")
-            if tools.Version(self.version) < "0.4.5":
+            if Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
     def validate(self):
@@ -117,30 +120,30 @@ class SentryNativeConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Compiler is unknown. Assuming it supports C++14.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
-        if self.options.backend == "inproc" and self.settings.os == "Windows" and tools.Version(self.version) < "0.4":
+        if self.options.backend == "inproc" and self.settings.os == "Windows" and Version(self.version) < "0.4":
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
-        if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
+        if Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
-        if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if self.options.backend == "crashpad" and Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
         if self.options.performance:
-            if tools.Version(self.version) < "0.4.14" or tools.Version(self.version) > "0.4.15":
+            if Version(self.version) < "0.4.14" or Version(self.version) > "0.4.15":
                 raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
+        if Version(self.version) >= "0.4.0" and self.settings.os == "Windows":
             self.build_requires("cmake/3.22.0")
         if self.options.backend == "breakpad":
             self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -157,17 +160,16 @@ class SentryNativeConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", self.build_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sentry")
@@ -182,7 +184,7 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shlwapi", "dbghelp"]
-            if tools.Version(self.version) >= "0.4.7":
+            if Version(self.version) >= "0.4.7":
                 self.cpp_info.system_libs.append("Version")
             if self.options.transport == "winhttp":
                 self.cpp_info.system_libs.append("winhttp")
