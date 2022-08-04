@@ -69,12 +69,7 @@ class FlecsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "flecs")
         self.cpp_info.set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
 
-        self.cpp_info.names["cmake_find_package"] = "flecs"
-        self.cpp_info.names["cmake_find_package_multi"] = "flecs"
-        self.cpp_info.components["_flecs"].names["cmake_find_package"] = "flecs{}".format(suffix)
-        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = "flecs{}".format(suffix)
-        self.cpp_info.components["_flecs"].set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
-
+        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["_flecs"].libs = ["flecs{}".format(suffix)]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
@@ -83,3 +78,16 @@ class FlecsConan(ConanFile):
                 self.cpp_info.components["_flecs"].system_libs.append("pthread")
             elif self.settings.os == "Windows":
                 self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32"])
+
+        # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
+        # from that version components don't have empty libdirs by default
+        self.cpp_info.components["_flecs"].includedirs = ["include"]
+        self.cpp_info.components["_flecs"].libdirs= ["lib"]
+        self.cpp_info.components["_flecs"].bindirs = ["bin"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "flecs"
+        self.cpp_info.names["cmake_find_package_multi"] = "flecs"
+        self.cpp_info.components["_flecs"].names["cmake_find_package"] = "flecs{}".format(suffix)
+        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = "flecs{}".format(suffix)
+        self.cpp_info.components["_flecs"].set_property("cmake_target_name", "flecs::flecs{}".format(suffix))
