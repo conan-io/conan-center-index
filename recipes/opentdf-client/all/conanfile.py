@@ -121,7 +121,7 @@ class OpenTDFConan(ConanFile):
         cmake.install()
         copy(self, "*", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(os.path.join(self._source_subfolder,"tdf-lib-cpp"), "lib"), keep_path=False)
         copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(os.path.join(self._source_subfolder,"tdf-lib-cpp"), "include"), keep_path=False)
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self._source_subfolder,"tdf-lib-cpp"), ignore_case=True, keep_path=False)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder, ignore_case=True, keep_path=False)
 
     # TODO - this only advertises the static lib, add dynamic lib also
     def package_info(self):
