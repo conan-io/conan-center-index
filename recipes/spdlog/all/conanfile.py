@@ -151,6 +151,7 @@ class SpdlogConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
+        else:
             self.cpp_info.components["libspdlog"].libdirs = []
             self.cpp_info.components["libspdlog"].bindirs = []
         if self.options.wchar_support:
