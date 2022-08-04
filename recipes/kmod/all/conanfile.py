@@ -56,7 +56,7 @@ class KModConan(ConanFile):
             raise ConanInvalidConfiguration("kmod is Linux-only!")
 
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.6")
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
