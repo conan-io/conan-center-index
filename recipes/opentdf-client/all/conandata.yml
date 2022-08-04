@@ -8,25 +8,25 @@ sources:
   "0.9.0":
     url: "https://github.com/opentdf/client-cpp/archive/opentdf-0.9.0.tar.gz"
     sha256: "152e79c136b472e13a37c108118c8d4d7b5a85a8e34f4f284452ac59bdb7afdb"
-#patches:
-#  "1.1.0":
-#     - patch_file: "patches/0001-1.1.0-fstream-missing.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0002-1.1.0-cmake-install.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0003-1.1.0-cmake-find-package.patch"
-#       base_path: "source_subfolder"
-#  "1.0.0":
-#     - patch_file: "patches/0001-1.0.0-fstream-missing.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0002-1.0.0-cmake-install.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0003-1.0.0-cmake-find-package.patch"
-#       base_path: "source_subfolder"
-#  "0.9.0":
-#     - patch_file: "patches/0001-0.9.0-fstream-missing.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0002-0.9.0-cmake-install.patch"
-#       base_path: "source_subfolder"
-#     - patch_file: "patches/0003-0.9.0-cmake-find-package.patch"
-#       base_path: "source_subfolder"
+patches:
+  "1.1.0":
+     - patch_file: "patches/0001-1.1.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-1.1.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-1.1.0-cmake-find-package.patch"
+       base_path: "source_subfolder"
+  "1.0.0":
+     - patch_file: "patches/0001-1.0.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-1.0.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-1.0.0-cmake-find-package.patch"
+       base_path: "source_subfolder"
+  "0.9.0":
+     - patch_file: "patches/0001-0.9.0-fstream-missing.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0002-0.9.0-cmake-install.patch"
+       base_path: "source_subfolder"
+     - patch_file: "patches/0003-0.9.0-cmake-find-package.patch"
+       base_path: "source_subfolder"
