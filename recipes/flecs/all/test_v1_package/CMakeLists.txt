@@ -6,7 +6,7 @@ conan_basic_setup(TARGETS)
 
 find_package(flecs REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../test_package/test_package.c)
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 if(TARGET flecs::flecs_static)
     target_link_libraries(${PROJECT_NAME} PRIVATE flecs::flecs_static)
 else()
