@@ -49,7 +49,7 @@ class KModConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.3")
+            self.requires("openssl/3.0.5")
 
     def validate(self):
         if self.settings.os != "Linux":
