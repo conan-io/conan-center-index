@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 import os
 
 required_conan_version = ">=1.33.0"
@@ -8,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class BenchmarkConan(ConanFile):
     name = "benchmark"
     description = "A microbenchmark support library."
-    topics = ("conan", "benchmark", "google", "microbenchmark")
+    topics = ("benchmark", "google", "microbenchmark")
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://github.com/google/benchmark"
     license = "Apache-2.0"
@@ -65,7 +66,7 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
 
         if self.settings.os != "Windows":
-            if tools.cross_building(self.settings):
+            if cross_building(self):
                 self._cmake.definitions["HAVE_STD_REGEX"] = False
                 self._cmake.definitions["HAVE_POSIX_REGEX"] = False
                 self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
