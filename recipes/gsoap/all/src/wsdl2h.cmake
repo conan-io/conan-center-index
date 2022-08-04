@@ -58,7 +58,7 @@ if(${WITH_OPENSSL})
     find_package(ZLIB REQUIRED)
     target_include_directories(wsdl2h PRIVATE ${GSOAP_PATH}/gsoap/plugin)
     target_compile_definitions(wsdl2h PRIVATE WITH_OPENSSL WITH_GZIP)
-    target_link_libraries(wsdl2h OpenSSL::OpenSSL ZLIB::ZLIB)
+    target_link_libraries(wsdl2h OpenSSL::Crypto OpenSSL::SSL ZLIB::ZLIB)
 endif()
 
 install(TARGETS wsdl2h RUNTIME DESTINATION bin)
