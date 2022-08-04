@@ -116,7 +116,7 @@ class SpdlogConan(ConanFile):
             cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst="licenses", src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
             copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
         else:
