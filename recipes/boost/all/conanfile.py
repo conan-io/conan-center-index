@@ -59,9 +59,17 @@ CONFIGURE_OPTIONS = (
     "wave",
 )
 
-PYTHON_VERSIONS = (
+class PythonVersion:
+    def __init__(self, v):
+        self.v = v
+
+    @property
+    def xy(self):
+        return self.v.replace('.', '')
+
+PYTHON_VERSIONS = [PythonVersion(v) for v in (
     "2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"
-)
+)]
 
 
 class BoostConan(ConanFile):
@@ -87,8 +95,6 @@ class BoostConan(ConanFile):
         "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "diagnostic_definitions": [True, False],  # enables BOOST_LIB_DIAGNOSTIC
-        "python_executable": "ANY",  # system default python installation is used, if None
-        "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
         "multithreading": [True, False],  # enables multithreading support
@@ -113,7 +119,8 @@ class BoostConan(ConanFile):
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
     # extra boost_python libs to build
-    options.update({f"python{_name.replace('.', '')}_executable": "ANY" for _name in PYTHON_VERSIONS})
+    options.update({f"python{v.xy}": [True, False] for v in PYTHON_VERSIONS})
+    options.update({f"python{v.xy}_executable": "ANY" for v in PYTHON_VERSIONS})
 
     default_options = {
         "shared": False,
@@ -127,8 +134,6 @@ class BoostConan(ConanFile):
         "layout": "system",
         "magic_autolink": False,
         "diagnostic_definitions": False,
-        "python_executable": "None",
-        "python_version": "None",
         "namespace": "boost",
         "namespace_alias": False,
         "multithreading": True,
@@ -154,12 +159,13 @@ class BoostConan(ConanFile):
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
     # extra boost_python libs to build
-    default_options.update({f"python{_name.replace('.', '')}_executable": "None" for _name in PYTHON_VERSIONS})
+    default_options.update({f"python{v.xy}": False for v in PYTHON_VERSIONS})
+    default_options.update({f"python{v.xy}_executable": "None" for v in PYTHON_VERSIONS})
 
     short_paths = True
     no_copy_source = True
     _cached_dependencies = None
-    _detected_python = None
+    _pythons = []  # -> list[PythonTool]
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -387,9 +393,12 @@ class BoostConan(ConanFile):
             del self.options.i18n_backend_icu
 
         if not self.options.without_python:
-            if not self.options.python_version:
-                self.options.python_version = self._python.version
-                self.options.python_executable = self._python.executable
+            enabled_pythons = [self.options.get_safe(f"python{version.xy}") for version in PYTHON_VERSIONS]
+            if not any(enabled_pythons):
+                # No specified pythons so detect and set
+                python = self._detect_python()
+                setattr(self.options, f"python{python.version.xy}", True)
+                setattr(self.options, f"python{python.version.xy}_executable", python.executable)
         else:
             del self.options.python_buildid
 
@@ -553,11 +562,14 @@ class BoostConan(ConanFile):
             del self.info.options.debug_level
             del self.info.options.filesystem_version
             del self.info.options.pch
-            del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
-            if self.options.without_python:
-                del self.info.options.python_version
-            else:
-                self.info.options.python_version = self._python.version
+
+            for version in PYTHON_VERSIONS:
+                # PATH to the interpreter is not important, only version matters
+                delattr(self.info.options, f"python{version.xy}_executable")
+
+                # only enabled versions matter
+                if self.options.without_python or not self.options.get_safe(f"python{version.xy}"):
+                    delattr(self.info.options, f"python{version.xy}")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -575,18 +587,15 @@ class BoostConan(ConanFile):
         obtain version of python interpreter
         :return: python interpreter version, in format major.minor
         """
-        detected = detect_python(context=self)
-
-        if self.options.python_version and detected.version != self.options.python_version:
-            raise ConanInvalidConfiguration(f"detected python version {detected.version} doesn't match conan option {self.options.python_version}")
-
-        return detected
+        return detect_python(context=self)
 
     @property
     def _python(self):
-        if self._detected_python is None:
-            self._detected_python = self._detect_python()
-        return self._detected_python
+        if not self._pythons:
+            detected_python = self._detect_python()
+            self._pythons.append(detected_python)
+
+        return next(iter(self._pythons), None)
 
     def _clean(self):
         src = os.path.join(self.source_folder, self._source_subfolder)
@@ -963,8 +972,14 @@ class BoostConan(ConanFile):
 
         if self.options.buildid:
             flags.append(f"--buildid={self.options.buildid}")
-        if not self.options.without_python and self.options.python_buildid:
-            flags.append(f"--python-buildid={self.options.python_buildid}")
+        if not self.options.without_python:
+            if self.options.python_buildid:
+                flags.append(f"--python-buildid={self.options.python_buildid}")
+
+            # b2 needs a comma separated list of pythons to build.
+            python_var = "python=%s" % ",".join([p.version.v for p in self._pythons])
+            flags.append(python_var)
+
 
         if self.options.extra_b2_flags:
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
@@ -1062,18 +1077,25 @@ class BoostConan(ConanFile):
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
             def create_python_config(python_tool):
-                version = python_tool.version
+                version = python_tool.version.v
                 executable = python_tool.executable
                 includes = python_tool.includes
                 library_dir = python_tool.library_dir
                 return f'\nusing python : {version} : "{executable}" : "{includes}" : "{library_dir}" ;'
 
-            contents += create_python_config(self._python)
+            for version in reversed(PYTHON_VERSIONS):  # default to latest python version
+                if self.options.get_safe(f"python{version.xy}"):
+                    executable = self.options.get_safe(f"python{version.xy}_executable")
+                    self._pythons.append(PythonTool(version, executable.value, self))
 
-            for version in PYTHON_VERSIONS:
-                option = self.options.get_safe(f"python{version.replace('.', '')}_executable")
-                if option:
-                    contents += create_python_config(PythonTool(version, option.value, self))
+            if not self._pythons:
+                # No specified pythons so detect and set
+                python = self._detect_python()
+                self._pythons.append(PythonTool(python.version, python.executable, self))
+
+            for python_xy in self._pythons:
+                contents += create_python_config(python_xy)
+
 
         if not self.options.without_mpi:
             # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
@@ -1448,7 +1470,18 @@ class BoostConan(ConanFile):
                     new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
                     if self.options.namespace != 'boost':
                         new_name = new_name.replace("boost_", str(self.options.namespace) + "_")
+
                     if name.startswith("boost_python") or name.startswith("boost_numpy"):
+                        # FIXME: these are missing python_buildid and buildid
+                        for p in self._pythons:
+                            xy_version = tools.Version(p.version.v)
+                            xy_formatdata = {
+                                "py_major": xy_version.major,
+                                "py_minor": xy_version.minor
+                            }
+                            xy_name = add_libprefix(name.format(**xy_formatdata)) + libsuffix
+                            libs.append(xy_name)
+
                         if self.options.python_buildid:
                             new_name += f"-{self.options.python_buildid}"
                     if self.options.buildid:
@@ -1581,13 +1614,14 @@ def detect_python(context, executable=sys.executable):
     Factory method.
     """
     exe = executable.replace("\\", "/")
-    version = run_script(
+    version_str = run_script(
         context,
         exe,
         "from __future__ import print_function; "
         "import sys; "
         "print('{}.{}'.format(sys.version_info[0], sys.version_info[1]))",
     )
+    version = PythonVersion(version_str)
 
     return PythonTool(version, exe, context)
 
@@ -1673,7 +1707,7 @@ class PythonTool:
 
         NOTE: distutils is deprecated and breaks the recipe since Python 3.10
         """
-        python_version_parts = self.version.split(".")
+        python_version_parts = self.version.v.split(".")
         python_major = int(python_version_parts[0])
         python_minor = int(python_version_parts[1])
 
@@ -1757,9 +1791,7 @@ class PythonTool:
         if with_dyld:
             library_suffixes.insert(0, ".dylib")
 
-        python_version = self.version
-        python_version_no_dot = python_version.replace(".", "")
-        versions = ["", python_version, python_version_no_dot]
+        versions = ["", self.version.v, self.version.xy]
         abiflags = self.abiflags
 
         for prefix in library_prefixes:
