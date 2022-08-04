@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 # TODO: Need to be ported for Conan 2.0
 from conans import __version__ as conan_version
 # TODO: Update after Conan 1.50
-from conans.tools import check_min_cppstd
+from conans import tools as tools_legacy
 import os
 
 
@@ -66,7 +66,7 @@ class SpdlogConan(ConanFile):
 
     def validate_build(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            tools_legacy.check_min_cppstd(self, 11)
         if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self.options.get_safe("shared", False) and is_msvc_static_runtime(self):
