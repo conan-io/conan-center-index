@@ -26,7 +26,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _is_universal2(self):
-        return self.version in ["r23b", "r23c", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+        return self.version in ["r23b", "r23c", "r24", "r25"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
