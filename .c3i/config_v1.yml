@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.49.0
+  version: 1.50.1
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -159,7 +159,7 @@ node_labels:
   Windows:
     x86_64:
       "Visual Studio":
-        default: "windows20220708"
+        default: "windows20220803"
   Macos:
     x86_64:
       "apple-clang":
