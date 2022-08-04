@@ -55,7 +55,6 @@ class AbseilConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        self.folders.build = "build"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
