@@ -2,11 +2,12 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.errors import ConanInvalidConfiguration
 # TODO: Need to be ported for Conan 2.0
 from conans import __version__ as conan_version
+# TODO: Update after Conan 1.50
+from conans.tools import check_min_cppstd
 import os
 
 
