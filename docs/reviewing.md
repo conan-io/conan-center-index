@@ -10,6 +10,7 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
+  * [Exporting Patches](#exporting-patches)
   * [Applying Patches](#applying-patches)
   * [CMake](#cmake)
     * [Caching Helper](#caching-helper)
