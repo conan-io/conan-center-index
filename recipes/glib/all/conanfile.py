@@ -7,6 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 from conans import tools
 import functools
 import os
@@ -170,9 +171,8 @@ class GLibConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if scm.Version(self.version) < "2.67.2":
+        apply_conandata_patches(self)
+        if tools.Version(self.version) < "2.67.2":
             tools.replace_in_file(
                 os.path.join(self.source_folder, "meson.build"),
                 "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())",
