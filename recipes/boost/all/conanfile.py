@@ -1,19 +1,19 @@
-from conan.tools.build import cross_building
-from conan.tools.files import rename, rmdir, get
-from conan.tools.files.patches import apply_conandata_patches
-from conan.tools.microsoft import msvc_runtime_flag
-from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
-from conans import tools
-from conan.tools.scm import Version
-
 import glob
 import os
 import re
-import sys
 import shlex
 import shutil
+import sys
+
 import yaml
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import get, rename, rmdir
+from conan.tools.files.patches import apply_conandata_patches
+from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.scm import Version
+from conans import tools
 
 try:
     from cStringIO import StringIO
@@ -59,7 +59,9 @@ CONFIGURE_OPTIONS = (
     "wave",
 )
 
-PYTHON_VERSIONS = ("2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10")
+PYTHON_VERSIONS = (
+    "2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"
+)
 
 
 class BoostConan(ConanFile):
@@ -358,7 +360,7 @@ class BoostConan(ConanFile):
     @property
     def _stacktrace_addr2line_available(self):
         if (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
-             # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
+            # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
             return False
         return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
@@ -563,7 +565,7 @@ class BoostConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+            destination=self._source_subfolder, strip_root=True)
         apply_conandata_patches(self)
 
     ##################### BUILDING METHODS ###########################
@@ -585,7 +587,6 @@ class BoostConan(ConanFile):
         if self._detected_python is None:
             self._detected_python = self._detect_python()
         return self._detected_python
-
 
     def _clean(self):
         src = os.path.join(self.source_folder, self._source_subfolder)
@@ -889,7 +890,6 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-g")
             elif self._is_msvc:
                 cxx_flags.append("/Z7")
-
 
         # Standalone toolchain fails when declare the std lib
         if self.settings.os not in ("Android", "Emscripten"):
@@ -1564,8 +1564,8 @@ class BoostConan(ConanFile):
                     # from the aforementioned flag)
                     if arch.startswith("x86") or arch.startswith("wasm"):
                         self.cpp_info.components["_libboost"].cxxflags.append("-pthread")
-                        self.cpp_info.components["_libboost"].sharedlinkflags.extend(["-pthread","--shared-memory"])
-                        self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.components["_libboost"].sharedlinkflags.extend(["-pthread", "--shared-memory"])
+                        self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread", "--shared-memory"])
             elif self.settings.os == "iOS":
                 if self.options.multithreading:
                     # https://github.com/conan-io/conan-center-index/issues/3867
@@ -1744,7 +1744,7 @@ class PythonTool:
         with_dyld = self._get_var("WITH_DYLD")
         if libdir and multiarch and masd:
             if masd.startswith(os.sep):
-                masd = masd[len(os.sep) :]
+                masd = masd[len(os.sep):]
             libdir = os.path.join(libdir, masd)
 
         if not libdir:
