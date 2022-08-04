@@ -38,8 +38,7 @@ class FlecsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def layout(self):
-        cmake_layout(self)
-        self.folders.source = "src"
+        cmake_layout(self, src_folder="src")
         self.folders.build = "build"
 
     def source(self):
