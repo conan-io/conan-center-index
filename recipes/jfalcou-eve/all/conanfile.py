@@ -26,7 +26,7 @@ class JfalcouEveConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if not self.version.startswith("cci.") and  tools.Version(self.version) >= "2022.03.0":
+        if  tools.Version(self.version) >= "2022.03.0":
                 return {
                     "gcc": "11",
                     "Visual Studio": "16.9",
