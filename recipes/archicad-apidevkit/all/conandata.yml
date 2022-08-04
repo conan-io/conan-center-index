@@ -7,7 +7,7 @@ sources:
       Windows:
           "x86_64":
               url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/210519.v2021Release.3002.FULL.FIN.WIN64.DevKitAPI.zip"
-              sha256: "f921878cc969478a20fa440743c44d29c2578692ae44a15ae2df63bb719a77c8"
+              sha256: "e7da392408f6150c58f3cba5d4f05118f1eaed4519fdb76895e13aed9ceede97"
 
   "26":
       Macos:
@@ -17,5 +17,5 @@ sources:
       Windows:
           "x86_64":
               url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.WIN64.DevKitAPI.zip"
-              sha256: "f921878cc969478a20fa440743c44d29c2578692ae44a15ae2df63bb719a77c8"
+              sha256: "32b86cfbf66dd915f53944af0b34cab7f4eedd034d622a523fd4f01bdf3e3e26"
 
