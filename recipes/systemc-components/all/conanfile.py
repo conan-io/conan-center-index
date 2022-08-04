@@ -62,6 +62,7 @@ class SystemcComponentsConan(ConanFile):
         cmake.definitions["SC_WITH_PHASE_CALLBACKS"] = self.options.sc_with_phases_callbacks
         cmake.definitions["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.sc_with_phases_callback_tracing
         cmake.definitions["BUILD_SCC_DOCUMENTATION"] = False
+        cmake.definitions["SCC_LIB_ONLY"] = True
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
