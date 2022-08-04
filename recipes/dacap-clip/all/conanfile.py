@@ -3,6 +3,8 @@ import os
 from conan import ConanFile
 from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 
 from conans.tools import check_min_cppstd
 
@@ -50,6 +52,8 @@ class DacapClipConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.shared == True:
+            raise ConanInvalidConfiguration("{} doesn't support MSVC debug shared build (now).".format(self.name))
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
