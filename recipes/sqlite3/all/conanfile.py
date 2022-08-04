@@ -223,4 +223,4 @@ class Sqlite3Conan(ConanFile):
         self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite::SQLite3")
         self.cpp_info.components["sqlite"].set_property("pkg_config_name", "sqlite3")
 
-        self.cpp_info.components["sqlite"].builddirs = [os.path.join("lib", "cmake")]
+        self.cpp_info.components["sqlite"].builddirs.append(os.path.join("lib", "cmake"))
