@@ -77,8 +77,7 @@ class LibrdkafkaConan(ConanFile):
             self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
-        cmake_layout(self)
-        self.folders.source = "src"
+        cmake_layout(self, src_folder="src")
         self.folders.build = "build"
 
     def source(self):
