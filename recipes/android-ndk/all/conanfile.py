@@ -143,12 +143,12 @@ class AndroidNDKConan(ConanFile):
                         self.output.info(f"chmod on ELF file: '{filename}'")
                         self._chmod_plus_x(filename)
                     elif sig in (
-                        [202, 254, 186, 190],
-                        [190, 186, 254, 202],
-                        [254, 237, 250, 207],
-                        [207, 250, 237, 254],
-                        [254, 239, 250, 206],
-                        [206, 250, 237, 254]
+                        [0xCA, 0xFE, 0xBA, 0xBE],
+                        [0xBE, 0xBA, 0xFE, 0xCA],
+                        [0xFE, 0xED, 0xFA, 0xCF],
+                        [0xCF, 0xFA, 0xED, 0xFE],
+                        [0xFE, 0xEF, 0xFA, 0xCE],
+                        [0xCE, 0xFA, 0xED, 0xFE]
                     ):
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
