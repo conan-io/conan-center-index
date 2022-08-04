@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans import CMake, tools
 from conan.tools.files import get, copy, patch
 # TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
@@ -20,8 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_libiconv": [True, False], "with_zlib": [True, False], "with_libarchive": [True, False], "fPIC": [True, False]}
-    default_options = {"with_libiconv": True, "with_zlib": True, "with_libarchive": False, "fPIC": True}
+    options = {"with_libiconv": [True, False], "with_zlib": [True, False], "with_libarchive": [True, False], "fPIC": [True, False], "branch_version": [True, False]}
+    default_options = {"with_libiconv": True, "with_zlib": True, "with_libarchive": False, "fPIC": True, "branch_version": False}
 
     @property
     def _source_subfolder(self):
@@ -73,9 +73,11 @@ class OpenTDFConan(ConanFile):
         # We do not require libiconv but conan-center only allows 'stock' references, and boost+libxml2
         # specify differerent versions, which causes a build fail due to the dependency conflict.
         # Overriding the version here allows a clean build with the stock build settings.
+        # Preferred solution is to set with_libiconv to False
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.17@")
         # Same for zlib
+        # Preferred solution is to set with_zlib to False
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.12@")
 
@@ -92,7 +94,12 @@ class OpenTDFConan(ConanFile):
             self.options["boost"].without_log = True
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        # If branch_version is set to True, the supplied version will be treated as a branch name for git clone
+        if self.options.get_safe("branch_version"):
+            self.output.warn("Building branch_version = {}".format(self.version))
+            self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
+        else:
+            get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
