@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
+from conan.tools.build import cross_building
 
 required_conan_version = ">=1.33.0"
 
@@ -91,18 +92,19 @@ class DiligentCoreConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
 
-        self.requires("spirv-cross/1.3.204.0")
-        self.requires("spirv-tools/1.3.204.0")
+        self.requires("spirv-cross/1.3.216.0")
+        self.requires("spirv-tools/1.3.216.0")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.204.0")
-        self.requires("vulkan-headers/1.3.204.1")
-        self.requires("volk/1.3.204")
+            self.requires("glslang/1.3.216.0")
+        self.requires("vulkan-headers/1.3.216.0")
+        self.requires("vulkan-validationlayers/1.3.216.0")
+        self.requires("volk/1.3.216.0")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-            if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.3.1")
+            if not cross_building(self, skip_x64_x86=True):
+                self.requires("xkbcommon/1.4.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
@@ -131,6 +133,8 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
         self._cmake.definitions["BUILD_SHARED_LIBS"] = False
+        self._cmake.definitions["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        self._cmake.definitions["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
@@ -173,12 +177,14 @@ class DiligentCoreConan(ConanFile):
 
         self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        # MinGw creates many invalid files, called objects.a, remove them here:
+        tools.remove_files_by_mask(self.package_folder, "objects.a")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "dummy1", "dummy2"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "DiligentCore", "Common"))
 
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
@@ -189,7 +195,9 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface"))
+        archiver_path = os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface")
+        if os.path.isdir(archiver_path):
+            self.cpp_info.includedirs.append(archiver_path)
 
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
@@ -212,4 +220,6 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
         if self.settings.os == 'Macos':
-            self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa']
+            self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa', 'AppKit']
+        if self.settings.os == 'Windows':
+            self.cpp_info.system_libs = ["dxgi", "shlwapi"]

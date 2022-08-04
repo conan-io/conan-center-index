@@ -11,26 +11,23 @@ class BitmagicConan(ConanFile):
                   "promote combination of hardware optimizations and on the fly compression to fit " \
                   "inverted indexes and binary fingerprints into memory, minimize disk and network footprint."
     license = "Apache-2.0"
-    topics = ("bitmagic", "information-retrieval", "algorithm", "bit-manipulation",
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://bitmagic.io"
+    topics = ("information-retrieval", "algorithm", "bit-manipulation",
               "integer-compression", "sparse-vector", "sparse-matrix", "bit-array",
               "bit-vector", "indexing-engine", "adjacency-matrix", "associative-array")
-    homepage = "http://bitmagic.io"
-    url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def _minimum_compilers_version(self, cppstd):
         standards = {
-            "11": {
-                "Visual Studio": "15",
-                "gcc": "4.8",
-                "clang": "4",
-                "apple-clang": "9",
-            },
             "17": {
                 "Visual Studio": "16",
                 "gcc": "7",
@@ -42,7 +39,7 @@ class BitmagicConan(ConanFile):
 
     @property
     def _cppstd(self):
-        return "11" if tools.Version(self.version) < "7.5.0" else "17"
+        return "17"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -54,9 +51,6 @@ class BitmagicConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, self._cppstd))
         else:
             self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, self._cppstd))
-
-    def package_id(self):
-        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

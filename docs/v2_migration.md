@@ -6,6 +6,8 @@
 > will be taken in ConanCenter and this repository to start running
 > Conan v2 in pull requests.
 
+> ⚠️  Read about the [linter in pull requests](v2_linter.md).
+
 It's time to start thinking seriously about Conan v2 and prepare recipes
 for the incoming changes. Conan v2 comes with many
 changes and improvements, you can read about them in the

@@ -11,3 +11,6 @@ sources:
   0.0.17:
     url: https://github.com/bernedom/bertrand/archive/0.0.17.tar.gz
     sha256: 72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012
+  "0.013":
+    url: "https://github.com/bernedom/bertrand/archive/0.013.tar.gz"
+    sha256: "f2f071006d3a9b31382957b84e81405adba44cbf1a9bb8242ad4d0f44d7af7fb"

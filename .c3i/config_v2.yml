@@ -1,0 +1,103 @@
+---
+# Configuration for `https://github.com/conan-io/conan-center-index-staging` repository (using Conan v2)
+id: 'conan-io/conan-center-index-staging-v2'
+
+conan:
+  version: 2.0.0-pre
+
+artifactory:
+  url: "https://c3i.jfrog.io/c3i"
+  main_repo: "conan-center-v2"
+  pull-request_repo_prefix: "c3i_PR-v2"
+  pull-request_permission: "c3i-pr"
+  logs_repo: "misc-v2"
+  # cache_repo: "cache"
+
+github:
+  reviewers: "reviewers.yml"
+  authorized_users: "authorized_users.yml"
+
+# Requirements to merge a given pull-request:
+# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+# * check_runs refers to notifications from GH actions
+#status_checks:
+#  - "license/cla"
+#  - "continuous-integration/jenkins/pr-merge"
+
+#slack:
+#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+
+# Things related to Jenkins jobs:
+tasks:
+  write_comments: false
+  detailed_status_checks: false
+  update_labels: false
+  automatic_merge:
+    reviews_required_total: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+    reviews_required_team: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+
+configurations:
+  - id: linux-gcc
+    epochs: [20220628]
+    hrname: "Linux, GCC"
+    build_profile:
+      os: "Linux"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "gcc":
+              compiler.libcxx: ["libstdc++11"]
+              compiler.version: ["11"]
+              build_type: ["Release"]
+  - id: configs/macos-clang
+    epochs: [20220628]
+    hrname: "macOS, Clang"
+    build_profile:
+      os: "Macos"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: ["13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: configs/windows-msvc
+    epochs: [20220628]
+    hrname: "Windows, MSVC"
+    build_profile:
+      os: "Windows"
+    content:
+      - os: [ "Windows" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "msvc":
+              compiler.version: [ "192" ]
+              build_type:
+                - "Release":
+                    compiler.runtime: [ "static", "dynamic" ]
+                    compiler.runtime_type: [ "Release" ]
+
+jenkins:
+  url: "http://mb-jenkins-my-bloody-jenkins:8080"
+
+node_labels:
+  Windows:
+    x86_64:
+      "msvc":
+        default: "windows20220803"
+  Macos:
+    x86_64:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+    armv8:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+  Linux:
+    x86_64:
+      "gcc":
+        default: "linux_gcc_${compiler.version}_ubuntu16.04"
+      "clang":
+        default: "linux_clang_${compiler.version}_ubuntu16.04"

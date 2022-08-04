@@ -38,7 +38,7 @@ class LibSELinuxConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("pcre2/10.37")
+        self.requires("pcre2/10.40")
 
     def validate(self):
         if self.settings.os != "Linux":
