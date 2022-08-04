@@ -52,8 +52,7 @@ class GlfwConan(ConanFile):
             self.requires("xorg/system")
 
     def layout(self):
-        cmake_layout(self)
-        self.folders.source = "src"
+        cmake_layout(self, src_folder="src")
         self.folders.build = "build"
 
     def source(self):
