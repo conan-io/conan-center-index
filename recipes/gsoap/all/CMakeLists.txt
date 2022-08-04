@@ -4,14 +4,12 @@ project(gSOAP)
 option(BUILD_TOOLS "Build soapcpp2 and wsdl2h" ON)
 option(BUILD_GSOAP "Build gsoap library" ON)
 
-if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-  include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-else()
-  include(conanbuildinfo.cmake)
-endif()
-conan_basic_setup(TARGETS)
-
 message("Generate gSOAP from sources at ${GSOAP_PATH}")
+
+if(${WITH_OPENSSL})
+  find_package(OpenSSL REQUIRED)
+  find_package(ZLIB REQUIRED)
+endif()
 
 # Tools
 if(${BUILD_TOOLS})

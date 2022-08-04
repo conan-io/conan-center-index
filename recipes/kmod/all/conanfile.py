@@ -1,11 +1,14 @@
-from conans import tools
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-from conan.tools.files import get, save, rmdir
+from conan.tools.layout import basic_layout
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.44"
+required_conan_version = ">=1.48.0"
+
 
 class KModConan(ConanFile):
     name = "kmod"
@@ -15,7 +18,6 @@ class KModConan(ConanFile):
     homepage = "https://github.com/kmod-project/kmod"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
-    tool_requires = 'libtool/2.4.6', 'pkgconf/1.7.4'
     options = {
         "fPIC": [True, False],
         "with_zstd": [True, False],
@@ -35,14 +37,37 @@ class KModConan(ConanFile):
         "logging": False,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.with_zstd:
+            self.requires("zstd/1.5.2")
+        if self.options.with_xz:
+            self.requires("xz_utils/5.2.5")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.12")
+        if self.options.with_openssl:
+            self.requires("openssl/3.0.5")
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("kmod is Linux-only!")
+
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("pkgconf/1.7.4")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
-        tc.default_configure_install_args = True  # FIXME: https://github.com/conan-io/conan/issues/10650 (should be default)
         tc.configure_args.append("--with-zstd=%s" % yes_no(self.options.with_zstd))
         tc.configure_args.append("--with-xz=%s" % yes_no(self.options.with_xz))
         tc.configure_args.append("--with-zlib=%s" % yes_no(self.options.with_zlib))
@@ -59,48 +84,24 @@ class KModConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = AutotoolsDeps(self)
-        tc.environment.define("PKG_CONFIG_PATH", self.source_folder)  # FIXME: https://github.com/conan-io/conan/issues/10639 (should work out of the box)
-        tc.environment.define("LIBS", "-lpthread")  # FIXME: https://github.com/conan-io/conan/issues/10341 (regression in 1.45, soname arguments are "eaten")
-        tc.environment.define("libzstd_LIBS", "-lzstd")  # FIXME: https://github.com/conan-io/conan/issues/10640 (zstd pkg-config includes itself)
-        tc.environment.define("zlib_LIBS", "-lz")  # FIXME: https://github.com/conan-io/conan/issues/10651 (command line is polluted by framework arguments)
-        tc.environment.define("libcrypto_LIBS", "-lcrypto -ldl -lrt -lpthread")
-        tc.environment.define("liblzma_LIBS", "-llzma")
         tc.generate()
-
-    def requirements(self):
-        if self.options.with_zstd:
-            self.requires('zstd/1.5.2')
-        if self.options.with_xz:
-            self.requires('xz_utils/5.2.5')
-        if self.options.with_zlib:
-            self.requires('zlib/1.2.12')
-        if self.options.with_openssl:
-            self.requires('openssl/3.0.3')
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("kmod is Linux-only!")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        # inject tools_require env vars in build context
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     def build(self):
-        save(self, os.path.join(self._source_subfolder, "libkmod", "docs", "gtk-doc.make"), "")
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"),
-                 win_bash=tools.os_info.is_windows, run_environment=True, cwd=self._source_subfolder)
+        save(self, os.path.join(self.source_folder, "libkmod", "docs", "gtk-doc.make"), "")
         autotools = Autotools(self)
-        autotools.configure(build_script_folder=self._source_subfolder)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        # TODO: replace by conan.tools.files.rm (conan 1.50.0)
+        tools_legacy.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
