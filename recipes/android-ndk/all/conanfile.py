@@ -45,7 +45,7 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24']:
+        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
