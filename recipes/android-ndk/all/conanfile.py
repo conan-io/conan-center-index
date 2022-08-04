@@ -49,7 +49,7 @@ class AndroidNDKConan(ConanFile):
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
+            tools.files.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):
@@ -346,8 +346,8 @@ def unzip_fix_symlinks(url, target_folder, sha256):
     # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
 
     filename = "android_sdk.zip"
-    tools.download(url, filename, sha256=sha256)
-    tools.unzip(filename, destination=target_folder, strip_root=True)
+    tools.files.download(url, filename, sha256=sha256)
+    tools.files.unzip(filename, destination=target_folder, strip_root=True)
 
     def is_symlink_zipinfo(zi):
         return (zi.external_attr >> 28) == 0xA
@@ -364,7 +364,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
             if is_symlink_zipinfo(file_):
                 rel_path = os.path.relpath(file_.filename, common_folder)
                 full_name = os.path.join(full_path, rel_path)
-                target = tools.load(full_name)
+                target = tools.files.load(full_name)
                 os.unlink(full_name)
 
                 try:
