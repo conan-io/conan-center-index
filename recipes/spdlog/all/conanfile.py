@@ -11,7 +11,7 @@ from conans.tools import check_min_cppstd
 import os
 
 
-required_conan_version = ">=1.50.1"
+required_conan_version = ">=1.49.0"
 
 
 class SpdlogConan(ConanFile):
