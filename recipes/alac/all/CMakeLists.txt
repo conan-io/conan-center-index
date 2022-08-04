@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
-project(alac)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(alac LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
-file(GLOB ALAC_LIB_SRCS source_subfolder/codec/*.c source_subfolder/codec/*.cpp)
-file(GLOB ALAC_LIB_PUBLIC_HDRS source_subfolder/codec/ALAC*.h)
+file(GLOB ALAC_LIB_SRCS src/codec/*.c src/codec/*.cpp)
+file(GLOB ALAC_LIB_PUBLIC_HDRS src/codec/ALAC*.h)
 
 add_library(alac ${ALAC_LIB_SRCS})
-target_include_directories(alac PUBLIC source_subfolder/codec)
+target_include_directories(alac PUBLIC src/codec)
 set_property(TARGET alac PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 target_compile_definitions(alac
     PRIVATE
@@ -24,7 +21,7 @@ install(TARGETS alac
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ALAC_BUILD_UTILITY)
-    file(GLOB ALAC_CONVERTER_SRCS source_subfolder/convert-utility/*.cpp)
+    file(GLOB ALAC_CONVERTER_SRCS src/convert-utility/*.cpp)
 
     add_executable(alacconvert ${ALAC_CONVERTER_SRCS})
     target_link_libraries(alacconvert PRIVATE alac)
