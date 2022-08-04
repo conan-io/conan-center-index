@@ -48,7 +48,7 @@ class OpenTDFConan(ConanFile):
     def export_sources(self):
         self.copy("CMakeLists.txt")
         for data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **data)
+            self.copy(data["patch_file"])
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -63,7 +63,7 @@ class OpenTDFConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.79.0")
         self.requires("ms-gsl/2.1.0")
         self.requires("libxml2/2.9.14")
         self.requires("nlohmann_json/3.11.1")
@@ -127,7 +127,7 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
-        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "libarchive::libarchive", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
+        self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
         if self.options.get_safe("with_libarchive"):
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if self.options.get_safe("with_zlib"):
