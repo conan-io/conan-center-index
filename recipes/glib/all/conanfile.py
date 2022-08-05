@@ -258,6 +258,7 @@ class GLibConan(ConanFile):
             os.path.join(self.package_folder, "share"),
             os.path.join(self.package_folder, "res"),
         )
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pc")
 
