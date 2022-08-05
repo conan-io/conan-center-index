@@ -29,4 +29,3 @@ sources:
 patches:
   "2.73.1":
     - patch_file: "patches/f2ea67ae441bc6059b43a1051dd0b750fe5f6301.patch"
-      base_path: "source_subfolder"
