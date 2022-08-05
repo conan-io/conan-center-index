@@ -1,4 +1,5 @@
 import os
+from conan.tools import files
 from conans import ConanFile, CMake, tools
 
 
@@ -60,7 +61,7 @@ class Log4cplusConan(ConanFile):
 
     def source(self):
         archive_name = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
+        files.get(self, **self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -96,7 +97,7 @@ class Log4cplusConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
