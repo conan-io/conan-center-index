@@ -1,9 +1,10 @@
 from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class LibtiffConan(ConanFile):
@@ -52,10 +53,6 @@ class LibtiffConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _has_webp_option(self):
         return tools.Version(self.version) >= "4.0.10"
 
@@ -93,19 +90,19 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.12")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.10")
+            self.requires("libdeflate/1.12")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.3")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
             self.requires("zstd/1.5.2")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.3")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
@@ -130,14 +127,14 @@ class LibtiffConan(ConanFile):
             else:
                 os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
 
-        if self.options.shared and self._is_msvc:
+        if self.options.shared and is_msvc(self):
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, "libtiff", "CMakeLists.txt"),
                                   r"set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})",
                                   r"set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} "
                                   r"WINDOWS_EXPORT_ALL_SYMBOLS ON)")
         cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        if self.settings.os == "Windows" and not self._is_msvc:
+        if self.settings.os == "Windows" and not is_msvc(self):
             if tools.Version(self.version) < "4.2.0":
                 tools.replace_in_file(cmakefile,
                                     "find_library(M_LIBRARY m)",
@@ -185,6 +182,7 @@ class LibtiffConan(ConanFile):
         self.copy("COPYRIGHT", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -195,9 +193,9 @@ class LibtiffConan(ConanFile):
         if self.options.cxx:
             self.cpp_info.libs.append("tiffxx")
         self.cpp_info.libs.append("tiff")
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug" and self._is_msvc:
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug" and is_msvc(self):
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
-        if self.options.shared and self.settings.os == "Windows" and not self._is_msvc:
+        if self.options.shared and self.settings.os == "Windows" and not is_msvc(self):
             self.cpp_info.libs = [lib + ".dll" for lib in self.cpp_info.libs]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
