@@ -70,12 +70,21 @@ class SpdlogConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if self.info.settings.os != "Windows" and (self.info.options.wchar_support or self.info.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is only supported under windows")
-        if not self.info.options.header_only and self.info.options.shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+        # FIXME: Conan 1.x is not able to parse self.info.xxx as Conan 2.x when is header-only
+        if Version(conan_version) >= "2.0.0-beta":
+            if self.info.settings.compiler.cppstd:
+                check_min_cppstd(self, 11)
+            if self.info.settings.os != "Windows" and (self.info.options.wchar_support or self.info.options.wchar_filenames):
+                raise ConanInvalidConfiguration("wchar is only supported under windows")
+            if not self.info.options.header_only and self.info.options.shared and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+        else:
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, 11)
+            if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
+                raise ConanInvalidConfiguration("wchar is only supported under windows")
+            if self.options.get_safe("shared") and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -146,14 +155,10 @@ class SpdlogConan(ConanFile):
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
 
-        self.cpp_info.components["libspdlog"].includedirs = ["include"]
         if not self.options.header_only:
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
-        else:
-            self.cpp_info.components["libspdlog"].libdirs = []
-            self.cpp_info.components["libspdlog"].bindirs = []
         if self.options.wchar_support:
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
