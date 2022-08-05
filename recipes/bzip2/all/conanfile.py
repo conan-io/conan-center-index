@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -59,7 +60,7 @@ class Bzip2Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BZ2_VERSION_STRING"] = self.version
-        tc.variables["BZ2_VERSION_MAJOR"] = self.version.split(".")[0]
+        tc.variables["BZ2_VERSION_MAJOR"] = Version(self.version).major(fill=False)
         tc.variables["BZ2_BUILD_EXE"] = self.options.build_executable
         tc.generate()
 
