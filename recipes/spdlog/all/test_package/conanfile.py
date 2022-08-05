@@ -1,4 +1,3 @@
-# pylint: skip-file
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
