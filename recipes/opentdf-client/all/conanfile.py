@@ -21,7 +21,11 @@ class OpenTDFConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_libiconv": [True, False], "with_zlib": [True, False], "with_libarchive": [True, False], "fPIC": [True, False], "branch_version": [True, False]}
-    default_options = {"with_libiconv": True, "with_zlib": True, "with_libarchive": False, "fPIC": True, "branch_version": False}
+    # opentdf-client does not need libiconv or zlib, they are required by default by boost and libxml,
+    # because of the default configuration on those packages.  The build at conan-center only allows
+    # prebuilt (default) packages, so they are on by default to satisfy that situation.
+    # Recommendation: disable both if you are doing a local build
+    default_options = {"with_libiconv": True, "with_zlib": True, "with_libarchive": True, "fPIC": True, "branch_version": False}
 
     @property
     def _source_subfolder(self):
@@ -70,21 +74,11 @@ class OpenTDFConan(ConanFile):
         self.requires("jwt-cpp/0.4.0")
         if self.options.get_safe("with_libarchive"):
             self.requires("libarchive/3.6.1")
-        # We do not require libiconv but conan-center only allows 'stock' references, and boost+libxml2
-        # specify differerent versions, which causes a build fail due to the dependency conflict.
-        # Overriding the version here allows a clean build with the stock build settings.
-        # Preferred solution is to set with_libiconv to False
-        if self.options.get_safe("with_libiconv"):
-            self.requires("libiconv/1.17@")
-        # Same for zlib
-        # Preferred solution is to set with_zlib to False
-        if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.12@")
 
     def config_options(self):
-        # Do not require libarchive as of 1.1.0
-        if Version(self.version) < "1.1.0":
-            self.options.with_libarchive = True
+        # Do not need libarchive after 1.0.0
+        if Version(self.version) > "1.0.0":
+            del self.options.libarchive
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self.options.with_zlib:
@@ -137,7 +131,3 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
         if self.options.get_safe("with_libarchive"):
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
-        if self.options.get_safe("with_zlib"):
-            self.cpp_info.components["libopentdf"].requires.append("zlib::zlib")
-        if self.options.get_safe("with_libiconv"):
-            self.cpp_info.components["libopentdf"].requires.append("libiconv::libiconv")
