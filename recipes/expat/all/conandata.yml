@@ -39,9 +39,9 @@ sources:
     sha256: "42241742da97d40557857726cc4f02008cd14f2b44134c6e33af043967cd9d15"
     url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_7/expat-2.2.7.tar.gz"
 patches:
+  "2.3.0":
+    - patch_file: "patches/0001-2.3.0-relax-vs-restriction.patch"
   "2.2.7":
     - patch_file: "patches/0002-2.2.7-fix-set-cmake-policies.patch"
       patch_description: "cmake_minimum_required(VERSION) should be called before project() for cmake policies to work"
       patch_type: "conan"
-  "2.3.0":
-    - patch_file: "patches/0001-2.3.0-relax-vs-restriction.patch"
