@@ -50,7 +50,7 @@ class AsmjitConan(ConanFile):
         tc.variables["ASMJIT_EMBED"] = False
         tc.variables["ASMJIT_STATIC"] = not self.options.shared
         if self.version == "cci.20210306":
-            tc.variables["ASMJIT_BUILD_X86"] = self.settings.os in ["x86", "x86_64"]
+            tc.variables["ASMJIT_BUILD_X86"] = self.settings.arch in ["x86", "x86_64"]
         tc.variables["ASMJIT_TEST"] = False
         tc.variables["ASMJIT_NO_NATVIS"] = True
         tc.generate()
