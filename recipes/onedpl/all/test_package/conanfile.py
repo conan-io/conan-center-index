@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["ONEDPL_VERSION_MAJOR"] = tools.Version(self.deps_cpp_info["onedpl"].version).major[0:4]
         cmake.configure()
         cmake.build()
 

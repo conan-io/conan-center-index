@@ -15,7 +15,6 @@ class OneDplConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
-
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "backend": ["tbb", "serial"],
@@ -23,7 +22,6 @@ class OneDplConan(ConanFile):
     default_options = {
         "backend": "tbb",
     }
-
     no_copy_source = True
 
     @property
@@ -39,15 +37,22 @@ class OneDplConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            if tools.Version(self.version) >= "2021.7.0":
+                tools.check_min_cppstd(self, 17)
+            else:
+                tools.check_min_cppstd(self, 11)
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
+        version_major = int(tools.Version(self.version).major[0:4])
         self.copy("*", src=os.path.join(self._source_subfolder, "include"), dst="include")
-        self.copy("*", src=os.path.join(self._source_subfolder, "stdlib"), dst="include")
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
+        if version_major < 2021:
+            self.copy("*", src=os.path.join(self._source_subfolder, "stdlib"), dst="include")
+            self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
+        else:
+            self.copy("LICENSE.txt", src=os.path.join(self._source_subfolder, "licensing"), dst="licenses")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ParallelSTL")

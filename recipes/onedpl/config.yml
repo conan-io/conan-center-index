@@ -1,7 +1,7 @@
 versions:
   "20200330":
-    folder: 2020
+    folder: all
   "2021.6.1":
-    folder: 2021.x
+    folder: all
   "2021.7.0":
-    folder: 2021.x
+    folder: all
