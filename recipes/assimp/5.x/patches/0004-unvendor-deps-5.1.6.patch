@@ -219,15 +219,16 @@
    # Necessary to show the headers in the project when using the VC++ generator:
  
    ${PUBLIC_HEADERS}
-@@ -1145,7 +1154,6 @@ ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
+@@ -1145,7 +1154,7 @@ ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
  IF(NOT ASSIMP_HUNTER_ENABLED)
    INCLUDE_DIRECTORIES(
        ${IRRXML_INCLUDE_DIR}
 -      ../contrib/openddlparser/include
++      ../contrib # for Open3DGC
    )
  ENDIF()
  
-@@ -1154,8 +1162,8 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+@@ -1154,8 +1163,8 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
    INCLUDE_DIRECTORIES(${C4D_INCLUDES})
  ENDIF ()
  
@@ -238,7 +239,7 @@
    ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
  ENDIF()
  
-@@ -1166,9 +1174,7 @@ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+@@ -1166,9 +1175,7 @@ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
  
  # enable warnings as errors ########################################
  IF (MSVC)
@@ -248,7 +249,7 @@
  ENDIF()
  
  # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
-@@ -1201,9 +1207,32 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -1201,9 +1208,32 @@ IF(ASSIMP_HUNTER_ENABLED)
      target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
    endif()
  ELSE()
@@ -284,7 +285,7 @@
    endif()
  ENDIF()
  
-@@ -1291,8 +1320,7 @@ ENDIF()
+@@ -1291,8 +1321,7 @@ ENDIF()
  # assimp can #include "unzip.h"
  IF(NOT ASSIMP_HUNTER_ENABLED)
    if (UNZIP_FOUND)

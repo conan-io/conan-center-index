@@ -129,7 +129,15 @@
    # Necessary to show the headers in the project when using the VC++ generator:
  
    ${PUBLIC_HEADERS}
-@@ -1125,7 +1132,24 @@ IF(HUNTER_ENABLED)
+@@ -1094,6 +1101,7 @@ IF(NOT HUNTER_ENABLED)
+   INCLUDE_DIRECTORIES(
+       ${IRRXML_INCLUDE_DIR}
+       ../contrib/openddlparser/include
++      ../contrib # for Open3DGC
+   )
+ ENDIF(NOT HUNTER_ENABLED)
+ 
+@@ -1125,7 +1133,24 @@ IF(HUNTER_ENABLED)
        zip::zip
    )
  ELSE(HUNTER_ENABLED)
@@ -155,7 +163,7 @@
  ENDIF(HUNTER_ENABLED)
  
  if(ASSIMP_ANDROID_JNIIOSYSTEM)
-@@ -1210,8 +1234,7 @@ ENDIF(APPLE)
+@@ -1210,8 +1235,7 @@ ENDIF(APPLE)
  # assimp can #include "unzip.h"
  IF(NOT HUNTER_ENABLED)
    if (UNZIP_FOUND)
