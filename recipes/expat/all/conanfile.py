@@ -60,7 +60,7 @@ class ExpatConan(ConanFile):
             tc.variables["BUILD_tests"] = "Off"
             tc.variables["BUILD_tools"] = "Off"
             # Generate a relocatable shared lib on Macos
-            tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
             # These options were renamed in 2.2.8 to be more consistent
             tc.variables["EXPAT_BUILD_DOCS"] = "Off"
