@@ -18,6 +18,9 @@ class CppProjectFrameworkConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = f"{name}/*", "test_package/*.*"
 
+    def package_id(self):
+        self.info.header_only()
+
     @property
     def _minimum_cpp_standard(self):
         return 14
@@ -61,6 +64,3 @@ class CppProjectFrameworkConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=f"include/{self.name}", src=os.path.join(self._source_subfolder, self.name))
-
-    def package_id(self):
-        self.info.header_only()

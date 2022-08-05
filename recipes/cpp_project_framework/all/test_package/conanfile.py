@@ -6,7 +6,7 @@ import os
 
 class CppProjectFrameworkTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     requires = "gtest/1.10.0"
 
     def build(self):
