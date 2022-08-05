@@ -9,6 +9,4 @@ if(SPDLOG_HEADER_ONLY)
 else()
     target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog)
 endif()
-set_target_properties(${PROJECT_NAME} PROPERTIES
-                        CXX_STANDARD 11
-                        CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)

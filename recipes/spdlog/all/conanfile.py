@@ -107,7 +107,7 @@ class SpdlogConan(ConanFile):
             tc.variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
             if self.settings.os in ("iOS", "tvOS", "watchOS"):
                 tc.variables["SPDLOG_NO_TLS"] = True
-            tc.variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.generate()
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
