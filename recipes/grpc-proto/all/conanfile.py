@@ -1,7 +1,5 @@
 import os
 import functools
-import glob
-from io import StringIO
 from conan import ConanFile
 from conans import CMake, tools
 from conan.tools.files import get, copy
