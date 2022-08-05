@@ -41,6 +41,7 @@ protobuf/0.0@trassir/sdk120
 qt/5.9.9@trassir/sdk120
 sdl/1.2.11@trassir/sdk120
 signalr-qt/0.1@trassir/sdk120
+zkteco-pacs-usb-fp-sdk/5.3.0.26@trassir/sdk120
 zlib/1.2.8@trassir/sdk120
 
 [options]
