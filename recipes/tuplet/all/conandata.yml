@@ -1,0 +1,4 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/codeinred/tuplet/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "8605abf16f3ffcf87b0a5d81bc30f75b1fb478a5d747749fca31397e8705f8bc"
