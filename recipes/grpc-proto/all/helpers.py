@@ -39,7 +39,7 @@ class _ProtoLibrary:
         def to_cmake_target(item):
             if item.startswith("//"):
                 return item[2:].replace("/", "_").replace(":", "_")
-            return item
+            return f"grpc_{item}"
         return [to_cmake_target(it) for it in self.deps]
 
     @property
