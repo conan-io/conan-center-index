@@ -65,17 +65,17 @@ class SpdlogConan(ConanFile):
         else:
             requires("fmt/6.0.0")
 
-    def validate_build(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is only supported under windows")
-        if self.options.get_safe("shared", False) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
+
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+        if self.info.settings.os != "Windows" and (self.info.options.wchar_support or self.info.options.wchar_filenames):
+            raise ConanInvalidConfiguration("wchar is only supported under windows")
+        if not self.info.options.header_only and self.info.options.shared and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
