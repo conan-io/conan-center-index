@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if not cross_building(self):
-            self.run("ls -lR " + self.deps_cpp_info["asn1c"].rootpath)
             copy(self, "MyModule.asn1", src=self.source_folder, dst=self.build_folder)
             cmake = CMake(self)
             cmake.configure()
