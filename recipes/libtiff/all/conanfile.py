@@ -1,4 +1,4 @@
-from conan.tools.files import rename
+from conan.tools.files import get, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools
@@ -110,7 +110,7 @@ class LibtiffConan(ConanFile):
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
