@@ -142,3 +142,11 @@ class GlfwConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "glfw3"
+
+        # FIXME: shouldn't be necessary.
+        # It's a workaround to support conan v1 generators
+        self.cpp_info.requires.append("opengl::opengl")
+        if self.options.vulkan_static:
+            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.requires.append("xorg::xorg")
