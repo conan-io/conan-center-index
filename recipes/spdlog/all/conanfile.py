@@ -78,7 +78,7 @@ class SpdlogConan(ConanFile):
             self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         if not self.options.header_only:
@@ -104,7 +104,7 @@ class SpdlogConan(ConanFile):
         cmake_deps.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def _disable_werror(self):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")

@@ -6,7 +6,7 @@ conan_basic_setup(TARGETS)
 
 find_package(spdlog REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 if(TARGET spdlog::spdlog_header_only)
     target_link_libraries(${PROJECT_NAME} spdlog::spdlog_header_only)
 else()
