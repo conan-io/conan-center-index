@@ -66,7 +66,7 @@ class AbseilConan(ConanFile):
         tc.variables["ABSL_PROPAGATE_CXX_STD"] = True
         tc.variables["BUILD_TESTING"] = False
         # We force CMP0067 policy to NEW for our abi trick in _patch_sources()
-        tc.variables["CMAKE_POLICY_DEFAULT_CMP0067"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0067"] = "NEW"
         if is_msvc(self):
             # see https://github.com/abseil/abseil-cpp/issues/649
             tc.preprocessor_definitions["_HAS_DEPRECATED_RESULT_OF"] = 1
