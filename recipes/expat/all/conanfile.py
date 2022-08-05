@@ -40,8 +40,7 @@ class ExpatConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not is_msvc(self):
-            del self.settings.compiler.libcxx
+        del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def layout(self):
