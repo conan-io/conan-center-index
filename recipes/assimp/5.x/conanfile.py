@@ -162,13 +162,12 @@ class AssimpConan(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
+        self.requires("minizip/1.2.12")
+        self.requires("utfcpp/3.2.1")
         if Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
             self.requires("pugixml/1.12.1")
-
-        self.requires("minizip/1.2.12")
-        self.requires("utfcpp/3.2.1")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.2.4")
         if self._depends_on_poly2tri:
@@ -283,3 +282,28 @@ class AssimpConan(ConanFile):
             stdcpp_library = tools_legacy.stdcpp_library(self)
             if stdcpp_library:
                 self.cpp_info.system_libs.append(stdcpp_library)
+
+        # FIXME: shouldn't be necessary.
+        # It's a workaround to support conan v1 generators
+        self.cpp_info.requires.append("minizip::minizip")
+        self.cpp_info.requires.append("utfcpp::utfcpp")
+        if Version(self.version) < "5.1.0":
+            self.cpp_info.requires.append("irrxml::irrxml")
+        else:
+            self.cpp_info.requires.append("pugixml::pugixml")
+        if self._depends_on_kuba_zip:
+            self.cpp_info.requires.append("kuba-zip::kuba-zip")
+        if self._depends_on_poly2tri:
+            self.cpp_info.requires.append("poly2tri::poly2tri")
+        if self._depends_on_rapidjson:
+            self.cpp_info.requires.append("rapidjson::rapidjson")
+        if self._depends_on_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+        if self._depends_on_draco:
+            self.cpp_info.requires.append("draco::draco")
+        if self._depends_on_clipper:
+            self.cpp_info.requires.append("clipper::clipper")
+        if self._depends_on_stb:
+            self.cpp_info.requires.append("stb::stb")
+        if self._depends_on_openddlparser:
+            self.cpp_info.requires.append("openddl-parser::openddl-parser")
