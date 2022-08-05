@@ -60,11 +60,20 @@ class TupletConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
 
+    def build(self):
+        pass
+
     def package_id(self):
         self.info.header_only()
 
     def package(self):
-        include_folder = os.path.join(self._source_subfolder, "include")
-        tools.files.copy(self, pattern="*.hpp", dst=os.path.join(self.package_folder, "include"), src=include_folder)
-        tools.files.copy(self, pattern="LICENSE", dst=os.path.joins(self.package_folder, "licenses"),
-                  src=self._source_subfolder)
+        source_folder = os.path.join(self.source_folder, self._source_subfolder)
+        include_folder = os.path.join(
+            self.source_folder, self._source_subfolder, "include")
+
+        tools.files.copy(self, pattern="*.hpp",
+                         dst=os.path.join(self.package_folder, "include"),
+                         src=include_folder)
+        tools.files.copy(self, pattern="LICENSE",
+                         dst=os.path.join(self.package_folder, "licenses"),
+                         src=source_folder)
