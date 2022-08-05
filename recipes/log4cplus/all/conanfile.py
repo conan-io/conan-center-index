@@ -20,7 +20,8 @@ class Log4cplusConan(ConanFile):
                "working_locale": [True, False],
                "working_c_locale": [True, False],
                "decorated_name": [True, False],
-               "unicode": [True, False]}
+               "unicode": [True, False],
+               "thread_pool": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "single_threaded": False,
@@ -29,7 +30,8 @@ class Log4cplusConan(ConanFile):
                        "working_locale": False,
                        "working_c_locale": False,
                        "decorated_name": False,
-                       "unicode": True}
+                       "unicode": True,
+                       "thread_pool": True}
     short_paths = True
 
     _cmake = None
@@ -65,6 +67,7 @@ class Log4cplusConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["LOG4CPLUS_ENABLE_THREAD_POOL"] = self.options.thread_pool
         self._cmake.definitions["UNICODE"] = self.options.unicode
         self._cmake.definitions["LOG4CPLUS_BUILD_TESTING"] = False
         self._cmake.definitions["WITH_UNIT_TESTS"] = False
