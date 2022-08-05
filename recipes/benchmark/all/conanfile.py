@@ -91,7 +91,10 @@ class BenchmarkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
-        self.cpp_info.libs = ["benchmark", "benchmark_main"]
+        self.cpp_info.libs = ["benchmark", "benchmark_main"]          
+        if not self.options.shared and tools.Version(self.version) >= "1.7.0":
+            # https://github.com/google/benchmark/issues/1457
+            self.cpp_info.defines.append("BENCHMARK_STATIC_DEFINE")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
