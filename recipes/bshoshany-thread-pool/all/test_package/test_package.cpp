@@ -3,19 +3,19 @@
 BS::synced_stream sync_out;
 BS::thread_pool pool;
 
+std::condition_variable ID_cv, total_cv;
+std::mutex ID_mutex, total_mutex;
 BS::concurrency_t count_unique_threads()
 {
     const BS::concurrency_t num_tasks = pool.get_thread_count() * 2;
     std::vector<std::thread::id> thread_IDs(num_tasks);
-    std::mutex ID_mutex, total_mutex;
-    std::condition_variable ID_cv, total_cv;
     std::unique_lock<std::mutex> total_lock(total_mutex);
     BS::concurrency_t total_count = 0;
     bool ID_release = false;
     pool.wait_for_tasks();
     for (std::thread::id& id : thread_IDs)
         pool.push_task(
-            [&]
+            [&total_count, &id, &ID_release]
             {
                 id = std::this_thread::get_id();
                 {
@@ -24,15 +24,16 @@ BS::concurrency_t count_unique_threads()
                 }
                 total_cv.notify_one();
                 std::unique_lock<std::mutex> ID_lock_local(ID_mutex);
-                ID_cv.wait(ID_lock_local, [&] { return ID_release; });
+                ID_cv.wait(ID_lock_local, [&ID_release] { return ID_release; });
             });
-    total_cv.wait_for(total_lock, std::chrono::milliseconds(500), [&] { return total_count == pool.get_thread_count(); });
+    total_cv.wait(total_lock, [&total_count] { return total_count == pool.get_thread_count(); });
     {
         const std::scoped_lock ID_lock(ID_mutex);
         ID_release = true;
     }
     ID_cv.notify_all();
-    total_cv.wait_for(total_lock, std::chrono::milliseconds(500), [&] { return total_count == num_tasks; });
+    total_cv.wait(total_lock, [&total_count, &num_tasks] { return total_count == num_tasks; });
+    pool.wait_for_tasks();
     std::sort(thread_IDs.begin(), thread_IDs.end());
     return static_cast<BS::concurrency_t>(std::unique(thread_IDs.begin(), thread_IDs.end()) - thread_IDs.begin());
 }

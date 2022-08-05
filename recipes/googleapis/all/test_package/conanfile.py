@@ -10,15 +10,10 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "VirtualRunEnv"
 
     def requirements(self):
-        self.requires("protobuf/3.21.1")
         self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        self.tool_requires("protobuf/3.21.1")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GOOGLEAPIS_RES_DIR"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
         tc.generate()
 
     def layout(self):

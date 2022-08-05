@@ -66,7 +66,7 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.options.shared:

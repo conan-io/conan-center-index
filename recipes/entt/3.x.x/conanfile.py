@@ -1,8 +1,10 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class EnttConan(ConanFile):
@@ -19,10 +21,13 @@ class EnttConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def validate(self):
         minimal_cpp_standard = "17"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+        if self.settings.compiler.get_safe("cppstd"):
+            tools_legacy.check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
             "Visual Studio": "15.9",
@@ -50,16 +55,15 @@ class EnttConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "src"))
+        copy(self, pattern="LICENSE", src=os.path.join(self.source_folder, self._source_subfolder),
+             dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="*", src=os.path.join(self.source_folder, self._source_subfolder, "src"),
+             dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "EnTT")
