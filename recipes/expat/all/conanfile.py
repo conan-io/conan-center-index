@@ -1,5 +1,5 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, rmdir
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -43,6 +43,9 @@ class ExpatConan(ConanFile):
         if not is_msvc(self):
             del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         tools.files.get(self,
