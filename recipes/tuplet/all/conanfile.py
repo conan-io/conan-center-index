@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -7,14 +7,15 @@ class TupletConan(ConanFile):
     name = "tuplet"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://sinusoid.es/zug/"
-    description = "Transducers for C++ — Clojure style higher order push/pull \
-        sequence transformations"
-    topics = ("transducer", "algorithm", "signals")
+    homepage = "https://github.com/codeinred/tuplet"
+    description = "A fast, simple tuple implementation that implements tuple as an aggregate"
+    topics = ("tuple", "trivially-copyable", "modern-c++")
     settings = ("compiler", "arch", "os", "build_type")
     no_copy_source = True
 
-    _cmake = None
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _min_cppstd(self):
@@ -30,19 +31,11 @@ class TupletConan(ConanFile):
             "apple-clang": "11"
         }
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
-
     def source(self):
         tools.get(
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self.source_folder
+            destination=self._source_subfolder
         )
 
     def validate(self):
@@ -55,20 +48,23 @@ class TupletConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(
-            str(self.settings.compiler), False
-        )
+        compiler = str(self.settings.compiler)
+        version = self.settings.compiler.version
+
+        minimum_version = self._compilers_minimum_version.get(compiler, False)
+
         if not minimum_version:
             self.output.warn(
                 "{} requires C++20. Your compiler ({}) is unknown. Assuming it supports C++20.".format(self.name, compiler))
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++20, which your compiler does not support.")
+                f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
 
     def package_id(self):
         self.info.header_only()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        include_folder = os.path.join(self._source_subfolder, "include")
+        self.copy(pattern="*.hpp", dst="include", src=include_folder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
