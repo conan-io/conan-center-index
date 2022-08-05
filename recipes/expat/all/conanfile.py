@@ -1,7 +1,7 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, rmdir
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -74,7 +74,7 @@ class ExpatConan(ConanFile):
             # EXPAT_CHAR_TYPE was added in 2.2.8
             tc.variables["EXPAT_CHAR_TYPE"] = self.options.char_type
             if is_msvc(self):
-                tc.variables["EXPAT_MSVC_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
+                tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
         if Version(self.version) >= "2.2.10":
             tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
         tc.generate()
