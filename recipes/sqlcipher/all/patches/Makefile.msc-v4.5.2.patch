@@ -1,0 +1,161 @@
+diff --git a/Makefile.msc b/Makefile.msc
+index 4771dc4..87675e1 100644
+--- a/Makefile.msc
++++ b/Makefile.msc
+@@ -286,9 +286,9 @@ SQLITE3H = sqlite3.h
+ #
+ !IFNDEF SQLITE3DLL
+ !IF $(FOR_WIN10)!=0
+-SQLITE3DLL = winsqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ELSE
+-SQLITE3DLL = sqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ENDIF
+ !ENDIF
+ 
+@@ -296,9 +296,9 @@ SQLITE3DLL = sqlite3.dll
+ #
+ !IFNDEF SQLITE3LIB
+ !IF $(FOR_WIN10)!=0
+-SQLITE3LIB = winsqlite3.lib
++SQLITE3LIB = sqlcipher.lib
+ !ELSE
+-SQLITE3LIB = sqlite3.lib
++SQLITE3LIB = sqlcipher.lib
+ !ENDIF
+ !ENDIF
+ 
+@@ -674,7 +674,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
+ SHELL_CORE_DEP = $(SQLITE3DLL)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_DEP = libsqlite3.lib
++SHELL_CORE_DEP = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_DEP =
+@@ -697,7 +697,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
+ SHELL_CORE_LIB = $(SQLITE3LIB)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_LIB = libsqlite3.lib
++SHELL_CORE_LIB = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_LIB =
+@@ -732,8 +732,9 @@ RCC = $(RCC) -DWINAPI_FAMILY=WINAPI_FAMILY_APP
+ # C compiler options for the Windows 10 platform (needs MSVC 2015).
+ #
+ !IF $(FOR_WIN10)!=0
+-TCC = $(TCC) /d2guard4 -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
+-BCC = $(BCC) /d2guard4 -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
++# /d2guard4 requires /guard:cf to be present as well, but it doesn't work with /Zi (Debug builds)
++TCC = $(TCC) -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
++BCC = $(BCC) -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
+ !ENDIF
+ 
+ # Also, we need to dynamically link to the correct MSVC runtime
+@@ -1010,8 +1011,10 @@ TLIBS =
+ # default to file, 2 to default to memory, and 3 to force temporary
+ # tables to always be in memory.
+ #
+-TCC = $(TCC) -DSQLITE_TEMP_STORE=1
+-RCC = $(RCC) -DSQLITE_TEMP_STORE=1
++
++# Allow overriding the value
++TCC = $(TCC) -DSQLITE_TEMP_STORE=$(SQLITE_TEMP_STORE)
++RCC = $(RCC) -DSQLITE_TEMP_STORE=$(SQLITE_TEMP_STORE)
+ 
+ # Enable/disable loadable extensions, and other optional features
+ # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
+@@ -1177,14 +1180,15 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
+ !ENDIF
+ LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ole32.lib
++# Remove /NODEFAULTLIB:kernel32.lib, required by OpenSSL
+ !ENDIF
+ 
+ # When compiling for UWP or the Windows 10 platform, some extra linker
+ # options are also required.
+ #
+ !IF $(FOR_UWP)!=0 || $(FOR_WIN10)!=0
+-LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE /NODEFAULTLIB:kernel32.lib
++# Remove /NODEFAULTLIB:kernel32.lib, required by OpenSSL
++LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) mincore.lib
+ !IFDEF PSDKLIBPATH
+ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+@@ -1239,7 +1243,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+ #
+ LIBOBJS0 = vdbe.lo parse.lo alter.lo analyze.lo attach.lo auth.lo \
+          backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
+-         callback.lo complete.lo ctime.lo \
++         callback.lo complete.lo crypto.lo crypto_impl.lo crypto_openssl.lo ctime.lo \
+          date.lo dbpage.lo dbstat.lo delete.lo \
+          expr.lo fault.lo fkey.lo \
+          fts3.lo fts3_aux.lo fts3_expr.lo fts3_hash.lo fts3_icu.lo \
+@@ -1735,7 +1739,7 @@ ALL_TCL_TARGETS =
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-core:	dll libsqlite3.lib shell
++core:	dll sqlcipher.lib shell
+ 
+ # Targets that require the Tcl library.
+ #
+@@ -1754,11 +1758,12 @@ dll:	$(SQLITE3DLL)
+ shell:	$(SQLITE3EXE)
+ 
+ # <<mark>>
+-libsqlite3.lib:	$(LIBOBJ)
+-	$(LTLIB) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
++# LTLIBPATHS is required to find the openssl/libressl libs
++sqlcipher.lib:	$(LIBOBJ)
++	$(LTLIB) $(LTLIBPATHS) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
+ 
+-libtclsqlite3.lib:	tclsqlite.lo libsqlite3.lib
+-	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo libsqlite3.lib $(LIBTCLSTUB) $(TLIBS)
++libtclsqlite3.lib:	tclsqlite.lo sqlcipher.lib
++	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo sqlcipher.lib $(LIBTCLSTUB) $(TLIBS)
+ 
+ tclsqlite3.def:	tclsqlite.lo
+ 	echo EXPORTS > tclsqlite3.def
+@@ -1780,9 +1785,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
+ 	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
+ 
+ # <<block2>>
+-sqlite3.def:	libsqlite3.lib
++sqlite3.def:	sqlcipher.lib
+ 	echo EXPORTS > sqlite3.def
+-	dumpbin /all libsqlite3.lib \
++	dumpbin /all sqlcipher.lib \
+ 		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
+ 		| sort >> sqlite3.def
+ # <</block2>>
+@@ -1962,6 +1967,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+ complete.lo:	$(TOP)\src\complete.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
+ 
++crypto.lo:	$(TOP)\src\crypto.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto.c
++
++crypto_impl.lo:	$(TOP)\src\crypto_impl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_impl.c
++
++crypto_openssl.lo:	$(TOP)\src\crypto_openssl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_openssl.c
++
+ ctime.lo:	$(TOP)\src\ctime.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
+ 
+@@ -2388,7 +2402,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+ # Rules to build the 'testfixture' application.
+ #
+ # If using the amalgamation, use sqlite3.c directly to build the test
+-# fixture.  Otherwise link against libsqlite3.lib.  (This distinction is
++# fixture.  Otherwise link against sqlcipher.lib.  (This distinction is
+ # necessary because the test fixture requires non-API symbols which are
+ # hidden when the library is built via the amalgamation).
+ #
