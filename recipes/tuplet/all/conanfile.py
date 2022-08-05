@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -32,7 +32,7 @@ class TupletConan(ConanFile):
         }
 
     def source(self):
-        tools.get(
+        tools.files.get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self._source_subfolder
@@ -49,14 +49,14 @@ class TupletConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
 
         compiler = str(self.settings.compiler)
-        version = self.settings.compiler.version
+        version = str(self.settings.compiler.version)
 
         minimum_version = self._compilers_minimum_version.get(compiler, False)
 
         if not minimum_version:
             self.output.warn(
-                "{} requires C++20. Your compiler ({}) is unknown. Assuming it supports C++20.".format(self.name, compiler))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                f"{self.name} requires C++20. Your compiler ({compiler}) is unknown. Assuming it supports C++20.")
+        elif lazy_lt_semver(version, minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
 
