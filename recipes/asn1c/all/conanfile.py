@@ -75,4 +75,8 @@ class Asn1cConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
+        # asn1c cannot use environment variables to specify support files path
+        # so `SUPPORT_PATH` should be propagated to command line invocation to `-S` argument
+        self.env_info.SUPPORT_PATH = os.path.join(self.package_folder, "res/asn1c")
+
         self.cpp_info.includedirs = []
