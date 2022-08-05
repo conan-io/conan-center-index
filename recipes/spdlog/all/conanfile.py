@@ -3,15 +3,16 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
+
 # TODO: Need to be ported for Conan 2.0
 from conans import __version__ as conan_version
-# TODO: Update after Conan 1.50
-from conans import tools as tools_legacy
+
 import os
 
 
-required_conan_version = ">=1.49.0"
+required_conan_version = ">=1.50.0"
 
 
 class SpdlogConan(ConanFile):
@@ -66,7 +67,7 @@ class SpdlogConan(ConanFile):
 
     def validate_build(self):
         if self.settings.compiler.cppstd:
-            tools_legacy.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
         if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self.options.get_safe("shared", False) and is_msvc_static_runtime(self):
