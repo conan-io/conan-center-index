@@ -20,12 +20,8 @@ class OpenTDFConan(ConanFile):
     license = "BSD-3-Clause-Clear"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_libiconv": [True, False], "with_zlib": [True, False], "with_libarchive": [True, False], "fPIC": [True, False], "branch_version": [True, False]}
-    # opentdf-client does not need libiconv or zlib, they are required by default by boost and libxml,
-    # because of the default configuration on those packages.  The build at conan-center only allows
-    # prebuilt (default) packages, so they are on by default to satisfy that situation.
-    # Recommendation: disable both if you are doing a local build
-    default_options = {"with_libiconv": True, "with_zlib": True, "with_libarchive": True, "fPIC": True, "branch_version": False}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -72,28 +68,16 @@ class OpenTDFConan(ConanFile):
         self.requires("libxml2/2.9.14")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
-        if self.options.get_safe("with_libarchive"):
+        # Do not need libarchive after 1.0.0
+        if Version(self.version) < "1.1.0":
             self.requires("libarchive/3.6.1")
 
     def config_options(self):
-        # Do not need libarchive after 1.0.0
-        if Version(self.version) > "1.0.0":
-            del self.options.libarchive
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self.options.with_zlib:
-            self.options["libxml2"].zlib = False
-        if not self.options.with_libiconv:
-            self.options["boost"].without_locale = True
-            self.options["boost"].without_log = True
 
     def source(self):
-        # If branch_version is set to True, the supplied version will be treated as a branch name for git clone
-        if self.options.get_safe("branch_version"):
-            self.output.warn("Building branch_version = {}".format(self.version))
-            self.run("git clone git@github.com:opentdf/client-cpp.git --depth 1 --branch " + self.version + " " + self._source_subfolder)
-        else:
-            get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
@@ -129,5 +113,5 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
-        if self.options.get_safe("with_libarchive"):
+        if Version(self.version) < "1.1.0":
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
