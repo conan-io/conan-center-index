@@ -16,7 +16,6 @@ class CppProjectFrameworkConan(ConanFile):
     description = "C++ Project Framework is a framework for creating C++ project."
     topics = ("c++", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = f"{name}/*", "test_package/*.*"
 
     def package_id(self):
         self.info.header_only()
@@ -63,4 +62,4 @@ class CppProjectFrameworkConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst=f"include/{self.name}", src=os.path.join(self._source_subfolder, self.name))
+        self.copy("*.h", dst=os.path.join("include", self.name), src=os.path.join(self._source_subfolder, self.name))
