@@ -57,14 +57,17 @@ class ZstdConan(ConanFile):
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
 
         if Version(self.version) < "1.4.3":
-            # Generate a relocatable shared lib on Macos
+            # Versions earlier than 1.4.0 obey CMake 2.8 policies
+            # We need to set this policy to the new behaviour 
+            # so that on macOS so that install names are prefixed
+            # with `@rpath` for relocatability
             tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
 
-        # Don't force PIC
+        # Don't force PIC unconditionally, to allow the `fPIC` option to control this
         if Version(self.version) >= "1.4.5":
             files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "cmake", "lib", "CMakeLists.txt"),
                                   "POSITION_INDEPENDENT_CODE On", "")
