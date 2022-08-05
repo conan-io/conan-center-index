@@ -70,13 +70,13 @@ class GRPCProto(ConanFile):
         proto_libraries = parse_proto_libraries(os.path.join(self.source_folder, 'BUILD.bazel'), self.source_folder, self.output.error)
         
         # Validate that all files exist and all dependencies are found
-        all_deps = [it.name for it in proto_libraries]
+        all_deps = [it.cmake_target for it in proto_libraries]
         all_deps += ["googleapis::googleapis", "protobuf::libprotobuf"]
         for it in proto_libraries:
             it.validate(self.source_folder, all_deps)
 
         # Mark the libraries we need recursively (C++ context)
-        all_dict = {it.name: it for it in proto_libraries}
+        all_dict = {it.cmake_target: it for it in proto_libraries}
         def activate_library(proto_library):
             proto_library.is_used = True
             for it_dep in proto_library.deps:

@@ -3,6 +3,10 @@ import re
 import textwrap
 
 
+def grpc_target_name(internal_name):
+    return f"grpc_{internal_name}"
+
+
 class _ProtoLibrary:
     name: str = None
     srcs: list = None
@@ -32,14 +36,14 @@ class _ProtoLibrary:
 
     @property
     def cmake_target(self):
-        return f"grpc_{self.name}"
+        return grpc_target_name(self.name)
 
     @property
     def cmake_deps(self):
         def to_cmake_target(item):
             if item.startswith("//"):
                 return item[2:].replace("/", "_").replace(":", "_")
-            return f"grpc_{item}"
+            return item
         return [to_cmake_target(it) for it in self.deps]
 
     @property
@@ -95,7 +99,7 @@ def parse_proto_libraries(filename, source_folder, error):
         elif line.startswith("@com_google_googleapis//"):
             proto_library.deps.add("googleapis::googleapis")
         elif line.startswith(":"):
-            proto_library.deps.add(line[1:])
+            proto_library.deps.add(grpc_target_name(line[1:]))
         else:
             error(f"Unrecognized dep: {line} -- {os.path.relpath(filename, source_folder)}")
 
