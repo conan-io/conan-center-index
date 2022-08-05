@@ -211,12 +211,6 @@ class GLibConan(ConanFile):
             "'share'",
             "'res'",
         )
-        if self.settings.os != "Linux":
-            tools.replace_in_file(
-                os.path.join(self.source_folder, "meson.build"),
-                "if cc.has_function('ngettext'",
-                "if false #cc.has_function('ngettext'",
-            )
 
     def _patch_pkgconfig(self):
         with tools.chdir(self.generators_folder):
