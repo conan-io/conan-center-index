@@ -24,10 +24,10 @@ class TupletConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "9",
-            "Visual Studio": "16.2",
+            "gcc": "11",
+            "Visual Studio": "16.11",
             "msvc": "19.22",
-            "clang": "10",
+            "clang": "13",
             "apple-clang": "11"
         }
 
