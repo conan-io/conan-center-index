@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -26,7 +26,7 @@ class JfalcouEveConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if  tools.Version(self.version) >= "2022.03.0":
+        if  tools.scm.Version(self.version) >= "2022.03.0":
                 return {
                     "gcc": "11",
                     "Visual Studio": "16.9",
@@ -43,7 +43,7 @@ class JfalcouEveConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("EVE does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
         if self.settings.compiler == "apple-clang":
@@ -65,7 +65,7 @@ class JfalcouEveConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+        tools.files.get(**self.conan_data["sources"][self.version], strip_root=True,
                 destination=self._source_subfolder)
 
     def package(self):
