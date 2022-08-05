@@ -65,6 +65,6 @@ class TupletConan(ConanFile):
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="*.hpp", dst="include", src=include_folder)
-        self.copy(pattern="LICENSE", dst="licenses",
+        tools.files.copy(self, pattern="*.hpp", dst=os.path.join(self.package_folder, "include"), src=include_folder)
+        tools.files.copy(self, pattern="LICENSE", dst=os.path.joins(self.package_folder, "licenses"),
                   src=self._source_subfolder)
