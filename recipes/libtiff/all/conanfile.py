@@ -1,4 +1,4 @@
-from conan.tools.files import get, rename
+from conan.tools.files import get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools
@@ -110,7 +110,7 @@ class LibtiffConan(ConanFile):
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -183,8 +183,8 @@ class LibtiffConan(ConanFile):
         self.copy("COPYRIGHT", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
