@@ -9,7 +9,7 @@ class TupletConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/codeinred/tuplet"
     description = "A fast, simple tuple implementation that implements tuple as an aggregate"
-    topics = ("tuple", "trivially-copyable", "modern-c++")
+    topics = ("tuple", "trivially-copyable", "modern-cpp")
     settings = ("compiler", "arch", "os", "build_type")
     no_copy_source = True
 
