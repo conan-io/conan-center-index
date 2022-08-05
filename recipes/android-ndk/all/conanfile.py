@@ -338,6 +338,8 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_INCLUDE = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
 
+        self.conf_info.define("tools.android:ndk_path", self.package_folder)
+
 
 def unzip_fix_symlinks(url, target_folder, sha256):
     # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
