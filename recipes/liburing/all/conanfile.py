@@ -18,10 +18,12 @@ class LiburingConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        "with_libc": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
+        "with_libc": True,
     }
 
     exports_sources = ["patches/*"]
@@ -35,6 +37,8 @@ class LiburingConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < "2.2":
+            del self.options.with_libc
 
     def configure(self):
         if self.options.shared:
@@ -62,7 +66,10 @@ class LiburingConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure()
+        args = []
+        if self.options.get_safe("with_libc") is False:
+            args.append("--nolibc")
+        self._autotools.configure(args=args)
         self._autotools.flags.append("-std=gnu99")
         return self._autotools
 
