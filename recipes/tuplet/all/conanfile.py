@@ -1,6 +1,6 @@
 import os
 from conan import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 
 class TupletConan(ConanFile):
