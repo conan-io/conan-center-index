@@ -25,12 +25,21 @@ runtimes = [
 ]
 default_projects = [
     'clang',
+    'clang-tools-extra',
+    #'libc', clang-14 crashes for sin/cos/tan
+    'libclc',
+    'lld',
+    'lldb',
+    'openmp',
+    'polly',
+    'pstl',
 ]
 default_runtimes = [
-    #'libcxx',
-    # libcxxabi appears to be required to build libcxx.
-    # See: https://reviews.llvm.org/D63883
-    #'libcxxabi',
+    # 'compiler-rt', # include missing
+    # 'libc',
+    'libcxx',
+    'libcxxabi',
+    'libunwind',
 ]
 
 class Llvm(ConanFile):
@@ -76,9 +85,10 @@ class Llvm(ConanFile):
                 'Address;Undefined',
                 'None'
             ],
+            'with_z3': [True, False],
             'with_ffi': [True, False],
-            'with_zlib': [True, False],
-            'with_xml2': [True, False],
+            'with_zlib': [True, False], # ? https://conan.io/center/zlib
+            'with_xml2': [True, False], # ? https://conan.io/center/libxml2
             'use_llvm_cmake_files': [True, False],
             'enable_debug': [True, False],
         },
@@ -97,8 +107,8 @@ class Llvm(ConanFile):
             'fPIC': True,
             'components': 'all',
             'targets': 'all',
-            'exceptions': True,
-            'rtti': True,
+            'exceptions': True, # llvm 14 default off
+            'rtti': True, # llvm 14 default off
             'threads': True,
             'lto': 'Off',
             'static_stdlib': False,
@@ -106,14 +116,25 @@ class Llvm(ConanFile):
             'expensive_checks': False,
             'use_perf': False,
             'use_sanitizer': 'None',
+            'with_z3': False,
             'with_ffi': False,
             'with_zlib': True,
             'with_xml2': True,
             'enable_debug': False,
             'use_llvm_cmake_files': False,
+            'keep_binaries': ['clang++', 'clang', 'opt'],
         }
     }
-    generators = 'cmake_find_package'
+
+    def requirements(self):
+        if self.options.with_ffi:
+            self.requires('libffi/3.4.2')
+        if self.options.get_safe('with_zlib', False):
+            self.requires('zlib/1.2.12')
+        if self.options.get_safe('with_xml2', False):
+           self.requires('libxml2/2.9.10')
+        if self.options.get_safe('with_z3', False):
+            self.requires('z3/4.8.8')
 
     @property
     def repo_folder(self):
@@ -129,6 +150,8 @@ class Llvm(ConanFile):
         self._patch_sources()
 
     def build_requirements(self):
+        # Older cmake versions may have issues generating the graphviz output used
+        # to model the components
         self.build_requires("cmake/3.21.3")
 
     def configure(self):
@@ -136,12 +159,17 @@ class Llvm(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_zlib
+            del self.options.with_xml2
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '14')
 
     def _patch_sources(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
+
+        # fix LOCATION / LOCATION_${build_type} not set on libxml2
+        tools.replace_in_file(self._source_subfolder + "/llvm/lib/WindowsManifest/CMakeLists.txt", "get_property", 'find_library(libxml2_library NAME xml2 PATHS ${LibXml2_LIB_DIRS} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH) #')
 
     def _cmake_configure(self):
         enabled_projects = [
@@ -175,18 +203,19 @@ class Llvm(ConanFile):
             'LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN': True,
             'LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO': False,
             'LLVM_BUILD_INSTRUMENTED_COVERAGE': False,
-            'LLVM_OPTIMIZED_TABLEGEN': True,
+            'LLVM_OPTIMIZED_TABLEGEN': True, # NOT default, can speedup compilation a lot
             'LLVM_REVERSE_ITERATION': False,
-            'LLVM_ENABLE_BINDINGS': False,
+            'LLVM_ENABLE_BINDINGS': False, # NOT default, dont build OCaml and go bindings
             'LLVM_CCACHE_BUILD': False,
-            'LLVM_INCLUDE_TOOLS': self.options.shared,
-            'LLVM_INCLUDE_EXAMPLES': False,
-            'LLVM_INCLUDE_TESTS': False,
+            'LLVM_INCLUDE_TOOLS': True, # needed for clang libs, but remove binaries
+            'LLVM_INCLUDE_EXAMPLES': False, # NOT default
+            'LLVM_BUILD_TESTS': False,
+            'LLVM_INCLUDE_TESTS': False, # NOT default
             'LLVM_INCLUDE_BENCHMARKS': False,
-            'LLVM_APPEND_VC_REV': False,
+            'LLVM_APPEND_VC_REV': True,
             'LLVM_BUILD_DOCS': False,
             'LLVM_ENABLE_IDE': False,
-            'LLVM_ENABLE_TERMINFO': False,
+            'LLVM_ENABLE_TERMINFO': False, # NOT default Use terminfo database if available.
             'LLVM_ENABLE_EH': self.options.exceptions,
             'LLVM_ENABLE_RTTI': self.options.rtti,
             'LLVM_ENABLE_THREADS': self.options.threads,
@@ -198,7 +227,7 @@ class Llvm(ConanFile):
             'LLVM_USE_NEWPM': False,
             'LLVM_USE_OPROFILE': False,
             'LLVM_USE_PERF': self.options.use_perf,
-            'LLVM_ENABLE_Z3_SOLVER': False,
+            'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
             'LLVM_ENABLE_LIBPFM': False,
             'LLVM_ENABLE_LIBEDIT': False,
             'LLVM_ENABLE_FFI': self.options.with_ffi,
@@ -206,8 +235,6 @@ class Llvm(ConanFile):
             'LLVM_ENABLE_LIBXML2': self.options.get_safe('with_xml2', False),
             'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
             'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
-            'LLVM_ENABLE_BINDINGS': False,
-            'LLVM_ENABLE_RTTI': self.options.rtti,
         },
                         source_folder=os.path.join(self._source_subfolder,
                                                    'llvm'))
