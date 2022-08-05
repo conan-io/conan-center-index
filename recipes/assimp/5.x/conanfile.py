@@ -170,7 +170,7 @@ class AssimpConan(ConanFile):
         self.requires("minizip/1.2.12")
         self.requires("utfcpp/3.2.1")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.2.2")
+            self.requires("kuba-zip/0.2.4")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
@@ -178,13 +178,13 @@ class AssimpConan(ConanFile):
         if self._depends_on_zlib:
             self.requires("zlib/1.2.12")
         if self._depends_on_draco:
-            self.requires("draco/1.5.2")
+            self.requires("draco/1.5.3")
         if self._depends_on_clipper:
             self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
             self.requires("stb/cci.20210910")
         if self._depends_on_openddlparser:
-            self.requires("openddl-parser/cci.20211217")
+            self.requires("openddl-parser/0.5.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
