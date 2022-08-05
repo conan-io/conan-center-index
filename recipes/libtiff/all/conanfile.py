@@ -1,5 +1,6 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -54,15 +55,15 @@ class LibtiffConan(ConanFile):
 
     @property
     def _has_webp_option(self):
-        return tools.Version(self.version) >= "4.0.10"
+        return Version(self.version) >= "4.0.10"
 
     @property
     def _has_zstd_option(self):
-        return tools.Version(self.version) >= "4.0.10"
+        return Version(self.version) >= "4.0.10"
 
     @property
     def _has_libdeflate_option(self):
-        return tools.Version(self.version) >= "4.2.0"
+        return Version(self.version) >= "4.2.0"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -117,7 +118,7 @@ class LibtiffConan(ConanFile):
             tools.patch(**patch)
 
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
-        if tools.Version(self.version) >= "4.3.0":
+        if Version(self.version) >= "4.3.0":
             if self.options.jbig:
                 rename(self, "Findjbig.cmake", "ConanFindjbig.cmake")
             else:
@@ -135,11 +136,11 @@ class LibtiffConan(ConanFile):
                                   r"WINDOWS_EXPORT_ALL_SYMBOLS ON)")
         cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if self.settings.os == "Windows" and not is_msvc(self):
-            if tools.Version(self.version) < "4.2.0":
+            if Version(self.version) < "4.2.0":
                 tools.replace_in_file(cmakefile,
                                     "find_library(M_LIBRARY m)",
                                     "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
-            if tools.Version(self.version) < "4.0.9":
+            if Version(self.version) < "4.0.9":
                 tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
         tools.replace_in_file(cmakefile,
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
@@ -155,7 +156,7 @@ class LibtiffConan(ConanFile):
             if self._has_libdeflate_option:
                 self._cmake.definitions["libdeflate"] = self.options.libdeflate
                 if self.options.libdeflate:
-                    if tools.Version(self.version) < "4.3.0":
+                    if Version(self.version) < "4.3.0":
                         self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
             if self._has_zstd_option:
                 self._cmake.definitions["zstd"] = self.options.zstd
@@ -189,7 +190,7 @@ class LibtiffConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "TIFF")
         self.cpp_info.set_property("cmake_target_name", "TIFF::TIFF")
-        self.cpp_info.set_property("pkg_config_name", "libtiff-{}".format(tools.Version(self.version).major))
+        self.cpp_info.set_property("pkg_config_name", "libtiff-{}".format(Version(self.version).major))
         if self.options.cxx:
             self.cpp_info.libs.append("tiffxx")
         self.cpp_info.libs.append("tiff")
@@ -203,4 +204,4 @@ class LibtiffConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
-        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(tools.Version(self.version).major)
+        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(Version(self.version).major)
