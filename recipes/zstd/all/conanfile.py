@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.49.0"
 
 
 class ZstdConan(ConanFile):
@@ -55,6 +55,10 @@ class ZstdConan(ConanFile):
         tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared
         tc.variables["ZSTD_BUILD_SHARED"] = self.options.shared
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
+
+        if Version(self.version) < "1.4.3":
+            # Generate a relocatable shared lib on Macos
+            tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
