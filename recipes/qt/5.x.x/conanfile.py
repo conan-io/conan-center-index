@@ -1018,6 +1018,9 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].build_modules["cmake_find_package"].append(self._cmake_qt5_variables_file(module))
             self.cpp_info.components[componentname].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_variables_file(module))
 
+            if self.settings.build_type == "Release":
+               self.cpp_info.components[componentname].defines.append("QT_NO_DEBUG")
+
 
         def _create_plugin(pluginname, libname, type, requires):
             componentname = "qt%s" % pluginname
