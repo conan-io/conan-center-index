@@ -1362,7 +1362,7 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
-        if self.settings.os == "Emscripten":
+        if self.settings.os == "Emscripten" and not self.options.header_only:
             self._create_emscripten_libs()
 
         if self._is_msvc and self._shared:
@@ -1391,6 +1391,10 @@ class BoostConan(ConanFile):
         staged_libs = os.path.join(
             self.package_folder, "lib"
         )
+        if not os.path.exists(staged_libs):
+            self.output.warn("Lib folder doesn't exist, can't collect libraries: "
+                             "{0}".format(staged_libs))
+            return
         for bc_file in os.listdir(staged_libs):
             if bc_file.startswith("lib") and bc_file.endswith(".bc"):
                 a_file = bc_file[:-3] + ".a"
