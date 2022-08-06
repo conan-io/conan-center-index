@@ -18,7 +18,7 @@ index 6e24a238..4379c060 100644
 -  target_link_libraries(rdkafka PRIVATE ${ZSTD_LIBRARY})
 -  target_include_directories(rdkafka PRIVATE ${ZSTD_INCLUDE_DIR})
 -  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
-+  target_link_libraries(rdkafka PRIVATE CONAN_PKG::zstd)
++  target_link_libraries(rdkafka PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
  endif()
  
  if(WITH_SSL)
@@ -28,7 +28,7 @@ index 6e24a238..4379c060 100644
  if(WITH_LZ4_EXT)
 -  target_include_directories(rdkafka PRIVATE ${LZ4_INCLUDE_DIRS})
 -  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
-+  target_link_libraries(rdkafka PUBLIC CONAN_PKG::lz4)
++  target_link_libraries(rdkafka PUBLIC lz4::lz4)
  endif()
  
  if(WIN32)
