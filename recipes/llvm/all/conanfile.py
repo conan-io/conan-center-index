@@ -1,7 +1,8 @@
 from conans import ConanFile, tools, CMake
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-import os, shutil, glob
+from collections import defaultdict
+import os, shutil, glob, re, json
 
 # https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
 projects = [
@@ -129,8 +130,6 @@ class Llvm(ConanFile):
     generators = 'cmake_find_package'
 
     def requirements(self):
-        # check keep_binaries_regex early to fail early
-        re.compile(str(self.options.keep_binaries_regex))
         if self.options.with_ffi:
             self.requires('libffi/3.4.2')
         if self.options.get_safe('with_zlib', False):
@@ -242,8 +241,6 @@ class Llvm(ConanFile):
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
             }, 
-        },
-            }, 
             source_folder=os.path.join(self._source_subfolder, 'llvm'))
         if not self.options.shared:
             cmake.definitions['DISABLE_LLVM_LINK_LLVM_DYLIB'] = True
@@ -261,32 +258,11 @@ class Llvm(ConanFile):
         cmake = self._cmake_configure()
         cmake.build()
 
-    # XXX maybe check instead if part of lib folder ?
     def _is_relevant_component(self, target_name):
-        return target_name.startswith('LLVM') or \
-                target_name.startswith('clang') or \
-                target_name.startswith('lldb') or \
-                target_name.startswith('omp') or \
-                target_name.startswith('lld') or \
-                target_name.startswith('Polly') or \
-                target_name == "LTO" or \
-                target_name == "Remarks"
-        # else ignored targets for llvm-14 with:
-        # clang;clang-tools-extra;cross-project-tests;libc;libclc;lld;lldb;openmp;polly;pstl
-        # compiler-rt;libcxx;libcxxabi;libunwind
-        #
-        # BugpointPasses ParallelSTL FileCheck
-        # test_stdlib findAllSymbols elf_common libc_test_utils liblldb benchmark_main benchmark libc-benchmark libc-memory-benchmark
-        # libc-memory-benchmark LibcFPTestHelpers LibcUnitTestMain libclang obj.clangTooling test_stdlib findAllSymbols
-        # CheckerDependencyHandlingAnalyzerPlugin CheckerOptionHandlingAnalyzerPlugin SampleAnalyzerPlugin
-        # DeLICMTests ISLToolsTests FlattenTests IslTests LibcUnitTest ScheduleOptimizerTests ScopPassManagerTests
-        # pstl-pstl-header_inclusion_order.* pstl-pstl-version.pass pstl-std-algorithms-alg.* libc.* obj.*
-        # ZLIB::ZLIB dl m rt pthread gtest gtest_main Threads::Threads json
-        # -Wl,--version-script=/home/ubuntu/git/llvm-project/openmp/libomptarget/src/exports
-        # -L/home/ubuntu/git/llvm-project/build/projects/libc/benchmarks/google-benchmark/lib/
-        # /usr/lib/x86_64-linux-gnu/libcurses.so
-        # /usr/lib/x86_64-linux-gnu/libform.so
-        # /usr/lib/x86_64-linux-gnu/libpanel.so
+        package_lib_folder = os.path.join(self.package_folder, "lib")
+        return os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.a")) or \
+                os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.so")) or \
+                os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.dylib"))
 
     def package(self):
         cmake = self._cmake_configure()
@@ -299,13 +275,15 @@ class Llvm(ConanFile):
             keep_path=False,
         )
 
-        binaries = []
         bin_matcher = re.compile(str(self.options.keep_binaries_regex))
         keep_binaries = []
         # resolve binaries to keep which are links, so we need to keep link target as well
-        package_bin_path = os.path.join(self.package_folder, 'bin')
-        for bin in os.listdir(package_bin_path):
-            binaries.append(bin)
+        build_bin_path = os.path.join(self.build_folder, 'bin')
+        binaries = ["lldb-test", "clang-fuzzer", "clang-objc-fuzzer"] # missed by the method below
+        binaries.extend(os.listdir(build_bin_path))
+        binaries.extend(os.listdir(os.path.join(self.package_folder, 'bin')))
+        binaries = list(set(binaries))
+        for bin in binaries:
             # there are links like clang-14 -> clang -> clang++
             if bin_matcher.match(bin):
                 keep_binaries.append(bin)
@@ -316,11 +294,12 @@ class Llvm(ConanFile):
 
         # remove unneccessary binaries from package
         for bin in binaries:
+            bin_path = os.path.join(build_bin_path, bin)
             if bin in keep_binaries:
                 self.output.info(f"Keeping binary \"{bin}\" from package")
-            else:
+            elif os.path.isfile(bin_path):
                 self.output.info(f"Removing binary \"{bin}\" from package")
-                os.remove(os.path.join(package_bin_path, bin))
+                os.remove(bin_path)
 
         # remove unneccessary files from package
         ignore = ["share", "libexec", "**/Find*.cmake", "**/*Config.cmake"]
@@ -334,6 +313,7 @@ class Llvm(ConanFile):
                     os.remove(ignore_path)
                 else:
                     shutil.rmtree(ignore_path)
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
         
         if not self.options.shared:
             for ext in ['.a', '.lib']:
@@ -348,72 +328,128 @@ class Llvm(ConanFile):
         dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
         deps = re.findall(dep_regex, dot_text)
 
-        dummy_targets = defaultdict(list)
-        for target, dep in deps:
-            if not self._is_relevant_component(target):
-                dummy_targets[target].append(dep)
-
         # map dependency names # XXX not seen any of this in llvm-14 linux build
         external_targets = {
             'libffi::libffi': 'ffi',
             'ZLIB::ZLIB': 'z',
             'Iconv::Iconv': 'iconv',
-            'LibXml2::LibXml2': 'xml2'
-        }
+            'LibXml2::LibXml2': 'xml2',
+            'pthread': 'pthread',
+            'rt': "rt",
+            'm': "m",
+            'dl': 'dl'
+        } 
+        external_targets_keys = external_targets.keys()
+        dummy_targets = defaultdict(list)
+        for target, dep in deps:
+            if not self._is_relevant_component(target) and target not in external_targets_keys:
+                dummy_targets[target].append(dep)
+        dummy_targets_keys = dummy_targets.keys()
         
         # fill components with relevant targets
         components = defaultdict(list)
+        ignored_deps = []
         for lib, dep in deps:
             if lib in binaries:
                 continue
+
             if self._is_relevant_component(lib):
-                # init relevant components
                 components[lib]
 
                 if isinstance(dep, list):
                     current_deps  = dep
+                elif " " in dep:
+                    current_deps = dep.split() # lib: omp dep: str(-lpthread -lrt)
                 else:
                     current_deps  = [dep]
-
-                visited = components[lib]
+                
+                visited = components[lib].copy()
                 while len(current_deps) > 0:
                     current_dep = current_deps.pop()
                     visited.append(current_dep)
 
-                    if self._is_relevant_component(current_dep):
+                    if current_dep in binaries:
+                        continue
+                    elif self._is_relevant_component(current_dep):
                         components[current_dep]
 
-                    elif current_dep.startswith('-delayload:'): # special case from llvm-core but never seen, maybe other systems?
+                    # Copied from llvm-core but not used on linus, maybe for other systems? ==>
+                    elif current_dep.startswith('-delayload:'):
                         continue
 
-                    # what !?
                     elif os.path.exists(current_dep):
-                        s=os.path.basename(current_dep)
-                        print(f"package debug, dep path exists: {s}") # TODO remove
                         current_dep = os.path.splitext(os.path.basename(current_dep))[0]
                         current_dep = current_dep.replace('lib', '')
-                        print(f"exists: {current_dep} : {type(current_dep)}") # TODO remove
+                    # <==
 
-                    # e.g. -lpthread -> pthread
-                    if current_dep.startswith("-l"):
-                        current_dep = current_dep[2]
+                    if current_dep.startswith("-l"): # e.g. -lpthread -> pthread
+                        current_dep = current_dep[2:]
 
-
-                    # if not relevant
-                    if current_dep in dummy_targets.keys():
-                        for d in dummy_targets[dep]:
+                    if current_dep in dummy_targets_keys:
+                        for d in dummy_targets[current_dep]:
                             if not visited:
                                 current_deps.append(d)
-                    elif self._is_relevant_component(dep):
+                    elif self._is_relevant_component(current_dep):
                         components[lib].append(current_dep)
-                    elif current_dep in external_targets:
+                    elif current_dep in external_targets_keys:
                         components[lib].append(external_targets[current_dep])
+                    else:
+                        ignored_deps.append(current_dep)
+                components[lib] = list(set(components[lib]))
+                if lib in components[lib]:
+                    raise "found circular dependency for {lib} over {dep}"
+        ignored_deps = list(set(ignored_deps))
+        self.output.info(f'ignored these dependencies: {ignored_deps}')
 
-            components[lib] = list(set(components[lib]))
-            self.output.info(f"{lib} has {len(components[lib])} dependencies")
-            if lib in components[lib]:
-                self.output.warn("found circular dependency for {lib} over {dep}")
-                components[lib].remove(lib)
+        # workaround for circular dependencies
+        remove_dependencies = [
+            ('lldbBreakpoint', 'lldbCore'),
+            ('lldbBreakpoint', 'lldbTarget'),
+            ('lldbPluginCPlusPlusLanguage', 'lldbCore'),
+            ('lldbPluginObjCLanguage', 'lldbCore'),
+            ('lldbTarget', 'lldbCore'),
+            ('lldbInterpreter', 'lldbCore'),
+            ('lldbSymbol', 'lldbCore'),
+            ('lldbDataFormatters', 'lldbCore'),
+            ('lldbExpression', 'lldbCore'),
+            ('lldbDataFormatters', 'lldbInterpreter'),
+            ('lldbTarget', 'lldbInterpreter'),
+            ('lldbInterpreter', 'lldbCommands'),
+            ('lldbCommands', 'lldbInterpreter'),
+            ('lldbExpression', 'lldbTarget'),
+            ('lldbExpression', 'lldbSymbol'),
+            ('lldbSymbol', 'lldbTarget'),
+            ('lldbSymbol', 'lldbExpression'),
+            ('lldbTarget', 'lldbSymbol'),
+            ('lldbTarget', 'lldbPluginProcessUtility'),
+            ('lldbTarget', 'lldbExpression'),
+            ('lldbPluginProcessUtility', 'lldbTarget'),
+            ('lldbPluginExpressionParserClang', 'lldbPluginTypeSystemClang'),
+            ('lldbPluginTypeSystemClang', 'lldbPluginSymbolFileDWARF'),
+            ('lldbPluginTypeSystemClang', 'lldbPluginExpressionParserClang'),
+            ('lldbPluginTypeSystemClang', 'lldbPluginSymbolFilePDB'),
+            ('lldbPluginSymbolFileDWARF', 'lldbPluginTypeSystemClang'),
+            ('lldbPluginSymbolFilePDB', 'lldbPluginTypeSystemClang'),
+            ('lldbPluginDynamicLoaderPosixDYLD', 'lldbPluginProcessElfCore'),
+            ('lldbPluginProcessElfCore', 'lldbPluginDynamicLoaderPosixDYLD'),
+        ]
+        keys = components.keys() 
+
+        for target, remove in remove_dependencies:
+            if target in keys:
+                if remove in components[target]:
+                    components[target].remove(remove)
+                if target in components[remove]:
+                    components[remove].remove(target)
+        r = False
+        for c in keys:
+            for c_dep in components[c]:
+                if c_dep in keys:
+                    if c in components[c_dep]:
+                        print(f"{c} -> {c_dep} -> {c}")
+                        r = True
+        if r:
+            raise "circulare dependency found"
         
         lib_path = os.path.join(self.package_folder, 'lib')
         if not self.options.shared:
@@ -435,6 +471,9 @@ class Llvm(ConanFile):
         del self.info.options.use_llvm_cmake_files
 
     def validate(self):
+        # check keep_binaries_regex early to fail early
+        re.compile(str(self.options.keep_binaries_regex))
+
         if self.settings.compiler == "gcc" and tools.Version(
                 self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration(
@@ -457,6 +496,60 @@ class Llvm(ConanFile):
                     self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
                     raise ConanInvalidConfiguration(f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs = ["lib/cmake"]
+        self.cpp_info.set_property("cmake_file_name", "LLVM")
+
+        if self.options.shared:
+            self.cpp_info.libs = tools.collect_libs(self)
+            if self.settings.os == 'Linux':
+                self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
+            elif self.settings.os == 'Macos':
+                self.cpp_info.system_libs = ['m']
+            return
+
+        components_path = \
+            os.path.join(self.package_folder, 'lib', 'components.json')
+        with open(components_path, 'r') as components_file:
+            components = json.load(components_file)
+
+        dependencies = ['ffi', 'z', 'iconv', 'xml2']
+        external_targets = {
+            'ffi': 'libffi::libffi',
+            'z': 'zlib::zlib',
+            'xml2': 'libxml2::libxml2',
+            'iconv': 'Iconv::Iconv',
+        }
+
+        for component, deps in components.items():
+            self.cpp_info.components[component].libs = [component]
+            self.cpp_info.components[component].requires.extend(dep for dep in deps if self._is_relevant_component(dep))
+
+            for lib, target in external_targets.items():
+                if lib in deps:
+                    self.cpp_info.components[component].requires.append(target)
+
+            self.cpp_info.components[component].system_libs = [
+                dep for dep in deps
+                if not self._is_relevant_component(dep) and dep not in dependencies
+            ]
+
+            self.cpp_info.components[component].set_property("cmake_target_name", component)
+            self.cpp_info.components[component].builddirs.append(self._module_subfolder)
+            self.cpp_info.components[component].names["cmake_find_package"] = component
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = component
+
+            if self.options.use_llvm_cmake_files:
+                self.cpp_info.components[component].build_modules["cmake_find_package"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
+                self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LLVM"
+        self.cpp_info.names["cmake_find_package_multi"] = "LLVM"
