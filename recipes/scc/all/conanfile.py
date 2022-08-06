@@ -5,7 +5,7 @@ import functools
 required_conan_version = ">=1.43.0"
 
 class SystemcComponentsConan(ConanFile):
-    name = "systemc-components"
+    name = "scc"
     description = """A light weight productivity library for SystemC and TLM 2.0"""
     homepage = "https://minres.github.io/SystemC-Components"
     url = "https://github.com/conan-io/conan-center-index"
