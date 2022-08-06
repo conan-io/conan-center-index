@@ -25,10 +25,10 @@ class TupletConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "Visual Studio": "16.11",
+            "Visual Studio": "17",
             "msvc": "19.22",
             "clang": "13",
-            "apple-clang": "11"
+            "apple-clang": "13"
         }
 
     def source(self):
@@ -54,8 +54,9 @@ class TupletConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(compiler, False)
 
         if not minimum_version:
-            self.output.warn(
-                f"{self.name} requires C++20. Your compiler ({compiler}) is unknown. Assuming it supports C++20.")
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++20. Your compiler configuration ({compiler}-{version}) wasn't validated. \
+                please report an issue if it does actually supports c++20.")
         elif lazy_lt_semver(version, minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
@@ -67,7 +68,8 @@ class TupletConan(ConanFile):
         self.info.header_only()
 
     def package(self):
-        source_folder = os.path.join(self.source_folder, self._source_subfolder)
+        source_folder = os.path.join(
+            self.source_folder, self._source_subfolder)
         include_folder = os.path.join(
             self.source_folder, self._source_subfolder, "include")
 
