@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class AssimpConan(ConanFile):
