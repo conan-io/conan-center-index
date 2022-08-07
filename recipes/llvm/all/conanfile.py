@@ -450,7 +450,7 @@ class Llvm(ConanFile):
             for c_dep in components[c]:
                 if c_dep in keys:
                     if c in components[c_dep]:
-                        print(f"{c} -> {c_dep} -> {c}")
+                        self.output.warn(f"{c} -> {c_dep} -> {c}")
                         r = True
         if r:
             raise "circulare dependency found"
