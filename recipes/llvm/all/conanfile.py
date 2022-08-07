@@ -88,8 +88,8 @@ class Llvm(ConanFile):
             ],
             'with_z3': [True, False],
             'with_ffi': [True, False],
-            'with_zlib': [True, False], # ? https://conan.io/center/zlib
-            'with_xml2': [True, False], # ? https://conan.io/center/libxml2
+            'with_zlib': [True, False],
+            'with_xml2': [True, False],
             'use_llvm_cmake_files': [True, False],
             'enable_debug': [True, False],
             'keep_binaries_regex': 'ANY',
