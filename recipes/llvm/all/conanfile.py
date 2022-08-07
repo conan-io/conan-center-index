@@ -284,10 +284,10 @@ class Llvm(ConanFile):
         binaries.extend(os.listdir(os.path.join(self.package_folder, 'bin')))
         binaries = list(set(binaries))
         for bin in binaries:
-            # there are links like clang-14 -> clang -> clang++
             if bin_matcher.match(bin):
                 keep_binaries.append(bin)
                 current_bin=bin
+                # there are links like clang-14 -> clang -> clang++
                 while os.path.islink(os.path.join('bin', current_bin)):
                     current_bin=os.path.basename(os.readlink(os.path.join('bin', current_bin)))
                     keep_binaries.append(current_bin)
@@ -314,6 +314,9 @@ class Llvm(ConanFile):
                 else:
                     shutil.rmtree(ignore_path)
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+
+        # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
+        tools.rmdir(os.path.join(self.build_folder, 'bin'))
         
         if not self.options.shared:
             for ext in ['.a', '.lib']:
@@ -390,7 +393,8 @@ class Llvm(ConanFile):
                             if not visited:
                                 current_deps.append(d)
                     elif self._is_relevant_component(current_dep):
-                        components[lib].append(current_dep)
+                        if not self.options.shared:
+                            components[lib].append(current_dep)
                     elif current_dep in external_targets_keys:
                         components[lib].append(external_targets[current_dep])
                     else:
@@ -460,8 +464,29 @@ class Llvm(ConanFile):
             suffixes = ['.dylib', '.so']
             for name in os.listdir(lib_path):
                 if not any(suffix in name for suffix in suffixes):
-                    os.remove(os.path.join(lib_path, name))
+                    remove_path = os.path.join(lib_path, name)
+                    self.output.info(f"Removing library \"{remove_path}\" from package because its not shared")
+                    if os.path.isfile(remove_path):
+                        os.remove(remove_path)
+                    else:
+                        shutil.rmtree(remove_path)
 
+            # because we remove libs from lib/folder, we need to clear components as well
+            removed = []
+            for key in components.keys():
+                removed_component = not self._is_relevant_component(key)
+                if removed_component:
+                    removed.append(key)
+            for remove in removed:
+                del components[remove]
+            # and check if still existing components relay on these
+            for remove in removed:
+                for key in components.keys():
+                    if remove in components[key]:
+                        self.output.info(f"Removing dependency from \"{key}\" to \"{remove}\" because its not available as shared.")
+                        components[key].remove(remove)
+        
+        # write components.json for package_info
         components_path = os.path.join(self.package_folder, 'lib', 'components.json')
         with open(components_path, 'w') as components_file:
             json.dump(components, components_file, indent=4)
