@@ -1,0 +1,4 @@
+sources:
+  "1.3.0":
+    url: "https://gitlab.inria.fr/gf2x/gf2x/-/archive/gf2x-1.3.0/gf2x-gf2x-1.3.0.tar.gz"
+    sha256: "11bcf98b620c60c2ee3b4460b02b7be741f14cfdc26b542f22c92950926575e0"
