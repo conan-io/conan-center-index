@@ -293,8 +293,9 @@ class Llvm(ConanFile):
                     keep_binaries.append(current_bin)
 
         # remove unneccessary binaries from package
+        package_bin_path = os.path.join(self.build_folder, 'bin')
         for bin in binaries:
-            bin_path = os.path.join(build_bin_path, bin)
+            bin_path = os.path.join(package_bin_path, bin)
             if bin in keep_binaries:
                 self.output.info(f"Keeping binary \"{bin}\" from package")
             elif os.path.isfile(bin_path):
