@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rmdir
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=1.47.0"
@@ -69,4 +69,4 @@ class LZOConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name" "lzo2")
         self.cpp_info.includedirs.append(os.path.join("include", "lzo"))
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["lzo2"]
