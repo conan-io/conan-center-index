@@ -1,4 +1,4 @@
-from conan import CMakeFile
+from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import get
 from conans import tools, CMake
