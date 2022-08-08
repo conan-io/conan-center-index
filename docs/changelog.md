@@ -1,5 +1,11 @@
 # Changelog
 
+### 8-August-2022 - 11:25 CEST
+
+- [fix] Take into account status checks from GitHub actions before merging a pull-request.
+- [feature] Double check that the recipe revision exported using Conan v2 matches the one exported by Conan v1.
+- [feature] Fail if required Conan version is not available on Linux containers instead of falling back to latest.
+
 ### 22-July-2022 - 12:13 CEST
 
 - [feature]: ValidateInfrastructure: Add check to verify CMake 3.21 is installed in Windows machines.

@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 import os
 import re
 import shutil
@@ -26,7 +26,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _is_universal2(self):
-        return self.version in ["r23b", "r23c", "r24"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+        return self.version in ["r23b", "r23c", "r24", "r25"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
@@ -45,11 +45,11 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24']:
+        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
-            unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
+            self.unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
+            tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):
@@ -132,22 +132,24 @@ class AndroidNDKConan(ConanFile):
                 filename = os.path.join(root, filename)
                 with open(filename, "rb") as f:
                     sig = f.read(4)
-                    if type(sig) is str:
+                    if isinstance(sig, str):
                         sig = [ord(s) for s in sig]
                     else:
-                        sig = [s for s in sig]
+                        sig = list(sig)
                     if len(sig) > 2 and sig[0] == 0x23 and sig[1] == 0x21:
                         self.output.info(f"chmod on script file: '{filename}'")
                         self._chmod_plus_x(filename)
                     elif sig == [0x7F, 0x45, 0x4C, 0x46]:
                         self.output.info(f"chmod on ELF file: '{filename}'")
                         self._chmod_plus_x(filename)
-                    elif sig == [0xCA, 0xFE, 0xBA, 0xBE] or \
-                         sig == [0xBE, 0xBA, 0xFE, 0xCA] or \
-                         sig == [0xFE, 0xED, 0xFA, 0xCF] or \
-                         sig == [0xCF, 0xFA, 0xED, 0xFE] or \
-                         sig == [0xFE, 0xEF, 0xFA, 0xCE] or \
-                         sig == [0xCE, 0xFA, 0xED, 0xFE]:
+                    elif sig in (
+                        [0xCA, 0xFE, 0xBA, 0xBE],
+                        [0xBE, 0xBA, 0xFE, 0xCA],
+                        [0xFE, 0xED, 0xFA, 0xCF],
+                        [0xCF, 0xFA, 0xED, 0xFE],
+                        [0xFE, 0xEF, 0xFA, 0xCE],
+                        [0xCE, 0xFA, 0xED, 0xFE]
+                    ):
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
 
@@ -339,37 +341,37 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
 
 
-def unzip_fix_symlinks(url, target_folder, sha256):
-    # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
-    # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
-
-    filename = "android_sdk.zip"
-    tools.download(url, filename, sha256=sha256)
-    tools.unzip(filename, destination=target_folder, strip_root=True)
-
-    def is_symlink_zipinfo(zi):
-        return (zi.external_attr >> 28) == 0xA
-
-    full_path = os.path.normpath(target_folder)
-    import zipfile
-    with zipfile.ZipFile(filename, "r") as z:
-        zip_info = z.infolist()
-
-        names = [n.replace("\\", "/") for n in z.namelist()]
-        common_folder = os.path.commonprefix(names).split("/", 1)[0]
-
-        for file_ in zip_info:
-            if is_symlink_zipinfo(file_):
-                rel_path = os.path.relpath(file_.filename, common_folder)
-                full_name = os.path.join(full_path, rel_path)
-                target = tools.load(full_name)
-                os.unlink(full_name)
-
-                try:
-                    os.symlink(target, full_name)
-                except OSError:
-                    if not os.path.isabs(target):
-                        target = os.path.normpath(os.path.join(os.path.dirname(full_name), target))
-                    shutil.copy2(target, full_name)
-
-    os.unlink(filename)
+    def unzip_fix_symlinks(self, url, target_folder, sha256):
+        # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
+        # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
+    
+        filename = "android_sdk.zip"
+        tools.files.download(self, url, filename, sha256=sha256)
+        tools.files.unzip(self, filename, destination=target_folder, strip_root=True)
+    
+        def is_symlink_zipinfo(zi):
+            return (zi.external_attr >> 28) == 0xA
+    
+        full_path = os.path.normpath(target_folder)
+        import zipfile
+        with zipfile.ZipFile(filename, "r") as z:
+            zip_info = z.infolist()
+    
+            names = [n.replace("\\", "/") for n in z.namelist()]
+            common_folder = os.path.commonprefix(names).split("/", 1)[0]
+    
+            for file_ in zip_info:
+                if is_symlink_zipinfo(file_):
+                    rel_path = os.path.relpath(file_.filename, common_folder)
+                    full_name = os.path.join(full_path, rel_path)
+                    target = tools.files.load(self, full_name)
+                    os.unlink(full_name)
+    
+                    try:
+                        os.symlink(target, full_name)
+                    except OSError:
+                        if not os.path.isabs(target):
+                            target = os.path.normpath(os.path.join(os.path.dirname(full_name), target))
+                        shutil.copy2(target, full_name)
+    
+        os.unlink(filename)

@@ -1,4 +1,7 @@
 sources:
+  "1.9.2":
+    url: "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.9.2.tar.gz"
+    sha256: "3fba157a9f80a0889c982acdd44608be8a46142270a389008b22d921be1198ad"
   "1.9.1":
     url: "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.9.1.tar.gz"
     sha256: "3a54cf375218977b7af4716ed9738378e37fe400a6c5ddb9d622354ca31fdc79"
@@ -21,38 +24,27 @@ sources:
     url: "https://github.com/edenhill/librdkafka/archive/v1.5.3.tar.gz"
     sha256: "2105ca01fef5beca10c9f010bc50342b15d5ce6b73b2489b012e6d09a008b7bf"
 patches:
+  "1.9.2":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-1-9-1.patch
   "1.9.1":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-9-1.patch
-      base_path: source_subfolder
   "1.8.2":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.8.0":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.7.0":
     - patch_file: patches/0001-Change-library-names-1-7-0.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-7-0.patch
-      base_path: source_subfolder
   "1.6.1":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-1.patch
-      base_path: source_subfolder
   "1.6.0":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-6-0.patch
-      base_path: source_subfolder
   "1.5.3":
     - patch_file: patches/0001-Change-library-names-1-5-2.patch
-      base_path: source_subfolder
     - patch_file: patches/0002-Change-library-targets-and-result-variables-1-5-2.patch
-      base_path: source_subfolder
