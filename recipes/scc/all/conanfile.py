@@ -49,7 +49,7 @@ class SystemcComponentsConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     def source(self):
