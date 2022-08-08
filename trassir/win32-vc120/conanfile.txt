@@ -36,7 +36,7 @@ openal/1.15.1@trassir/sdk120
 openblas/0.2.14@trassir/sdk120
 opencv/2.4.11@trassir/sdk120
 OpenSSL/1.0.2d@trassir/sdk120
-postgresql-binaries-x86-vc120/14.3.dssl1
+postgresql-binaries-x86-vc120/14.3.dssl1 # GHA: ignore: this probably should be with @trassir/sdk142 or something
 pjsip/2.4.5@trassir/sdk120
 protobuf/0.0@trassir/sdk120
 qt/4.8.7@trassir/sdk120
