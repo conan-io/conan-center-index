@@ -1,9 +1,11 @@
 import os
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conans import CMake
+from conan.tools.build import cross_building
 
 
 class TestPackgeConan(ConanFile):
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
     generators = "cmake"
 
@@ -18,7 +20,7 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             if self.settings.os == "Windows":
                 self.run("ndk-build.cmd --version", run_environment=True)
             else:
@@ -28,4 +30,3 @@ class TestPackgeConan(ConanFile):
         if self.settings.os == "Android":
             test_file = os.path.join("bin", "test_package")
             assert os.path.exists(test_file)
-            # self.run("android-emulator {}".format(test_file), run_environment=True)

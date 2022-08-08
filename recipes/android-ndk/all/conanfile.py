@@ -1,10 +1,11 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, download, unzip, load, copy
 import os
 import re
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class AndroidNDKConan(ConanFile):
@@ -47,9 +48,9 @@ class AndroidNDKConan(ConanFile):
     def build(self):
         if self.version in ['r23', 'r23b', 'r23c', 'r24']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
-            unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
+            _unzip_fix_symlinks(self, url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
+            get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):
@@ -59,11 +60,11 @@ class AndroidNDKConan(ConanFile):
         del self.info.settings.build_type
 
     def package(self):
-        self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
-        self.copy("*NOTICE", src=self._source_subfolder, dst="licenses")
-        self.copy("*NOTICE.toolchain", src=self._source_subfolder, dst="licenses")
-        self.copy("cmake-wrapper.cmd")
-        self.copy("cmake-wrapper")
+        copy(self, "*", src=self._source_subfolder, dst=self.package_folder, keep_path=True)
+        copy(self, "*NOTICE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*NOTICE.toolchain", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "cmake-wrapper.cmd", src=self.build_folder, dst=self.package_folder)
+        copy(self, "cmake-wrapper", src=self.build_folder, dst=self.package_folder)
         self._fix_broken_links()
         self._fix_permissions()
 
@@ -341,13 +342,13 @@ class AndroidNDKConan(ConanFile):
         self.conf_info.define("tools.android:ndk_path", self.package_folder)
 
 
-def unzip_fix_symlinks(url, target_folder, sha256):
+def _unzip_fix_symlinks(conanfile, url, target_folder, sha256):
     # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
     # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
 
     filename = "android_sdk.zip"
-    tools.download(url, filename, sha256=sha256)
-    tools.unzip(filename, destination=target_folder, strip_root=True)
+    download(conanfile, url, filename, sha256=sha256)
+    unzip(conanfile, filename, destination=target_folder, strip_root=True)
 
     def is_symlink_zipinfo(zi):
         return (zi.external_attr >> 28) == 0xA
@@ -364,7 +365,7 @@ def unzip_fix_symlinks(url, target_folder, sha256):
             if is_symlink_zipinfo(file_):
                 rel_path = os.path.relpath(file_.filename, common_folder)
                 full_name = os.path.join(full_path, rel_path)
-                target = tools.load(full_name)
+                target = load(conanfile, full_name)
                 os.unlink(full_name)
 
                 try:
