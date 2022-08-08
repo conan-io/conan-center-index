@@ -1,4 +1,5 @@
 from conan import ConanFile, tools
+from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -26,20 +27,11 @@ class JfalcouEveConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if  tools.scm.Version(self.version) >= "2022.03.0":
-                return {
-                    "gcc": "11",
-                    "Visual Studio": "16.9",
-                    "clang": "13",
-                    "apple-clang": "13",
-                    }
-        else:
-                return {
-                    "gcc": "10.2",
-                    "Visual Studio": "16.9",
-                    "clang": "12",
-                    "apple-clang": "13",
-                    }
+        return {"gcc": "11",
+                "Visual Studio": "16.9",
+                "clang": "13",
+                "apple-clang": "13",
+                }
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -65,7 +57,7 @@ class JfalcouEveConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.files.get(**self.conan_data["sources"][self.version], strip_root=True,
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
                 destination=self._source_subfolder)
 
     def package(self):
