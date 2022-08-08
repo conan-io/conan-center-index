@@ -23,7 +23,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     @property
     def _is_universal2(self):
