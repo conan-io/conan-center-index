@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class LzfseConan(ConanFile):
@@ -55,6 +55,8 @@ class LzfseConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LZFSE_BUNDLE_MODE"] = False
         tc.variables["LZFSE_DISABLE_TESTS"] = False
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
