@@ -1,5 +1,11 @@
-from conans import ConanFile, Meson, tools
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools import files
+
+from conans import Meson
+from conans import tools
 from conans.errors import ConanInvalidConfiguration
+
 import os
 
 required_conan_version = ">=1.33.0"
@@ -50,11 +56,11 @@ class GtkConan(ConanFile):
 
     @property
     def _gtk4(self):
-        return tools.Version("4.0.0") <= tools.Version(self.version) < tools.Version("5.0.0")
+        return Version("4.0.0") <= Version(self.version) < Version("5.0.0")
 
     @property
     def _gtk3(self):
-        return tools.Version("3.0.0") <= tools.Version(self.version) < tools.Version("4.0.0")
+        return Version("3.0.0") <= Version(self.version) < Version("4.0.0")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -68,7 +74,7 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
-        if tools.Version(self.version) >= "4.1.0":
+        if Version(self.version) >= "4.1.0":
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
@@ -77,18 +83,18 @@ class GtkConan(ConanFile):
             del self.options.with_x11
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.2":
-                raise ConanInvalidConfiguration(f"MSVC support of this recipe requires at least gtk/4.2")
+            if Version(self.version) < "4.2":
+                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             if not self.options["glib"].shared:
                 raise ConanInvalidConfiguration(f"{self.name} recipe requires shared glib")
             if not self.options["gdk-pixbuf"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared cairo")
-        if tools.Version(self.version) >= "4.1.0":
+        if Version(self.version) >= "4.1.0":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
 
@@ -143,7 +149,7 @@ class GtkConan(ConanFile):
             self.requires("gstreamer/1.19.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -162,12 +168,14 @@ class GtkConan(ConanFile):
         defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
 
         if self._gtk4:
-            enabled_disabled = lambda opt : "enabled" if opt else "disabled"
-            defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
-            defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
-            defs["print-cups"] = enabled_disabled(self.options.with_cups)
-            if tools.Version(self.version) < "4.3.2":
-                defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
+            def enabled(opt):
+                return "enabled" if opt else "disabled"
+
+            defs["media-ffmpeg"] = enabled(self.options.with_ffmpeg)
+            defs["media-gstreamer"] = enabled(self.options.with_gstreamer)
+            defs["print-cups"] = enabled(self.options.with_cups)
+            if Version(self.version) < "4.3.2":
+                defs["print-cloudprint"] = enabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
@@ -175,15 +183,15 @@ class GtkConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            files.patch(self, **patch)
         if self._gtk3:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
-        if "4.2.0" <= tools.Version(self.version) < "4.6.1":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+        if "4.2.0" <= Version(self.version) < "4.6.1":
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "gtk_update_icon_cache: true",
                                   "gtk_update_icon_cache: false")
-        if "4.6.2" <= tools.Version(self.version):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        if "4.6.2" <= Version(self.version):
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "dependency(is_msvc_like ? ",
                                   "dependency(false ? ")
         with tools.environment_append(tools.RunEnvironment(self).vars):
@@ -199,9 +207,9 @@ class GtkConan(ConanFile):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def _build_gdk3_requirements(self):
         requirements = [
