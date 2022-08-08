@@ -45,7 +45,7 @@ openblas/0.3.7.dssl1
 opencv/2.4.13.7
 openh264/1.7.0.dssl2
 openssl/1.1.1k
-postgresql-binaries-x86-vc120/14.3.dssl1
+postgresql-binaries-x86-vc120/14.3.dssl1 # GHA: ignore: this probably should be with @trassir/sdk142 or something
 pjsip/2.9
 sdl/2.0.16
 signalr-qt/0.1.dssl3
