@@ -178,7 +178,7 @@ class PocoConan(ConanFile):
 
     def _patch_sources(self):
         for data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**data)
+            patch(self, **data)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
