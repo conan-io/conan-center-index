@@ -35,3 +35,6 @@ sources:
   "3.23.3":
     url: "https://github.com/Kitware/CMake/archive/v3.23.3.tar.gz"
     sha256: "013f688b7da463dcd1e7afde769081af21cb24365aefc246761cfb2e04cd2872"
+  "3.24.0":
+    url: "https://github.com/Kitware/CMake/archive/v3.24.0.tar.gz"
+    sha256: "d71f48192a0747c0bd46e8f2128773adf3d650d3900a9b03bd2ee5058619bafd"
