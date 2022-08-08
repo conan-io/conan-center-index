@@ -1,5 +1,8 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
+from conan import ConanFile
+from conan.tools.files import get, patch, chdir, rmdir, copy
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -37,7 +40,7 @@ class LiburingConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version < "2.2":
+        if Version(self.version) < "2.2":
             del self.options.with_libc
 
     def configure(self):
@@ -58,8 +61,8 @@ class LiburingConan(ConanFile):
                 "liburing is supported only on linux")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -67,35 +70,35 @@ class LiburingConan(ConanFile):
 
         self._autotools = AutoToolsBuildEnvironment(self)
         args = []
-        if self.options.get_safe("with_libc") is False:
+        if self.options.get_safe("with_libc") == False:
             args.append("--nolibc")
         self._autotools.configure(args=args)
         self._autotools.flags.append("-std=gnu99")
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for data in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **data)
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        copy(self, "COPYING*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
 
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             install_args = [
                 "ENABLE_SHARED={}".format(1 if self.options.shared else 0)
             ]
             autotools.install(args=install_args)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "man"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "man"))
 
         if self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
