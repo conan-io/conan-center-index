@@ -23,6 +23,7 @@ Guardant/7.update7@trassir/stable
 hdf5/1.10.6
 hidapi/0.10.1
 hikvision-pacs-sdk/6.1.4.42@trassir/sdk142
+HikSingleThreadDecode/3.4.4.2@trassir/sdk142
 icu/64.2.dssl2
 intel_media_sdk/2018R2_1
 jansson/2.12
@@ -44,7 +45,7 @@ openblas/0.3.7.dssl1
 opencv/2.4.13.7
 openh264/1.7.0.dssl2
 openssl/1.1.1k
-postgresql/14.3.dssl1
+postgresql-binaries-x86-vc120/14.3.dssl1
 pjsip/2.9
 sdl/2.0.16
 signalr-qt/0.1.dssl3
@@ -55,7 +56,9 @@ tevian/2.13.6@trassir/stable
 qt/5.14.1.dssl3
 qtwebkit/5.212.0-alpha4.dssl3
 xz_utils/5.2.4.dssl2
+zkteco-pacs-usb-fp-sdk/5.3.0.26@trassir/sdk142
 zlib/1.2.11
+ZlnetSDK_win64/3.0.0.0@dssl/stable
 
 # grpc and its dependencies
 protobuf/3.19.2
@@ -237,7 +240,7 @@ qt:with_libjpeg=libjpeg
 qt:with_libpng=True
 qt:with_mesa=True
 qt:with_mysql=False
-qt:with_odbc=False
+qt:with_odbc=True
 qt:with_openal=False
 qt:with_pcre2=False
 qt:with_pq=True
