@@ -61,6 +61,7 @@ class GtkConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
+        self.options["glib"].shared = True
         if self.settings.os == "Windows":
             del self.options.fPIC
             # Fix duplicate definitions of DllMain
@@ -80,7 +81,9 @@ class GtkConan(ConanFile):
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
             if tools.Version(self.version) < "4.2":
-                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
+                raise ConanInvalidConfiguration(f"MSVC support of this recipe requires at least gtk/4.2")
+            if not self.options["glib"].shared:
+                raise ConanInvalidConfiguration(f"{self.name} recipe requires shared glib")
             if not self.options["gdk-pixbuf"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
@@ -109,7 +112,7 @@ class GtkConan(ConanFile):
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.8")
-        self.requires("glib/2.73.0")
+        self.requires("glib/2.73.3")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
