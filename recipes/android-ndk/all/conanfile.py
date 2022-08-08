@@ -48,7 +48,7 @@ class AndroidNDKConan(ConanFile):
     def build(self):
         if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
-            self._unzip_fix_symlinks(self, url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
+            self._unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
             get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self._source_subfolder, strip_root=True)
