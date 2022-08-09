@@ -422,7 +422,7 @@ class BoostConan(ConanFile):
             )
 
         if self._stacktrace_addr2line_available:
-            if os.path.abspath(str(self.options.addr2line_location)) != str(self.options.addr2line_location):
+            if not os.path.isabs(str(self.options.addr2line_location)):
                 raise ConanInvalidConfiguration("addr2line_location must be an absolute path to addr2line")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
