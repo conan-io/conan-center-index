@@ -62,7 +62,7 @@ class Log4cplusConan(ConanFile):
             self.requires("libiconv/1.16")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True,
                 destination=self._source_subfolder)
 
     def _configure_cmake(self):
