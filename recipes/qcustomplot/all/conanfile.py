@@ -18,10 +18,12 @@ class QcustomplotConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_opengl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_opengl": False,
     }
 
     generators = "cmake", "cmake_find_package_multi"
@@ -58,6 +60,8 @@ class QcustomplotConan(ConanFile):
             tools.check_min_cppstd(self, min_cppstd)
         if not (self.options["qt"].gui and self.options["qt"].widgets):
             raise ConanInvalidConfiguration("qcustomplot requires qt gui and widgets")
+        if self.options.with_opengl and self.options["qt"].opengl == "no":
+            raise ConanInvalidConfiguration("qcustomplot with opengl requires Qt with opengl enabled")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -76,7 +80,7 @@ class QcustomplotConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["QT_VERSION"] = self.deps_cpp_info["qt"].version
-        # TODO: add an option to enable QCUSTOMPLOT_USE_OPENGL
+        cmake.definitions["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
         cmake.configure()
         return cmake
 
@@ -95,4 +99,6 @@ class QcustomplotConan(ConanFile):
         self.cpp_info.libs = ["qcustomplot" + postfix]
         if self.options.shared:
             self.cpp_info.defines.append("QCUSTOMPLOT_USE_LIBRARY")
+        if self.options.with_opengl:
+            self.cpp_info.defines.append("QCUSTOMPLOT_USE_OPENGL")
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport"]
