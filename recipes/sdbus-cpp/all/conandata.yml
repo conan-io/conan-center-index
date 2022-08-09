@@ -9,6 +9,9 @@ sources:
     url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.1.0.tar.gz"
     sha256: "35e939fdd9c796522702c9c8762dd59b5c47f3440c01ba9feb9921c042780b55"
 
+  "1.2.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.2.0.tar.gz"
+    sha256: "7f7231904abb6a996b8c18ddc5fb50078ef5dff5191649abf9f127aff41d24e9"
 patches:
   "0.8.3":
     - base_path: "source_subfolder"
