@@ -76,7 +76,7 @@ class BoostConan(ConanFile):
         "system_no_deprecated": [True, False],
         "asio_no_deprecated": [True, False],
         "filesystem_no_deprecated": [True, False],
-        "filesystem_version": ["default", "3", "4"],
+        "filesystem_version": [None, "3", "4"],
         "fPIC": [True, False],
         "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
@@ -114,7 +114,7 @@ class BoostConan(ConanFile):
         "system_no_deprecated": False,
         "asio_no_deprecated": False,
         "filesystem_no_deprecated": False,
-        "filesystem_version": "default",
+        "filesystem_version": None,
         "fPIC": True,
         "layout": "system",
         "magic_autolink": False,
@@ -1437,7 +1437,7 @@ class BoostConan(ConanFile):
         if self.options.filesystem_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
-        if self.options.filesystem_version != "default":
+        if self.options.filesystem_version is not None:
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_VERSION=%s" % self.options.filesystem_version)
 
         if self.options.segmented_stacks:
