@@ -30,7 +30,7 @@ class SamariumConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11.0",
-            "Visual Studio": "16.9",
+            "Visual Studio": "16",
             "clang": "13",
             "apple-clang": "13",
         }
