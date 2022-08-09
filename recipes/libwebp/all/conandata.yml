@@ -20,27 +20,17 @@ sources:
 patches:
   "1.2.3":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
   "1.2.2":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
   "1.2.1":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
   "1.2.0":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-build-libwebpmux-1.2.0.patch"
-      base_path: "source_subfolder"
   "1.1.0":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-qnx.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-build-libwebpmux-1.1.0.patch"
-      base_path: "source_subfolder"
   "1.0.3":
     - patch_file: "patches/0001-fix-dll-export.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-build-libwebpmux-1.0.3.patch"
-      base_path: "source_subfolder"
