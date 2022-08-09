@@ -90,9 +90,12 @@ class Llvm(ConanFile):
             'with_ffi': [True, False],
             'with_zlib': [True, False],
             'with_xml2': [True, False],
+            'keep_binaries_regex': 'ANY',
+
+            # options removed in package id
             'use_llvm_cmake_files': [True, False],
             'enable_debug': [True, False],
-            'keep_binaries_regex': 'ANY',
+            'clean_build_bin': [True, False],
         },
     }
     default_options = {
@@ -122,22 +125,25 @@ class Llvm(ConanFile):
             'with_ffi': False,
             'with_zlib': True,
             'with_xml2': True,
-            'enable_debug': False,
+            'keep_binaries_regex': '^$',
+
+            # options removed in package id
+            'enable_debug': False, # disable debug builds in ci
             'use_llvm_cmake_files': False,
-            'keep_binaries_regex': '^(clang\+\+|clang|opt)$',
+            'clean_build_bin': True, # prevent 40gb debug build folder
         }
     }
     generators = 'cmake_find_package'
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires('libffi/3.4.2')
+            self.requires('libffi/[>3.4.0 <4.0.0]')
         if self.options.get_safe('with_zlib', False):
-            self.requires('zlib/1.2.12')
+            self.requires('zlib/[>1.2.0 <2.0.0]')
         if self.options.get_safe('with_xml2', False):
-           self.requires('libxml2/2.9.10')
+           self.requires('libxml2/[>2.9.0 <3.0.0]')
         if self.options.get_safe('with_z3', False):
-            self.requires('z3/4.8.8')
+            self.requires('z3/[>4.8.0 <5.0.0]')
 
     @property
     def repo_folder(self):
@@ -155,7 +161,7 @@ class Llvm(ConanFile):
     def build_requirements(self):
         # Older cmake versions may have issues generating the graphviz output used
         # to model the components
-        self.build_requires("cmake/3.21.3")
+        self.build_requires("cmake/[>3.21.3 <4.0.0]")
 
     def configure(self):
         if self.options.shared:
@@ -317,7 +323,8 @@ class Llvm(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
         # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
-        tools.rmdir(os.path.join(self.build_folder, 'bin'))
+        if self.options.clean_build_bin:
+            tools.rmdir(os.path.join(self.build_folder, 'bin'))
         
         if not self.options.shared:
             for ext in ['.a', '.lib']:
@@ -332,7 +339,7 @@ class Llvm(ConanFile):
         dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
         deps = re.findall(dep_regex, dot_text)
 
-        # map dependency names # XXX not seen any of this in llvm-14 linux build
+        # map dependency names
         external_targets = {
             'libffi::libffi': 'ffi',
             'ZLIB::ZLIB': 'z',
@@ -495,6 +502,7 @@ class Llvm(ConanFile):
     def package_id(self):
         del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
+        del self.info.options.clean_build_bin
 
     def validate(self):
         # check keep_binaries_regex early to fail early
