@@ -11,59 +11,13 @@ sources:
   "3.19.4":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.19.4.tar.gz"
     sha256: "3bd7828aa5af4b13b99c191e8b1e884ebfa9ad371b0ce264605d347f135d2568"
-  "3.19.2":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.19.2.tar.gz"
-    sha256: "4dd35e788944b7686aac898f77df4e9a54da0ca694b8801bd6b2a9ffc1b3085e"
   "3.18.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.1.tar.gz"
     sha256: "9111bf0b542b631165fadbd80aa60e7fb25b25311c532139ed2089d76ddf6dd7"
   "3.17.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
-  "3.16.0":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.16.0.tar.gz"
-    sha256: "7892a35d979304a404400a101c46ce90e85ec9e2a766a86041bb361f626247f5"
-  "3.15.8":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.15.8.tar.gz"
-    sha256: "0cbdc9adda01f6d2facc65a22a2be5cecefbefe5a09e5382ee8879b522c04441"
-  "3.15.5":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.15.5.tar.gz"
-    sha256: "bc3dbf1f09dba1b2eb3f2f70352ee97b9049066c9040ce0c9b67fb3294e91e4b"
-  "3.13.0":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.13.0.tar.gz"
-    sha256: "9b4ee22c250fe31b16f1a24d61467e40780a3fbb9b91c3b65be2a376ed913a1a"
-  "3.12.4":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.12.4.tar.gz"
-    sha256: "512e5a674bf31f8b7928a64d8adf73ee67b8fe88339ad29adaa3b84dbaa570d8"
-  "3.11.4":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.11.4.tar.gz"
-    sha256: "a79d19dcdf9139fa4b81206e318e33d245c4c9da1ffed21c87288ed4380426f9"
-  "3.9.1":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.9.1.tar.gz"
-    sha256: "98e615d592d237f94db8bf033fba78cd404d979b0b70351a9e5aaff725398357"
 patches:
   "3.19.4":
     - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
-      base_path: "source_subfolder"
-  "3.19.2":
-    - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
-      base_path: "source_subfolder"
-  "3.15.5":
-    - patch_file: "patches/upstream-pr-8301-bundle-destination.patch"
-      base_path: "source_subfolder"
-  "3.13.0":
-    - patch_file: "patches/upstream-pr-7761-cmake-regex-fix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/upstream-pr-7288-android-log.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/upstream-pr-8301-bundle-destination.patch"
-      base_path: "source_subfolder"
-  "3.12.4":
-    - patch_file: "patches/upstream-pr-7761-cmake-regex-fix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/upstream-issue-7567-no-export-template-define.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/upstream-pr-7288-android-log.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/upstream-pr-8301-bundle-destination.patch"
       base_path: "source_subfolder"
