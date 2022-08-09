@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-        self.folders.build = "build"
 
     def build(self):
         cmake = CMake(self)
