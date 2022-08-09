@@ -14,7 +14,7 @@ class CppProjectFrameworkConan(ConanFile):
     homepage = "https://github.com/sheepgrass/cpp_project_framework"
     url = "https://github.com/conan-io/conan-center-index"  # Package recipe repository url here, for issues about the package
     description = "C++ Project Framework is a framework for creating C++ project."
-    topics = ("c++", "project", "framework")
+    topics = ("cpp", "project", "framework")
     settings = "os", "compiler", "build_type", "arch"
 
     def package_id(self):
