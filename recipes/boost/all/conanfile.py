@@ -1345,7 +1345,7 @@ class BoostConan(ConanFile):
         if self._is_msvc:
             toolset_version = self._toolset_version.replace(".", "")
         else:
-            toolset_version = str(Version(self.settings.compiler.version).major)
+            toolset_version = str(Version(self.settings.compiler.version).major(fill=False))
 
         toolset_parts = [compiler, os_]
         toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
@@ -1458,8 +1458,8 @@ class BoostConan(ConanFile):
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
         if self.options.layout == "versioned":
-            version = Version(self.version)
-            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
+            version = Version(self.version).as_list
+            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", f"boost-{version[0]}_{version[1]}"))
 
         # Boost::boost is an alias of Boost::headers
         self.cpp_info.components["_boost_cmake"].requires = ["headers"]
@@ -1565,20 +1565,20 @@ class BoostConan(ConanFile):
                     libsuffix_data["abi"] = "-{}".format(abi)
 
             libsuffix_data["arch"] = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
-            version = Version(self.version)
-            if not version.patch or version.patch == "0":
-                libsuffix_data["version"] = "-{}_{}".format(version.major, version.minor)
+            version = Version(self.version).as_list
+            if len(version) == 2 or version[2] == 0:
+                libsuffix_data["version"] = f"-{version[0]}_{version[1]}"
             else:
-                libsuffix_data["version"] = "-{}_{}_{}".format(version.major, version.minor, version.patch)
+                libsuffix_data["version"] = f"-{version[0]}_{version[1]}_{version[2]}"
             libsuffix = libsuffix_lut[str(self.options.layout)].format(**libsuffix_data)
             if libsuffix:
                 self.output.info("Library layout suffix: {}".format(repr(libsuffix)))
 
             libformatdata = {}
             if not self.options.without_python:
-                pyversion = Version(self._python_version)
-                libformatdata["py_major"] = pyversion.major
-                libformatdata["py_minor"] = pyversion.minor
+                pyversion = Version(self._python_version).as_list
+                libformatdata["py_major"] = pyversion[0]
+                libformatdata["py_minor"] = pyversion[1]
 
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
@@ -1698,12 +1698,12 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
-                pyversion = Version(self._python_version)
-                self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
+                pyversion = Version(self._python_version).as_list
+                self.cpp_info.components[f"python{pyversion[0]}{pyversion[1]}"].requires = ["python"]
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
+                self.cpp_info.components[f"numpy{pyversion[0]}{pyversion[1]}"].requires = ["numpy"]
 
             if self._is_msvc or self._is_clang_cl:
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
