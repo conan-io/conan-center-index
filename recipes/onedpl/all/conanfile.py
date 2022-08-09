@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conan.tools import files
+from conan import ConanFile, tools
+from conan.tools import files, scm
 import os
 
 required_conan_version = ">=1.43.0"
@@ -37,7 +37,7 @@ class OneDplConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if tools.Version(self.version) >= "2021.7.0":
+            if tools.scm.Version(self.version) >= "2021.7.0":
                 tools.check_min_cppstd(self, 17)
             else:
                 tools.check_min_cppstd(self, 11)
@@ -46,7 +46,7 @@ class OneDplConan(ConanFile):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
-        version_major = int(tools.Version(self.version).major[0:4])
+        version_major = int(tools.scm.Version(self.version).major()[0:4])
         self.copy("*", src=os.path.join(self._source_subfolder, "include"), dst="include")
         if version_major < 2021:
             self.copy("*", src=os.path.join(self._source_subfolder, "stdlib"), dst="include")
