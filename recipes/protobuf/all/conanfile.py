@@ -1,7 +1,10 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import CMake, tools
+
 import functools
 import os
 import textwrap
@@ -60,7 +63,7 @@ class ProtobufConan(ConanFile):
 
     @property
     def _can_disable_rtti(self):
-        return tools.Version(self.version) >= "3.15.4"
+        return Version(self.version) >= "3.15.4"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -86,12 +89,12 @@ class ProtobufConan(ConanFile):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) < "14":
+            if Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
 
         if self.settings.compiler == "clang":
-            if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
+            if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
 
         if hasattr(self, "settings_build") and tools.cross_building(self) and \
@@ -116,7 +119,7 @@ class ProtobufConan(ConanFile):
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
         if not self.options.debug_suffix:
             cmake.definitions["protobuf_DEBUG_POSTFIX"] = ""
-        if tools.Version(self.version) >= "3.14.0":
+        if Version(self.version) >= "3.14.0":
             cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
         if self._can_disable_rtti:
             cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
@@ -125,7 +128,7 @@ class ProtobufConan(ConanFile):
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        if tools.Version(self.version) < "3.18.0" and self._is_clang_cl:
+        if Version(self.version) < "3.18.0" and self._is_clang_cl:
             cmake.definitions["CMAKE_RC_COMPILER"] = os.environ.get("RC", "llvm-rc")
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -180,7 +183,7 @@ class ProtobufConan(ConanFile):
                  "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
-            cmd_str = "COMMAND  protobuf::protoc" if tools.Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
+            cmd_str = "COMMAND  protobuf::protoc" if Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
             tools.replace_in_file(
                 protobuf_config_cmake,
                 cmd_str,
@@ -203,7 +206,7 @@ class ProtobufConan(ConanFile):
 
         # https://github.com/protocolbuffers/protobuf/issues/9916
         # it will be solved in protobuf 3.21.0
-        if tools.Version(self.version) == "3.20.0":
+        if Version(self.version) == "3.20.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
                 "#elif PROTOBUF_GNUC_MIN(12, 0)",
                 "#elif PROTOBUF_GNUC_MIN(12, 2)")
