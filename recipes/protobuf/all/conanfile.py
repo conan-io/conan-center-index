@@ -1,9 +1,11 @@
-from conan.tools.files import rename
+from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
+from conan.tools.build import cross_building
+from conan.tools.apple.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
-from conans import CMake, tools
+from conans import CMake
 
 import functools
 import os
@@ -97,13 +99,13 @@ class ProtobufConan(ConanFile):
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
 
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+        if hasattr(self, "settings_build") and cross_building(self) and \
            self.settings.os == "Macos" and self.options.shared:
             # FIXME: should be allowed, actually build succeeds but it fails at build time of test package due to SIP
             raise ConanInvalidConfiguration("protobuf shared not supported yet in CCI while cross-building on Macos")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @property
@@ -134,15 +136,14 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         # Provide relocatable protobuf::protoc target and Protobuf_PROTOC_EXECUTABLE cache variable
         # TODO: some of the following logic might be disabled when conan will
         #       allow to create executable imported targets in package_info()
         protobuf_config_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in")
 
-        tools.replace_in_file(
+        replace_in_file(self,
             protobuf_config_cmake,
             "@_protobuf_FIND_ZLIB@",
             "# BEGIN CONAN PATCH\n#_protobuf_FIND_ZLIB@\n# END CONAN PATCH"
@@ -166,7 +167,7 @@ class ProtobufConan(ConanFile):
                 set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})
             endif()
         """.format(protoc_rel_path=protoc_rel_path))
-        tools.replace_in_file(
+        replace_in_file(self,
             protobuf_config_cmake,
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
             protoc_target
@@ -175,8 +176,8 @@ class ProtobufConan(ConanFile):
         # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
         # (even with virtualrunenv, this fix might be required due to SIP)
         # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if tools.is_apple_os(self.settings.os):
-            tools.replace_in_file(
+        if is_apple_os(self.settings.os):
+            replace_in_file(self,
                 protobuf_config_cmake,
                 "add_custom_command(",
                 ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
@@ -184,7 +185,7 @@ class ProtobufConan(ConanFile):
                  "add_custom_command(")
             )
             cmd_str = "COMMAND  protobuf::protoc" if Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
-            tools.replace_in_file(
+            replace_in_file(self,
                 protobuf_config_cmake,
                 cmd_str,
                 "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
@@ -193,12 +194,12 @@ class ProtobufConan(ConanFile):
         # Disable a potential warning in protobuf-module.cmake.in
         # TODO: remove this patch? Is it really useful?
         protobuf_module_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in")
-        tools.replace_in_file(
+        replace_in_file(self,
             protobuf_module_cmake,
             "if(DEFINED Protobuf_SRC_ROOT_FOLDER)",
             "if(0)\nif(DEFINED Protobuf_SRC_ROOT_FOLDER)",
         )
-        tools.replace_in_file(
+        replace_in_file(self,
             protobuf_module_cmake,
             "# Define upper case versions of output variables",
             "endif()",
@@ -207,7 +208,7 @@ class ProtobufConan(ConanFile):
         # https://github.com/protocolbuffers/protobuf/issues/9916
         # it will be solved in protobuf 3.21.0
         if Version(self.version) == "3.20.0":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "src", "google", "protobuf", "port_def.inc"),
                 "#elif PROTOBUF_GNUC_MIN(12, 0)",
                 "#elif PROTOBUF_GNUC_MIN(12, 2)")
 
@@ -220,7 +221,7 @@ class ProtobufConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
@@ -228,8 +229,8 @@ class ProtobufConan(ConanFile):
                      os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "libprotobuf-lite.*")
+            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "lib"))
+            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
