@@ -76,6 +76,7 @@ class XsimdConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "xsimd")
         self.cpp_info.set_property("cmake_target_name", "xsimd")
+        self.cpp_info.set_property("cmake_target_namespace", "xsimd")
         self.cpp_info.set_property("pkg_config_name", "xsimd")
         if self.options.xtl_complex:
             self.cpp_info.defines = ["XSIMD_ENABLE_XTL_COMPLEX=1"]
