@@ -189,7 +189,7 @@ class BoostConan(ConanFile):
             dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
             if not os.path.isfile(dependencies_filepath):
                 raise ConanException("Cannot find {}".format(dependencies_filepath))
-            self._cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+            self._cached_dependencies = yaml.safe_load(open(dependencies_filepath, encoding='utf-8'))
         return self._cached_dependencies
 
     def _all_dependent_modules(self, name):
@@ -761,7 +761,7 @@ class BoostConan(ConanFile):
         ]
         for d in clean_dirs:
             if os.path.isdir(d):
-                self.output.warn("removing '%s'".format(d))
+                self.output.warn("removing '{}'".format(d))
                 shutil.rmtree(d)
 
     @property
@@ -958,7 +958,7 @@ class BoostConan(ConanFile):
                 return "0"
             elif str(self.settings.compiler.libcxx) == "libstdc++11":
                 return "1"
-        except:
+        except ConanException:
             pass
         return None
 
@@ -1069,7 +1069,7 @@ class BoostConan(ConanFile):
                     }.get(str(self.settings.compiler.libcxx), str(self.settings.compiler.libcxx))
                     cxx_flags.append("-stdlib={}".format(libcxx))
                     link_flags.append("-stdlib={}".format(libcxx))
-            except:
+            except ConanException:
                 pass
 
         if self.options.error_code_header_only:
@@ -1334,7 +1334,6 @@ class BoostConan(ConanFile):
         # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
         compiler = {
             "apple-clang": "",
-            "msvc": "vc",
             "Visual Studio": "vc",
             "msvc": "vc",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
