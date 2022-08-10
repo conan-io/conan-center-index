@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class FlecsConan(ConanFile):
@@ -83,12 +83,6 @@ class FlecsConan(ConanFile):
                 self.cpp_info.components["_flecs"].system_libs.append("pthread")
             elif self.settings.os == "Windows":
                 self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32"])
-
-        # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
-        # from that version components don't have empty libdirs by default
-        self.cpp_info.components["_flecs"].includedirs = ["include"]
-        self.cpp_info.components["_flecs"].libdirs= ["lib"]
-        self.cpp_info.components["_flecs"].bindirs = ["bin"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "flecs"
