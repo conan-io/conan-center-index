@@ -38,9 +38,9 @@ class OneDplConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             if tools.scm.Version(self.version) >= "2021.7.0":
-                tools.check_min_cppstd(self, 17)
+                tools.build.check_min_cppstd(self, 17)
             else:
-                tools.check_min_cppstd(self, 11)
+                tools.build.check_min_cppstd(self, 11)
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
