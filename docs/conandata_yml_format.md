@@ -9,6 +9,9 @@ In the context of conan-center-index, this file is mandatory and consists of two
  * `sources`: Library sources origin with their verification checksums.
  * `patches`: Details about the different patches the library needs for several reasons.
 
+<!-- toc -->
+## Contents<!-- endToc -->
+
 ## sources
 
 `sources` is a top level dictionary, containing entries of sources and checksums for each of the supported versions.
