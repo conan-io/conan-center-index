@@ -2,7 +2,7 @@ import os
 from conan.tools import files
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.35.0"
 
 
 class Log4cplusConan(ConanFile):
