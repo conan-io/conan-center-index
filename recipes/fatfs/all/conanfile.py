@@ -3,6 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools import files
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 
+from http.client import HTTPConnection
+HTTPConnection.debuglevel = 1
+
+
 required_conan_version = ">=1.49.0"
 
 
