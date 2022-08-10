@@ -199,14 +199,15 @@ class Llvm(ConanFile):
             args=['--graphviz=graph/llvm.dot'],
             defs={
                 'BUILD_SHARED_LIBS': False,
+                'LIBOMP_ENABLE_SHARED': self.options.shared,
                 'CMAKE_SKIP_RPATH': True,
                 'CMAKE_POSITION_INDEPENDENT_CODE': \
                     self.options.get_safe('fPIC', default=False) or self.options.shared,
                 'LLVM_TARGET_ARCH': 'host',
                 'LLVM_TARGETS_TO_BUILD': self.options.targets,
-                'LLVM_BUILD_LLVM_DYLIB': self.options.shared,
+                'LLVM_BUILD_LLVM_DYLIB': self.options.shared, # also sets CLANG_LINK_CLANG_DYLIB
                 'LLVM_DYLIB_COMPONENTS': self.options.components,
-                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False),
+                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False), # llvm default on
                 'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
                 'LLVM_ENABLE_WARNINGS': True,
                 'LLVM_ENABLE_PEDANTIC': True,
