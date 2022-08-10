@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
 import os
 import textwrap
 
@@ -96,7 +96,7 @@ class LibccdConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ccd")
         self.cpp_info.set_property("pkg_config_name", "ccd")
 
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["ccd"]
         if not self.options.shared:
             self.cpp_info.defines.append("CCD_STATIC_DEFINE")
         if self.settings.os in ["Linux", "FreeBSD"]:
