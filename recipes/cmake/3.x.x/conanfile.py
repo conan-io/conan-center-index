@@ -118,5 +118,5 @@ class CMakeConan(ConanFile):
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
-            
+
         self.cpp_info.includedirs = []
