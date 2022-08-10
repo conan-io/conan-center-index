@@ -112,6 +112,9 @@ class FatFsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.0")
+
     def validate(self):
         if self.options.use_find and self.options.minimize > 2:
             raise ConanInvalidConfiguration(
