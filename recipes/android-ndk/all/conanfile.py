@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class AndroidNDKConan(ConanFile):
