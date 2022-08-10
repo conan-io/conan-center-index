@@ -1,7 +1,8 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
 from conan.tools import files
 from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake, tools
 import functools
 import os
 import textwrap
@@ -106,7 +107,7 @@ class TensorflowLiteConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         files.apply_conandata_patches(self)
 
         # Shared build fails on Windows with
@@ -118,9 +119,10 @@ class TensorflowLiteConan(ConanFile):
 
         # All CMake targets will be provided by Conan through the wrapper, removing every occurrence of `find_package`
         cmake_lists_path = os.path.join(self.source_folder, self._source_subfolder, "tensorflow/lite/CMakeLists.txt")
-        original_content = open(cmake_lists_path, "r").readlines()
-        patched_content = "".join(line for line in original_content if "find_package" not in line)
-        open(cmake_lists_path, "w").write(patched_content)
+        with open(cmake_lists_path, "r", encoding="utf-8") as f:
+            patched_content = "".join(line for line in f.readlines() if "find_package" not in line)
+        with open(cmake_lists_path, "w", encoding="utf-8") as f:
+            f.write(patched_content)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -157,7 +159,7 @@ class TensorflowLiteConan(ConanFile):
 
     @property
     def _module_file(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
