@@ -2,7 +2,7 @@ from os import path
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import patch, copy, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -23,8 +23,6 @@ class SamariumConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [
         True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    exports_sources = "patches/*"
 
     @property
     def _compilers_minimum_version(self):
@@ -65,8 +63,14 @@ class SamariumConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def build(self):
-        apply_conandata_patches(self)
+        for patch_ in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **patch_)
+
         cmake = CMake(self)
         cmake.configure(build_script_folder="src")
         cmake.build()
