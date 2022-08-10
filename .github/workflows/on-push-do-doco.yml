@@ -1,5 +1,7 @@
 name: docs_markdown_toc
 on:
+  workflow_dispatch:
+    inputs: {}
   push:
     branches:
       - master
@@ -20,6 +22,7 @@ jobs:
           --toc-level 5
       shell: bash
     - name: Create Pull Request
+      if: github.event_name == 'push'
       uses: peter-evans/create-pull-request@v3
       with:
         branch: bot/action-doc-toc
