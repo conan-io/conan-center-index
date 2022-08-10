@@ -1,5 +1,8 @@
 import os
-from conans import tools, ConanFile, CMake
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.files import rmdir, get
+from conans import tools, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
 required_conan_version = ">=1.35.0"
@@ -58,13 +61,13 @@ class CMakeConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -99,7 +102,7 @@ class CMakeConan(ConanFile):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "doc"))
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_id(self):
         del self.info.settings.compiler
