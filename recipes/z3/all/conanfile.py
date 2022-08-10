@@ -97,7 +97,8 @@ class Z3Conan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 tools.check_min_cppstd(self, "17")
             compiler = self.settings.compiler
-            min_version = self._compilers_minimum_version.get(str(compiler), False)
+            min_version = self._compilers_minimum_version\
+                .get(str(compiler), False)
             if min_version:
                 if tools.Version(compiler.version) < min_version:
                     raise ConanInvalidConfiguration(
@@ -135,8 +136,8 @@ class Z3Conan(ConanFile):
             "libz3" if self.settings.os == "Windows" else "z3"]
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["libz3"].system_libs.append("pthread")
-
+                self.cpp_info.components["libz3"]\
+                    .system_libs.extend(["pthread", "m"])
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Z3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Z3"
