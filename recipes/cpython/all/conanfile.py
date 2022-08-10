@@ -667,7 +667,7 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["embed"].requires = ["python"]
 
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
-        self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
+        self.cpp_info.components["_embed_copy"].names["pkg_config"] = "python{}-embed".format(py_version.major)
         self.cpp_info.components["_embed_copy"].libdirs = []
 
         if self._supports_modules:
