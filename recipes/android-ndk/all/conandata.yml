@@ -1,4 +1,17 @@
 sources:
+  "r25":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-windows.zip"
+        sha256: "bdb25e75647532f979844f549a33eaf75c54a2cb4367f349be187ae9bfee9234"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-linux.zip"
+        sha256: "cd661aeda5d9b7cfb6e64bd80737c274d7c1c0d026df2f85be3bf3327b25e545"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r25-darwin.zip"
+        sha256: "2373424b91bba4cdd15e4c82e05f77a44ba3617aa3329843958ea3d0e25e62d0"
   "r24":
     "Windows":
       "x86_64":

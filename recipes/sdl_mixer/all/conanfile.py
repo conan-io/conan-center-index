@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conans import CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, rmdir
 import os
 import functools
 
@@ -72,7 +74,7 @@ class SDLMixerConan(ConanFile):
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
         if self.options.opus:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
             self.requires("opus/1.3.1")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
@@ -86,9 +88,9 @@ class SDLMixerConan(ConanFile):
                 self.requires("tinymidi/cci.20130325")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-        tools.rmdir(os.path.join(self._source_subfolder, "external"))
+        rmdir(self, os.path.join(self._source_subfolder, "external"))
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -136,7 +138,7 @@ class SDLMixerConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "SDL2_mixer::SDL2_mixer")
         self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
         self.cpp_info.libs = ["SDL2_mixer"]
-        self.cpp_info.includedirs = [os.path.join("include", "SDL2")]
-        
+        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
+
         self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"        
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"
