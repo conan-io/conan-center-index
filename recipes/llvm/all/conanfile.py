@@ -280,34 +280,35 @@ class Llvm(ConanFile):
             dst="licenses",
             keep_path=False,
         )
-
         bin_matcher = re.compile(str(self.options.keep_binaries_regex))
         keep_binaries = []
-        # resolve binaries to keep which are links, so we need to keep link target as well
+        # resolve binaries to keep which are links, so we need to keep link target as well.
+        # Binaries are also used to skip targets
         build_bin_path = os.path.join(self.build_folder, 'bin')
-        binaries = ["lldb-test", "clang-fuzzer", "clang-objc-fuzzer"] # missed by the method below
+        package_bin_path = os.path.join(self.package_folder, 'bin')
+        binaries = ["lldb-test", "clang-fuzzer", "clang-objc-fuzzer"] # missed targets by the method below
         binaries.extend(os.listdir(build_bin_path))
-        binaries.extend(os.listdir(os.path.join(self.package_folder, 'bin')))
+        binaries.extend(os.listdir(package_bin_path))
         binaries = list(set(binaries))
+        binaries.sort()
         for bin in binaries:
             if bin_matcher.match(bin):
                 keep_binaries.append(bin)
                 current_bin=bin
-                # there are links like clang-14 -> clang -> clang++
+                # there are links like clang++ -> clang -> clang-14
                 while os.path.islink(os.path.join('bin', current_bin)):
                     current_bin=os.path.basename(os.readlink(os.path.join('bin', current_bin)))
                     keep_binaries.append(current_bin)
 
         # remove unneccessary binaries from package
-        package_bin_path = os.path.join(self.build_folder, 'bin')
         for bin in binaries:
             bin_path = os.path.join(package_bin_path, bin)
             if bin in keep_binaries:
                 self.output.info(f"Keeping binary \"{bin}\" from package")
-            elif os.path.isfile(bin_path):
+            elif os.path.isfile(bin_path) or os.path.islink(bin_path):
                 self.output.info(f"Removing binary \"{bin}\" from package")
                 os.remove(bin_path)
-
+        
         # remove unneccessary files from package
         ignore = ["share", "libexec", "**/Find*.cmake", "**/*Config.cmake"]
         for ignore_entry in ignore:
