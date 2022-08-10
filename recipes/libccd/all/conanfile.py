@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, rmdir, save
 import os
 import textwrap
 
@@ -58,8 +58,6 @@ class LibccdConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "${CMAKE_BINARY_DIR}", "${CMAKE_CURRENT_BINARY_DIR}")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
