@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, rmdir, save
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibccdConan(ConanFile):
@@ -55,6 +55,7 @@ class LibccdConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["ENABLE_DOUBLE_PRECISION"] = self.options.enable_double_precision
         tc.variables["CCD_HIDE_ALL_SYMBOLS"] = not self.options.shared
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
