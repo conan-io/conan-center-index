@@ -118,7 +118,8 @@ class GoogleAPIS(ConanFile):
                 all_dict[key].is_used = False
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
-        if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.2" and self.settings.os == "Macos":
+        #    as of 3.21.4 issue still exist
+        if tools.Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++") or \
