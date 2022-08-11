@@ -167,6 +167,7 @@ class TensorflowLiteConan(ConanFile):
         self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
         if self.options.shared:
             self.copy("*", dst="bin", src=os.path.join(self._build_subfolder, "bin"))
+        if self.settings.build_type == "Debug":
             tools.remove_files_by_mask(self.package_folder, "*.pdb")
         self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_file))
 
