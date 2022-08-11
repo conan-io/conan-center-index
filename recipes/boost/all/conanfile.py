@@ -189,7 +189,8 @@ class BoostConan(ConanFile):
             dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
             if not os.path.isfile(dependencies_filepath):
                 raise ConanException("Cannot find {}".format(dependencies_filepath))
-            self._cached_dependencies = yaml.safe_load(open(dependencies_filepath, encoding='utf-8'))
+            with open(dependencies_filepath, encoding='utf-8') as f:
+                self._cached_dependencies = yaml.safe_load(f)
         return self._cached_dependencies
 
     def _all_dependent_modules(self, name):
