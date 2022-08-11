@@ -284,7 +284,7 @@ class ArrowConan(ConanFile):
         if self._with_thrift():
             self.requires("thrift/0.16.0")
         if self._with_protobuf():
-            self.requires("protobuf/3.21.1")
+            self.requires("protobuf/3.21.4")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
@@ -296,7 +296,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
         if self._with_grpc():
-            self.requires("grpc/1.47.0")
+            self.requires("grpc/1.47.1")
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
