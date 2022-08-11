@@ -54,6 +54,9 @@ class VerilatorConan(ConanFile):
                 self.build_requires("bison/3.5.3")
             else:
                 self.build_requires("bison/3.7.6")
+        if tools.Version(self.version) >= "4.224":
+            self.build_requires("autoconf/2.71")
+
 
     def requirements(self):
         if self.settings.os == "Windows":
@@ -109,7 +112,11 @@ class VerilatorConan(ConanFile):
             if yacc.endswith(" -y"):
                 yacc = yacc[:-3]
         with tools.environment_append({"YACC": yacc}):
+            if tools.Version(self.version) >= "4.224":
+               with tools.chdir(self._source_subfolder):        
+                    self.run("autoconf", run_environment=True)
             self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
+
         return self._autotools
 
     @property

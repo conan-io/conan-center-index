@@ -41,7 +41,13 @@
      if (VL_UNCOVERABLE(ret == -1)) {
          v3fatal("Failed to execute command:"  // LCOV_EXCL_LINE
                  << command << " " << strerror(errno));
-
+@@ -356,4 +359,5 @@ int V3Os::system(const string& command) {
+         UASSERT(exit_code >= 0, "exit code must not be negative");
+         return exit_code;
+     }
++#endif
+ }
+ 
 --- src/VlcTop.cpp
 +++ src/VlcTop.cpp
 @@ -14,6 +14,11 @@
