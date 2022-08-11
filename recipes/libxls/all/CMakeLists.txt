@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.4)
 project(libxls C)
-cmake_minimum_required(VERSION 3.0)
 
 option(WITH_CLI "Build and install cli command" OFF)
 
