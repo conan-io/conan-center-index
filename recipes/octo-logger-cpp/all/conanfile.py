@@ -1,6 +1,5 @@
-from conans import CMake
-from conans import ConanFile
-from conans import tools
+from conans import ConanFile, CMake
+from conan.tools.files import get, collect_libs
 
 
 class OctoLoggerCPPConan(ConanFile):
@@ -24,8 +23,7 @@ class OctoLoggerCPPConan(ConanFile):
         return "build"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
 
     def requirements(self):
         self.requires("catch2/3.1.0")
@@ -44,4 +42,4 @@ class OctoLoggerCPPConan(ConanFile):
         cmake.install(build_dir=self._build_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
