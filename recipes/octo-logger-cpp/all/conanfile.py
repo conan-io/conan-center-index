@@ -5,6 +5,7 @@ from conans import tools
 
 class OctoLoggerCPPConan(ConanFile):
     name = "octo-logger-cpp"
+    version = "1.0.0"
     license = "MIT"
     url = "https://github.com/ofiriluz/octo-logger-cpp"
     homepage = "https://github.com/ofiriluz/octo-logger-cpp"
@@ -16,11 +17,11 @@ class OctoLoggerCPPConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return "source"
 
     @property
     def _build_subfolder(self):
-        return "build_subfolder"
+        return "build"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -33,9 +34,9 @@ class OctoLoggerCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        cmake.build()
-        cmake.test()
+        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.build(build_dir=self._build_subfolder)
+        cmake.test(build_dir=self._build_subfolder)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
