@@ -470,31 +470,32 @@ class Llvm(ConanFile):
             if self.options.get_safe('with_zlib', False):
                 if not 'z' in components['LLVMSupport']:
                     components['LLVMSupport'].append('z')
+            suffixes = ['.a']
         else:
             suffixes = ['.dylib', '.so']
-            for name in os.listdir(lib_path):
-                if not any(suffix in name for suffix in suffixes):
-                    remove_path = os.path.join(lib_path, name)
-                    self.output.info(f"Removing library \"{remove_path}\" from package because its not shared")
-                    if os.path.isfile(remove_path):
-                        os.remove(remove_path)
-                    else:
-                        shutil.rmtree(remove_path)
+        for name in os.listdir(lib_path):
+            if not any(suffix in name for suffix in suffixes):
+                remove_path = os.path.join(lib_path, name)
+                self.output.info(f"Removing library \"{remove_path}\" from package because it doesn't end with {suffixes}")
+                if os.path.isdir(remove_path):
+                    shutil.rmtree(remove_path)
+                else:
+                    os.remove(remove_path)
 
-            # because we remove libs from lib/folder, we need to clear components as well
-            removed = []
+        # because we remove libs from lib/folder, we need to clear components as well
+        removed = []
+        for key in components.keys():
+            removed_component = not self._is_relevant_component(key)
+            if removed_component:
+                removed.append(key)
+        for remove in removed:
+            del components[remove]
+        # and check if still existing components relay on these
+        for remove in removed:
             for key in components.keys():
-                removed_component = not self._is_relevant_component(key)
-                if removed_component:
-                    removed.append(key)
-            for remove in removed:
-                del components[remove]
-            # and check if still existing components relay on these
-            for remove in removed:
-                for key in components.keys():
-                    if remove in components[key]:
-                        self.output.info(f"Removing dependency from \"{key}\" to \"{remove}\" because its not available as shared.")
-                        components[key].remove(remove)
+                if remove in components[key]:
+                    self.output.info(f"Removing dependency from \"{key}\" to \"{remove}\" because it doesn't end with {suffixes}")
+                    components[key].remove(remove)
         
         # write components.json for package_info
         components_path = os.path.join(self.package_folder, 'lib', 'components.json')
