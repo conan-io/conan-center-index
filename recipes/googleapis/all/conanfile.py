@@ -56,7 +56,7 @@ class GoogleAPIS(ConanFile):
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
     def requirements(self):
-        self.requires('protobuf/3.21.1')
+        self.requires('protobuf/3.21.4')
 
     @property
     def _cmake_new_enough(self):
@@ -73,7 +73,7 @@ class GoogleAPIS(ConanFile):
             return True
 
     def build_requirements(self):
-        self.build_requires('protobuf/3.21.1')
+        self.build_requires('protobuf/3.21.4')
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         if not self._cmake_new_enough:
             self.build_requires('cmake/3.23.2')
