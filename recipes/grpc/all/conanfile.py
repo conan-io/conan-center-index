@@ -91,7 +91,7 @@ class grpcConan(ConanFile):
     def requirements(self):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1o")
+        self.requires("openssl/1.1.1q")
         self.requires("re2/20220201")
         self.requires("zlib/1.2.12")
         self.requires("protobuf/3.21.1")
@@ -209,12 +209,6 @@ class grpcConan(ConanFile):
             "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
             "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
         )
-        if Version(self.version) >= "1.39.0" and Version(self.version) < "1.42.0":
-            # Bug introduced in https://github.com/grpc/grpc/pull/26148
-            # Reverted in https://github.com/grpc/grpc/pull/27626
-            tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                    "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
-                    "if(gRPC_INSTALL)")
 
     def build(self):
         self._patch_sources()
