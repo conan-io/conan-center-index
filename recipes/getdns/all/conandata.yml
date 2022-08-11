@@ -5,14 +5,7 @@ sources:
 patches:
   "1.6.0":
     - patch_file: "patches/1.6.0-0001-install-runtimes.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.6.0-0002-fix-exports-extension-libraries.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.6.0-0003-let-find-modules-use-pkgconfig.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.6.0-0004-dont-install-symlinked-license.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.6.0-0005-fix-libuv-name.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.6.0-0006-support-cross-compiling.patch"
-      base_path: "source_subfolder"

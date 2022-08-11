@@ -1,18 +1,26 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+import glob
 
+from conan import ConanFile
+from conan import tools
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches
+from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.50.0"
 
 class GetDnsConan(ConanFile):
     name = "getdns"
     description = "A modern asynchronous DNS API"
-    topics = "conan", "getdns", "asynchronous", "event"
     license = "BSD-3-Clause"
-    homepage = "https://getdnsapi.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://getdnsapi.net/"
+    topics = ("dns", "asynchronous", "event")
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,9 +41,6 @@ class GetDnsConan(ConanFile):
         "with_libuv": True,
         "with_libidn2": True,
     }
-    generators = "cmake", "pkg_config", "cmake_find_package", "cmake_find_package_multi"
-
-    _cmake = None
 
     @property
     def _with_libev(self):
@@ -53,9 +58,10 @@ class GetDnsConan(ConanFile):
         else:
             return self.options.stub_only
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,6 +72,9 @@ class GetDnsConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def layout(self):
+        cmake_layout(self, src_folder='src')
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
@@ -86,49 +95,59 @@ class GetDnsConan(ConanFile):
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("getdns-{}".format(self.version), self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
-        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        self._cmake.definitions["ENABLE_STUB_ONLY"] = self._stub_only
-        self._cmake.definitions["BUILD_LIBEV"] = self._with_libev
-        self._cmake.definitions["BUILD_LIBEVENT2"] = self.options.with_libevent
-        self._cmake.definitions["BUILD_LIBUV"] = self.options.with_libuv
-        self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn2
-        self._cmake.definitions["USE_GNUTLS"] = self.options.tls == "gnutls"
-        self._cmake.definitions["BUILD_TESTING"] = False
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.variables["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
+        toolchain.variables["ENABLE_SHARED"] = self.options.shared
+        toolchain.variables["ENABLE_STATIC"] = not self.options.shared
+        toolchain.variables["ENABLE_STUB_ONLY"] = self._stub_only
+        toolchain.variables["BUILD_LIBEV"] = self._with_libev
+        toolchain.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
+        toolchain.variables["BUILD_LIBUV"] = self.options.with_libuv
+        toolchain.variables["USE_LIBIDN2"] = self.options.with_libidn2
+        toolchain.variables["USE_GNUTLS"] = self.options.tls == "gnutls"
+        toolchain.variables["BUILD_TESTING"] = False
+        toolchain.generate()
 
-        self._cmake.configure()
-        return self._cmake
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        pkg = PkgConfigDeps(self)
+        pkg.generate()
+
+        # inject pkgconf env vars in build context
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
+        # also need to inject generators folder into PKG_CONFIG_PATH
+        env = Environment()
+        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+        envvars = env.vars(self, scope="build")
+        envvars.save_script("conanbuildenv_pkg_config_path")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # Use FindOpenSSL.cmake to let check_function_exists succeed
         # Remove other cmake modules as they use FindPkgConfig
-        for fn in glob.glob("Find*cmake"):
-            if "OpenSSL" not in fn:
-                os.unlink(fn)
-        cmake = self._configure_cmake()
+        # for fn in glob.glob(os.path.join(self.source_folder, "cmake", "modules", "Find*.cmake")):
+        #     if "OpenSSL" not in fn:
+        #         os.remove(fn)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         self.info.options.stub_only = self._stub_only
@@ -143,8 +162,6 @@ class GetDnsConan(ConanFile):
         self.cpp_info.components["libgetdns"].includedirs.append(os.path.join("include", "getdns"))
         self.cpp_info.components["libgetdns"].names["pkg_config"]= "getdns"
         self.cpp_info.components["libgetdns"].requires = ["openssl::openssl"]
-        if self.options.with_libidn2:
-            self.cpp_info.components["libgetdns"].requires.append("libidn2::libidn2")
         if self.options.with_libidn2:
             self.cpp_info.components["libgetdns"].requires.append("libidn2::libidn2")
         if self.options.tls == "gnutls":

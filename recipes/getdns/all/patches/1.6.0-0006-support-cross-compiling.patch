@@ -1,7 +1,5 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 51b7c1e..ac01cc6 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+--- CMakeLists.txt
++++ CMakeLists.txt
 @@ -521,9 +521,17 @@ set(STRPTIME_TEST_SOURCE "\n
    if (!res) return 1; return 0; }")
  
