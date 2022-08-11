@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: 69763b538a6e945c1697653c11fddbffd5e9195685fb78d7ef067a3eca9d3889
+    url: https://github.com/ofiriluz/octo-logger-cpp/archive/refs/tags/v1.0.0.tar.gz
