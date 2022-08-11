@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2db10e5..ea10629 100644
+index 2db10e5..612d2cf 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -329,7 +329,7 @@ function(protobuf_generate_grpc_cpp)
@@ -233,7 +233,15 @@ index 2db10e5..ea10629 100644
    src/cpp/ext/proto_server_reflection.cc
    src/cpp/ext/proto_server_reflection_plugin.cc
  )
-@@ -3872,10 +3717,8 @@ endif()
+@@ -3317,6 +3162,7 @@ target_link_libraries(grpc++_reflection
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
+@@ -3872,10 +3718,8 @@ endif()
  # See https://github.com/grpc/grpc/issues/19473
  if(gRPC_BUILD_CODEGEN AND NOT gRPC_USE_PROTO_LITE)
  add_library(grpcpp_channelz
@@ -246,6 +254,14 @@ index 2db10e5..ea10629 100644
    src/cpp/server/channelz/channelz_service.cc
    src/cpp/server/channelz/channelz_service_plugin.cc
  )
+@@ -3914,6 +3758,7 @@ target_link_libraries(grpcpp_channelz
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
 diff --git a/src/cpp/ext/proto_server_reflection.h b/src/cpp/ext/proto_server_reflection.h
 index 04f1e63..82837e8 100644
 --- a/src/cpp/ext/proto_server_reflection.h

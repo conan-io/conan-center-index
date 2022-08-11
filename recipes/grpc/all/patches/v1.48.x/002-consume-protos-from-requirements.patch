@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7d23aa5..a6ceead 100644
+index 7d23aa5..457188b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -451,7 +451,7 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
@@ -287,6 +287,14 @@ index 7d23aa5..a6ceead 100644
    src/cpp/server/channelz/channelz_service.cc
    src/cpp/server/channelz/channelz_service_plugin.cc
  )
+@@ -4138,6 +3961,7 @@ target_link_libraries(grpcpp_channelz
+   ${_gRPC_PROTOBUF_LIBRARIES}
+   ${_gRPC_ALLTARGETS_LIBRARIES}
+   grpc++
++  grpc-proto::grpc-proto
+ )
+ 
+ foreach(_hdr
 diff --git a/src/cpp/ext/proto_server_reflection.h b/src/cpp/ext/proto_server_reflection.h
 index a9b5db0..528e75b 100644
 --- a/src/cpp/ext/proto_server_reflection.h

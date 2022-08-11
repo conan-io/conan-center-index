@@ -387,12 +387,12 @@ class grpcConan(ConanFile):
             components.update({
                 "grpc++_reflection": {
                     "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
+                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
                 "grpcpp_channelz": {
                     "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
+                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
@@ -440,6 +440,3 @@ class grpcConan(ConanFile):
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
-
-        # Hack. googleapis doesn't provide a library so it is not used by any component
-        self.cpp_info.components["__"].requires = ["googleapis::googleapis", "grpc-proto::grpc-proto"]
