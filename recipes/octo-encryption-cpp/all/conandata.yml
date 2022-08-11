@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: e7c192d9d991dd06cb77ff7e5191b7008770fc23dc7133b19c232dcf1393e56f
+    url: https://github.com/ofiriluz/octo-encryption-cpp/archive/refs/tags/v1.0.0.tar.gz
