@@ -466,10 +466,14 @@ class Llvm(ConanFile):
             suffixes = ['.a']
         else:
             suffixes = ['.dylib', '.so']
+            for ext in suffixes:
+                lib = 'libclang*{}*'.format(ext)
+                self.copy(lib, dst='lib', src='lib')
+            
         for name in os.listdir(lib_path):
             if not any(suffix in name for suffix in suffixes):
                 remove_path = os.path.join(lib_path, name)
-                self.output.info(f"Removing library \"{remove_path}\" from package because it doesn't end with {suffixes}")
+                self.output.info(f"Removing library \"{remove_path}\" from package because it doesn't contain any of {suffixes}")
                 if os.path.isdir(remove_path):
                     shutil.rmtree(remove_path)
                 else:
@@ -487,7 +491,7 @@ class Llvm(ConanFile):
         for remove in removed:
             for key in components.keys():
                 if remove in components[key]:
-                    self.output.info(f"Removing dependency from \"{key}\" to \"{remove}\" because it doesn't end with {suffixes}")
+                    self.output.info(f"Removing dependency from \"{key}\" to \"{remove}\" because it doesn't contain any of {suffixes}")
                     components[key].remove(remove)
         
         # write components.json for package_info
