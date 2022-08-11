@@ -2,10 +2,11 @@ from conan.tools.build import cross_building
 from conan.tools.files import rename, rmdir, get
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import tools as tools_legacy
-from conans import tools
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conans import tools
+# TODO: Update to conan.tools.scm.Version after Conan 1.52.0
+from conans.tools import Version
 
 import glob
 import os
@@ -273,7 +274,7 @@ class BoostConan(ConanFile):
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
-                if tools_legacy.Version(self.settings.compiler.version) < version_cxx11_standard_json:
+                if Version(self.settings.compiler.version) < version_cxx11_standard_json:
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
@@ -290,7 +291,7 @@ class BoostConan(ConanFile):
         elif self.settings.os == "Android":
             # bionic provides iconv since API level 28
             api_level = self.settings.get_safe("os.api_level")
-            if api_level and tools_legacy.Version(api_level) < "28":
+            if api_level and Version(api_level) < "28":
                 self.options.i18n_backend_iconv = "libiconv"
 
         # Remove options not supported by this version of boost
@@ -298,7 +299,7 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, "without_{}".format(dep_name))
 
-        if tools_legacy.Version(self.version) >= "1.76.0":
+        if Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
             # ==> disable it by default for older compilers or c++ standards
 
@@ -317,10 +318,10 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warn("Assuming the compiler supports c++11 by default")
-                elif tools_legacy.Version(self.settings.compiler.version) < min_compiler_version:
+                elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_math()
 
-        if tools_legacy.Version(self.version) >= "1.79.0":
+        if Version(self.version) >= "1.79.0":
             # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
             # ==> disable it by default for older compilers or c++ standards
 
@@ -339,7 +340,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warn("Assuming the compiler supports c++11 by default")
-                elif tools_legacy.Version(self.settings.compiler.version) < min_compiler_version:
+                elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_wave()
 
     @property
@@ -436,7 +437,7 @@ class BoostConan(ConanFile):
             # nowide require a c++11-able compiler with movable std::fstream
             mincompiler_version = self._min_compiler_version_nowide
             if mincompiler_version:
-                if tools_legacy.Version(self.settings.compiler.version) < mincompiler_version:
+                if Version(self.settings.compiler.version) < mincompiler_version:
                     raise ConanInvalidConfiguration("This compiler is too old to build Boost.nowide.")
 
             if self.settings.compiler.cppstd:
@@ -444,7 +445,7 @@ class BoostConan(ConanFile):
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
-                    if tools_legacy.Version(self.settings.compiler.version) < version_cxx11_standard:
+                    if Version(self.settings.compiler.version) < version_cxx11_standard:
                         raise ConanInvalidConfiguration("Boost.{fiber,json} require a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
                 else:
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
@@ -457,13 +458,13 @@ class BoostConan(ConanFile):
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
-                    if tools_legacy.Version(self.settings.compiler.version) < version_cxx11_standard:
+                    if Version(self.settings.compiler.version) < version_cxx11_standard:
                         raise ConanInvalidConfiguration("Boost.{fiber,json} requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
                 else:
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
 
-        if tools_legacy.Version(self.version) >= "1.76.0":
+        if Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a compiler with c++ standard 11 or higher
             if not self.options.without_math:
                 if self.settings.compiler.cppstd:
@@ -471,10 +472,10 @@ class BoostConan(ConanFile):
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:
-                        if tools_legacy.Version(self.settings.compiler.version) < min_compiler_version:
+                        if Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Math requires (boost:)cppstd>=11 (current one is lower)")
 
-        if tools_legacy.Version(self.version) >= "1.79.0":
+        if Version(self.version) >= "1.79.0":
             # Starting from 1.79.0, Boost.Wave requires a compiler with c++ standard 11 or higher
             if not self.options.without_wave:
                 if self.settings.compiler.cppstd:
@@ -482,7 +483,7 @@ class BoostConan(ConanFile):
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:
-                        if tools_legacy.Version(self.settings.compiler.version) < min_compiler_version:
+                        if Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Wave requires (boost:)cppstd>=11 (current one is lower)")
 
     def _with_dependency(self, dependency):
@@ -829,7 +830,7 @@ class BoostConan(ConanFile):
                               "/* thread_local */", "thread_local", strict=False)
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* static __thread */", "static __thread", strict=False)
-        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and tools_legacy.Version(self.settings.compiler.version) < 6):
+        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "thread_local", "/* thread_local */")
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
@@ -1345,7 +1346,7 @@ class BoostConan(ConanFile):
         if self._is_msvc:
             toolset_version = self._toolset_version.replace(".", "")
         else:
-            toolset_version = str(tools_legacy.Version(self.settings.compiler.version).major)
+            toolset_version = str(Version(self.settings.compiler.version).major)
 
         toolset_parts = [compiler, os_]
         toolset_tag = "-".join(part for part in toolset_parts if part) + toolset_version
@@ -1458,7 +1459,7 @@ class BoostConan(ConanFile):
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
         if self.options.layout == "versioned":
-            version = tools_legacy.Version(self.version)
+            version = Version(self.version)
             self.cpp_info.components["headers"].includedirs.append(os.path.join("include", f"boost-{version.major}_{version.minor}"))
 
         # Boost::boost is an alias of Boost::headers
@@ -1565,7 +1566,7 @@ class BoostConan(ConanFile):
                     libsuffix_data["abi"] = "-{}".format(abi)
 
             libsuffix_data["arch"] = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
-            version = tools_legacy.Version(self.version)
+            version = Version(self.version)
             if not version.patch or version.patch == "0":
                 libsuffix_data["version"] = f"-{version.major}_{version.minor}"
             else:
@@ -1576,7 +1577,7 @@ class BoostConan(ConanFile):
 
             libformatdata = {}
             if not self.options.without_python:
-                pyversion = tools_legacy.Version(self._python_version)
+                pyversion = Version(self._python_version)
                 libformatdata["py_major"] = pyversion.major
                 libformatdata["py_minor"] = pyversion.minor
 
@@ -1698,7 +1699,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
-                pyversion = tools_legacy.Version(self._python_version)
+                pyversion = Version(self._python_version)
                 self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
