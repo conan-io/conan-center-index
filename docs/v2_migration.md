@@ -1,6 +1,7 @@
 # Preparing recipes for Conan 2.0
 
-<!-- toc --><!-- endToc -->
+<!-- toc -->
+## Contents<!-- endToc -->
 
 > ⚠️  Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
 > will be taken in ConanCenter and this repository to start running

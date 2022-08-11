@@ -4,6 +4,8 @@ Recipes in this repository are evolving continously, contributors are creating p
 fixing issues and adding new features every day. It is expected that from time to time these
 new recipe revisions stop to work in your project.
 
+<!-- toc -->
+## Contents<!-- endToc -->
 
 ## Breaking changes
 

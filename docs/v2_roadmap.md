@@ -1,6 +1,7 @@
 # Road to Conan v2
 
-<!-- toc --><!-- endToc -->
+<!-- toc -->
+## Contents<!-- endToc -->
 
 > ⚠️ **Note.-** This document is not a [guide about how to migrate recipes to Conan v2](v2_migration.md).
 
