@@ -1,0 +1,18 @@
+--- a/contrib/cmake_unofficial/CMakeLists.txt
++++ b/contrib/cmake_unofficial/CMakeLists.txt
+@@ -9,6 +9,7 @@
+ #
+ # LZ4's CMake support is maintained by Evan Nemerson; when filing
+ # bugs please mention @nemequ to make sure I see it.
++cmake_minimum_required (VERSION 2.8.6)
+ 
+ set(LZ4_TOP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+ 
+@@ -34,7 +35,6 @@ else()
+     LANGUAGES C)
+ endif()
+ 
+-cmake_minimum_required (VERSION 2.8.6)
+ 
+ # If LZ4 is being bundled in another project, we don't want to
+ # install anything.  However, we want to let people override this, so
