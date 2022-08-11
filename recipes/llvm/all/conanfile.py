@@ -327,13 +327,6 @@ class Llvm(ConanFile):
         # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
         if self.options.clean_build_bin:
             tools.rmdir(os.path.join(self.build_folder, 'bin'))
-        
-        if not self.options.shared:
-            for ext in ['.a', '.lib']:
-                lib = '**/lib/*LLVMTableGenGlobalISel{}'.format(ext)
-                self.copy(lib, dst='lib', keep_path=False)
-                lib = '*LLVMTableGenGlobalISel{}'.format(ext)
-                self.copy(lib, dst='lib', src='lib')
 
         # creating dependency graph
         with tools.chdir('graph'):
