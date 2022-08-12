@@ -8,7 +8,7 @@ from conan.tools.env import VirtualBuildEnv
 from conans.tools import Version
 from conans import tools
 import os
-import re
+
 
 required_conan_version = ">=1.48.0"
 
@@ -31,10 +31,6 @@ class LibUSBConan(ConanFile):
         "fPIC": True,
         "enable_udev": True,
     }
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _is_mingw(self):
@@ -112,59 +108,33 @@ class LibUSBConan(ConanFile):
             ms = VirtualBuildEnv(self)
             ms.generate(scope="build")
 
-    def _build_visual_studio(self):
-        with chdir(self, self._source_subfolder):
-            # Assume we're using the latest Visual Studio and default to libusb_2019.sln
-            # (or libusb_2017.sln for libusb < 1.0.24).
-            # If we're not using the latest Visual Studio, select an appropriate solution file.
-            solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
+    @property
+    def _msvc_sln_filename(self):
+        # INFO: Assume we're using the latest Visual Studio and default to libusb_2019.sln
+        # (or libusb_2017.sln for libusb < 1.0.24).
+        # If we're not using the latest Visual Studio, select an appropriate solution file.
+        solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
+        solution_msvc_year = {
+            "11": 2012,
+            "12": 2013,
+            "14": 2015,
+            "15": 2017,
+        }.get(str(self.settings.compiler.version), solution_msvc_year)
+        return os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
 
-            solution_msvc_year = {
-                "11": 2012,
-                "12": 2013,
-                "14": 2015,
-                "15": 2017
-            }.get(str(self.settings.compiler.version), solution_msvc_year)
+    @property
+    def _msvc_build_type(self):
+        return "Debug" if self.settings.build_type == "Debug" else "Release"
 
-            solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
-            platforms = {"x86":"Win32"}
-            properties = {
-                # Enable LTO when CFLAGS contains -GL
-                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
-            }
-            msbuild = MSBuild(self)
-            build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-            msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties, build_type=build_type)
+    def _msvc_platform(self, msbuild):
+        return "Win32" if self.settings.arch == "x86" else msbuild.platform
 
     def build(self):
         if is_msvc(self):
-            if Version(self.version) < "1.0.24":
-                for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
-                                "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
-                    vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
-                    replace_in_file(self, vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
-            with chdir(self, self._source_subfolder):
-                # Assume we're using the latest Visual Studio and default to libusb_2019.sln
-                # (or libusb_2017.sln for libusb < 1.0.24).
-                # If we're not using the latest Visual Studio, select an appropriate solution file.
-                solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
-
-                solution_msvc_year = {
-                    "11": 2012,
-                    "12": 2013,
-                    "14": 2015,
-                    "15": 2017
-                }.get(str(self.settings.compiler.version), solution_msvc_year)
-
-                solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
-                platforms = {"x86":"Win32"}
-                properties = {
-                    # Enable LTO when CFLAGS contains -GL
-                    "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
-                }
-                msbuild = MSBuild(self)
-                build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-                msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties, build_type=build_type)
+            msbuild = MSBuild(self)
+            msbuild.build_type = self._msvc_build_type
+            msbuild.platform = self._msvc_platform(msbuild)
+            msbuild.build(self._msvc_sln_filename)
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
@@ -172,10 +142,9 @@ class LibUSBConan(ConanFile):
             autotools.make()
 
     def _package_visual_studio(self):
-        self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self._source_subfolder, "libusb"), keep_path=False)
+        self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self.build_folder, "libusb"), keep_path=False)
         arch = "x64" if self.settings.arch == "x86_64" else "Win32"
-        build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-        source_dir = os.path.join(self._source_subfolder, arch, build_type, "dll" if self.options.shared else "lib")
+        source_dir = os.path.join(self.build_folder, arch, self._msvc_build_type, "dll" if self.options.shared else "lib")
         if self.options.shared:
             copy(self, pattern="libusb-1.0.dll", dst=os.path.join(self.package_folder, "bin"), src=source_dir, keep_path=False)
             copy(self, pattern="libusb-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
