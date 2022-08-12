@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get
 from conan.tools.files import rmdir
+from conan.tools.build import cross_building
 from conans import AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
@@ -72,7 +73,7 @@ class VerilatorConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.build.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
         if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
