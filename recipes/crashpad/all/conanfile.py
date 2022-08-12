@@ -1,11 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import conan.tools.files as tools_files
+import conan.tools.scm as tools_scm
 import os
 import sys
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.46.0"
 
 
 class CrashpadConan(ConanFile):
@@ -75,7 +78,7 @@ class CrashpadConan(ConanFile):
                 self.output.warn("crashpad needs a shared libcurl library")
         min_compiler_version = self._minimum_compiler_cxx14()
         if min_compiler_version:
-            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            if tools_scm.Version(self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
         else:
             self.output.warn("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
@@ -83,9 +86,9 @@ class CrashpadConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)
-        tools.get(**self.conan_data["sources"][self.version]["mini_chromium"],
-                  destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
+        tools_files.get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)
+        tools_files.get(self, **self.conan_data["sources"][self.version]["mini_chromium"],
+                        destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
 
     @property
     def _gn_os(self):
