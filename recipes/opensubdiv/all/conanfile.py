@@ -1,8 +1,12 @@
 import functools
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, replace_in_file
+from conans import CMake, tools
+from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.48.0"
 
 
 class OpenSubdivConan(ConanFile):
@@ -93,7 +97,7 @@ class OpenSubdivConan(ConanFile):
                 )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @property
     def _osd_gpu_enabled(self):
@@ -134,9 +138,9 @@ class OpenSubdivConan(ConanFile):
     def build(self):
         if self.settings.os == "Macos":
             path = os.path.join(self._source_subfolder, "opensubdiv", "CMakeLists.txt")
-            tools.replace_in_file(path, "${CMAKE_SOURCE_DIR}/opensubdiv", "${CMAKE_SOURCE_DIR}/source_subfolder/opensubdiv")
+            replace_in_file(self, path, "${CMAKE_SOURCE_DIR}/opensubdiv", "${CMAKE_SOURCE_DIR}/source_subfolder/opensubdiv")
             if not self._osd_gpu_enabled:
-                tools.replace_in_file(path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
+                replace_in_file(self, path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
         cmake = self._configure_cmake()
         cmake.build()
 
