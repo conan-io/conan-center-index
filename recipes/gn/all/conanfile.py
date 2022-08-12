@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
+import conan.tools.files as tools_files
 import os
 import sys
 import textwrap
@@ -45,7 +46,7 @@ class GnConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+        tools_files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.
