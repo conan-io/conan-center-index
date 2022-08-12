@@ -83,6 +83,8 @@ class UriparserConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "uriparser")
+        self.cpp_info.set_property("cmake_target_name", "uriparser::uriparser")
         self.cpp_info.set_property("pkg_config_name", "liburiparser")
         self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
