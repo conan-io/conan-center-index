@@ -32,7 +32,7 @@ class GnConan(ConanFile):
             "apple-clang": 10,
         }.get(str(self.settings.compiler))
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
         else:
