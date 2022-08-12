@@ -41,6 +41,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_zlib": [True, False],
+        "opengl_profile": ["GL1", "GL2", "GL3", "GLCORE", "GLES1", "GLES2", "GLES3", "GLES2+GLES3"],
     }
     default_options = {
         "shared": False,
@@ -68,6 +69,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_png": True,
         "with_tiff": True,
         "with_zlib": True,
+        "opengl_profile": "GL2",
     }
 
     short_paths = True
@@ -185,6 +187,8 @@ class OpenSceneGraphConanFile(ConanFile):
         cmake.definitions["BUILD_OSG_DEPRECATED_SERIALIZERS"] = self.options.enable_deprecated_serializers
 
         cmake.definitions["OSG_TEXT_USE_FONTCONFIG"] = self.options.use_fontconfig
+
+        cmake.definitions["OPENGL_PROFILE"] = self.options.opengl_profile
 
         # Disable option dependencies unless we have a package for them
         cmake.definitions["OSG_WITH_FREETYPE"] = self.options.with_freetype
