@@ -1231,10 +1231,11 @@ class BoostConan(ConanFile):
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
 
+        cxx_fwd_slahes = self._cxx.replace("\\", "/")
         if self._is_msvc:
-            contents += f' "{self._cxx.replace("\\", "/")}"'
+            contents += f' "{cxx_fwd_slahes}"'
         else:
-            contents += f' {self._cxx.replace("\\", "/")}'
+            contents += f' {cxx_fwd_slahes}'
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
