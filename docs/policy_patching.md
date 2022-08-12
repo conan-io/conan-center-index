@@ -9,7 +9,11 @@ the library maintainers.
 
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [Rules](#rules)
+  * [Exceptions](#exceptions)
+  * [Patches: format and conventions](#patches-format-and-conventions)<!-- endToc -->
 
 ## Rules
 
