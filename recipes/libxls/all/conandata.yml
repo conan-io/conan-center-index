@@ -2,3 +2,6 @@ sources:
   "1.6.2":
     url: "https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz"
     sha256: "5dacc34d94bf2115926c80c6fb69e4e7bd2ed6403d51cff49041a94172f5e371"
+patches:
+  "1.6.2":
+    - patch_file: "patches/1.6.2-0001-fix-ssize_t-msvc.patch"

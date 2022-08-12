@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan import tools
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.files import apply_conandata_patches
 
 import os
 
@@ -27,6 +28,8 @@ class LibxlsConan(ConanFile):
 
     def export_sources(self):
         tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,6 +69,7 @@ class LibxlsConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
