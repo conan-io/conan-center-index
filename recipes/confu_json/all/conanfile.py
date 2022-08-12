@@ -26,7 +26,7 @@ class ConfuJson(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "10",
             "clang": "10",
         }
@@ -53,8 +53,8 @@ class ConfuJson(ConanFile):
                         self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("boost/1.76.0")
-        self.requires("magic_enum/0.7.2")
+        self.requires("boost/1.79.0")
+        self.requires("magic_enum/0.8.0")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
