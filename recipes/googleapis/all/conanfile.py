@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import collect_libs, copy, get
+from conan.tools.files import collect_libs, copy, get, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -141,12 +141,16 @@ class GoogleAPIS(ConanFile):
 
         return proto_libraries
 
+    def _populate_cmakelists_from_bazel(self, cmakelists):
+        content = ""
+        proto_libraries = self._parse_proto_libraries()
+        for it in filter(lambda u: u.is_used, proto_libraries):
+            content += it.cmake_content
+        save(self, cmakelists, content, append=True)
+
     def build(self):
         cmakelists_folder = os.path.join(self.source_folder, os.pardir)
-        with open(os.path.join(cmakelists_folder, "CMakeLists.txt"), "a", encoding="utf-8") as f:
-            proto_libraries = self._parse_proto_libraries()
-            for it in filter(lambda u: u.is_used, proto_libraries):
-                f.write(it.cmake_content)
+        self._populate_cmakelists_from_bazel(os.path.join(cmakelists_folder, "CMakeLists.txt"))
         cmake = CMake(self)
         cmake.configure(build_script_folder=cmakelists_folder)
         cmake.build()
