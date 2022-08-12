@@ -1,8 +1,10 @@
 extends: default
 rules:
   document-start:
+    level: error
     present: false
   document-end:
+    level: error
     present: false
   empty-values:
     forbid-in-block-mappings: true
