@@ -29,7 +29,7 @@ class GLibConan(ConanFile):
         "with_mount": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_pcre": True,
         "with_elf": True,
