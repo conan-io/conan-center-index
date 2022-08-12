@@ -134,3 +134,4 @@ class FmtConan(ConanFile):
         self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
         self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", "fmt::{}".format(target))
+        self.cpp_info.components["_fmt"].builddirs = [""]
