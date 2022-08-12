@@ -41,8 +41,8 @@ set_target_properties(xlsreader PROPERTIES
 if (APPLE)
     target_link_libraries(xlsreader PUBLIC iconv)
 else()
-    find_package(libiconv REQUIRED CONFIG)
-    target_link_libraries(xlsreader PUBLIC libiconv::libiconv)
+    find_package(Iconv REQUIRED CONFIG)
+    target_link_libraries(xlsreader PUBLIC Iconv::Iconv)
 endif()
 
 
