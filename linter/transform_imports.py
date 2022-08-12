@@ -22,8 +22,8 @@ def transform_tools(module):
         del module.locals['cross_building']
     if 'rmdir' in module.locals:
         del module.locals['rmdir']
-    #if 'Version' in module.locals:
-    #    del module.locals['Version']
+    if 'Version' in module.locals:
+        del module.locals['Version']
 
 
 astroid.MANAGER.register_transform(
