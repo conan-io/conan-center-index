@@ -12,8 +12,8 @@ patches:
   "1.48.0":
     - patch_file: "patches/v1.48.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
-    #- patch_file: "patches/v1.48.x/002-consume-protos-from-requirements.patch"
-    #  base_path: "source_subfolder"
+    - patch_file: "patches/v1.48.x/002-consume-protos-from-requirements.patch"
+      base_path: "source_subfolder"
   "1.47.1":
     - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
