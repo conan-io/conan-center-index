@@ -122,6 +122,7 @@ class LibebConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
 
     def package_info(self):
         if self.settings.os in ("FreeBSD", "Linux", "Macos"):
