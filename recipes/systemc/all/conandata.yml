@@ -2,6 +2,9 @@ sources:
   "2.3.3":
     url: https://github.com/accellera-official/systemc/archive/2.3.3.tar.gz
     sha256: 5781b9a351e5afedabc37d145e5f7edec08f3fd5de00ffeb8fa1f3086b1f7b3f
+  "2.3.3_asan":
+    url: https://github.com/accellera-official/systemc/archive/2.3.3.tar.gz
+    sha256: 5781b9a351e5afedabc37d145e5f7edec08f3fd5de00ffeb8fa1f3086b1f7b3f
 patches:
   "2.3.3":
     - patch_file: "patches/0001-cmake.patch"
@@ -9,4 +12,13 @@ patches:
     - patch_file: "patches/0002-sc_string_view.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-mingw.patch"
+      base_path: "source_subfolder"
+  "2.3.3_asan":
+    - patch_file: "patches/0001-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-sc_string_view.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-asan.patch"
       base_path: "source_subfolder"
