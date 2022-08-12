@@ -28,6 +28,7 @@ class PCRE2Conan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "support_jit": [True, False],
+        "support_callout_fork": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,6 +40,7 @@ class PCRE2Conan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "support_jit": False,
+        "support_callout_fork": True,
     }
 
     exports_sources = "CMakeLists.txt"
@@ -110,6 +112,7 @@ class PCRE2Conan(ConanFile):
         cmake.definitions["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
         cmake.definitions["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
         cmake.definitions["PCRE2_SUPPORT_JIT"] = self.options.support_jit
+        cmake.definitions["PCRE2GREP_SUPPORT_CALLOUT_FORK"] = self.options.support_callout_fork
         if tools.Version(self.version) < "10.38":
             # relocatable shared libs on Macos
             cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
