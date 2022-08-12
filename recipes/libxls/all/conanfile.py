@@ -46,13 +46,15 @@ class LibxlsConan(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        tools.files.save(self, os.path.join(self.source_folder, "include", "config.h"),
-        """
+        config_h_content =         """
 #define HAVE_ICONV 1
 #define ICONV_CONST
 #define PACKAGE_VERSION "{}"
-        """.format(self.version)
-        )
+""".format(self.version)
+        if self.settings.os == "Macos":
+            config_h_content += "#define HAVE_XLOCALE_H 1\n"
+
+        tools.files.save(self, os.path.join(self.source_folder, "include", "config.h"), config_h_content)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
