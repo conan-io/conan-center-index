@@ -1,6 +1,7 @@
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, patch
+from conans import CMake
 
 required_conan_version = ">=1.47.0"
 
@@ -42,7 +43,7 @@ class SemVer200Conan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -52,8 +53,8 @@ class SemVer200Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **patch_file)
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
