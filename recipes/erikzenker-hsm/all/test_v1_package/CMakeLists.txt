@@ -6,6 +6,6 @@ conan_basic_setup(TARGETS)
 
 find_package(hsm REQUIRED CONFIG)
 
-add_executable(${PROJET_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJET_NAME} PRIVATE hsm::hsm)
-target_compile_features(${PROJET_NAME} PRIVATE cxx_std_17)
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE hsm::hsm)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
