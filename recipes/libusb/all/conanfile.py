@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
-from conan.tools.files import get, rmdir, rm, copy, chdir, replace_in_file
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars, unix_path
+from conan.tools.files import get, rmdir, rm, copy, replace_in_file
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanException
 # TODO: Update when Conan 1.52.0 is available in CCI
 from conans.tools import Version
-from conans import tools
 import os
 
 
@@ -60,9 +60,10 @@ class LibUSBConan(ConanFile):
             del self.settings.compiler.cppstd
         except Exception:
             pass
+        self.win_bash = self._is_mingw
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not is_msvc(self) and not self.conf_info.get("tools.microsoft.bash:path"):
             self.tool_requires("msys2/cci.latest")
 
     def requirements(self):
@@ -130,11 +131,11 @@ class LibUSBConan(ConanFile):
         return "Win32" if self.settings.arch == "x86" else msbuild.platform
 
     def _patch_msvc_source(self):
-        if tools.Version(self.version) < "1.0.24":
+        if Version(self.version) < "1.0.24":
             for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                             "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                 vcxproj_path = os.path.join(self.build_folder, "msvc", "%s.vcxproj" % vcxproj)
-                tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+                replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
 
     def build(self):
         if is_msvc(self):
@@ -145,7 +146,11 @@ class LibUSBConan(ConanFile):
             msbuild.build(self._msvc_sln_filename)
         else:
             autotools = Autotools(self)
-            autotools.autoreconf()
+            try:
+                autotools.autoreconf()
+            except ConanException as error:
+                if "command not found" in str(error):
+                    raise
             autotools.configure()
             autotools.make()
 
@@ -168,7 +173,8 @@ class LibUSBConan(ConanFile):
             self._package_visual_studio()
         else:
             autotools = Autotools(self)
-            autotools.install()
+            destdir = unix_path(self, self.package_folder) if self._is_mingw else self.package_folder
+            autotools.install([f"DESTDIR={destdir}"])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
