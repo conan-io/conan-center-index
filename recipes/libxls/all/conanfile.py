@@ -42,11 +42,12 @@ class LibxlsConan(ConanFile):
         cmake_layout(self, src_folder='src')
 
     def requirements(self):
-        self.requires("libiconv/1.17")
+        if self.settings.os != "Macos":
+            self.requires("libiconv/1.17")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        config_h_content =         """
+        config_h_content = """
 #define HAVE_ICONV 1
 #define ICONV_CONST
 #define PACKAGE_VERSION "{}"
@@ -77,6 +78,9 @@ class LibxlsConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["xlsreader"]
 
+        if self.settings.os == "Macos":
+            self.cpp_info.system_libs.append("iconv")
+
         self.cpp_info.set_property("cmake_file_name", "libxls")
         self.cpp_info.set_property("cmake_target_name", "libxls::libxls")
 
@@ -85,4 +89,5 @@ class LibxlsConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "libxls"
         self.cpp_info.names["cmake_find_package_multi"] = "libxls"
 
-        self.cpp_info.requires.append("libiconv::libiconv")
+        if self.settings.os != "Macos":
+            self.cpp_info.requires.append("libiconv::libiconv")
