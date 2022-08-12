@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import sys
 import textwrap
 
 required_conan_version = ">=1.33.0"
@@ -192,7 +193,7 @@ class CrashpadConan(ConanFile):
         ]
         with tools.chdir(self._source_subfolder):
             with self._build_context():
-                self.run("gn gen out/Default --args=\"{}\"".format(" ".join(gn_args)), run_environment=True)
+                self.run("gn gen out/Default --args=\"{}\" --script-executable=\"{}\"".format(" ".join(gn_args), sys.executable), run_environment=True)
                 targets = ["client", "minidump", "crashpad_handler", "snapshot"]
                 if self.settings.os == "Windows":
                     targets.append("crashpad_handler_com")
