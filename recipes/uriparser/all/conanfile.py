@@ -10,7 +10,7 @@ required_conan_version = ">=1.50.0"
 class UriparserConan(ConanFile):
     name = "uriparser"
     description = "Strictly RFC 3986 compliant URI parsing and handling library written in C89"
-    topics = ("uriparser", "URI", "parser")
+    topics = ("uriparser", "uri", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://uriparser.github.io/"
 
