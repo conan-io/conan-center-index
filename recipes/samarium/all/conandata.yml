@@ -19,10 +19,10 @@ patches:
 
     - patch_file: "patches/1.0.0-RandomGenerator.hpp-link.patch"
       patch_description: "Fix static function linking"
-      patch_type: "fix"
+      patch_type: "backport"
       sha256: "218318c017500ab4c6360dafaf0523736295ddac323c04aaad5fc8a31867b4f0"
 
     - patch_file: "patches/1.0.0-RandomGenerator.cpp-link.patch"
       patch_description: "Fix static function linking"
-      patch_type: "fix"
+      patch_type: "backport"
       sha256: "f5d0cc6a108bb3f5f22a88c29f5eda1ddf73c25720e894e7ac3c67396e687087"
