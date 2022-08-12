@@ -124,3 +124,4 @@ class GnConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+        self.cpp_info.includedirs = []
