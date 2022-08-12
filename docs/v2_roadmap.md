@@ -1,7 +1,23 @@
 # Road to Conan v2
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [Short term](#short-term)
+    * [Prepare the CI infrastructure](#prepare-the-ci-infrastructure)
+    * [Export recipes using Conan v2 (warning)](#export-recipes-using-conan-v2-warning)
+    * [Prepare a syntax linter (CCI specific)](#prepare-a-syntax-linter-cci-specific)
+    * [Run an scheduled job exporting all recipes](#run-an-scheduled-job-exporting-all-recipes)
+  * [Mid term](#mid-term)
+    * [Add CI running Conan v2 (hidden)](#add-ci-running-conan-v2-hidden)
+    * [Show CI results to contributors (info)](#show-ci-results-to-contributors-info)
+    * [Linter - turn more warnings to errors](#linter---turn-more-warnings-to-errors)
+    * [Export using Conan v2 becomes an error](#export-using-conan-v2-becomes-an-error)
+  * [Long term](#long-term)
+    * [CI running v2 is reported (and required)](#ci-running-v2-is-reported-and-required)
+    * [Conan v2 remote](#conan-v2-remote)
+    * [Webpage with v2 information](#webpage-with-v2-information)
+  * [Future](#future)<!-- endToc -->
 
 > ⚠️ **Note.-** This document is not a [guide about how to migrate recipes to Conan v2](v2_migration.md).
 

@@ -5,7 +5,12 @@ fixing issues and adding new features every day. It is expected that from time t
 new recipe revisions stop to work in your project.
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [Breaking changes](#breaking-changes)
+  * [Isolate your project from upstream changes](#isolate-your-project-from-upstream-changes)
+    * [Use your own Artifactory instance](#use-your-own-artifactory-instance)
+    * [Use recipe revisions and lockfiles](#use-recipe-revisions-and-lockfiles)<!-- endToc -->
 
 ## Breaking changes
 
