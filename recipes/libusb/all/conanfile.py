@@ -80,7 +80,7 @@ class LibUSBConan(ConanFile):
         if is_msvc(self):
             vs_layout(self)
         else:
-            basic_layout(self)
+            basic_layout(self, src_folder="src")
 
     def generate(self):
         if is_msvc(self):
@@ -139,7 +139,7 @@ class LibUSBConan(ConanFile):
             self._build_visual_studio()
         else:
             autotools = Autotools(self)
-            #autotools.autoreconf()
+            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
@@ -158,7 +158,7 @@ class LibUSBConan(ConanFile):
             copy(self, pattern="libusb-usbdk-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
 
     def package(self):
-        copy(self, "COPYING", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             self._package_visual_studio()
         else:
@@ -169,7 +169,8 @@ class LibUSBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"
-        self.cpp_info.libs = ["libusb-1.0"]
+        self.cpp_info.set_property("pkg_config_name", "libusb-1.0")
+        self.cpp_info.libs = ["libusb-1.0"] if is_msvc(self) else ["usb-1.0"]
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
