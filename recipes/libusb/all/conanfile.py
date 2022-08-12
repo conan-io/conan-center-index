@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, rmdir, rm, copy
+from conan.tools.files import get, rmdir, rm, copy, chdir, replace_in_file
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.env import VirtualBuildEnv
+# TODO: Update when Conan 1.52.0 is available in CCI
+from conans.tools import Version
 from conans import MSBuild, tools
 import os
 import re
@@ -17,7 +19,7 @@ class LibUSBConan(ConanFile):
     license = "LGPL-2.1"
     homepage = "https://github.com/libusb/libusb"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "libusb", "usb", "device")
+    topics = ("usb", "device")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -106,11 +108,11 @@ class LibUSBConan(ConanFile):
             ms.generate(scope="build")
 
     def _build_visual_studio(self):
-        with tools.chdir(self._source_subfolder):
+        with chdir(self, self._source_subfolder):
             # Assume we're using the latest Visual Studio and default to libusb_2019.sln
             # (or libusb_2017.sln for libusb < 1.0.24).
             # If we're not using the latest Visual Studio, select an appropriate solution file.
-            solution_msvc_year = 2019 if tools.Version(self.version) >= "1.0.24" else 2017
+            solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
 
             solution_msvc_year = {
                 "11": 2012,
@@ -131,11 +133,11 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         if is_msvc(self):
-            if tools.Version(self.version) < "1.0.24":
+            if Version(self.version) < "1.0.24":
                 for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                                 "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                     vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
-                    tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+                    replace_in_file(self, vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
             self._build_visual_studio()
         else:
             autotools = Autotools(self)
