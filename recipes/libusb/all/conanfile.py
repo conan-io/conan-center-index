@@ -1,8 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conan import ConanFile
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, rmdir, rm, copy
+from conan.tools.layout import basic_layout, vs_layout
+from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
+from conan.tools.env import VirtualBuildEnv
+from conans import MSBuild, tools
 import os
 import re
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.48.0"
 
 
 class LibUSBConan(ConanFile):
@@ -23,7 +29,6 @@ class LibUSBConan(ConanFile):
         "fPIC": True,
         "enable_udev": True,
     }
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -32,10 +37,6 @@ class LibUSBConan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _is_msvc(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
 
     @property
     def _settings_build(self):
@@ -53,12 +54,18 @@ class LibUSBConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self) and not tools.get_env("CONAN_BASH_PATH"):
+            self.tool_requires("msys2/cci.latest")
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -66,8 +73,37 @@ class LibUSBConan(ConanFile):
                 self.requires("libudev/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
+
+    def layout(self):
+        if is_msvc(self):
+            vs_layout(self)
+        else:
+            basic_layout(self)
+
+    def generate(self):
+        if is_msvc(self):
+            pass
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--enable-shared" if self.info.options.shared else "--disable-shared")
+            tc.configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
+            if self.settings.os in ["Linux", "Android"]:
+                tc.configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
+            elif self._is_mingw:
+                if self.settings.arch == "x86_64":
+                    tc.configure_args.append("--host=x86_64-w64-mingw32")
+                elif self.settings.arch == "x86":
+                    tc.configure_args.append("--build=i686-w64-mingw32")
+                    tc.configure_args.append("--host=i686-w64-mingw32")
+            tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
+            tc = PkgConfigDeps(self)
+            tc.generate()
+            ms = VirtualBuildEnv(self)
+            ms.generate(scope="build")
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
@@ -93,24 +129,8 @@ class LibUSBConan(ConanFile):
             build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
             msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties, build_type=build_type)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
-            configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
-            if self.settings.os in ["Linux", "Android"]:
-                configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
-            elif self._is_mingw:
-                if self.settings.arch == "x86_64":
-                    configure_args.append("--host=x86_64-w64-mingw32")
-                elif self.settings.arch == "x86":
-                    configure_args.append("--build=i686-w64-mingw32")
-                    configure_args.append("--host=i686-w64-mingw32")
-            self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
     def build(self):
-        if self._is_msvc:
+        if is_msvc(self):
             if tools.Version(self.version) < "1.0.24":
                 for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                                 "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
@@ -118,35 +138,38 @@ class LibUSBConan(ConanFile):
                     tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
             self._build_visual_studio()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            #autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
     def _package_visual_studio(self):
         self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self._source_subfolder, "libusb"), keep_path=False)
         arch = "x64" if self.settings.arch == "x86_64" else "Win32"
-        source_dir = os.path.join(self._source_subfolder, arch, str(self.settings.build_type), "dll" if self.options.shared else "lib")
+        build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+        source_dir = os.path.join(self._source_subfolder, arch, build_type, "dll" if self.options.shared else "lib")
         if self.options.shared:
-            self.copy(pattern="libusb-1.0.dll", dst="bin", src=source_dir, keep_path=False)
-            self.copy(pattern="libusb-1.0.lib", dst="lib", src=source_dir, keep_path=False)
-            self.copy(pattern="libusb-usbdk-1.0.dll", dst="bin", src=source_dir, keep_path=False)
-            self.copy(pattern="libusb-usbdk-1.0.lib", dst="lib", src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-1.0.dll", dst=os.path.join(self.package_folder, "bin"), src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-usbdk-1.0.dll", dst=os.path.join(self.package_folder, "bin"), src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-usbdk-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
         else:
-            self.copy(pattern="libusb-1.0.lib", dst="lib", src=source_dir, keep_path=False)
-            self.copy(pattern="libusb-usbdk-1.0.lib", dst="lib", src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
+            copy(self, pattern="libusb-usbdk-1.0.lib", dst=os.path.join(self.package_folder, "lib"), src=source_dir, keep_path=False)
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        if self._is_msvc:
+        copy(self, "COPYING", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
             self._package_visual_studio()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["libusb-1.0"]
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
