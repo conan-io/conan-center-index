@@ -13,7 +13,7 @@ class LibcapConan(ConanFile):
     homepage = "https://git.kernel.org/pub/scm/libs/libcap/libcap.git"
     description = "This is a library for getting and setting POSIX.1e" \
                   " (formerly POSIX 6) draft 15 capabilities"
-    topics = ("conan", "libcap", "capabilities")
+    topics = ("libcap", "capabilities")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
