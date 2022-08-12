@@ -65,7 +65,7 @@ class SamariumConan(ConanFile):
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(patch["patch_file"])
+            self.copy(patch["patch_file"])
 
     def build(self):
         for patch_ in self.conan_data.get("patches", {}).get(self.version, []):
