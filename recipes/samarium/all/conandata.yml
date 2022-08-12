@@ -9,7 +9,7 @@ patches:
   "1.0.0":
     - patch_file: "patches/1.0.0-updated-cmake.patch"
       patch_description: "Use find_package for CMakeDeps"
-      patch_type: "fix"
+      patch_type: "conan"
       sha256: "2be2eadc468fe676f547793fc7ec48bc38ce6f1daa47a497cd2535aaa493fa9a"
 
     - patch_file: "patches/1.0.0-Grid.hpp-include-vector.patch"
