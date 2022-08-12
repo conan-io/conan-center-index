@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, VCVars
 from conan.tools.files import get, rmdir, rm, copy, chdir, replace_in_file
 from conan.tools.layout import basic_layout, vs_layout
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 from conan.tools.env import VirtualBuildEnv
 # TODO: Update when Conan 1.52.0 is available in CCI
 from conans.tools import Version
-from conans import MSBuild, tools
+from conans import tools
 import os
 import re
 
@@ -86,7 +86,12 @@ class LibUSBConan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            pass
+            tc = MSBuildToolchain(self)
+            tc.generate()
+            tc = MSBuildDeps(self)
+            tc.generate()
+            tc = VCVars(self)
+            tc.generate()
         else:
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-shared" if self.info.options.shared else "--disable-shared")
@@ -138,7 +143,28 @@ class LibUSBConan(ConanFile):
                                 "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                     vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
                     replace_in_file(self, vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
-            self._build_visual_studio()
+            with chdir(self, self._source_subfolder):
+                # Assume we're using the latest Visual Studio and default to libusb_2019.sln
+                # (or libusb_2017.sln for libusb < 1.0.24).
+                # If we're not using the latest Visual Studio, select an appropriate solution file.
+                solution_msvc_year = 2019 if Version(self.version) >= "1.0.24" else 2017
+
+                solution_msvc_year = {
+                    "11": 2012,
+                    "12": 2013,
+                    "14": 2015,
+                    "15": 2017
+                }.get(str(self.settings.compiler.version), solution_msvc_year)
+
+                solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
+                platforms = {"x86":"Win32"}
+                properties = {
+                    # Enable LTO when CFLAGS contains -GL
+                    "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+                }
+                msbuild = MSBuild(self)
+                build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+                msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties, build_type=build_type)
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
