@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conan.tools import files
 from conan.tools.microsoft import is_msvc
 from conans import tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -109,7 +110,7 @@ class GLibConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_meson(self):
@@ -215,7 +216,7 @@ class GLibConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         shutil.move(
             os.path.join(self.package_folder, "share"),
             os.path.join(self.package_folder, "res"),
