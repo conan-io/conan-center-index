@@ -81,7 +81,6 @@ class VerilatorConan(ConanFile):
         
         if self.settings.os == "Windows" and tools.Version(self.version) >= "4.200":
             raise ConanInvalidConfiguration("Windows build is not yet supported. Contributions are welcome")
-            
     @contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
