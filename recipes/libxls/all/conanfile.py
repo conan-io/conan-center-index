@@ -84,3 +84,5 @@ class LibxlsConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "libxls"
         self.cpp_info.names["cmake_find_package_multi"] = "libxls"
+
+        self.cpp_info.requires.append("libiconv::libiconv")
