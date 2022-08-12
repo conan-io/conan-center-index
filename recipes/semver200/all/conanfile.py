@@ -38,6 +38,10 @@ class SemVer200Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             self.copy(patch["patch_file"])
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 14)
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
