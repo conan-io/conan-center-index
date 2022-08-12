@@ -2,10 +2,11 @@ from conan.tools.build import cross_building
 from conan.tools.files import rename, rmdir, get
 from conan.tools.files.patches import apply_conandata_patches
 from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.scm import Version
-from conans import tools
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conans import tools
+# TODO: Update to conan.tools.scm.Version after Conan 1.52.0
+from conans.tools import Version
 
 import glob
 import os
@@ -20,7 +21,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.47.0"
 
 
 # When adding (or removing) an option, also add this option to the list in
@@ -1459,7 +1460,7 @@ class BoostConan(ConanFile):
 
         if self.options.layout == "versioned":
             version = Version(self.version)
-            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
+            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", f"boost-{version.major}_{version.minor}"))
 
         # Boost::boost is an alias of Boost::headers
         self.cpp_info.components["_boost_cmake"].requires = ["headers"]
@@ -1567,9 +1568,9 @@ class BoostConan(ConanFile):
             libsuffix_data["arch"] = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
             version = Version(self.version)
             if not version.patch or version.patch == "0":
-                libsuffix_data["version"] = "-{}_{}".format(version.major, version.minor)
+                libsuffix_data["version"] = f"-{version.major}_{version.minor}"
             else:
-                libsuffix_data["version"] = "-{}_{}_{}".format(version.major, version.minor, version.patch)
+                libsuffix_data["version"] = f"-{version.major}_{version.minor}_{version.patch}"
             libsuffix = libsuffix_lut[str(self.options.layout)].format(**libsuffix_data)
             if libsuffix:
                 self.output.info("Library layout suffix: {}".format(repr(libsuffix)))
@@ -1699,11 +1700,11 @@ class BoostConan(ConanFile):
 
             if not self.options.without_python:
                 pyversion = Version(self._python_version)
-                self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
+                self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
+                self.cpp_info.components[f"numpy{pyversion.major}{pyversion.minor}"].requires = ["numpy"]
 
             if self._is_msvc or self._is_clang_cl:
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974

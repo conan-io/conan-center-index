@@ -1,8 +1,8 @@
 from conan.tools.files import get, rename, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 
 required_conan_version = ">=1.47.0"
@@ -190,7 +190,7 @@ class LibtiffConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "TIFF")
         self.cpp_info.set_property("cmake_target_name", "TIFF::TIFF")
-        self.cpp_info.set_property("pkg_config_name", "libtiff-{}".format(Version(self.version)[0]))
+        self.cpp_info.set_property("pkg_config_name", "libtiff-{}".format(Version(self.version).major))
         if self.options.cxx:
             self.cpp_info.libs.append("tiffxx")
         self.cpp_info.libs.append("tiff")
@@ -204,4 +204,4 @@ class LibtiffConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
-        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(Version(self.version)[0])
+        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(Version(self.version).major)
