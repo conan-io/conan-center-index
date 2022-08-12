@@ -1245,10 +1245,10 @@ class BoostConan(ConanFile):
         contents += " : \n"
         if self._ar:
             ar_path = tools.which(self._ar).replace("\\", "/")
-            contents += f'<archiver>"{ar_path}" ' 
+            contents += f'<archiver>"{ar_path}" '
         if self._ranlib:
             ranlib_path = tools.which(self._ranlib).replace("\\", "/")
-            contents += f'<ranlib>"{ranlib_path}" ' 
+            contents += f'<ranlib>"{ranlib_path}" '
         cxxflags = tools.get_env("CXXFLAGS", "") + " "
         cflags = tools.get_env("CFLAGS", "") + " "
         cppflags = tools.get_env("CPPFLAGS", "") + " "
@@ -1575,7 +1575,7 @@ class BoostConan(ConanFile):
 
             all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.collect_libs(self))
             all_expected_libraries = set()
-            incomplete_components = list()
+            incomplete_components = []
 
             def filter_transform_module_libraries(names):
                 libs = []
