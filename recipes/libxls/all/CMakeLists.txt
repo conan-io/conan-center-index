@@ -38,6 +38,14 @@ set_target_properties(xlsreader PROPERTIES
     C_STANDARD 99
 )
 
+if (APPLE)
+    target_link_libraries(xlsreader PUBLIC iconv)
+else()
+    find_package(libiconv REQUIRED CONFIG)
+    target_link_libraries(xlsreader PUBLIC libiconv::libiconv)
+endif()
+
+
 if(WITH_CLI)
     add_executable(xls2csv src/src/xls2csv.c)
     target_compile_features(xls2csv PRIVATE c_std_99)
