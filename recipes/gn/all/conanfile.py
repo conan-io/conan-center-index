@@ -2,6 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import sys
 import textwrap
 import time
 
@@ -104,7 +105,7 @@ class GnConan(ConanFile):
                 ]
                 if self.settings.build_type == "Debug":
                     conf_args.append("-d")
-                self.run("python build/gen.py {}".format(" ".join(conf_args)), run_environment=True)
+                self.run("{} build/gen.py {}".format(sys.executable, " ".join(conf_args)), run_environment=True)
                 # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
                 time.sleep(1)
                 build_args = [
