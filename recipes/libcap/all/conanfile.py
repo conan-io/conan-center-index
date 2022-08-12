@@ -60,7 +60,7 @@ class LibcapConan(ConanFile):
         self._autotools_env["prefix"] = "/"
         self._autotools_env["lib"] = "lib"
 
-        if tools.cross_building(self.settings) and not tools.get_env("BUILD_CC"):
+        if tools.cross_building(self) and not tools.get_env("BUILD_CC"):
             native_cc = tools.which("cc")
             self.output.info("Using native compiler '{}'".format(native_cc))
             self._autotools_env["BUILD_CC"] = native_cc
