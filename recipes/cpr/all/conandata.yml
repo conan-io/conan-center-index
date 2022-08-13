@@ -1,4 +1,7 @@
 sources:
+  "1.9.1":
+    url: "https://github.com/libcpr/cpr/archive/1.9.1.tar.gz"
+    sha256: "389b9bb78cba0d63a064eac224c120069acdd2ed9172f7d06547ce1e74384330"
   "1.9.0":
     url: "https://github.com/libcpr/cpr/archive/refs/tags/1.9.0.tar.gz"
     sha256: "67023cde8979e8371f5ee7d6e586d6d0761af4a3a3a3be6270256353c9bf411f"
@@ -18,6 +21,9 @@ sources:
     url: "https://github.com/libcpr/cpr/archive/1.4.0.tar.gz"
     sha256: "13baffba95445e02291684e31906b04df41d8c6a3020a1a55253047c6756a004"
 patches:
+  "1.9.1":
+    - patch_file: "patches/005-1.9.0-fix-curl-components.patch"
+      base_path: "source_subfolder"
   "1.9.0":
     - patch_file: "patches/005-1.9.0-fix-curl-components.patch"
       base_path: "source_subfolder"
