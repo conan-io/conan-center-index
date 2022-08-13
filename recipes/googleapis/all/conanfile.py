@@ -15,7 +15,7 @@ from helpers import parse_proto_libraries
 required_conan_version = ">=1.50.0"
 
 
-class GoogleAPIS(ConanFile):
+class GoogleAPISConan(ConanFile):
     name = "googleapis"
     description = "Public interface definitions of Google APIs"
     license = "Apache-2.0"
