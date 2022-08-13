@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
 from conans import tools, CMake
+from conan.tools.files import apply_conandata_patches
 from conan.tools.build.cross_building import cross_building
 
 required_conan_version = ">=1.45.0"
@@ -13,7 +14,7 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     topics = ("png", "libpng")
-
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -61,11 +62,6 @@ class LibpngConan(ConanFile):
     def _has_vsx_support(self):
         return "ppc" in self.settings.arch
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -92,8 +88,6 @@ class LibpngConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         if tools.Version(self.version) > "1.5.2":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "find_library(M_LIBRARY m)",
@@ -155,6 +149,7 @@ class LibpngConan(ConanFile):
         return self._cmake
 
     def build(self):
+        apply_conandata_patches(self)
         self._patch()
         cmake = self._configure_cmake()
         cmake.build()
