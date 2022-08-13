@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class LibcapTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     def build(self):
         cmake = CMake(self)
