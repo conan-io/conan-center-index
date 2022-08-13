@@ -71,7 +71,7 @@ class GoogleAPISConan(ConanFile):
             self.run("cmake --version", output=output)
             m = re.search(r'cmake version (\d+)\.(\d+)\.(\d+)', output.getvalue())
             major, minor = int(m.group(1)), int(m.group(2))
-            assert major >= 3 and minor >= 20
+            assert (major == 3 and minor >= 20) or major >= 4
         except:
             return False
         else:
