@@ -171,3 +171,7 @@ class GoogleAPISConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m"])
+
+        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
+        #       (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires = ["protobuf::protobuf"]
