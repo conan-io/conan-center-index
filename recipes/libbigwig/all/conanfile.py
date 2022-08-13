@@ -35,6 +35,7 @@ class LibBigWigConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["WITH_CURL"] = self.options.with_curl
         tc.variables["WITH_ZLIBNG"] = self.options.with_zlibng
