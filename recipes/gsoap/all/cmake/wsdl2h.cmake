@@ -61,4 +61,4 @@ if(${WITH_OPENSSL})
     target_link_libraries(wsdl2h OpenSSL::Crypto OpenSSL::SSL ZLIB::ZLIB)
 endif()
 
-install(TARGETS wsdl2h RUNTIME DESTINATION bin)
+install(TARGETS wsdl2h DESTINATION ${CMAKE_INSTALL_BINDIR})
