@@ -18,12 +18,16 @@ class GsoapConan(ConanFile):
     topics = ("gsoap", "logging")
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_ipv6": [True, False],
         "with_cookies": [True, False],
         "with_c_locale": [True, False],
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "with_openssl": True,
         "with_ipv6": True,
         "with_cookies": True,
@@ -36,6 +40,14 @@ class GsoapConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.with_openssl:
