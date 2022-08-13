@@ -101,17 +101,18 @@ class GoogleAPISConan(ConanFile):
     def _parse_proto_libraries(self):
         # Generate the libraries to build dynamically
         proto_libraries = []
+        cmakelists_folder = os.path.join(self.source_folder, os.pardir)
         for filename in glob.iglob(os.path.join(self.source_folder, 'google', '**', 'BUILD.bazel'), recursive=True):
-            proto_libraries += parse_proto_libraries(filename, self.source_folder, self.output.error)
+            proto_libraries += parse_proto_libraries(filename, cmakelists_folder, self.output.error)
 
         for filename in glob.iglob(os.path.join(self.source_folder, 'grafeas', '**', 'BUILD.bazel'), recursive=True):
-            proto_libraries += parse_proto_libraries(filename, self.source_folder, self.output.error)
+            proto_libraries += parse_proto_libraries(filename, cmakelists_folder, self.output.error)
 
         # Validate that all files exist and all dependencies are found
         all_deps = [f"{it.qname}:{it.name}" for it in proto_libraries]
         all_deps += ["protobuf::libprotobuf"]
         for it in proto_libraries:
-            it.validate(self.source_folder, all_deps)
+            it.validate(cmakelists_folder, all_deps)
 
         # Mark the libraries we need recursively (C++ context)
         all_dict = {f"{it.qname}:{it.name}": it for it in proto_libraries}

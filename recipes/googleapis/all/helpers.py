@@ -16,10 +16,10 @@ class _ProtoLibrary:
         self.is_cc = is_cc
         self.is_used = self.is_cc
 
-    def validate(self, source_folder, all_deps):
+    def validate(self, cmakelists_folder, all_deps):
         # Check all files exists
         for it in self.srcs:
-            assert os.path.exists(os.path.join(source_folder, it)), f"{self.qname}:{self.name} - file '{it}' doesn't exist"
+            assert os.path.exists(os.path.join(cmakelists_folder, it)), f"{self.qname}:{self.name} - file '{it}' doesn't exist"
         # Check all deps exists
         for it in self.deps:
             assert it in all_deps, f"{self.qname}:{self.name} - dep '{it}' not found"
@@ -53,7 +53,7 @@ class _ProtoLibrary:
     def cmake_content(self):
         content = f"\n\n# {self.cmake_target}\n"
         content += "\n".join([f"#{it}" for it in self.dumps().split('\n')])
-        content += "\n"        
+        content += "\n"
         if not self.srcs:
             content += textwrap.dedent(f"""\
                 add_library({self.cmake_target} INTERFACE)
@@ -64,8 +64,8 @@ class _ProtoLibrary:
                 add_library({self.cmake_target} ${{{self.cmake_target}_PROTOS}})
                 target_include_directories({self.cmake_target} PUBLIC ${{CMAKE_BINARY_DIR}})
                 target_compile_features({self.cmake_target} PUBLIC cxx_std_11)
-                protobuf_generate(LANGUAGE cpp 
-                                TARGET {self.cmake_target} 
+                protobuf_generate(LANGUAGE cpp
+                                TARGET {self.cmake_target}
                                 PROTOS ${{{self.cmake_target}_PROTOS}}
                                 IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}
                                 )
@@ -78,7 +78,7 @@ class _ProtoLibrary:
 
         return content
 
-def parse_proto_libraries(filename, source_folder, error):
+def parse_proto_libraries(filename, cmakelists_folder, error):
     # Generate the libraries to build dynamically
     re_name = re.compile(r'name = "(.*)"')
     re_srcs_oneline = re.compile(r'srcs = \["(.*)"\],')
@@ -88,11 +88,11 @@ def parse_proto_libraries(filename, source_folder, error):
     proto_libraries = []
 
     basedir = os.path.dirname(filename)
-    current_folder_str = os.path.relpath(basedir, source_folder).replace('\\', '/')  # We need forward slashes because of Windows
+    current_folder_str = os.path.relpath(basedir, cmakelists_folder).replace('\\', '/')  # We need forward slashes because of Windows
     proto_library = None
-    
+
     def parsing_sources(line):
-        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), source_folder).replace('\\', '/')
+        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), cmakelists_folder).replace('\\', '/')
         proto_library.srcs.append(proto_path)
 
     def parsing_deps(line):
@@ -108,7 +108,7 @@ def parse_proto_libraries(filename, source_folder, error):
         elif line.startswith("//grafeas/"):
             proto_library.deps.add(line)
         else:
-            error(f"Unrecognized dep: {line} -- {os.path.relpath(filename, source_folder)}")
+            error(f"Unrecognized dep: {line} -- {os.path.relpath(filename, cmakelists_folder)}")
 
     def collecting_items(collection, line):
         line = line.strip(",").strip("\"")
@@ -120,7 +120,7 @@ def parse_proto_libraries(filename, source_folder, error):
         variables = {}
         for line in f.readlines():
             line = line.strip()
-            
+
             if line == "proto_library(":
                 assert proto_library == None
                 proto_library = _ProtoLibrary(is_cc=False)
@@ -158,11 +158,11 @@ def parse_proto_libraries(filename, source_folder, error):
                     proto_library = None
                     action = None
                 elif line == "],":
-                    action = None 
+                    action = None
                 elif line.startswith("] + "):
                     varname = re_add_varname.search(line).group(1)
                     for it in variables[varname]:
-                        action(it) 
+                        action(it)
                 elif action:
                     action(line)
 
