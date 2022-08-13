@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, get
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class LibBigWigConan(ConanFile):
@@ -12,7 +14,6 @@ class LibBigWigConan(ConanFile):
     homepage = "https://github.com/dpryan79/libBigWig"
     license = "MIT"
     settings = "arch", "build_type", "compiler", "os"
-    generators = "cmake", "cmake_find_package_multi"
 
     options = {
         "shared": [True, False],
@@ -28,26 +29,20 @@ class LibBigWigConan(ConanFile):
         "with_zlibng": False
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _minimum_c_standard(self):
-        return 11
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        tc.variables["ENABLE_TESTING"] = False
+        tc.variables["WITH_CURL"] = self.options.with_curl
+        tc.variables["WITH_ZLIBNG"] = self.options.with_zlibng
+
+        tc.generate()
+
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
 
     def requirements(self):
         if self.options.with_curl:
@@ -58,40 +53,39 @@ class LibBigWigConan(ConanFile):
             self.requires("zlib/1.2.12")
 
     def validate(self):
-        if self.settings.os == "Windows":
+        if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows not supported")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
         if self.options.with_zlibng:
             self.options["zlib-ng"].zlib_compat = True
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.definitions["WITH_CURL"] = self.options.with_curl
-        self._cmake.definitions["WITH_ZLIBNG"] = self.options.with_zlibng
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        self.copy("LICENSE", dst="licenses", src=self.source_folder)
+
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.system_libs = ["m"]
         self.cpp_info.names["cmake_find_package"] = "libBigWig"
         self.cpp_info.names["cmake_find_package_multi"] = "libBigWig"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
