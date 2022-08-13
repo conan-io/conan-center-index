@@ -1,5 +1,7 @@
 import os
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import rename, get
+from conans import tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -18,7 +20,7 @@ class AclConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("rtm/2.1.3")
+        self.requires("rtm/2.1.4")
 
     def configure(self):
         minimal_cpp_standard = "11"
@@ -30,9 +32,9 @@ class AclConan(ConanFile):
                                                                                       self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         extracted_dir = "acl-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        rename(self, extracted_dir, self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

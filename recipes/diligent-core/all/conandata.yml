@@ -1,4 +1,7 @@
 sources:
+  "api.252004":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252004.tar.gz"
+    sha256: "f1a5a46f60b26cd7f07e27a64b90e76e28643a09cb3af786d04141ce7c306452"
   "api.252003":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252003.tar.gz"
     sha256: "18f17eaa0b6425022be4019c61fede441b9feec4b94c2b7e8ab73d86a7f6a913"
@@ -13,19 +16,7 @@ sources:
     sha256: "8f85fc55c6241f9215875df58a077f797e9134c9b51f330f1489df91d8553b7d"
 patches:
   "api.252003":
-    - patch_file: "patches/0019-252003-exclude-tests.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0020-252003-dont-install-3d-party-license.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0021-252003-fix-glslang-usage.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0022-252003-fix-glslang-include.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0023-252003-fix-warning-as-error.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0024-252003-dont-install-3d-party-license.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0025-252003-fix-warning-as-error-win.patch"
       base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0014-252-exclude-tests.patch"

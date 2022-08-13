@@ -1,5 +1,43 @@
 # Changelog
 
+### 8-August-2022 - 11:25 CEST
+
+- [fix] Take into account status checks from GitHub actions before merging a pull-request.
+- [feature] Double check that the recipe revision exported using Conan v2 matches the one exported by Conan v1.
+- [feature] Fail if required Conan version is not available on Linux containers instead of falling back to latest.
+
+### 22-July-2022 - 12:13 CEST
+
+- [feature]: ValidateInfrastructure: Add check to verify CMake 3.21 is installed in Windows machines.
+- [feature]: ValidateInfrastructure: Execute the validation when a pull-request is modifying configuration files.
+- [feature]: Conan v2: Iterate `cppstd` values in profiles to build first match.
+- [feature]: Conan v2: Apply `shared` option for the whole dependency graph.
+- [feature]: Add `tools.apple.sdk_path` to configuration in Macos (required by new build helpers).
+- [feature]: Set `tools.system.package_manager:mode=install` and `tools.system.package_manager:sudo=True` in configuration files (required by new system package manager helpers to mimic the behavior of old ones).
+- [feature]: Upgrade required Conan versions to work with the library. Minimum versions tested are now `1.49.0` and `2.0.0b1`.
+- [fix]: ValidateInfrastructure: Fix error message split.
+- [bugfix]: Accept missing HTTP code for requests.
+
+### 06-July-2022 - 14:28 CEST
+
+- [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
+- [fix]: Improve Conan v2 export message.
+- [fix]: Fix config parameters for RelaunchUnexpected job
+- [fix]: Make AccessRequest job open PR against cci repo.
+- [fix]: DSL: Remove old jobs by date only
+- [refactor]: Refactor GitHub-related code utilities.
+
+### 27-June-2022 - 17:29 CEST
+
+- [fix] Fix "no changes detected" issue in some pull-requests.
+- [fix] Avoid static builds with static runtime in MSVC compiler.
+- [fix] Fix Conan v2 export checkout of sources.
+- [fix] Conan v2: Avoid reading configuration entries that do not exist.
+- [feature] Avoid failure in some jobs when the system is under maintenance.
+- [feature] ValidateInfrastructure job now works for `msvc` & Visual Studio 2022.
+- [feature] Conan v2: support hooks installation.
+- [feature] Add more parameters to DSL scripts.
+
 ### 08-June-2022 - 16:29 CEST
 
 - [feature] Allow changes in multiple folders (except for the `recipes` one).

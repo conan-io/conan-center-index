@@ -1,6 +1,0 @@
-#!groovy
-
-@Library('c3i@') _
-
-String configurationFile = '.c3i/c3i.yml'
-cci.runBuild(this, configurationFile)

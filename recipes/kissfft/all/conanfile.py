@@ -88,8 +88,23 @@ class KissfftConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libkissfft"].includedirs.append(os.path.join("include", "kissfft"))
         self.cpp_info.components["libkissfft"].libs = [lib_name]
+
+        # got to duplicate the logic from kissfft/CMakeLists.txt
+        if self.options.datatype in ["float", "double"]:
+            self.cpp_info.components["libkissfft"].defines.append("kiss_fft_scalar={}".format(self.options.datatype))
+        elif self.options.datatype == "int16_t":
+            self.cpp_info.components["libkissfft"].defines.append("FIXED_POINT=16")
+        elif self.options.datatype == "int32_t":
+            self.cpp_info.components["libkissfft"].defines.append("FIXED_POINT=32")
+        elif self.options.datatype == "simd":
+            self.cpp_info.components["libkissfft"].defines.append("USE_SIMD")
+
+        if self.options.use_alloca:
+            self.cpp_info.components["libkissfft"].defines.append("KISS_FFT_USE_ALLOCA")
+
         if self.options.shared:
             self.cpp_info.components["libkissfft"].defines.append("KISS_FFT_SHARED")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libkissfft"].system_libs = ["m"]
 

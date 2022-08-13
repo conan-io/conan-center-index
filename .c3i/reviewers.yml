@@ -34,7 +34,7 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "prince-chrismc"
-    type: "community"
+    type: "team"
     request_reviews: false
   - user: "Croydon"
     type: "community"
@@ -66,3 +66,6 @@ reviewers:
   - user: "dmn-star"
     type: "community"
     request_reviews: false
+  - user: "jcar87"
+    type: "team"
+    request_reviews: true

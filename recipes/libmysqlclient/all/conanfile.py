@@ -1,5 +1,6 @@
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import rename
+from conan.tools.build import cross_building
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
@@ -68,7 +69,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         if self.options.with_zlib:
             self.requires("zlib/1.2.12")
         if self._with_zstd:
@@ -91,7 +92,7 @@ class LibMysqlClientCConan(ConanFile):
                 self.name, self.version, self.settings.compiler, minimum_version,
             ))
 
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
         # FIXME: patch libmysqlclient 8.0.17 to support apple-clang >= 12?
@@ -116,7 +117,7 @@ class LibMysqlClientCConan(ConanFile):
     def build_requirements(self):
         if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
-            self.build_requires("cmake/3.22.0")
+            self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":
             self.build_requires("pkgconf/1.7.4")
 

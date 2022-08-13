@@ -1,4 +1,3 @@
-import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -99,11 +98,11 @@ class MsixConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux" and not self.options.skip_bundles:
-            self.requires("icu/69.1")
+            self.requires("icu/71.1")
         if self.options.crypto_lib == "openssl":
-            self.requires("openssl/1.0.2t")
+            self.requires("openssl/1.1.1q")
         if self.options.use_external_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.xml_parser == "xerces":
             self.requires("xerces-c/3.2.3")
 

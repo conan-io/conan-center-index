@@ -82,7 +82,7 @@ class PangoConan(ConanFile):
             self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
             self.requires("libxft/2.3.4")
-        if self.options.with_fontconfig and self.options.with_freetype:
+        if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")

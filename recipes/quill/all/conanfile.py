@@ -83,11 +83,9 @@ class QuillConan(ConanFile):
 
     def requirements(self):
         if tools.Version(self.version) >= "1.6.3":
-            self.requires("fmt/8.1.1")
-        elif tools.Version(self.version) >= "1.3.3":
-            self.requires("fmt/7.1.3")
+            self.requires("fmt/9.0.0")
         else:
-            self.requires("fmt/6.2.1")
+            self.requires("fmt/7.1.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -104,9 +102,6 @@ class QuillConan(ConanFile):
         return cmake
 
     def build(self):
-        if tools.Version(self.version) < "1.3.3" and tools.Version(self.deps_cpp_info["fmt"].version) > "6.2.1":
-            raise ConanInvalidConfiguration("The project {}/{} requires fmt <= 6.2.1".format(self.name, self.version))
-
         if tools.Version(self.version) >= "2.0.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 """set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/quill/cmake" CACHE STRING "Modules for CMake" FORCE)""",

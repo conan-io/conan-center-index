@@ -39,7 +39,7 @@ class DawUtfRangeConan(ConanFile):
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.53.3")
+        self.requires("daw_header_libraries/2.68.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)

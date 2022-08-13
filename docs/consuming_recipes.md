@@ -4,6 +4,13 @@ Recipes in this repository are evolving continously, contributors are creating p
 fixing issues and adding new features every day. It is expected that from time to time these
 new recipe revisions stop to work in your project.
 
+<!-- toc -->
+## Contents
+
+  * [Breaking changes](#breaking-changes)
+  * [Isolate your project from upstream changes](#isolate-your-project-from-upstream-changes)
+    * [Use your own Artifactory instance](#use-your-own-artifactory-instance)
+    * [Use recipe revisions and lockfiles](#use-recipe-revisions-and-lockfiles)<!-- endToc -->
 
 ## Breaking changes
 

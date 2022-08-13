@@ -31,6 +31,7 @@ class FFMpegConan(ConanFile):
         "swscale": [True, False],
         "postproc": [True, False],
         "avfilter": [True, False],
+        "with_asm": [True, False],
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
@@ -107,6 +108,7 @@ class FFMpegConan(ConanFile):
         "swscale": True,
         "postproc": True,
         "avfilter": True,
+        "with_asm": True,
         "with_zlib": True,
         "with_bzip2": True,
         "with_lzma": True,
@@ -253,11 +255,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_libiconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_openh264:
             self.requires("openh264/2.1.1")
         if self.options.with_vorbis:
@@ -279,11 +281,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.3")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.5.1")
+            self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
@@ -293,7 +295,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.211.0")
+            self.requires("vulkan-loader/1.3.221")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
@@ -342,6 +344,8 @@ class FFMpegConan(ConanFile):
                 str(self.settings.arch),
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             ).split("-")
+            if target_os == "gnueabihf":
+                target_os = "gnu" # could also be "linux"
             return target_os
 
     def _patch_sources(self):
@@ -361,11 +365,12 @@ class FFMpegConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self._is_msvc:
-            with tools.vcvars(self):
+        with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
+            if self._is_msvc:
+                with tools.vcvars(self):
+                    yield
+            else:
                 yield
-        else:
-            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -385,6 +390,7 @@ class FFMpegConan(ConanFile):
             "--pkg-config-flags=--static",
             "--disable-doc",
             opt_enable_disable("cross-compile", tools.cross_building(self)),
+            opt_enable_disable("asm", self.options.with_asm),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),

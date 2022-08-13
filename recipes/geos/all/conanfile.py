@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conans import CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -27,7 +29,6 @@ class GeosConan(ConanFile):
     }
 
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -38,8 +39,8 @@ class GeosConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _has_utils_option(self):
-        return tools.Version(self.version) >= "3.10.0"
+    def _has_inline_option(self):
+        return tools.Version(self.version) < "3.11.0"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -49,8 +50,8 @@ class GeosConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_utils_option:
-            del self.options.utils
+        if not self._has_inline_option:
+            del self.options.inline
 
     def configure(self):
         if self.options.shared:
@@ -67,30 +68,21 @@ class GeosConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)
-
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) <= "3.9.0":
-            # Issue reported https://trac.osgeo.org/geos/ticket/1090, and
-            # fixed upstream for following versions https://trac.osgeo.org/geos/changeset/6318f224552c27a4b87ecf8817173cb7e6a2f4f1/git
-            os.unlink(os.path.join(self.build_folder, self._source_subfolder, 'src', 'inlines.cpp'))
-
         cmake = self._configure_cmake()
         cmake.build()
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if tools.Version(self.version) >= "3.9.1":
-            self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        if tools.Version(self.version) >= "3.10.0":
-            self._cmake.definitions["BUILD_ASTYLE"] = False
-        if self._has_utils_option:
-            self._cmake.definitions["BUILD_GEOSOP"] = self.options.utils
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_BENCHMARKS"] = False
+        if self._has_inline_option:
+            cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["BUILD_DOCUMENTATION"] = False
+        cmake.definitions["BUILD_ASTYLE"] = False
+        cmake.definitions["BUILD_GEOSOP"] = self.options.utils
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -115,7 +107,7 @@ class GeosConan(ConanFile):
         # GEOS::geos_cxx_flags
         self.cpp_info.components["geos_cxx_flags"].set_property("cmake_target_name", "GEOS::geos_cxx_flags")
         self.cpp_info.components["geos_cxx_flags"].defines.append("USE_UNSTABLE_GEOS_CPP_API")
-        if self.options.inline:
+        if self.options.get_safe("inline"):
             self.cpp_info.components["geos_cxx_flags"].defines.append("GEOS_INLINE")
         if self.settings.os == "Windows":
             self.cpp_info.components["geos_cxx_flags"].defines.append("TTMATH_NOASM")
@@ -136,7 +128,7 @@ class GeosConan(ConanFile):
         self.cpp_info.components["geos_c"].libs = ["geos_c"]
         self.cpp_info.components["geos_c"].requires = ["geos_cpp"]
 
-        if self.options.get_safe("utils"):
+        if self.options.utils:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
