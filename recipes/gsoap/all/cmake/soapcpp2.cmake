@@ -1,7 +1,7 @@
 
 # Generate project for soapcpp2 executable
 
-set(STDCPP2_PATH ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/src)
+set(STDCPP2_PATH ${GSOAP_PATH}/gsoap/src)
 
 set(SRC_CPP
     ${STDCPP2_PATH}/symbol2.c

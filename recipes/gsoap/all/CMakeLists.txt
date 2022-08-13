@@ -15,15 +15,15 @@ endif()
 
 # Tools
 if(${BUILD_TOOLS})
-  include(${CMAKE_SOURCE_DIR}/cmake/soapcpp2.cmake)
-  include(${CMAKE_SOURCE_DIR}/cmake/wsdl2h.cmake)
+  include(${PROJECT_SOURCE_DIR}/cmake/soapcpp2.cmake)
+  include(${PROJECT_SOURCE_DIR}/cmake/wsdl2h.cmake)
 
-  install(FILES ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/typemap.dat DESTINATION res)
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/import DESTINATION ${CMAKE_INSTALL_BINDIR}
+  install(FILES ${GSOAP_PATH}/gsoap/typemap.dat DESTINATION res)
+  install(DIRECTORY ${GSOAP_PATH}/gsoap/import DESTINATION ${CMAKE_INSTALL_BINDIR}
           FILES_MATCHING PATTERN "*.h")
 endif()
 
 # Libraries
 if(${BUILD_GSOAP})
-  include(${CMAKE_SOURCE_DIR}/cmake/gsoap.cmake)
+  include(${PROJECT_SOURCE_DIR}/cmake/gsoap.cmake)
 endif()
