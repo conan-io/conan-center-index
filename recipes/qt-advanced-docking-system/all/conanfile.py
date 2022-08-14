@@ -41,7 +41,7 @@ class QtADS(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires(f"qt/5.15.2")
+        self.requires("qt/5.15.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
