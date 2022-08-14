@@ -42,7 +42,7 @@ class OctoLoggerCPPConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "octo-logger-cpp")
-        self.cpp_info.set_property("cmake_target_name", "octo-logger-cpp::octo-logger-cpp")
+        self.cpp_info.set_property("cmake_target_name", "octo::octo-logger-cpp")
         self.cpp_info.set_property("pkg_config_name", "octo-logger-cpp")
         self.cpp_info.components["octo-logger-cpp"].libs = ["octo-logger-cpp"]
         self.cpp_info.components["octo-logger-cpp"].requires = [
@@ -57,5 +57,5 @@ class OctoLoggerCPPConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "octo-logger-cpp"
         self.cpp_info.components["octo-logger-cpp"].names["cmake_find_package"] = "octo-logger-cpp"
         self.cpp_info.components["octo-logger-cpp"].names["cmake_find_package_multi"] = "octo-logger-cpp"
-        self.cpp_info.components["octo-logger-cpp"].set_property("cmake_target_name", "octo-logger-cpp::octo-logger-cpp")
+        self.cpp_info.components["octo-logger-cpp"].set_property("cmake_target_name", "octo::octo-logger-cpp")
         self.cpp_info.components["octo-logger-cpp"].set_property("pkg_config_name", "octo-logger-cpp")
