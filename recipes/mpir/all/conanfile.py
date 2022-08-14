@@ -73,7 +73,7 @@ class MpirConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.files.get(keep_permissions=True, **self.conan_data["sources"][self.version],
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     @property
