@@ -144,6 +144,9 @@ class SDLConan(ConanFile):
                 self.requires("libunwind/1.6.2")
 
     def validate(self):
+        if self.settings.os != "Macos": # REMOVE AFTER TEST
+            raise ConanInvalidConfiguration("Excluded for reasons")
+
         if self.settings.os == "Macos" and not self.options.iconv:
             raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
 
@@ -194,6 +197,7 @@ class SDLConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.verbose = True # REMOVER AFTER TEST
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
         # FIXME: self.install_folder not defined? Neccessary?
