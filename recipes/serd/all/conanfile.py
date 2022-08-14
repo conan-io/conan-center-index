@@ -58,6 +58,9 @@ class SerdConan(ConanFile):
         tc.project_options["docs"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["tools"] = "disabled"
+        # TODO: fixed in conan 1.51.0?
+        tc.project_options["bindir"] = "bin"
+        tc.project_options["libdir"] = "lib"
         tc.generate()
 
         env = VirtualBuildEnv(self)
