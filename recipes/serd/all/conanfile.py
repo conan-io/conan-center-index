@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rmdir
 from conan.tools.layout import basic_layout
@@ -78,6 +79,7 @@ class SerdConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
         if is_msvc(self) and not self.options.shared:
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
                 self._fixup_static_libname_for_msvc(lib)
