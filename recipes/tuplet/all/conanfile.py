@@ -1,6 +1,11 @@
-import os
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+import os
+
+required_conan_version = ">=1.50.0"
 
 
 class TupletConan(ConanFile):
@@ -10,12 +15,8 @@ class TupletConan(ConanFile):
     homepage = "https://github.com/codeinred/tuplet"
     description = "A fast, simple tuple implementation that implements tuple as an aggregate"
     topics = ("tuple", "trivially-copyable", "modern-cpp")
-    settings = ("compiler", "arch", "os", "build_type")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _min_cppstd(self):
@@ -31,16 +32,12 @@ class TupletConan(ConanFile):
             "apple-clang": "13"
         }
 
-    def source(self):
-        tools.files.get(self,
-                        **self.conan_data["sources"][self.version],
-                        strip_root=True,
-                        destination=self._source_subfolder
-                        )
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -61,21 +58,25 @@ class TupletConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
     def build(self):
         pass
 
-    def package_id(self):
-        self.info.header_only()
-
     def package(self):
-        source_folder = os.path.join(
-            self.source_folder, self._source_subfolder)
-        include_folder = os.path.join(
-            self.source_folder, self._source_subfolder, "include")
+        include_folder = os.path.join(self.source_folder, "include")
+        copy(self, "*.hpp", src=include_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        tools.files.copy(self, pattern="*.hpp",
-                         dst=os.path.join(self.package_folder, "include"),
-                         src=include_folder)
-        tools.files.copy(self, pattern="LICENSE",
-                         dst=os.path.join(self.package_folder, "licenses"),
-                         src=source_folder)
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "tuplet")
+        self.cpp_info.set_property("cmake_target_name", "tuplet::tuplet")
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
