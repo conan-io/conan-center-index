@@ -78,11 +78,11 @@ class SerdConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if is_msvc(self):
+        if is_msvc(self) and not self.options.shared:
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                self._fix_meson_libname_for_msvc(lib)
+                self._fixup_static_libname_for_msvc(lib)
 
-    def _fix_meson_libname_for_msvc(self, filepath):
+    def _fixup_static_libname_for_msvc(self, filepath):
         # remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)
         libname = os.path.splitext(os.path.basename(filepath))[0]
         if libname[0:3] == "lib":
