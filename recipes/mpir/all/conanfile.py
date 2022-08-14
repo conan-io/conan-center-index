@@ -1,6 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag
-from conan import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conan.errors import ConanInvalidConfiguration
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
@@ -62,14 +62,14 @@ class MpirConan(ConanFile):
             self.provides.append("gmp")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.build.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
         if not self._is_msvc:
             self.build_requires("m4/1.4.19")
-            if self._settings_build.os == "Windows" and not tools.build.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
