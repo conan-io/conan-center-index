@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 import glob
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.49.0"
 
 
 class SerdConan(ConanFile):
