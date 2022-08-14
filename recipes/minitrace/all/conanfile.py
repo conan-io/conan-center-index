@@ -1,9 +1,10 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy
+from conan.tools.files import apply_conandata_patches, copy, get
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
+
 
 class MinitraceConan(ConanFile):
     name = "minitrace"
@@ -33,19 +34,24 @@ class MinitraceConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
 
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.files.get(self,
-            **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
