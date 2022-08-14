@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+PROJECT(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+INCLUDE(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+CONAN_BASIC_SETUP(TARGETS)
+FIND_PACKAGE(octo-encryption-cpp REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::octo-encryption-cpp)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+ADD_EXECUTABLE(${PROJECT_NAME} test_package.cpp)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} octo-encryption-cpp::octo-encryption-cpp)
+SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)

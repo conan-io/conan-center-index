@@ -4,6 +4,9 @@
 
 int main(int argc, char** argv)
 {
+    auto encryptor = std::make_shared<octo::encryption::ssl::SSLEncryptor>(
+        std::make_shared<octo::encryption::ssl::SSLCipher>("AES256"));
+    auto material = std::make_shared<octo::encryption::SimpleMaterial>(std::vector<std::string>{"Key1", "Key2", "Key3"});
     octo::encryption::SingleEncryptedString encrypted_string(encryptor);
     // Encryption
     encrypted_string.set(input_plain_string, material);
