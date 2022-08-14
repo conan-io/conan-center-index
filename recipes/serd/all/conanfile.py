@@ -1,11 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.47.0"
@@ -44,12 +41,6 @@ class SerdConan(ConanFile):
            del self.settings.compiler.cppstd
         except Exception:
            pass
-
-    def validate(self):
-        if cross_building(self) and hasattr(self.settings_build):
-            raise ConanInvalidConfiguration("Cross compiling is not working.")
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("Meson packaging is broken for MSVC.")
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.1")
