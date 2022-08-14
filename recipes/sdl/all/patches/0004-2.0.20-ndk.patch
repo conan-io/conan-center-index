@@ -1,9 +1,9 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -600,13 +600,17 @@ if(USE_GCC OR USE_CLANG)
+@@ -526,13 +526,17 @@ if(USE_GCC OR USE_CLANG)
      list(APPEND EXTRA_CFLAGS "-fno-strict-aliasing")
    endif()
-
+ 
 -  check_c_compiler_flag(-Wdeclaration-after-statement HAVE_GCC_WDECLARATION_AFTER_STATEMENT)
 -  if(HAVE_GCC_WDECLARATION_AFTER_STATEMENT)
 -    check_c_compiler_flag(-Werror=declaration-after-statement HAVE_GCC_WERROR_DECLARATION_AFTER_STATEMENT)
@@ -22,5 +22,5 @@
      endif()
 -    list(APPEND EXTRA_CFLAGS "-Wdeclaration-after-statement")
    endif()
-
+ 
    if(DEPENDENCY_TRACKING)
