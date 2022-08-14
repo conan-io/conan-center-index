@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES C)
 
-add_executable(${PROJECT_NAME} test_package.c)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 
 if (WIN32)
     find_package(glib CONFIG REQUIRED)
