@@ -1,13 +1,16 @@
-from conans import ConanFile, tools
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
+
 
 class SophusConan(ConanFile):
     name = "sophus"
     description = "C++ implementation of Lie Groups using Eigen."
-    topics = ("conan", "eigen", "numerical", "math")
+    topics = ("eigen", "numerical", "math")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://strasdat.github.io/Sophus/"
     license = "MIT"
@@ -21,26 +24,25 @@ class SophusConan(ConanFile):
         "with_fmt": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.capitalize() + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def requirements(self):
         self.requires("eigen/3.4.0")
         if self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
             self.requires("fmt/8.1.1")
 
-    def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "sophus"), dst=os.path.join("include", "sophus"), keep_path=False)
-
     def package_id(self):
         self.info.header_only()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def package(self):
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "sophus"),
+                            dst=os.path.join(self.package_folder, "include", "sophus"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Sophus")
