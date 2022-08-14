@@ -27,7 +27,6 @@ class QtADS(ConanFile):
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
-    _qt_version = "5.15.2"
 
     @property
     def _source_subfolder(self):
@@ -42,7 +41,7 @@ class QtADS(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires(f"qt/{self._qt_version}")
+        self.requires(f"qt/5.15.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -64,10 +63,11 @@ class QtADS(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+        qt = self.dependencies["qt"]
         tools.replace_in_file(
             f"{self.source_folder}/{self._source_subfolder}/src/ads_globals.cpp",
             "#include <qpa/qplatformnativeinterface.h>",
-            f"#include <{self._qt_version}/QtGui/qpa/qplatformnativeinterface.h>"
+            f"#include <{qt.ref.version}/QtGui/qpa/qplatformnativeinterface.h>"
         )
 
     def build(self):
