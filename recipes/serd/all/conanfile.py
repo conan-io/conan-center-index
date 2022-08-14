@@ -90,9 +90,11 @@ class SerdConan(ConanFile):
         rename(self, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
 
     def package_info(self):
-        libname = "serd-0"
-        self.cpp_info.set_property("pkg_config_name", libname)
+        self.cpp_info.set_property("pkg_config_name", "serd-0")
+        libname = "serd"
+        if not (is_msvc(self) and self.options.shared):
+            libname += "-0"
         self.cpp_info.libs = [libname]
-        self.cpp_info.includedirs = [os.path.join("include", libname)]
+        self.cpp_info.includedirs = [os.path.join("include", "serd-0")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
