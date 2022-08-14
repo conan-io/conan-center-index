@@ -26,42 +26,26 @@ sources:
 
 patches:
   "2.45":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.46":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.48":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.50":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.57":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.58":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.62":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.65":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
