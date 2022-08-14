@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: f8df39d682e10152dd93bd474173278b044f3979275a149d5908113780b0ad4b
+    url: https://github.com/ofiriluz/octo-wildcardmatching-cpp/archive/refs/tags/v1.0.0.tar.gz
