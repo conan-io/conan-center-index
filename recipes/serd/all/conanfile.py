@@ -85,11 +85,9 @@ class SerdConan(ConanFile):
     def _fix_meson_libname_for_msvc(self, filepath):
         # remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)
         libname = os.path.splitext(os.path.basename(filepath))[0]
-        prefix = libname[0:3]
-        if prefix == "lib":
+        if libname[0:3] == "lib":
             libname = libname[3:]
-        newfilepath = os.path.join(os.path.dirname(filepath), f"{libname}.lib")
-        rename(self, filepath, newfilepath)
+        rename(self, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
 
     def package_info(self):
         libname = "serd-0"
