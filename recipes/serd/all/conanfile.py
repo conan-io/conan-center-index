@@ -1,8 +1,10 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rename, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
+import glob
 import os
 
 required_conan_version = ">=1.47.0"
@@ -72,10 +74,22 @@ class SerdConan(ConanFile):
         meson.build()
 
     def package(self):
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                self._fix_meson_libname_for_msvc(lib)
+
+    def _fix_meson_libname_for_msvc(self, filepath):
+        # remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)
+        libname = os.path.splitext(os.path.basename(filepath))[0]
+        prefix = libname[0:3]
+        if prefix == "lib":
+            libname = libname[3:]
+        newfilepath = os.path.join(os.path.dirname(filepath), f"{libname}.lib")
+        rename(self, filepath, newfilepath)
 
     def package_info(self):
         libname = "serd-0"
