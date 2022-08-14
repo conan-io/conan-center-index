@@ -56,7 +56,7 @@ class WaylandConan(ConanFile):
         self.tool_requires("meson/0.63.0")
         self.tool_requires("pkgconf/1.7.4")
         if cross_building(self):
-            self.tool_requires(f"wayland/{self.version}")
+            self.tool_requires(self.ref)
 
     def layout(self):
         basic_layout(self)
@@ -82,8 +82,9 @@ class WaylandConan(ConanFile):
             if cross_building(self):
                 native_generators_folder = os.path.join(self.generators_folder, "native")
                 mkdir(self, native_generators_folder)
-                for pc_name, pc_content in get_pc_files_and_content(self, self.dependencies.build["wayland"]).items():
-                    save(self, os.path.join(native_generators_folder, pc_name), pc_content)
+                for target in ["wayland", "expat", "libxml2", "libiconv"]:
+                    for pc_name, pc_content in get_pc_files_and_content(self, self.dependencies.build[target]).items():
+                        save(self, os.path.join(native_generators_folder, pc_name), pc_content)
                 tc.project_options["build.pkg_config_path"] = native_generators_folder
         tc.generate()
 
@@ -165,7 +166,7 @@ class WaylandConan(ConanFile):
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-client"].includedirs = ["include"]
             self.cpp_info.components["wayland-client"].libdirs = ["lib"]
-            
+
             pkgconfig_variables = {
                 'datarootdir': '${prefix}/res',
                 'pkgdatadir': '${datarootdir}/wayland',
@@ -201,3 +202,7 @@ class WaylandConan(ConanFile):
             # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
             self.cpp_info.components["wayland-egl-backend"].includedirs = ["include"]
             self.cpp_info.components["wayland-egl-backend"].libdirs = ["lib"]
+
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
