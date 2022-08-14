@@ -53,6 +53,7 @@ class SerdConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/0.63.1")
+        self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
         basic_layout(self, src_folder="src")
