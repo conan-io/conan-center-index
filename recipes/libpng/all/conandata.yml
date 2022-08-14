@@ -12,7 +12,7 @@ patches:
   "1.5.2":
     - patch_file: "patches/CMakeLists-symlink.patch"
       patch_description: "Fix symlink macro call for Linux debug builds. Previously it was attempting to symlink libpng to libpng15 that did not exist in debug builds."
-      patch_type: "backport"
+      patch_type: "portability"
       base_path: "source_subfolder"
     - patch_file: "patches/CMakeLists-ext-zlib.patch"
       patch_description: "Update ZLib include and library paths for conan to provide lib. Remove Zlib dll definition."
