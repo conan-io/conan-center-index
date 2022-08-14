@@ -4,14 +4,12 @@ from conan.tools.files import get, collect_libs
 
 class OctoLoggerCPPConan(ConanFile):
     name = "octo-logger-cpp"
-    version = "1.0.0"
     license = "MIT"
     url = "https://github.com/ofiriluz/octo-logger-cpp"
     homepage = "https://github.com/ofiriluz/octo-logger-cpp"
     description = "Octo logger library"
     topics = ("logging", "cpp")
-    author = "Ofir Iluz"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
 
     @property
