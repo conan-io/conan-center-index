@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rename, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-import glob
 import os
 
 required_conan_version = ">=1.49.0"
@@ -80,16 +79,7 @@ class SerdConan(ConanFile):
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
-        if is_msvc(self) and not self.options.shared:
-            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                self._fixup_static_libname_for_msvc(lib)
-
-    def _fixup_static_libname_for_msvc(self, filepath):
-        # remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)
-        libname = os.path.splitext(os.path.basename(filepath))[0]
-        if libname[0:3] == "lib":
-            libname = libname[3:]
-        rename(self, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
+        fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "serd-0")
@@ -102,3 +92,18 @@ class SerdConan(ConanFile):
             self.cpp_info.defines.append("SERD_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+def fix_msvc_libname(conanfile):
+    """remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)"""
+    from conan.tools.files import rename
+    import glob
+    if not is_msvc(conanfile):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        full_folder = os.path.join(conanfile.package_folder, libdir)
+        for filepath in glob.glob(os.path.join(full_folder, "*.a")):
+            libname = os.path.splitext(os.path.basename(filepath))[0]
+            if libname[0:3] == "lib":
+                libname = libname[3:]
+            rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
