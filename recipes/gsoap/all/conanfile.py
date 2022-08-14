@@ -115,3 +115,7 @@ class GsoapConan(ConanFile):
         if self.options.with_c_locale:
             defines.append("WITH_C_LOCALE")
         self.cpp_info.defines = defines
+
+        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
+        #       (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires = ["openssl::openssl", "zlib::zlib"]
