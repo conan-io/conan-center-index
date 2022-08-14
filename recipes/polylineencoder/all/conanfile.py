@@ -1,10 +1,11 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy
+from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.46.0"
+
 
 class PolylineencoderConan(ConanFile):
     name = "polylineencoder"
@@ -35,6 +36,10 @@ class PolylineencoderConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def package_id(self):
+        if Version(self.version) >= "1.1.2":
+            self.info.header_only()
+
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["BUILD_TESTING"] = False
@@ -43,11 +48,10 @@ class PolylineencoderConan(ConanFile):
         toolchain.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.files.get(self,
-            **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
@@ -64,9 +68,5 @@ class PolylineencoderConan(ConanFile):
     def package_info(self):
         if Version(self.version) == "1.0.0":
             self.cpp_info.libs.append("polylineencoder")
-            if self.settings.os == "Linux" and self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
                 self.cpp_info.system_libs.append("m")
-
-    def package_id(self):
-        if Version(self.version) >= "1.1.2":
-            self.info.header_only()
