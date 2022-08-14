@@ -1,10 +1,9 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
 
-from conan import ConanFile
-from conan.tools.cmake import CMake
-from conans import tools
-
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class Ntv2Conan(ConanFile):
@@ -14,10 +13,16 @@ class Ntv2Conan(ConanFile):
     homepage = "https://github.com/aja-video/ntv2"
     description = "AJA NTV2 SDK"
     topics = "video, hardware"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "CMakeToolchain"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -27,35 +32,44 @@ class Ntv2Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(os.path.join(self._source_subfolder, 'LICENSE'), 'licenses')
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         for suffix in ["so", "lib", "a", "dylib", "bc"]:
-            self.copy(
-                f"*.{suffix}", src=os.path.join("ajalibraries", "ajantv2"), dst="lib", keep_path=False)
+            copy(self,
+                 f"*.{suffix}",
+                 src=os.path.join(self.build_folder, "ajalibraries", "ajantv2"),
+                 dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
         if self.settings.os == "Windows" and self.options.shared:
-            self.copy(
-                "*.dll", src=os.path.join("ajalibraries", "ajantv2"), dst="bin", keep_path=False)
+            copy(self,
+                "*.dll",
+                src=os.path.join(self.build_folder, "ajalibraries", "ajantv2"),
+                dst=os.path.join(self.package_folder, "bin"),
+                keep_path=False)
         for lib in ["ajaanc", "ajacc", "ajantv2"]:
-            self.copy("*", src=os.path.join(self._source_subfolder,
-                      "ajalibraries", lib, "includes"), dst=os.path.join("include", lib))
-        self.copy("ajalibraries/**/*.h",
-                  src=self._source_subfolder, dst="include")
-        self.copy("ajalibraries/**/*.hh",
-                  src=self._source_subfolder, dst="include")
+            copy(self,
+                 "*",
+                 src=os.path.join(self.source_folder, "ajalibraries", lib, "includes"),
+                 dst=os.path.join(self.package_folder, "include", lib))
+        copy(self, "ajalibraries/**/*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "ajalibraries/**/*.hh", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         lib_name = "ajantv2shared" if self.options.shared else "ajantv2"
