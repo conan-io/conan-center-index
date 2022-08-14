@@ -96,5 +96,7 @@ class SerdConan(ConanFile):
             libname += "-0"
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [os.path.join("include", "serd-0")]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("SERD_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
