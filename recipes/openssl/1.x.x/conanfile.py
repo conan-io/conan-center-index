@@ -228,6 +228,8 @@ class OpenSSLConan(ConanFile):
     def requirements(self):
         if self._full_version < "1.1.0" and self.options.get_safe("no_zlib") == False:
             self.requires("zlib/1.2.12")
+        if self.settings.os == "Linux":
+            self.requires("linux-headers-generic/5.14.9")
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -881,6 +883,9 @@ class OpenSSLConan(ConanFile):
 
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             self.cpp_info.components["crypto"].requires = ["zlib::zlib"]
+
+        if self.settings.os == "Linux":
+            self.cpp_info.components["crypto"].requires = ["linux-headers-generic::linux-headers-generic"]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"])
