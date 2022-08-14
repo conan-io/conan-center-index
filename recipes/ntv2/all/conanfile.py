@@ -53,16 +53,16 @@ class Ntv2Conan(ConanFile):
 
         for suffix in ["so", "lib", "a", "dylib", "bc"]:
             copy(self,
-                 f"*.{suffix}",
+                 f"*{self._lib_name}.{suffix}",
                  src=os.path.join(self.build_folder, "ajalibraries", "ajantv2"),
                  dst=os.path.join(self.package_folder, "lib"),
                  keep_path=False)
         if self.settings.os == "Windows" and self.options.shared:
             copy(self,
-                "*.dll",
-                src=os.path.join(self.build_folder, "ajalibraries", "ajantv2"),
-                dst=os.path.join(self.package_folder, "bin"),
-                keep_path=False)
+                 "*.dll",
+                 src=os.path.join(self.build_folder, "ajalibraries", "ajantv2"),
+                 dst=os.path.join(self.package_folder, "bin"),
+                 keep_path=False)
         for lib in ["ajaanc", "ajacc", "ajantv2"]:
             copy(self,
                  "*",
@@ -71,11 +71,15 @@ class Ntv2Conan(ConanFile):
         copy(self, "ajalibraries/**/*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
         copy(self, "ajalibraries/**/*.hh", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
-    def package_info(self):
+    @property
+    def _lib_name(self):
         lib_name = "ajantv2shared" if self.options.shared else "ajantv2"
         if self.settings.build_type == "Debug":
             lib_name += "d"
-        self.cpp_info.libs = [lib_name]
+        return lib_name
+
+    def package_info(self):
+        self.cpp_info.libs = [self._lib_name]
         self.cpp_info.includedirs = [
             os.path.join("include", "ajalibraries"),
             os.path.join("include", "ajalibraries", "ajabase"),
