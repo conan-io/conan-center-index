@@ -95,16 +95,17 @@ class SerdConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
 def fix_msvc_libname(conanfile):
-    """remove lib prefix & change extension to .lib (see https://github.com/mesonbuild/meson/issues/7378)"""
+    """remove lib prefix & change extension to .lib"""
     from conan.tools.files import rename
     import glob
     if not is_msvc(conanfile):
         return
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:
-        full_folder = os.path.join(conanfile.package_folder, libdir)
-        for filepath in glob.glob(os.path.join(full_folder, "*.a")):
-            libname = os.path.splitext(os.path.basename(filepath))[0]
-            if libname[0:3] == "lib":
-                libname = libname[3:]
-            rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.splitext(os.path.basename(filepath))[0]
+                if libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
