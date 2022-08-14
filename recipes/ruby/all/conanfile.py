@@ -192,5 +192,12 @@ class RubyConan(ConanFile):
         major, minor, _ = str(self.version).split(".")
         self.cpp_info.set_property("pkg_config_aliases", [f"ruby-{major}.{minor}"])
 
+        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
+        #       (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires.extend(["zlib::zlib", "gmp::gmp"])
+        if self.options.with_openssl:
+            self.cpp_info.requires.append("openssl::openssl")
+
+        # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Ruby"
         self.cpp_info.names["cmake_find_package_multi"] = "Ruby"
