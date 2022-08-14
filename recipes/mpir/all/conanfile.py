@@ -86,7 +86,7 @@ class MpirConan(ConanFile):
 
     @property
     def _vcxproj_paths(self):
-        compiler_version = self.settings.compiler.version if tools.Version(self.settings.compiler.version) < "16" else "15"
+        compiler_version = self.settings.compiler.version if tools.Version(self.settings.compiler.version) <= "16" else "16"
         build_subdir = "build.vc{}".format(compiler_version)
         vcxproj_paths = [
             os.path.join(self._source_subfolder, build_subdir,
@@ -150,7 +150,27 @@ class MpirConan(ConanFile):
             self._autotools.configure(args=args)
         return self._autotools
 
+    def _patch_sources(self):
+        if self._is_msvc:
+            self.copy("*", src="build.vc15", dst="build.vc16")
+            for root, _, files in os.walk("build.vc16"):
+                for file in files:
+                    tools.replace_in_file(os.path.join(root, file), "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>")
+
+
+            # for root, _, files in os.walk(self.build_folder):
+            #     if "Makefile" in files:
+            #         tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
+
+
+            # fn = os.path.join("CPP", "Build.mak")
+            # os.chmod(fn, 0o644)
+            # tools.replace_in_file(fn, "-MT", "-{}".format(str(self.settings.compiler.runtime)))
+            # tools.replace_in_file(fn, "-MD", "-{}".format(str(self.settings.compiler.runtime)))
+
+
     def build(self):
+        self._patch_sources()
         if self._is_msvc:
             self._build_visual_studio()
         else:
