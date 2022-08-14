@@ -8,17 +8,10 @@ sources:
 patches:
   "1.7.4":
     - patch_file: "patches/1.7.4-0001-clang-12-strndup-not-in-string-h.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.4-0002-fix-static-link.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.4-0003-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
-      base_path: "source_subfolder"
   "1.7.3":
     - patch_file: "patches/1.7.3-0001-meson-use-declare-dependencies.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.3-0002-clang-12-strndup-not-in-string-h.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.3-0003-meson-use-library.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.7.3-0004-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
-      base_path: "source_subfolder"
