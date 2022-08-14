@@ -52,6 +52,12 @@ class SophusConan(ConanFile):
         if not self.options.with_fmt:
             self.cpp_info.defines.append("SOPHUS_USE_BASIC_LOGGING=1")
 
+        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
+        #       (see https://github.com/conan-io/conan/pull/11790)
+        self.cpp_info.requires = ["eigen::eigen"]
+        if self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
+            self.cpp_info.requires.append("fmt::fmt")
+
         # TODO: to remove in conan v2 once cmake_find_package* generator removed
         self.cpp_info.names["cmake_find_package"] = "Sophus"
         self.cpp_info.names["cmake_find_package_multi"] = "Sophus"
