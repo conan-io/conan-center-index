@@ -1,13 +1,12 @@
-from conans import ConanFile, Meson, tools
-from conan.tools.files import rename
 import glob
 import os
 import re
 import shutil
 
-from conan.tools.microsoft import is_msvc
+from conan import ConanFile
+from conan.tools import files, microsoft, scm, build
+from conans import Meson, tools
 from conans.errors import ConanInvalidConfiguration
-
 
 
 class GlibmmConan(ConanFile):
@@ -25,7 +24,7 @@ class GlibmmConan(ConanFile):
     exports_sources = "patches/**"
 
     def _abi_version(self):
-        return "2.68" if tools.Version(self.version) >= "2.68.0" else "2.4"
+        return "2.68" if scm.Version(self.version) >= "2.68.0" else "2.4"
 
     def _glibmm_lib(self):
         return f"glibmm-{self._abi_version()}"
@@ -58,19 +57,20 @@ class GlibmmConan(ConanFile):
         raise ConanInvalidConfiguration("Cannot get MSVC compiler toolset information")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and build.cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
         if self.settings.compiler.get_safe("cppstd"):
             if self._abi_version() == "2.68":
-                tools.check_min_cppstd(self, 17)
+                build.check_min_cppstd(self, 17)
             else:
-                tools.check_min_cppstd(self, 11)
+                build.check_min_cppstd(self, 11)
+
         if self.options.shared and not self.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             self._get_msvc_toolset()
 
     @property
@@ -98,7 +98,7 @@ class GlibmmConan(ConanFile):
             self.requires("libsigcpp/2.10.8")
 
     def source(self):
-        tools.get(
+        files.get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
             destination=self._source_subfolder,
@@ -106,15 +106,15 @@ class GlibmmConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            files.patch(self, **patch)
 
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             # GLiBMM_GEN_EXTRA_DEFS_STATIC is not defined anywhere and is not
             # used anywhere except here
             # when building a static build !defined(GLiBMM_GEN_EXTRA_DEFS_STATIC)
             # evaluates to 0
             if not self.options.shared:
-                tools.replace_in_file(
+                files.replace_in_file(self,
                     os.path.join(self._source_subfolder, "tools",
                                  "extra_defs_gen", "generate_extra_defs.h"),
                     "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
@@ -126,7 +126,7 @@ class GlibmmConan(ConanFile):
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
+            files.replace_in_file(self,
                 os.path.join(self._source_subfolder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 
@@ -165,61 +165,29 @@ class GlibmmConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
 
-        if is_msvc(self):
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "bin"), "*.pdb")
+        if microsoft.is_msvc(self):
+            files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if not self.options.shared:
-
-                rename(
+                files.rename(
                     self,
-                    os.path.join(self.package_folder, "lib",
-                                 f"libglibmm-{self._abi_version()}.a"),
-                    os.path.join(self.package_folder, "lib",
-                                 f"{self._glibmm_lib()}.lib"),
-                )
-                rename(
+                    os.path.join(self.package_folder, "lib", f"libglibmm-{self._abi_version()}.a"),
+                    os.path.join(self.package_folder, "lib", f"{self._glibmm_lib()}.lib"))
+                files.rename(
                     self,
-                    os.path.join(self.package_folder, "lib",
-                                 f"libgiomm-{self._abi_version()}.a"),
-                    os.path.join(self.package_folder, "lib",
-                                 f"{self._giomm_lib()}.lib"),
-                )
-
-                rename(
+                    os.path.join(self.package_folder, "lib", f"libgiomm-{self._abi_version()}.a"),
+                    os.path.join(self.package_folder, "lib", f"{self._giomm_lib()}.lib"))
+                files.rename(
                     self,
-                    os.path.join(
-                        self.package_folder,
-                        "lib",
-                        f"libglibmm_generate_extra_defs-{self._abi_version()}.a",
-                    ),
-                    os.path.join(
-                        self.package_folder,
-                        "lib",
-                        f"glibmm_generate_extra_defs-{self._abi_msvc_toolset_suffix}.lib",
-                    ),
-                )
+                    os.path.join(self.package_folder, "lib", f"libglibmm_generate_extra_defs-{self._abi_version()}.a"),
+                    os.path.join(self.package_folder, "lib", f"glibmm_generate_extra_defs-{self._abi_msvc_toolset_suffix}.lib"))
 
         for directory in [self._glibmm_lib(), self._giomm_lib()]:
-            directory_path = os.path.join(self.package_folder, "lib",
-                                          directory, "include", "*.h")
+            directory_path = os.path.join(self.package_folder, "lib", directory, "include", "*.h")
             for header_file in glob.glob(directory_path):
-                shutil.move(
-                    header_file,
-                    os.path.join(
-                        self.package_folder,
-                        "include",
-                        directory,
-                        os.path.basename(header_file),
-                    ),
-                )
+                shutil.move(header_file, os.path.join( self.package_folder, "include", directory, os.path.basename(header_file)))
 
-        for dir_to_remove in [
-                "pkgconfig",
-                self._glibmm_lib(),
-                self._giomm_lib()
-        ]:
-            tools.rmdir(os.path.join(self.package_folder, "lib",
-                                     dir_to_remove))
+        for dir_to_remove in ["pkgconfig", self._glibmm_lib(), self._giomm_lib()]:
+            files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
         glibmm_component = f"glibmm-{self._abi_version()}"
@@ -243,7 +211,7 @@ class GlibmmConan(ConanFile):
             glibmm_component, "glib::gio-2.0"
         ]
 
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             extra_defs_component = f"glibmm_generate_extra_defs-{self._abi_version()}"
             extra_defs_libname = f"glibmm_generate_extra_defs-{self._abi_msvc_toolset_suffix}"
             self.cpp_info.components[extra_defs_component].libs = [extra_defs_libname]
