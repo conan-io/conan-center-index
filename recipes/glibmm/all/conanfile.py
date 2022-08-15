@@ -90,7 +90,7 @@ class GlibmmConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("glib/2.73.0")
+        self.requires("glib/2.73.3")
 
         if self._abi_version() == "2.68":
             self.requires("libsigcpp/3.0.7")
