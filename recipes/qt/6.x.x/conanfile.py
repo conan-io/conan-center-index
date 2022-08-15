@@ -706,7 +706,7 @@ class QtConan(ConanFile):
             cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
         if self.settings.os == "Windows":
-            cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
+            cmake.definitions["HOST_PERL"] = getattr(self, "user_info_build", self.user_info)["strawberryperl"].perl
 
         try:
             cmake.configure(source_folder="qt6")
