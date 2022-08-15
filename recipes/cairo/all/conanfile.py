@@ -1,7 +1,11 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
+
+from conan import ConanFile
+from conan.tools import files, microsoft
+from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans import tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class CairoConan(ConanFile):
@@ -56,7 +60,7 @@ class CairoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_fontconfig
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             del self.options.with_freetype
             del self.options.with_glib
         if self.settings.os != "Linux":
@@ -69,7 +73,7 @@ class CairoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             if self.settings.build_type not in ["Debug", "Release"]:
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
 
@@ -90,23 +94,19 @@ class CairoConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        if not self._is_msvc:
+        if not microsoft.is_msvc(self):
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
             self.build_requires("gtk-doc-stub/cci.20181216")
 
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self._is_msvc:
+            files.patch(self, **patch)
+        if microsoft.is_msvc(self):
             self._build_msvc()
         else:
             self._build_configure()
@@ -115,13 +115,13 @@ class CairoConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             # https://cairographics.org/end_to_end_build_for_win32/
             win32_common = os.path.join("build", "Makefile.win32.common")
-            tools.replace_in_file(win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
-            tools.replace_in_file(win32_common, "-MDd ", "-%s " % self.settings.compiler.runtime)
-            tools.replace_in_file(win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
+            files.replace_in_file(self, win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
+            files.replace_in_file(self, win32_common, "-MDd ", "-%s " % self.settings.compiler.runtime)
+            files.replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
                                                 self.deps_cpp_info["zlib"].libs[0] + ".lib")
-            tools.replace_in_file(win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
+            files.replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
                                                 self.deps_cpp_info["libpng"].libs[0] + ".lib")
-            tools.replace_in_file(win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
+            files.replace_in_file(self, win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
                                                 self.deps_cpp_info["freetype"].libs[0] + ".lib")
             with tools.vcvars(self.settings):
                 env_msvc = VisualStudioBuildEnvironment(self)
@@ -130,13 +130,13 @@ class CairoConan(ConanFile):
                     env_build = AutoToolsBuildEnvironment(self)
                     args=[
                         "-f", "Makefile.win32",
-                        "CFG={}".format(str(self.settings.build_type).lower()),
+                        f"CFG={str(self.settings.build_type).lower()}",
                         "CAIRO_HAS_FC_FONT=0",
-                        "ZLIB_PATH={}".format(self.deps_cpp_info["zlib"].rootpath),
-                        "LIBPNG_PATH={}".format(self.deps_cpp_info["libpng"].rootpath),
-                        "PIXMAN_PATH={}".format(self.deps_cpp_info["pixman"].rootpath),
-                        "FREETYPE_PATH={}".format(self.deps_cpp_info["freetype"].rootpath),
-                        "GOBJECT_PATH={}".format(self.deps_cpp_info["glib"].rootpath)
+                        f"ZLIB_PATH={self.deps_cpp_info['zlib'].rootpath}",
+                        f"LIBPNG_PATH={self.deps_cpp_info['libpng'].rootpath}",
+                        f"PIXMAN_PATH={self.deps_cpp_info['pixman'].rootpath}",
+                        f"FREETYPE_PATH={self.deps_cpp_info['freetype'].rootpath}",
+                        f"GOBJECT_PATH={self.deps_cpp_info['glib'].rootpath}"
                     ]
 
                     env_build.make(args=args)
@@ -146,18 +146,20 @@ class CairoConan(ConanFile):
         if self._autotools:
             return self._autotools
 
+        def boolean(value):
+            return "yes" if value else "no"
+
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
         configure_args = [
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "--enable-ft={}".format(yes_no(self.options.with_freetype)),
-            "--enable-gobject={}".format(yes_no(self.options.with_glib)),
-            "--enable-fc={}".format(yes_no(self.options.get_safe("with_fontconfig"))),
-            "--enable-xlib={}".format(yes_no(self.options.get_safe("with_xlib"))),
-            "--enable-xlib_xrender={}".format(yes_no(self.options.get_safe("with_xlib_xrender"))),
-            "--enable-xcb={}".format(yes_no(self.options.get_safe("xcb"))),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
+            f"--datarootdir={tools.unix_path(os.path.join(self.package_folder, 'res'))}",
+            f"--enable-ft={boolean(self.options.with_freetype)}",
+            f"--enable-gobject={boolean(self.options.with_glib)}",
+            f"--enable-fc={boolean(self.options.get_safe('with_fontconfig'))}",
+            f"--enable-xlib={boolean(self.options.get_safe('with_xlib'))}",
+            f"--enable-xlib_xrender={boolean(self.options.get_safe('with_xlib_xrender'))}",
+            f"--enable-xcb={boolean(self.options.get_safe('xcb'))}",
+            f"--enable-shared={boolean(self.options.shared)}",
+            f"--enable-static={boolean(not self.options.shared)}",
             "--disable-gtk-doc",
         ]
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
@@ -170,10 +172,10 @@ class CairoConan(ConanFile):
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             # disable build of test suite
-            tools.replace_in_file(os.path.join("test", "Makefile.am"), "noinst_PROGRAMS = cairo-test-suite$(EXEEXT)",
+            files.replace_in_file(self, os.path.join("test", "Makefile.am"), "noinst_PROGRAMS = cairo-test-suite$(EXEEXT)",
                                   "")
             if self.options.with_freetype:
-                tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
+                files.replace_in_file(self, os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       "#if HAVE_UNISTD_H", "#ifdef HAVE_UNISTD_H")
 
             tools.touch(os.path.join("boilerplate", "Makefile.am.features"))
@@ -182,7 +184,7 @@ class CairoConan(ConanFile):
 
             with tools.environment_append({"GTKDOCIZE": "echo"}):
                 self.run(
-                    "{} -fiv".format(tools.get_env("AUTORECONF")),
+                    f"{tools.get_env('AUTORECONF')} -fiv",
                     run_environment=True,
                     win_bash=tools.os_info.is_windows,
                 )
@@ -191,7 +193,7 @@ class CairoConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             src = os.path.join(self._source_subfolder, "src")
             cairo_gobject = os.path.join(self._source_subfolder, "util", "cairo-gobject")
             inc = os.path.join("include", "cairo")
@@ -222,7 +224,7 @@ class CairoConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.la")
 
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.components["cairo_"].libs = ["cairo"]

@@ -1,10 +1,14 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 import contextlib
 import glob
 import os
 
+from conan import ConanFile
+from conan.tools import files, microsoft
+from conans import tools, Meson, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
+
 required_conan_version = ">=1.38.0"
+
 
 class CairoConan(ConanFile):
     name = "cairo"
@@ -128,13 +132,9 @@ class CairoConan(ConanFile):
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["msvc", "Visual Studio"]
-
     @contextlib.contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             env_build = VisualStudioBuildEnvironment(self)
             if not self.options.shared:
                 env_build.flags.append("-DCAIRO_WIN32_STATIC_BUILD")
@@ -145,23 +145,25 @@ class CairoConan(ConanFile):
             yield
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
-        yes_no = lambda v: "enabled" if v else "disabled"
+        def boolean(value):
+            return "enabled" if value else "disabled"
+
         meson = Meson(self)
 
         defs = dict()
         defs["tests"] = "disabled"
-        defs["zlib"] = yes_no(self.options.with_zlib)
-        defs["png"] = yes_no(self.options.with_png)
-        defs["freetype"] = yes_no(self.options.with_freetype)
-        defs["fontconfig"] = yes_no(self.options.with_fontconfig)
+        defs["zlib"] = boolean(self.options.with_zlib)
+        defs["png"] = boolean(self.options.with_png)
+        defs["freetype"] = boolean(self.options.with_freetype)
+        defs["fontconfig"] = boolean(self.options.with_fontconfig)
         if self.settings.os == "Linux":
-            defs["xcb"] = yes_no(self.options.get_safe("with_xcb"))
-            defs["xlib"] = yes_no(self.options.get_safe("with_xlib"))
-            defs["xlib-xrender"] = yes_no(self.options.get_safe("with_xlib_xrender"))
+            defs["xcb"] = boolean(self.options.get_safe("with_xcb"))
+            defs["xlib"] = boolean(self.options.get_safe("with_xlib"))
+            defs["xlib-xrender"] = boolean(self.options.get_safe("with_xlib_xrender"))
         else:
             defs["xcb"] = "disabled"
             defs["xlib"] = "disabled"
@@ -173,10 +175,10 @@ class CairoConan(ConanFile):
             defs["gl-backend"] = "glesv3"
         else:
             defs["gl-backend"] = "disabled"
-        defs["glesv2"] = yes_no(self.options.get_safe("with_opengl") == "gles2")
-        defs["glesv3"] = yes_no(self.options.get_safe("with_opengl") == "gles3")
-        defs["tee"] = yes_no(self.options.tee)
-        defs["symbol-lookup"] = yes_no(self.options.get_safe("with_symbol_lookup"))
+        defs["glesv2"] = boolean(self.options.get_safe("with_opengl") == "gles2")
+        defs["glesv3"] = boolean(self.options.get_safe("with_opengl") == "gles3")
+        defs["tee"] = boolean(self.options.tee)
+        defs["symbol-lookup"] = boolean(self.options.get_safe("with_symbol_lookup"))
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
@@ -198,11 +200,11 @@ class CairoConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            files.patch(self, **patch)
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
-            tools.replace_in_file("freetype2.pc",
+            files.replace_in_file(self, "freetype2.pc",
                                   "Version: %s" % self.deps_cpp_info["freetype"].version,
                                   "Version: 9.7.3")
         with self._build_context():
@@ -210,12 +212,12 @@ class CairoConan(ConanFile):
             meson.build()
 
     def _fix_library_names(self):
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
                     self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    tools.rename(filename_old, filename_new)
+                    files.rename(self, filename_old, filename_new)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -224,8 +226,8 @@ class CairoConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         self._fix_library_names()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         base_requirements = {"pixman::pixman"}
