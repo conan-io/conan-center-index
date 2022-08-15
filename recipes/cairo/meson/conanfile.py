@@ -228,6 +228,16 @@ class CairoConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
+        base_requirements = {"pixman::pixman"}
+        base_system_libs = {}
+
+        def add_component_and_base_requirements(component, requirements, system_libs=None):
+            self.cpp_info.components[component].requires += ["cairo_"] + requirements
+            base_requirements.update(set(requirements))
+            if system_libs is not None:
+                self.cpp_info.components[component].system_libs += system_libs
+                base_system_libs.update(set(system_libs))
+
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
         if self.settings.os == "Linux":
@@ -241,148 +251,73 @@ class CairoConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["cairo_"].requires.append("zlib::zlib")
         if self.options.with_png:
-            self.cpp_info.components["cairo_"].requires.append("libpng::libpng")
+            add_component_and_base_requirements("cairo-png", ["libpng::libpng"])
+            add_component_and_base_requirements("cairo-svg", ["libpng::libpng"])
         if self.options.with_fontconfig:
-            self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
+            add_component_and_base_requirements("cairo-fc", ["fontconfig::fontconfig"])
         if self.options.with_freetype:
-            self.cpp_info.components["cairo_"].requires.append("freetype::freetype")
+            add_component_and_base_requirements("cairo-ft", ["freetype::freetype"])
         if self.options.get_safe("with_xlib"):
-            self.cpp_info.components["cairo_"].requires.extend(["xorg::x11", "xorg::xext"])
+            add_component_and_base_requirements("cairo-xlib", ["xorg::x11", "xorg::xext"])
         if self.options.get_safe("with_xlib_xrender"):
-            self.cpp_info.components["cairo_"].requires.append("xorg::xrender")
+            add_component_and_base_requirements("cairo-xlib-xrender", ["xorg::xrender"])
         if self.options.get_safe("with_xcb"):
-            self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb", "xorg::xcb-render", "xorg::xcb-shm"])
-        if self.options.get_safe("with_xlib") and self.options.get_safe("with_xcb"):
-            self.cpp_info.components["cairo_"].requires.append("xorg::x11-xcb")
+            add_component_and_base_requirements("cairo-xcb", ["xorg::xcb", "xorg::xcb-render"])
+            add_component_and_base_requirements("cairo-xcb-shm", ["xorg::xcb", "xorg::xcb-shm"])
+            if self.options.get_safe("with_xlib"):
+                add_component_and_base_requirements("cairo-xlib-xcb", ["xorg::x11-xcb"])
+
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
-            if not self.options.shared:
-                self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
-        if self.options.get_safe("with_opengl") == "desktop":
-            self.cpp_info.components["cairo_"].requires.append("opengl::opengl")
-            if self.settings.os == "Windows":
-                self.cpp_info.components["cairo_"].requires.extend(["glext::glext", "wglext::wglext", "khrplatform::khrplatform"])
-        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["cairo_"].requires.append("egl::egl")
-        if self.options.get_safe("with_opengl") == "gles2" or self.options.get_safe("with_opengl") == "gles3":
-            self.cpp_info.components["cairo_"].system_libs.append("GLESv2")
-        self.cpp_info.components["cairo_"].requires.append("pixman::pixman")
-
-        # built-features
-        if self.options.with_png:
-            self.cpp_info.components["cairo-png"].names["pkg_config"] = "cairo-png"
-            self.cpp_info.components["cairo-png"].requires = ["cairo_", "libpng::libpng"]
-
-        if self.options.with_png:
-            self.cpp_info.components["cairo-svg"].names["pkg_config"] = "cairo-svg"
-            self.cpp_info.components["cairo-svg"].requires = ["cairo_", "libpng::libpng"]
-
-        if self.options.with_fontconfig:
-            self.cpp_info.components["cairo-fc"].names["pkg_config"] = "cairo-fc"
-            self.cpp_info.components["cairo-fc"].requires = ["cairo_", "fontconfig::fontconfig"]
-
-        if self.options.with_freetype:
-            self.cpp_info.components["cairo-ft"].names["pkg_config"] = "cairo-ft"
-            self.cpp_info.components["cairo-ft"].requires = ["cairo_", "freetype::freetype"]
-
-        if self.options.get_safe("with_xlib"):
-            self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
-            self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
-
-        if self.options.get_safe("with_xlib_xrender"):
-            self.cpp_info.components["cairo-xlib-xrender"].names["pkg_config"] = "cairo-xlib-xrender"
-            self.cpp_info.components["cairo-xlib-xrender"].requires = ["cairo_", "xorg::xrender"]
-
-        if self.options.get_safe("with_xcb"):
-            self.cpp_info.components["cairo-xcb"].names["pkg_config"] = "cairo-xcb"
-            self.cpp_info.components["cairo-xcb"].requires = ["cairo_", "xorg::xcb", "xorg::xcb-render"]
-
-        if self.options.get_safe("with_xlib") and self.options.get_safe("with_xcb"):
-            self.cpp_info.components["cairo-xlib-xcb"].names["pkg_config"] = "cairo-xlib-xcb"
-            self.cpp_info.components["cairo-xlib-xcb"].requires = ["cairo_", "xorg::x11-xcb"]
-
-        if self.options.get_safe("with_xcb"):
-            self.cpp_info.components["cairo-xcb-shm"].names["pkg_config"] = "cairo-xcb-shm"
-            self.cpp_info.components["cairo-xcb-shm"].requires = ["cairo_", "xorg::xcb-shm"]
-
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
-
-            self.cpp_info.components["cairo-quartz-image"].names["pkg_config"] = "cairo-quartz-image"
             self.cpp_info.components["cairo-quartz-image"].requires = ["cairo_"]
-
-            self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["cairo-win32"].names["pkg_config"] = "cairo-win32"
+            self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
             self.cpp_info.components["cairo-win32"].requires = ["cairo_"]
-
-            self.cpp_info.components["cairo-win32-font"].names["pkg_config"] = "cairo-win32-font"
             self.cpp_info.components["cairo-win32-font"].requires = ["cairo_"]
+            if not self.options.shared:
+                self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
 
-        if self.options.get_safe("with_opengl") == "desktop":
-            self.cpp_info.components["cairo-gl"].names["pkg_config"] = "cairo-gl"
-            self.cpp_info.components["cairo-gl"].requires = ["cairo_", "opengl::opengl"]
+        if self.options.get_safe("with_opengl"):
+            if self.options.with_opengl == "desktop":
+                add_component_and_base_requirements("cairo-gl", ["opengl::opengl"])
 
-            if self.settings.os == "Linux":
-                self.cpp_info.components["cairo-glx"].names["pkg_config"] = "cairo-glx"
-                self.cpp_info.components["cairo-glx"].requires = ["cairo_", "opengl::opengl"]
+                if self.settings.os == "Linux":
+                    add_component_and_base_requirements("cairo-glx", ["opengl::opengl"])
 
-            if self.settings.os == "Windows":
-                self.cpp_info.components["cairo-wgl"].names["pkg_config"] = "cairo-wgl"
-                self.cpp_info.components["cairo-wgl"].requires = ["cairo_", "glext::glext", "wglext::wglext"]
+                if self.settings.os == "Windows":
+                    add_component_and_base_requirements("cairo-wgl", ["glext::glext", "wglext::wglext", "khrplatform::khrplatform"])
 
-        if self.options.get_safe("with_opengl") == "gles2":
-            self.cpp_info.components["cairo-glesv2"].names["pkg_config"] = "cairo-glesv2"
-            self.cpp_info.components["cairo-glesv2"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-glesv2"].system_libs = ["GLESv2"]
-
-        if self.options.get_safe("with_opengl") == "gles3":
-            self.cpp_info.components["cairo-glesv3"].names["pkg_config"] = "cairo-glesv3"
-            self.cpp_info.components["cairo-glesv3"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-glesv3"].system_libs = ["GLESv2"]
-
-        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["cairo-egl"].names["pkg_config"] = "cairo-egl"
-            self.cpp_info.components["cairo-egl"].requires = ["cairo_", "egl::egl"]
+            elif self.options.with_opengl == "gles3":
+                add_component_and_base_requirements("cairo-glesv3", [], ["GLESv2"])
+            elif self.options.with_opengl == "gles2":
+                add_component_and_base_requirements("cairo-glesv2", [], ["GLESv2"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                add_component_and_base_requirements("cairo-egl", ["egl::egl"])
 
         if self.options.with_zlib:
-            self.cpp_info.components["cairo-script"].names["pkg_config"] = "cairo-script"
-            self.cpp_info.components["cairo-script"].requires = ["cairo_", "zlib::zlib"]
+            add_component_and_base_requirements("cairo-script", ["zlib::zlib"])
+            add_component_and_base_requirements("cairo-ps", ["zlib::zlib"])
+            add_component_and_base_requirements("cairo-pdf", ["zlib::zlib"])
+            self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
+            self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
 
-        if self.options.with_zlib:
-            self.cpp_info.components["cairo-ps"].names["pkg_config"] = "cairo-ps"
-            self.cpp_info.components["cairo-ps"].requires = ["cairo_", "zlib::zlib"]
-
-        if self.options.with_zlib:
-            self.cpp_info.components["cairo-pdf"].names["pkg_config"] = "cairo-pdf"
-            self.cpp_info.components["cairo-pdf"].requires = ["cairo_", "zlib::zlib"]
-
-        if self.options.with_zlib and self.options.with_png:
-            self.cpp_info.components["cairo-xml"].names["pkg_config"] = "cairo-xml"
-            self.cpp_info.components["cairo-xml"].requires = ["cairo_", "zlib::zlib"]
+            if self.options.with_png:
+                add_component_and_base_requirements("cairo-xml", ["zlib::zlib"])
+                add_component_and_base_requirements("cairo-util_", ["expat::expat"])
 
         if self.options.tee:
-            self.cpp_info.components["cairo-tee"].names["pkg_config"] = "cairo-tee"
             self.cpp_info.components["cairo-tee"].requires = ["cairo_"]
 
         # util directory
         if self.options.with_glib:
-            self.cpp_info.components["cairo-gobject"].names["pkg_config"] = "cairo-gobject"
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
             self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
 
-        if self.options.with_zlib:
-            self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
-            self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
-
-        # binary tools
-        if self.options.with_zlib and self.options.with_png:
-            self.cpp_info.components["cairo_util_"].requires.append("expat::expat") # trace-to-xml.c, xml-to-trace.c
+        self.cpp_info.components["cairo_"].requires += list(base_requirements)
+        self.cpp_info.components["cairo_"].system_libs += list(base_system_libs)
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
