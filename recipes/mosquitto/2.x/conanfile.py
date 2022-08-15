@@ -64,7 +64,7 @@ class Mosquitto(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1q")
         if self.options.get_safe("cjson"):
             self.requires("cjson/1.7.14")
         if self.options.get_safe("websockets"):
