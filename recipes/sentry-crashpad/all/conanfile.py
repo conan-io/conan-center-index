@@ -5,6 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir, rm, replace_in_file
 from conan.tools.apple.apple import is_apple_os
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
