@@ -1,11 +1,12 @@
-from conan import ConanFile, tools
-from conan.tools.scm import Version
-from conan.tools.files import get, save
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, save
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class XsimdConan(ConanFile):
@@ -26,31 +27,29 @@ class XsimdConan(ConanFile):
 
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def requirements(self):
         if self.options.xtl_complex:
             self.requires("xtl/0.7.4")
+
+    def package_id(self):
+        self.info.header_only()
 
     def validate(self):
         # TODO: check supported version (probably >= 8.0.0)
         if Version(self.version) < "8.0.0" and self.settings.os == "Macos" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             raise ConanInvalidConfiguration(f"{self.name} doesn't support macOS M1")
 
-    def package_id(self):
-        self.info.header_only()
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(
-            "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
-        )
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        includedir = os.path.join(self.source_folder, "include")
+        copy(self, "*.hpp", src=includedir, dst=os.path.join(self.package_folder, "include"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -79,6 +78,10 @@ class XsimdConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "xsimd")
         if self.options.xtl_complex:
             self.cpp_info.defines = ["XSIMD_ENABLE_XTL_COMPLEX=1"]
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
