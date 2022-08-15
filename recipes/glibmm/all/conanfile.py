@@ -198,7 +198,7 @@ class GlibmmConan(ConanFile):
             os.path.join("include", glibmm_component)
         ]
         self.cpp_info.components[glibmm_component].requires = [
-            "glib::gobject-2.0", "libsigcpp::sigc++"
+            "glib::gobject-2.0", "libsigcpp::libsigcpp"
         ]
 
         giomm_component = f"giomm-{self._abi_version()}"
