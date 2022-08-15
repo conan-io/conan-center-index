@@ -10,6 +10,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import tools, RunEnvironment, CMake
+from conan.tools.files import get, rmdir
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
@@ -423,7 +424,7 @@ class QtConan(ConanFile):
             self.build_requires("wayland/1.21.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination="qt6")
 
         # patching in source method because of no_copy_source attribute
@@ -771,8 +772,8 @@ class QtConan(ConanFile):
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
-                tools.rmdir(os.path.join(self.package_folder, "licenses", module))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+                rmdir(os.path.join(self.package_folder, "licenses", module))
+        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
@@ -784,7 +785,7 @@ class QtConan(ConanFile):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
             if not os.path.isfile(module) and not helper_modules:
-                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
+                rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":
