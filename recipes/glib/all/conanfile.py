@@ -335,7 +335,7 @@ class GLibConan(ConanFile):
             'datadir': '${prefix}/res',
             'schemasdir': '${datadir}/glib-2.0/schemas',
             'bindir': '${prefix}/bin',
-            'giomoduledir': '${libdir}/gio/modules',
+            'giomoduledir': '${prefix}/lib/gio/modules',
             'gio': '${bindir}/gio',
             'gio_querymodules': '${bindir}/gio-querymodules',
             'glib_compile_schemas': '${bindir}/glib-compile-schemas',
