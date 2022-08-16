@@ -35,7 +35,7 @@ class GdkPixbufConan(ConanFile):
         "with_introspection": False,
     }
 
-    generators = "pkg_config"
+    generators = "pkg_config", "cmake_find_package"
     exports_sources = "patches/**"
 
     @property
