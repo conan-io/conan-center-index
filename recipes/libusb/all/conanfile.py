@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files
+from conan.tools import files, scm
 from conans import AutoToolsBuildEnvironment, MSBuild, tools
 import os
 import re
@@ -76,7 +76,7 @@ class LibUSBConan(ConanFile):
             # Assume we're using the latest Visual Studio and default to libusb_2019.sln
             # (or libusb_2017.sln for libusb < 1.0.24).
             # If we're not using the latest Visual Studio, select an appropriate solution file.
-            solution_msvc_year = 2019 if tools.Version(self.version) >= "1.0.24" else 2017
+            solution_msvc_year = 2019 if scm.Version(self.version) >= "1.0.24" else 2017
 
             solution_msvc_year = {
                 "11": 2012,
@@ -113,7 +113,7 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         if self._is_msvc:
-            if tools.Version(self.version) < "1.0.24":
+            if scm.Version(self.version) < "1.0.24":
                 for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
                                 "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
                     vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
