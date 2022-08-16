@@ -22,6 +22,7 @@ class GlibmmConan(ConanFile):
 
     generators = "pkg_config"
     exports_sources = "patches/**"
+    short_paths = True
 
     def _abi_version(self):
         return "2.68" if scm.Version(self.version) >= "2.68.0" else "2.4"
