@@ -49,7 +49,7 @@ class GiflibConan(ConanFile):
            pass
 
     def requirements(self):
-        if is_msvc(self):
+        if is_msvc(self) and self.options.utils:
             self.requires("getopt-for-visual-studio/20200201")
 
     def layout(self):
