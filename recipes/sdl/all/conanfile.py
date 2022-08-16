@@ -197,8 +197,10 @@ class SDLConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        if tools.is_apple_os(self) and self.settings.arch == "armv8":
-            cmake.definitions["CMAKE_OBJC_FLAGS"] = "-arch arm64"
+        if tools.is_apple_os(self):
+            cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = {
+                "armv8": "arm64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
         cmake.verbose = True # REMOVE AFTER TEST
         cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
         cmake_extra_ldflags = []
