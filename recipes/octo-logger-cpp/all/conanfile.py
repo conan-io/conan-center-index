@@ -5,7 +5,7 @@ from conan.tools.files import get
 class OctoLoggerCPPConan(ConanFile):
     name = "octo-logger-cpp"
     license = "MIT"
-    url = "https://github.com/ofiriluz/octo-logger-cpp"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ofiriluz/octo-logger-cpp"
     description = "Octo logger library"
     topics = ("logging", "cpp")
