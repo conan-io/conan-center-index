@@ -24,14 +24,17 @@ class GlibmmConan(ConanFile):
     exports_sources = "patches/**"
     short_paths = True
 
+    @property
     def _abi_version(self):
         return "2.68" if scm.Version(self.version) >= "2.68.0" else "2.4"
 
+    @property
     def _glibmm_lib(self):
-        return f"glibmm-{self._abi_version()}"
+        return f"glibmm-{self._abi_version}"
 
+    @property
     def _giomm_lib(self):
-        return f"giomm-{self._abi_version()}"
+        return f"giomm-{self._abi_version}"
 
     def _get_msvc_toolset(self):
         if self.settings.compiler.get_safe("toolset"):
@@ -50,10 +53,13 @@ class GlibmmConan(ConanFile):
 
     @property
     def _abi_msvc_toolset_suffix(self):
+        if scm.Version(self.version) < "2.68.0":
+            return self._abi_version
+
         toolset = self._get_msvc_toolset()
         match = re.match("v([0-9]+)", str(toolset))
         if match is not None:
-            return f"vc{match.group(1)}-{self._abi_version()}"
+            return f"vc{match.group(1)}-{self._abi_version}"
 
         raise ConanInvalidConfiguration("Cannot get MSVC compiler toolset information")
 
@@ -62,7 +68,7 @@ class GlibmmConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
         if self.settings.compiler.get_safe("cppstd"):
-            if self._abi_version() == "2.68":
+            if self._abi_version == "2.68":
                 build.check_min_cppstd(self, 17)
             else:
                 build.check_min_cppstd(self, 11)
@@ -93,7 +99,7 @@ class GlibmmConan(ConanFile):
     def requirements(self):
         self.requires("glib/2.73.3")
 
-        if self._abi_version() == "2.68":
+        if self._abi_version == "2.68":
             self.requires("libsigcpp/3.0.7")
         else:
             self.requires("libsigcpp/2.10.8")
@@ -171,27 +177,27 @@ class GlibmmConan(ConanFile):
             if not self.options.shared:
                 files.rename(
                     self,
-                    os.path.join(self.package_folder, "lib", f"libglibmm-{self._abi_version()}.a"),
-                    os.path.join(self.package_folder, "lib", f"{self._glibmm_lib()}.lib"))
+                    os.path.join(self.package_folder, "lib", f"libglibmm-{self._abi_version}.a"),
+                    os.path.join(self.package_folder, "lib", f"{self._glibmm_lib}.lib"))
                 files.rename(
                     self,
-                    os.path.join(self.package_folder, "lib", f"libgiomm-{self._abi_version()}.a"),
-                    os.path.join(self.package_folder, "lib", f"{self._giomm_lib()}.lib"))
+                    os.path.join(self.package_folder, "lib", f"libgiomm-{self._abi_version}.a"),
+                    os.path.join(self.package_folder, "lib", f"{self._giomm_lib}.lib"))
                 files.rename(
                     self,
-                    os.path.join(self.package_folder, "lib", f"libglibmm_generate_extra_defs-{self._abi_version()}.a"),
+                    os.path.join(self.package_folder, "lib", f"libglibmm_generate_extra_defs-{self._abi_version}.a"),
                     os.path.join(self.package_folder, "lib", f"glibmm_generate_extra_defs-{self._abi_msvc_toolset_suffix}.lib"))
 
-        for directory in [self._glibmm_lib(), self._giomm_lib()]:
+        for directory in [self._glibmm_lib, self._giomm_lib]:
             directory_path = os.path.join(self.package_folder, "lib", directory, "include", "*.h")
             for header_file in glob.glob(directory_path):
                 shutil.move(header_file, os.path.join( self.package_folder, "include", directory, os.path.basename(header_file)))
 
-        for dir_to_remove in ["pkgconfig", self._glibmm_lib(), self._giomm_lib()]:
+        for dir_to_remove in ["pkgconfig", self._glibmm_lib, self._giomm_lib]:
             files.rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
-        glibmm_component = f"glibmm-{self._abi_version()}"
+        glibmm_component = f"glibmm-{self._abi_version}"
 
         self.cpp_info.components[glibmm_component].names["pkg_config"] = glibmm_component
         self.cpp_info.components[glibmm_component].libs = [glibmm_component]
@@ -202,7 +208,7 @@ class GlibmmConan(ConanFile):
             "glib::gobject-2.0", "libsigcpp::libsigcpp"
         ]
 
-        giomm_component = f"giomm-{self._abi_version()}"
+        giomm_component = f"giomm-{self._abi_version}"
         self.cpp_info.components[giomm_component].names["pkg_config"] = giomm_component
         self.cpp_info.components[giomm_component].libs = [giomm_component]
         self.cpp_info.components[giomm_component].includedirs = [
@@ -213,7 +219,7 @@ class GlibmmConan(ConanFile):
         ]
 
         if microsoft.is_msvc(self):
-            extra_defs_component = f"glibmm_generate_extra_defs-{self._abi_version()}"
+            extra_defs_component = f"glibmm_generate_extra_defs-{self._abi_version}"
             extra_defs_libname = f"glibmm_generate_extra_defs-{self._abi_msvc_toolset_suffix}"
             self.cpp_info.components[extra_defs_component].libs = [extra_defs_libname]
             self.cpp_info.components[extra_defs_component].requires = [glibmm_component]
