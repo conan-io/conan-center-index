@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
-from conan import tools as tools_legacy
+from conans import tools as tools_legacy
 import os
 
 required_conan_version = ">=1.50.0"
