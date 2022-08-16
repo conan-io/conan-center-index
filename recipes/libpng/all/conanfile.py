@@ -1,7 +1,8 @@
 import os
 from conans import tools, CMake
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, get, rmdir
+from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.build.cross_building import cross_building
 
 required_conan_version = ">=1.47.0"
@@ -88,23 +89,23 @@ class LibpngConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
-        if tools.Version(self.version) > "1.5.2":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        if Version(self.version) > "1.5.2":
+            replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "find_library(M_LIBRARY m)",
                                 "set(M_LIBRARY m)")
 
         if tools.os_info.is_windows:
             if self._is_msvc:
-                if tools.Version(self.version) <= "1.5.2":
-                    tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                if Version(self.version) <= "1.5.2":
+                    replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                           'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
                                           'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
                 else:
-                    tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                         'OUTPUT_NAME "${PNG_LIB_NAME}_static',
                                         'OUTPUT_NAME "${PNG_LIB_NAME}')
             else:
-                tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
@@ -177,7 +178,7 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        major_min_version = "{}{}".format(tools.Version(self.version).major, tools.Version(self.version).minor)
+        major_min_version = f"{Version(self.version).major()[0]}{Version(self.version).minor()[2]}"
 
         self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
