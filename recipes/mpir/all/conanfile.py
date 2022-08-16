@@ -154,7 +154,33 @@ class MpirConan(ConanFile):
     def _patch_sources(self):
         if self._is_msvc:
             # self.copy("*", src="build.vc15", dst="build.vc16")
+
+            self.output.info(f"build.vc15 exists: {os.path.isfile("build.vc15")}")
+            self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, "build.vc15"))}")
+
             conan.tools.files.copy(self, pattern="*", src="build.vc15", dst="build.vc16")
+            self.output.info(f"build.vc16 exists: {os.path.isfile("build.vc16")}")
+            self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, "build.vc16"))}")
+
+
+            self.output.info("build.vc15 *********************************")
+            for root, _, files in os.walk("build.vc15"):
+                for file in files:
+                    self.output.info(f"file: {os.path.join(root, file)}")
+
+            self.output.info("source/build.vc15 *********************************")
+            for root, _, files in os.walk(os.path.join(self._source_subfolder, "build.vc15")):
+                for file in files:
+                    self.output.info(f"file: {os.path.join(root, file)}")
+
+
+            self.output.info("build.vc16 *********************************")
+            for root, _, files in os.walk("build.vc16"):
+                for file in files:
+                    self.output.info(f"file: {os.path.join(root, file)}")
+
+
+
             for root, _, files in os.walk("build.vc16"):
                 for file in files:
                     tools.replace_in_file(os.path.join(root, file), "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>")
