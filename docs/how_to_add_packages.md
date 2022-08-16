@@ -113,33 +113,26 @@ versions:
 This file lists **all the sources that are needed to build the package**: source code, license files,... any file that will be used by the recipe
 should be listed here. The file is organized into two sections, `sources` and `patches`, each one of them contains the files that are required
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
-they are not changed:
+they are not changed.
 
-```yml
-sources:
-  "1.1.0":
-    url: "https://www.url.org/source/mylib-1.0.0.tar.gz"
-    sha256: "8c48baf3babe0d505d16cfc0cf272589c66d3624264098213db0fb00034728e9"
-  "1.1.1":
-    url: "https://www.url.org/source/mylib-1.0.1.tar.gz"
-    sha256: "15b6393c20030aab02c8e2fe0243cb1d1d18062f6c095d67bca91871dc7f324a"
-patches:
-  "1.1.1":
-    - patch_file: "patches/1.1.1-001-simpler-cmakelists.patch"
-      base_path: "source_subfolder"
-```
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We strongly encourage adding the [patch feilds](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
 ```py
 def source(self):
-     tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+     
+def export_sources(self):
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        self.copy(patch["patch_file"])
 
 def build(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        tools.patch(**patch)
+    apply_conandata_patches(self)
     [...]
 ```
+
+More details can be found in the [reviewing preference](reviewing.md) documentation
 
 ### The _recipe folder_: `conanfile.py`
 
