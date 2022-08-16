@@ -1,4 +1,7 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools import files
+
 import os
 
 
@@ -23,14 +26,9 @@ class QtADS(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    requires = "qt/6.3.1"
+    exports_sources = ["patches/**"]
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,47 +38,40 @@ class QtADS(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("qt/5.15.2")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["ADS_VERSION"] = self.version
-        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-
-        self._cmake.configure()
-        return self._cmake
-
+        files.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination="ads")
+        
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
+            files.patch(self, **patch)
+        
         qt = self.dependencies["qt"]
-        tools.replace_in_file(
-            f"{self.source_folder}/{self._source_subfolder}/src/ads_globals.cpp",
+        files.replace_in_file(
+            self,
+            f"{self.source_folder}/ads/src/ads_globals.cpp",
             "#include <qpa/qplatformnativeinterface.h>",
             f"#include <{qt.ref.version}/QtGui/qpa/qplatformnativeinterface.h>"
         )
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        
+        cmake = CMake(self)
+        cmake.configure({
+            "CMAKE_FIND_DEBUG_MODE": "ON",
+            "ADS_VERSION": self.version,
+            "BUILD_EXAMPLES": "OFF",
+            "BUILD_STATIC": not self.options.shared,
+            }, build_script_folder="ads")
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "license"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self.copy("LICENSE", dst="licenses", src="ads")
+        files.rmdir(os.path.join(self.package_folder, "license"))
+        files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.shared:
