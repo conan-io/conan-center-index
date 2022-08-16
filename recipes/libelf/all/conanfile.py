@@ -86,8 +86,8 @@ class LibelfConan(ConanFile):
     def _package_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "locale"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "locale"))
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
 
@@ -120,7 +120,7 @@ class LibelfConan(ConanFile):
             self._package_cmake()
         else:
             self._package_autotools()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
