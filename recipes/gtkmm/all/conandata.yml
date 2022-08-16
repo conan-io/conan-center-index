@@ -1,4 +1,8 @@
 sources:
-  "4.6.1":
-    sha256: "0d5efeca9ec64fdd530bb8226c6310ac99549b3dd9604d6e367639791af3d1e0"
-    url: "https://download.gnome.org/sources/gtkmm/4.6/gtkmm-4.6.1.tar.xz"
+  "4.7.1":
+    sha256: "86eed705a0539201098bcee710cc33dbe585b905a746b9162adda92ba833d396"
+    url: "https://download.gnome.org/sources/gtkmm/4.7/gtkmm-4.7.1.tar.xz"
+patches:
+  "4.7.1":
+    - patch_file: "patches/0001-find-extra-defs-dep.patch"
+      base_path: "source_subfolder"

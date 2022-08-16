@@ -1,0 +1,16 @@
+diff --git a/tools/extra_defs_gen/meson.build b/tools/extra_defs_gen/meson.build
+index 862202e9..59b13d12 100644
+--- a/tools/extra_defs_gen/meson.build
++++ b/tools/extra_defs_gen/meson.build
+@@ -4,10 +4,7 @@
+ #        gtkmm_pcname, msvc14x_toolset_ver, glibmm_dep
+ # Output: m4_files, install_m4dir
+ 
+-glibmm_generate_extra_defs_dep = cpp_compiler.find_library(
+-  'glibmm_generate_extra_defs@0@-2.68'.format(msvc14x_toolset_ver),
+-  required: glibmm_dep.type_name() != 'internal',
+-)
++glibmm_generate_extra_defs_dep = dependency('glibmm_generate_extra_defs-2.68')
+ if not glibmm_generate_extra_defs_dep.found()
+   glibmm_generate_extra_defs_dep = dependency(
+     '', fallback: ['glibmm-2.68', 'glibmm_generate_extra_defs_dep'],
