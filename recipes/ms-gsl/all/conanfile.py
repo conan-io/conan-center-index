@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class MicrosoftGslConan(ConanFile):
