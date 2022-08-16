@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class PolylineencoderConan(ConanFile):
@@ -38,7 +38,7 @@ class PolylineencoderConan(ConanFile):
 
     def package_id(self):
         if Version(self.version) >= "1.1.2":
-            self.info.header_only()
+            self.info.clear()
 
     def generate(self):
         toolchain = CMakeToolchain(self)
