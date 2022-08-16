@@ -70,14 +70,14 @@ class GoogleCloudCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
-        self.requires('protobuf/3.21.1')
-        self.requires('grpc/1.47.0')
-        self.requires('nlohmann_json/3.10.5')
+        self.requires('protobuf/3.21.4')
+        self.requires('grpc/1.48.0')
+        self.requires('nlohmann_json/3.11.2')
         self.requires('crc32c/1.1.2')
         self.requires('abseil/20211102.0')
-        self.requires('libcurl/7.83.1')
-        self.requires('openssl/1.1.1o')
-        self.requires("googleapis/cci.20220531")
+        self.requires('libcurl/7.84.0')
+        self.requires('openssl/1.1.1q')
+        self.requires("googleapis/cci.20220711")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
