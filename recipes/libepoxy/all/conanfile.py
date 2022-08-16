@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files
+from conan.tools import files, build
 from conans import  Meson, tools
 import os
 import glob
@@ -56,7 +56,7 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Windows":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds on Windows are not supported")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and build.cross_building(self):
             raise ConanInvalidConfiguration("meson build helper cannot cross-compile. It has to be migrated to conan.tools.meson")
 
     def config_options(self):
@@ -113,7 +113,7 @@ class EpoxyConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
