@@ -59,7 +59,6 @@ class QtADS(ConanFile):
         
         cmake = CMake(self)
         cmake.configure({
-            "CMAKE_FIND_DEBUG_MODE": "ON",
             "ADS_VERSION": self.version,
             "BUILD_EXAMPLES": "OFF",
             "BUILD_STATIC": not self.options.shared,
@@ -70,8 +69,8 @@ class QtADS(ConanFile):
         cmake = CMake(self)
         cmake.install()
         self.copy("LICENSE", dst="licenses", src="ads")
-        files.rmdir(os.path.join(self.package_folder, "license"))
-        files.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "license"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.shared:
