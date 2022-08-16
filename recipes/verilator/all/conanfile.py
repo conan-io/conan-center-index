@@ -135,8 +135,9 @@ class VerilatorConan(ConanFile):
         return args
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if tools.Version(self.version) < "4.200":
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
         try:
             os.unlink(os.path.join(self._source_subfolder, "src", "config_build.h"))
