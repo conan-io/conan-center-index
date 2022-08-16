@@ -31,7 +31,10 @@ class OctoLoggerCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.configure(source_folder=self._source_subfolder, 
+                        build_folder=self._build_subfolder,
+                        defs={"DISABLE_TESTS": "ON",
+                              "DISABLE_EXAMPLES": "ON"})
         cmake.build(build_dir=self._build_subfolder)
 
     def package(self):
