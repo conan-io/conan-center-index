@@ -36,7 +36,7 @@ class GdkPixbufConan(ConanFile):
         "with_introspection": False,
     }
 
-    generators = "pkg_config", "cmake_find_package"
+    generators = "pkg_config"
     exports_sources = "patches/**"
 
     @property
@@ -104,6 +104,10 @@ class GdkPixbufConan(ConanFile):
         if tools.Version(self.version) >= "2.42.6":
             tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
+        if tools.Version(self.version) >= "2.42.9":
+            tools.replace_in_file(meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
+            tools.replace_in_file(meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
+            tools.replace_in_file(meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
 
     @property
     def _requires_compiler_rt(self):
