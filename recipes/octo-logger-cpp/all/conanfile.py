@@ -1,5 +1,8 @@
 from conans import ConanFile, CMake
 from conan.tools.files import get
+from conan.tools.build import check_min_cppstd
+from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 
 class OctoLoggerCPPConan(ConanFile):
@@ -19,6 +22,27 @@ class OctoLoggerCPPConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11",
+            "Visual Studio": "16",
+        }
+
+    def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, "17")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++17, which your compiler does not support."
+            )
+        else:
+            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
