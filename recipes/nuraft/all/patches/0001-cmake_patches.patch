@@ -1,0 +1,262 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 87685ff..1fc9199 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,41 +44,41 @@ endif()
+ 
+ 
+ # === Find ASIO ===
+-if (BOOST_INCLUDE_PATH AND BOOST_LIBRARY_PATH)
+-    # If Boost path (both include and library) is given,
+-    # use Boost's ASIO.
+-    message(STATUS "Boost include path: " ${BOOST_INCLUDE_PATH})
+-    message(STATUS "Boost library path: " ${BOOST_LIBRARY_PATH})
+-
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_ASIO")
+-
+-    set(ASIO_INCLUDE_DIR ${BOOST_INCLUDE_PATH})
+-    set(LIBBOOST_SYSTEM "${BOOST_LIBRARY_PATH}/libboost_system.a")
+-
+-else ()
+-    # If not, ASIO standalone mode.
+-    FIND_PATH(ASIO_INCLUDE_DIR
+-              NAME asio.hpp
+-              HINTS ${PROJECT_SOURCE_DIR}/asio/asio/include
+-                    $ENV{HOME}/local/include
+-                    /opt/local/include
+-                    /usr/local/include
+-                    /usr/include)
+-
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
+-
+-endif ()
+-
+-if (NOT ASIO_INCLUDE_DIR)
+-    message(FATAL_ERROR "Can't find ASIO header files")
+-else ()
+-    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
+-endif ()
++#if (BOOST_INCLUDE_PATH AND BOOST_LIBRARY_PATH)
++#    # If Boost path (both include and library) is given,
++#    # use Boost's ASIO.
++#    message(STATUS "Boost include path: " ${BOOST_INCLUDE_PATH})
++#    message(STATUS "Boost library path: " ${BOOST_LIBRARY_PATH})
++#
++#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_ASIO")
++#
++#    set(ASIO_INCLUDE_DIR ${BOOST_INCLUDE_PATH})
++#    set(LIBBOOST_SYSTEM "${BOOST_LIBRARY_PATH}/libboost_system.a")
++#
++#else ()
++#    # If not, ASIO standalone mode.
++#    FIND_PATH(ASIO_INCLUDE_DIR
++#              NAME asio.hpp
++#              HINTS ${PROJECT_SOURCE_DIR}/asio/asio/include
++#                    $ENV{HOME}/local/include
++#                    /opt/local/include
++#                    /usr/local/include
++#                    /usr/include)
++#
++#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
++#
++#endif ()
++
++#if (NOT ASIO_INCLUDE_DIR)
++#    message(FATAL_ERROR "Can't find ASIO header files")
++#else ()
++#    message(STATUS "ASIO include path: " ${ASIO_INCLUDE_DIR})
++#endif ()
+ 
+ 
+ # === Includes ===
+ include_directories(BEFORE ./)
+-include_directories(BEFORE ${ASIO_INCLUDE_DIR})
++#include_directories(BEFORE ${ASIO_INCLUDE_DIR})
+ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
+ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/libnuraft)
+ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/examples)
+@@ -213,6 +231,7 @@ if (NOT (DISABLE_SSL GREATER 0))
+     )
+ endif ()
+ 
++include_directories(BEFORE "${PROJECT_SOURCE_DIR}/include/libnuraft")
+ # === Source files ===
+ set(RAFT_CORE
+     ${ROOT_SRC}/asio_service.cxx
+@@ -240,6 +259,8 @@ set(RAFT_CORE
+     ${ROOT_SRC}/snapshot_sync_req.cxx
+     ${ROOT_SRC}/srv_config.cxx
+     ${ROOT_SRC}/stat_mgr.cxx
++    examples/in_memory_log_store.cxx
+     )
+ add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
++target_link_libraries(RAFT_CORE_OBJ Boost::Boost OpenSSL::OpenSSL)
+ 
+@@ -249,54 +269,26 @@ set(STATIC_LIB_SRC
+ # === Executables ===
+ set(LIBRARY_NAME "nuraft")
+ 
+-add_library(static_lib ${STATIC_LIB_SRC})
+-set_target_properties(static_lib PROPERTIES OUTPUT_NAME ${LIBRARY_NAME} CLEAN_DIRECT_OUTPUT 1)
+-
+-add_library(shared_lib SHARED ${STATIC_LIB_SRC})
+-set_target_properties(shared_lib PROPERTIES OUTPUT_NAME ${LIBRARY_NAME} CLEAN_DIRECT_OUTPUT 1)
+-if (APPLE)
+-    target_link_libraries(shared_lib ${LIBRARIES})
+-endif ()
+-
+-if (WIN32)
+-    set(LIBRARY_OUTPUT_NAME "${LIBRARY_NAME}.lib")
+-else ()
+-    set(LIBRARY_OUTPUT_NAME "lib${LIBRARY_NAME}.a")
+-endif ()
+-message(STATUS "Output library file name: ${LIBRARY_OUTPUT_NAME}")
+-
+-# === Examples ===
+-add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
+-
++add_library(nuraft ${STATIC_LIB_SRC})
++target_link_libraries(nuraft Boost::Boost OpenSSL::OpenSSL)
++
++include_directories(BEFORE ${EXAMPLES_SRC})
++#set(TEST_SRCS
++#      "tests/src/test_async_result.cxx"
++#      "tests/src/test_buffer.cxx"
++#      "tests/src/test_everything_together.cxx"
++#      "tests/src/test_impls.cxx"
++#      "tests/src/test_logger.cxx"
++#      "tests/src/test_log_store.cxx"
++#      "tests/src/test_ptr.cxx"
++#      "tests/src/test_runner.cxx"
++#      "tests/src/test_scheduler.cxx"
++#      "tests/src/test_serialization.cxx"
++#      "tests/src/test_strfmt.cxx"
++#    )
++#add_executable(test_runner ${TEST_SRCS})
++#target_link_libraries(test_runner nuraft)
++#add_test(NAME TestRunner COMMAND test_runner)
+ 
+ # === Tests ===
+ add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
+-
+-
+-if (CODE_COVERAGE GREATER 0)
+-    set(CODE_COVERAGE_DEPS
+-        raft_server_test
+-        failure_test
+-        asio_service_test
+-        buffer_test
+-        serialization_test
+-        timer_test
+-        strfmt_test
+-        stat_mgr_test
+-    )
+-
+-    # lcov
+-    SETUP_TARGET_FOR_COVERAGE(
+-        NAME raft_cov
+-        EXECUTABLE ./runtests.sh
+-        DEPENDENCIES ${CODE_COVERAGE_DEPS}
+-    )
+-endif()
+-
+-
+-# === Install Targets ===
+-install(TARGETS static_lib ARCHIVE DESTINATION lib)
+-install(TARGETS shared_lib LIBRARY DESTINATION lib)
+-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/libnuraft DESTINATION include)
+-
+-
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 5ceccce..f6dc2f0 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -1,83 +1,9 @@
+ # === Basic Raft server functionality test ===
++include_directories(BEFORE "${PROJECT_SOURCE_DIR}/tests")
++include_directories(BEFORE "${PROJECT_SOURCE_DIR}/src")
+ add_executable(raft_server_test
+                unit/raft_server_test.cxx
+                unit/fake_network.cxx
+-               ${EXAMPLES_SRC}/logger.cc
+-               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
+-add_dependencies(raft_server_test
+-                 static_lib)
+-target_link_libraries(raft_server_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
+-# === Failure recovery & conflict resolution test ===
+-add_executable(failure_test
+-               unit/failure_test.cxx
+-               unit/fake_network.cxx
+-               ${EXAMPLES_SRC}/logger.cc
+-               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
+-add_dependencies(failure_test
+-                 static_lib)
+-target_link_libraries(failure_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
+-# === ASIO network stuff test ===
+-add_executable(asio_service_test
+-               unit/asio_service_test.cxx
+-               ${EXAMPLES_SRC}/logger.cc
+-               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
+-add_dependencies(asio_service_test
+-                 static_lib
+-                 build_ssl_key)
+-target_link_libraries(asio_service_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
+-                      ${LIBRARIES})
+-
+-# === Benchmark ===
+-add_executable(raft_bench
+-               bench/raft_bench.cxx
+-               ${EXAMPLES_SRC}/logger.cc
+-               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
+-add_dependencies(raft_bench
+-                 static_lib)
+-target_link_libraries(raft_bench
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
+-                      ${LIBRARIES})
+-
+-
+-# === Other modules ===
+-add_executable(buffer_test
+-               unit/buffer_test.cxx)
+-add_dependencies(buffer_test
+-                 static_lib)
+-target_link_libraries(buffer_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
+-add_executable(serialization_test
+-               unit/serialization_test.cxx)
+-add_dependencies(serialization_test
+-                 static_lib)
+-target_link_libraries(serialization_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
+-add_executable(timer_test
+-               unit/timer_test.cxx)
+-add_dependencies(timer_test
+-                 static_lib)
+-target_link_libraries(timer_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
+-                      ${LIBRARIES})
+-
+-add_executable(strfmt_test
+-               unit/strfmt_test.cxx)
+-add_dependencies(strfmt_test
+-                 static_lib)
+-target_link_libraries(strfmt_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
+-add_executable(stat_mgr_test
+-               unit/stat_mgr_test.cxx)
+-add_dependencies(stat_mgr_test
+-                 static_lib)
+-target_link_libraries(stat_mgr_test
+-                      ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME})
+-
++               ${EXAMPLES_SRC}/logger.cc)
++add_test(NAME RaftServerTest COMMAND raft_server_test)
++target_link_libraries(raft_server_test nuraft)
