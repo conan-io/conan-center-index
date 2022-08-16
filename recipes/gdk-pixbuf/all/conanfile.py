@@ -1,6 +1,7 @@
-from conans import ConanFile, CMake, Meson, tools
+from conan import ConanFile
 from conan.tools import files
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conans import CMake, Meson, tools
 from tempfile import TemporaryDirectory
 import functools
 import os
@@ -86,7 +87,7 @@ class GdkPixbufConan(ConanFile):
             self.build_requires("gobject-introspection/1.70.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
@@ -188,8 +189,8 @@ class GdkPixbufConan(ConanFile):
             meson.install()
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
