@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, apply_conandata_patches, copy, rmdir, rm, replace_in_file
 from conan.tools.apple.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
@@ -61,6 +61,8 @@ class SentryCrashpadConan(ConanFile):
         tc.variables["CRASHPAD_ENABLE_INSTALL"] = True
         tc.variables["CRASHPAD_ENABLE_INSTALL_DEV"] = True
         tc.variables["CRASHPAD_ZLIB_SYSTEM"] = True
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def layout(self):
