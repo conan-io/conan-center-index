@@ -248,7 +248,7 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
 
         if self.settings.os == "Linux":
-            self.cpp_info.components["cairo_"].system_libs = ["pthread"]
+            self.cpp_info.components["cairo_"].system_libs = ["pthread", "rt"]
             self.cpp_info.components["cairo_"].cflags = ["-pthread"]
             self.cpp_info.components["cairo_"].cxxflags = ["-pthread"]
             if self.options.with_xcb:
@@ -288,7 +288,7 @@ class CairoConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cairo-quartz"].set_property("pkg_config_name", "cairo-quartz")
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
-            self.cpp_info.components["cairo-quartz"].frameworks.extend(["CoreFoundation", "CoreGraphics"])
+            self.cpp_info.components["cairo-quartz"].frameworks.extend(["CoreFoundation", "CoreGraphics", "ApplicationServices"])
 
             self.cpp_info.components["cairo-quartz-font"].set_property("pkg_config_name", "cairo-quartz-font")
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
