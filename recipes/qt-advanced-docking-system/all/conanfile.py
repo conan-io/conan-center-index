@@ -39,7 +39,9 @@ class QtADS(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        files.get(**self.conan_data["sources"][self.version], strip_root=True,
+        files.get(self,
+                  **self.conan_data["sources"][self.version], 
+                  strip_root=True,
                   destination="ads")
         
     def _patch_sources(self):
