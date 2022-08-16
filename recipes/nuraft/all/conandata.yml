@@ -1,0 +1,10 @@
+sources:
+  "cci.20220801":
+    url: "https://github.com/eBay/NuRaft/archive/50031e1b230569ccaa46008fc09d401e3e5c5985.tar.gz"
+    sha256: 225c30d04d9e067010b4a9b3340961ae89c30bee00e9762fcdc651401f890e41
+patches:
+  "cci.20220801":
+    - patch_file: "patches/0001-cmake_patches.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-boost-asio.patch"
+      base_path: "source_subfolder"

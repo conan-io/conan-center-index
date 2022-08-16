@@ -1,0 +1,57 @@
+diff --git a/src/asio_service.cxx b/src/asio_service.cxx
+index ceb4f70..4623667 100644
+--- a/src/asio_service.cxx
++++ b/src/asio_service.cxx
+@@ -38,7 +38,7 @@ limitations under the License.
+ #include "strfmt.hxx"
+ #include "tracer.hxx"
+ 
+-#include "asio.hpp"
++#include <boost/asio.hpp>
+ 
+ #include <atomic>
+ #include <ctime>
+@@ -49,11 +49,12 @@ limitations under the License.
+ #include <thread>
+ #include <regex>
+ 
++#define USE_BOOST_ASIO
+ #ifdef USE_BOOST_ASIO
+     using namespace boost;
+     #define ERROR_CODE system::error_code
+ #else
+-    #define ERROR_CODE asio::error_code
++    #define ERROR_CODE boost::asio::error_code
+ #endif
+ 
+ //#define SSL_LIBRARY_NOT_FOUND (1)
+@@ -62,9 +63,9 @@ limitations under the License.
+     using ssl_socket = mock_ssl_socket;
+     using ssl_context = mock_ssl_context;
+ #else
+-    #include "asio/ssl.hpp"
+-    using ssl_socket = asio::ssl::stream<asio::ip::tcp::socket&>;
+-    using ssl_context = asio::ssl::context;
++    #include <boost/asio/ssl.hpp>
++    using ssl_socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket&>;
++    using ssl_context = boost::asio::ssl::context;
+ #endif
+ 
+ // Note: both req & resp header structures have been modified by Jung-Sang Ahn.
+diff --git a/src/handle_commit.cxx b/src/handle_commit.cxx
+index dc47186..b032ef4 100644
+--- a/src/handle_commit.cxx
++++ b/src/handle_commit.cxx
+@@ -552,9 +552,9 @@ bool raft_server::snapshot_and_compact(ulong committed_idx, bool forced_creation
+     }
+     return false;
+ 
+- } catch (...) {
+-    p_er( "failed to compact logs at index %llu due to errors",
+-          committed_idx );
++ } catch (std::exception &e) {
++    p_er( "failed to compact logs at index %llu due to errors %s",
++          committed_idx, e.what());
+     if (snapshot_in_action) {
+         bool val = true;
+         snp_in_progress_.compare_exchange_strong(val, false);
