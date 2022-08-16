@@ -87,6 +87,15 @@ Where the SPDX guidelines do not apply, packages should do the following:
 - When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
 - When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
 
+## Predeinfed Options and Known Defaults
+
+ConanCenter supports many combinations, these are outline in the [supported configurations](supported_platforms_and_configurations.md) document for each platform. 
+
+The following known options for compiled libraries are defined:
+
+- shared: default should be set to `False`
+- fPIC: should be set to `True` 
+
 ## Exporting Patches
 
 It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
