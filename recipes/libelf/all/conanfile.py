@@ -1,5 +1,7 @@
+from conan import ConanFile
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -49,7 +51,7 @@ class LibelfConan(ConanFile):
             self.build_requires("gnu-config/cci.20210814")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
