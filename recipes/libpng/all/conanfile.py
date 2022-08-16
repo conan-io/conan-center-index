@@ -1,7 +1,7 @@
 import os
-from conans import tools, CMake
+from conans import CMake, tools
+from conans.tools import Version
 from conan import ConanFile
-from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.build.cross_building import cross_building
 
@@ -178,7 +178,7 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if self._is_msvc else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        major_min_version = f"{Version(self.version).major()[0]}{Version(self.version).minor()[2]}"
+        major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
 
         self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
