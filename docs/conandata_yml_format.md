@@ -10,7 +10,32 @@ In the context of conan-center-index, this file is mandatory and consists of two
  * `patches`: Details about the different patches the library needs for several reasons.
 
 <!-- toc -->
-## Contents<!-- endToc -->
+## Contents
+
+  * [sources](#sources)
+    * [Mirrors](#mirrors)
+    * [Sources fields](#sources-fields)
+      * [url](#url)
+      * [sha256](#sha256)
+      * [sha1](#sha1)
+      * [md5](#md5)
+    * [Other cases](#other-cases)
+      * [Source code & license](#source-code--license)
+      * [Several source code archives](#several-source-code-archives)
+      * [Different source code archives per configuration](#different-source-code-archives-per-configuration)
+  * [patches](#patches)
+    * [Patches fields](#patches-fields)
+      * [patch_file](#patch_file)
+      * [patch_description](#patch_description)
+      * [patch_type](#patch_type)
+        * [official](#official)
+        * [vulnerability](#vulnerability)
+        * [backport](#backport)
+        * [portability](#portability)
+        * [conan](#conan)
+      * [patch_source](#patch_source)
+      * [base_path](#base_path)
+      * [sha256](#sha256-1)<!-- endToc -->
 
 ## sources
 

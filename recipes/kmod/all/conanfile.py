@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.48.0"
+required_conan_version = ">=1.50.0"
 
 
 class KModConan(ConanFile):
@@ -38,8 +37,14 @@ class KModConan(ConanFile):
     }
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
 
     def requirements(self):
         if self.options.with_zstd:
@@ -100,8 +105,7 @@ class KModConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        # TODO: replace by conan.tools.files.rm (conan 1.50.0)
-        tools_legacy.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
