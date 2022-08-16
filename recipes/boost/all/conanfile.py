@@ -1438,7 +1438,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
         if self.options.filesystem_version is not None:
-            self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_VERSION=%s" % self.options.filesystem_version)
+            self.cpp_info.components["headers"].defines.append(f"BOOST_FILESYSTEM_VERSION={self.options.filesystem_version}")
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
