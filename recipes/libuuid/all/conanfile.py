@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
 import os
@@ -72,7 +73,7 @@ class LibuuidConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        fiels.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "uuid"
