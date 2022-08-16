@@ -2,6 +2,8 @@ import os
 from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake
 
+required_conan_version = ">=1.46.0"
+
 
 class Box2dConan(ConanFile):
     name = "box2d"
