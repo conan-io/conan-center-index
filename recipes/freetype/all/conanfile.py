@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files
+from conan.tools import files, scm
 from conans import CMake, tools
 import os
 import re
@@ -51,7 +51,7 @@ class FreetypeConan(ConanFile):
 
     @property
     def _has_with_brotli_option(self):
-        return tools.Version(self.version) >= "2.10.2"
+        return scm.Version(self.version) >= "2.10.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,8 +82,8 @@ class FreetypeConan(ConanFile):
     def _patch_sources(self):
         # Do not accidentally enable dependencies we have disabled
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if tools.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
-        if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if tools.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
+        find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if scm.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
+        if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if scm.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
         tools.replace_in_file(cmakelists, find_harfbuzz, "")
         tools.replace_in_file(cmakelists, if_harfbuzz_found, "if(0)")
         if not self.options.with_png:
