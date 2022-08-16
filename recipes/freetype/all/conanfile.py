@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import CMake, tools
 import os
 import re
 import shutil
@@ -74,7 +76,7 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.0.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -176,8 +178,8 @@ class FreetypeConan(ConanFile):
         self.copy("GPLv2.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
         self.copy("LICENSE.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_rel_path)
         )
