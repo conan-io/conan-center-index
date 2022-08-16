@@ -234,51 +234,67 @@ class CairoConan(ConanFile):
         base_system_libs = {}
 
         def add_component_and_base_requirements(component, requirements, system_libs=None):
+            self.cpp_info.components[component].set_property("pkg_config_name", component)
             self.cpp_info.components[component].requires += ["cairo_"] + requirements
             base_requirements.update(set(requirements))
             if system_libs is not None:
                 self.cpp_info.components[component].system_libs += system_libs
                 base_system_libs.update(set(system_libs))
 
+        self.cpp_info.set_property("pkg_config_name", "cairo-all-do-no-use")
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
+
         if self.settings.os == "Linux":
             self.cpp_info.components["cairo_"].system_libs.extend(["m", "dl", "pthread"])
             if self.options.get_safe("with_symbol_lookup"):
                 self.cpp_info.components["cairo_"].system_libs.append("bfd")
             self.cpp_info.components["cairo_"].cflags = ["-pthread"]
             self.cpp_info.components["cairo_"].cxxflags = ["-pthread"]
+
         if self.options.with_lzo:
             self.cpp_info.components["cairo_"].requires.append("lzo::lzo")
+
         if self.options.with_zlib:
             self.cpp_info.components["cairo_"].requires.append("zlib::zlib")
+
         if self.options.with_png:
             add_component_and_base_requirements("cairo-png", ["libpng::libpng"])
             add_component_and_base_requirements("cairo-svg", ["libpng::libpng"])
+
         if self.options.with_fontconfig:
             add_component_and_base_requirements("cairo-fc", ["fontconfig::fontconfig"])
+
         if self.options.with_freetype:
             add_component_and_base_requirements("cairo-ft", ["freetype::freetype"])
+
         if self.options.get_safe("with_xlib"):
             add_component_and_base_requirements("cairo-xlib", ["xorg::x11", "xorg::xext"])
+
         if self.options.get_safe("with_xlib_xrender"):
             add_component_and_base_requirements("cairo-xlib-xrender", ["xorg::xrender"])
+
         if self.options.get_safe("with_xcb"):
             add_component_and_base_requirements("cairo-xcb", ["xorg::xcb", "xorg::xcb-render"])
             add_component_and_base_requirements("cairo-xcb-shm", ["xorg::xcb", "xorg::xcb-shm"])
+
             if self.options.get_safe("with_xlib"):
                 add_component_and_base_requirements("cairo-xlib-xcb", ["xorg::x11-xcb"])
 
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
+            self.cpp_info.components["cairo-quartz"].set_property("pkg_config_name", "cairo-quartz")
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
             self.cpp_info.components["cairo-quartz-image"].requires = ["cairo_"]
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
+            self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
+            self.cpp_info.components["cairo-win32"].set_property("pkg_config_name", "cairo-win32")
             self.cpp_info.components["cairo-win32"].requires = ["cairo_"]
+            self.cpp_info.components["cairo-win32-font"].set_property("pkg_config_name", "cairo-win32-font")
             self.cpp_info.components["cairo-win32-font"].requires = ["cairo_"]
+            self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
+
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
 
@@ -303,6 +319,7 @@ class CairoConan(ConanFile):
             add_component_and_base_requirements("cairo-script", ["zlib::zlib"])
             add_component_and_base_requirements("cairo-ps", ["zlib::zlib"])
             add_component_and_base_requirements("cairo-pdf", ["zlib::zlib"])
+            self.cpp_info.components["cairo-script-interpreter"].set_property("pkg_config_name", "cairo-script-interpreter")
             self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
             self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
 
@@ -311,10 +328,12 @@ class CairoConan(ConanFile):
                 add_component_and_base_requirements("cairo-util_", ["expat::expat"])
 
         if self.options.tee:
+            self.cpp_info.components["cairo-tee"].set_property("pkg_config_name", "cairo-tee")
             self.cpp_info.components["cairo-tee"].requires = ["cairo_"]
 
         # util directory
         if self.options.with_glib:
+            self.cpp_info.components["cairo-gobject"].set_property("pkg_config_name", "cairo-gobject")
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
             self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
 
