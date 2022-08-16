@@ -19,7 +19,7 @@ class EnttConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         # TODO: use self.info.settings in validate() instead of self.settings
