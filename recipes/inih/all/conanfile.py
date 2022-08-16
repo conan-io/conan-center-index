@@ -46,7 +46,7 @@ class InihConan(ConanFile):
            pass
 
     def validate(self):
-        if self.options.shared and is_msvc(self):
+        if self.info.options.shared and is_msvc(self):
             raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
 
     def build_requirements(self):
