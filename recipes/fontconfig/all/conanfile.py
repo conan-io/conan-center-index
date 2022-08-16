@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files
+from conan.tools import files, scm
 from conans import tools, AutoToolsBuildEnvironment, Meson
 import contextlib
 import functools
@@ -65,7 +65,7 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if self._is_msvc and tools.Version(self.version) < "2.13.93":
+        if self._is_msvc and scm.Version(self.version) < "2.13.93":
             raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
 
     def build_requirements(self):
