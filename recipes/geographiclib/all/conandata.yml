@@ -11,4 +11,3 @@ sources:
 patches:
   "1.50.1":
     - patch_file: "patches/0001-streamoff.patch"
-      base_path: "source_subfolder"
