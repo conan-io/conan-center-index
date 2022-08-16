@@ -1,3 +1,4 @@
+from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -13,7 +14,7 @@ class CreateDmgConan(ConanFile):
     homepage = "https://github.com/create-dmg/create-dmg"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+    exports_sources = 'patches/**'
 
     @property
     def _source_subfolder(self):
@@ -26,11 +27,12 @@ class CreateDmgConan(ConanFile):
     def build(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
+        apply_conandata_patches(self)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("create-dmg", dst="bin", src=self._source_subfolder)
-        self.copy("*", dst=os.path.join("bin","support"), src=os.path.join(self._source_subfolder,"support"))
+        self.copy("*", dst=os.path.join("res", "create-dmg", "support"), src=os.path.join(self._source_subfolder,"support"))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 

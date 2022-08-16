@@ -1,0 +1,53 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bd8cb34..5d8981f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,7 +68,8 @@ if(NOT WIN32)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+ endif()
+ 
+-cmake_minimum_required(VERSION 3.16.3)
++## TODO: dirty fix.
++cmake_minimum_required(VERSION 3.15)
+ if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.4)
+   cmake_policy(SET CMP0063 NEW)
+ endif()
+@@ -144,26 +145,17 @@ if(BUILD_LITE)
+ endif()
+ 
+ if(PREFER_EXTERNAL_LZ4)
+-    find_package(LZ4)
++    find_package(lz4)
+ else()
+     message(STATUS "Using LZ4 internal sources.")
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+     if(PREFER_EXTERNAL_ZLIB)
+-        find_package(ZLIB_NG)
+-        if (ZLIB_NG_FOUND)
+-            set(HAVE_ZLIB_NG TRUE)
+-        else()
+-            find_package(ZLIB)
+-        endif()
+-
+-        if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
+-            message(STATUS "No ZLIB found.  Using ZLIB-NG internal sources.")
+-        endif()
++        find_package(ZLIB REQUIRED)
+     endif()
+ 
+-    if (NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++    if (0)
+         message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
+         set(HAVE_ZLIB_NG TRUE)
+         add_definitions(-DZLIB_COMPAT)
+@@ -184,7 +176,7 @@ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+     if(PREFER_EXTERNAL_ZSTD)
+-        find_package(ZSTD)
++        find_package(zstd)
+         if(NOT ZSTD_FOUND)
+           message(STATUS "No ZSTD library found.  Using internal sources.")
+         endif()

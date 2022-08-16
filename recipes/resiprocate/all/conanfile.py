@@ -42,11 +42,11 @@ class ResiprocateConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1q")
         if self.options.with_postgresql:
-            self.requires("libpq/11.9")
+            self.requires("libpq/14.2")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.29")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

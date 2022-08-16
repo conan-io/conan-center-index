@@ -1,0 +1,36 @@
+diff -ruN a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
+--- a/cmake/PocoMacros.cmake	2022-07-08 18:28:44.000000000 +0200
++++ b/cmake/PocoMacros.cmake	2022-07-11 17:50:48.547610971 +0200
+@@ -40,7 +40,7 @@
+ 			endforeach()
+ 		endif(X64)
+ 	endif()
+-	find_program(CMAKE_MC_COMPILER mc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
++	find_program(CMAKE_MC_COMPILER NAMES mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
+ 		DOC "path to message compiler")
+ 	if(NOT CMAKE_MC_COMPILER)
+ 		message(FATAL_ERROR "message compiler not found: required to build")
+diff -ruN a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
+--- a/Foundation/CMakeLists.txt	2022-07-08 18:28:44.000000000 +0200
++++ b/Foundation/CMakeLists.txt	2022-07-11 17:54:24.035097782 +0200
+@@ -107,7 +107,7 @@
+ )
+ 
+ if(POCO_UNBUNDLED)
+-	target_link_libraries(Foundation PUBLIC Pcre2::Pcre2 ZLIB::ZLIB)
++	target_link_libraries(Foundation PUBLIC PCRE2::PCRE2 ZLIB::ZLIB)
+ 	target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
+ endif(POCO_UNBUNDLED)
+ 
+diff -ruN a/NetSSL_Win/CMakeLists.txt b/NetSSL_Win/CMakeLists.txt
+--- a/NetSSL_Win/CMakeLists.txt	2022-07-08 18:28:44.000000000 +0200
++++ b/NetSSL_Win/CMakeLists.txt	2022-07-11 17:50:09.841223897 +0200
+@@ -21,7 +21,7 @@
+ 	DEFINE_SYMBOL NetSSL_Win_EXPORTS
+ )
+ 
+-target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util crypt32 ws2_32)
+ target_include_directories(NetSSLWin
+ 	PUBLIC
+ 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

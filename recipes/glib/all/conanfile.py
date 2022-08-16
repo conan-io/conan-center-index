@@ -1,6 +1,8 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
+from conans import tools, Meson, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 import glob
@@ -72,7 +74,10 @@ class GLibConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
-            self.requires("pcre/8.45")
+            if tools.Version(self.version) >= "2.73.2":
+                self.requires("pcre2/10.40")
+            else:
+                self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
@@ -84,10 +89,10 @@ class GLibConan(ConanFile):
             self.requires("libgettext/0.21")
 
         if tools.is_apple_os(self.settings.os):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
 
     def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, 'settings_build') and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
@@ -109,7 +114,7 @@ class GLibConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_meson(self):
         meson = Meson(self)
-        defs = dict()
+        defs = {}
         if tools.is_apple_os(self.settings.os):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
@@ -148,13 +153,14 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        for filename in [
-            os.path.join(self._source_subfolder, "meson.build"),
-            os.path.join(self._source_subfolder, "glib", "meson.build"),
-            os.path.join(self._source_subfolder, "gobject", "meson.build"),
-            os.path.join(self._source_subfolder, "gio", "meson.build"),
-        ]:
-            tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
+        if tools.Version(self.version) < "2.73.2":
+            for filename in [
+                os.path.join(self._source_subfolder, "meson.build"),
+                os.path.join(self._source_subfolder, "glib", "meson.build"),
+                os.path.join(self._source_subfolder, "gobject", "meson.build"),
+                os.path.join(self._source_subfolder, "gio", "meson.build"),
+            ]:
+                tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
         if self.settings.os != "Linux":
             # allow to find gettext
             tools.replace_in_file(
@@ -163,7 +169,7 @@ class GLibConan(ConanFile):
                 else "libintl = dependency('intl', required: false)",
                 "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
             )
-            
+
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
@@ -195,7 +201,7 @@ class GLibConan(ConanFile):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    self.output.info(f"rename {filename_old} into {filename_new}")
                     shutil.move(filename_old, filename_new)
 
     def package(self):
@@ -239,7 +245,10 @@ class GLibConan(ConanFile):
             os.path.join("lib", "glib-2.0", "include")
         )
         if self.options.with_pcre:
-            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+            if tools.Version(self.version) >= "2.73.2":
+                self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
+            else:
+                self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append(
                 "libgettext::libgettext"
@@ -332,7 +341,7 @@ class GLibConan(ConanFile):
             )  # this is actually an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with: {}".format(bin_path))
+        self.output.info(f"Appending PATH env var with: {bin_path}")
         self.env_info.PATH.append(bin_path)
 
         pkgconfig_variables = {
@@ -351,7 +360,7 @@ class GLibConan(ConanFile):
         }
         self.cpp_info.components["gio-2.0"].set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
 
         pkgconfig_variables = {
             'bindir': '${prefix}/bin',
@@ -361,4 +370,4 @@ class GLibConan(ConanFile):
         }
         self.cpp_info.components["glib-2.0"].set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))

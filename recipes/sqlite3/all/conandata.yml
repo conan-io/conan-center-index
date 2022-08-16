@@ -1,4 +1,10 @@
 sources:
+  "3.39.2":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390200.zip"
+    sha256: "87775784f8b22d0d0f1d7811870d39feaa7896319c7c20b849a4181c5a50609b"
+  "3.39.1":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390100.zip"
+    sha256: "f2ce17bca51b376de4fcb9d0dc174c52f472a34c29aa1ccc774f27467cc63ed7"
   "3.39.0":
     url: "https://sqlite.org/2022/sqlite-amalgamation-3390000.zip"
     sha256: "35109dd6e4f062f4d76b48bd7614eec35abae9d2da70351c7ef936876b064b5f"
@@ -29,6 +35,3 @@ sources:
   "3.35.5":
     url: "https://sqlite.org/2021/sqlite-amalgamation-3350500.zip"
     sha256: "b49409ef123e193e719e2536f9b795482a69e61a9cc728933739b9024f035061"
-  "3.32.3":
-    url: "https://sqlite.org/2020/sqlite-amalgamation-3320300.zip"
-    sha256: "e9cec01d4519e2d49b3810615237325263fe1feaceae390ee12b4a29bd73dbe2"

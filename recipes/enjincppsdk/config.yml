@@ -1,4 +1,6 @@
 versions:
+  "1.0.0-beta.1":
+    folder: all
   "1.0.0-alpha.7":
     folder: all
   "1.0.0-alpha.6":

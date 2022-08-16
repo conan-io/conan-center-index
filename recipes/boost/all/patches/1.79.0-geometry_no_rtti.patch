@@ -1,0 +1,169 @@
+From 379f0c364a5ef3e6d57021ab815ea603ab3f1178 Mon Sep 17 00:00:00 2001
+From: Adam Wulkiewicz <adam.wulkiewicz@gmail.com>
+Date: Tue, 19 Jul 2022 22:52:09 +0200
+Subject: [PATCH] [index] Fix and improve rtree experimental features
+
+Fix access specifier preventing use of experimental iterators.
+Allow more granular control over enabled experimental features.
+---
+ .../geometry/index/distance_predicates.hpp     | 12 +++++++++---
+ include/boost/geometry/index/predicates.hpp    | 16 +++++++++++-----
+ include/boost/geometry/index/rtree.hpp         | 18 ++++++++++++++----
+ 3 files changed, 34 insertions(+), 12 deletions(-)
+
+diff --git a/boost/geometry/index/distance_predicates.hpp b/boost/geometry/index/distance_predicates.hpp
+index 59b32af4753..00fc663cb38 100644
+--- a/boost/geometry/index/distance_predicates.hpp
++++ b/boost/geometry/index/distance_predicates.hpp
+@@ -2,7 +2,7 @@
+ //
+ // Spatial index distance predicates, calculators and checkers used in nearest neighbor query
+ //
+-// Copyright (c) 2011-2013 Adam Wulkiewicz, Lodz, Poland.
++// Copyright (c) 2011-2022 Adam Wulkiewicz, Lodz, Poland.
+ //
+ // Use, modification and distribution is subject to the Boost Software License,
+ // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+@@ -11,6 +11,12 @@
+ #ifndef BOOST_GEOMETRY_INDEX_DISTANCE_PREDICATES_HPP
+ #define BOOST_GEOMETRY_INDEX_DISTANCE_PREDICATES_HPP
+ 
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifndef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
++#define BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
++#endif
++#endif
++
+ #include <boost/geometry/index/detail/distance_predicates.hpp>
+ 
+ /*!
+@@ -21,7 +27,7 @@ namespace boost { namespace geometry { namespace index {
+ 
+ // relations generators
+ 
+-#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ /*!
+ \brief Generate to_nearest() relationship.
+@@ -91,7 +97,7 @@ detail::to_furthest<T> to_furthest(T const& v)
+     return detail::to_furthest<T>(v);
+ }
+ 
+-#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ // distance predicates generators
+ 
+diff --git a/boost/geometry/index/predicates.hpp b/boost/geometry/index/predicates.hpp
+index 6da0d0ec5d0..3678188dcd1 100644
+--- a/boost/geometry/index/predicates.hpp
++++ b/boost/geometry/index/predicates.hpp
+@@ -2,7 +2,7 @@
+ //
+ // Spatial query predicates
+ //
+-// Copyright (c) 2011-2018 Adam Wulkiewicz, Lodz, Poland.
++// Copyright (c) 2011-2022 Adam Wulkiewicz, Lodz, Poland.
+ //
+ // This file was modified by Oracle on 2019-2021.
+ // Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
+@@ -15,6 +15,12 @@
+ #ifndef BOOST_GEOMETRY_INDEX_PREDICATES_HPP
+ #define BOOST_GEOMETRY_INDEX_PREDICATES_HPP
+ 
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifndef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
++#define BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
++#endif
++#endif
++
+ #include <boost/geometry/index/detail/predicates.hpp>
+ #include <boost/geometry/util/tuples.hpp>
+ 
+@@ -212,7 +218,7 @@ overlaps(Geometry const& g)
+                 >(g);
+ }
+ 
+-#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ /*!
+ \brief Generate \c touches() predicate.
+@@ -240,7 +246,7 @@ touches(Geometry const& g)
+                 >(g);
+ }
+ 
+-#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ /*!
+ \brief Generate \c within() predicate.
+@@ -343,7 +349,7 @@ nearest(Geometry const& geometry, std::size_t k)
+     return detail::predicates::nearest<Geometry>(geometry, k);
+ }
+ 
+-#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ /*!
+ \brief Generate path() predicate.
+@@ -373,7 +379,7 @@ path(SegmentOrLinestring const& linestring, std::size_t k)
+     return detail::predicates::path<SegmentOrLinestring>(linestring, k);
+ }
+ 
+-#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#endif // BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_PREDICATES
+ 
+ namespace detail { namespace predicates {
+ 
+diff --git a/boost/geometry/index/rtree.hpp b/boost/geometry/index/rtree.hpp
+index af3b6f4ee07..6bb34faf6e9 100644
+--- a/boost/geometry/index/rtree.hpp
++++ b/boost/geometry/index/rtree.hpp
+@@ -3,7 +3,7 @@
+ // R-tree implementation
+ //
+ // Copyright (c) 2008 Federico J. Fernandez.
+-// Copyright (c) 2011-2019 Adam Wulkiewicz, Lodz, Poland.
++// Copyright (c) 2011-2022 Adam Wulkiewicz, Lodz, Poland.
+ // Copyright (c) 2020 Caian Benedicto, Campinas, Brazil.
+ //
+ // This file was modified by Oracle on 2019-2021.
+@@ -90,7 +90,15 @@
+ #include <boost/geometry/index/detail/rtree/query_iterators.hpp>
+ 
+ #ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
+-// serialization
++#ifndef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_SERIALIZATION
++#define BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_SERIALIZATION
++#endif
++#ifndef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_ITERATORS
++#define BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_ITERATORS
++#endif
++#endif
++
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_SERIALIZATION
+ #include <boost/geometry/index/detail/serialization.hpp>
+ #endif
+ 
+@@ -312,7 +320,7 @@ class rtree
+     typedef typename members_holder::allocator_traits_type allocator_traits_type;
+ 
+     friend class detail::rtree::utilities::view<rtree>;
+-#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_SERIALIZATION
+     friend class detail::rtree::private_view<rtree>;
+     friend class detail::rtree::const_private_view<rtree>;
+ #endif
+@@ -1184,7 +1192,9 @@ class rtree
+             detail::rtree::iterators::distance_query_iterator<members_holder, Predicates>
+         >;
+ 
+-#ifndef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
++#ifdef BOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL_ITERATORS
++public:
++#else
+ private:
+ #endif
+     /*!

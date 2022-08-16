@@ -1,6 +1,7 @@
 from conan.tools.files import rename
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan.tools.build import cross_building
 from conans.errors import ConanInvalidConfiguration
 import contextlib
 import fnmatch
@@ -55,6 +56,7 @@ class OpenSSLConan(ConanFile):
         "no_md2": [True, False],
         "no_md4": [True, False],
         "no_mdc2": [True, False],
+        "no_module": [True, False],
         "no_ocsp": [True, False],
         "no_pinshared": [True, False],
         "no_rc2": [True, False],
@@ -82,6 +84,7 @@ class OpenSSLConan(ConanFile):
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
+    default_options["no_md2"] = True
     default_options["openssldir"] = None
 
     @property
@@ -406,6 +409,7 @@ class OpenSSLConan(ConanFile):
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
 
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
+        args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
@@ -434,7 +438,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.options.values.fields:
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -610,7 +614,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
-            (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
+            (self._is_mingw or cross_building(self, skip_x64_x86=True))
 
     @property
     def _make_program(self):

@@ -87,7 +87,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20220708"
+        default: "windows20220803"
   Macos:
     x86_64:
       "apple-clang":

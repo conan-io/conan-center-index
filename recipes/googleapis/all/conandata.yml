@@ -7,6 +7,9 @@
 #     (master branch) https://github.com/grpc/grpc/blob/master/CMakeLists.txt#L347
 
 sources:
+  "cci.20220711":
+    url: "https://github.com/googleapis/googleapis/archive/220b13e335ea8e0153c84c56a135a19d15384621.zip"
+    sha256: "0a8aac018f49f8595fc0fbfe53f46d73b2fb42661a425746be802302928e6ac2"
   "cci.20220531":  # Used by google-cloud-cpp 1.41.0
     url: "https://github.com/googleapis/googleapis/archive/f19049fdd8dfc8b6eba387f4ef6d1d8b4d0103e7.zip"
     sha256: "d4ebe22c0a8a884adbeb63f72ab1fee4b15bad0a535de37cabba427a37711ee8"

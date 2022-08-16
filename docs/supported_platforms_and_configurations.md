@@ -37,12 +37,12 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 ## Windows
 
 - Python: 3.7.9
-- CMake: 3.15.6
+- CMake: 3.21.6
 - WinSDK: 10.0.20348
 - Compilers: Visual Studio:
   
   - 2017 (19.16.27048)
-  - 2019 (19.29.30145)
+  - 2019 (19.29.30146)
   
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64

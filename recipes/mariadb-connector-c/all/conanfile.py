@@ -59,11 +59,11 @@ class MariadbConnectorcConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.12")
         if self.options.get_safe("with_iconv"):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_curl:
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/7.84.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_ssl == "schannel":

@@ -70,6 +70,7 @@ class OsmanipConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["OSMANIP_VERSION"] = str(self.version)
         cmake.configure()
         return cmake
 

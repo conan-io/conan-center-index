@@ -1,0 +1,8 @@
+sources:
+  "cci.20210321":
+    url: "https://github.com/hrydgard/minitrace/archive/020f42b189e8d6ad50e4d8f45d69edee0a6b3f23.tar.gz"
+    sha256: "314bcab4dc069c61f2eb813c9bd649efb2bd1fd75f91205a269a4c5abcd3d66b"
+
+patches:
+  "cci.20210321":
+    - patch_file: "patches/0001-fix-cmake.patch"

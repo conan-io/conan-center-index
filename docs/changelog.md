@@ -1,5 +1,23 @@
 # Changelog
 
+### 8-August-2022 - 11:25 CEST
+
+- [fix] Take into account status checks from GitHub actions before merging a pull-request.
+- [feature] Double check that the recipe revision exported using Conan v2 matches the one exported by Conan v1.
+- [feature] Fail if required Conan version is not available on Linux containers instead of falling back to latest.
+
+### 22-July-2022 - 12:13 CEST
+
+- [feature]: ValidateInfrastructure: Add check to verify CMake 3.21 is installed in Windows machines.
+- [feature]: ValidateInfrastructure: Execute the validation when a pull-request is modifying configuration files.
+- [feature]: Conan v2: Iterate `cppstd` values in profiles to build first match.
+- [feature]: Conan v2: Apply `shared` option for the whole dependency graph.
+- [feature]: Add `tools.apple.sdk_path` to configuration in Macos (required by new build helpers).
+- [feature]: Set `tools.system.package_manager:mode=install` and `tools.system.package_manager:sudo=True` in configuration files (required by new system package manager helpers to mimic the behavior of old ones).
+- [feature]: Upgrade required Conan versions to work with the library. Minimum versions tested are now `1.49.0` and `2.0.0b1`.
+- [fix]: ValidateInfrastructure: Fix error message split.
+- [bugfix]: Accept missing HTTP code for requests.
+
 ### 06-July-2022 - 14:28 CEST
 
 - [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
