@@ -26,6 +26,9 @@ class OctoLoggerCPPConan(ConanFile):
     def requirements(self):
         self.requires("fmt/9.0.0")
 
+    def build_requirements(self):
+        self.build_requires("cmake/3.16.9")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
