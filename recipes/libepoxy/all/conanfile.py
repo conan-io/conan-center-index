@@ -1,5 +1,7 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools imort files
+from conans import  Meson, tools
 import os
 import glob
 
@@ -67,7 +69,7 @@ class EpoxyConan(ConanFile):
             del self.options.x11
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.0")
+        self.build_requires("meson/0.63.1")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -78,7 +80,7 @@ class EpoxyConan(ConanFile):
                 self.requires("egl/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
