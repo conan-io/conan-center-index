@@ -1,5 +1,6 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -38,10 +39,10 @@ class LibuuidConan(ConanFile):
             raise ConanInvalidConfiguration("libuuid is not supported on Windows")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("libtool/2.4.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
@@ -71,7 +72,7 @@ class LibuuidConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fiels.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "uuid"
