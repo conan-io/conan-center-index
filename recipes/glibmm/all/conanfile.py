@@ -42,26 +42,25 @@ class GlibmmConan(ConanFile):
 
         version = str(self.settings.compiler.version)
         toolset_map = {
+            "14": "v140",
             "15": "v141",
             "16": "v142",
             "17": "v143"
         }
-        if version in toolset_map:
-            return toolset_map.get(version)
-
-        raise ConanInvalidConfiguration("Cannot get MSVC compiler toolset information")
+        return toolset_map.get(version)
 
     @property
     def _abi_msvc_toolset_suffix(self):
-        if scm.Version(self.version) < "2.68.0":
+        if scm.Version(self.version) < "2.68.0" or self.options.shared:
             return self._abi_version
 
         toolset = self._get_msvc_toolset()
+        if toolset is None:
+            return self._abi_version
+
         match = re.match("v([0-9]+)", str(toolset))
         if match is not None:
             return f"vc{match.group(1)}-{self._abi_version}"
-
-        raise ConanInvalidConfiguration("Cannot get MSVC compiler toolset information")
 
     def validate(self):
         if hasattr(self, "settings_build") and build.cross_building(self):
