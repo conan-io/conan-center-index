@@ -7,7 +7,7 @@ import sys
 import textwrap
 import time
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.41.0"
 
 
 class GnConan(ConanFile):
