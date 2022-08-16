@@ -1,4 +1,6 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import AutoToolsBuildEnvironment, tools
 import os
 import functools
 
@@ -29,10 +31,10 @@ class libxftConan(ConanFile):
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("xorg-macros/1.19.3")
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("libtool/2.4.7")
     
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
@@ -64,8 +66,8 @@ class libxftConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names['pkg_config'] = "Xft"
