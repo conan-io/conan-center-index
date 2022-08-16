@@ -1,7 +1,10 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class GiflibConan(ConanFile):
@@ -24,21 +27,10 @@ class GiflibConan(ConanFile):
         "utils" : True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,33 +43,35 @@ class GiflibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self._is_msvc:
+        if is_msvc(self):
             self.requires("getopt-for-visual-studio/20200201")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["UTILS"] = self.options.utils
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["GIFLIB_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["UTILS"] = self.options.utils
+        tc.generate()
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        if is_msvc(self):
+            cd = CMakeDeps(self)
+            cd.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -89,7 +83,7 @@ class GiflibConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GIF"
 
         self.cpp_info.libs = ["gif"]
-        if self._is_msvc:
+        if is_msvc(self):
             self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
 
         bin_path = os.path.join(self.package_folder, "bin")

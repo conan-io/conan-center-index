@@ -1,19 +1,16 @@
 cmake_minimum_required(VERSION 3.1)
-project(gif C)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(gif LANGUAGES C)
 
 include(GNUInstallDirs)
 
 add_library(gif
-    "source_subfolder/dgif_lib.c"
-    "source_subfolder/egif_lib.c"
-    "source_subfolder/gifalloc.c"
-    "source_subfolder/gif_err.c"
-    "source_subfolder/gif_font.c"
-    "source_subfolder/gif_hash.c"
-    "source_subfolder/openbsd-reallocarray.c"
+    "${GIFLIB_SRC_DIR}/dgif_lib.c"
+    "${GIFLIB_SRC_DIR}/egif_lib.c"
+    "${GIFLIB_SRC_DIR}/gifalloc.c"
+    "${GIFLIB_SRC_DIR}/gif_err.c"
+    "${GIFLIB_SRC_DIR}/gif_font.c"
+    "${GIFLIB_SRC_DIR}/gif_hash.c"
+    "${GIFLIB_SRC_DIR}/openbsd-reallocarray.c"
 )
 if(WIN32)
     if(BUILD_SHARED_LIBS)
@@ -23,6 +20,10 @@ if(WIN32)
         target_compile_definitions(gif PUBLIC USE_GIF_LIB)
     endif()
 endif()
+if(MSVC)
+    find_package(getopt-for-visual-studio REQUIRED CONFIG)
+    target_link_libraries(gif PRIVATE getopt-for-visual-studio::getopt-for-visual-studio)
+endif()
 
 install(
     TARGETS gif
@@ -31,15 +32,15 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(
-    FILES "source_subfolder/gif_lib.h"
+    FILES "${GIFLIB_SRC_DIR}/gif_lib.h"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 if(UTILS)
     add_library(giflib_util STATIC
-        "source_subfolder/qprintf.c"
-        "source_subfolder/quantize.c"
-        "source_subfolder/getarg.c"
+        "${GIFLIB_SRC_DIR}/qprintf.c"
+        "${GIFLIB_SRC_DIR}/quantize.c"
+        "${GIFLIB_SRC_DIR}/getarg.c"
     )
     target_link_libraries(giflib_util PRIVATE gif)
 
@@ -52,7 +53,7 @@ if(UTILS)
         gifclrmp
     )
     foreach(GIF_UTIL ${GIF_UTILS})
-        add_executable(${GIF_UTIL} "source_subfolder/${GIF_UTIL}.c")
+        add_executable(${GIF_UTIL} "${GIFLIB_SRC_DIR}/${GIF_UTIL}.c")
         target_link_libraries(${GIF_UTIL} PRIVATE gif giflib_util)
     endforeach()
     find_library(LIBM NAMES m)
