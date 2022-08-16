@@ -1,8 +1,14 @@
 import os
 import re
 
-from conan.tools.microsoft import is_msvc
-from conans import ConanFile, Meson, tools
+from conan import ConanFile
+from conan.tools import (
+    build,
+    files,
+    microsoft,
+    scm
+)
+from conans import Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -44,7 +50,7 @@ class GtkmmConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             # Static builds not supported by MSVC
             self.options.shared = True
 
@@ -68,15 +74,19 @@ class GtkmmConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            build.check_min_cppstd(self, self._minimum_cpp_standard)
+
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn(
+                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
+            )
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+            if scm.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires C++{self._minimum_cpp_standard} support. " +
+                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not " +
+                    f"support it.")
 
     def build_requirements(self):
         self.build_requires("meson/0.62.2")
@@ -87,18 +97,18 @@ class GtkmmConan(ConanFile):
         # gtkmm has a direct dependency on cairo-gobject which is not explicit in the meson configuration
         self.requires("cairo/1.17.4")
         self.requires("glibmm/2.72.1")
-        self.requires("glib/2.73.0")
+        self.requires("glib/2.73.3")
         self.requires("gtk/4.7.0")
         self.requires("libsigcpp/3.0.7")
         self.requires("pangomm/2.50.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             for patch in self.conan_data.get("patches", {}).get(self.version, []):
-                tools.patch(**patch)
+                files.patch(self, **patch)
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -156,13 +166,12 @@ class GtkmmConan(ConanFile):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rm(self, "*.pdb", self.package_folder, recursive=True)
 
     @property
     def _libname(self):
-        if is_msvc(self):
+        if microsoft.is_msvc(self):
             return f"gtkmm-{self._msvc_toolset_suffix}-4.0"
         return "gtkmm-4.0"
 
