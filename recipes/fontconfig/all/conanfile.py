@@ -1,5 +1,7 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, Meson
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import files
+from conans import tools, AutoToolsBuildEnvironment, Meson
 import contextlib
 import functools
 import os
@@ -70,12 +72,12 @@ class FontconfigConan(ConanFile):
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
         if self._is_msvc:
-            self.build_requires("meson/0.61.2")
+            self.build_requires("meson/0.63.1")
         elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
@@ -169,9 +171,9 @@ class FontconfigConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"), "*.conf")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "etc"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
