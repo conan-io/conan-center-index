@@ -41,7 +41,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_zlib": [True, False],
-        "opengl_profile": ["GL1", "GL2", "GL3", "GLCORE", "GLES1", "GLES2", "GLES3", "GLES2+GLES3"],
+        "opengl_profile": ["gl1", "gl2", "gl3", "glCore", "gles1", "gles2", "gles3", "gles2+gles3"],
     }
     default_options = {
         "shared": False,
@@ -69,7 +69,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_png": True,
         "with_tiff": True,
         "with_zlib": True,
-        "opengl_profile": "GL2",
+        "opengl_profile": "gl2",
     }
 
     short_paths = True
@@ -188,7 +188,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
         cmake.definitions["OSG_TEXT_USE_FONTCONFIG"] = self.options.use_fontconfig
 
-        cmake.definitions["OPENGL_PROFILE"] = self.options.opengl_profile
+        cmake.definitions["OPENGL_PROFILE"] = self.options.opengl_profile.upper()
 
         # Disable option dependencies unless we have a package for them
         cmake.definitions["OSG_WITH_FREETYPE"] = self.options.with_freetype
