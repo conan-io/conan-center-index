@@ -1,12 +1,13 @@
 import os
-import glob
 from conan import ConanFile, tools
 
+
+required_conan_version = ">=1.46.0"
 
 class ClippConan(ConanFile):
     name = "clipp"
     description = """Easy to use, powerful & expressive command line argument parsing for modern C++ / single header / usage & doc generation."""
-    topics = ("conan", "clipp", "argparse")
+    topics = ("clipp", "argparse", "cli", "usage", "options", "subcommands")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/muellan/clipp"
     license = "MIT"
@@ -17,14 +18,12 @@ class ClippConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.files.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=include_folder)
+        tools.files.copy(self, pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        tools.files.copy(self, pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
         self.info.header_only()
