@@ -1,10 +1,10 @@
 import os
-from conan import ConanFile
 from conans import tools, CMake
-from conan.tools.files import apply_conandata_patches
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, get, rmdir
 from conan.tools.build.cross_building import cross_building
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 class LibpngConan(ConanFile):
@@ -84,7 +84,7 @@ class LibpngConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
@@ -161,10 +161,10 @@ class LibpngConan(ConanFile):
         if self.options.shared:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
         else:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
