@@ -1,7 +1,8 @@
 from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
-from conan.tools import files
+# from conan.tools import files
+import conan
 import contextlib
 import os
 
@@ -153,7 +154,7 @@ class MpirConan(ConanFile):
     def _patch_sources(self):
         if self._is_msvc:
             # self.copy("*", src="build.vc15", dst="build.vc16")
-            files.copy("*", src="build.vc15", dst="build.vc16")
+            conan.tools.files.copy("*", src="build.vc15", dst="build.vc16")
             for root, _, files in os.walk("build.vc16"):
                 for file in files:
                     tools.replace_in_file(os.path.join(root, file), "<PlatformToolset>v141</PlatformToolset>", "<PlatformToolset>v142</PlatformToolset>")
