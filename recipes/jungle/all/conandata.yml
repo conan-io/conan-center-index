@@ -1,0 +1,10 @@
+sources:
+  "cci.20220801":
+    url: "https://github.com/eBay/Jungle/archive/f41b7123489f1bc942a6b76dc54485391485cd27.tar.gz"
+    sha256: 8667a114bcef661b2a93e627a68b0584931f182dc8b96693ce6901d903584ab8
+patches:
+  "cci.20220801":
+    - patch_file: "patches/0001-cmake-alterations.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-forestdb-path.patch"
+      base_path: "source_subfolder"

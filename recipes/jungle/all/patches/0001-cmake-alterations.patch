@@ -1,0 +1,82 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,9 +16,10 @@ endif ()
+ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+ 
+ 
+-set(ROOT_SRC ${PROJECT_SOURCE_DIR}/src)
+-set(CMAKE_DIR ${PROJECT_SOURCE_DIR}/cmake)
+-set(FDB_LIB_DIR ${PROJECT_SOURCE_DIR}/third_party/forestdb/build)
++set(TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
++set(ROOT_SRC ${TOP_SOURCE_DIR}/src)
++set(CMAKE_DIR ${TOP_SOURCE_DIR}/cmake)
++set(FDB_LIB_DIR ${TOP_SOURCE_DIR}/third_party/forestdb/build)
+ 
+ if (CODE_COVERAGE GREATER 0)
+     set(CMAKE_BUILD_TYPE "Debug")
+@@ -45,10 +49,10 @@ set(LIBDL dl)
+ 
+ # Includes
+ include_directories(BEFORE ./)
+-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/src)
+-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
+-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/tools)
+-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/tests)
++include_directories(BEFORE ${TOP_SOURCE_DIR}/src)
++include_directories(BEFORE ${TOP_SOURCE_DIR}/include)
++include_directories(BEFORE ${TOP_SOURCE_DIR}/tests)
++include_directories(BEFORE ${TOP_SOURCE_DIR}/examples)
+ 
+ # Compiler flags
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+@@ -100,7 +100,8 @@ if (TESTSUITE_NO_COLOR GREATER 0)
+     add_definitions(-DTESTSUITE_NO_COLOR=1)
+ endif()
+ 
+-file(COPY ${CMAKE_SOURCE_DIR}/scripts/runtests.sh
++find_package(forestdb REQUIRED)
++file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/runtests.sh
+      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ # === CUSTOM LOGGER ===
+@@ -187,16 +191,16 @@ set(JUNGLE_DEPS
+     ${LIBDL})
+ 
+ add_library(static_lib ${JUNGLE_CORE})
+-target_link_libraries(static_lib ${JUNGLE_DEPS})
++target_link_libraries(static_lib forestdb::forestdb)
+ set_target_properties(static_lib PROPERTIES OUTPUT_NAME jungle
+                       CLEAN_DIRECT_OUTPUT 1)
+ if (DETACH_LOGGER GREATER 0)
+     add_dependencies(static_lib simplelogger_lib)
+ endif ()
+ 
+-add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
++#add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
+-add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
++#add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
+-add_subdirectory("${PROJECT_SOURCE_DIR}/tools")
++#add_subdirectory("${PROJECT_SOURCE_DIR}/tools")
+ 
+ if (CODE_COVERAGE GREATER 0)
+     SETUP_TARGET_FOR_COVERAGE(
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -1,14 +1,11 @@
+-set(TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
++set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ set(UNIT_TEST_DIR ${TEST_DIR}/unit)
+ set(JUNGLE_TEST_DIR ${TEST_DIR}/jungle)
+ set(STRESS_TEST_DIR ${TEST_DIR}/stress)
+ 
+ set(JUNGLE_TEST_DEPS
+-    ${CMAKE_CURRENT_BINARY_DIR}/../libjungle.a
+-    ${LIBSIMPLELOGGER}
+-    ${FDB_LIB_DIR}/libforestdb.a
+-    ${LIBSNAPPY}
+-    ${LIBDL})
++    static_lib
++    forestdb::forestdb)
+ 
+ set(FILEOPS_TEST ${TEST_DIR}/unit/fileops_test.cc)
+ add_executable(fileops_test ${FILEOPS_TEST})
