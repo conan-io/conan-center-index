@@ -322,7 +322,6 @@ class Llvm(ConanFile):
                     os.remove(ignore_path)
                 else:
                     shutil.rmtree(ignore_path)
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
         # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
         if self.options.clean_build_bin:
