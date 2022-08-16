@@ -1,13 +1,13 @@
 sources:
+  "1.1.2":
+    url: "https://github.com/opentdf/client-cpp/archive/1.1.2.tar.gz"
+    sha256: "4e41a18ef9d47aa9f964beffa78fdd4290a5f50336c6e4dc3c9bf2dd4b075d10"
   "1.1.0":
     url: "https://github.com/opentdf/client-cpp/archive/1.1.0.tar.gz"
     sha256: "2c4c8c00ad67e71b3ad9a5d0473e33a51c8756af68971f0db9218f0e337aa1a5"
   "1.0.0":
     url: "https://github.com/opentdf/client-cpp/archive/1.0.0.tar.gz"
     sha256: "a0c38aa06bb592b8749f8d02cbe67cbe7e35f83fde24b47c516ff28801414ac3"
-  "0.9.0":
-    url: "https://github.com/opentdf/client-cpp/archive/opentdf-0.9.0.tar.gz"
-    sha256: "152e79c136b472e13a37c108118c8d4d7b5a85a8e34f4f284452ac59bdb7afdb"
 patches:
   "1.1.0":
      - patch_file: "patches/0001-1.1.0-fstream-missing.patch"
@@ -22,11 +22,4 @@ patches:
      - patch_file: "patches/0002-1.0.0-cmake-install.patch"
        base_path: "source_subfolder"
      - patch_file: "patches/0003-1.0.0-cmake-find-package.patch"
-       base_path: "source_subfolder"
-  "0.9.0":
-     - patch_file: "patches/0001-0.9.0-fstream-missing.patch"
-       base_path: "source_subfolder"
-     - patch_file: "patches/0002-0.9.0-cmake-install.patch"
-       base_path: "source_subfolder"
-     - patch_file: "patches/0003-0.9.0-cmake-find-package.patch"
        base_path: "source_subfolder"
