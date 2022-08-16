@@ -65,8 +65,8 @@ class GccConan(ConanFile):
     def requirements(self):
         self.requires("mpc/1.2.0")
         self.requires("mpfr/4.1.0")
-        self.requires("gmp/6.2.0")
-        self.requires("zlib/1.2.11")
+        self.requires("gmp/6.2.1")
+        self.requires("zlib/1.2.12")
 
     def configure(self):
         if self.settings.os == "Windows":
