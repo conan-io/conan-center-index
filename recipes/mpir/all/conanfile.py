@@ -155,12 +155,12 @@ class MpirConan(ConanFile):
         if self._is_msvc:
             # self.copy("*", src="build.vc15", dst="build.vc16")
 
-            self.output.info(f"build.vc15 exists: {os.path.isfile("build.vc15")}")
-            self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, "build.vc15"))}")
+            self.output.info(f"build.vc15 exists: {os.path.isfile('build.vc15')}")
+            self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc15'))}")
 
             conan.tools.files.copy(self, pattern="*", src="build.vc15", dst="build.vc16")
-            self.output.info(f"build.vc16 exists: {os.path.isfile("build.vc16")}")
-            self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, "build.vc16"))}")
+            self.output.info(f"build.vc16 exists: {os.path.isfile('build.vc16')}")
+            self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc16'))}")
 
 
             self.output.info("build.vc15 *********************************")
