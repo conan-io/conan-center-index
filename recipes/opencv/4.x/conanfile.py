@@ -200,7 +200,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.3")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/4.4.1")
