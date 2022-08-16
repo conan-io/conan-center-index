@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class Crc_CppConan(ConanFile):
     name = "crc_cpp"
     description = "A header only constexpr / compile time small-table based CRC library for C++17 and newer"
-    topics = ("conan", "crc_cpp", "crc", "constexpr", "cpp17", "cpp20", "header-only")
+    topics = "crc_cpp", "crc", "constexpr", "cpp17", "cpp20", "header-only"
     settings = "compiler", "os"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AshleyRoll/crc_cpp"
@@ -22,7 +22,7 @@ class Crc_CppConan(ConanFile):
     @property
     def _supported_compiler(self):
         compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
             return True
         elif compiler == "gcc" and version >= "9":
@@ -37,12 +37,12 @@ class Crc_CppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            tools.build.check_min_cppstd(self, "17")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration("crc_cpp: Unsupported compiler: {}-{} "
                                             "Minimum C++17 constexpr features required.".format(self.settings.compiler, self.settings.compiler.version))
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+       tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
