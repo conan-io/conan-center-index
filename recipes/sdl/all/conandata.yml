@@ -1,6 +1,7 @@
 sources:
   "2.0.24-prerelease":
     url: "https://www.libsdl.org/tmp/SDL-2.0.zip"
+    sha256: 385a14814c38bed76a5546e9b9f53f0c749b7e8cc7aa38936beaad789e5d902c
   "2.0.22":
     url: "https://www.libsdl.org/release/SDL2-2.0.22.tar.gz"
     sha256: fe7cbf3127882e3fc7259a75a0cb585620272c51745d3852ab9dd87960697f2e
