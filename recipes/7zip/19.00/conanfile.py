@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class SevenZipConan(ConanFile):
     name = "7zip"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "7-Zip is a file archiver with a high compression ratio"
+    description = "7-Zip is a file archiver with a high compression ratio -- test"
     license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
     homepage = "https://www.7-zip.org"
     topics = ("7zip", "zip", "compression", "decompression")
