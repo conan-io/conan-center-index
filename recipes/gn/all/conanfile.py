@@ -2,12 +2,13 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import conan.tools.files as tools_files
+import conan.tools.scm as tools_scm
 import os
 import sys
 import textwrap
 import time
 
-required_conan_version = ">=1.41.0"
+required_conan_version = ">=1.46.0"
 
 
 class GnConan(ConanFile):
@@ -37,7 +38,7 @@ class GnConan(ConanFile):
             tools.check_min_cppstd(self, 17)
         else:
             if self._minimum_compiler_version_supporting_cxx17:
-                if tools.Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
+                if tools_scm.Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
                     raise ConanInvalidConfiguration("gn requires a compiler supporting c++17")
             else:
                 self.output.warn("gn recipe does not recognize the compiler. gn requires a compiler supporting c++17. Assuming it does.")
