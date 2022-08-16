@@ -1,4 +1,5 @@
 from conan import ConanFile, tools
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -22,7 +23,7 @@ class Crc_CppConan(ConanFile):
     @property
     def _supported_compiler(self):
         compiler = str(self.settings.compiler)
-        version = tools.scm.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
             return True
         elif compiler == "gcc" and version >= "9":
