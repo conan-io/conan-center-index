@@ -1,4 +1,6 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import AutoToolsBuildEnvironment, MSBuild, tools
 import os
 import re
 
@@ -66,7 +68,7 @@ class LibUSBConan(ConanFile):
                 self.requires("libudev/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):
@@ -141,7 +143,7 @@ class LibUSBConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
