@@ -379,7 +379,7 @@ class Llvm(ConanFile):
                     elif self._is_relevant_component(current_dep):
                         components[current_dep]
 
-                    # Copied from llvm-core but not used on linus, maybe for other systems? ==>
+                    # Copied from llvm-core but not used on linux, maybe for other systems? ==>
                     elif current_dep.startswith('-delayload:'):
                         continue
 
@@ -456,7 +456,7 @@ class Llvm(ConanFile):
                         self.output.warn(f"{c} -> {c_dep} -> {c}")
                         r = True
         if r:
-            raise "circulare dependency found"
+            raise "circular dependency found"
         
         lib_path = os.path.join(self.package_folder, 'lib')
         if not self.options.shared:
@@ -473,11 +473,11 @@ class Llvm(ConanFile):
         for name in os.listdir(lib_path):
             if not any(suffix in name for suffix in suffixes):
                 remove_path = os.path.join(lib_path, name)
-                self.output.info(f"Removing library \"{remove_path}\" from package because it doesn't contain any of {suffixes}")
+                # directories are needed for certain binaries, e.g. clang -> lib/clang 
                 if os.path.isdir(remove_path):
-                    shutil.rmtree(remove_path)
-                else:
-                    os.remove(remove_path)
+                    continue
+                self.output.info(f"Removing library \"{remove_path}\" from package because it doesn't contain any of {suffixes}")
+                os.remove(remove_path)
 
         # because we remove libs from lib/folder, we need to clear components as well
         removed = []
@@ -487,7 +487,7 @@ class Llvm(ConanFile):
                 removed.append(key)
         for remove in removed:
             del components[remove]
-        # and check if still existing components relay on these
+        # and check if still existing components rely on these
         for remove in removed:
             for key in components.keys():
                 if remove in components[key]:
