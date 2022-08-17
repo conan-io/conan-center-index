@@ -5,6 +5,9 @@ option(ENABLE_DOUBLE_PRECISION "Enable FFTW single precision" ON)
 option(ENABLE_SINGLE_PRECISION "Enable FFTW single precision" OFF)
 option(ENABLE_LONG_DOUBLE_PRECISION "Enable FFTW single precision" OFF)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 if(ENABLE_SINGLE_PRECISION)
   find_package(FFTW3f REQUIRED CONFIG)
 elseif(ENABLE_LONG_DOUBLE_PRECISION)
@@ -13,7 +16,7 @@ else()
   find_package(FFTW3 REQUIRED CONFIG)
 endif()
 
-add_executable(${PROJECT_NAME} test_package.c)
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 target_link_libraries(${PROJECT_NAME}
   $<$<BOOL:${ENABLE_DOUBLE_PRECISION}>:FFTW3::fftw3>
   $<$<BOOL:${ENABLE_SINGLE_PRECISION}>:FFTW3::fftw3f>
