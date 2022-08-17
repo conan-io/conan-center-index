@@ -108,15 +108,14 @@ class FontconfigConan(ConanFile):
         meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return meson
 
-    def _patch_files(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def _patch_files(self):        
+        files.apply_conandata_patches(self)
         # fontconfig requires libtool version number, change it for the corresponding freetype one
-        tools.replace_in_file(os.path.join(self.install_folder, "freetype2.pc"),
+        files.replace_in_file(self, os.path.join(self.install_folder, "freetype2.pc"),
                               "Version: {}".format(self.deps_cpp_info["freetype"].version),
                               "Version: {}".format(self.deps_user_info["freetype"].LIBTOOL_VERSION))
         # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
-        tools.replace_in_file(
+        files.replace_in_file(self, 
             os.path.join(self._source_subfolder, "Makefile.in"),
             "@CROSS_COMPILING_TRUE@RUN_FC_CACHE_TEST = false",
             "RUN_FC_CACHE_TEST=false"
@@ -145,7 +144,7 @@ class FontconfigConan(ConanFile):
                 meson.build()
         else:
             # relocatable shared lib on macOS
-            tools.replace_in_file(
+            files.replace_in_file(self,
                 os.path.join(self._source_subfolder, "configure"),
                 "-install_name \\$rpath/",
                 "-install_name @rpath/"
@@ -161,16 +160,16 @@ class FontconfigConan(ConanFile):
                 meson = self._configure_meson()
                 meson.install()
                 if os.path.isfile(os.path.join(self.package_folder, "lib", "libfontconfig.a")):
-                    tools.rename(os.path.join(self.package_folder, "lib", "libfontconfig.a"),
+                    files.rename(self, os.path.join(self.package_folder, "lib", "libfontconfig.a"),
                                  os.path.join(self.package_folder, "lib", "fontconfig.lib"))
         else:
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"), "*.conf")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        files.rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        files.rm(self, "*.conf", os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"))
+        files.rm(self, "*.def", os.path.join(self.package_folder, "lib"))
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "etc"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
