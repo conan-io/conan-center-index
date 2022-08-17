@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
@@ -29,6 +29,8 @@ class OctoLoggerCPPConan(ConanFile):
         tc.variables["DISABLE_TESTS"] = True
         tc.variables["DISABLE_EXAMPLES"] = True
         tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
