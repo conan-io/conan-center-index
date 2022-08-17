@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
@@ -16,14 +16,6 @@ class OctoEncryptionCPPConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     @property
-    def _source_subfolder(self):
-        return "source"
-
-    @property
-    def _build_subfolder(self):
-        return "build"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
@@ -34,10 +26,14 @@ class OctoEncryptionCPPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.generate()  
+        tc.variables["DISABLE_TESTS"] = True
+        tc.variables["DISABLE_EXAMPLES"] = True
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def layout(self):
-        cmake_layout(self, src_folder=self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -56,7 +52,8 @@ class OctoEncryptionCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def requirements(self):
         self.requires("openssl/1.1.1q")
@@ -66,17 +63,13 @@ class OctoEncryptionCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, 
-                        build_folder=self._build_subfolder,
-                        defs={"DISABLE_TESTS": "ON",
-                              "DISABLE_EXAMPLES": "ON"})
-        cmake.build(build_dir=self._build_subfolder)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        cmake.install(build_dir=self._build_subfolder)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "octo-encryption-cpp")
