@@ -30,7 +30,7 @@ class ConfuJson(ConanFile):
             "clang": "10",
         }
 
-    def configure(self):
+    def validate_build(self):
         if self.settings.compiler == "Visual Studio" and Version(self.version)<Version("0.0.9"):
             raise ConanInvalidConfiguration(
                 "Visual Studio is not supported in versions before confu_json/0.0.9")
@@ -39,6 +39,8 @@ class ConfuJson(ConanFile):
                 "apple-clang is not supported because of missing concept support")
         if self.settings.compiler.get_safe("cppstd"):
          tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
+
+    def configure(self):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
