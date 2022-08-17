@@ -54,8 +54,8 @@ class ConfuJson(ConanFile):
         self.options["boost"].header_only = True
 
     def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("magic_enum/0.7.2")
+        self.requires("boost/1.79.0")
+        self.requires("magic_enum/0.8.0")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
