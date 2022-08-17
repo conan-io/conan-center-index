@@ -145,7 +145,7 @@ class GoogleAPISConan(ConanFile):
         content = ""
         proto_libraries = self._parse_proto_libraries()
         for it in filter(lambda u: u.is_used, proto_libraries):
-            content += it.cmake_content
+            content += it.cmake_content(self.source_folder.replace("\\", "/"))
         save(self, cmakelists, content, append=True)
 
     def build(self):

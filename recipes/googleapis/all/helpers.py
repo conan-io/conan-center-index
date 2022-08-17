@@ -49,8 +49,7 @@ class _ProtoLibrary:
             return item
         return [to_cmake_target(it) for it in self.deps]
 
-    @property
-    def cmake_content(self):
+    def cmake_content(self, source_folder):
         content = f"\n\n# {self.cmake_target}\n"
         content += "\n".join([f"#{it}" for it in self.dumps().split('\n')])
         content += "\n"
@@ -60,14 +59,14 @@ class _ProtoLibrary:
             """)
         else:
             content += textwrap.dedent(f"""\
-                set({self.cmake_target}_PROTOS {" ".join(["${CMAKE_SOURCE_DIR}/src/"+it for it in self.srcs])})
+                set({self.cmake_target}_PROTOS {" ".join([f"{source_folder}/" + it for it in self.srcs])})
                 add_library({self.cmake_target} ${{{self.cmake_target}_PROTOS}})
                 target_include_directories({self.cmake_target} PUBLIC ${{CMAKE_BINARY_DIR}})
                 target_compile_features({self.cmake_target} PUBLIC cxx_std_11)
                 protobuf_generate(LANGUAGE cpp
                                 TARGET {self.cmake_target}
                                 PROTOS ${{{self.cmake_target}_PROTOS}}
-                                IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}/src
+                                IMPORT_DIRS {source_folder}
                                 )
             """)
 
@@ -78,7 +77,7 @@ class _ProtoLibrary:
 
         return content
 
-def parse_proto_libraries(filename, cmakelists_folder, error):
+def parse_proto_libraries(filename, source_folder, error):
     # Generate the libraries to build dynamically
     re_name = re.compile(r'name = "(.*)"')
     re_srcs_oneline = re.compile(r'srcs = \["(.*)"\],')
@@ -88,11 +87,11 @@ def parse_proto_libraries(filename, cmakelists_folder, error):
     proto_libraries = []
 
     basedir = os.path.dirname(filename)
-    current_folder_str = os.path.relpath(basedir, cmakelists_folder).replace('\\', '/')  # We need forward slashes because of Windows
+    current_folder_str = os.path.relpath(basedir, source_folder).replace('\\', '/')  # We need forward slashes because of Windows
     proto_library = None
 
     def parsing_sources(line):
-        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), cmakelists_folder).replace('\\', '/')
+        proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), source_folder).replace('\\', '/')
         proto_library.srcs.append(proto_path)
 
     def parsing_deps(line):
@@ -108,7 +107,7 @@ def parse_proto_libraries(filename, cmakelists_folder, error):
         elif line.startswith("//grafeas/"):
             proto_library.deps.add(line)
         else:
-            error(f"Unrecognized dep: {line} -- {os.path.relpath(filename, cmakelists_folder)}")
+            error(f"Unrecognized dep: {line} -- {os.path.relpath(filename, source_folder)}")
 
     def collecting_items(collection, line):
         line = line.strip(",").strip("\"")
