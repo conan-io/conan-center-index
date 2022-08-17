@@ -1,15 +1,16 @@
-from conan import ConanFile
-from conan.tools.build import cross_building
-from conan.tools import files, scm
-from conan.tools.microsoft import is_msvc
-from conans import tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 import glob
 import shutil
 
-required_conan_version = ">=1.45.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools import files, scm
+from conan.tools.microsoft import is_msvc
+from conans import tools, Meson, VisualStudioBuildEnvironment
+
+required_conan_version = ">=1.50.0"
 
 
 class GLibConan(ConanFile):
