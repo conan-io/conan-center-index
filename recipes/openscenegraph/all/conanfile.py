@@ -1,9 +1,15 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, rmdir, rm, patch
+from conan.tools.build import cross_building
+from conan.tools.scm import Version
+from conan.tools.apple.apple import is_apple_os
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake
 import os
 import functools
 
-required_conan_version = ">=1.29.1"
+
+required_conan_version = ">=1.50.0"
 
 
 class OpenSceneGraphConanFile(ConanFile):
@@ -88,7 +94,7 @@ class OpenSceneGraphConanFile(ConanFile):
             # Default to false with fontconfig until it is supported on Windows
             self.options.use_fontconfig = False
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self.settings.os):
             # osg uses imageio on Apple platforms
             del self.options.with_gif
             del self.options.with_jpeg
@@ -110,7 +116,7 @@ class OpenSceneGraphConanFile(ConanFile):
     def validate(self):
         if self.options.get_safe("with_asio", False):
             raise ConanInvalidConfiguration("ASIO support in OSG is broken, see https://github.com/openscenegraph/OpenSceneGraph/issues/921")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("openscenegraph recipe cannot be cross-built yet. Contributions are welcome.")
 
     def requirements(self):
@@ -151,12 +157,12 @@ class OpenSceneGraphConanFile(ConanFile):
             self.requires("zlib/1.2.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
+        for p in self.conan_data["patches"].get(self.version, []):
+            patch(self, **p)
 
         for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
             # Prefer conan's find package scripts over osg's
@@ -237,8 +243,8 @@ class OpenSceneGraphConanFile(ConanFile):
 
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
@@ -331,7 +337,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.enable_windowing_system:
             if self.settings.os == "Linux":
                 library.requires.append("xorg::xorg")
-            elif tools.is_apple_os(self.settings.os):
+            elif is_apple_os(self.settings.os):
                 library.frameworks = ["Cocoa"]
         if self.settings.os == "Windows":
             library.system_libs = ["gdi32"]
@@ -477,16 +483,16 @@ class OpenSceneGraphConanFile(ConanFile):
         # with_directshow
         # setup_plugin("directshow")
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self.settings.os):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
-        if ((self.settings.os == "Macos" and self.settings.os.version and tools.Version(self.settings.os.version) >= "10.8")
-                or (self.settings.os == "iOS" and tools.Version(self.settings.os.version) >= "6.0")):
+        if ((self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8")
+                or (self.settings.os == "iOS" and Version(self.settings.os.version) >= "6.0")):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
-        if self.settings.os == "Macos" and self.settings.os.version and tools.Version(self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
+        if self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
             setup_plugin("qt").frameworks = ["QuickTime"]
 
         if self.settings.os == "Macos" and self.settings.arch == "x86":
