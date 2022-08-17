@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools import files
+from conan.tools import files, scm
 from conan.tools.microsoft import is_msvc
 from conans import tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -57,7 +57,7 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if tools.Version(self.version) < "2.71.1":
+            if scm.Version(self.version) < "2.71.1":
                 self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
@@ -75,7 +75,7 @@ class GLibConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("libffi/3.4.2")
         if self.options.with_pcre:
-            if tools.Version(self.version) >= "2.73.2":
+            if scm.Version(self.version) >= "2.73.2":
                 self.requires("pcre2/10.40")
             else:
                 self.requires("pcre/8.45")
@@ -95,14 +95,14 @@ class GLibConan(ConanFile):
     def validate(self):
         if hasattr(self, 'settings_build') and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-        if tools.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
+        if scm.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-        if self.settings.os == "Windows" and not self.options.shared and tools.Version(self.version) < "2.71.1":
+        if self.settings.os == "Windows" and not self.options.shared and scm.Version(self.version) < "2.71.1":
             raise ConanInvalidConfiguration(
                 "glib < 2.71.1 can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
-        if tools.Version(self.version) < "2.67.0" and not is_msvc(self) and not self.options.with_elf:
+        if scm.Version(self.version) < "2.67.0" and not is_msvc(self) and not self.options.with_elf:
             raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def build_requirements(self):
@@ -121,15 +121,15 @@ class GLibConan(ConanFile):
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
 
-        if tools.Version(self.version) < "2.69.0":
+        if scm.Version(self.version) < "2.69.0":
             defs["internal_pcre"] = not self.options.with_pcre
 
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
-        if tools.Version(self.version) >= "2.67.2":
+        if scm.Version(self.version) >= "2.67.2":
             defs["tests"] = "false"
 
-        if tools.Version(self.version) >= "2.67.0":
+        if scm.Version(self.version) >= "2.67.0":
             defs["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
 
         meson.configure(
@@ -143,7 +143,7 @@ class GLibConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if tools.Version(self.version) < "2.67.2":
+        if scm.Version(self.version) < "2.67.2":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
                 "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())",
@@ -154,7 +154,7 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        if tools.Version(self.version) < "2.73.2":
+        if scm.Version(self.version) < "2.73.2":
             for filename in [
                 os.path.join(self._source_subfolder, "meson.build"),
                 os.path.join(self._source_subfolder, "glib", "meson.build"),
@@ -166,7 +166,7 @@ class GLibConan(ConanFile):
             # allow to find gettext
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
-                "libintl = cc.find_library('intl', required : false)" if tools.Version(self.version) < "2.73.1" \
+                "libintl = cc.find_library('intl', required : false)" if scm.Version(self.version) < "2.73.1" \
                 else "libintl = dependency('intl', required: false)",
                 "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
             )
@@ -206,7 +206,7 @@ class GLibConan(ConanFile):
                     shutil.move(filename_old, filename_new)
 
     def package(self):
-        if tools.Version(self.version) < "2.73.0":
+        if scm.Version(self.version) < "2.73.0":
             self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         else:
             self.copy(pattern="LGPL-2.1-or-later.txt", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
@@ -284,7 +284,7 @@ class GLibConan(ConanFile):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         if self.options.with_pcre:
-            if tools.Version(self.version) >= "2.73.2":
+            if scm.Version(self.version) >= "2.73.2":
                 self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
             else:
                 self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
