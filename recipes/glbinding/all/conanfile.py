@@ -107,7 +107,7 @@ class GlbindingConan(ConanFile):
         self.cpp_info.components["khrplatform"].libdirs = []
 
         # workaround to propagate all components in CMakeDeps generator
-        self.cpp_info.set_property("cmake_file_name", "glbinding::glbinding-aux")
+        self.cpp_info.set_property("cmake_target_name", "glbinding::glbinding-aux")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "glbinding"
