@@ -60,14 +60,14 @@ class _ProtoLibrary:
             """)
         else:
             content += textwrap.dedent(f"""\
-                set({self.cmake_target}_PROTOS {" ".join(["${CMAKE_SOURCE_DIR}/"+it for it in self.srcs])})
+                set({self.cmake_target}_PROTOS {" ".join(["${CMAKE_SOURCE_DIR}/src/"+it for it in self.srcs])})
                 add_library({self.cmake_target} ${{{self.cmake_target}_PROTOS}})
                 target_include_directories({self.cmake_target} PUBLIC ${{CMAKE_BINARY_DIR}})
                 target_compile_features({self.cmake_target} PUBLIC cxx_std_11)
                 protobuf_generate(LANGUAGE cpp
                                 TARGET {self.cmake_target}
                                 PROTOS ${{{self.cmake_target}_PROTOS}}
-                                IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}
+                                IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}/src
                                 )
             """)
 
