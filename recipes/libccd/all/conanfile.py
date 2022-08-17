@@ -55,6 +55,7 @@ class LibccdConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["ENABLE_DOUBLE_PRECISION"] = self.options.enable_double_precision
         tc.variables["CCD_HIDE_ALL_SYMBOLS"] = not self.options.shared
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
