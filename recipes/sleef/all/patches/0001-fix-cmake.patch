@@ -1,0 +1,44 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,3 +1,12 @@
++cmake_minimum_required(VERSION 3.15)
++if(POLICY CMP0066)
++    cmake_policy(SET CMP0066 OLD)
++endif()
++set(SLEEF_VERSION_MAJOR 3)
++set(SLEEF_VERSION_MINOR 5)
++set(SLEEF_VERSION_PATCHLEVEL 1)
++set(SLEEF_VERSION ${SLEEF_VERSION_MAJOR}.${SLEEF_VERSION_MINOR}.${SLEEF_VERSION_PATCHLEVEL})
++project(SLEEF VERSION ${SLEEF_VERSION} LANGUAGES C)
+ # Options
+ 
+ option(BUILD_SHARED_LIBS "Build shared libs" ON)
+@@ -22,28 +31,11 @@ option(ENABLE_ALTSQRT "Enable alternative sqrt method (aarch64 only)" OFF)
+ 
+ option(DISABLE_FFTW "Disable testing the DFT library with FFTW" OFF)
+ 
+-cmake_minimum_required(VERSION 3.4.3)
+-
+-# Set to NEW when updating cmake_minimum_required to VERSION >= 3.7.2
+-if(${CMAKE_VERSION} VERSION_GREATER "3.7.1")
+-  cmake_policy(SET CMP0066 OLD)
+-endif()
+-
+-if(${CMAKE_VERSION} VERSION_GREATER "3.14.99")
+-  cmake_policy(SET CMP0091 NEW)
+-endif()
+ 
+ enable_testing()
+ 
+-set(SLEEF_VERSION_MAJOR 3)
+-set(SLEEF_VERSION_MINOR 5)
+-set(SLEEF_VERSION_PATCHLEVEL 1)
+-set(SLEEF_VERSION ${SLEEF_VERSION_MAJOR}.${SLEEF_VERSION_MINOR}.${SLEEF_VERSION_PATCHLEVEL})
+ set(SLEEF_SOVERSION ${SLEEF_VERSION_MAJOR})
+ 
+-project(SLEEF
+-	VERSION ${SLEEF_VERSION}
+-	LANGUAGES C)
+ 
+ # For specifying installation directories
+ include(GNUInstallDirs)
