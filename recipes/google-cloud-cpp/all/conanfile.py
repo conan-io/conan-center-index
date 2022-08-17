@@ -28,7 +28,6 @@ class GoogleCloudCppConan(ConanFile):
         }
 
     short_paths = True
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -54,9 +53,8 @@ class GoogleCloudCppConan(ConanFile):
         if hasattr(self, "settings_build") and tools.build.cross_building(self):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
-        if Version(self.version) >= "1.30.0":
-            if self.settings.compiler == 'clang' and Version(self.settings.compiler.version) < "6.0":
-                raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
+        if self.settings.compiler == 'clang' and Version(self.settings.compiler.version) < "6.0":
+            raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
 
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, 11)
@@ -104,8 +102,7 @@ class GoogleCloudCppConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.patch(**patch)
+        tools.files.apply_conandata_patches(self)
 
         # Use googleapis from requirement
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "external", "googleapis", "CMakeLists.txt"),
@@ -116,6 +113,13 @@ class GoogleCloudCppConan(ConanFile):
                 set(EXTERNAL_GOOGLEAPIS_SOURCE
                     "{self.dependencies["googleapis"].cpp_info.resdirs[0]}")
                 """))
+
+        # API change on protobuf library starting on "3.21.0"
+        if Version(self.deps_cpp_info["protobuf"].version) >= "3.21.0":
+            tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "generator", "internal", "descriptor_utils.cc"),
+            "#include <google/protobuf/compiler/cpp/cpp_names.h>",
+            "#include <google/protobuf/compiler/cpp/names.h>"
+            )
 
     def build(self):
         self._patch_sources()
