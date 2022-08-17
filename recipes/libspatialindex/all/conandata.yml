@@ -5,6 +5,4 @@ sources:
 patches:
   "1.9.3":
     - patch_file: "patches/fix-static-and-mingw.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-capi.patch"
-      base_path: "source_subfolder"
