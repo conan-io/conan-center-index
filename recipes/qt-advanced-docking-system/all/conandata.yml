@@ -6,3 +6,5 @@ patches:
   "3.8.2":
     - patch_file: "patches/fix-cmake-license-install.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-find-package-qt6-compat.patch"
+      base_path: "source_subfolder"
