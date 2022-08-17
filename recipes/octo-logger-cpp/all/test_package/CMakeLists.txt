@@ -3,6 +3,7 @@ PROJECT(test_package CXX)
 
 INCLUDE(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 CONAN_BASIC_SETUP(TARGETS)
+
 FIND_PACKAGE(octo-logger-cpp REQUIRED CONFIG)
 
 ADD_EXECUTABLE(${PROJECT_NAME} test_package.cpp)
