@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files, scm
+from conan.tools import files, scm, microsoft
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conans import CMake, Meson, tools
 from tempfile import TemporaryDirectory
@@ -190,7 +190,7 @@ class GdkPixbufConan(ConanFile):
         with tools.environment_append({"LD_LIBRARY_PATH": os.path.join(self.package_folder, "lib")}):
             meson = self._configure_meson()
             meson.install()
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
+        if microsoft.is_msvc(self) and not self.options.shared:
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
