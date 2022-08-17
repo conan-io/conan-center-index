@@ -539,8 +539,8 @@ class OpenSSLConan(ConanFile):
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = self._adjust_path(include_path)
                 lib_path = self._adjust_path(lib_path)
-
-                if zlib_info.shared:
+            
+                if self.options["zlib"].shared:
                     args.append("zlib-dynamic")
                 else:
                     args.append("zlib")
