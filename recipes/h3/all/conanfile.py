@@ -67,7 +67,6 @@ class H3Conan(ConanFile):
         tc.variables["ENABLE_LINTING"] = False
         tc.variables["ENABLE_DOCS"] = False
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["CMAKE_C_STANDARD"] = 99
         tc.generate()
 
     def build(self):
