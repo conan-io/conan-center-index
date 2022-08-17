@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake
+from conans import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
@@ -31,6 +32,13 @@ class OctoLoggerCPPConan(ConanFile):
             "apple-clang": "11",
             "Visual Studio": "16",
         }
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()  
+
+    def layout(self):
+        cmake_layout(self, src_folder=self._source_subfolder)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -68,7 +76,6 @@ class OctoLoggerCPPConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         cmake.install(build_dir=self._build_subfolder)
 
     def package_info(self):
