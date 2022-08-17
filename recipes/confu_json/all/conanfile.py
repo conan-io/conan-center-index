@@ -1,3 +1,4 @@
+import os
 from conan import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
@@ -58,8 +59,7 @@ class ConfuJson(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.h*", dst="include/confu_json",
