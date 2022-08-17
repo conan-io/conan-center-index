@@ -43,6 +43,7 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.tools.get | [conan.tools.files.get](https://docs.conan.io/en/latest/reference/conanfile/tools/files/downloads.html#conan-tools-files-get) |
 | conans.tools.cross_building | [conan.tools.build.cross_building](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-cross-building) |
 | conans.tools.rmdir | [conan.tools.files.rmdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rmdir) |
+| conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) |
 | conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) |
 | conans.errors.ConanException | [conan.errors.ConanException](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) |
 
