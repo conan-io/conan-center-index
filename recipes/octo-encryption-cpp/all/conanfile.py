@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake
+from conans import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
@@ -12,7 +13,6 @@ class OctoEncryptionCPPConan(ConanFile):
     homepage = "https://github.com/ofiriluz/octo-encryption-cpp"
     description = "Octo encryption library"
     topics = ("cryptography", "cpp")
-    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
 
     @property
@@ -31,6 +31,13 @@ class OctoEncryptionCPPConan(ConanFile):
             "apple-clang": "11",
             "Visual Studio": "16",
         }
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()  
+
+    def layout(self):
+        cmake_layout(self, src_folder=self._source_subfolder)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
