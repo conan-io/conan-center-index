@@ -12,7 +12,7 @@ class OctoWildcardMatchingCPPConan(ConanFile):
     homepage = "https://github.com/ofiriluz/octo-wildcardmatching-cpp"
     description = "Octo wildcardmatching library"
     topics = ("wildcard", "regex", "patterns", "cpp")
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
 
     @property
