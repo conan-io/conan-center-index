@@ -2,3 +2,15 @@ sources:
   0.0.5:
     url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.5.tar.gz
     sha256: bc506d4b7836a7689b1c6a2d89bb0c3441f774c8f845fef79d85c71099df5bf9
+  0.0.6:
+    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.6.tar.gz
+    sha256: 24679344d57e54bbf358097f1a74c8b8ff63713fb3355ecf9e12622af3d19589
+  0.0.7:
+    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.7.tar.gz
+    sha256: 2bf2e4b7b29390b692972fd7731589977c68cee06c815134a136f335937f0515
+  0.0.8:
+    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.8.tar.gz
+    sha256: 4504177eabce505cbda4418bb1feb63c6e287f85385b82998cb5ad97940f73d6
+  0.0.9:
+    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.9.tar.gz
+    sha256: 968db8ad4c85542531e6740f1f37775c7a521529a90d044b743671b5b8aac77a

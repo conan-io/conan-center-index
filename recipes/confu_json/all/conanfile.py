@@ -4,8 +4,6 @@ from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 from conans.tools import Version
 
-required_conan_version = ">=1.33.0"
-
 
 class ConfuJson(ConanFile):
     name = "confu_json"
@@ -33,7 +31,7 @@ class ConfuJson(ConanFile):
             "clang": "10",
         }
 
-    def validate(self):
+    def configure(self):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
                 "apple-clang is not supported because of missing concept support")
@@ -53,14 +51,16 @@ class ConfuJson(ConanFile):
                         self.name, self._minimum_cpp_standard,
                         self.settings.compiler,
                         self.settings.compiler.version))
+        self.options["boost"].header_only = True
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.78.0")
         self.requires("magic_enum/0.7.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
         self.copy("*.h*", dst="include/confu_json",
