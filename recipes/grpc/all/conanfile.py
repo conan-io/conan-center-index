@@ -92,7 +92,7 @@ class grpcConan(ConanFile):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
         self.requires("openssl/1.1.1q")
-        self.requires("re2/20220201")
+        self.requires("re2/20220601")
         self.requires("zlib/1.2.12")
         self.requires("protobuf/3.21.4")
         self.requires("googleapis/cci.20220711")
