@@ -1,9 +1,12 @@
-from conans import ConanFile
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
+import os
+
+required_conan_version = ">=1.50.0"
 
 
 class OctoEncryptionCPPConan(ConanFile):
@@ -22,6 +25,7 @@ class OctoEncryptionCPPConan(ConanFile):
             "clang": "9",
             "apple-clang": "11",
             "Visual Studio": "16",
+            "msvc": "1923",
         }
 
     def generate(self):
@@ -67,7 +71,7 @@ class OctoEncryptionCPPConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self.source_folder, dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
