@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -144,15 +144,14 @@ class CivetwebConan(ConanFile):
                 os.remove(os.path.join(bin_folder, bin_file))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "civetweb")
-        self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.names["cmake_find_package"] = "civetweb"
         self.cpp_info.names["cmake_find_package_multi"] = "civetweb"
+        self.cpp_info.set_property("cmake_file_name", "civetweb")
+        self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb")
 
-        self.cpp_info.components["_civetweb"].set_property("cmake_file_name", "civetweb")
-        self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
+        self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
         if self.settings.os == "Linux":
             self.cpp_info.components["_civetweb"].system_libs.extend(["rt", "pthread"])
@@ -171,10 +170,9 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].requires.append("zlib::zlib")
 
         if self.options.with_cxx:
-            self.cpp_info.components["civetweb-cpp"].set_property("cmake_file_name", "civetweb-cpp")
-            self.cpp_info.components["civetweb-cpp"].set_property("cmake_target_name", "civetweb::civetweb-cpp")
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
+            self.cpp_info.components["civetweb-cpp"].set_property("cmake_target_name", "civetweb::civetweb-cpp")
             self.cpp_info.components["civetweb-cpp"].libs = ["civetweb-cpp"]
             self.cpp_info.components["civetweb-cpp"].requires = ["_civetweb"]
             if self.settings.os == "Linux":
