@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     auto material = std::make_shared<octo::encryption::SimpleMaterial>(std::vector<std::string>{"Key1", "Key2", "Key3"});
     octo::encryption::SingleEncryptedString encrypted_string(encryptor);
     // Encryption
-    encrypted_string.set(input_plain_string, material);
+    encrypted_string.set("some_string", material);
     octo::encryption::SingleEncryptedString encrypted_string2(encrypted_string.cipher(), material, encryptor);
     // Decryption
     const std::string& output_plain_string = encrypted_string2.get();
