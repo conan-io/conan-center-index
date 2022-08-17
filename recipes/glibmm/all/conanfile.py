@@ -8,6 +8,8 @@ from conan.tools import files, microsoft, scm, build
 from conans import Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.49.0"
+
 
 class GlibmmConan(ConanFile):
     name = "glibmm"
