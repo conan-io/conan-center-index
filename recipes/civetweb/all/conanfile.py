@@ -148,7 +148,6 @@ class CivetwebConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.set_property("cmake_file_name", "civetweb")
         self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb")
-
         self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
