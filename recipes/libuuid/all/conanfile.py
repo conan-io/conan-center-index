@@ -61,9 +61,8 @@ class LibuuidConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
+        files.apply_conandata_patches(self)
+        with files.chdir(sefl, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
@@ -72,7 +71,7 @@ class LibuuidConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        files.rm("*.la", os.path.join(self.package_folder, "lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
