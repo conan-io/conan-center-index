@@ -108,14 +108,14 @@ class FontconfigConan(ConanFile):
         meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return meson
 
-    def _patch_files(self):        
+    def _patch_files(self):
         files.apply_conandata_patches(self)
         # fontconfig requires libtool version number, change it for the corresponding freetype one
         files.replace_in_file(self, os.path.join(self.install_folder, "freetype2.pc"),
                               "Version: {}".format(self.deps_cpp_info["freetype"].version),
                               "Version: {}".format(self.deps_user_info["freetype"].LIBTOOL_VERSION))
         # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
-        files.replace_in_file(self, 
+        files.replace_in_file(self,
             os.path.join(self._source_subfolder, "Makefile.in"),
             "@CROSS_COMPILING_TRUE@RUN_FC_CACHE_TEST = false",
             "RUN_FC_CACHE_TEST=false"
@@ -187,11 +187,11 @@ class FontconfigConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
 
         fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.output.info("Creating FONTCONFIG_FILE environment variable: {}".format(fontconfig_file))
+        self.output.info(f"Creating FONTCONFIG_FILE environment variable: {fontconfig_file}")
         self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
         self.env_info.FONTCONFIG_FILE = fontconfig_file # TODO: remove in conan v2?
 
         fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.output.info("Creating FONTCONFIG_PATH environment variable: {}".format(fontconfig_path))
+        self.output.info(f"Creating FONTCONFIG_PATH environment variable: {fontconfig_path}")
         self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
         self.env_info.FONTCONFIG_PATH = fontconfig_path # TODO: remove in conan v2?
