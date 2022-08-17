@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 11cae4e..3899728 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,10 +15,10 @@ find_package("OpenSSL")
+ find_package("Boost")
+ find_package("libiconv")
+ find_package("ZLIB")
+-find_package("gsl_microsoft/20180102")
++find_package("Microsoft.GSL")
+ find_package("LibXml2")
+ find_package("pybind11")
+-find_package("libarchive")
++find_package("LibArchive")
+ 
+ include_directories(${CONAN_INCLUDE_DIRS})
+ 

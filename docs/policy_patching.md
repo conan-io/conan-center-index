@@ -7,6 +7,16 @@ needed. Packages from Conan Center should fulfill the expectations of anyone
 reading the changelog of the library, the documentation, or any statement by
 the library maintainers.
 
+
+<!-- toc -->
+## Contents
+
+  * [Rules](#rules)
+  * [Exceptions](#exceptions)
+  * [Patches: format and conventions](#patches-format-and-conventions)<!-- endToc -->
+
+## Rules
+
 These are the rules that apply to regular version of Conan packages:
 
 **Build system patches.-** In order to add libraries into ConanCenter sometimes
