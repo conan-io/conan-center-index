@@ -153,33 +153,31 @@ class MpirConan(ConanFile):
 
     def _patch_sources(self):
         if self._is_msvc:
-            # self.copy("*", src="build.vc15", dst="build.vc16")
 
-            self.output.info(f"build.vc15 exists: {os.path.isfile('build.vc15')}")
-            self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc15'))}")
+            # self.output.info(f"build.vc15 exists: {os.path.isfile('build.vc15')}")
+            # self.output.info(f"source/build.vc15 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc15'))}")
 
-            # conan.tools.files.copy(self, pattern="*", src="build.vc15", dst="build.vc16")
             conan.tools.files.copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=os.path.join(self._source_subfolder, 'build.vc16'))
 
-            self.output.info(f"build.vc16 exists: {os.path.isfile('build.vc16')}")
-            self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc16'))}")
+            # self.output.info(f"build.vc16 exists: {os.path.isfile('build.vc16')}")
+            # self.output.info(f"source/build.vc16 exists: {os.path.isfile(os.path.join(self._source_subfolder, 'build.vc16'))}")
 
 
-            self.output.info("build.vc15 *********************************")
-            for root, _, files in os.walk("build.vc15"):
-                for file in files:
-                    self.output.info(f"file: {os.path.join(root, file)}")
+            # self.output.info("build.vc15 *********************************")
+            # for root, _, files in os.walk("build.vc15"):
+            #     for file in files:
+            #         self.output.info(f"file: {os.path.join(root, file)}")
 
-            self.output.info("source/build.vc15 *********************************")
-            for root, _, files in os.walk(os.path.join(self._source_subfolder, "build.vc15")):
-                for file in files:
-                    self.output.info(f"file: {os.path.join(root, file)}")
+            # self.output.info("source/build.vc15 *********************************")
+            # for root, _, files in os.walk(os.path.join(self._source_subfolder, "build.vc15")):
+            #     for file in files:
+            #         self.output.info(f"file: {os.path.join(root, file)}")
 
 
-            self.output.info("build.vc16 *********************************")
-            for root, _, files in os.walk("build.vc16"):
-                for file in files:
-                    self.output.info(f"file: {os.path.join(root, file)}")
+            # self.output.info("build.vc16 *********************************")
+            # for root, _, files in os.walk("build.vc16"):
+            #     for file in files:
+            #         self.output.info(f"file: {os.path.join(root, file)}")
 
 
 
@@ -216,6 +214,10 @@ class MpirConan(ConanFile):
             lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
+
+            self.output.info(f"***** package ***** MSVC")
+            self.output.info(f"lib_folder: {lib_folder}")
+
             self.copy("mpir.h", dst="include", src=lib_folder, keep_path=True)
             if self.options.enable_gmpcompat:
                 self.copy("gmp.h", dst="include", src=lib_folder, keep_path=True)
