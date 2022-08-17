@@ -81,9 +81,7 @@ class GoogleCloudCppConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
-        # Do not build in parallel for certain configurations, it fails writting/reading files at the same time
-        parallel = not (self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16" and self.version in ["1.31.1", "1.30.1"])
-        cmake = CMake(self, parallel=parallel)
+        cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = 0
  
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
