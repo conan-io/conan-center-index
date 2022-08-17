@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files, scm
+from conan.tools import files, scm, microsoft
 from conans import tools, AutoToolsBuildEnvironment, Meson
 import contextlib
 import functools
@@ -37,10 +37,6 @@ class FontconfigConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -65,13 +61,13 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if self._is_msvc and scm.Version(self.version) < "2.13.93":
+        if microsoft.is_msvc(self) and scm.Version(self.version) < "2.13.93":
             raise ConanInvalidConfiguration("fontconfig does not support Visual Studio for versions < 2.13.93.")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             self.build_requires("meson/0.63.1")
         elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -95,7 +91,7 @@ class FontconfigConan(ConanFile):
             "--localstatedir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "var"))),
         ]
         autotools.configure(configure_dir=self._source_subfolder, args=args)
-        tools.replace_in_file("Makefile", "po-conf test", "po-conf")
+        files.replace_in_file(self, "Makefile", "po-conf test", "po-conf")
         return autotools
 
     @functools.lru_cache(1)
@@ -123,7 +119,7 @@ class FontconfigConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             with tools.vcvars(self):
                 env = {
                     "CC": "cl",
@@ -138,7 +134,7 @@ class FontconfigConan(ConanFile):
 
     def build(self):
         self._patch_files()
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             with self._build_context():
                 meson = self._configure_meson()
                 meson.build()
@@ -155,7 +151,7 @@ class FontconfigConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self._is_msvc:
+        if microsoft.is_msvc(self):
             with self._build_context():
                 meson = self._configure_meson()
                 meson.install()
