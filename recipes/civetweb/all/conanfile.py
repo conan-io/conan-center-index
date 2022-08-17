@@ -97,7 +97,7 @@ class CivetwebConan(ConanFile):
         tc = CMakeToolchain(self)
 
         if self.options.with_ssl:
-            openssl_version = Version(self.deps_cpp_info["openssl"].version[:-1])
+            openssl_version = Version(self.dependencies["openssl"].ref.version[:-1])
             tc.variables["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             tc.variables["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
             tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
