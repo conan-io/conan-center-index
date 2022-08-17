@@ -25,6 +25,9 @@ class Box2dConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="Box2D")
+
     def source(self):
         tools.files.get(self,
                         **self.conan_data["sources"][self.version],
@@ -54,9 +57,6 @@ class Box2dConan(ConanFile):
         tools.files.copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        print(self.cpp_info.includedirs)
         self.cpp_info.libs = ["Box2D"]
-
-
-    def layout(self):
-        cmake_layout(self, src_folder="Box2D")
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
