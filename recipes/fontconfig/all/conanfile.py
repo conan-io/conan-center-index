@@ -6,7 +6,7 @@ import contextlib
 import functools
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.2"
 
 
 class FontconfigConan(ConanFile):
