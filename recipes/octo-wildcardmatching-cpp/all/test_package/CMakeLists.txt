@@ -1,9 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 PROJECT(test_package CXX)
 
-INCLUDE(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-CONAN_BASIC_SETUP(TARGETS)
-FIND_PACKAGE(octo-encryption-cpp REQUIRED CONFIG)
+FIND_PACKAGE(octo-wildcardmatching-cpp REQUIRED CONFIG)
 
 ADD_EXECUTABLE(${PROJECT_NAME} test_package.cpp)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} octo::octo-wildcardmatching-cpp)
