@@ -1,4 +1,3 @@
-import os
 from conan import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
@@ -32,7 +31,7 @@ class ConfuJson(ConanFile):
         }
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and Version(self.version)<Version("0.0.10"):
+        if self.settings.compiler == "Visual Studio" and Version(self.version)<Version("0.0.9"):
             raise ConanInvalidConfiguration(
                 "Visual Studio is not supported in versions before confu_json/0.0.9")
         if self.settings.compiler == "apple-clang":
