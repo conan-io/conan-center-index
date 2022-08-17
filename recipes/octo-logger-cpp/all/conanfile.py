@@ -43,6 +43,8 @@ class OctoLoggerCPPConan(ConanFile):
             )
         else:
             self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
+            raise ConanInvalidConfiguration("{} does not support clang with libc++. Use libstdc++ instead.".format(self.name))
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
