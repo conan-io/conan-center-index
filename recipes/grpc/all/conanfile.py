@@ -125,7 +125,7 @@ class grpcConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.21.1')
+            self.build_requires('protobuf/3.21.4')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.build.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
