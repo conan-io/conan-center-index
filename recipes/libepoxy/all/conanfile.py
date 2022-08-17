@@ -33,11 +33,11 @@ class EpoxyConan(ConanFile):
     }
 
     _meson = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
@@ -118,7 +118,7 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl"]
         self.cpp_info.names["pkg_config"] = "epoxy"
-        
+
         pkgconfig_variables = {
             'epoxy_has_glx': '1' if self.options.get_safe("glx") else '0',
             'epoxy_has_egl': '1' if self.options.get_safe("egl") else '0',
@@ -126,4 +126,4 @@ class EpoxyConan(ConanFile):
         }
         self.cpp_info.set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
