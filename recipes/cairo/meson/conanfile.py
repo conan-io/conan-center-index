@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools import files, microsoft
 from conans import tools, Meson, VisualStudioBuildEnvironment
 
-required_conan_version = ">=1.38.0"
+required_conan_version = ">=1.50.0"
 
 
 class CairoConan(ConanFile):
