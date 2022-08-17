@@ -113,7 +113,7 @@ class GoogleCloudCppConan(ConanFile):
                 """))
 
         # API change on protobuf library starting on "3.21.0"
-        if Version(self.deps_cpp_info["protobuf"].version) >= "3.21.0":
+        if Version(self.version) >= "1.36.0" and Version(self.deps_cpp_info["protobuf"].version) >= "3.21.0":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "generator", "internal", "descriptor_utils.cc"),
             "#include <google/protobuf/compiler/cpp/cpp_names.h>",
             "#include <google/protobuf/compiler/cpp/names.h>"
