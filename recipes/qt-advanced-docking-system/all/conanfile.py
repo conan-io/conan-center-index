@@ -11,7 +11,7 @@ class QtADS(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"
     topics = ("qt", "gui")
-    description = (
+    description = (source_subfolder
         "Qt Advanced Docking System lets you create customizable layouts "
         "using a full featured window docking system similar to what is found "
         "in many popular integrated development environments (IDEs) such as "
@@ -42,7 +42,7 @@ class QtADS(ConanFile):
         files.get(self,
                   **self.conan_data["sources"][self.version], 
                   strip_root=True,
-                  destination="ads")
+                  destination="source_subfolder")
         
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -51,7 +51,7 @@ class QtADS(ConanFile):
         qt = self.dependencies["qt"]
         files.replace_in_file(
             self,
-            f"{self.source_folder}/ads/src/ads_globals.cpp",
+            f"{self.source_folder}/source_subfolder/src/ads_globals.cpp",
             "#include <qpa/qplatformnativeinterface.h>",
             f"#include <{qt.ref.version}/QtGui/qpa/qplatformnativeinterface.h>"
         )
@@ -64,13 +64,13 @@ class QtADS(ConanFile):
             "ADS_VERSION": self.version,
             "BUILD_EXAMPLES": "OFF",
             "BUILD_STATIC": not self.options.shared,
-            }, build_script_folder="ads")
+            }, build_script_folder="source_subfolder")
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src="ads")
+        self.copy("LICENSE", dst="licenses", src="source_subfolder")
         files.rmdir(self, os.path.join(self.package_folder, "license"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
