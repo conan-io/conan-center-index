@@ -1,6 +1,6 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
+from conan.tools.scm import Version
 
 
 
@@ -25,7 +25,7 @@ class ConfuJson(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "10",
             "clang": "10",
         }
@@ -35,7 +35,7 @@ class ConfuJson(ConanFile):
             raise ConanInvalidConfiguration(
                 "apple-clang is not supported because of missing concept support")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+         tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
@@ -43,7 +43,7 @@ class ConfuJson(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -57,7 +57,7 @@ class ConfuJson(ConanFile):
         self.requires("magic_enum/0.7.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.files.get(self, **self.conan_data["sources"][self.version],
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
