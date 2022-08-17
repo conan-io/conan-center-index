@@ -5,8 +5,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conans import tools
-# TODO: Update to conan.tools.scm.Version after Conan 1.50.2
-from conans.tools import Version
+from conan.tools.scm import Version
 
 import glob
 import os
