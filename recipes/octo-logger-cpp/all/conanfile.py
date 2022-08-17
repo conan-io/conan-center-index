@@ -26,8 +26,8 @@ class OctoLoggerCPPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc["DISABLE_TESTS"] = "ON"
-        tc["DISABLE_EXAMPLES"] = "ON"
+        tc.variables["DISABLE_TESTS"] = True
+        tc.variables["DISABLE_EXAMPLES"] = True
         tc.generate()  
 
     def layout(self):
