@@ -115,7 +115,7 @@ should be listed here. The file is organized into two sections, `sources` and `p
 for each version of the library. All the files that are downloaded from the internet should include a checksum, so we can validate that
 they are not changed.
 
-A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We strongly encourage adding the [patch feilds](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
+A detailed breakdown of all the fields can be found in [conandata_yml_format.md](conandata_yml_format.md). We strongly encourage adding the [patch fields](conandata_yml_format.md#patches-fields) to help track where patches come from and what issue they solve.
 
 Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` attribute that can be used as follows:
 
