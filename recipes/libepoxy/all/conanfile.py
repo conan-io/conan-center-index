@@ -5,7 +5,7 @@ from conans import  Meson, tools
 import os
 import glob
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.50.0"
 
 class EpoxyConan(ConanFile):
     name = "libepoxy"
