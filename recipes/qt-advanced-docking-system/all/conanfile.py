@@ -11,7 +11,7 @@ class QtADS(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"
     topics = ("qt", "gui")
-    description = (source_subfolder
+    description = (
         "Qt Advanced Docking System lets you create customizable layouts "
         "using a full featured window docking system similar to what is found "
         "in many popular integrated development environments (IDEs) such as "
