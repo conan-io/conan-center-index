@@ -83,10 +83,6 @@ class EpoxyConan(ConanFile):
         files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
     def _configure_meson(self):
         if self._meson:
             return self._meson
@@ -104,7 +100,7 @@ class EpoxyConan(ConanFile):
         return self._meson
 
     def build(self):
-        self._patch_sources()
+        files.apply_conandata_patches(self)
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
