@@ -6,7 +6,7 @@ from conans import CMake, tools
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.50.0"
 
 
 class PCREConan(ConanFile):
