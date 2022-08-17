@@ -60,7 +60,7 @@ class GoogleAPISConan(ConanFile):
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration("Source code generated from protos is missing some export macro")
-        if self.info.options.shared and not self.dependencies.host["protobuf"].options["shared"]:
+        if self.info.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
     @property
