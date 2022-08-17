@@ -3,8 +3,8 @@ sources:
     url: "https://sourceforge.net/projects/polyclipping/files/clipper_ver6.4.2.zip"
     sha256: "a14320d82194807c4480ce59c98aa71cd4175a5156645c4e2b3edd330b930627"
   "5.1.6":
-    url: "https://sourceforge.net/projects/polyclipping/files/Older%20versions/clipper_ver5.1.6.zip"
-    sha256: "3655a090f55c16815eaebb4c3f863ff6c028d4b9c22111f81d4eac86bdb2f867"
+    url: "https://github.com/marcusl/clipper-archive/raw/main/clipper_ver5.1.6.zip"
+    sha256: "9aed086401e0a6ff78481e20da199d467b32ed1728aba1b74c5735e5ce84723f"
   "4.10.0":
     url: "https://github.com/marcusl/clipper-archive/raw/main/clipper_ver4.10.0.zip"
     sha256: "85f5a7d281e45cd1d9baa2d6154a64fcbc557340cab6b091ed9a07aab369e752"
