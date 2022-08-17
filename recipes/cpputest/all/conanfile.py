@@ -4,7 +4,7 @@ from conan import tools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class CppUTestConan(ConanFile):
