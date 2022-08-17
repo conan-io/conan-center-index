@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files
+from conan.tools import files, scm
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conans import CMake, Meson, tools
 from tempfile import TemporaryDirectory
@@ -7,7 +7,7 @@ import functools
 import os
 import shutil
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.50.2"
 
 
 class GdkPixbufConan(ConanFile):
@@ -91,23 +91,22 @@ class GdkPixbufConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
 
         meson_build = os.path.join(self._source_subfolder, "meson.build")
-        tools.replace_in_file(meson_build, "subdir('tests')", "#subdir('tests')")
-        tools.replace_in_file(meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
-        tools.replace_in_file(meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
+        files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+        files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        files.replace_in_file(self, meson_build,
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if scm.Version(self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if tools.Version(self.version) >= "2.42.6":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
+        if scm.Version(self.version) >= "2.42.6":
+            files.replace_in_file(self, os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
-        if tools.Version(self.version) >= "2.42.9":
-            tools.replace_in_file(meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
-            tools.replace_in_file(meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
-            tools.replace_in_file(meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
+        if scm.Version(self.version) >= "2.42.9":
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
+            files.replace_in_file(self, meson_build, "is_msvc_like ? 'tiff' : 'libtiff-4'", "'libtiff-4'")
 
     @property
     def _requires_compiler_rt(self):
@@ -147,14 +146,14 @@ class GdkPixbufConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        if tools.Version(self.version) >= "2.42.0":
+        if scm.Version(self.version) >= "2.42.0":
             defs["introspection"] = "false"
         else:
             defs["gir"] = "false"
         defs["docs"] = "false"
         defs["man"] = "false"
         defs["installed_tests"] = "false"
-        if tools.Version(self.version) >= "2.42.8":
+        if scm.Version(self.version) >= "2.42.8":
             defs["png"] = "enabled" if self.options.with_libpng else "disabled"
             defs["tiff"] = "enabled" if self.options.with_libtiff else "disabled"
             defs["jpeg"] = "enabled" if self.options.with_libjpeg else "disabled"
@@ -195,7 +194,7 @@ class GdkPixbufConan(ConanFile):
             files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        files.rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
