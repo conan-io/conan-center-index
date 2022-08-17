@@ -52,7 +52,7 @@ class OctoEncryptionCPPConan(ConanFile):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
-        self.requires("openssl/3.0.5")
+        self.requires("openssl/1.1.1q")
 
     def build_requirements(self):
         self.build_requires("cmake/3.16.9")
