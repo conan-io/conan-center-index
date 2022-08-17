@@ -50,17 +50,7 @@ class LibsystemdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "249.5":
-            self.build_requires("meson/0.60.2")
-        elif tools.Version(self.version) >= "248.3":
-            # Mason 0.60.0.rc1 introduced a breaking change addressed in 249.5
-            # https://github.com/mesonbuild/meson/commit/43302d3296baff6aeaf8e03f5d701b0402e37a6c
-            # https://github.com/systemd/systemd-stable/commit/c29537f39e4f413a6cbfe9669fa121bdd6d8b36f
-            self.build_requires("meson/0.59.3")
-        else:
-            # incompatible change in meson/0.57.2:
-            # https://github.com/mesonbuild/meson/pull/8526
-            self.build_requires("meson/0.57.1")
+        self.build_requires("meson/0.60.2")
         self.build_requires("m4/1.4.19")
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
@@ -124,10 +114,16 @@ class LibsystemdConan(ConanFile):
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
             "dns-over-tls", "gnu-efi", "valgrind", "log-trace"]
+
+        if tools.Version(self.version) >= "247.1":
+            unrelated.append("oomd")
+        if tools.Version(self.version) >= "248.1":
+            unrelated.extend(["sysext", "nscd"])
+
         for opt in unrelated:
             defs[opt] = "false"
 
-        # 'rootprefix' is unused during libsystemd packaging but systemd v248
+        # 'rootprefix' is unused during libsystemd packaging but systemd > v247
         # build files require 'prefix' to be a subdirectory of 'rootprefix'.
         defs["rootprefix"] = self.package_folder
 

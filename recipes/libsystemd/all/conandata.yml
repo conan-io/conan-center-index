@@ -1,29 +1,25 @@
 sources:
-  "246.6":
-    url: "https://github.com/systemd/systemd-stable/archive/v246.6.tar.gz"
-    sha256: "e999dbf0cff5b0109c28b307741b7dc315877fe2e1999f25c153548db44bb020"
-  "247.2":
-    url: "https://github.com/systemd/systemd-stable/archive/v247.2.tar.gz"
-    sha256: "e6100f447f67a49f6e019ff7ee317cf8b67a5c491e54dcf8b02975d4307fa468"
-  "247.3":
-    url: "https://github.com/systemd/systemd-stable/archive/v247.3.tar.gz"
-    sha256: "2869986e219a8dfc96cc0dffac66e0c13bb70a89e16b85a3948876c146cfa3e0"
-  "248.3":
-    url: "https://github.com/systemd/systemd-stable/archive/v248.3.tar.gz"
-    sha256: "cc372aeed563379a734901ed73d6fbb6b75c171251e1d69c0b5650aaf9c15d06"
-  "249.4":
-    url: "https://github.com/systemd/systemd-stable/archive/v249.4.tar.gz"
-    sha256: "f3df809bbe777fcb5ffe2b29aaf6f871de764ef22706940960f88b8a850e9278"
-  "249.7":
-    url: "https://github.com/systemd/systemd-stable/archive/v249.7.tar.gz"
-    sha256: "5dbf457431bb16e5dfc957200731ad302fe3ae4919470bc34b8224428e1addbb"
+  "246.16":
+    url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
+    sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
+  "247.11":
+    url: "https://github.com/systemd/systemd-stable/archive/v247.11.tar.gz"
+    sha256: "99537ecf15815d5bac2f8f75b4e04635e1f8e95e7c857c711e42483aa2744f7f"
+  "248.10":
+    url: "https://github.com/systemd/systemd-stable/archive/v248.10.tar.gz"
+    sha256: "dab015c2ccd5cb0427b1c3ec85ac0f02974b38ca643de31932f198a8b60de8da"
+  "249.12":
+    url: "https://github.com/systemd/systemd-stable/archive/v249.12.tar.gz"
+    sha256: "cf8851e94cbd82c65a86ab122747f3e0018b04cd991c7daccbacb4a3ef149b68"
 patches:
-  "248.3":
+  "246.16":
     - base_path: "source_subfolder"
-      patch_file: "patches/248.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-  "249.4":
+      patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/249.4/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-  "249.7":
+      patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
+  "248.10":
     - base_path: "source_subfolder"
-      patch_file: "patches/249.7/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "249.12":
+    - base_path: "source_subfolder"
+      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"

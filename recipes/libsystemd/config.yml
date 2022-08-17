@@ -1,13 +1,9 @@
 versions:
-  "246.6":
+  "246.16":
     folder: all
-  "247.2":
+  "247.11":
     folder: all
-  "247.3":
+  "248.10":
     folder: all
-  "248.3":
-    folder: all
-  "249.4":
-    folder: all
-  "249.7":
+  "249.12":
     folder: all
