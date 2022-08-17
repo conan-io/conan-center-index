@@ -1,10 +1,14 @@
-import os
 from conan import ConanFile
-from conan.tools.files import rename, get
-from conans import Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class Dav1dConan(ConanFile):
@@ -14,6 +18,8 @@ class Dav1dConan(ConanFile):
     topics = ("av1", "codec", "video", "decoding")
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,102 +34,106 @@ class Dav1dConan(ConanFile):
         "bit_depth": "all",
         "with_tools": True,
         "assembly": True,
-        "with_avx512": False
+        "with_avx512": False,
     }
-    settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-
-    _meson = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+        if is_msvc(self) and self.settings.build_type == "Debug":
             # debug builds with assembly often causes linker hangs or LNK1000
             self.options.assembly = False
-        if tools.Version(self.version) < "1.0.0":
+        if Version(self.version) < "1.0.0":
             del self.options.with_avx512
-
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
         if not self.options.assembly:
             del self.options.with_avx512
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        # Meson versions since 0.51.0 do not work with autodetect symbol prefix
-        # so the nasm build is broken
-        # See upstream bug https://github.com/mesonbuild/meson/issues/5482
-        self.build_requires("meson/0.51.0")
+        self.tool_requires("meson/0.63.1")
         if self.options.assembly:
-            self.build_requires("nasm/2.15.05")
+            self.tool_requires("nasm/2.15.05")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["enable_tests"] = False
+        tc.project_options["enable_asm"] = self.options.assembly
+        if Version(self.version) < "1.0.0":
+            tc.project_options["enable_avx512"] = self.options.get_safe("with_avx512", False)
+        tc.project_options["enable_tools"] = self.options.with_tools
+        if self.options.bit_depth == "all":
+            tc.project_options["bitdepths"] = "8,16"
+        else:
+            tc.project_options["bitdepths"] = str(self.options.bit_depth)
+        # TODO: fixed in conan 1.51.0?
+        tc.project_options["bindir"] = "bin"
+        tc.project_options["libdir"] = "lib"
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate(scope="build")
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                               "subdir('doc')", "")
-
-    def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.options["enable_tests"] = False
-        self._meson.options["enable_asm"] = self.options.assembly
-        if tools.Version(self.version) < "1.0.0":
-            self._meson.options["enable_avx512"] = self.options.get_safe("with_avx512", False)
-        self._meson.options["enable_tools"] = self.options.with_tools
-        if self.options.bit_depth == "all":
-            self._meson.options["bitdepths"] = "8,16"
-        else:
-            self._meson.options["bitdepths"] = str(self.options.bit_depth)
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder, pkg_config_paths=[self.install_folder])
-        return self._meson
 
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        meson = self._configure_meson()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
-
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            # https://github.com/mesonbuild/meson/issues/7378
-            rename(self,
-                   os.path.join(self.package_folder, "lib", "libdav1d.a"),
-                   os.path.join(self.package_folder, "lib", "dav1d.lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "dav1d")
         self.cpp_info.libs = ["dav1d"]
-        self.cpp_info.names["pkg_config"] = "dav1d"
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
 
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib"""
+    from conan.tools.files import rename
+    import glob
+    if not is_msvc(conanfile):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
