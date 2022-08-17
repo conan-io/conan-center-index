@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake
+from conans import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
@@ -12,16 +13,7 @@ class OctoWildcardMatchingCPPConan(ConanFile):
     homepage = "https://github.com/ofiriluz/octo-wildcardmatching-cpp"
     description = "Octo wildcardmatching library"
     topics = ("wildcard", "regex", "patterns", "cpp")
-    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
-
-    @property
-    def _source_subfolder(self):
-        return "source"
-
-    @property
-    def _build_subfolder(self):
-        return "build"
 
     @property
     def _compilers_minimum_version(self):
@@ -31,6 +23,17 @@ class OctoWildcardMatchingCPPConan(ConanFile):
             "apple-clang": "11",
             "Visual Studio": "16",
         }
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DISABLE_TESTS"] = True
+        tc.variables["DISABLE_EXAMPLES"] = True
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -49,24 +52,21 @@ class OctoWildcardMatchingCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build_requirements(self):
         self.build_requires("cmake/3.16.9")
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, 
-                        build_folder=self._build_subfolder,
-                        defs={"DISABLE_TESTS": "ON",
-                              "DISABLE_EXAMPLES": "ON"})
-        cmake.build(build_dir=self._build_subfolder)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        cmake.install(build_dir=self._build_subfolder)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "octo-wildcardmatching-cpp")
