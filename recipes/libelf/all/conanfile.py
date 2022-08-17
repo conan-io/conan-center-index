@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+from conans import AutoToolsBuildEnvironment, CMake, tools
 import os
 import shutil
 
@@ -40,7 +40,7 @@ class LibelfConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-    
+
     def validate(self):
         if self.options.shared and self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
             raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux/FreeBSD/windows platforms")
