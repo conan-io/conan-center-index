@@ -3,9 +3,9 @@ import glob
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools import files, microsoft
 from conans import tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.38.0"
 

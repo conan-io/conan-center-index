@@ -2,10 +2,10 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.tools import files, microsoft
+from conan.errors import ConanInvalidConfiguration
+from conan.tools import files, microsoft, scm
 from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans import tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class CairoConan(ConanFile):
@@ -115,8 +115,8 @@ class CairoConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             # https://cairographics.org/end_to_end_build_for_win32/
             win32_common = os.path.join("build", "Makefile.win32.common")
-            files.replace_in_file(self, win32_common, "-MD ", "-%s " % self.settings.compiler.runtime)
-            files.replace_in_file(self, win32_common, "-MDd ", "-%s " % self.settings.compiler.runtime)
+            files.replace_in_file(self, win32_common, "-MD ", f"-{self.settings.compiler.runtime} ")
+            files.replace_in_file(self, win32_common, "-MDd ", f"-{self.settings.compiler.runtime} ")
             files.replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
                                                 self.deps_cpp_info["zlib"].libs[0] + ".lib")
             files.replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
@@ -197,7 +197,7 @@ class CairoConan(ConanFile):
             src = os.path.join(self._source_subfolder, "src")
             cairo_gobject = os.path.join(self._source_subfolder, "util", "cairo-gobject")
             inc = os.path.join("include", "cairo")
-            self.copy(pattern="cairo-version.h", dst=inc, src=(src if tools.Version(self.version) >= "1.17.4" else self._source_subfolder))
+            self.copy(pattern="cairo-version.h", dst=inc, src=(src if scm.Version(self.version) >= "1.17.4" else self._source_subfolder))
             self.copy(pattern="cairo-features.h", dst=inc, src=src)
             self.copy(pattern="cairo.h", dst=inc, src=src)
             self.copy(pattern="cairo-deprecated.h", dst=inc, src=src)
