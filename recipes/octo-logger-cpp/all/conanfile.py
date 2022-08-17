@@ -20,10 +20,6 @@ class OctoLoggerCPPConan(ConanFile):
         return "source"
 
     @property
-    def _build_subfolder(self):
-        return "build"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
@@ -66,16 +62,14 @@ class OctoLoggerCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, 
-                        build_folder=self._build_subfolder,
-                        defs={"DISABLE_TESTS": "ON",
-                              "DISABLE_EXAMPLES": "ON"})
-        cmake.build(build_dir=self._build_subfolder)
+        cmake.configure(variables={"DISABLE_TESTS": "ON",
+                                   "DISABLE_EXAMPLES": "ON"})
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = CMake(self)
-        cmake.install(build_dir=self._build_subfolder)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "octo-logger-cpp")
