@@ -93,7 +93,10 @@ class GlewConan(ConanFile):
         self.cpp_info.components["glewlib"].set_property("cmake_target_name", f"GLEW::{glewlib_target_name}")
         self.cpp_info.components["glewlib"].set_property("pkg_config_name", "glew")
 
-        lib_name = "glew32" if self.settings.os == "Windows" else "GLEW"
+        if self.settings.os == "Windows"
+            lib_name = "glew32" if self.options.shared else "libglew32"
+        else:
+            lib_name = "GLEW"
         if self.settings.build_type == "Debug":
             lib_name += "d"
         self.cpp_info.components["glewlib"].libs = [lib_name]
