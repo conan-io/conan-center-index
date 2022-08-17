@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools import files
-from conans import AutoToolsBuildEnvironment, tools
+from conans import AutoToolsBuildEnvironment
 import os
 import functools
 
@@ -55,17 +55,17 @@ class libxftConan(ConanFile):
         return autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with files.chdir(self, self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install(args=["-j1"])
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
 
