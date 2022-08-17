@@ -16,10 +16,6 @@ class OctoLoggerCPPConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     @property
-    def _source_subfolder(self):
-        return "source"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
@@ -30,10 +26,12 @@ class OctoLoggerCPPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc["DISABLE_TESTS"] = "ON"
+        tc["DISABLE_EXAMPLES"] = "ON"
         tc.generate()  
 
     def layout(self):
-        cmake_layout(self, src_folder=self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -52,7 +50,8 @@ class OctoLoggerCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def requirements(self):
         self.requires("fmt/9.0.0")
@@ -62,12 +61,11 @@ class OctoLoggerCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(variables={"DISABLE_TESTS": "ON",
-                                   "DISABLE_EXAMPLES": "ON"})
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE", src=self.source_folder, dst="licenses")
         cmake = CMake(self)
         cmake.install()
 
