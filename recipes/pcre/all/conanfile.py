@@ -1,5 +1,6 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conans import CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import functools
 import os
@@ -58,10 +59,6 @@ class PCREConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -93,25 +90,25 @@ class PCREConan(ConanFile):
             raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Avoid man and share during install stage
-        tools.replace_in_file(
+        files.replace_in_file(self,
             cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
-        tools.replace_in_file(
+        files.replace_in_file(self,
             cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
-        tools.replace_in_file(
+        files.replace_in_file(self,
             cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
         # Do not override CMAKE_MODULE_PATH and do not add ${PROJECT_SOURCE_DIR}/cmake
         # because it contains a custom FindPackageHandleStandardArgs.cmake which
         # can break conan generators
-        tools.replace_in_file(
+        files.replace_in_file(self,
             cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
         # Avoid CMP0006 error (macos bundle)
-        tools.replace_in_file(
+        files.replace_in_file(self,
             cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
     @functools.lru_cache(1)
@@ -131,7 +128,7 @@ class PCREConan(ConanFile):
         cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
         cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
         cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
-        if self._is_msvc:
+        if is_msvc(self):
             cmake.definitions["PCRE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
         if tools.is_apple_os(self.settings.os):
             # Generate a relocatable shared lib on Macos
@@ -148,7 +145,7 @@ class PCREConan(ConanFile):
         self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PCRE"
@@ -183,7 +180,7 @@ class PCREConan(ConanFile):
 
         if self.options.build_pcregrep:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcregrep executable, not of any pcre lib.
