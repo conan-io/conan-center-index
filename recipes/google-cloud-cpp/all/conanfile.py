@@ -77,7 +77,15 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.84.0')
         self.requires('openssl/1.1.1q')
-        self.requires("googleapis/cci.20220711")
+        # TODO: Consume headers + libraries and avoid this if/else
+        if self.version == "1.40.1":
+            self.requires("googleapis/cci.20220711")
+        elif self.version == "1.34.1":
+            self.requires("googleapis/cci.20211122")
+        else:
+            self.requires("googleapis/cci.20220711")  # This is just a guess, sources are vendored
+                                                      # and concrete commit is definded in 
+                                                      # https://github.com/googleapis/google-cloud-cpp/blob/main/cmake/GoogleapisConfig.cmake
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
