@@ -121,14 +121,14 @@ Inside the `conanfile.py` recipe, this data is available in a `self.conan_data` 
 
 ```py
 def source(self):
-    tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
      
 def export_sources(self):
     for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        self.copy(patch["patch_file"])
+        files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
 def build(self):
-    apply_conandata_patches(self)
+    files.apply_conandata_patches(self)
     [...]
 ```
 
