@@ -138,7 +138,7 @@ class FreetypeConan(ConanFile):
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         shutil.copy(freetype_config_in, freetype_config)
         libs = "-lfreetyped" if self.settings.build_type == "Debug" else "-lfreetype"
-        staticlibs = "-lm %s" % libs if self.settings.os == "Linux" else libs
+        staticlibs = f"-lm {libs}" if self.settings.os == "Linux" else libs
         tools.replace_in_file(freetype_config, r"%PKG_CONFIG%", r"/bin/false")  # never use pkg-config
         tools.replace_in_file(freetype_config, r"%prefix%", r"$conan_prefix")
         tools.replace_in_file(freetype_config, r"%exec_prefix%", r"$conan_exec_prefix")
@@ -225,12 +225,12 @@ class FreetypeConan(ConanFile):
     @property
     def _module_vars_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+                            f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _module_target_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+                            f"conan-official-{self.name}-targets.cmake")
 
     @staticmethod
     def _chmod_plus_x(filename):
