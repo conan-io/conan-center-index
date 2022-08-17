@@ -13,7 +13,6 @@ class OctoLoggerCPPConan(ConanFile):
     homepage = "https://github.com/ofiriluz/octo-logger-cpp"
     description = "Octo logger library"
     topics = ("logging", "cpp")
-    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
 
     @property
