@@ -22,17 +22,17 @@ class libxftConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     def requirements(self):
         self.requires("xorg/system")
         self.requires("freetype/2.12.1")
         self.requires("fontconfig/2.13.93")
-    
+
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("xorg-macros/1.19.3")
         self.build_requires("libtool/2.4.7")
-    
+
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
