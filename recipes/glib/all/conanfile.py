@@ -225,122 +225,84 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
-        self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
-        self.cpp_info.components["glib-2.0"].names["pkg_config"] = "glib-2.0"
         self.cpp_info.components["glib-2.0"].set_property("pkg_config_name", "glib-2.0")
+        self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
+        self.cpp_info.components["glib-2.0"].includedirs += [
+            os.path.join("include", "glib-2.0"),
+            os.path.join("lib", "glib-2.0", "include")
+        ]
+
+        self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
+        self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
+
+        self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
+        self.cpp_info.components["gmodule-export-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+
+        self.cpp_info.components["gmodule-2.0"].set_property("pkg_config_name", "gmodule-2.0")
+        self.cpp_info.components["gmodule-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+
+        self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
+        self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
+        self.cpp_info.components["gobject-2.0"].requires += ["glib-2.0", "libffi::libffi"]
+
+        self.cpp_info.components["gthread-2.0"].set_property("pkg_config_name", "gthread-2.0")
+        self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
+        self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
+
+        self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
+        self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
+        self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
+
+        self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
+        self.cpp_info.components["gresource"].libs = []  # this is actually an executable
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gio-2.0"].system_libs.append("dl")
+
         if self.settings.os == "Windows":
-            self.cpp_info.components["glib-2.0"].system_libs.extend(
-                ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
-            )
+            self.cpp_info.components["glib-2.0"].system_libs += ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
+            self.cpp_info.components["gio-2.0"].system_libs.extend(["iphlpapi", "dnsapi", "shlwapi"])
+            self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
+            self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join("include", "gio-win32-2.0")]
+        else:
+            self.cpp_info.components["gio-unix-2.0"].requires += ["gobject-2.0", "gio-2.0"]
+            self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
+
         if self.settings.os == "Macos":
             self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
-            self.cpp_info.components["glib-2.0"].frameworks.extend(
-                ["Foundation", "CoreServices", "CoreFoundation"]
-            )
-        self.cpp_info.components["glib-2.0"].includedirs.append(
-            os.path.join("include", "glib-2.0")
-        )
-        self.cpp_info.components["glib-2.0"].includedirs.append(
-            os.path.join("lib", "glib-2.0", "include")
-        )
+            self.cpp_info.components["glib-2.0"].frameworks += ["Foundation", "CoreServices", "CoreFoundation"]
+            self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
+
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
+
         if self.options.with_pcre:
             if tools.Version(self.version) >= "2.73.2":
                 self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
             else:
                 self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+
         if self.settings.os != "Linux":
-            self.cpp_info.components["glib-2.0"].requires.append(
-                "libgettext::libgettext"
-            )
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
-
-        self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
-        self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append(
-                "pthread"
-            )
-            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
-        self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
-
-        self.cpp_info.components["gmodule-export-2.0"].requires.extend(
-            ["gmodule-no-export-2.0", "glib-2.0"]
-        )
-        self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append(
-                "-Wl,--export-dynamic"
-            )
-
-        self.cpp_info.components["gmodule-2.0"].set_property("pkg_config_name", "gmodule-2.0")
-        self.cpp_info.components["gmodule-2.0"].requires.extend(
-            ["gmodule-no-export-2.0", "glib-2.0"]
-        )
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append(
-                "-Wl,--export-dynamic"
-            )
-
-        self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
-        self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
-        self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
-        self.cpp_info.components["gobject-2.0"].requires.append("libffi::libffi")
-
-        self.cpp_info.components["gthread-2.0"].set_property("pkg_config_name", "gthread-2.0")
-        self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
-        self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
-
-        self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
-        self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
-        if self.settings.os == "Linux":
+            self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gio-2.0"].system_libs.append("dl")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["gio-2.0"].system_libs.extend(["iphlpapi", "dnsapi", "shlwapi"])
-        self.cpp_info.components["gio-2.0"].requires.extend(
-            ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
-        )
-        if self.settings.os == "Macos":
-            self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
+
         if self.options.get_safe("with_mount"):
             self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
+
         if self.options.get_safe("with_selinux"):
-            self.cpp_info.components["gio-2.0"].requires.append(
-                "libselinux::libselinux"
-            )
-        if self.settings.os == "Windows":
-            self.cpp_info.components["gio-windows-2.0"].requires = [
-                "gobject-2.0",
-                "gmodule-no-export-2.0",
-                "gio-2.0",
-            ]
-            self.cpp_info.components["gio-windows-2.0"].includedirs = [
-                os.path.join("include", "gio-win32-2.0")
-            ]
-        else:
-            self.cpp_info.components["gio-unix-2.0"].requires.extend(
-                ["gobject-2.0", "gio-2.0"]
-            )
-            self.cpp_info.components["gio-unix-2.0"].includedirs = [
-                os.path.join("include", "gio-unix-2.0")
-            ]
-        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(
-            self.package_folder, "bin", "glib-compile-schemas"
-        )
+            self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
 
-        self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
-        self.cpp_info.components["gresource"].libs = []  # this is actually an executable
         if self.options.get_safe("with_elf"):
-            self.cpp_info.components["gresource"].requires.append(
-                "libelf::libelf"
-            )  # this is actually an executable
+            self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
 
+        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH env var with: {bin_path}")
         self.env_info.PATH.append(bin_path)
@@ -371,4 +333,4 @@ class GLibConan(ConanFile):
         }
         self.cpp_info.components["glib-2.0"].set_property(
             "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
