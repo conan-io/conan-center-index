@@ -7,6 +7,8 @@ from conan.tools import files, microsoft, scm
 from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans import tools
 
+required_conan_version = ">=1.50.0"
+
 
 class CairoConan(ConanFile):
     name = "cairo"
