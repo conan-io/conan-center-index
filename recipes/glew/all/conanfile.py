@@ -1,4 +1,6 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import CMake
 import functools
 import os
 
@@ -56,7 +58,7 @@ class GlewConan(ConanFile):
         self.requires("glu/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -68,8 +70,7 @@ class GlewConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -77,9 +78,9 @@ class GlewConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         glewlib_target_name = "glew" if self.options.shared else "glew_s"
@@ -89,10 +90,13 @@ class GlewConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "GLEW::GLEW")
         self.cpp_info.set_property("pkg_config_name", "glew")
         self.cpp_info.components["glewlib"].set_property("cmake_module_target_name", "GLEW::GLEW")
-        self.cpp_info.components["glewlib"].set_property("cmake_target_name", "GLEW::{}".format(glewlib_target_name))
+        self.cpp_info.components["glewlib"].set_property("cmake_target_name", f"GLEW::{glewlib_target_name}")
         self.cpp_info.components["glewlib"].set_property("pkg_config_name", "glew")
 
-        self.cpp_info.components["glewlib"].libs = tools.collect_libs(self)
+        lib_name = "glew32" if self.settings.os == "Windows" else "GLEW"
+        if self.settings.build_type == "Debug":
+            lib_name += "d"
+        self.cpp_info.components["glewlib"].libs = [lib_name]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
         self.cpp_info.components["glewlib"].requires = ["opengl::opengl", "glu::glu"]
