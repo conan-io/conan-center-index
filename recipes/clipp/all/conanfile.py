@@ -22,8 +22,8 @@ class ClippConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        tools.files.copy(self, pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.files.copy(self, pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        tools.files.copy(self, "LICENSE", self._source_subfolder, "licenses")
+        tools.files.copy(self, "*", os.path.join(self._source_subfolder, "include"), "include")
 
     def package_id(self):
         self.info.header_only()
