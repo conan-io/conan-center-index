@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.build.cross_building import cross_building
 
-required_conan_version = ">=1.51.2"
+required_conan_version = ">=1.50.2"
 
 
 class LibpngConan(ConanFile):
@@ -15,7 +15,6 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     topics = ("png", "libpng")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,6 +61,11 @@ class LibpngConan(ConanFile):
     @property
     def _has_vsx_support(self):
         return "ppc" in self.settings.arch
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
