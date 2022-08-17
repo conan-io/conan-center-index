@@ -1,4 +1,5 @@
 from conans import CMake, tools, ConanFile
+from conan.tools.build import cross_building
 import os
 
 
@@ -32,7 +33,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not self._skip_test and not tools.cross_building(self):
+        if not self._skip_test and not cross_building(self):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
