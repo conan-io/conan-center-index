@@ -259,6 +259,7 @@ class GLibConan(ConanFile):
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         self.cpp_info.components["glib-2.0"].includedirs += [
             os.path.join("include", "glib-2.0"),
+        ]
         self.cpp_info.components["glib-2.0"].libdirs = ["lib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.extend(["pthread", "m"])
