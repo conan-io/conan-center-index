@@ -71,7 +71,7 @@ class PyBind11Conan(ConanFile):
             self.cpp_info.components["main"].names["cmake_find_package"] = "pybind11"
             self.cpp_info.components["main"].builddirs = [cmake_base_path]
             cmake_file = os.path.join(cmake_base_path, "pybind11Common.cmake")
-            self.cpp_info.components["main"].set_property("cmake_build_modules", [cmake_file])
+            self.cpp_info.set_property("cmake_build_modules", [cmake_file])
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["main"].build_modules[generator].append(cmake_file)
             self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
