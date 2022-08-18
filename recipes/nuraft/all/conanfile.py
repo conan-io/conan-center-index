@@ -45,8 +45,6 @@ class NuRaftConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def configure(self):
-        if self.settings.os in ["Macos"]:
-            del self.options.shared
         if self.options.shared:
             del self.options.fPIC
 
