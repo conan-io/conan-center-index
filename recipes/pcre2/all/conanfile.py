@@ -68,6 +68,7 @@ class PCRE2Conan(ConanFile):
         if not self.options.build_pcre2grep:
             del self.options.with_zlib
             del self.options.with_bzip2
+            del self.options.grep_support_callout_fork
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
