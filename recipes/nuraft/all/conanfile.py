@@ -39,14 +39,14 @@ class NuRaftConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
     def source(self):
-        get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def cmakeGet(self):
         cmake = CMake(self)
@@ -55,7 +55,7 @@ class NuRaftConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch)
+            patch(self, **patch)
         cmake = self.cmakeGet()
         cmake.build()
         cmake.test()
