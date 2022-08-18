@@ -3,11 +3,12 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save, rm
 from conans import CMake
-from conans.tools import remove_files_by_mask
+# TODO: Update to conan.tools.apple after 1.51.3
+from conans.tools import is_apple_os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class DbusConan(ConanFile):
@@ -110,7 +111,7 @@ class DbusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
-        remove_files_by_mask(self.package_folder, "*.la")
+        rm(self, "*.la", self.package_folder)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
