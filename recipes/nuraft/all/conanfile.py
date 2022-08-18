@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import get, patch
-from conans.tools import check_min_cppstd
 from conans import CMake
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import check_min_cppstd
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
@@ -38,10 +39,14 @@ class NuRaftConan(ConanFile):
         self.requires("openssl/1.1.1q")
 
     def validate(self):
+        if self.settings.os in ["Macos"] and self.options.shared:
+            raise ConanInvalidConfiguration("Building Shared Object for {} unsupported".format(self.settings.os))
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
     def configure(self):
+        if self.settings.os in ["Macos"]:
+            del self.options.shared
         if self.options.shared:
             del self.options.fPIC
 
