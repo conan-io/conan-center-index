@@ -8,13 +8,3 @@ sources:
   "1.42.0":
     url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v1.42.0.tar.gz"
     sha256: "c06ae9aededbb8aa217a6d2453754daa40b815f9a4004bc4f2d2d215c79828aa"
-patches:
-  "1.34.1":
-    - patch_file: "patches/0002-1.34.1-googleapis-requirement.patch"
-      base_path: "source_subfolder"
-  "1.40.1":
-    - patch_file: "patches/0002-1.40.1-googleapis-requirement.patch"
-      base_path: "source_subfolder"
-  "1.42.0":
-    - patch_file: "patches/0002-1.42.0-googleapis-requirement.patch"
-      base_path: "source_subfolder"

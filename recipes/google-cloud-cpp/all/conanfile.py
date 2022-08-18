@@ -1,5 +1,4 @@
 import os
-import textwrap
 import functools
 
 from conans import CMake
@@ -35,8 +34,8 @@ class GoogleCloudCppConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        self.copy("googleapis-grpc-libraries.cmake")
+        self.copy("googleapis-helpers.cmake")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,17 +76,13 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20211102.0')
         self.requires('libcurl/7.84.0')
         self.requires('openssl/1.1.1q')
-        # TODO: Consume headers + libraries and avoid this if/else
-        if self.version == "1.34.1":
-            self.requires("googleapis/cci.20211122")
-        else:
-            self.requires("googleapis/cci.20220711")  # This is just a guess, sources are vendored
-                                                      # and concrete commit is definded in 
-                                                      # https://github.com/googleapis/google-cloud-cpp/blob/main/cmake/GoogleapisConfig.cmake
+        self.requires("googleapis/cci.20220711")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["CONAN_GOOGLEAPIS_PROTOS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
+
         cmake.definitions["BUILD_TESTING"] = 0
  
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
@@ -106,17 +101,9 @@ class GoogleCloudCppConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        tools.files.apply_conandata_patches(self)
-
-        # Use googleapis from requirement
-        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "external", "googleapis", "CMakeLists.txt"),
-            textwrap.dedent("""\
-                set(EXTERNAL_GOOGLEAPIS_SOURCE
-                    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")"""),
-            textwrap.dedent(f"""\
-                set(EXTERNAL_GOOGLEAPIS_SOURCE
-                    "{self.dependencies["googleapis"].cpp_info.resdirs[0]}")
-                """))
+        tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "add_subdirectory(external/googleapis)",
+            "# add_subdirectory(external/googleapis)")
 
         # API change on protobuf library starting on "3.21.0"
         if Version(self.version) >= "1.36.0" and Version(self.version) < "1.41.0" and Version(self.deps_cpp_info["protobuf"].version) >= "3.21.0":

@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.4)
 project(cmake_wrapper)
 
+set(CONAN_CMAKE_SILENT_OUTPUT 1)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
+
+find_package(googleapis REQUIRED CONFIG)
+find_package(protobuf REQUIRED CONFIG)
+find_package(gRPC REQUIRED CONFIG)
+
+include(googleapis-grpc-libraries.cmake)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
