@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.47.0"
 
 
 class BigintConan(ConanFile):
