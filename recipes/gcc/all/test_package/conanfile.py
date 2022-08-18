@@ -1,4 +1,5 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
+from conan.tools.build import cross_building
 import os
 
 
@@ -21,7 +22,7 @@ class TestPackageConan(ConanFile):
         self.run("%s -dumpversion" % cxx, run_environment=True)
         self.run("%s %s -o hello_c" % (cc, hello_c), run_environment=True)
         self.run("%s %s -o hello_cpp" % (cxx, hello_cpp), run_environment=True)
-        if not tools.cross_building(self.settings):
+        if not cross_building(self):
             chmod_plus_x("hello_c")
             chmod_plus_x("hello_cpp")
             self.run("./hello_c", run_environment=True)
