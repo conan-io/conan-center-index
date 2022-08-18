@@ -10,7 +10,7 @@ class FoonathanMemory(ConanFile):
     homepage = "https://github.com/foonathan/memory"
     url = "https://github.com/conan-io/conan-center-index"
     description = "STL compatible C++ memory allocator library"
-    topics = ("conan", "memory", "STL", "RawAllocator")
+    topics = ("memory", "stl", "rawallocator")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared":          [True, False],
@@ -93,7 +93,7 @@ class FoonathanMemory(ConanFile):
         # FIXME: jenkins servers throw error with this combination 
         # quick fix until somebody can reproduce
         if hasattr(self, "settings_build") and tools.cross_building(self):
-            if not (self.settings.os == "Macos" and self.settings.arch != self.settings_build.arch):
+            if self.version == '0.7.0' or not (self.settings.os == "Macos" and self.settings.arch != self.settings_build.arch):
                 raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def source(self):
@@ -143,4 +143,3 @@ class FoonathanMemory(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path)),
             self.env_info.PATH.append(bin_path)
-
