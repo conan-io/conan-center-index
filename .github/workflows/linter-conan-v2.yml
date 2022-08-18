@@ -145,5 +145,5 @@ jobs:
         run: |
           echo "::add-matcher::linter/recipe_linter.json"
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            pylint --rcfile=linter/pylintrc_testpackage --ignore=recipes/*/*/test_v1*/conanfile.py --output-format=parseable ${file}
+            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
           done
