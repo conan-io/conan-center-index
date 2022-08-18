@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -47,7 +48,7 @@ class UTConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
-        if Version(self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
+        if Version(self.version) <= "1.1.8" and is_msvc(self):
             raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
         min_version = self._minimum_compilers_version.get(
@@ -70,9 +71,8 @@ class UTConan(ConanFile):
             del self.options.disable_module
 
     def configure(self):
-        if self.settings.compiler in ["msvc", "Visual Studio"]:
-            if "disable_module" in self.options.values:
-                self.options.disable_module = True
+        if is_msvc(self) and "disable_module" in self.options.values:
+            self.options.disable_module = True
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
