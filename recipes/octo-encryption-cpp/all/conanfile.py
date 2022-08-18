@@ -63,7 +63,7 @@ class OctoEncryptionCPPConan(ConanFile):
         self.requires("openssl/1.1.1q")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.16.9")
+        self.build_requires("cmake/3.24.0")
 
     def build(self):
         cmake = CMake(self)

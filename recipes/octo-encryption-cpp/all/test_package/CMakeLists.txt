@@ -1,8 +1,8 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
-PROJECT(test_package CXX)
+cmake_minimum_required(VERSION 3.1)
+project(test_package CXX)
 
-FIND_PACKAGE(octo-encryption-cpp REQUIRED CONFIG)
+find_package(octo-encryption-cpp REQUIRED CONFIG)
 
-ADD_EXECUTABLE(${PROJECT_NAME} test_package.cpp)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} octo::octo-encryption-cpp)
-SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} octo::octo-encryption-cpp)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
