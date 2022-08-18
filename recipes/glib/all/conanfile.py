@@ -13,12 +13,6 @@ import os
 import glob
 import shutil
 
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
-from conan.tools import files, scm
-from conan.tools.microsoft import is_msvc
-from conans import tools, Meson, VisualStudioBuildEnvironment
 
 required_conan_version = ">=1.50.0"
 
@@ -356,7 +350,7 @@ class GLibConan(ConanFile):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         if self.options.with_pcre:
-            if scm.Version(self.version) >= "2.73.2":
+            if Version(self.version) >= "2.73.2":
                 self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
             else:
                 self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
