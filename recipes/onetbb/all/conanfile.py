@@ -1,10 +1,12 @@
-from conan.tools.cmake import CMake, CMakeToolchain
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, load, rmdir
+from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class OneTBBConan(ConanFile):
@@ -35,7 +37,7 @@ class OneTBBConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "2021.2.0":
+        if Version(self.version) < "2021.2.0":
             del self.options.shared
             del self.options.fPIC
 
@@ -43,10 +45,14 @@ class OneTBBConan(ConanFile):
         if self.options.get_safe("shared", True):
             del self.options.fPIC
 
+    def package_id(self):
+        del self.info.options.tbbmalloc
+        del self.info.options.tbbproxy
+
     def validate(self):
         if (self.settings.os == "Macos"
                 and self.settings.compiler == "apple-clang"
-                and tools.Version(self.settings.compiler.version) < "11.0"):
+                and Version(self.settings.compiler.version) < "11.0"):
             raise ConanInvalidConfiguration(
                 "{} {} couldn't be built by apple-clang < 11.0".format(
                     self.name,
@@ -61,41 +67,31 @@ class OneTBBConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "tbbproxy needs tbbmalloc and shared options")
 
-    def package_id(self):
-        del self.info.options.tbbmalloc
-        del self.info.options.tbbproxy
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination="src",
-        )
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
-        toolchain.variables["CMAKE_INSTALL_BINDIR"] = "bin"
-        toolchain.variables["CMAKE_INSTALL_SBINDIR"] = "bin"
-        toolchain.variables["CMAKE_INSTALL_LIBEXECDIR"] = "bin"
-        toolchain.variables["CMAKE_INSTALL_LIBDIR"] = "lib"
-        toolchain.variables["CMAKE_INSTALL_INCLUDEDIR"] = "include"
-        toolchain.variables["CMAKE_INSTALL_OLDINCLUDEDIR"] = "include"
-        toolchain.variables["CMAKE_INSTALL_DATAROOTDIR"] = "share"
         toolchain.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="src")
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        CMake(self).install()
-        self.copy(os.path.join("src", "LICENSE.txt"), dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")
@@ -112,7 +108,7 @@ class OneTBBConan(ConanFile):
         tbb.set_property("cmake_target_name", "TBB::tbb")
         tbb.libs = [lib_name("tbb")]
         if self.settings.os == "Windows":
-            version_info = tools.load(
+            version_info = load(self,
                 os.path.join(self.package_folder, "include", "oneapi", "tbb",
                              "version.h"))
             binary_version = re.sub(

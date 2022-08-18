@@ -22,10 +22,20 @@ def transform_tools(module):
         del module.locals['cross_building']
     if 'rmdir' in module.locals:
         del module.locals['rmdir']
-    #if 'Version' in module.locals:
-    #    del module.locals['Version']
+    if 'Version' in module.locals:
+        del module.locals['Version']
+
+def transform_errors(module):
+    if 'ConanInvalidConfiguration' in module.locals:
+        del module.locals['ConanInvalidConfiguration']
+    if 'ConanException' in module.locals:
+        del module.locals['ConanException']
 
 
 astroid.MANAGER.register_transform(
     astroid.Module, transform_tools,
     lambda node: node.qname() == "conans.tools")
+
+astroid.MANAGER.register_transform(
+    astroid.Module, transform_errors,
+    lambda node: node.qname() == "conans.errors")

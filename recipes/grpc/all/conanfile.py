@@ -1,3 +1,4 @@
+import shutil
 from conan import tools
 from conan.tools.scm import Version
 from conans import ConanFile, CMake, tools as tools_legacy
@@ -83,15 +84,18 @@ class grpcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            self.options["protobuf"].shared = True
+            self.options["googleapis"].shared = True
+            self.options["grpc-proto"].shared = True
 
     def requirements(self):
         self.requires("abseil/20211102.0")
         self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1o")
-        self.requires("protobuf/3.21.1")
-        self.requires("re2/20220201")
+        self.requires("openssl/1.1.1q")
+        self.requires("re2/20220601")
         self.requires("zlib/1.2.12")
-        self.requires("googleapis/cci.20220531")
+        self.requires("protobuf/3.21.4")
+        self.requires("googleapis/cci.20220711")
         self.requires("grpc-proto/cci.20220627")
 
     def validate(self):
@@ -112,12 +116,16 @@ class grpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools_legacy.check_min_cppstd(self, self._cxxstd_required)
 
+        if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared or not self.options["grpc-proto"].shared):
+            raise ConanInvalidConfiguration("If built as shared, protobuf, googleapis and grpc-proto must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True` and `grpc-proto:shared=True`")
+
     def package_id(self):
         del self.info.options.secure
+        self.info.requires["protobuf"].full_package_mode()
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.21.1')
+            self.build_requires('protobuf/3.21.4')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if tools.build.cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
@@ -185,12 +193,8 @@ class grpcConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools_legacy.patch(**patch)
 
-        # Copy status.proto (TODO: Other protos are used in the test suite)
-        status_proto_dir = os.path.join(self._source_subfolder, "src", "proto", "grpc", "status")
-        os.remove(os.path.join(status_proto_dir, "status.proto"))
-        tools.files.copy(self, "status.proto", 
-             src=os.path.join(self.dependencies["googleapis"].cpp_info.resdirs[0], "google", "rpc"),
-             dst=status_proto_dir)
+        # Clean existing proto files, they will be taken from requirements
+        shutil.rmtree(os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         if Version(self.version) >= "1.47":
             # Take googleapis from requirement instead of vendored/hardcoded version
@@ -198,12 +202,6 @@ class grpcConan(ConanFile):
                 "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
-            tools.files.copy(self, "*", src=self.dependencies["googleapis"].cpp_info.resdirs[0], dst=os.path.join(self._source_subfolder, "third_party", "googleapis"))
-
-        # Copy from grpc-proto
-        tools.files.copy(self, "*", 
-             src=os.path.join(self.dependencies["grpc-proto"].cpp_info.resdirs[0], "grpc"), 
-             dst=os.path.join(self._source_subfolder, "src", "proto", "grpc"))
 
         # We are fine with protobuf::protoc coming from conan generated Find/config file
         # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
@@ -211,12 +209,6 @@ class grpcConan(ConanFile):
             "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
             "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
         )
-        if Version(self.version) >= "1.39.0" and Version(self.version) < "1.42.0":
-            # Bug introduced in https://github.com/grpc/grpc/pull/26148
-            # Reverted in https://github.com/grpc/grpc/pull/27626
-            tools_legacy.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                    "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
-                    "if(gRPC_INSTALL)")
 
     def build(self):
         self._patch_sources()
@@ -395,12 +387,12 @@ class grpcConan(ConanFile):
             components.update({
                 "grpc++_reflection": {
                     "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
+                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
                 "grpcpp_channelz": {
                     "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
+                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
@@ -448,6 +440,3 @@ class grpcConan(ConanFile):
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
-
-        # Hack. googleapis doesn't provide a library so it is not used by any component
-        self.cpp_info.components["__"].requires = ["googleapis::googleapis", "grpc-proto::grpc-proto"]

@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.tools.scm import Version
+from conan.tools.files import get, save
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -34,14 +36,14 @@ class XsimdConan(ConanFile):
 
     def validate(self):
         # TODO: check supported version (probably >= 8.0.0)
-        if tools.Version(self.version) < "8.0.0" and self.settings.os == "Macos" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+        if Version(self.version) < "8.0.0" and self.settings.os == "Macos" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             raise ConanInvalidConfiguration(f"{self.name} doesn't support macOS M1")
 
     def package_id(self):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
@@ -56,8 +58,7 @@ class XsimdConan(ConanFile):
             {"xsimd": "xsimd::xsimd"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -66,7 +67,7 @@ class XsimdConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
