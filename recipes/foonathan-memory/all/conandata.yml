@@ -5,7 +5,16 @@ sources:
   "0.7.1":
     url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-1.tar.gz"
     sha256: "19EB61C5CBA6CCC40B8EE741350FD29402A46641BA752C30B7079528D87DBC79"
+  "0.7.2":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-2.tar.gz"
+    sha256: "8aba7211bb0e59b7538decda453e492cc6e36f8781508ed92b38cbafe8a48762"
 patches:
   "0.7.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"
+  "0.7.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/fix-macosCrossCompile.patch"
+  "0.7.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/fix-macosCrossCompile.patch"

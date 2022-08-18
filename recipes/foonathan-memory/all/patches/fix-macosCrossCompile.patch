@@ -1,0 +1,13 @@
+diff --git a/tool/CMakeLists.txt b/tool/CMakeLists.txt
+index df51586..0ba9a2b 100644
+--- a/tool/CMakeLists.txt
++++ b/tool/CMakeLists.txt
+@@ -9,6 +9,8 @@ if (CMAKE_CROSSCOMPILING)
+     # statically link when cross compiling so emulator doesn't need library paths
+     if (MSVC)
+         set_target_properties(foonathan_memory_node_size_debugger PROPERTIES LINK_FLAGS "/WHOLEARCHIVE")
++    elseif(CMAKE_HOST_APPLE AND ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") #MacOS to MacOS
++        message(STATUS "Cross compile on MacOS from ${CMAKE_HOST_SYSTEM_PROCESSOR} to ${CMAKE_OSX_ARCHITECTURES}")
+     else()
+         set_target_properties(foonathan_memory_node_size_debugger PROPERTIES LINK_FLAGS "-static")
+     endif()
