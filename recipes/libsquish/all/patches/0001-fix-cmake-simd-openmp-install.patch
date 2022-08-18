@@ -1,19 +1,17 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -8,11 +8,9 @@
- #   Xcode: builds universal binaries, uses SSE2 on i386 and Altivec on ppc
+@@ -9,9 +9,9 @@
  #   Unix and VS: SSE2 support is enabled by default
  #    use BUILD_SQUISH_WITH_SSE2 and BUILD_SQUISH_WITH_ALTIVEC to override
--
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ 
++CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
  PROJECT(squish)
  
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
--
+ 
  OPTION(BUILD_SQUISH_WITH_OPENMP "Build with OpenMP." ON)
  
- OPTION(BUILD_SQUISH_WITH_SSE2 "Build with SSE2." ON)
-@@ -22,26 +20,6 @@ OPTION(BUILD_SHARED_LIBS "Build shared libraries." OFF)
+@@ -22,25 +22,6 @@ OPTION(BUILD_SHARED_LIBS "Build shared libraries." OFF)
  
  OPTION(BUILD_SQUISH_EXTRA "Build extra source code." OFF)
  
@@ -36,14 +34,13 @@
 -        ADD_DEFINITIONS(-DSQUISH_USE_ALTIVEC=1 -maltivec)
 -    ENDIF (BUILD_SQUISH_WITH_ALTIVEC AND NOT WIN32)
 -ENDIF (CMAKE_GENERATOR STREQUAL "Xcode")
--
+ 
  SET(SQUISH_HDRS
      squish.h
-     )
-@@ -75,18 +53,41 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+@@ -74,6 +55,34 @@ SET(SQUISH_SRCS
+ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
  
  ADD_LIBRARY(squish ${SQUISH_SRCS} ${SQUISH_HDRS})
- 
 +IF(BUILD_SQUISH_WITH_OPENMP)
 +    IF(NOT TARGET OpenMP::OpenMP_CXX)
 +        FIND_PACKAGE(Threads REQUIRED)
@@ -72,10 +69,10 @@
 +        TARGET_COMPILE_OPTIONS(squish PRIVATE -maltivec)
 +    ENDIF()
 +ENDIF()
-+
+ 
  SET_TARGET_PROPERTIES(
      squish PROPERTIES
-     PUBLIC_HEADER "${SQUISH_HDRS}"
+@@ -81,12 +90,6 @@ SET_TARGET_PROPERTIES(
      VERSION 0.0
      SOVERSION 0.0
      DEBUG_POSTFIX "d"
@@ -88,7 +85,7 @@
      )
  
  IF (BUILD_SQUISH_EXTRA)
-@@ -113,5 +114,6 @@ INSTALL(
+@@ -113,5 +116,6 @@ INSTALL(
      TARGETS squish
      LIBRARY DESTINATION lib
      ARCHIVE DESTINATION lib
