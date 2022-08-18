@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, patch
+from conans.tools import check_min_cppstd
+from conans import CMake
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
@@ -44,7 +46,7 @@ class NuRaftConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def cmakeGet(self):
         cmake = CMake(self)
@@ -53,7 +55,7 @@ class NuRaftConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            patch(**patch)
         cmake = self.cmakeGet()
         cmake.build()
         cmake.test()
