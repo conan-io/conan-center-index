@@ -4,11 +4,11 @@ from conan.tools import files
 
 from conans import Meson
 from conans import tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class GtkConan(ConanFile):
@@ -67,7 +67,6 @@ class GtkConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def config_options(self):
-        self.options["glib"].shared = True
         if self.settings.os == "Windows":
             del self.options.fPIC
             # Fix duplicate definitions of DllMain
@@ -182,8 +181,7 @@ class GtkConan(ConanFile):
         return meson
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self, **patch)
+        files.apply_conandata_patches(self)
         if self._gtk3:
             files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         if "4.2.0" <= Version(self.version) < "4.6.1":
