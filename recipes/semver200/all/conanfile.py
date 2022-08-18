@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.files import get, patch
+from conans.tools import check_min_cppstd
 from conans import CMake
 
 required_conan_version = ">=1.47.0"
@@ -40,7 +41,7 @@ class SemVer200Conan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
+            check_min_cppstd(self, 14)
 
     def configure(self):
         if self.options.shared:
