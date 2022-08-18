@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 import os
