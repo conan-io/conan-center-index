@@ -50,13 +50,13 @@ class LibsystemdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
+        self.build_requires("meson/0.63.1")
         self.build_requires("m4/1.4.19")
         self.build_requires("gperf/3.1")
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.58")
+        self.requires("libcap/2.62")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
@@ -65,7 +65,7 @@ class LibsystemdConan(ConanFile):
         if self.options.with_xz:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.0")
+            self.requires("zstd/1.5.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
