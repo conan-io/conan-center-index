@@ -1,7 +1,4 @@
-from conan import ConanFile
-from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
-
+from conans import ConanFile, CMake, tools
 import os
 import subprocess
 import re
@@ -9,10 +6,7 @@ import re
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
-
-    def layout(self):
-        cmake_layout(self)
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -24,8 +18,8 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.cpp.build.bindirs[0], "test_package")
 
     def test(self):
-        if can_run(self):
-            self.run(self._test_executable, env="conanrun")
+        if not tools.cross_building(self):
+            self.run(self._test_executable, run_environment=True)
         else:
             # We will dump information for the generated executable
             if self.settings.os in ["Android", "iOS"]:

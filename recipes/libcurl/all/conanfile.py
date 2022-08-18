@@ -1,15 +1,18 @@
-import glob
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, download, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
+# TODO: Migrate
+from conans.tools import get_env
+
 import os
 import re
-import functools
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.build import cross_building
-from conan.tools.scm import Version
-from conan.tools.files import replace_in_file, rmdir, chdir, get, download, save, load, apply_conandata_patches
-from conan.tools.apple import is_apple_os
-
 
 required_conan_version = ">=1.51.3"
 
@@ -112,27 +115,18 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": None,
         "with_ca_path": None,
     }
-    generators = "cmake", "cmake_find_package_multi", "pkg_config", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
-    def _is_win_x_android(self):
-        return self.settings.os == "Android" and tools.os_info.is_windows
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_win_x_android(self):
+        return self.settings.os == "Android" and self._settings_build.os == "Windows"
 
     @property
     def _is_using_cmake_build(self):
@@ -148,10 +142,9 @@ class LibcurlConan(ConanFile):
         return Version(self.version) < "7.78.0" and not self._is_using_cmake_build
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        self.copy("lib_Makefile_add.am")
+        copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if Version(self.version) < "7.10.4":
@@ -213,13 +206,24 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.6")
             self.tool_requires("pkgconf/1.7.4")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH") and not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
                 self.tool_requires("msys2/cci.latest")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-        download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
+                  destination=self.source_folder, strip_root=True)
+        download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True, sha256="6ed95025fba2aef0ce7b647607225745624497f876d74ef6ec22b26e73e9de77")
+
+    def generate(self):
+        if self._is_using_cmake_build:
+            self._generate_with_cmake()
+        else:
+            self._generate_with_autotools()
+        ms = VirtualBuildEnv(self)
+        ms.generate(scope="build")
 
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):
@@ -231,14 +235,19 @@ class LibcurlConan(ConanFile):
         #     but does not work on OS X 10.11 with SIP)
         # 2. copying dylib's to the build directory (fortunately works on OS X)
         if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
+            copy(self, "*.dylib*", src=self.build_folder, dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
         if self._is_using_cmake_build:
-            self._build_with_cmake()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
         else:
-            self._build_with_autotools()
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -267,14 +276,14 @@ class LibcurlConan(ConanFile):
         # Disable curl tool for these reasons:
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
-        top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+        top_makefile = os.path.join(self.source_folder, "Makefile.am")
         replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         if self._is_mingw:
             # patch for zlib naming in mingw
             if self.options.with_zlib:
-                configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+                configure_ac = os.path.join(self.source_folder, "configure.ac")
                 zlib_name = self.deps_cpp_info["zlib"].libs[0]
                 replace_in_file(self, configure_ac,
                                       "AC_CHECK_LIB(z,",
@@ -285,7 +294,7 @@ class LibcurlConan(ConanFile):
 
             if self.options.shared:
                 # patch for shared mingw build
-                lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
+                lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
                 replace_in_file(self, lib_makefile,
                                       "noinst_LTLIBRARIES = libcurlu.la",
                                       "")
@@ -304,10 +313,10 @@ class LibcurlConan(ConanFile):
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
             return
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
         if self._has_zstd_option:
-            replace_in_file(self, os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "FindZstd.cmake"),
                                   "if(UNIX)", "if(TRUE)")
         # TODO: check this patch, it's suspicious
         replace_in_file(self, cmakelists,
@@ -344,9 +353,10 @@ class LibcurlConan(ConanFile):
     get_target_property(_lib "${_libname}" LOCATION)""",
             )
 
-    def _get_configure_command_args(self):
+    def _generate_with_autotools(self):
         yes_no = lambda v: "yes" if v else "no"
-        params = [
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
             "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
             "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
@@ -378,77 +388,101 @@ class LibcurlConan(ConanFile):
             "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
             "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
             "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
-        ]
+        ])
         if self.options.with_ssl == "openssl":
-            params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
+            tc.configure_args.append("--with-ssl={}".format(unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
         else:
-            params.append("--without-ssl")
+            tc.configure_args.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            params.append("--with-wolfssl={}".format(tools.unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
+            tc.configure_args.append("--with-wolfssl={}".format(unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
         else:
-            params.append("--without-wolfssl")
+            tc.configure_args.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].rootpath)))
+            tc.configure_args.append("--with-libssh2={}".format(unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
         else:
-            params.append("--without-libssh2")
+            tc.configure_args.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2={}".format(tools.unix_path(self.deps_cpp_info["libnghttp2"].rootpath)))
+            tc.configure_args.append("--with-nghttp2={}".format(unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
         else:
-            params.append("--without-nghttp2")
+            tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib={}".format(tools.unix_path(self.deps_cpp_info["zlib"].rootpath)))
+            tc.configure_args.append("--with-zlib={}".format(unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
         else:
-            params.append("--without-zlib")
+            tc.configure_args.append("--without-zlib")
 
         if self._has_zstd_option:
-            params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
+            tc.configure_args.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
         if self._has_metalink_option:
-            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
+            tc.configure_args.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         if not self.options.with_proxy:
-            params.append("--disable-proxy")
+            tc.configure_args.append("--disable-proxy")
 
         if not self.options.with_rtsp:
-            params.append("--disable-rtsp")
+            tc.configure_args.append("--disable-rtsp")
 
         if not self.options.with_crypto_auth:
-            params.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
+            tc.configure_args.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
 
         # ntlm will default to enabled if any SSL options are enabled
         if not self.options.with_ntlm:
             if Version(self.version) <= "7.77.0":
-                params.append("--disable-crypto-auth")
+                tc.configure_args.append("--disable-crypto-auth")
             else:
-                params.append("--disable-ntlm")
+                tc.configure_args.append("--disable-ntlm")
 
         if not self.options.with_ntlm_wb:
-            params.append("--disable-ntlm-wb")
+            tc.configure_args.append("--disable-ntlm-wb")
 
         if self.options.with_ca_bundle == False:
-            params.append("--without-ca-bundle")
+            tc.configure_args.append("--without-ca-bundle")
         elif self.options.with_ca_bundle:
-            params.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
+            tc.configure_args.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
 
         if self.options.with_ca_path == False:
-            params.append('--without-ca-path')
+            tc.configure_args.append('--without-ca-path')
         elif self.options.with_ca_path:
-            params.append("--with-ca-path=" + str(self.options.with_ca_path))
+            tc.configure_args.append("--with-ca-path=" + str(self.options.with_ca_path))
 
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
-                params.append("--host=%s" % self._get_linux_arm_host())
+                tc.configure_args.append("--host={}".format(self._get_linux_arm_host()))
             elif self.settings.os == "iOS":
-                params.append("--enable-threaded-resolver")
-                params.append("--disable-verbose")
+                tc.configure_args.append("--enable-threaded-resolver")
+                tc.configure_args.append("--disable-verbose")
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
-        return params
+        # tweaks for mingw
+        if self._is_mingw:
+            rcflags = "-O COFF"
+            if self.settings.arch == "x86":
+                rcflags += " --target=pe-i386"
+            else:
+                rcflags += " --target=pe-x86-64"
+            env = tc.environment()
+            env.define("RCFLAGS", rcflags)
+
+            tc.extra_defines.append("_AMD64_")
+
+        if self.settings.os != "Windows":
+            tc.fpic = self.options.get_safe("fPIC", True)
+
+
+        if cross_building(self) and is_apple_os(self):
+            tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
+
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
+
 
     def _get_linux_arm_host(self):
         arch = None
@@ -472,150 +506,89 @@ class LibcurlConan(ConanFile):
             version = int(match.group(1))
         return version
 
-    def _build_with_autotools(self):
-        with chdir(self, self._source_subfolder):
-            # autoreconf
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
-
-            # fix generated autotools files to have relocatable binaries
-            if is_apple_os(self):
-                replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
-
-            self.run("chmod +x configure")
-
-            # run configure with *LD_LIBRARY_PATH env vars it allows to pick up shared openssl
-            with tools.run_environment(self):
-                autotools, autotools_vars = self._configure_autotools()
-                autotools.make(vars=autotools_vars)
-
-    def _configure_autotools_vars(self):
-        autotools_vars = {}
-        # tweaks for mingw
-        if self._is_mingw:
-            autotools_vars["RCFLAGS"] = "-O COFF"
-            if self.settings.arch == "x86":
-                autotools_vars["RCFLAGS"] += " --target=pe-i386"
-            else:
-                autotools_vars["RCFLAGS"] += " --target=pe-x86-64"
-        return autotools_vars
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-
-        if self.settings.os != "Windows":
-            autotools.fpic = self.options.get_safe("fPIC", True)
-
-        autotools_vars = self._configure_autotools_vars()
-
-        # tweaks for mingw
-        if self._is_mingw:
-            autotools.defines.append("_AMD64_")
-
-        if cross_building(self) and is_apple_os(self):
-            autotools.defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
-
-        configure_args = self._get_configure_command_args()
-
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            # please do not autodetect --build for the iOS simulator, thanks!
-            autotools.configure(vars=autotools_vars, args=configure_args, build=False)
-        else:
-            autotools.configure(vars=autotools_vars, args=configure_args)
-
-        return autotools, autotools_vars
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
+    def _generate_with_cmake(self):
         if self._is_win_x_android:
-            cmake = CMake(self, generator="Ninja")
+            tc = CMakeToolchain(self, generator="Ninja")
         else:
-            cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["BUILD_CURL_EXE"] = False
-        cmake.definitions["CURL_DISABLE_LDAP"] = not self.options.with_ldap
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["CURL_STATICLIB"] = not self.options.shared
-        cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
+            tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_CURL_EXE"] = False
+        tc.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["CURL_STATICLIB"] = not self.options.shared
+        tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "7.81.0":
-            cmake.definitions["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+            tc.variables["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         elif Version(self.version) >= "7.72.0":
-            cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+            tc.variables["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         else:
-            cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
+            tc.variables["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
         if Version(self.version) >= "7.81.0":
-            cmake.definitions["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+            tc.variables["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         else:
-            cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+            tc.variables["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         if Version(self.version) >= "7.81.0":
-            cmake.definitions["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+            tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         elif Version(self.version) >= "7.70.0":
-            cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
-        cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
-        cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
-        cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
+            tc.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
+        tc.variables["CURL_ZLIB"] = self.options.with_zlib
+        tc.variables["CURL_BROTLI"] = self.options.with_brotli
         if self._has_zstd_option:
-            cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
+            tc.variables["CURL_ZSTD"] = self.options.with_zstd
         if Version(self.version) >= "7.81.0":
-            cmake.definitions["CURL_USE_LIBSSH2"] = self.options.with_libssh2
+            tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         else:
-            cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
-        cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+            tc.variables["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
+        tc.variables["ENABLE_ARES"] = self.options.with_c_ares
         if not self.options.with_c_ares:
-            cmake.definitions["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
-        cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
-        cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp
+            tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
+        tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
+        tc.variables["USE_LIBRTMP"] = self.options.with_librtmp
         if Version(self.version) >= "7.75.0":
-            cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
-        cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
-        cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
-        cmake.definitions["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
+            tc.variables["USE_LIBIDN2"] = self.options.with_libidn
+        tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
+        tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
+        tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
             if Version(self.version) <= "7.77.0":
-                cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = True
+                tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = True
             else:
-                cmake.definitions["CURL_DISABLE_NTLM"] = True
-        cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
+                tc.variables["CURL_DISABLE_NTLM"] = True
+        tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         if self.options.with_ca_bundle == False:
-            cmake.definitions['CURL_CA_BUNDLE'] = 'none'
+            tc.variables['CURL_CA_BUNDLE'] = 'none'
         elif self.options.with_ca_bundle:
-            cmake.definitions['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
+            tc.variables['CURL_CA_BUNDLE'] = self.options.with_ca_bundle
 
         if self.options.with_ca_path == False:
-            cmake.definitions['CURL_CA_PATH'] = 'none'
+            tc.variables['CURL_CA_PATH'] = 'none'
         elif self.options.with_ca_path:
-            cmake.definitions['CURL_CA_PATH'] = self.options.with_ca_path
+            tc.variables['CURL_CA_PATH'] = self.options.with_ca_path
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def _build_with_cmake(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        tc.generate()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("cacert.pem", dst="res")
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="cacert.pem", src=self.build_folder, dst="res")
         if self._is_using_cmake_build:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
-            with tools.run_environment(self):
-                with chdir(self, self._source_subfolder):
-                    autotools, autotools_vars = self._configure_autotools()
-                    autotools.install(vars=autotools_vars)
+            autotools = Autotools(self)
+            autotools.install()
+            fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
                 # Handle only mingw libs
-                self.copy(pattern="*.dll", dst="bin", keep_path=False)
-                self.copy(pattern="*.dll.a", dst="lib", keep_path=False)
-                self.copy(pattern="*.lib", dst="lib", keep_path=False)
+                copy(self, pattern="*.dll", src=self.build_folder, dst="bin", keep_path=False)
+                copy(self, pattern="*.dll.a", src=self.build_folder, dst="lib", keep_path=False)
+                copy(self, pattern="*.lib", src=self.build_folder, dst="lib", keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
