@@ -117,7 +117,7 @@ class GtkConan(ConanFile):
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.8")
-        self.requires("glib/2.73.3")
+        self.requires("glib/2.73.0")
         if self._gtk4 or self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
@@ -270,27 +270,27 @@ class GtkConan(ConanFile):
 
     def package_info(self):
         if self._gtk3:
+            self.cpp_info.components["gdk-3.0"].set_property("pkg_config_name", "gdk-3.0")
             self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
             self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gdk-3.0"].requires = self._build_gdk3_requirements()
-            self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
 
+            self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
             self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
             self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
             self.cpp_info.components["gtk+-3.0"].requires = self._build_gtk3_requirements()
-            self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
 
+            self.cpp_info.components["gail-3.0"].set_property("pkg_config_name", "gail-3.0")
             self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
             self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
             self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
-            self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
         elif self._gtk4:
-            self.cpp_info.components["gtk4"].names["pkg_config"] = "gtk4"
+            self.cpp_info.components["gtk4"].set_property("pkg_config_name", "gtk4")
             self.cpp_info.components["gtk4"].requires = self._build_gtk4_requirements()
             self.cpp_info.components["gtk4"].libs = ["gtk-4"]
             self.cpp_info.components["gtk4"].includedirs.append(os.path.join("include", "gtk-4.0"))
 
             if self.settings.os == "Linux":
-                self.cpp_info.components["gtk4-unix-print"].names["pkg_config"] = "gtk4-unix-print"
+                self.cpp_info.components["gtk4-unix-print"].set_property("pkg_config_name", "gtk4-unix-print")
                 self.cpp_info.components["gtk4-unix-print"].includedirs.append(os.path.join("include", "gtk-4.0", "unix-print"))
                 self.cpp_info.components["gtk4-unix-print"].requires.append("gtk4")
