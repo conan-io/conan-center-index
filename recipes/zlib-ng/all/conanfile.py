@@ -20,21 +20,21 @@ class ZlibNgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "zlib_compat": [True, False],
         "with_gzfileop": [True, False],
         "with_optim": [True, False],
         "with_new_strategies": [True, False],
         "with_native_instructions": [True, False],
-        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "zlib_compat": False,
         "with_gzfileop": True,
         "with_optim": False,
         "with_new_strategies": True,
         "with_native_instructions": False,
-        "fPIC": True,
     }
 
     def config_options(self):
