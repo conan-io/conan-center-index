@@ -188,7 +188,7 @@ class GlibmmConan(ConanFile):
         self.cpp_info.components[giomm_component].set_property("pkg_config_name", giomm_component)
         self.cpp_info.components[giomm_component].libs = [giomm_component]
         self.cpp_info.components[giomm_component].includedirs = [ os.path.join("include", giomm_component)]
-        self.cpp_info.components[giomm_component].requires = [giomm_component, "glib::gio-2.0"]
+        self.cpp_info.components[giomm_component].requires = [glibmm_component, "glib::gio-2.0"]
 
     def package_id(self):
         self.info.requires["glib"].full_package_mode()
