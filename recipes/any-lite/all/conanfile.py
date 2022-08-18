@@ -1,4 +1,5 @@
-from conans import ConanFile, tools
+from distutils.log import error
+from conans import ConanFile, tools, errors
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -24,6 +25,7 @@ class AnyLiteConan(ConanFile):
         self.info.header_only()
         if self.name != "any-lite":
             raise ConanInvalidConfiguration("Testing")
+        raise errors.ConanException("lol")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
