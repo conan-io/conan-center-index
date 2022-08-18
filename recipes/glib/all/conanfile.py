@@ -240,6 +240,7 @@ class GLibConan(ConanFile):
         meson.install()
         self._fix_library_names()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
         shutil.move(
             os.path.join(self.package_folder, "share"),
             os.path.join(self.package_folder, "res"),
