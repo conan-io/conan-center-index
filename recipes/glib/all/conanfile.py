@@ -346,7 +346,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].frameworks += ["Foundation", "CoreServices", "CoreFoundation"]
             self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
 
-            if tools.is_apple_os(self.settings.os):
+            if is_apple_os(self.settings.os):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         if self.options.with_pcre:
