@@ -1,12 +1,15 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.1.2)
 project(test_package CXX)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 find_package(GTest REQUIRED)
 
 if(WITH_MAIN)
-    add_executable(${PROJECT_NAME} test_package.cpp)
+    add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 else()
-    add_executable(${PROJECT_NAME} main.cpp test_package.cpp)
+    add_executable(${PROJECT_NAME} ../test_package/main.cpp ../test_package/test_package.cpp)
 endif()
 
 if(WITH_MAIN)
