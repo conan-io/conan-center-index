@@ -101,7 +101,7 @@ class UTConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ut")
