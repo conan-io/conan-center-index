@@ -54,8 +54,8 @@ class NuRaftConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch)
+        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **patch_file)
         cmake = self.cmakeGet()
         cmake.build()
         cmake.test()
