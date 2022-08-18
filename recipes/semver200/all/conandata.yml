@@ -6,3 +6,5 @@ patches:
   "1.1.0":
     - patch_file: "patches/0001-unused-var-fix.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-macro-invocation-fix.patch"
+      base_path: "source_subfolder"
