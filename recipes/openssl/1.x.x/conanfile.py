@@ -1,7 +1,7 @@
 from conan.tools.files import rename, get, rmdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.build import cross_building
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 from functools import total_ordering
