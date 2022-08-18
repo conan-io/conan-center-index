@@ -69,7 +69,7 @@ class GoogleAPISConan(ConanFile):
             import re
             output = StringIO()
             self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+)\.(\d+)\.(\d+)', output.getvalue())
+            m = re.search(r"cmake version (\d+)\.(\d+)\.(\d+)", output.getvalue())
             major, minor = int(m.group(1)), int(m.group(2))
             assert Version(f"{major}.{minor}") >= "3.20"
         except:
@@ -78,7 +78,7 @@ class GoogleAPISConan(ConanFile):
             return True
 
     def build_requirements(self):
-        self.tool_requires('protobuf/3.21.4')
+        self.tool_requires("protobuf/3.21.4")
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         if not self._cmake_new_enough:
             self.tool_requires("cmake/3.23.2")
@@ -101,10 +101,10 @@ class GoogleAPISConan(ConanFile):
     def _parse_proto_libraries(self):
         # Generate the libraries to build dynamically
         proto_libraries = []
-        for filename in glob.iglob(os.path.join(self.source_folder, 'google', '**', 'BUILD.bazel'), recursive=True):
+        for filename in glob.iglob(os.path.join(self.source_folder, "google", "**", "BUILD.bazel"), recursive=True):
             proto_libraries += parse_proto_libraries(filename, self.source_folder, self.output.error)
 
-        for filename in glob.iglob(os.path.join(self.source_folder, 'grafeas', '**', 'BUILD.bazel'), recursive=True):
+        for filename in glob.iglob(os.path.join(self.source_folder, "grafeas", "**", "BUILD.bazel"), recursive=True):
             proto_libraries += parse_proto_libraries(filename, self.source_folder, self.output.error)
 
         # Validate that all files exist and all dependencies are found
