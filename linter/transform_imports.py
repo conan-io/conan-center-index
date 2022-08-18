@@ -30,10 +30,11 @@ def transform_tools(module):
         del module.locals['Version']
 
 def transform_errors(module):
-    if 'ConanInvalidConfiguration' in module.locals:
-        del module.locals['ConanInvalidConfiguration']
-    if 'ConanException' in module.locals:
-        del module.locals['ConanException']
+    pass
+    #if 'ConanInvalidConfiguration' in module.locals:
+    #    del module.locals['ConanInvalidConfiguration']
+    #if 'ConanException' in module.locals:
+    #    del module.locals['ConanException']
 
 
 astroid.MANAGER.register_transform(
