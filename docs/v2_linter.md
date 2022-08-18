@@ -46,15 +46,12 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) |
 
 
-# Disable linter for `test_v1_*/conanfile.py`
+# Disable linter for a specific conanfile
 
-Using the pattern `test_v1_*/conanfile.py` you can write a test that will be executed using only Conan v1,
-you probably don't want v2-migration linter to check this file, as it will likely contain syntax that is
-specific to Conan v1.
+If for some reason a conanfile of a recipe or a test_package is not yet prepared to pass
+all the checks of the linter, it can be skipped from `pylint` adding the following comment to the file:
 
-To skip the file you just need to add the following comment to the file and `pylint` will skip it:
-
-**`test_v1_*/conanfile.py`**
+**`conanfile.py`**
 ```python
 # pylint: skip-file
 from conans import ConanFile, CMake, tools
