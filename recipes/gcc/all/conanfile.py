@@ -1,8 +1,12 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, rmdir, rm, copy, replace_in_file
+from conan.tools.build import cross_building
+from conan.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.50.0"
 
 
 class GccConan(ConanFile):
@@ -43,7 +47,7 @@ class GccConan(ConanFile):
             "--with-bugurl=%s" % bugurl
         ]
         if self.settings.os == "Macos":
-            xcrun = tools.XCRun(self.settings)
+            xcrun = tools_legacy.XCRun(self.settings)
             args.extend([
                 '--with-native-system-header-dir=/usr/include',
                 "--with-sysroot={}".format(xcrun.sdk_path)
@@ -71,13 +75,11 @@ class GccConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows builds aren't supported (yet), sorry")
-        if tools.cross_building(self.settings):
+        if cross_building(self):
             raise ConanInvalidConfiguration("no cross-building support (yet), sorry")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "gcc-%s" % self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _make_args(self):
@@ -88,12 +90,12 @@ class GccConan(ConanFile):
     def build(self):
         # If building on x86_64, change the default directory name for 64-bit libraries to "lib":
         libdir = "%s/lib/gcc/%s" % (self.package_folder, self.version)
-        tools.replace_in_file(os.path.join(self.source_folder,
+        replace_in_file(self, os.path.join(self.source_folder,
                                            self._source_subfolder, "gcc", "config", "i386", "t-linux64"),
                               "m64=../lib64", "m64=../lib", strict=False)
         # Ensure correct install names when linking against libgcc_s;
         # see discussion in https://github.com/Homebrew/legacy-homebrew/pull/34303
-        tools.replace_in_file(os.path.join(self.source_folder,
+        replace_in_file(self, os.path.join(self.source_folder,
                                            self._source_subfolder, "libgcc", "config", "t-slibgcc-darwin"),
                               "@shlib_slibdir@", libdir, strict=False)
         autotools = self._configure_autotools()
@@ -108,9 +110,10 @@ class GccConan(ConanFile):
             autotools.install(args=self._make_args)
         else:
             autotools.make(args=["install-strip"] + self._make_args)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
-        self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", self.package_folder)
+        copy(self, pattern="COPYING*", dst=os.path.join(self.package_folder, "licenses"),
+              src=os.path.join(self.build_folder, self._source_subfolder))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
