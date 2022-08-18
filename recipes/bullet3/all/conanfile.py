@@ -1,12 +1,14 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conans import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class Bullet3Conan(ConanFile):
@@ -45,16 +47,6 @@ class Bullet3Conan(ConanFile):
     }
 
     short_paths = True
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,43 +57,50 @@ class Bullet3Conan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration("Shared libraries on Visual Studio not supported")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_BULLET3"] = self.options.bullet3
-        cmake.definitions["INSTALL_LIBS"] = True
-        cmake.definitions["USE_GRAPHICAL_BENCHMARK"] = self.options.graphical_benchmark
-        cmake.definitions["USE_DOUBLE_PRECISION"] = self.options.double_precision
-        cmake.definitions["BULLET2_MULTITHREADING"] = self.options.bt2_thread_locks
-        cmake.definitions["USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD"] = self.options.soft_body_multi_body_dynamics_world
-        cmake.definitions["BUILD_ENET"] = self.options.network_support
-        cmake.definitions["BUILD_CLSOCKET"] = self.options.network_support
-        cmake.definitions["BUILD_CPU_DEMOS"] = False
-        cmake.definitions["BUILD_OPENGL3_DEMOS"] = False
-        cmake.definitions["BUILD_BULLET2_DEMOS"] = False
-        cmake.definitions["BUILD_EXTRAS"] = self.options.extras
-        cmake.definitions["BUILD_UNIT_TESTS"] = False
-        if self._is_msvc:
-            cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in msvc_runtime_flag(self)
-        cmake.configure()
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_BULLET3"] = self.options.bullet3
+        tc.variables["INSTALL_LIBS"] = True
+        tc.variables["USE_GRAPHICAL_BENCHMARK"] = self.options.graphical_benchmark
+        tc.variables["USE_DOUBLE_PRECISION"] = self.options.double_precision
+        tc.variables["BULLET2_MULTITHREADING"] = self.options.bt2_thread_locks
+        tc.variables["USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD"] = self.options.soft_body_multi_body_dynamics_world
+        tc.variables["BUILD_ENET"] = self.options.network_support
+        tc.variables["BUILD_CLSOCKET"] = self.options.network_support
+        tc.variables["BUILD_CPU_DEMOS"] = False
+        tc.variables["BUILD_OPENGL3_DEMOS"] = False
+        tc.variables["BUILD_BULLET2_DEMOS"] = False
+        tc.variables["BUILD_EXTRAS"] = self.options.extras
+        tc.variables["BUILD_UNIT_TESTS"] = False
+        if is_msvc(self):
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) < "3.21":
+            # silence warning
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*.cmake")):
             if os.path.basename(cmake_file) != "UseBullet.cmake":
                 os.remove(cmake_file)
@@ -129,7 +128,7 @@ class Bullet3Conan(ConanFile):
             set(BULLET_ROOT_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../..")
             set(BULLET_VERSION_STRING {self.version})
         """)
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
@@ -138,7 +137,7 @@ class Bullet3Conan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+                            f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _bullet_definitions(self):
