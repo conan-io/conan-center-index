@@ -73,7 +73,7 @@ class DoxygenConan(ConanFile):
             if Version(self.settings.compiler.version) < minimum_compiler_version:
                 raise ConanInvalidConfiguration(f"Compiler version too old. At least {minimum_compiler_version} is required.")
         if (self.settings.compiler == "Visual Studio" and
-                Version(self.settings.compiler.version.value) <= 14 and
+                Version(self.settings.compiler.version) <= "14" and
                 Version(self.version) == "1.8.18"):
             raise ConanInvalidConfiguration(f"Doxygen version {self.version} broken with VS {self.settings.compiler.version}.")
 
