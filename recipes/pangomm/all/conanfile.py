@@ -64,11 +64,11 @@ class PangommConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.build_requires("meson/0.63.1")
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("pango/1.50.7")
+        self.requires("pango/1.50.8")
 
         if self._is_2_48_api:
             self.requires("glibmm/2.72.1")
