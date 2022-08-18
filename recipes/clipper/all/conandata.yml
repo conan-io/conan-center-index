@@ -6,7 +6,7 @@ sources:
     url: "https://sourceforge.net/projects/polyclipping/files/Older%20versions/clipper_ver5.1.6.zip"
     sha256: "3655a090f55c16815eaebb4c3f863ff6c028d4b9c22111f81d4eac86bdb2f867"
   "4.10.0":
-    url: "https://github.com/marcusl/clipper-archive/raw/main/clipper_ver4.10.0.zip"
+    url: "https://sourceforge.net/projects/polyclipping/files/Older%20versions/clipper_ver4.10.0.zip"
     sha256: "4530e01006d02507a41f7eeaefa758c8067a94a7a0d6e0381fadfa40bc0cf248"
 patches:
   "6.4.2":
