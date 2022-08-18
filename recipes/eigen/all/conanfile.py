@@ -50,9 +50,6 @@ class EigenConan(ConanFile):
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        if not self.conf.get("tools.build:skip_test", default=True, check_type=bool):
-            cmake.build()
-            cmake.test()
 
     def package(self):
         cmake = CMake(self)
