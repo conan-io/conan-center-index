@@ -2,10 +2,9 @@ from conan.tools.files import rename, get, apply_conandata_patches, replace_in_f
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
-from conan.tools.apple.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
-from conans import CMake
+from conans import CMake, tools
 
 import functools
 import os
@@ -176,7 +175,7 @@ class ProtobufConan(ConanFile):
         # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
         # (even with virtualrunenv, this fix might be required due to SIP)
         # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if is_apple_os(self.settings.os):
+        if tools.is_apple_os(self.settings.os):
             replace_in_file(self,
                 protobuf_config_cmake,
                 "add_custom_command(",
