@@ -28,7 +28,7 @@ class EigenConan(ConanFile):
         self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
