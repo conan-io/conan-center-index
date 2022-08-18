@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CXX20_SUPPORTED"] = Version(self.deps_cpp_info["abseil"].version) > "20210324.2"
+        tc.variables["CXX20_SUPPORTED"] = Version(self.dependencies["abseil"].ref.version) > "20210324.2"
         tc.generate()
 
     def build(self):
