@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-forestdb-path.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-stdatomic.patch"
+      base_path: "source_subfolder"
