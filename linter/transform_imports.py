@@ -14,6 +14,10 @@ def register(linter: PyLinter):
     msge1101.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
     linter.msgs_store.register_message(msge1101)
 
+    msge0611 = linter.msgs_store._messages_definitions["E0611"]
+    msge0611.msg += ". Please, check https://github.com/conan-io/conan-center-index/blob/master/docs/v2_linter.md"
+    linter.msgs_store.register_message(msge0611)
+
 def transform_tools(module):
     """ Transform import module """
     if 'get' in module.locals:
