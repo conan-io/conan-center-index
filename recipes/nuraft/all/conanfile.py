@@ -1,7 +1,7 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, patch
 from conans import CMake
-from conans.errors import ConanInvalidConfiguration
 from conans.tools import check_min_cppstd
 
 class NuRaftConan(ConanFile):
