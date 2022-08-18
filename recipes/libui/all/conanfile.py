@@ -1,6 +1,6 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import os_info
 import os
+
+from conans import CMake, ConanFile, tools
 
 
 class libuiConan(ConanFile):
@@ -36,7 +36,8 @@ class libuiConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
-        self.requires("gtk/3.24.24")
+        if self.settings.os == "Linux":
+            self.requires("gtk/3.24.24")
 
     def _configure_cmake(self):
         cmake = CMake(self)
