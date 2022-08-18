@@ -119,6 +119,8 @@ class LibsystemdConan(ConanFile):
             unrelated.append("oomd")
         if tools.Version(self.version) >= "248.1":
             unrelated.extend(["sysext", "nscd"])
+        if tools.Version(self.version) >= "251.1":
+            unrelated.append("link-boot-shared")
 
         for opt in unrelated:
             defs[opt] = "false"

@@ -11,6 +11,9 @@ sources:
   "249.12":
     url: "https://github.com/systemd/systemd-stable/archive/v249.12.tar.gz"
     sha256: "cf8851e94cbd82c65a86ab122747f3e0018b04cd991c7daccbacb4a3ef149b68"
+  "251.4":
+    url: "https://github.com/systemd/systemd-stable/archive/v251.4.tar.gz"
+    sha256: "3459239979f52b8c4ace33734d31c2fb69fa13cf81d04b1b982f7d8d4651e015"
 patches:
   "246.16":
     - base_path: "source_subfolder"
@@ -32,3 +35,8 @@ patches:
       patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/249.12/0001-Remove-dependency-from-coreutils.patch"
+  "251.4":
+    - base_path: "source_subfolder"
+      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
