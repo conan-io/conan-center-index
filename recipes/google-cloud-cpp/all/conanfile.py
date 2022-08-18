@@ -5,7 +5,7 @@ import functools
 from conans import CMake
 from conan import tools, ConanFile
 from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.50.0"
 
@@ -19,11 +19,11 @@ class GoogleCloudCppConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
         }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
         }
 
@@ -45,7 +45,7 @@ class GoogleCloudCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-    
+
     def validate(self):
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
@@ -78,9 +78,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('libcurl/7.84.0')
         self.requires('openssl/1.1.1q')
         # TODO: Consume headers + libraries and avoid this if/else
-        if self.version == "1.40.1":
-            self.requires("googleapis/cci.20220711")
-        elif self.version == "1.34.1":
+        if self.version == "1.34.1":
             self.requires("googleapis/cci.20211122")
         else:
             self.requires("googleapis/cci.20220711")  # This is just a guess, sources are vendored
