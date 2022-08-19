@@ -213,7 +213,6 @@ class GLibConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self._patch_pkgconfig()
         meson = Meson(self)
         meson.configure()
         meson.build()
