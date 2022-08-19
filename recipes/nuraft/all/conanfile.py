@@ -42,7 +42,7 @@ class NuRaftConan(ConanFile):
         self.requires("openssl/1.1.1q")
 
     def validate(self):
-        if self.info.settings.os in ["Windows"]
+        if self.info.settings.os in ["Windows"]:
             raise ConanInvalidConfiguration("{} Builds are unsupported".format(self.info.settings.os))
         if self.info.settings.os in ["Macos"] and self.options.shared:
             raise ConanInvalidConfiguration("Building Shared Object for {} unsupported".format(self.info.settings.os))
