@@ -1,19 +1,18 @@
 import os
 from conan import ConanFile
 from conan.tools.files import get, patch
-from conans.tools import check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conans import CMake
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 class SemVer200Conan(ConanFile):
     name = "semver200"
-    version = "1.1.0"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zmarko/semver"
     description = "Semantic versioning for cpp14"
-    topics = ("versioning", "semver", "semantic", "versioning")
+    topics = ("versioning", "semver", "semantic")
 
     settings = "os", "compiler", "arch", "build_type"
 
