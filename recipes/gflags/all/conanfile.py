@@ -20,7 +20,7 @@ class GflagsConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "nothreads": [True, False],
-        "namespace": "ANY",
+        "namespace": ["ANY"],
     }
     default_options = {
         "shared": False,
