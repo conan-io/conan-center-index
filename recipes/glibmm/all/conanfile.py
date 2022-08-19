@@ -51,9 +51,15 @@ class GlibmmConan(ConanFile):
                 build.check_min_cppstd(self, 17)
             else:
                 build.check_min_cppstd(self, 11)
+
         if self.options.shared and not self.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
+        if self.options["glib"].shared and microsoft.is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                "Linking shared glib with the MSVC static runtime is not supported"
             )
 
     @property
