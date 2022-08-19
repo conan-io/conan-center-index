@@ -74,6 +74,7 @@ class XorgMacrosConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xorg-macros"
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
         self.cpp_info.set_property("pkg_config_custom_content", textwrap.dedent("""\
             datarootdir={datarootdir}
             datadir=${{datarootdir}}
