@@ -167,3 +167,7 @@ class PangommConan(ConanFile):
         self.cpp_info.components[pangomm_lib].set_property(
             "pkg_config_custom_content",
             f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
+
+    def package_id(self):
+        if not self.options["pango"].shared:
+            self.info.requires["pango"].full_package_mode()
