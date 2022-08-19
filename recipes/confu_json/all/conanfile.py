@@ -1,5 +1,5 @@
 from conan import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 
 
@@ -30,7 +30,9 @@ class ConfuJson(ConanFile):
             "clang": "10",
         }
 
-    def validate_build(self):
+
+       
+    def configure(self):
         if self.settings.compiler == "Visual Studio" and Version(self.version)<Version("0.0.9"):
             raise ConanInvalidConfiguration(
                 "Visual Studio is not supported in versions before confu_json/0.0.9")
@@ -40,7 +42,6 @@ class ConfuJson(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
          tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
 
-    def configure(self):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler)) 
         if not min_version:
