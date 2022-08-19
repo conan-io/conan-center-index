@@ -197,4 +197,5 @@ class GlibmmConan(ConanFile):
         self.cpp_info.components[giomm_component].requires = [glibmm_component, "glib::gio-2.0"]
 
     def package_id(self):
-        self.info.requires["glib"].full_package_mode()
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
