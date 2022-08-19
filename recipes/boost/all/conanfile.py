@@ -5,8 +5,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conans import tools
-# TODO: Update to conan.tools.scm.Version after Conan 1.50.2
-from conans.tools import Version
+from conan.tools.scm import Version
 
 import glob
 import os
@@ -1429,7 +1428,7 @@ class BoostConan(ConanFile):
         if self.options.filesystem_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
-        if self.options.filesystem_version is not None:
+        if self.options.filesystem_version:
             self.cpp_info.components["headers"].defines.append(f"BOOST_FILESYSTEM_VERSION={self.options.filesystem_version}")
 
         if self.options.segmented_stacks:
