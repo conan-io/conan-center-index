@@ -1,6 +1,6 @@
 import os
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, get, patch
+from conan.tools.files import apply_conandata_patches, get
 from conans import CMake
 from conans.tools import check_min_cppstd
 
