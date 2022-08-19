@@ -75,9 +75,16 @@ class CairoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
         if microsoft.is_msvc(self):
             if self.settings.build_type not in ["Debug", "Release"]:
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
+            if self.options.get_safe("with_glib") and self.options["glib"].shared \
+                    and microsoft.is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration(
+                    "Linking shared glib with the MSVC static runtime is not supported"
+                )
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
@@ -294,7 +301,7 @@ class CairoConan(ConanFile):
 
             self.cpp_info.components["cairo-quartz-font"].set_property("pkg_config_name", "cairo-quartz-font")
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
-            
+
     def package_id(self):
         if self.options.get_safe("with_glib") and not self.options["glib"].shared:
             self.info.requires["glib"].full_package_mode()
