@@ -236,7 +236,7 @@ class GLibConan(ConanFile):
         if Version(self.version) < "2.73.0":
             self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
         else:
-            self.copy(pattern="LGPL-2.1-or-later.txt", dst="licenses", src=os.path.join(self.source_folder, "LICENSES"))
+            copy(self, pattern="LGPL-2.1-or-later.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
         meson = Meson(self)
         meson.install()
         self._fix_library_names()
