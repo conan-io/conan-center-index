@@ -13,7 +13,7 @@ import glob
 import shutil
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.0"
 
 
 class GLibConan(ConanFile):
