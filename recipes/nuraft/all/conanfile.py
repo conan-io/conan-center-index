@@ -61,7 +61,6 @@ class NuRaftConan(ConanFile):
             patch(self, **patch_file)
         cmake = self.cmakeGet()
         cmake.build()
-        cmake.test()
 
     def package(self):
         self.copy("LICENSE", dst="licenses/", src=self._source_subfolder )
