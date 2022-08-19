@@ -69,7 +69,7 @@ class SemVer200Conan(ConanFile):
         self.copy("*.lib", dst="lib", src="lib")
         self.copy("*.so*", dst="lib", src="lib", symlinks=True)
         self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dll*", dst="lib", src="lib")
+        self.copy("*.dll*", dst="bin", src="lib")
         self.copy("*.h", dst=os.path.join("include", self.name), src=os.path.join(self._source_subfolder, "include"), keep_path=True)
         self.copy("*.inl", dst=os.path.join("include", self.name), src=os.path.join(self._source_subfolder, "include"), keep_path=True)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
