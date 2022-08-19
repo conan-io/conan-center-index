@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.7)
 # libraries provided by 'googleapis'. Those that are not available are also included
 # in the targets generated here
 
-set(_gRPC_PROTO_GENS_DIR ${CMAKE_BINARY_DIR}/proto_grpc)
+set(_gRPC_PROTO_GENS_DIR ${CMAKE_BINARY_DIR})
 file(MAKE_DIRECTORY ${_gRPC_PROTO_GENS_DIR})
 set(GOOGLEAPIS_GRPC_PROTOS_TARGETS "")
 
