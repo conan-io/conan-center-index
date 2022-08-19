@@ -164,4 +164,5 @@ class CairommConan(ConanFile):
             self.cpp_info.components[cairomm_lib_name].requires = ["libsigcpp::sigc++-2.0", "cairo::cairo_"]
 
     def package_id(self):
-        self.info.requires["cairo"].full_package_mode()
+        if not self.options["cairo"].shared:
+            self.info.requires["cairo"].full_package_mode()
