@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.2"
 
 
 class OpenjpegConan(ConanFile):
@@ -115,8 +115,8 @@ class OpenjpegConan(ConanFile):
 
     @property
     def _openjpeg_subdir(self):
-        major, minor, _ = str(self.version).split(".")
-        return f"openjpeg-{major}.{minor}"
+        openjpeg_version = Version(self.version)
+        return f"openjpeg-{openjpeg_version.major}.{openjpeg_version.minor}"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenJPEG")
