@@ -8,7 +8,6 @@ from conan.tools.files import apply_conandata_patches, get, replace_in_file, rmd
 # TODO: Update to conan.tools.apple after Conan 1.51.3
 from conans.tools import is_apple_os
 import re
-import functools
 import os
 import glob
 import shutil
