@@ -91,7 +91,7 @@ class GlibmmConan(ConanFile):
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
-        meson_build = os.path.join(self._source_subfolder, "meson.build"),
+        meson_build = os.path.join(self._source_subfolder, "meson.build")
         files.replace_in_file(self, meson_build, "subdir('tests')", "")
         if microsoft.is_msvc(self):
             # GLiBMM_GEN_EXTRA_DEFS_STATIC is not defined anywhere and is not
