@@ -120,8 +120,6 @@ class GLibConan(ConanFile):
         self.folders.source = self._source_subfolder
 
     def generate(self):
-        if is_apple_os(self.settings.os):
-            self.conf["tools.apple:sdk_path"] = apple_sdk_path(self)
 
         tc = PkgConfigDeps(self)
         tc.generate()
