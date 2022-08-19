@@ -1,10 +1,10 @@
+import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, patch
+from conan.tools.files import apply_conandata_patches, get, patch
 from conans import CMake
 from conans.tools import check_min_cppstd
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 class JungleConan(ConanFile):
     name = "jungle"
@@ -51,8 +51,7 @@ class JungleConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch_file)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -63,9 +62,10 @@ class JungleConan(ConanFile):
         self.copy("*.lib", dst="lib", src="lib")
         self.copy("*.so*", dst="lib", src="lib", symlinks=True)
         self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dll*", dst="lib", src="lib")
-        self.copy("*.h", dst="include/", src="%s/include" % (self._source_subfolder), keep_path=True)
+        self.copy("*.dll*", dst="bin", src="lib")
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
 
     def package_info(self):
         self.cpp_info.libs = ["jungle"]
-        self.cpp_info.system_libs.extend(["pthread", "dl"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "dl"])

@@ -1,12 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile
 from conan.tools.build import cross_building
+from conans import CMake
 import os
-import subprocess
-import re
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
