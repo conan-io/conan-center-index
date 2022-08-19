@@ -233,6 +233,10 @@ googleapis_grpc_proto_library(cloud_dialogflow_v2_protos
     GRPC_PROTOS_DIRS
         "${CONAN_GOOGLEAPIS_PROTOS}/google/cloud/dialogflow/v2"
     )
+googleapis_grpc_proto_library(cloud_dialogflow_v2beta1_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/cloud/dialogflow/v2beta1"
+    )
 
 
 install(

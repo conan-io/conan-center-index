@@ -137,11 +137,6 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
         self.cpp_info.components["bigtable"].names["pkg_config"] = "google_cloud_cpp_bigtable"
 
-        if Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
-            self.cpp_info.components["experimental-firestore"].requires = ["common"]
-            self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
-            self.cpp_info.components["experimental-firestore"].names["pkg_config"] = "google_cloud_cpp_firestore"
-            
         self.cpp_info.components["bigtable_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "iam_v1_iam_policy_protos", "iam_v1_policy_protos", "longrunning_operations_protos", "rpc_status_protos", "api_auth_protos"]
         self.cpp_info.components["bigtable_protos"].libs = ["google_cloud_cpp_bigtable_protos"]
         self.cpp_info.components["bigtable_protos"].names["pkg_config"] = "google_cloud_cpp_bigtable_protos"
@@ -230,19 +225,11 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].libs = ["google_cloud_cpp_devtools_cloudtrace_v2_tracing_protos"]
         self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].names["pkg_config"] = "google_cloud_cpp_devtools_cloudtrace_v2_tracing_protos"
 
-        cmp_logging_type_type_protos = None
-        if Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
-            cmp_logging_type_type_protos = "logging_type_protos"
-            self.cpp_info.components[cmp_logging_type_type_protos].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
-            self.cpp_info.components[cmp_logging_type_type_protos].libs = ["google_cloud_cpp_logging_type_protos"]
-            self.cpp_info.components[cmp_logging_type_type_protos].names["pkg_config"] = "google_cloud_cpp_logging_type_protos"
-        else:
-            cmp_logging_type_type_protos = "logging_type_type_protos"
-            self.cpp_info.components[cmp_logging_type_type_protos].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
-            self.cpp_info.components[cmp_logging_type_type_protos].libs = ["google_cloud_cpp_logging_type_type_protos"]
-            self.cpp_info.components[cmp_logging_type_type_protos].names["pkg_config"] = "google_cloud_cpp_logging_type_type_protos"
+        self.cpp_info.components["logging_type_type_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
+        self.cpp_info.components["logging_type_type_protos"].libs = ["google_cloud_cpp_logging_type_type_protos"]
+        self.cpp_info.components["logging_type_type_protos"].names["pkg_config"] = "google_cloud_cpp_logging_type_type_protos"
 
-        self.cpp_info.components["logging_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_distribution_protos", "api_field_behavior_protos", "api_metric_protos", "api_monitored_resource_protos", "api_resource_protos", cmp_logging_type_type_protos, "rpc_status_protos"]
+        self.cpp_info.components["logging_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_distribution_protos", "api_field_behavior_protos", "api_metric_protos", "api_monitored_resource_protos", "api_resource_protos", "logging_type_type_protos", "rpc_status_protos"]
         self.cpp_info.components["logging_protos"].libs = ["google_cloud_cpp_logging_protos"]
         self.cpp_info.components["logging_protos"].names["pkg_config"] = "google_cloud_cpp_logging_protos"
 
@@ -338,7 +325,7 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["cloud_dialogflow_v2_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2_protos"]
         self.cpp_info.components["cloud_dialogflow_v2_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2_protos"
 
-        if Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+        if Version(self.version) < "1.35.0":
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "longrunning_operations_protos", "rpc_status_protos", "type_latlng_protos"]
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2beta1_protos"]
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2beta1_protos"
