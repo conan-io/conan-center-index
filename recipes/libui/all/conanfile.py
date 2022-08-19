@@ -37,7 +37,7 @@ class libuiConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("gtk/3.24.24")
+            self.requires("gtk/system")
 
     def _configure_cmake(self):
         cmake = CMake(self)
