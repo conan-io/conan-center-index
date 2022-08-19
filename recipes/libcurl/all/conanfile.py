@@ -215,7 +215,6 @@ class LibcurlConan(ConanFile):
         download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
-    # now ???
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
         #
