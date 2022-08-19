@@ -3,10 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class FclConan(ConanFile):
@@ -76,11 +77,12 @@ class FclConan(ConanFile):
         tc.variables["FCL_COVERALLS_UPLOAD"] = False
         tc.variables["FCL_WITH_OCTOMAP"] = self.options.with_octomap
         if self.options.with_octomap:
-            tc.variables["OCTOMAP_VERSION"] = self.deps_cpp_info["octomap"].version
-            octomap_major, octomap_minor, octomap_patch = self.deps_cpp_info["octomap"].version.split(".")
-            tc.variables["OCTOMAP_MAJOR_VERSION"] = octomap_major
-            tc.variables["OCTOMAP_MINOR_VERSION"] = octomap_minor
-            tc.variables["OCTOMAP_PATCH_VERSION"] = octomap_patch
+            octomap_version_str = self.dependencies["octomap"].ref.version
+            tc.variables["OCTOMAP_VERSION"] = octomap_version_str
+            octomap_version = Version(octomap_version_str)
+            tc.variables["OCTOMAP_MAJOR_VERSION"] = octomap_version.major
+            tc.variables["OCTOMAP_MINOR_VERSION"] = octomap_version.minor
+            tc.variables["OCTOMAP_PATCH_VERSION"] = octomap_version.patch
         tc.variables["BUILD_TESTING"] = False
         tc.variables["FCL_NO_DEFAULT_RPATH"] = False
         tc.generate()
