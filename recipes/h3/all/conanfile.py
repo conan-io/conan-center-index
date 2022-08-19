@@ -19,7 +19,7 @@ class H3Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_filters": [True, False],
-        "h3_prefix": "ANY",
+        "h3_prefix": ["ANY"],
     }
     default_options = {
         "shared": False,
