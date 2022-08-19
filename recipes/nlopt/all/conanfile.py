@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class NloptConan(ConanFile):
@@ -26,18 +29,6 @@ class NloptConan(ConanFile):
         "enable_cxx_routines": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,42 +37,51 @@ class NloptConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if not self.options.enable_cxx_routines:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            try:
+               del self.settings.compiler.libcxx
+            except Exception:
+               pass
+            try:
+               del self.settings.compiler.cppstd
+            except Exception:
+               pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.build()
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NLOPT_CXX"] = self.options.enable_cxx_routines
+        tc.variables["NLOPT_FORTRAN"] = False
+        tc.variables["NLOPT_PYTHON"] = False
+        tc.variables["NLOPT_OCTAVE"] = False
+        tc.variables["NLOPT_MATLAB"] = False
+        tc.variables["NLOPT_GUILE"] = False
+        tc.variables["NLOPT_SWIG"] = False
+        tc.variables["NLOPT_TESTS"] = False
+        tc.variables["WITH_THREADLOCAL"] = True
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def _patch_sources(self):
         # don't force PIC
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
-        tools.replace_in_file(cmakelists, "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
+        replace_in_file(self, cmakelists, "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["NLOPT_CXX"] = self.options.enable_cxx_routines
-        self._cmake.definitions["NLOPT_FORTRAN"] = False
-        self._cmake.definitions["NLOPT_PYTHON"] = False
-        self._cmake.definitions["NLOPT_OCTAVE"] = False
-        self._cmake.definitions["NLOPT_MATLAB"] = False
-        self._cmake.definitions["NLOPT_GUILE"] = False
-        self._cmake.definitions["NLOPT_SWIG"] = False
-        self._cmake.definitions["NLOPT_TESTS"] = False
-        self._cmake.definitions["WITH_THREADLOCAL"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         algs_licenses = [
             {"subdir": "ags"   , "license_name": "COPYRIGHT"},
             {"subdir": "bobyqa", "license_name": "COPYRIGHT"},
@@ -94,15 +94,15 @@ class NloptConan(ConanFile):
             {"subdir": "stogo" , "license_name": "COPYRIGHT"},
         ]
         for alg_license in algs_licenses:
-            self.copy(alg_license["license_name"],
-                      dst=os.path.join("licenses", alg_license["subdir"]),
-                      src= os.path.join(self._source_subfolder, "src", "algs", alg_license["subdir"]))
-        cmake = self._configure_cmake()
+            copy(self, alg_license["license_name"],
+                      src=os.path.join(self.source_folder, "src", "algs", alg_license["subdir"]),
+                      dst=os.path.join(self.package_folder, "licenses", alg_license["subdir"]))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "NLopt")
@@ -119,7 +119,9 @@ class NloptConan(ConanFile):
         self.cpp_info.components["nloptlib"].libs = ["nlopt"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["nloptlib"].system_libs.append("m")
-        if not self.options.shared and self.options.enable_cxx_routines and tools.stdcpp_library(self):
-            self.cpp_info.components["nloptlib"].system_libs.append(tools.stdcpp_library(self))
+        if not self.options.shared and self.options.enable_cxx_routines:
+            libcxx = tools_legacy.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["nloptlib"].system_libs.append(libcxx)
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["nloptlib"].defines.append("NLOPT_DLL")
