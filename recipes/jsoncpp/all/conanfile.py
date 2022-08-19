@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, save
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, save
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -114,7 +114,7 @@ class JsoncppConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.set_property("cmake_target_aliases", ["jsoncpp_static", "jsoncpp_lib_static"])
         self.cpp_info.set_property("pkg_config_name", "jsoncpp")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["jsoncpp"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("JSON_DLL")
 
