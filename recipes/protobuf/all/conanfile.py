@@ -2,10 +2,11 @@ from conan.tools.files import rename, get, apply_conandata_patches, replace_in_f
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
-from conan.tools.apple.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conans import CMake
+# TODO: Update to conan.tools.apple after 1.51.3
+from conans.tools import is_apple_os
 
 import functools
 import os
