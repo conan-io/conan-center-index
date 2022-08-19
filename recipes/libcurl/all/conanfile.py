@@ -3,13 +3,13 @@ import os
 import re
 import functools
 from conan import ConanFile
-from conans import AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, replace_in_file, rmdir, save
 from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment
 # TODO: Update to conan.tools.apple after 1.51.3
 from conans.tools import is_apple_os, get_env, os_info, run_environment, unix_path
 
@@ -143,7 +143,7 @@ class LibcurlConan(ConanFile):
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"])
+            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -522,7 +522,10 @@ class LibcurlConan(ConanFile):
         return autotools, autotools_vars
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        if self._is_win_x_android:
+            tc = CMakeToolchain(self, generator="Ninja")
+        else:
+            tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_CURL_EXE"] = False
         tc.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
@@ -584,20 +587,14 @@ class LibcurlConan(ConanFile):
         tc.generate()
 
     def _build_with_cmake(self):
-        if self._is_win_x_android:
-            cmake = CMake(self, generator="Ninja")
-        else:
-            cmake = CMake(self)
+        cmake = CMake(self)
         cmake.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self.source_folder)
         self.copy("cacert.pem", dst="res")
         if self._is_using_cmake_build:
-            if self._is_win_x_android:
-                cmake = CMake(self, generator="Ninja")
-            else:
-                cmake = CMake(self)
+            cmake = CMake(self)
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
