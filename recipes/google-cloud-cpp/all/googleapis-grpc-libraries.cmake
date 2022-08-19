@@ -19,6 +19,7 @@ set(GOOGLEAPIS_GRPC_PROTOS_TARGETS "")
 include(CompileProtos)
 include(googleapis-helpers.cmake)
 
+# Libraries that are consumed by other targets in `google-cloud-cpp`
 googleapis_grpc_proto_library(iam_protos 
     GRPC_PROTOS_DIRS
         "${CONAN_GOOGLEAPIS_PROTOS}/google/iam/admin"
@@ -80,6 +81,159 @@ googleapis_grpc_proto_library(api_client_protos
         "${CONAN_GOOGLEAPIS_PROTOS}/google/api/serviceusage/v1beta1/resources.proto"
         "${CONAN_GOOGLEAPIS_PROTOS}/google/api/serviceusage/v1beta1/serviceusage.proto"
     )
+
+# Libraries that are provided, but not consumed by the project. These are libraries
+# containing just one proto! IMHO, I would have combined them all together and leave
+# some work to the linker...
+googleapis_grpc_proto_library(cloud_speech_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/cloud/speech/v1"
+    )
+googleapis_grpc_proto_library(cloud_texttospeech_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/cloud/texttospeech/v1"
+    )
+googleapis_grpc_proto_library(storage_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/storage/v2"
+    )
+googleapis_grpc_proto_library(api_http_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/http.proto"
+    )
+googleapis_grpc_proto_library(api_annotations_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/annotations.proto"
+    )
+googleapis_grpc_proto_library(api_auth_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/auth.proto"
+    )
+googleapis_grpc_proto_library(api_distribution_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/distribution.proto"
+    )
+googleapis_grpc_proto_library(api_field_behavior_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/field_behavior.proto"
+    )
+googleapis_grpc_proto_library(api_label_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/label.proto"
+    )
+googleapis_grpc_proto_library(api_launch_stage_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/launch_stage.proto"
+    )
+googleapis_grpc_proto_library(api_metric_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/metric.proto"
+    )
+googleapis_grpc_proto_library(api_monitored_resource_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/monitored_resource.proto"
+    )
+googleapis_grpc_proto_library(api_resource_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/api/resource.proto"
+    )
+googleapis_grpc_proto_library(devtools_cloudtrace_v2_trace_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/devtools/cloudtrace/v2/trace.proto"
+    )
+googleapis_grpc_proto_library(devtools_cloudtrace_v2_tracing_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/devtools/cloudtrace/v2/tracing.proto"
+    )
+googleapis_grpc_proto_library(logging_type_type_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/logging/type"
+    )
+googleapis_grpc_proto_library(monitoring_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/monitoring/dashboard/v1"
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/monitoring/metricsscope/v1"
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/monitoring/v3"
+    )
+googleapis_grpc_proto_library(iam_v1_options_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/iam/v1/options.proto"
+    )
+googleapis_grpc_proto_library(iam_v1_iam_policy_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/iam/v1/iam_policy.proto"
+    )
+googleapis_grpc_proto_library(type_calendar_period_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/calendar_period.proto"
+    )
+googleapis_grpc_proto_library(type_color_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/color.proto"
+    )
+googleapis_grpc_proto_library(type_date_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/date.proto"
+    )
+googleapis_grpc_proto_library(type_datetime_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/datetime.proto"
+    )
+googleapis_grpc_proto_library(type_dayofweek_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/dayofweek.proto"
+    )
+googleapis_grpc_proto_library(type_expr_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/expr.proto"
+    )
+googleapis_grpc_proto_library(type_fraction_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/fraction.proto"
+    )
+googleapis_grpc_proto_library(type_interval_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/interval.proto"
+    )
+googleapis_grpc_proto_library(type_latlng_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/latlng.proto"
+    )
+googleapis_grpc_proto_library(type_localized_text_protos
+    PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/localized_text.proto"
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/localized_text.proto"
+    )
+googleapis_grpc_proto_library(type_money_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/money.proto"
+    )
+googleapis_grpc_proto_library(type_month_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/month.proto"
+    )
+googleapis_grpc_proto_library(type_phone_number_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/phone_number.proto"
+    )
+googleapis_grpc_proto_library(type_postal_address_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/postal_address.proto"
+    )
+googleapis_grpc_proto_library(type_quaternion_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/quaternion.proto"
+    )
+googleapis_grpc_proto_library(type_timeofday_protos
+    GRPC_PROTOS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/type/timeofday.proto"
+    )
+googleapis_grpc_proto_library(cloud_dialogflow_v2_protos
+    GRPC_PROTOS_DIRS
+        "${CONAN_GOOGLEAPIS_PROTOS}/google/cloud/dialogflow/v2"
+    )
+
 
 install(
     TARGETS ${GOOGLEAPIS_GRPC_PROTOS_TARGETS}
