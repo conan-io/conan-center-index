@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.meson import Meson, MesonToolchain
