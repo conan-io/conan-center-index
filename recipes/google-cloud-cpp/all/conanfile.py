@@ -367,5 +367,12 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["storage"].libs = ["google_cloud_cpp_storage"]
         self.cpp_info.components["storage"].names["pkg_config"] = "google_cloud_cpp_storage"
 
+        if Version(self.version) >= "1.35.0":
+            self.cpp_info.components["rest_internal"].requires = ["abseil::absl_span", "common", "nlohmann_json::nlohmann_json", "libcurl::libcurl", "openssl::ssl", "openssl::crypto"]
+            self.cpp_info.components["rest_internal"].libs = ["google_cloud_cpp_rest_internal"]
+            self.cpp_info.components["rest_internal"].names["pkg_config"] = "google_cloud_cpp_rest_internal"
+
+            self.cpp_info.components["storage"].requires.append("rest_internal")
+
         # Hack. googleapis doesn't provide a library so it is not used by any component
         self.cpp_info.components["__"].requires = ["googleapis::googleapis",]
