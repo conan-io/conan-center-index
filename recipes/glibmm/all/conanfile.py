@@ -91,6 +91,8 @@ class GlibmmConan(ConanFile):
 
     def _patch_sources(self):
         files.apply_conandata_patches(self)
+        meson_build = os.path.join(self._source_subfolder, "meson.build"),
+        files.replace_in_file(self, meson_build, "subdir('tests')", "")
         if microsoft.is_msvc(self):
             # GLiBMM_GEN_EXTRA_DEFS_STATIC is not defined anywhere and is not
             # used anywhere except here
@@ -109,9 +111,7 @@ class GlibmmConan(ConanFile):
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            files.replace_in_file(self,
-                os.path.join(self._source_subfolder, "meson.build"),
-                "cpp_std=c++", "cpp_std=vc++")
+            files.replace_in_file(self, meson_build, "cpp_std=c++", "cpp_std=vc++")
 
     def configure(self):
         if self.options.shared:
