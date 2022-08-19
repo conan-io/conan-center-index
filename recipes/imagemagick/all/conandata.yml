@@ -1,13 +1,44 @@
 sources:
+  "7.1.0-45":
+    url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.0-45.tar.gz"
+    sha256: "3df6ca6dff15a4e8a20b4593c60285a59e38890440494d91a344e5c0e2bb3eec"
+
   "7.0.11-14":
-    source:
-      url: "https://github.com/ImageMagick/ImageMagick/archive/7.0.11-14.tar.gz"
-      sha256: "dfa5aa3f7f289f12c2f9ee6c7c19b02ae857b4eec02f40298f60f5c11048a016"
-    visualmagick:
-      "fcd198e4344576b9efc2facd952a2f0c57752c07":
-        url: "https://github.com/ImageMagick/VisualMagick/archive/fcd198e4344576b9efc2facd952a2f0c57752c07.zip"
-        sha256: "f793c1c48796ed2f295ba9cacb938f6aa7e4bf011226d96f977655911852bfda"
+    url: "https://github.com/ImageMagick/ImageMagick/archive/7.0.11-14.tar.gz"
+    sha256: "dfa5aa3f7f289f12c2f9ee6c7c19b02ae857b4eec02f40298f60f5c11048a016"
+
 patches:
   "7.0.11-14":
-    - patch_file: "patches/remove-unnecessary-dependencies.patch"
-      base_path: "VisualMagick"
+    - patch_file: "patches/fix_linking_against_libtiff.patch"
+      patch_description: "Use pkgconfig to link against libtiff. The original patch edits configure.ac, while this patch edits the resulting configure file"
+      patch_source: "https://github.com/ImageMagick/ImageMagick/commit/ee1f26ff19ae070d91fab8415a9f7950a2b4d19d.patch"
+      patch_type: "backport"
+
+  "7.1.0-45":
+    - patch_file: "patches/disable_complex_fftw.patch"
+      patch_description: "MSVC does not define _Complex keyword. This patch prohibits fftw from using it."
+      patch_type: "portability"
+
+    - patch_file: "patches/fix_ssize_t_undefined.patch"
+      patch_description: "MSVC does not define ssize_t. This patch defines ssize_t datatype."
+      patch_type: "portability"
+
+    - patch_file: "patches/dont_include_win32config.patch"
+      patch_description: "VisualMagick's recipe for libxml2 exports win32config header, which conan does not. This patch removes these includes."
+      patch_type: "conan"
+
+    - patch_file: "patches/fix_win_macros.patch"
+      patch_description: "This patch replaces WIN32 and WIN64 with _WIN32 and _WIN64. MSVC does not define these macros, but VisualMagick probably does."
+      patch_type: "conan"
+
+    - patch_file: "patches/fix_libheif_include.patch"
+      patch_description: "Include libheif as include<libheif/libheif.h> instead of include<libheif.h>."
+      patch_type: "conan"
+
+    - patch_file: "patches/fix_make_dependency.patch"
+      patch_description: "install-exec-local-utilities make target depends on install-binPROGRAMS target. Parallel installation (make install -j<N>) fails locally most of the times without this patch."
+      patch_type: "conan"
+
+    - patch_file: "patches/libtool_accept_static.patch"
+      patch_description: "For some reason (which might be valid) libtool doesn't want to link against conan's static libs using msvc. This patch fixes this."
+      patch_type: "conan"
