@@ -18,15 +18,11 @@ class CgalConan(ConanFile):
         "with_cgal_core": [True, False],
         "with_cgal_qt5": [True, False],
         "with_cgal_imageio": [True, False],
-        "shared": [True, False],
-        "header_only": [True, False]
     }
     default_options = {
         "with_cgal_core": True,
         "with_cgal_qt5": False,
         "with_cgal_imageio": True,
-        "shared": False,
-        "header_only": True
     }
 
     _cmake = None
@@ -45,7 +41,6 @@ class CgalConan(ConanFile):
             self._cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
             self._cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
             self._cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
-            self._cmake.definitions["CGAL_HEADER_ONLY"] = self.options.header_only
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -60,8 +55,6 @@ class CgalConan(ConanFile):
     def configure(self):
         if self.options.with_cgal_qt5:
             raise ConanInvalidConfiguration("Qt Conan package is not available yet.")
-        if self.options.header_only:
-            del self.options.shared
 
     def requirements(self):
         self.requires("boost/1.75.0")
@@ -88,21 +81,10 @@ class CgalConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        if self.options.get_safe("shared"):
-            for root, _, filenames in os.walk(os.path.join(self.package_folder, "bin")):
-                for filename in filenames:
-                    if not filename.endswith(".dll"):
-                        os.unlink(os.path.join(root, filename))
-        else:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
-        if not self.options.header_only:
-            self.cpp_info.defines.append("CGAL_NOT_HEADER_ONLY=1")
