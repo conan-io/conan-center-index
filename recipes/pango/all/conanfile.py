@@ -21,8 +21,24 @@ class PangoConan(ConanFile):
     homepage = "https://www.pango.org/"
     topics = ("conan", "fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_libthai": [True, False], "with_cairo": [True, False], "with_xft": [True, False, "auto"], "with_freetype": [True, False, "auto"], "with_fontconfig": [True, False, "auto"]}
-    default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": "auto", "with_fontconfig": "auto"}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libthai": [True, False],
+        "with_cairo": [True, False],
+        "with_xft": [True, False, "auto"],
+        "with_freetype": [True, False, "auto"],
+        "with_fontconfig": [True, False, "auto"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libthai": False,
+        "with_cairo": True,
+        "with_xft": "auto",
+        "with_freetype": "auto",
+        "with_fontconfig": "auto"
+    }
     generators = "pkg_config"
     _autotools = None
 
@@ -144,7 +160,7 @@ class PangoConan(ConanFile):
         self.cpp_info.components["pango_"].set_property("pkg_config_name", "pango")
         self.cpp_info.components["pango_"].names["pkg_config"] = "pango"
         self.cpp_info.components["pango_"].libs = ["pango-1.0"]
-        
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pango_"].system_libs.append("m")
         self.cpp_info.components["pango_"].requires.append("glib::glib-2.0")
@@ -152,7 +168,7 @@ class PangoConan(ConanFile):
         self.cpp_info.components["pango_"].requires.append("glib::gio-2.0")
         self.cpp_info.components["pango_"].requires.append("fribidi::fribidi")
         self.cpp_info.components["pango_"].requires.append("harfbuzz::harfbuzz")
-        
+
         if self.options.with_fontconfig:
             self.cpp_info.components["pango_"].requires.append("fontconfig::fontconfig")
 
@@ -209,9 +225,3 @@ class PangoConan(ConanFile):
     def package_id(self):
         if not self.options["glib"].shared:
             self.info.requires["glib"].full_package_mode()
-
-        if not self.options["harfbuzz"].shared:
-            self.info.requires["harfbuzz"].full_package_mode()
-
-        if self.options.with_cairo and not self.options["cairo"].shared:
-            self.info.requires["cairo"].full_package_mode()
