@@ -294,3 +294,7 @@ class CairoConan(ConanFile):
 
             self.cpp_info.components["cairo-quartz-font"].set_property("pkg_config_name", "cairo-quartz-font")
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
+            
+    def package_id(self):
+        if self.options.get_safe("with_glib") and not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()

@@ -341,4 +341,5 @@ class CairoConan(ConanFile):
         self.cpp_info.components["cairo_"].system_libs += list(base_system_libs)
 
     def package_id(self):
-        self.info.requires["glib"].full_package_mode()
+        if self.options.get_safe("with_glib") and not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
