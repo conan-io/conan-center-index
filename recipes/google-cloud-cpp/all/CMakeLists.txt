@@ -9,8 +9,6 @@ find_package(googleapis REQUIRED CONFIG)
 find_package(protobuf REQUIRED CONFIG)
 find_package(gRPC REQUIRED CONFIG)
 
-include(googleapis-grpc-libraries.cmake)
-
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if(MSVC)
@@ -19,3 +17,9 @@ if(MSVC)
 endif()
 
 add_subdirectory("source_subfolder")
+
+# Recover some variables that are not available in this scope, and create targets from googleapis
+get_target_property(PROJECT_VERSION google_cloud_cpp_common VERSION)
+get_target_property(PROJECT_VERSION_MAJOR google_cloud_cpp_common SOVERSION)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/source_subfolder/cmake)
+include(googleapis-grpc-libraries.cmake)

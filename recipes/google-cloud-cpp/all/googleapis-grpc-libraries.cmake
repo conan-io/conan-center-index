@@ -16,6 +16,7 @@ set(_gRPC_PROTO_GENS_DIR ${CMAKE_BINARY_DIR}/proto_grpc)
 file(MAKE_DIRECTORY ${_gRPC_PROTO_GENS_DIR})
 set(GOOGLEAPIS_GRPC_PROTOS_TARGETS "")
 
+include(CompileProtos)
 include(googleapis-helpers.cmake)
 
 googleapis_grpc_proto_library(iam_protos 
@@ -90,9 +91,23 @@ install(
             NAMELINK_SKIP
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT google_cloud_cpp_development)
+# With CMake-3.12 and higher we could avoid this separate command (and the
+# duplication).
+install(
+    TARGETS ${GOOGLEAPIS_GRPC_PROTOS_TARGETS}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT google_cloud_cpp_development
+            NAMELINK_ONLY
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT google_cloud_cpp_development)
 
 install(
     EXPORT googleapis-targets
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/google_cloud_cpp_googleapis"
     COMPONENT google_cloud_cpp_development)
 
+
+foreach (target ${GOOGLEAPIS_GRPC_PROTOS_TARGETS})
+    google_cloud_cpp_install_proto_library_headers("${target}")
+    google_cloud_cpp_install_proto_library_protos("${target}" "${CONAN_GOOGLEAPIS_PROTOS}")
+endforeach ()

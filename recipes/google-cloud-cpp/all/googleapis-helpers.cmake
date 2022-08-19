@@ -90,9 +90,12 @@ function(googleapis_grpc_proto_library TARGET_SHORT_NAME PROTO_DIRS)
     
     set_target_properties(
             "google_cloud_cpp_${TARGET_SHORT_NAME}"
-            PROPERTIES EXPORT_NAME google-cloud-cpp::${TARGET_SHORT_NAME})
+            PROPERTIES EXPORT_NAME google-cloud-cpp::${TARGET_SHORT_NAME}
+                       VERSION ${PROJECT_VERSION}
+                       SOVERSION ${PROJECT_VERSION_MAJOR})
     add_library("google-cloud-cpp::${TARGET_SHORT_NAME}" ALIAS
                 "google_cloud_cpp_${TARGET_SHORT_NAME}")
+
     list(APPEND GOOGLEAPIS_GRPC_PROTOS_TARGETS google_cloud_cpp_${TARGET_SHORT_NAME})
     set(GOOGLEAPIS_GRPC_PROTOS_TARGETS ${GOOGLEAPIS_GRPC_PROTOS_TARGETS} PARENT_SCOPE)
 endfunction()
