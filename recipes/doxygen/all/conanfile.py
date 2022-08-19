@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools import files
+from conan import tools
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -88,7 +88,7 @@ class DoxygenConan(ConanFile):
         self.compatible_packages.append(compatible_pkg)
 
     def source(self):
-        files.get(**self.conan_data["sources"][self.version],
+        tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -108,7 +108,7 @@ class DoxygenConan(ConanFile):
         if os.path.isfile("Findbison.cmake"):
             os.unlink("Findbison.cmake")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(**patch)
+            tools.files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
