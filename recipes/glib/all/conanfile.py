@@ -199,18 +199,6 @@ class GLibConan(ConanFile):
             "'res'",
         )
 
-    def _patch_pkgconfig(self):
-        with chdir(self, self.generators_folder):
-            for filename in glob.glob("*.pc"):
-                self.output.info("processing %s" % filename)
-                content = load(self, filename)
-                results = re.findall(r"-F (.*)[ \n]", content)
-                for result in results:
-                    if not os.path.isdir(result):
-                        self.output.info("removing bad framework path %s" % result)
-                        content = content.replace("-F %s" % result, "")
-                save(self, filename, content)
-
     def build(self):
         self._patch_sources()
         meson = Meson(self)
