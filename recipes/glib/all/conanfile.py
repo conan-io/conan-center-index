@@ -7,7 +7,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps, AutotoolsDeps
 from conan.tools.files import apply_conandata_patches, get, replace_in_file, rmdir, chdir, rm, load, save, copy
 # TODO: Update to conan.tools.apple after Conan 1.51.3
-from conans.tools import apple_sdk_path, is_apple_os
+from conans.tools import is_apple_os
 import re
 import functools
 import os
