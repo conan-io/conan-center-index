@@ -117,13 +117,6 @@ class TensorflowLiteConan(ConanFile):
         if Version(self.version) >= "2.9.1" and self.settings.os == "Windows" and self.options.shared:
             tools.patch(patch_file="patches/remove_simple_memory_arena_debug_dump.patch", base_path="src")
 
-        # All CMake targets will be provided by Conan through the wrapper, removing every occurrence of `find_package`
-        cmake_lists_path = os.path.join(self.source_folder, self._source_subfolder, "tensorflow/lite/CMakeLists.txt")
-        with open(cmake_lists_path, "r", encoding="utf-8") as f:
-            patched_content = "".join(line for line in f.readlines() if "find_package" not in line)
-        with open(cmake_lists_path, "w", encoding="utf-8") as f:
-            f.write(patched_content)
-
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()

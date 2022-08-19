@@ -14,3 +14,17 @@ patches:
       patch_description: "Fix Windows build: Apply fixes for compatibility with MSVC from master"
       patch_type: "backport"
       base_path: "src"
+    - patch_file: "patches/dependencies_2_9.patch"
+      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
+      patch_type: "conan"
+      base_path: "src"
+  "2.6.0":
+    - patch_file: "patches/dependencies_2_6.patch"
+      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
+      patch_type: "conan"
+      base_path: "src"
+  "2.6.2":
+    - patch_file: "patches/dependencies_2_6.patch"
+      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
+      patch_type: "conan"
+      base_path: "src"
