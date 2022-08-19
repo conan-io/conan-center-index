@@ -4,7 +4,7 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(PNG REQUIRED)
+find_package(PNG CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE PNG::PNG)
