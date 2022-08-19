@@ -30,7 +30,7 @@ class XorgMacrosConan(ConanFile):
 
     def validate(self):
         if build.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("xorg-macros package cannot be cross-compiledyet . Contributions are welcome")
+            raise ConanInvalidConfiguration("xorg-macros package cannot be cross-compiled yet. Contributions are welcome")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -57,7 +57,7 @@ class XorgMacrosConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
+            "--datarootdir={tools.unix_path(self._datarootdir)}",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
