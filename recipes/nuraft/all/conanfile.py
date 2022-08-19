@@ -45,7 +45,7 @@ class NuRaftConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared or self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
