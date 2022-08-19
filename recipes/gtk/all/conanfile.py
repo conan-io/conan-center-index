@@ -217,7 +217,7 @@ class GtkConan(ConanFile):
         if self.options.with_pango:
             requirements += ["pango::pango_", "pango::pangocairo"]
         if self.settings.compiler != "Visual Studio":
-            requirements += ["cairo::cairo", "cairo::cairo-gobject"]
+            requirements += ["cairo::cairo_", "cairo::cairo-gobject"]
         if self.settings.os == "Linux":
             requirements += ["glib::gio-unix-2.0", "cairo::cairo-xlib"]
             if self.options.with_x11:
@@ -233,7 +233,7 @@ class GtkConan(ConanFile):
             "libepoxy::libepoxy"
         ]
         if self.settings.compiler != "Visual Studio":
-            requirements += ["cairo::cairo", "cairo::cairo-gobject"]
+            requirements += ["cairo::cairo_", "cairo::cairo-gobject"]
         if self.settings.os == "Linux":
             requirements += ["at-spi2-atk::at-spi2-atk", "glib::gio-unix-2.0"]
         if self.options.with_pango:
@@ -294,3 +294,13 @@ class GtkConan(ConanFile):
                 self.cpp_info.components["gtk4-unix-print"].set_property("pkg_config_name", "gtk4-unix-print")
                 self.cpp_info.components["gtk4-unix-print"].includedirs.append(os.path.join("include", "gtk-4.0", "unix-print"))
                 self.cpp_info.components["gtk4-unix-print"].requires.append("gtk4")
+
+    def package_id(self):
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
+
+        if self.options.get_safe("with_pango") and not self.options["pango"].shared:
+            self.info.requires["glib"].full_package_mode()
+            
+        if self.settings.compiler != "Visual Studio" and not self.options["cairo"].shared:
+            self.info.requires["glib"].full_package_mode()
