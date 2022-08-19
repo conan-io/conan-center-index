@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class EdlibConan(ConanFile):
@@ -100,7 +100,7 @@ class EdlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "edlib")
         self.cpp_info.set_property("cmake_target_name", "edlib::edlib")
-        self.cpp_info.set_property("pkg_config_name", "edlib-{}".format(str(self.version).split(".")[0]))
+        self.cpp_info.set_property("pkg_config_name", "edlib-{}".format(Version(self.version).major))
         self.cpp_info.libs = ["edlib"]
         if self.options.shared:
             self.cpp_info.defines = ["EDLIB_SHARED"]
