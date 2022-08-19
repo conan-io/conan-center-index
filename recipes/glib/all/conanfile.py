@@ -98,7 +98,6 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def validate(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
         if Version(self.version) >= "2.69.0" and not self.options.with_pcre:
             raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
         if self.settings.os == "Windows" and not self.options.shared and Version(self.version) < "2.71.1":
