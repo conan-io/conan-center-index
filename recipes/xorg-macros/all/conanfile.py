@@ -57,7 +57,7 @@ class XorgMacrosConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         conf_args = [
-            "--datarootdir={tools.unix_path(self._datarootdir)}",
+            f"--datarootdir={tools.unix_path(self._datarootdir)}",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
