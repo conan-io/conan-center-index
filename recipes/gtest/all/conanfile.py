@@ -144,8 +144,8 @@ class GTestConan(ConanFile):
         try:
            check_min_vs(self, "191")
         except ConanInvalidConfiguration:
-            tc.preprocessor_definitions["GTEST_LANG_CXX11"] = True
-            tc.preprocessor_definitions["GTEST_HAS_TR1_TUPLE"] = False
+            tc.preprocessor_definitions["GTEST_LANG_CXX11"] = 1
+            tc.preprocessor_definitions["GTEST_HAS_TR1_TUPLE"] = 0
             
         tc.cache_variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
