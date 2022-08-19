@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.scm import Version
 from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.2"
 
 
 class LaszipConan(ConanFile):
@@ -61,7 +62,7 @@ class LaszipConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        suffix = str(self.version).split(".")[0] if self.settings.os == "Windows" else ""
+        suffix = Version(self.version).major if self.settings.os == "Windows" else ""
         self.cpp_info.libs = [f"laszip{suffix}"]
         if self.options.shared:
             self.cpp_info.defines.append("LASZIP_DYN_LINK")
