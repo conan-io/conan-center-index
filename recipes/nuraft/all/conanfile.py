@@ -1,8 +1,11 @@
+from os.path import join
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, patch
+from conan.tools.files import copy, get, apply_conandata_patches
 from conans import CMake
 from conans.tools import check_min_cppstd
+
+required_conan_version = ">=1.50.0"
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
@@ -31,17 +34,17 @@ class NuRaftConan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(p["patch_file"])
 
     def requirements(self):
         self.requires("boost/1.79.0")
         self.requires("openssl/1.1.1q")
 
     def validate(self):
-        if self.settings.os in ["Macos"] and self.options.shared:
+        if self.info.settings.os in ["Macos"] and self.options.shared:
             raise ConanInvalidConfiguration("Building Shared Object for {} unsupported".format(self.settings.os))
-        if self.settings.compiler.cppstd:
+        if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
     def configure(self):
@@ -57,24 +60,28 @@ class NuRaftConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch_file)
+        apply_conandata_patches(self)
         cmake = self.cmakeGet()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses/", src=self._source_subfolder )
-        self.copy("*.a", dst="lib", src="lib", symlinks=False)
-        self.copy("*.lib", dst="lib", src="lib", symlinks=False)
-        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dll*", dst="lib", src="lib")
-        self.copy("*.hxx", dst="include/", src="%s/include" % (self._source_subfolder), keep_path=True)
-        self.copy("*in_memory_log_store.hxx", dst="include/libnuraft", keep_path=False)
-        self.copy("*callback.h", dst="include/libnuraft", keep_path=False)
-        self.copy("*event_awaiter.h", dst="include/libnuraft", keep_path=False)
+        lib_dir = join(self.package_folder, "lib")
+        copy(self, "LICENSE", join(self.source_folder, self._source_subfolder), join(self.package_folder, "licenses/"), keep_path=False)
+        copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.so*", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dylib*", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
+
+        hdr_src = join(self.source_folder, join(self._source_subfolder, "include"))
+        hdr_dir = join(self.package_folder, join("include", "libnuraft"))
+
+        copy(self, "*.hxx", hdr_src, join(self.package_folder, "include"), keep_path=True)
+        copy(self, "*in_memory_log_store.hxx", self.source_folder, hdr_dir, keep_path=False)
+        copy(self, "*callback.h", self.source_folder, hdr_dir, keep_path=False)
+        copy(self, "*event_awaiter.h", self.source_folder, hdr_dir, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
