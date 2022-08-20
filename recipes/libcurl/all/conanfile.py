@@ -587,6 +587,7 @@ class LibcurlConan(ConanFile):
 
     def _build_with_cmake(self):
         cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
