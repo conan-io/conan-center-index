@@ -1,8 +1,6 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 058f4cd9..58b5ed01 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -486,6 +486,9 @@ if (MINGW)
+@@ -488,6 +488,9 @@ if (MINGW)
            "to a MinGW bug: http://eigen.tuxfamily.org/bz/show_bug.cgi?id=556")
    string(REPLACE "-O3" "-O2" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
    update_cache_variable(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")

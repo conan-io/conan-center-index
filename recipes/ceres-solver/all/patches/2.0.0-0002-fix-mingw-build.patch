@@ -1,8 +1,6 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3828e33..30ef8cb 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -512,6 +512,9 @@ if (MINGW)
+@@ -514,6 +514,9 @@ if (MINGW)
            "to a MinGW bug: http://eigen.tuxfamily.org/bz/show_bug.cgi?id=556")
    string(REPLACE "-O3" "-O2" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
    update_cache_variable(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
@@ -12,4 +10,3 @@ index 3828e33..30ef8cb 100644
  endif (MINGW)
  
  # After the tweaks for the compile settings, disable some warnings on MSVC.
-
