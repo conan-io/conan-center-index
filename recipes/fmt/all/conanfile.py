@@ -50,7 +50,7 @@ class FmtConan(ConanFile):
             tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows" or self.options.shared:
