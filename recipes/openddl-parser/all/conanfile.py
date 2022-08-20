@@ -1,9 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
-import functools
 
-
-required_conan_version = ">= 1.43.0"
+required_conan_version = ">= 1.50.0"
 
 
 class OpenDDLParserConan(ConanFile):
@@ -24,20 +25,9 @@ class OpenDDLParserConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,36 +38,36 @@ class OpenDDLParserConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["DDL_STATIC_LIBRARY"] = not self.options.shared
-        cmake.definitions["DDL_BUILD_TESTS"] = False
-        cmake.definitions["DDL_BUILD_PARSER_DEMO"] = False
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DDL_STATIC_LIBRARY"] = not self.options.shared
+        tc.variables["DDL_BUILD_TESTS"] = False
+        tc.variables["DDL_BUILD_PARSER_DEMO"] = False
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "openddlparser")
