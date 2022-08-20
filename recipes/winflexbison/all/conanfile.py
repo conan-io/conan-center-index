@@ -65,7 +65,7 @@ class WinflexbisonConan(ConanFile):
         save(self, os.path.join(package_license_folder, "COPYING.GPL3"), self._extract_license())
         copy(self, "COPYING", src=os.path.join(self.source_folder, "flex", "src"), dst=package_license_folder, keep_path=False)
         rename(self, os.path.join(package_license_folder, "COPYING"), os.path.join(package_license_folder, "bison-license"))
-        copy(self, "COPYING", src=os.path.join(self.source_folder, "bison", "src"), dst="licenses", keep_path=False)
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "bison", "src"), dst=package_license_folder, keep_path=False)
         rename(self, os.path.join(package_license_folder, "COPYING"), os.path.join(package_license_folder, "flex-license"))
 
     def package_info(self):
