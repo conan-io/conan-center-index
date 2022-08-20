@@ -1,10 +1,18 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -12,8 +20,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             in_wav_path = os.path.join(self.source_folder, "8kadpcm.wav")
             out_ogg_path = os.path.join("bin", "sample.ogg")
-            self.run("{0} < {1} > {2}".format(bin_path, in_wav_path, out_ogg_path), run_environment=True)
+            self.run(f"{bin_path} < {in_wav_path} > {out_ogg_path}", env="conanrun")
