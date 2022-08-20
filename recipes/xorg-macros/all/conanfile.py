@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools import files
 from conan.tools import build
-from conan.errors import ConanInvalidConfiguration
 from conans import AutoToolsBuildEnvironment, tools
 import os
 import textwrap
@@ -27,10 +26,6 @@ class XorgMacrosConan(ConanFile):
     @property
     def _settings_build(self):
         return self.settings_build if hasattr(self, "settings_build") else self.settings
-
-    def validate(self):
-        if build.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("xorg-macros package cannot be cross-compiled yet. Contributions are welcome")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
