@@ -69,7 +69,10 @@ class WinflexbisonConan(ConanFile):
         rename(self, os.path.join(package_license_folder, "COPYING"), os.path.join(package_license_folder, "flex-license"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "none") # FindFLEX.cmake too complex to emulate
+        # A conan recipe can't emulate 2 Find module files,
+        # and FindFLEX.cmake & FindBISON.cmake are too complex to emulate anyway
+        self.cpp_info.set_property("cmake_find_mode", "none")
+
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
 
