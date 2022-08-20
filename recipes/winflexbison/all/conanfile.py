@@ -51,12 +51,12 @@ class WinflexbisonConan(ConanFile):
         return "\n".join(license_content)
 
     def package(self):
-        if self.settings.build_type in ("Release", "Debug") and Version(self.version) < "2.5.23":
-            actual_build_path = os.path.join(self.build_folder, "bin", str(self.settings.build_type))
+        if self.settings.build_type in ("Release", "Debug"):
+            exec_build_path = os.path.join(self.source_folder, "bin")
         else:
-            actual_build_path = os.path.join(self.build_folder, "bin")
+            exec_build_path = self.build_folder
         package_bin_folder = os.path.join(self.package_folder, "bin")
-        copy(self, "*.exe", src=actual_build_path, dst=package_bin_folder, keep_path=False)
+        copy(self, "*.exe", src=exec_build_path, dst=package_bin_folder, keep_path=False)
         copy(self, "data/*", src=os.path.join(self.source_folder, "bison"), dst=package_bin_folder, keep_path=True)
         copy(self, "FlexLexer.h", src=os.path.join(self.source_folder, "flex", "src"), dst=os.path.join(self.package_folder, "include"), keep_path=False)
 
