@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        tc = CMakeToolchain
+        tc = CMakeToolchain(self)
         tc.variables["ONEDPL_VERSION_MAJOR"] = Version(self.dependencies["onedpl"].ref.version).major[0:4]
         tc.generate()
 
