@@ -55,14 +55,6 @@ class FmtConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows" or self.options.shared:
             del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
         if not self._has_with_os_api_option:
             del self.options.with_os_api
         elif str(self.settings.os) == "baremetal":
