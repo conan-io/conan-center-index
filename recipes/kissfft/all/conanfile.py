@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.46.0"
 
 
 class KissfftConan(ConanFile):
@@ -28,14 +30,6 @@ class KissfftConan(ConanFile):
         "use_alloca": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,37 +37,43 @@ class KissfftConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        cmake = CMake(self)
-        cmake.definitions["KISSFFT_PKGCONFIG"] = False
-        cmake.definitions["KISSFFT_STATIC"] = not self.options.shared
-        cmake.definitions["KISSFFT_TEST"] = False
-        cmake.definitions["KISSFFT_TOOLS"] = False
-        cmake.definitions["KISSFFT_DATATYPE"] = self.options.datatype
-        cmake.definitions["KISSFFT_OPENMP"] = self.options.openmp
-        cmake.definitions["KISSFFT_USE_ALLOCA"] = self.options.use_alloca
-        cmake.configure()
-        self._cmake = cmake
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["KISSFFT_PKGCONFIG"] = False
+        tc.variables["KISSFFT_STATIC"] = not self.options.shared
+        tc.variables["KISSFFT_TEST"] = False
+        tc.variables["KISSFFT_TOOLS"] = False
+        tc.variables["KISSFFT_DATATYPE"] = self.options.datatype
+        tc.variables["KISSFFT_OPENMP"] = self.options.openmp
+        tc.variables["KISSFFT_USE_ALLOCA"] = self.options.use_alloca
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         lib_name = "kissfft-{datatype}{openmp}".format(
@@ -83,7 +83,7 @@ class KissfftConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "kissfft")
         self.cpp_info.set_property("cmake_target_name", "kissfft::kissfft")
-        self.cpp_info.set_property("cmake_target_aliases", ["kissfft::{}".format(lib_name)])
+        self.cpp_info.set_property("cmake_target_aliases", [f"kissfft::{lib_name}"])
         self.cpp_info.set_property("pkg_config_name", lib_name)
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libkissfft"].includedirs.append(os.path.join("include", "kissfft"))
@@ -91,7 +91,7 @@ class KissfftConan(ConanFile):
 
         # got to duplicate the logic from kissfft/CMakeLists.txt
         if self.options.datatype in ["float", "double"]:
-            self.cpp_info.components["libkissfft"].defines.append("kiss_fft_scalar={}".format(self.options.datatype))
+            self.cpp_info.components["libkissfft"].defines.append(f"kiss_fft_scalar={self.options.datatype}")
         elif self.options.datatype == "int16_t":
             self.cpp_info.components["libkissfft"].defines.append("FIXED_POINT=16")
         elif self.options.datatype == "int32_t":
