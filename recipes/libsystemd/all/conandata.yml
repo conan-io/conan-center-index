@@ -16,27 +16,17 @@ sources:
     sha256: "3459239979f52b8c4ace33734d31c2fb69fa13cf81d04b1b982f7d8d4651e015"
 patches:
   "246.16":
-    - base_path: "source_subfolder"
-      patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/246.16/0003-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
+    - patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
+    - patch_file: "patches/246.16/0003-Remove-dependency-from-coreutils.patch"
   "247.11":
-    - base_path: "source_subfolder"
-      patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
   "248.10":
-    - base_path: "source_subfolder"
-      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+    - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
   "249.12":
-    - base_path: "source_subfolder"
-      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/249.12/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+    - patch_file: "patches/249.12/0001-Remove-dependency-from-coreutils.patch"
   "251.4":
-    - base_path: "source_subfolder"
-      patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+    - patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
