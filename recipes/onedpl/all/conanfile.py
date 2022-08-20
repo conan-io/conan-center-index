@@ -48,7 +48,7 @@ class OneDplConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def package(self):
-        version_major = int(Version(self.version).major[0:4])
+        version_major = int(str(Version(self.version).major)[0:4])
         copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         if version_major < 2021:
             copy(self, "*", src=os.path.join(self.source_folder, "stdlib"), dst=os.path.join(self.package_folder, "include"))
