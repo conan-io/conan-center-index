@@ -83,8 +83,9 @@ class CryptoPPConan(ConanFile):
             if android_ndk_home:
                 copy(
                     self,
-                    src=os.path.join(android_ndk_home, "sources", "android", "cpufeatures", "cpu-features.h"),
-                    dst=os.path.join(self.source_folder, "cpu-features.h"),
+                    "cpu-features.h",
+                    src=os.path.join(android_ndk_home, "sources", "android", "cpufeatures"),
+                    dst=self.source_folder,
                 )
         # Honor fPIC option
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
