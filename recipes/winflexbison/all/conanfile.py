@@ -52,7 +52,7 @@ class WinflexbisonConan(ConanFile):
 
     def package(self):
         if self.settings.build_type in ("Release", "Debug") and Version(self.version) < "2.5.23":
-            actual_build_path = os.path.join(self.build_folder, "bin", self.settings.build_type)
+            actual_build_path = os.path.join(self.build_folder, "bin", str(self.settings.build_type))
         else:
             actual_build_path = os.path.join(self.build_folder, "bin")
         package_bin_folder = os.path.join(self.package_folder, "bin")
