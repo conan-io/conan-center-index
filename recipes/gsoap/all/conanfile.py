@@ -3,6 +3,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.46.0"
@@ -35,10 +36,6 @@ class GsoapConan(ConanFile):
     exports_sources = "CMakeLists.txt", "cmake/*.cmake"
     short_paths = True
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,7 +49,7 @@ class GsoapConan(ConanFile):
         if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
             self.tool_requires("gsoap/{}".format(self.version))
 
-        if self._settings_build.os == "Windows":
+        if is_msvc(self):
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.7.6")
