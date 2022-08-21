@@ -38,13 +38,13 @@ class DiscountConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
