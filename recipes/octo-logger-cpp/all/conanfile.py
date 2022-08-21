@@ -17,6 +17,12 @@ class OctoLoggerCPPConan(ConanFile):
     description = "Octo logger library"
     topics = ("logging", "cpp")
     settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "with_aws": [True, False]
+    }
+    default_options = {
+        "with_aws": False
+    }
 
     @property
     def _compilers_minimum_version(self):
@@ -27,6 +33,14 @@ class OctoLoggerCPPConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "1923",
         }
+
+    @property
+    def _aws_supported(self):
+        return Version(self.version) >= "1.2.0"
+
+    def configure(self):
+        if self.options.with_aws and self._aws_supported:
+            self.options["aws-sdk-cpp"].logs = True
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -61,13 +75,21 @@ class OctoLoggerCPPConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/9.0.0")
+        if self.options.with_aws and self._aws_supported:
+            self.requires("nlohmann_json/3.11.2")
+            self.requires("aws-sdk-cpp/1.9.234")
 
     def build_requirements(self):
         self.build_requires("cmake/3.24.0")
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        variables = {}
+        if self._aws_supported:
+            variables.update({
+                "WITH_AWS": self.options.with_aws
+            })
+        cmake.configure(variables=variables)
         cmake.build()
 
     def package(self):
@@ -81,6 +103,11 @@ class OctoLoggerCPPConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "octo-logger-cpp")
         self.cpp_info.components["libocto-logger-cpp"].libs = ["octo-logger-cpp"]
         self.cpp_info.components["libocto-logger-cpp"].requires = ["fmt::fmt"]
+        if self.options.with_aws and self._aws_supported:
+            self.cpp_info.components["libocto-logger-cpp"].requires.extend([
+                "nlohmann_json::nlohmann_json",
+                "aws-sdk-cpp::monitoring"
+            ])
         self.cpp_info.filenames["cmake_find_package"] = "octo-logger-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "octo-logger-cpp"
         self.cpp_info.names["cmake_find_package"] = "octo-logger-cpp"
