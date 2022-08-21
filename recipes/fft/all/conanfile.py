@@ -23,8 +23,8 @@ class FftConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "threads": [True, False],
-        "max_threads": "ANY",
-        "threads_begin_n": "ANY",
+        "max_threads": ["ANY"],
+        "threads_begin_n": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -60,11 +60,11 @@ class FftConan(ConanFile):
             return (n != 0) and (n & (n-1) == 0)
 
         if self.info.options.threads:
-            if not self.info.options.max_threads.value.isdigit():
+            if not self.info.options.max_threads.isdigit():
                 raise ConanInvalidConfiguration("max_threads must be an integer")
-            if not self.info.options.threads_begin_n.value.isdigit():
+            if not self.info.options.threads_begin_n.isdigit():
                 raise ConanInvalidConfiguration("threads_begin_n must be an integer")
-            if not _is_power_of_two(int(self.info.options.max_threads.value)):
+            if not _is_power_of_two(int(self.info.options.max_threads)):
                 raise ConanInvalidConfiguration("max_threads must be a power of 2")
 
     def layout(self):
