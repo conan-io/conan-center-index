@@ -80,7 +80,7 @@ class GoogleCloudCppConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
-        cmake = CMake(self)
+        cmake = CMake(self, parallel=False)
         cmake.definitions["CONAN_GOOGLEAPIS_PROTOS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
 
         cmake.definitions["BUILD_TESTING"] = 0
