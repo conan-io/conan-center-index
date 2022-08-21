@@ -1,0 +1,32 @@
+
+env:
+   global:
+     - CONAN_REFERENCE: "sdl/2.0.22"
+     - CONAN_USERNAME: "None"
+     - CONAN_LOGIN_USERNAME: "None"
+     - CONAN_CHANNEL: "None"
+
+linux: &linux
+   os: linux
+   dist: xenial
+   language: python
+   python: "3.7"
+   services:
+     - docker
+osx: &osx
+   os: osx
+   language: generic
+matrix:
+   include:
+
+      - <<: *osx
+        osx_image: xcode13.4
+        env: CONAN_APPLE_CLANG_VERSIONS=13.0
+
+install:
+  - chmod +x .travis/install.sh
+  - ./.travis/install.sh
+
+script:
+  - chmod +x .travis/run.sh
+  - ./.travis/run.sh
