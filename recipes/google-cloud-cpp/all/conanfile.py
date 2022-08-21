@@ -65,6 +65,12 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.compiler == 'Visual Studio' and Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Building requires VS >= 2019")
 
+        # TODO: CCI fails
+        if self.version in ["1.34.1", "1.42.0"] \
+            and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) == "12.0" \
+            and self.options.shared:
+            raise ConanInvalidConfiguration("This is failing in CCI")
+
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -80,7 +86,7 @@ class GoogleCloudCppConan(ConanFile):
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
-        cmake = CMake(self, parallel=False)
+        cmake = CMake(self)
         cmake.definitions["CONAN_GOOGLEAPIS_PROTOS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
 
         cmake.definitions["BUILD_TESTING"] = 0
