@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class CoinLemonConan(ConanFile):
@@ -12,7 +14,7 @@ class CoinLemonConan(ConanFile):
     description = "LEMON stands for Library for Efficient Modeling and Optimization in Networks."
     topics = ("data structures", "algorithms", "graphs", "network")
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,17 +24,9 @@ class CoinLemonConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,35 +36,40 @@ class CoinLemonConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LEMON_ENABLE_GLPK"] = False
-        self._cmake.definitions["LEMON_ENABLE_ILOG"] = False
-        self._cmake.definitions["LEMON_ENABLE_COIN"] = False
-        self._cmake.definitions["LEMON_ENABLE_SOPLEX"] = False
-        self._cmake.configure()
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LEMON_ENABLE_GLPK"] = False
+        tc.variables["LEMON_ENABLE_ILOG"] = False
+        tc.variables["LEMON_ENABLE_COIN"] = False
+        tc.variables["LEMON_ENABLE_SOPLEX"] = False
+        # For msvc shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # Relocatable shared libs on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # For Ninja generator
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0058"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LEMON")
