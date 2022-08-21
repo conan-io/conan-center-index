@@ -1,7 +1,5 @@
 versions:
-  "2.0.24-prerelease":
-    folder: all
-  "2.0.22":
+  "2.24.0":
     folder: all
   "2.0.20":
     folder: all
