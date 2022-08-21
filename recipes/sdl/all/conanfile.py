@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.50.0"
 
 
 class SDLConan(ConanFile):
