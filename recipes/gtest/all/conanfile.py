@@ -24,7 +24,7 @@ class GTestConan(ConanFile):
         "build_gmock": [True, False],
         "fPIC": [True, False],
         "no_main": [True, False],
-        "debug_postfix": "ANY",
+        "debug_postfix": ["ANY"],
         "hide_symbols": [True, False],
     }
     default_options = {
