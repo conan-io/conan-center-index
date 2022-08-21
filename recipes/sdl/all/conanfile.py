@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import functools
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 class SDLConan(ConanFile):
@@ -150,6 +150,10 @@ class SDLConan(ConanFile):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
         if tools.Version(self.version) >= "2.0.18" and tools.is_apple_os(self.settings.os) and tools.Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
+
+        # SDL>=2.0.20 requires xcode 13 or higher to build armv8 on Macos
+        if tools.Version(self.version) >= "2.0.20" and tools.is_apple_os(self.settings.os) and self.settings.arch == "armv8" and tools.Version(self.settings.compiler.version) < "13":
+            raise ConanInvalidConfiguration("{}/{} requires xcode 13 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
             if self.options.sndio:
