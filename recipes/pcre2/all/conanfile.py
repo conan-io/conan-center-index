@@ -53,13 +53,13 @@ class PCRE2Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         try:
-           del self.settings.compiler.libcxx
+            del self.settings.compiler.libcxx
         except Exception:
-           pass
+            pass
         try:
-           del self.settings.compiler.cppstd
+            del self.settings.compiler.cppstd
         except Exception:
-           pass
+            pass
         if not self.options.build_pcre2grep:
             del self.options.with_zlib
             del self.options.with_bzip2
