@@ -176,6 +176,7 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].set_property("pkg_config_name", "gtest")
         self.cpp_info.components["libgtest"].libs = [f"gtest{self._postfix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libgtest"].system_libs.append("m")
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
         if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
             self.cpp_info.components["libgtest"].system_libs.append("regex")
