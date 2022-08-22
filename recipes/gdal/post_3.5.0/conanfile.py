@@ -3,49 +3,9 @@ from conan.tools.files import apply_conandata_patches, get
 from conan.tools.files.files import rmdir
 from conan.tools.microsoft import is_msvc
 from conans import CMake
+import functools
 import os
 import re
-
-
-def _strip_version(package):
-    return re.sub(r"/.*", "", package)
-
-
-def _option_name(dep):
-    if "option" in dep:
-        return dep["option"]
-    return "with_" + _strip_version(dep["require"])
-
-
-def _make_options(gdal_deps):
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        "tools": [True, False]
-    }
-    for dep in gdal_deps:
-        if "require" in dep:
-            options[_option_name(dep)] = [True, False]
-    return options
-
-
-def _make_default_options(gdal_deps):
-    default_options = {"shared": False, "fPIC": True, "tools": False}
-    for dep in gdal_deps:
-        if "require" in dep:
-            default_options[_option_name(dep)] = ("default" in dep
-                                                  and dep["default"])
-
-    return default_options
-
-
-def _components(gdal_dep):
-    if "conan_dep" in gdal_dep:
-        d = gdal_dep["conan_dep"]
-        return d if isinstance(d, list) else [d]
-    package = _strip_version(gdal_dep["require"])
-    return [ f"{package}::{package}" ]
-
 
 class GdalConan(ConanFile):
     name = "gdal"
@@ -60,298 +20,107 @@ class GdalConan(ConanFile):
 
     generators = "cmake", "cmake_find_package"
 
-    # List taken from cmake/helpers/CheckDependentLibraries.cmake within gdal sources
-    # with the command:
+    # A list of gdal dependencies can be taken from cmake/helpers/CheckDependentLibraries.cmake
+    # within gdal sources with the command:
     # grep -E '^[ \t]*gdal_check_package\(' cmake/helpers/CheckDependentLibraries.cmake \
     #   | sed 's/[ \t]*gdal_check_package(\([a-zA-Z_0-9]\+\) "\(.*\)"\(.*\)/{ 'dep': \'\1\', 'descr': \'\2\' },/' \
     #   | sort | uniq
-    #
-    #   'PROJ' has been added manually.
 
-    gdal_deps = [{
-        "conan_dep": "proj::projlib",
-        "require": "proj/9.0.0",
-        "dep": "PROJ",
-        "default": True
-    }, {
-        "dep": "Armadillo",
-        "require": "armadillo/10.7.3",
-        "descr": "C++ library for linear algebra (used for TPS transformation)"
-    }, {
-        "dep": "Arrow",
-        "conan_dep": "arrow::libarrow",
-        "require": "arrow/8.0.0",
-        "descr": "Apache Arrow C++ library"
-    }, {
-        "dep": "BRUNSLI",
-        "descr": "Enable BRUNSLI for JPEG packing in MRF"
-    }, {
-        "require": "c-blosc/1.21.1",
-        "option": "blosc",
-        "dep": "Blosc",
-        "descr": "Blosc compression"
-    }, {
-        "require": "cfitsio/4.1.0",
-        "dep": "CFITSIO",
-        "descr": "C FITS I/O library"
-    }, {
-        "conan_dep": "libcurl::curl",
-        "require": "libcurl/7.83.1",
-        "dep": "CURL",
-        "descr": "Enable drivers to use web API"
-    }, {
-        "dep": "Crnlib",
-        "descr": "enable gdal_DDS driver"
-    }, {
-        "require": "cryptopp/8.6.0",
-        "conan_dep": "cryptopp::libcryptopp",
-        "dep": "CryptoPP",
-        "descr": "Use crypto++ library for CPL."
-    }, {
-        "require": "libdeflate/1.12",
-        "default": True,
-        "dep": "Deflate",
-        "descr": "Enable libdeflate compression library (complement to ZLib)"
-    }, {
-        "dep": "ECW",
-        "descr": "Enable ECW driver"
-    }, {
-        "require": "expat/2.4.8",
-        "dep": "EXPAT",
-        "descr": "Read and write XML formats"
-    }, {
-        "dep": "FYBA",
-        "descr": "enable ogr_SOSI driver"
-    }, {
-        "dep": "FileGDB",
-        "descr": "Enable FileGDB (based on closed-source SDK) driver"
-    }, {
-        "dep": "FreeXL",
-        "descr": "Enable XLS driver"
-    }, {
-        "conan_dep": "geos::geos_c",
-        "require": "geos/3.11.0",
-        "default": True,
-        "dep": "GEOS",
-        "descr": "Geometry Engine - Open Source (GDAL core dependency)"
-    }, {
-        "require": "giflib/5.2.1",
-        "option": "gif",
-        "default": True,
-        "dep": "GIF",
-        "descr": "GIF compression library (external)"
-    }, {
-        "dep": "GTA",
-        "descr": "Enable GTA driver"
-    }, {
-        "require": "libgeotiff/1.7.1",
-        "default": True,
-        "dep": "GeoTIFF",
-        "descr": "libgeotiff library (external)"
-    }, {
-        "dep": "HDF4",
-        "descr": "Enable HDF4 driver"
-    }, {
-        "require": "hdf5/1.13.1",
-        "conan_dep": "hdf5::hdf5_c",
-        "dep": "HDF5",
-        "descr": "Enable Hadoop File System through native library"
-    }, {
-        "dep": "HEIF",
-        "descr": "HEIF >= 1.1"
-    }, {
-        "dep": "IDB",
-        "descr": "enable ogr_IDB driver"
-    }, {
-        "require": "libiconv/1.17",
-        "dep": "Iconv",
-        "descr": "Character set recoding (used in GDAL portability library)"
-    }, {
-        "dep": "OPENJPEG",
-        "require": "openjpeg/2.5.0",
-        "descr": "JPEG2000 driver based on OpenJPEG library"
-    }, {
-        "dep": "JPEG",
-        "require": "libjpeg/9d",
-        "descr": "JPEG compression library (external)"
-    }, {
-        "require": "json-c/0.15",
-        "default": True,
-        "dep": "JSONC",
-        "descr": "json-c library (external)"
-    }, {
-        "dep": "JXL",
-        "descr": "JPEG-XL compression (when used with internal libtiff)"
-    }, {
-        "dep": "KDU",
-        "descr": "Enable KAKADU"
-    }, {
-        "dep": "KEA",
-        "descr": "Enable KEA driver"
-    }, {
-        "dep": "LERC",
-        "descr": "Enable LERC (external)"
-    }, {
-        "dep": "LURATECH",
-        "descr": "Enable JP2Lura driver"
-    }, {
-        "require": "lz4/1.9.3",
-        "dep": "LZ4",
-        "descr": "LZ4 compression"
-    }, {
-        "dep": "LibLZMA",
-        "descr": "LZMA compression"
-    }, {
-        "require": "libxml2/2.9.14",
-        "dep": "LibXml2",
-        "descr": "Read and write XML formats"
-    }, {
-        "dep": "MONGOCXX",
-        "descr": "Enable MongoDBV3 driver"
-    }, {
-        "dep": "MRSID",
-        "descr": "MrSID raster SDK"
-    }, {
-        "dep": "MSSQL_NCLI",
-        "descr": "MSSQL Native Client to enable bulk copy"
-    }, {
-        "dep": "MSSQL_ODBC",
-        "descr": "MSSQL ODBC driver to enable bulk copy"
-    }, {
-        "dep": "MySQL",
-        "descr": "MySQL"
-    }, {
-        "dep": "NetCDF",
-        "descr": "Enable netCDF driver"
-    }, {
-        "dep": "ODBC",
-        "descr": "Enable DB support through ODBC"
-    }, {
-        "dep": "ODBCCPP",
-        "descr": "odbc-cpp library (external)"
-    }, {
-        "dep": "OGDI",
-        "descr": "Enable ogr_OGDI driver"
-    }, {
-        "dep": "OpenCAD",
-        "descr": "libopencad (external, used by OpenCAD driver)"
-    }, {
-        "dep": "OpenCL",
-        "descr": "Enable OpenCL (may be used for warping)"
-    }, {
-        "dep": "OpenEXR",
-        "descr": "OpenEXR >=2.2"
-    }, {
-        "require": "openssl/1.1.1o",
-        "conan_dep": "openssl::ssl",
-        "dep": "OpenSSL",
-        "descr": "Use OpenSSL library"
-    }, {
-        "dep": "Oracle",
-        "descr": "Enable Oracle OCI driver"
-    }, {
-        "dep": "PCRE",
-        "descr": "Enable PCRE support for sqlite3"
-    }, {
-        "dep": "PCRE2",
-        "descr": "Enable PCRE2 support for sqlite3"
-    }, {
-        "dep": "PDFIUM",
-        "descr": "Enable PDF driver with Pdfium (read side)"
-    }, {
-        "require": "libpng/1.6.37",
-        "default": True,
-        "dep": "PNG",
-        "descr": "PNG compression library (external)"
-    }, {
-        "dep": "Parquet",
-        "descr": "Apache Parquet C++ library"
-    }, {
-        "dep": "Podofo",
-        "descr": "Enable PDF driver with Podofo (read side)"
-    }, {
-        "require": "poppler/21.07.0",
-        "conan_dep": "poppler::libpoppler",
-        "dep": "Poppler",
-        "descr": "Enable PDF driver with Poppler (read side)"
-    }, {
-        "conan_dep": "libpq::pq",
-        "require": "libpq/14.2",
-        "option": "with_pg",
-        "dep": "PostgreSQL",
-        "descr": ""
-    }, {
-        "conan_dep": "qhull::libqhull",
-        "require": "qhull/8.0.1",
-        "default": True,
-        "dep": "QHULL",
-        "descr": "Enable QHULL (external)"
-    }, {
-        "dep": "RASDAMAN",
-        "descr": "enable rasdaman driver"
-    }, {
-        "dep": "RASTERLITE2",
-        "descr": "Enable RasterLite2 support for sqlite3"
-    }, {
-        "dep": "SFCGAL",
-        "descr": "gdal core supports ISO 19107:2013 and OGC Simple Features" \
-                + " Access 1.2 for 3D operations"
-    }, {
-        "dep": "SPATIALITE",
-        "descr": "Enable spatialite support for sqlite3"
-    }, {
-        "conan_dep": "sqlite3::sqlite",
-        "require": "sqlite3/3.38.5",
-        "default": True,
-        "dep": "SQLite3",
-        "descr": "Enable SQLite3 support (used by SQLite/Spatialite, GPKG, " \
-                + "Rasterlite, MBTiles, etc.)"
-    }, {
-        "dep": "SWIG",
-        "descr": "Enable language bindings"
-    }, {
-        "dep": "Shapelib",
-        "descr": "Enable Shapelib support (not recommended, internal Shapelib" \
-                + " is preferred)."
-    }, {
-        "dep": "TEIGHA",
-        "descr": "Enable DWG and DGNv8 drivers"
-    }, {
-        "require": "libtiff/4.3.0",
-        "dep": "TIFF",
-        "default": True,
-        "descr": "Support for the Tag Image File Format (TIFF)."
-    }, {
-        "dep": "TileDB",
-        "descr": "enable TileDB driver"
-    }, {
-        "dep": "WebP",
-        "descr": "WebP compression"
-    }, {
-        "dep": "XercesC",
-        "descr": "Read and write XML formats (needed for GMLAS and ILI drivers)"
-    }, {
-        "require": "zlib/1.2.12",
-        "default": True,
-        "dep": "ZLIB",
-        "descr": "zlib (external)"
-    }, {
-        "conan_dep": "zstd::zstdlib",
-        "require": "zstd/1.5.2",
-        "dep": "ZSTD",
-        "descr": "ZSTD compression library"
-    }, {
-        "dep": "rdb",
-        "descr": "enable RIEGL RDB library"
-    },
-    {
-        "conan_dep": [ "libkml::kmldom", "libkml::kmlengine" ],
-        "dep": "LibKML",
-        "require": "libkml/1.3.0"
-    }]
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "tools": [True, False],
+        "with_armadillo": [True, False],
+        "with_arrow": [True, False],
+        "with_blosc": [True, False],
+        "with_cfitsio": [True, False],
+        "with_cryptopp": [True, False],
+        "with_curl": [True, False],
+        "with_dds": [True, False],
+        "with_expat": [True, False],
+        "with_exr": [True, False],
+        "with_freexl": [True, False],
+        "with_geos": [True, False],
+        "with_gif": [True, False],
+        "with_gta": [True, False],
+        "with_hdf4": [True, False],
+        "with_hdf5": [True, False],
+        "with_heif": [True, False],
+        "with_kea": [True, False],
+        "with_libdeflate": [True, False],
+        "with_libiconv": [True, False],
+        "with_libjpeg": [True, False],
+        "with_libkml": [True, False],
+        "with_libtiff": [True, False],
+        "with_lz4": [True, False],
+        "with_mongocxx": [True, False],
+        "with_netcdf": [True, False],
+        "with_odbc": [True, False],
+        "with_openjpeg": [True, False],
+        "with_openssl": [True, False],
+        "with_pcre": [True, False],
+        "with_pcre2": [True, False],
+        "with_pg": [True, False],
+        "with_png": [True, False],
+        "with_podofo": [True, False],
+        "with_poppler": [True, False],
+        "with_proj": [True, False],
+        "with_qhull": [True, False],
+        "with_sqlite3": [True, False],
+        "with_webp": [True, False],
+        "with_xerces": [True, False],
+        "with_xml2": [True, False],
+        "with_zlib": [True, False],
+        "with_zstd": [True, False],
+    }
 
-    options = _make_options(gdal_deps)
-    default_options = _make_default_options(gdal_deps)
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "tools": False,
+        "with_armadillo": False,
+        "with_arrow": False,
+        "with_blosc": False,
+        "with_cfitsio": False,
+        "with_cryptopp": False,
+        "with_curl": False,
+        "with_dds": False,
+        "with_expat": False,
+        "with_exr": False,
+        "with_freexl": False,
+        "with_geos": True,
+        "with_gif": True,
+        "with_gta": False,
+        "with_hdf4": False,
+        "with_hdf5": False,
+        "with_heif": False,
+        "with_kea": False,
+        "with_libdeflate": True,
+        "with_libiconv": True,
+        "with_libjpeg": False,
+        "with_libkml": False,
+        "with_libtiff": True,
+        "with_lz4": False,
+        "with_mongocxx": False,
+        "with_netcdf": False,
+        "with_odbc": False,
+        "with_openjpeg": False,
+        "with_openssl": False,
+        "with_pcre": False,
+        "with_pcre2": False,
+        "with_pg": False,
+        "with_png": True,
+        "with_podofo": False,
+        "with_poppler": False,
+        "with_proj": True,
+        "with_qhull": True,
+        "with_sqlite3": True,
+        "with_webp": False,
+        "with_xerces": False,
+        "with_xml2": False,
+        "with_zlib": True,
+        "with_zstd": False,
+    }
 
     @property
     def _source_subfolder(self):
@@ -371,22 +140,145 @@ class GdalConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.with_sqlite3:
-            self.options["sqlite3"].enable_column_metadata = True
-
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("json-c/0.15")
+        self.requires("libgeotiff/1.7.1")
 
-        for dep in self.gdal_deps:
-            if "require" in dep and getattr(self.options, _option_name(dep)):
-                self.requires(dep["require"])
+        if self.options.with_armadillo:
+            self.requires("armadillo/10.7.3")
+
+        if self.options.with_arrow:
+            self.requires("arrow/8.0.0")
+
+        if self.options.with_blosc:
+            self.requires("c-blosc/1.21.1")
+
+        if self.options.with_cfitsio:
+            self.requires("cfitsio/4.1.0")
+
+        if self.options.with_cryptopp:
+            self.requires("cryptopp/8.6.0")
+
+        if self.options.with_curl:
+            self.requires("libcurl/7.83.1")
+
+        if self.options.with_dds:
+            self.requires("crunch/cci.20190615")
+
+        if self.options.with_expat:
+            self.requires("expat/2.4.8")
+
+        if self.options.with_exr:
+            self.requires("openexr/3.1.5")
+            self.requires("imath/3.1.5")
+
+        if self.options.with_freexl:
+            self.requires("freexl/1.0.6")
+
+        if self.options.with_geos:
+            self.requires("geos/3.11.0")
+
+        if self.options.with_gif:
+            self.requires("giflib/5.2.1")
+
+        if self.options.with_gta:
+            self.requires("libgta/1.2.1")
+
+        if self.options.with_hdf4:
+            self.requires("hdf4/4.2.15")
+
+        if self.options.with_hdf5:
+            self.requires("hdf5/1.13.1")
+
+        if self.options.with_heif:
+            self.requires("libheif/1.12.0")
+
+        if self.options.with_kea:
+            self.requires("kealib/1.4.14")
+
+        if self.options.with_libdeflate:
+            self.requires("libdeflate/1.12")
+
+        if self.options.with_libiconv:
+            self.requires("libiconv/1.17")
+
+        if self.options.with_libjpeg:
+            self.requires("libjpeg/9d")
+
+        if self.options.with_libkml:
+            self.requires("libkml/1.3.0")
+
+        if self.options.with_libtiff:
+            self.requires("libtiff/4.3.0")
+
+        if self.options.with_lz4:
+            self.requires("lz4/1.9.3")
+
+        if self.options.with_mongocxx:
+            self.requires("mongo-cxx-driver/3.6.6")
+
+        if self.options.with_netcdf:
+            self.requires("netcdf/4.8.1")
+
+        if self.options.with_odbc:
+            self.requires("odbc/2.3.9")
+
+        if self.options.with_openjpeg:
+            self.requires("openjpeg/2.5.0")
+
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1o")
+
+        if self.options.with_pcre:
+            self.requires("pcre/8.45")
+
+        if self.options.with_pcre2:
+            self.requires("pcre2/10.40")
+
+        if self.options.with_pg:
+            self.requires("libpq/14.2")
+
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+
+        if self.options.with_podofo:
+            self.requires("podofo/0.9.7")
+
+        if self.options.with_poppler:
+            self.requires("poppler/21.07.0")
+
+        if self.options.with_proj:
+            self.requires("proj/9.0.0")
+
+        if self.options.with_qhull:
+            self.requires("qhull/8.0.1")
+
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.38.5")
+
+        if self.options.with_webp:
+            self.requires("libwebp/1.2.2")
+
+        if self.options.with_xerces:
+            self.requires("xerces-c/3.2.3")
+
+        if self.options.with_xml2:
+            self.requires("libxml2/2.9.14")
+
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.12")
+
+        if self.options.with_zstd:
+            self.requires("zstd/1.5.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                 destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
 
@@ -420,20 +312,266 @@ class GdalConan(ConanFile):
         cmake.definitions["SQLite3_HAS_RTREE"] = self.options[
             "sqlite3"].enable_rtree
 
+        cmake.definitions["GDAL_USE_JSONC"] = True
+        cmake.definitions["GDAL_CONAN_PACKAGE_FOR_JSONC"] = "json-c"
+
+        cmake.definitions["GDAL_USE_GEOTIFF"] = True
+        cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GEOTIFF"] = "libgeotiff"
+
+        cmake.definitions["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
+        if self.options.with_armadillo:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ARMADILLO"] = "armadillo"
+        else:
+            cmake.definitions["Armadillo_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_ARROW"] = self.options.with_arrow
+        if self.options.with_arrow:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ARROW"] = "arrow"
+        else:
+            cmake.definitions["Arrow_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_BLOSC"] = self.options.with_blosc
+        if self.options.with_blosc:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_BLOSC"] = "c-blosc"
+        else:
+            cmake.definitions["Blosc_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
+        if self.options.with_cfitsio:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CFITSIO"] = "cfitsio"
+        else:
+            cmake.definitions["CFITSIO_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
+        if self.options.with_cryptopp:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CRYPTOPP"] = "cryptopp"
+        else:
+            cmake.definitions["CryptoPP_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_CURL"] = self.options.with_curl
+        if self.options.with_curl:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CURL"] = "libcurl"
+        else:
+            cmake.definitions["CURL_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_CRNLIB"] = self.options.with_dds
+        if self.options.with_dds:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_CRNLIB"] = "crunch"
+        else:
+            cmake.definitions["Crnlib_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_EXPAT"] = self.options.with_expat
+        if self.options.with_expat:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_EXPAT"] = "expat"
+        else:
+            cmake.definitions["EXPAT_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_OPENEXR"] = self.options.with_exr
+        if self.options.with_exr:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENEXR"] = "openexr"
+        else:
+            cmake.definitions["OpenEXR_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_FREEXL"] = self.options.with_freexl
+        if self.options.with_freexl:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_FREEXL"] = "freexl"
+        else:
+            cmake.definitions["FreeXL_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_GEOS"] = self.options.with_geos
+        if self.options.with_geos:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GEOS"] = "geos"
+        else:
+            cmake.definitions["GEOS_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_GIF"] = self.options.with_gif
+        if self.options.with_gif:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GIF"] = "giflib"
+        else:
+            cmake.definitions["GIF_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_GTA"] = self.options.with_gta
+        if self.options.with_gta:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_GTA"] = "libgta"
+        else:
+            cmake.definitions["GTA_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_HDF4"] = self.options.with_hdf4
+        if self.options.with_hdf4:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HDF4"] = "hdf4"
+        else:
+            cmake.definitions["HDF4_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_HDF5"] = self.options.with_hdf5
         if self.options.with_hdf5:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HDF5"] = "hdf5"
             cmake.definitions["HDF5_C_LIBRARIES"] = "HDF5::C"
             cmake.definitions["HDF5_BUILD_SHARED_LIBS"] = self.options["hdf5"].shared
+        else:
+            cmake.definitions["HDF5_FOUND"] = False
 
-        for dep in self.gdal_deps:
-            upper = dep["dep"].upper()
-            enabled = "require" in dep and getattr(self.options,
-                                                   _option_name(dep))
-            cmake.definitions["GDAL_USE_" + upper] = enabled
-            if enabled:
-                cmake.definitions["GDAL_CONAN_PACKAGE_FOR_" + upper] = \
-                       _strip_version(dep["require"])
-            else:
-                cmake.definitions[dep["dep"] + "_FOUND"] = False
+        cmake.definitions["GDAL_USE_HEIF"] = self.options.with_heif
+        if self.options.with_heif:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_HEIF"] = "libheif"
+        else:
+            cmake.definitions["HEIF_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_KEA"] = self.options.with_kea
+        if self.options.with_kea:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_KEA"] = "kealib"
+        else:
+            cmake.definitions["KEA_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
+        if self.options.with_libdeflate:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_DEFLATE"] = "libdeflate"
+        else:
+            cmake.definitions["Deflate_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_ICONV"] = self.options.with_libiconv
+        if self.options.with_libiconv:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ICONV"] = "libiconv"
+        else:
+            cmake.definitions["Iconv_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_JPEG"] = self.options.with_libjpeg
+        if self.options.with_libjpeg:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_JPEG"] = "libjpeg"
+        else:
+            cmake.definitions["JPEG_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_LIBKML"] = self.options.with_libkml
+        if self.options.with_libkml:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LIBKML"] = "libkml"
+        else:
+            cmake.definitions["LibKML_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_TIFF"] = self.options.with_libtiff
+        if self.options.with_libtiff:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_TIFF"] = "libtiff"
+        else:
+            cmake.definitions["TIFF_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_LZ4"] = self.options.with_lz4
+        if self.options.with_lz4:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LZ4"] = "lz4"
+        else:
+            cmake.definitions["LZ4_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
+        if self.options.with_mongocxx:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_MONGOCXX"] = "mongo-cxx-driver"
+        else:
+            cmake.definitions["MONGOCXX_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_NETCDF"] = self.options.with_netcdf
+        if self.options.with_netcdf:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_NETCDF"] = "netcdf"
+        else:
+            cmake.definitions["NetCDF_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_ODBC"] = self.options.with_odbc
+        if self.options.with_odbc:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ODBC"] = "odbc"
+        else:
+            cmake.definitions["ODBC_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
+        if self.options.with_openjpeg:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENJPEG"] = "openjpeg"
+        else:
+            cmake.definitions["OPENJPEG_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_OPENSSL"] = self.options.with_openssl
+        if self.options.with_openssl:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_OPENSSL"] = "openssl"
+        else:
+            cmake.definitions["OpenSSL_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PCRE"] = self.options.with_pcre
+        if self.options.with_pcre:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PCRE"] = "pcre"
+        else:
+            cmake.definitions["PCRE_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PDFIUM"] = self.options.with_pcre2
+        if self.options.with_pcre2:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PDFIUM"] = "pcre2"
+        else:
+            cmake.definitions["PDFIUM_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_POSTGRESQL"] = self.options.with_pg
+        if self.options.with_pg:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_POSTGRESQL"] = "libpq"
+        else:
+            cmake.definitions["PostgreSQL_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PNG"] = self.options.with_png
+        if self.options.with_png:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PNG"] = "libpng"
+        else:
+            cmake.definitions["PNG_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PODOFO"] = self.options.with_podofo
+        if self.options.with_podofo:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PODOFO"] = "podofo"
+        else:
+            cmake.definitions["Podofo_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_POPPLER"] = self.options.with_poppler
+        if self.options.with_poppler:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_POPPLER"] = "poppler"
+        else:
+            cmake.definitions["Poppler_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_PROJ"] = self.options.with_proj
+        if self.options.with_proj:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_PROJ"] = "proj"
+        else:
+            cmake.definitions["PROJ_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_QHULL"] = self.options.with_qhull
+        if self.options.with_qhull:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_QHULL"] = "qhull"
+        else:
+            cmake.definitions["QHULL_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
+        if self.options.with_sqlite3:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_SQLITE3"] = "sqlite3"
+        else:
+            cmake.definitions["SQLite3_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_WEBP"] = self.options.with_webp
+        if self.options.with_webp:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_WEBP"] = "libwebp"
+        else:
+            cmake.definitions["WebP_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_XERCESC"] = self.options.with_xerces
+        if self.options.with_xerces:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_XERCESC"] = "xerces-c"
+        else:
+            cmake.definitions["XercesC_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_LIBXML2"] = self.options.with_xml2
+        if self.options.with_xml2:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_LIBXML2"] = "libxml2"
+        else:
+            cmake.definitions["LibXml2_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_ZLIB"] = self.options.with_zlib
+        if self.options.with_zlib:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ZLIB"] = "zlib"
+        else:
+            cmake.definitions["ZLIB_FOUND"] = False
+
+        cmake.definitions["GDAL_USE_ZSTD"] = self.options.with_zstd
+        if self.options.with_zstd:
+            cmake.definitions["GDAL_CONAN_PACKAGE_FOR_ZSTD"] = "zstd"
+        else:
+            cmake.definitions["ZSTD_FOUND"] = False
+
 
         for k, v in cmake.definitions.items():
             print(k, " = ", v)
@@ -476,9 +614,134 @@ class GdalConan(ConanFile):
                 lib_suffix += "_d"
         self.cpp_info.libs = ["gdal{}".format(lib_suffix)]
 
-        for dep in self.gdal_deps:
-            if "require" in dep and getattr(self.options, _option_name(dep)):
-                self.cpp_info.requires.extend(_components(dep))
+        self.cpp_info.requires.extend(['json-c::json-c'])
+        self.cpp_info.requires.extend(['libgeotiff::libgeotiff'])
+
+        if self.options.with_armadillo:
+            self.cpp_info.requires.extend(['armadillo::armadillo'])
+
+        if self.options.with_arrow:
+            self.cpp_info.requires.extend(['arrow::libarrow'])
+
+        if self.options.with_blosc:
+            self.cpp_info.requires.extend(['c-blosc::c-blosc'])
+
+        if self.options.with_cfitsio:
+            self.cpp_info.requires.extend(['cfitsio::cfitsio'])
+
+        if self.options.with_cryptopp:
+            self.cpp_info.requires.extend(['cryptopp::libcryptopp'])
+
+        if self.options.with_curl:
+            self.cpp_info.requires.extend(['libcurl::curl'])
+
+        if self.options.with_dds:
+            self.cpp_info.requires.extend(['crunch::crunch'])
+
+        if self.options.with_expat:
+            self.cpp_info.requires.extend(['expat::expat'])
+
+        if self.options.with_exr:
+            self.cpp_info.requires.extend(['openexr::openexr', 'imath::imath'])
+
+        if self.options.with_freexl:
+            self.cpp_info.requires.extend(['freexl::freexl'])
+
+        if self.options.with_geos:
+            self.cpp_info.requires.extend(['geos::geos_c'])
+
+        if self.options.with_gif:
+            self.cpp_info.requires.extend(['giflib::giflib'])
+
+        if self.options.with_gta:
+            self.cpp_info.requires.extend(['libgta::libgta'])
+
+        if self.options.with_hdf4:
+            self.cpp_info.requires.extend(['hdf4::hdf4'])
+
+        if self.options.with_hdf5:
+            self.cpp_info.requires.extend(['hdf5::hdf5_c'])
+
+        if self.options.with_heif:
+            self.cpp_info.requires.extend(['libheif::libheif'])
+
+        if self.options.with_kea:
+            self.cpp_info.requires.extend(['kealib::kealib'])
+
+        if self.options.with_libdeflate:
+            self.cpp_info.requires.extend(['libdeflate::libdeflate'])
+
+        if self.options.with_libiconv:
+            self.cpp_info.requires.extend(['libiconv::libiconv'])
+
+        if self.options.with_libjpeg:
+            self.cpp_info.requires.extend(['libjpeg::libjpeg'])
+
+        if self.options.with_libkml:
+            self.cpp_info.requires.extend(['libkml::kmldom', 'libkml::kmlengine'])
+
+        if self.options.with_libtiff:
+            self.cpp_info.requires.extend(['libtiff::libtiff'])
+
+        if self.options.with_lz4:
+            self.cpp_info.requires.extend(['lz4::lz4'])
+
+        if self.options.with_mongocxx:
+            self.cpp_info.requires.extend(['mongo-cxx-driver::mongo-cxx-driver'])
+
+        if self.options.with_netcdf:
+            self.cpp_info.requires.extend(['netcdf::netcdf'])
+
+        if self.options.with_odbc:
+            self.cpp_info.requires.extend(['odbc::odbc'])
+
+        if self.options.with_openjpeg:
+            self.cpp_info.requires.extend(['openjpeg::openjpeg'])
+
+        if self.options.with_openssl:
+            self.cpp_info.requires.extend(['openssl::ssl'])
+
+        if self.options.with_pcre:
+            self.cpp_info.requires.extend(['pcre::pcre'])
+
+        if self.options.with_pcre2:
+            self.cpp_info.requires.extend(['pcre2::pcre2'])
+
+        if self.options.with_pg:
+            self.cpp_info.requires.extend(['libpq::pq'])
+
+        if self.options.with_png:
+            self.cpp_info.requires.extend(['libpng::libpng'])
+
+        if self.options.with_podofo:
+            self.cpp_info.requires.extend(['podofo::podofo'])
+
+        if self.options.with_poppler:
+            self.cpp_info.requires.extend(['poppler::libpoppler'])
+
+        if self.options.with_proj:
+            self.cpp_info.requires.extend(['proj::projlib'])
+
+        if self.options.with_qhull:
+            self.cpp_info.requires.extend(['qhull::libqhull'])
+
+        if self.options.with_sqlite3:
+            self.cpp_info.requires.extend(['sqlite3::sqlite'])
+
+        if self.options.with_webp:
+            self.cpp_info.requires.extend(['libwebp::libwebp'])
+
+        if self.options.with_xerces:
+            self.cpp_info.requires.extend(['xerces-c::xerces-c'])
+
+        if self.options.with_xml2:
+            self.cpp_info.requires.extend(['libxml2::libxml2'])
+
+        if self.options.with_zlib:
+            self.cpp_info.requires.extend(['zlib::zlib'])
+
+        if self.options.with_zstd:
+            self.cpp_info.requires.extend(['zstd::zstdlib'])
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
         self.output.info(
