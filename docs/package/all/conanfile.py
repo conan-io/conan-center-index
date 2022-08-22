@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.files import apply_conandata_patches
 import functools
 import os
 
@@ -85,8 +86,7 @@ class PackageConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # remove bundled xxhash
         tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
         tools.replace_in_file(
