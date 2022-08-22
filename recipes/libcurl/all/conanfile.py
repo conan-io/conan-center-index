@@ -1,18 +1,17 @@
-import glob
-import os
-import re
-import functools
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.scm import Version
-from conans import AutoToolsBuildEnvironment
 # TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os, get_env, os_info, run_environment
+from conans.tools import is_apple_os, get_env, os_info
+
+import os
+import re
 
 required_conan_version = ">=1.50.0"
 
@@ -215,6 +214,12 @@ class LibcurlConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
         download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
+    def generate(self):
+        if self._is_using_cmake_build:
+            self._generate_with_cmake()
+        else:
+            self._generate_with_autotools()
+
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -230,9 +235,14 @@ class LibcurlConan(ConanFile):
     def build(self):
         self._patch_sources()
         if self._is_using_cmake_build:
-            self._build_with_cmake()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
         else:
-            self._build_with_autotools()
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -340,9 +350,10 @@ class LibcurlConan(ConanFile):
     get_target_property(_lib "${_libname}" LOCATION)""",
             )
 
-    def _get_configure_command_args(self):
+    def _generate_with_autotools(self):
         yes_no = lambda v: "yes" if v else "no"
-        params = [
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
             "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
             "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
@@ -374,77 +385,101 @@ class LibcurlConan(ConanFile):
             "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
             "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
             "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
-        ]
+        ])
         if self.options.with_ssl == "openssl":
-            params.append("--with-ssl={}".format(unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
+            tc.configure_args.append("--with-ssl={}".format(unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
         else:
-            params.append("--without-ssl")
+            tc.configure_args.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            params.append("--with-wolfssl={}".format(unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
+            tc.configure_args.append("--with-wolfssl={}".format(unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
         else:
-            params.append("--without-wolfssl")
+            tc.configure_args.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2={}".format(unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
+            tc.configure_args.append("--with-libssh2={}".format(unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
         else:
-            params.append("--without-libssh2")
+            tc.configure_args.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2={}".format(unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
+            tc.configure_args.append("--with-nghttp2={}".format(unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
         else:
-            params.append("--without-nghttp2")
+            tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib={}".format(unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
+            tc.configure_args.append("--with-zlib={}".format(unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
         else:
-            params.append("--without-zlib")
+            tc.configure_args.append("--without-zlib")
 
         if self._has_zstd_option:
-            params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
+            tc.configure_args.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
         if self._has_metalink_option:
-            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
+            tc.configure_args.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         if not self.options.with_proxy:
-            params.append("--disable-proxy")
+            tc.configure_args.append("--disable-proxy")
 
         if not self.options.with_rtsp:
-            params.append("--disable-rtsp")
+            tc.configure_args.append("--disable-rtsp")
 
         if not self.options.with_crypto_auth:
-            params.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
+            tc.configure_args.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
 
         # ntlm will default to enabled if any SSL options are enabled
         if not self.options.with_ntlm:
             if Version(self.version) <= "7.77.0":
-                params.append("--disable-crypto-auth")
+                tc.configure_args.append("--disable-crypto-auth")
             else:
-                params.append("--disable-ntlm")
+                tc.configure_args.append("--disable-ntlm")
 
         if not self.options.with_ntlm_wb:
-            params.append("--disable-ntlm-wb")
+            tc.configure_args.append("--disable-ntlm-wb")
 
         if self.options.with_ca_bundle == False:
-            params.append("--without-ca-bundle")
+            tc.configure_args.append("--without-ca-bundle")
         elif self.options.with_ca_bundle:
-            params.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
+            tc.configure_args.append("--with-ca-bundle=" + str(self.options.with_ca_bundle))
 
         if self.options.with_ca_path == False:
-            params.append('--without-ca-path')
+            tc.configure_args.append('--without-ca-path')
         elif self.options.with_ca_path:
-            params.append("--with-ca-path=" + str(self.options.with_ca_path))
+            tc.configure_args.append("--with-ca-path=" + str(self.options.with_ca_path))
 
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
-                params.append("--host=%s" % self._get_linux_arm_host())
+                tc.configure_args.append("--host=%s".format(self._get_linux_arm_host()))
             elif self.settings.os == "iOS":
-                params.append("--enable-threaded-resolver")
-                params.append("--disable-verbose")
+                tc.configure_args.append("--enable-threaded-resolver")
+                tc.configure_args.append("--disable-verbose")
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
-        return params
+        # tweaks for mingw
+        if self._is_mingw:
+            rcflags = "-O COFF"
+            if self.settings.arch == "x86":
+                rcflags += " --target=pe-i386"
+            else:
+                rcflags += " --target=pe-x86-64"
+            env = tc.environment()
+            env.define("RCFLAGS", rcflags)
+
+            tc.extra_defines.append("_AMD64_")
+
+        if self.settings.os != "Windows":
+            tc.fpic = self.options.get_safe("fPIC", True)
+
+
+        if cross_building(self) and is_apple_os(self.settings.os):
+            tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
+
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
+
 
     def _get_linux_arm_host(self):
         arch = None
@@ -468,60 +503,7 @@ class LibcurlConan(ConanFile):
             version = int(match.group(1))
         return version
 
-    def _build_with_autotools(self):
-        with chdir(self, self.source_folder):
-            # autoreconf
-            self.run("{} -fiv".format(get_env("AUTORECONF") or "autoreconf"), win_bash=os_info.is_windows, run_environment=True)
-
-            # fix generated autotools files to have relocatable binaries
-            if is_apple_os(self.settings.os):
-                replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
-
-            self.run("chmod +x configure")
-
-            # run configure with *LD_LIBRARY_PATH env vars it allows to pick up shared openssl
-            with run_environment(self):
-                autotools, autotools_vars = self._configure_autotools()
-                autotools.make(vars=autotools_vars)
-
-    def _configure_autotools_vars(self):
-        autotools_vars = {}
-        # tweaks for mingw
-        if self._is_mingw:
-            autotools_vars["RCFLAGS"] = "-O COFF"
-            if self.settings.arch == "x86":
-                autotools_vars["RCFLAGS"] += " --target=pe-i386"
-            else:
-                autotools_vars["RCFLAGS"] += " --target=pe-x86-64"
-        return autotools_vars
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=os_info.is_windows)
-
-        if self.settings.os != "Windows":
-            autotools.fpic = self.options.get_safe("fPIC", True)
-
-        autotools_vars = self._configure_autotools_vars()
-
-        # tweaks for mingw
-        if self._is_mingw:
-            autotools.defines.append("_AMD64_")
-
-        if cross_building(self) and is_apple_os(self.settings.os):
-            autotools.defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
-
-        configure_args = self._get_configure_command_args()
-
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            # please do not autodetect --build for the iOS simulator, thanks!
-            autotools.configure(vars=autotools_vars, args=configure_args, build=False)
-        else:
-            autotools.configure(vars=autotools_vars, args=configure_args)
-
-        return autotools, autotools_vars
-
-    def generate(self):
+    def _generate_with_cmake(self):
         if self._is_win_x_android:
             tc = CMakeToolchain(self, generator="Ninja")
         else:
@@ -586,11 +568,6 @@ class LibcurlConan(ConanFile):
 
         tc.generate()
 
-    def _build_with_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def package(self):
         self.copy("COPYING", dst="licenses", src=self.source_folder)
         self.copy("cacert.pem", dst="res")
@@ -599,13 +576,10 @@ class LibcurlConan(ConanFile):
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
-            with run_environment(self):
-                with chdir(self, self.source_folder):
-                    autotools, autotools_vars = self._configure_autotools()
-                    autotools.install(vars=autotools_vars)
+            autotools = Autotools(self)
+            autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
                 # Handle only mingw libs
                 self.copy(pattern="*.dll", dst="bin", keep_path=False)
