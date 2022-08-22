@@ -10,15 +10,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
 
-    def build_requirements(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
-
     def layout(self):
         cmake_layout(self)
 
