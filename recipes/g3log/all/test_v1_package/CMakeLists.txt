@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 find_package(g3log REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE g3log::g3log)
+target_link_libraries(${PROJECT_NAME} PRIVATE g3log)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
