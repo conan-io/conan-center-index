@@ -1,8 +1,8 @@
 import os
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, get
+from conan.tools.build import check_min_cppstd
 from conans import CMake
-from conans.tools import check_min_cppstd
 
 required_conan_version = ">=1.50.0"
 
