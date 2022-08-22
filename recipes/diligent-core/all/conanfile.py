@@ -1,5 +1,5 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools, CMake
+from conan.errors import ConanInvalidConfiguration
 import os
 from conan.tools.build import cross_building
 
@@ -58,14 +58,14 @@ class DiligentCoreConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -109,17 +109,17 @@ class DiligentCoreConan(ConanFile):
     def _diligent_platform(self):
         if self.settings.os == "Windows":
             return "PLATFORM_WIN32"
-        elif self.settings.os == "Macos":
+        self.settings.os == "Macos":
             return "PLATFORM_MACOS"
-        elif self.settings.os == "Linux":
+        self.settings.os == "Linux":
             return "PLATFORM_LINUX"
-        elif self.settings.os == "Android":
+        self.settings.os == "Android":
             return "PLATFORM_ANDROID"
-        elif self.settings.os == "iOS":
+        self.settings.os == "iOS":
             return "PLATFORM_IOS"
-        elif self.settings.os == "Emscripten":
+        self.settings.os == "Emscripten":
             return "PLATFORM_EMSCRIPTEN"
-        elif self.settings.os == "watchOS":
+        self.settings.os == "watchOS":
             return "PLATFORM_TVOS"
 
     def _configure_cmake(self):
@@ -154,9 +154,9 @@ class DiligentCoreConan(ConanFile):
         tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
         dst=os.path.join(self.package_folder, "include", "DiligentCore"))
 
-        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.files.rmdir(os.path.join(self.package_folder, "Licenses"))
+        tools.files.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.files.rmdir(os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
         if self.options.shared:
