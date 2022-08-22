@@ -35,7 +35,7 @@ class UvmSystemC(ConanFile):
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos build not supported")
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows build not yet supported")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
