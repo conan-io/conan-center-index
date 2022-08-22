@@ -185,16 +185,6 @@ class LibcurlConan(ConanFile):
         if self.options.with_c_ares:
             self.requires("c-ares/1.18.1")
 
-    def build_requirements(self):
-        if self._is_using_cmake_build:
-            if self._is_win_x_android:
-                self.build_requires("ninja/1.11.0")
-        else:
-            self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.4")
-            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
-
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
@@ -205,6 +195,16 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             if self.options.with_ntlm and self.options["openssl"].no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+
+    def build_requirements(self):
+        if self._is_using_cmake_build:
+            if self._is_win_x_android:
+                self.build_requires("ninja/1.11.0")
+        else:
+            self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.4")
+            if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
