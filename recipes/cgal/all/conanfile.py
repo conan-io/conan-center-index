@@ -47,7 +47,8 @@ class CgalConan(ConanFile):
             self._cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
             self._cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
             self._cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
-            self._cmake.definitions["CGAL_HEADER_ONLY"] = self.options.header_only
+            if "header_only" in self.options:
+                self._cmake.definitions["CGAL_HEADER_ONLY"] = self.options.header_only
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -62,7 +63,10 @@ class CgalConan(ConanFile):
     def configure(self):
         if self.options.with_cgal_qt5:
             raise ConanInvalidConfiguration("Qt Conan package is not available yet.")
-        if self.options.header_only:
+        if tools.Version(self.version) >= "5.3":
+            del self.options.header_only
+            del self.options.shared
+        if not "header_only" in self.options or self.options.header_only:
             del self.options.shared
 
     def requirements(self):
@@ -71,7 +75,7 @@ class CgalConan(ConanFile):
         self.requires("mpfr/4.1.0")
 
     def package_id(self):
-        if self.options.header_only:
+        if not "header_only" in self.options or self.options.header_only:
             self.info.header_only()
 
     def source(self):
@@ -102,9 +106,9 @@ class CgalConan(ConanFile):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        if not self.options.header_only:
+        if "header_only" in self.options and not self.options.header_only:
             self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
-        if not self.options.header_only:
+        if "header_only" in self.options and not self.options.header_only:
             self.cpp_info.defines.append("CGAL_NOT_HEADER_ONLY=1")
