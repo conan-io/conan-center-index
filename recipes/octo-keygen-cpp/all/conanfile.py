@@ -85,8 +85,8 @@ class OctoKeygenCPPConan(ConanFile):
         self.cpp_info.components["libocto-keygen-cpp"].requires = [
             "fmt::fmt", 
             "openssl::openssl",
-            "octo::octo-logger-cpp",
-            "octo::octo-encryption-cpp"
+            "octo-logger-cpp::octo-logger-cpp",
+            "octo-encryption-cpp::octo-encryption-cpp"
         ]
         self.cpp_info.filenames["cmake_find_package"] = "octo-keygen-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "octo-keygen-cpp"
