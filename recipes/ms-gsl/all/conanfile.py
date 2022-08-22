@@ -43,6 +43,10 @@ class MicrosoftGslConan(ConanFile):
             "apple-clang": "3.4",
         }
 
+    def config_options(self):
+        if Version(self.version) >= "3.0.0":
+            del self.options.on_contract_violation
+
     def package_id(self):
         self.info.clear()
 
@@ -59,10 +63,6 @@ class MicrosoftGslConan(ConanFile):
                     raise ConanInvalidConfiguration("ms-gsl requires C++14, which your compiler does not fully support.")
             else:
                 self.output.warn("ms-gsl requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-
-    def config_options(self):
-        if Version(self.version) >= "3.0.0":
-            del self.options.on_contract_violation
 
     def layout(self):
         basic_layout(self, src_folder="src")
