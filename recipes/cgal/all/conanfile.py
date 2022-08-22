@@ -66,7 +66,7 @@ class CgalConan(ConanFile):
         if tools.Version(self.version) >= "5.3":
             del self.options.header_only
             del self.options.shared
-        if not "header_only" in self.options or self.options.header_only:
+        if self.options.get_safe("header_only", default=True):
             del self.options.shared
 
     def requirements(self):
@@ -75,7 +75,7 @@ class CgalConan(ConanFile):
         self.requires("mpfr/4.1.0")
 
     def package_id(self):
-        if not "header_only" in self.options or self.options.header_only:
+        if self.options.get_safe("header_only", default=True):
             self.info.header_only()
 
     def source(self):
@@ -106,9 +106,9 @@ class CgalConan(ConanFile):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        if "header_only" in self.options and not self.options.header_only:
+        if not self.options.get_safe("header_only", default=True):
             self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
-        if "header_only" in self.options and not self.options.header_only:
+        if not self.options.get_safe("header_only", default=True):
             self.cpp_info.defines.append("CGAL_NOT_HEADER_ONLY=1")
