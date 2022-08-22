@@ -1,6 +1,6 @@
-import os
+from os.path import join
 from conan import ConanFile
-from conan.tools.files import get, patch
+from conan.tools.files import apply_conandata_patches, copy, get
 from conan.tools.build import check_min_cppstd
 from conans import CMake
 
@@ -35,8 +35,8 @@ class SemVer200Conan(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(p["patch_file"])
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -57,22 +57,25 @@ class SemVer200Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch_file)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", join(self.source_folder, self._source_subfolder), join(self.package_folder, "licenses/"), keep_path=False)
         # Parent Build system does not support installation; so we must manually package
-        self.copy("*.a*", dst="lib", src="lib")
-        self.copy("*.lib", dst="lib", src="lib")
-        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dylib*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dll*", dst="bin", src="lib")
-        self.copy("*.h", dst=os.path.join("include", self.name), src=os.path.join(self._source_subfolder, "include"), keep_path=True)
-        self.copy("*.inl", dst=os.path.join("include", self.name), src=os.path.join(self._source_subfolder, "include"), keep_path=True)
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        hdr_src = join(self.source_folder, join(self._source_subfolder, "include"))
+        hdr_dst = join(join(self.package_folder, "include"), self.name)
+        copy(self, "*.h", hdr_src, hdr_dst, keep_path=True)
+        copy(self, "*.inl", hdr_src, hdr_dst, keep_path=True)
+
+        lib_dir = join(self.package_folder, "lib")
+        copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.so", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dylib", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.dll*", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["semver"]
