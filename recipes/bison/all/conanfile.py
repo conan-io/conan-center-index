@@ -32,6 +32,10 @@ class BisonConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.version == "3.8.2":
+            raise ConanInvalidConfiguration("bison/3.8.2 is not yet ready for Windows, use previous version or open a pull request on https://github.com/conan-io/conan-center-index/pulls")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,7 +51,7 @@ class BisonConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.5")
         if self.settings.os != "Windows":
             self.build_requires("flex/2.6.4")
 
