@@ -140,8 +140,10 @@ class OpenEXRConan(ConanFile):
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
 
-        openexr_version = Version(self.version)
-        lib_suffix = f"-{openexr_version.major}_{openexr_version.minor}"
+        lib_suffix = ""
+        if not self.options.shared or self.settings.os == "Windows":
+            openexr_version = Version(self.version)
+            lib_suffix += f"-{openexr_version.major}_{openexr_version.minor}"
         if self.settings.build_type == "Debug":
             lib_suffix += "_d"
 
