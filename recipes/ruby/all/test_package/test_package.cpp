@@ -2,9 +2,9 @@
 
 // when --static-linked-ext is used, ruby defines EXTSTATIC as 1
 #if defined(EXTSTATIC) && EXTSTATIC
-#  define RUBY_STATIC_LINKED_EXT
+#  define RUBY_STATIC_LINKED_EXT2
 #else
-#  undef RUBY_STATIC_LINKED_EXT
+#  undef RUBY_STATIC_LINKED_EXT2
 #endif
 
 int main(int argc, char* argv[]) {
@@ -24,6 +24,12 @@ int main(int argc, char* argv[]) {
   rb_eval_string("puts 'Ruby has statically linked extensions'");
 #else
   rb_eval_string("puts 'Ruby has dynamically linked extensions'");
+#endif
+
+#ifdef RUBY_STATIC_LINKED_EXT2
+  rb_eval_string("puts 'Ruby has statically linked extensions (EXTSTATIC)'");
+#else
+  rb_eval_string("puts 'Ruby has dynamically linked extensions (EXTSTATIC)'");
 #endif
 
 #ifdef RUBY_STATIC_RUBY

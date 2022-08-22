@@ -31,12 +31,26 @@ class RubyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_openssl": [True, False]
+        "with_openssl": [True, False],
+
+        "with_static_linked_ext": [True, False],
+        "with_enable_load_relative": [True, False],
+        "with_libyaml": [True, False],
+        "with_libffi": [True, False],
+        "with_readline": [True, False],
+        "with_gmp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": True
+        "with_openssl": True,
+
+        "with_static_linked_ext": True,
+        "with_enable_load_relative": True,
+        "with_libyaml": True,
+        "with_libffi": True,
+        "with_readline": True,
+        'with_gmp': True,
     }
     short_paths = True
 
@@ -61,9 +75,21 @@ class RubyConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("gmp/6.1.2")
+
         if self.options.with_openssl:
             self.requires("openssl/1.1.1o")
+
+        if self.options.with_libyaml:
+            self.requires("libyaml/0.2.5")
+
+        if self.options.with_libffi:
+            self.requires("libffi/3.4.2")
+
+        if self.options.with_readline:
+            self.requires("readline/8.1.2")
+
+        if self.options.with_gmp:
+            self.requires("gmp/6.2.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,8 +103,12 @@ class RubyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            del self.options.with_static_linked_ext
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == 'Windows':
+            # readline isn't supported on Windows
+            self.options.with_readline = False
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -106,6 +136,17 @@ class RubyConan(ConanFile):
             tc.fpic = True
             if "--enable-shared" not in tc.configure_args:
                 tc.configure_args.append("--enable-shared")
+
+        if not self.options.shared and self.options.with_static_linked_ext:
+            tc.configure_args.append('--with-static-linked-ext')
+
+        if self.options.with_enable_load_relative:
+            tc.configure_args.append('--enable-load-relative')
+
+        for name, dep_cpp_info in self.deps_cpp_info.dependencies:
+            if name in ['zlib', 'openssl', 'libffi', 'libyaml', 'readline', 'gmp']:
+                root_path = tools.unix_path(dep_cpp_info.rootpath)
+                tc.configure_args.append(f'--with-{name}-dir={root_path}')
 
         if cross_building(self) and is_apple_os(self.settings.os):
             apple_arch = to_apple_arch(self.settings.arch)
@@ -155,6 +196,13 @@ class RubyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
+        # install the enc/*.a / ext/*.a libraries
+        if not self.options.shared and self.options.with_static_linked_ext:
+            for dirname in ['ext', 'enc']:
+                dst = os.path.join('lib', dirname)
+                self.copy('*.a', dst=dst, src=dirname, keep_path=True)
+                self.copy('*.lib', dst=dst, src=dirname, keep_path=True)
+
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info(f"Adding to PATH: {binpath}")
@@ -173,9 +221,19 @@ class RubyConan(ConanFile):
                 rubylib.libs = list(filter(lambda l: not l.endswith("-static"), rubylib.libs))
             else:
                 rubylib.libs = list(filter(lambda l: l.endswith("-static"), rubylib.libs))
-        rubylib.requires.extend(["zlib::zlib", "gmp::gmp"])
+        rubylib.requires.extend(["zlib::zlib"])
+        # TODO: if --with-static-linked-ext is passed, is this necessary?
+        if self.options.with_gmp:
+            rubylib.requires.append("gmp::gmp")
         if self.options.with_openssl:
             rubylib.requires.append("openssl::openssl")
+        if self.options.with_libyaml:
+            rubylib.requires.append("libyaml::libyaml")
+        if self.options.with_libffi:
+            rubylib.requires.append("libffi::libffi")
+        if self.options.with_readline:
+            rubylib.requires.append("readline::readline")
+
         if self.settings.os in ("FreeBSD", "Linux"):
             rubylib.system_libs = ["dl", "pthread", "rt", "m", "crypt"]
         elif self.settings.os == "Windows":
