@@ -65,6 +65,7 @@ class Llvm(ConanFile):
            for runtime in runtimes},
         **{
             'shared': [True, False],
+            'shared_is_dylib': [True, False],
             'fPIC': [True, False],
             'components': 'ANY',
             'targets': 'ANY',
@@ -109,6 +110,7 @@ class Llvm(ConanFile):
         },
         **{
             'shared': False,
+            'shared_is_dylib': True,
             'fPIC': True,
             'components': 'all',
             'targets': 'all',
@@ -195,17 +197,18 @@ class Llvm(ConanFile):
             ', '.join(enabled_runtimes)))
 
         cmake = CMake(self, generator="Ninja", parallel=False)
+        build_shared_libs = self.options.shared and not self.options.shared_is_dylib
         cmake.configure(
             args=['--graphviz=graph/llvm.dot'],
             defs={
-                'BUILD_SHARED_LIBS': False,
+                'BUILD_SHARED_LIBS': build_shared_libs,
                 'LIBOMP_ENABLE_SHARED': self.options.shared,
-                'CMAKE_SKIP_RPATH': True,
+                'CMAKE_SKIP_RPATH': not build_shared_libs, # else shared / no dylib compilation failing because llvm-tblgen is linked to .so which cant be found
                 'CMAKE_POSITION_INDEPENDENT_CODE': \
                     self.options.get_safe('fPIC', default=False) or self.options.shared,
                 'LLVM_TARGET_ARCH': 'host',
                 'LLVM_TARGETS_TO_BUILD': self.options.targets,
-                'LLVM_BUILD_LLVM_DYLIB': self.options.shared, # also sets CLANG_LINK_CLANG_DYLIB
+                'LLVM_BUILD_LLVM_DYLIB': self.options.shared and self.options.shared_is_dylib,
                 'LLVM_DYLIB_COMPONENTS': self.options.components,
                 'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False), # llvm default on
                 'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
