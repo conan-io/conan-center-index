@@ -173,6 +173,8 @@ class Llvm(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        else:
+            del self.options.shared_is_dylib
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_zlib
@@ -203,7 +205,8 @@ class Llvm(ConanFile):
             ', '.join(enabled_runtimes)))
 
         cmake = CMake(self, generator="Ninja", parallel=False)
-        build_shared_libs = self.options.shared and not self.options.shared_is_dylib
+        build_shared_libs = self.options.shared and not self.options.get_safe(
+            'shared_is_dylib', default=True)
         cmake.configure(
             args=['--graphviz=graph/llvm.dot'],
             defs={
@@ -221,7 +224,7 @@ class Llvm(ConanFile):
                     'fPIC', default=False) or self.options.shared,
                 'LLVM_TARGET_ARCH': 'host',
                 'LLVM_TARGETS_TO_BUILD': self.options.targets,
-                'LLVM_BUILD_LLVM_DYLIB': self.options.shared and self.options.shared_is_dylib,
+                'LLVM_BUILD_LLVM_DYLIB': self.options.shared and self.options.get_safe('shared_is_dylib', default=True),
                 'LLVM_DYLIB_COMPONENTS': self.options.components,
                 # llvm default on
                 'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False),
