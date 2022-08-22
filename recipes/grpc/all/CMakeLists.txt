@@ -9,12 +9,12 @@ find_package(googleapis CONFIG REQUIRED)
 
 set(googleapis_RES_DIRS
     $<$<CONFIG:Release>:${googleapis_RES_DIRS_RELEASE}>
-    $<$<CONFIG:RelWithDebInfo>:${googleapis_RES_DIRS_RELWITHDEBINFO}}>
+    $<$<CONFIG:RelWithDebInfo>:${googleapis_RES_DIRS_RELWITHDEBINFO}>
     $<$<CONFIG:MinSizeRel>:${googleapis_RES_DIRS_MINSIZEREL}>
     $<$<CONFIG:Debug>:${googleapis_RES_DIRS_DEBUG}>)
 set(grpc-proto_RES_DIRS
     $<$<CONFIG:Release>:${grpc-proto_RES_DIRS_RELEASE}>
-    $<$<CONFIG:RelWithDebInfo>:${grpc-proto_RES_DIRS_RELWITHDEBINFO}}>
+    $<$<CONFIG:RelWithDebInfo>:${grpc-proto_RES_DIRS_RELWITHDEBINFO}>
     $<$<CONFIG:MinSizeRel>:${grpc-proto_RES_DIRS_MINSIZEREL}>
     $<$<CONFIG:Debug>:${grpc-proto_RES_DIRS_DEBUG}>)
 
