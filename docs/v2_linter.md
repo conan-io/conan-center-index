@@ -54,11 +54,11 @@ Here is a list of different imports and their new equivalent (note that the inte
 | conans.tools.chdir | [conan.tools.files.chdir](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-chdir) | 1.40.0 |
 | conans.tools.unzip | [conan.tools.files.unzip](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-unzip) | 1.46.0 |
 | conans.tools.collect_libs | [conan.tools.files.collect_libs](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-collect-libs) | 1.46.0 |
+| conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) | 1.46.0 |
 | conans.tools.sha256sum | [conan.tools.files.check_sha256](https://docs.conan.io/en/latest/reference/conanfile/tools/files/checksum.html#conan-tools-files-check-sha256) | 1.46.0 |
 | conans.tools.unix_path | [conan.tools.microsoft.unix_path](https://docs.conan.io/en/latest/reference/conanfile/tools/microsoft.html#conan-tools-microsoft-unix-path) | 1.47.0 |
 | conans.tools.is_apple_os | [conan.tools.apple.is_apple_os](https://docs.conan.io/en/latest/reference/conanfile/tools/apple.html#is-apple-os) | 1.51.3 |
 | conans.tools.cpu_count | [conan.tools.build.build_jobs](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-build-jobs) | 1.43.0 |
-| conans.tools.Version | [conan.tools.scm.Version](https://docs.conan.io/en/latest/reference/conanfile/tools/scm/other.html#version) | 1.46.0 |
 | conans.tools.check_min_cppstd | [conan.tools.build.check_min_cppstd](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-check-min-cppstd) | 1.50.0 |
 | conans.tools.cross_building | [conan.tools.build.cross_building](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html#conan-tools-build-cross-building) | 1.46.0 |
 | conans.errors.ConanInvalidConfiguration | [conan.errors.ConanInvalidConfiguration](https://docs.conan.io/en/latest/migrating_to_2.0/recipes.html#migrating-the-recipes) | 1.47.0 |
