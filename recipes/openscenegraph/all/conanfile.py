@@ -194,7 +194,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
         cmake.definitions["OSG_TEXT_USE_FONTCONFIG"] = self.options.use_fontconfig
 
-        cmake.definitions["OPENGL_PROFILE"] = self.options.opengl_profile.upper()
+        cmake.definitions["OPENGL_PROFILE"] = str(self.options.get_safe("opengl_profile", "gl2")).upper()
 
         # Disable option dependencies unless we have a package for them
         cmake.definitions["OSG_WITH_FREETYPE"] = self.options.with_freetype
