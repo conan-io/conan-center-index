@@ -112,7 +112,7 @@ if(FREEIMAGE_WITH_RAW)
 endif()
 if(FREEIMAGE_WITH_OPENEXR)
     target_compile_definitions(FreeImage PRIVATE FREEIMAGE_WITH_OPENEXR)
-    target_link_libraries(FreeImage PRIVATE OpenEXR::OpenEXR)
+    target_link_libraries(FreeImage PRIVATE openexr::openexr) # TODO: link to exact required components
 endif()
 if(FREEIMAGE_WITH_TIFF)
     target_compile_definitions(FreeImage PRIVATE FREEIMAGE_WITH_TIFF)
