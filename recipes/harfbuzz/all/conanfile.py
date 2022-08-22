@@ -158,5 +158,5 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append(libcxx)
 
     def package_id(self):
-        if self.options.with_glib:
+        if self.options.with_glib and not self.options["glib"].shared:
             self.info.requires["glib"].full_package_mode()
