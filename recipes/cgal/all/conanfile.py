@@ -1,4 +1,5 @@
 import os
+from conan.tools import files
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -10,10 +11,11 @@ class CgalConan(ConanFile):
     homepage = "https://github.com/CGAL/cgal"
     description = "C++ library that aims to provide easy access to efficient and reliable algorithms"\
                   "in computational geometry."
-    topics = ("conan", "cgal", "geometry", "algorithms")
+    topics = ("cgal", "geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
+    short_paths = True
     options = {
         "with_cgal_core": [True, False],
         "with_cgal_qt5": [True, False],
@@ -75,7 +77,7 @@ class CgalConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "CGAL-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        files.rename(self, extracted_dir, self._source_subfolder)
 
     def build(self):
         self._patch_sources()
