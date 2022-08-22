@@ -1,4 +1,6 @@
 from conan import ConanFile, tools
+from conan.tools.cmake import CMake
+
 from conan.errors import ConanInvalidConfiguration
 import os
 from conan.tools.build import cross_building
@@ -24,7 +26,7 @@ class DiligentCoreConan(ConanFile):
         'fPIC': True,
         'with_glslang': True
     }
-    generators = 'cmake_find_package', 'cmake', 'cmake_find_package_multi'
+    generators = 'cmake_find_package', 'cmake_find_package_multi'
     _cmake = None
     exports_sources = ['CMakeLists.txt', 'patches/**']
     short_paths = True
@@ -65,7 +67,7 @@ class DiligentCoreConan(ConanFile):
             raise ConanInvalidConfiguration('Visual Studio build with MT runtime is not supported')
 
     def source(self):
-        tools.files.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package_id(self):
         if self.settings.compiler == 'Visual Studio':
