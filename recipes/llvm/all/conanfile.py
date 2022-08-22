@@ -209,8 +209,13 @@ class Llvm(ConanFile):
             defs={
                 'BUILD_SHARED_LIBS': build_shared_libs,
                 'LIBOMP_ENABLE_SHARED': self.options.shared,
-                # else shared / no dylib compilation failing because llvm-tblgen is linked to .so which cant be found
-                'CMAKE_SKIP_RPATH': not build_shared_libs,
+                # cmake RPATH handling https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling#default-rpath-settings
+                # default behaviour for RPATH is to clear it on install
+                # skipping RPATH for build affects also RUNPATH but
+                # llvm-tblgen with BUILD_SHARED_LIBS needs it during build else build invocation fails because .so not found
+                # e.g. readelf -d bin/llvm-tblgen shows RUNPATH $ORIGIN/../lib for build and install location, which is fine in every case.
+                # Only if executed with elevated privileges this is ignored because of security concerns (it contains $ORIGIN and isn't absolute).
+                # CMAKE_SKIP_RPATH # default is fine, kept for documentation.
                 'CMAKE_POSITION_INDEPENDENT_CODE': \
                 self.options.get_safe(
                     'fPIC', default=False) or self.options.shared,
