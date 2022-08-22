@@ -66,6 +66,8 @@ class OpenEXRConan(ConanFile):
         tc.variables["OPENEXR_BUILD_UTILS"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["CMAKE_SKIP_INSTALL_RPATH"] = True
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
