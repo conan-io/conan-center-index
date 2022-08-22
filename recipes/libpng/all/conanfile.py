@@ -7,7 +7,7 @@ from conan.tools.build.cross_building import cross_building
 import os
 
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
 
 class LibpngConan(ConanFile):
