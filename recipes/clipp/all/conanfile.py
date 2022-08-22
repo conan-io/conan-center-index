@@ -22,4 +22,4 @@ class ClippConan(ConanFile):
         tools.files.copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
