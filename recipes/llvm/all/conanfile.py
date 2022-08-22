@@ -155,7 +155,7 @@ class Llvm(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'llvm-project-llvmorg-' + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.rename(extracted_dir, self._source_subfolder)
         self._patch_sources()
 
     def build_requirements(self):
