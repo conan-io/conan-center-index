@@ -37,6 +37,8 @@ class UvmSystemC(ConanFile):
         self.tool_requires("systemc/2.3.3")
 
     def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos build not supported")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
