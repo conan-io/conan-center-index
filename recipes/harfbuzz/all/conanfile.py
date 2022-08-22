@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files, scm
+from conan.tools import files, microsoft, scm
 from conan .errors import ConanInvalidConfiguration
 from conans import CMake, tools
 
