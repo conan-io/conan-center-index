@@ -41,7 +41,7 @@ default_projects = [
 ]
 default_runtimes = [
     # 'compiler-rt',  # fatal error: 'bits/libc-header-start.h' file not found
-    # 'libc',
+    'libc',
     'libcxx',
     'libcxxabi',
     'libunwind',
