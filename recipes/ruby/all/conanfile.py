@@ -235,7 +235,7 @@ class RubyConan(ConanFile):
             rubylib.requires.append("readline::readline")
 
         if self.settings.os in ("FreeBSD", "Linux"):
-            rubylib.system_libs = ["dl", "pthread", "rt", "m", "crypt"]
+            rubylib.system_libs = ["dl", "pthread", "rt", "m", "crypt", "util"]
         elif self.settings.os == "Windows":
             rubylib.system_libs = self._windows_system_libs
         if str(self.settings.compiler) in ("clang", "apple-clang"):
