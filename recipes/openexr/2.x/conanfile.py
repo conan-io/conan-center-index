@@ -8,7 +8,7 @@ from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.47.0"
 
 
 class OpenEXRConan(ConanFile):
@@ -140,11 +140,6 @@ class OpenEXRConan(ConanFile):
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
 
-        openexr_version = Version(self.version)
-        lib_suffix = f"-{openexr_version.major}_{openexr_version.minor}"
-        if self.settings.build_type == "Debug":
-            lib_suffix += "_d"
-
         include_dir = os.path.join("include", "OpenEXR")
 
         # IlmImfConfig
@@ -155,7 +150,7 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.components["openexr_ilmimf"].set_property("cmake_target_name", "OpenEXR::IlmImf")
         self.cpp_info.components["openexr_ilmimf"].set_property("pkg_config_name", "OpenEXR")
         self.cpp_info.components["openexr_ilmimf"].includedirs.append(include_dir)
-        self.cpp_info.components["openexr_ilmimf"].libs = [f"IlmImf{lib_suffix}"]
+        self.cpp_info.components["openexr_ilmimf"].libs = ["IlmImf"]
         self.cpp_info.components["openexr_ilmimf"].requires = [
             "openexr_ilmimfconfig", "ilmbase_iex", "ilmbase_half",
             "ilmbase_imath", "ilmbase_ilmthread", "zlib::zlib",
@@ -164,7 +159,7 @@ class OpenEXRConan(ConanFile):
         # IlmImfUtil
         self.cpp_info.components["openexr_ilmimfutil"].set_property("cmake_target_name", "OpenEXR::IlmImfUtil")
         self.cpp_info.components["openexr_ilmimfutil"].includedirs.append(include_dir)
-        self.cpp_info.components["openexr_ilmimfutil"].libs = [f"IlmImfUtil{lib_suffix}"]
+        self.cpp_info.components["openexr_ilmimfutil"].libs = ["IlmImfUtil"]
         self.cpp_info.components["openexr_ilmimfutil"].requires = ["openexr_ilmimfconfig", "openexr_ilmimf"]
 
         # IlmBaseConfig
@@ -174,31 +169,31 @@ class OpenEXRConan(ConanFile):
         # Half
         self.cpp_info.components["ilmbase_half"].set_property("cmake_target_name", "IlmBase::Half")
         self.cpp_info.components["ilmbase_half"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_half"].libs = [f"Half{lib_suffix}"]
+        self.cpp_info.components["ilmbase_half"].libs = ["Half"]
         self.cpp_info.components["ilmbase_half"].requires = ["ilmbase_ilmbaseconfig"]
 
         # Iex
         self.cpp_info.components["ilmbase_iex"].set_property("cmake_target_name", "IlmBase::Iex")
         self.cpp_info.components["ilmbase_iex"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_iex"].libs = [f"Iex{lib_suffix}"]
+        self.cpp_info.components["ilmbase_iex"].libs = ["Iex"]
         self.cpp_info.components["ilmbase_iex"].requires = ["ilmbase_ilmbaseconfig"]
 
         # IexMath
         self.cpp_info.components["ilmbase_iexmath"].set_property("cmake_target_name", "IlmBase::IexMath")
         self.cpp_info.components["ilmbase_iexmath"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_iexmath"].libs = [f"IexMath{lib_suffix}"]
+        self.cpp_info.components["ilmbase_iexmath"].libs = ["IexMath"]
         self.cpp_info.components["ilmbase_iexmath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
 
         # IMath
         self.cpp_info.components["ilmbase_imath"].set_property("cmake_target_name", "IlmBase::IMath")
         self.cpp_info.components["ilmbase_imath"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_imath"].libs = [f"Imath{lib_suffix}"]
+        self.cpp_info.components["ilmbase_imath"].libs = ["Imath"]
         self.cpp_info.components["ilmbase_imath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_half", "ilmbase_iexmath"]
 
         # IlmThread
         self.cpp_info.components["ilmbase_ilmthread"].set_property("cmake_target_name", "IlmBase::IlmThread")
         self.cpp_info.components["ilmbase_ilmthread"].includedirs.append(include_dir)
-        self.cpp_info.components["ilmbase_ilmthread"].libs = [f"IlmThread{lib_suffix}"]
+        self.cpp_info.components["ilmbase_ilmthread"].libs = ["IlmThread"]
         self.cpp_info.components["ilmbase_ilmthread"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ilmbase_ilmthread"].system_libs.append("pthread")
