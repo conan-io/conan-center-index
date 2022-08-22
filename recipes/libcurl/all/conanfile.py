@@ -8,10 +8,11 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, replace_in_file, rmdir, save
+from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment
 # TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os, get_env, os_info, run_environment, unix_path
+from conans.tools import is_apple_os, get_env, os_info, run_environment
 
 required_conan_version = ">=1.50.0"
 
@@ -375,26 +376,26 @@ class LibcurlConan(ConanFile):
             "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
         ]
         if self.options.with_ssl == "openssl":
-            params.append("--with-ssl={}".format(unix_path(self.deps_cpp_info["openssl"].rootpath)))
+            params.append("--with-ssl={}".format(unix_path(self, self.deps_cpp_info["openssl"].rootpath)))
         else:
             params.append("--without-ssl")
         if self.options.with_ssl == "wolfssl":
-            params.append("--with-wolfssl={}".format(unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
+            params.append("--with-wolfssl={}".format(unix_path(self, self.deps_cpp_info["wolfssl"].rootpath)))
         else:
             params.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2={}".format(unix_path(self.deps_cpp_info["libssh2"].rootpath)))
+            params.append("--with-libssh2={}".format(unix_path(self, self.deps_cpp_info["libssh2"].rootpath)))
         else:
             params.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2={}".format(unix_path(self.deps_cpp_info["libnghttp2"].rootpath)))
+            params.append("--with-nghttp2={}".format(unix_path(self, self.deps_cpp_info["libnghttp2"].rootpath)))
         else:
             params.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib={}".format(unix_path(self.deps_cpp_info["zlib"].rootpath)))
+            params.append("--with-zlib={}".format(unix_path(self, self.deps_cpp_info["zlib"].rootpath)))
         else:
             params.append("--without-zlib")
 
