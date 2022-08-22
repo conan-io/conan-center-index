@@ -28,6 +28,7 @@ class PCRE2Conan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "support_jit": [True, False],
+        "grep_support_callout_fork": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,6 +40,7 @@ class PCRE2Conan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "support_jit": False,
+        "grep_support_callout_fork": True,
     }
 
     def export_sources(self):
@@ -63,6 +65,7 @@ class PCRE2Conan(ConanFile):
         if not self.options.build_pcre2grep:
             del self.options.with_zlib
             del self.options.with_bzip2
+            del self.options.grep_support_callout_fork
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
@@ -101,6 +104,7 @@ class PCRE2Conan(ConanFile):
         tc.variables["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
         tc.variables["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
         tc.variables["PCRE2_SUPPORT_JIT"] = self.options.support_jit
+        tc.variables["PCRE2GREP_SUPPORT_CALLOUT_FORK"] = self.options.get_safe("grep_support_callout_fork", False)
         if Version(self.version) < "10.38":
             # relocatable shared libs on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
