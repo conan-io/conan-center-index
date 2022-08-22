@@ -46,7 +46,7 @@ class OctoLoggerCPPConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["DISABLE_TESTS"] = True
         tc.variables["DISABLE_EXAMPLES"] = True
-        if self.info.options.get_safe("with_aws"):
+        if self.options.get_safe("with_aws"):
             tc.variables["WITH_AWS"] = True
         tc.generate()
         cd = CMakeDeps(self)
