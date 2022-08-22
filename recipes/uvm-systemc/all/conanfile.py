@@ -3,6 +3,8 @@ from conans import tools, AutoToolsBuildEnvironment
 from conan.tools.files import get
 from conan.tools.files import rmdir
 from conan.tools.files import rm
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.45.0"
@@ -33,6 +35,12 @@ class UvmSystemC(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
         self.tool_requires("systemc/2.3.3")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
