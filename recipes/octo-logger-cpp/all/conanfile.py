@@ -39,13 +39,15 @@ class OctoLoggerCPPConan(ConanFile):
         return Version(self.version) >= "1.2.0"
 
     def configure(self):
-        if self.options.with_aws and self._aws_supported:
-            self.options["aws-sdk-cpp"].logs = True
+        if not self._aws_supported:
+            del self.options.with_aws
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["DISABLE_TESTS"] = True
         tc.variables["DISABLE_EXAMPLES"] = True
+        if self.info.options.get_safe("with_aws"):
+            tc.variables["WITH_AWS"] = True
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -68,6 +70,10 @@ class OctoLoggerCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} does not support clang with libc++. Use libstdc++ instead.")
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ["MTd", "MT"]:
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
+        if self.info.options.get_safe("with_aws"):
+            if not self.dependencies["aws-sdk-cpp"].options.logs:
+                raise ConanInvalidConfiguration(f"{self.name} requires the option aws-sdk-cpp:logs=True")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -75,7 +81,7 @@ class OctoLoggerCPPConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/9.0.0")
-        if self.options.with_aws and self._aws_supported:
+        if self.options.get_safe("with_aws"):
             self.requires("nlohmann_json/3.11.2")
             self.requires("aws-sdk-cpp/1.9.234")
 
@@ -84,12 +90,7 @@ class OctoLoggerCPPConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        variables = {}
-        if self._aws_supported:
-            variables.update({
-                "WITH_AWS": self.options.with_aws
-            })
-        cmake.configure(variables=variables)
+        cmake.configure()
         cmake.build()
 
     def package(self):
@@ -103,7 +104,7 @@ class OctoLoggerCPPConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "octo-logger-cpp")
         self.cpp_info.components["libocto-logger-cpp"].libs = ["octo-logger-cpp"]
         self.cpp_info.components["libocto-logger-cpp"].requires = ["fmt::fmt"]
-        if self.options.with_aws and self._aws_supported:
+        if self.options.get_safe("with_aws"):
             self.cpp_info.components["libocto-logger-cpp"].requires.extend([
                 "nlohmann_json::nlohmann_json",
                 "aws-sdk-cpp::monitoring"
