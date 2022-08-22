@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
@@ -61,8 +62,14 @@ class MicrosoftGslConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        pass
 
     def build(self):
         pass
