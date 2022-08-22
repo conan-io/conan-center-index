@@ -11,4 +11,3 @@ sources:
 patches:
   "1.3.2":
     - patch_file: "patches/0002-remove-explicit-stdlib-setting.patch"
-      base_path: "source_subfolder"
