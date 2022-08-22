@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class FreeImageConan(ConanFile):
@@ -43,20 +45,11 @@ class FreeImageConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,47 +86,52 @@ class FreeImageConan(ConanFile):
             self.requires("libtiff/4.3.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, "11")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["FREEIMAGE_WITH_JPEG"] = self.options.with_jpeg != False
-        cmake.definitions["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
-        cmake.definitions["FREEIMAGE_WITH_PNG"] = self.options.with_png
-        cmake.definitions["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
-        cmake.definitions["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
-        cmake.definitions["FREEIMAGE_WITH_RAW"] = self.options.with_raw
-        cmake.definitions["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
-        cmake.definitions["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["FREEIMAGE_FOLDER"] = self.source_folder.replace("\\", "/")
+        tc.variables["FREEIMAGE_WITH_JPEG"] = self.options.with_jpeg != False
+        tc.variables["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
+        tc.variables["FREEIMAGE_WITH_PNG"] = self.options.with_png
+        tc.variables["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
+        tc.variables["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
+        tc.variables["FREEIMAGE_WITH_RAW"] = self.options.with_raw
+        tc.variables["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
+        tc.variables["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibPNG"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibTIFF4"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibOpenJPEG"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibJXR"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibWebP"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "LibRawLite"))
+        rmdir(self, os.path.join(self.source_folder, "Source", "OpenEXR"))
 
     def build(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibPNG"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibTIFF4"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibOpenJPEG"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibJXR"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibWebP"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "LibRawLite"))
-        tools.rmdir(os.path.join(self._source_subfolder, "Source", "OpenEXR"))
-
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        for license in ["license-fi.txt", "license-gplv3.txt", "license-fi.txt"]:
+            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("license-fi.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("license-gplv3.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("license-gplv2.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         def imageformats_deps():

@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
-project(FreeImage C CXX)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+project(FreeImage LANGUAGES C CXX)
 
 include(GNUInstallDirs)
-
-set(FREEIMAGE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 
 find_package(ZLIB REQUIRED)
 if(FREEIMAGE_WITH_PNG)
