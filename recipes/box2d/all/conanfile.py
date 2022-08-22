@@ -1,5 +1,8 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+
+required_conan_version = ">=1.46.0"
 
 
 class Box2dConan(ConanFile):
@@ -13,12 +16,6 @@ class Box2dConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True,}
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt"
-
-    @property
-    def _source_subfolder(self):
-        return "sources"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,28 +25,38 @@ class Box2dConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="Box2D")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("box2d-%s" % self.version, self._source_subfolder)
+        tools.files.get(self,
+                        **self.conan_data["sources"][self.version],
+                        strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BOX2D_BUILD_SHARED"] = self.options.shared
+        tc.variables["BOX2D_BUILD_STATIC"] = not self.options.shared
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["BOX2D_BUILD_EXAMPLES"] = False
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["BOX2D_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["BOX2D_BUILD_STATIC"] = not self.options.shared
-        if self.settings.os == "Windows" and self.options.shared:
-            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        cmake.definitions["BOX2D_BUILD_EXAMPLES"] = False
-        cmake.configure()
+        cmake.configure(build_script_folder="Box2D")
         cmake.build()
 
     def package(self):
-        self.copy("License.txt", dst="licenses", src=os.path.join(self._source_subfolder, "Box2D"))
-        self.copy("*.h", dst=os.path.join("include", "Box2D"), src=os.path.join(self._source_subfolder, "Box2D", "Box2D"))
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        tools.files.copy(self, "License.txt", src=os.path.join(self.source_folder, "Box2D"), dst=os.path.join(self.package_folder,"licenses"))
+        tools.files.copy(self, os.path.join("Box2D", "*.h"), src=os.path.join(self.source_folder, "Box2D"), dst=os.path.join(self.package_folder, "include"))
+        tools.files.copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        tools.files.copy(self, "*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["Box2D"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
