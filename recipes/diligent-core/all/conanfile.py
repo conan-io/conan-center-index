@@ -1,5 +1,5 @@
 from conan import ConanFile, tools
-from conans import CMake
+from conans import CMake, tools as legacy_tools
 from conan.errors import ConanInvalidConfiguration
 import os
 from conan.tools.build import cross_building
@@ -85,7 +85,7 @@ class DiligentCoreConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.files.patch(**patch)
+            tools.files.patch(self, **patch)
 
     def build_requirements(self):
         self.build_requires('cmake/3.22.0')
@@ -122,6 +122,7 @@ class DiligentCoreConan(ConanFile):
             return 'PLATFORM_EMSCRIPTEN'
         if self.settings.os == 'watchOS':
             return 'PLATFORM_TVOS'
+        raise ConanInvalidConfiguration("Platform is not supported: {}".format(self.settings.os))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -152,37 +153,37 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.files.rename(src=os.path.join(self.package_folder, 'include', 'source_subfolder'),
+        tools.files.rename(self, src=os.path.join(self.package_folder, 'include', 'source_subfolder'),
         dst=os.path.join(self.package_folder, 'include', 'DiligentCore'))
 
-        tools.files.rmdir(os.path.join(self.package_folder, 'Licenses'))
-        tools.files.rmdir(os.path.join(self.package_folder, 'lib'))
-        tools.files.rmdir(os.path.join(self.package_folder, 'bin'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'Licenses'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'lib'))
+        tools.files.rmdir(self, os.path.join(self.package_folder, 'bin'))
         self.copy('License.txt', dst='licenses', src=self._source_subfolder)
 
         if self.options.shared:
             self.copy(pattern='*.dylib', dst='lib', keep_path=False)
             self.copy(pattern='*.so', dst='lib', keep_path=False)
             self.copy(pattern='*.dll', dst='bin', keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.a')
+            legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.a')
             if self.settings.os != 'Windows':
                 tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.lib')
         else:
             self.copy(pattern='*.a', dst='lib', keep_path=False)
             self.copy(pattern='*.lib', dst='lib', keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.dylib')
-            tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.so')
-            tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.dll')
+            legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.dylib')
+            legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.so')
+            legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.dll')
 
         self.copy(pattern='*.fxh', dst='res', keep_path=False)
 
         self.copy('File2String*', src=os.path.join(self._build_subfolder, 'bin'), dst='bin', keep_path=False)
-        tools.remove_files_by_mask(self.package_folder, '*.pdb')
+        legacy_tools.remove_files_by_mask(self.package_folder, '*.pdb')
         # MinGw creates many invalid files, called objects.a, remove them here:
-        tools.remove_files_by_mask(self.package_folder, 'objects.a')
+        legacy_tools.remove_files_by_mask(self.package_folder, 'objects.a')
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = legacy_tools.collect_libs(self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, 'include'))
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, 'include', 'DiligentCore', 'Common'))
@@ -204,7 +205,7 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join('include', 'DiligentCore', 'Platforms', 'Basic', 'interface'))
         if self.settings.os == 'Android':
             self.cpp_info.includedirs.append(os.path.join('include', 'DiligentCore', 'Platforms', 'Android', 'interface'))
-        elif tools.is_apple_os(self.settings.os):
+        elif legacy_tools.is_apple_os(self.settings.os):
             self.cpp_info.includedirs.append(os.path.join('include', 'DiligentCore', 'Platforms', 'Apple', 'interface'))
         elif self.settings.os == 'Emscripten':
             self.cpp_info.includedirs.append(os.path.join('include', 'DiligentCore', 'Platforms', 'Emscripten', 'interface'))
