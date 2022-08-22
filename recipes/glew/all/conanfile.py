@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools import files
 from conans import CMake
 import functools
-import os
 
 required_conan_version = ">=1.43.0"
 
@@ -78,9 +77,9 @@ class GlewConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        files.rmdir(self, f"{self.package_folder}/lib/pkgconfig")
+        files.rmdir(self, f"{self.package_folder}/lib/cmake")
+        files.rm(self, "*.pdb", f"{self.package_folder}/lib")
 
     def package_info(self):
         glewlib_target_name = "glew" if self.options.shared else "glew_s"
