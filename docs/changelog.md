@@ -1,5 +1,10 @@
 # Changelog
 
+### 18-August-2022 - 15:21 CEST
+
+- [fix] Conan v2: Check recipe revision only if it has been successfully exported.
+- [feature]: Consider changes from `master` before merging a pull-request. If those changes result in a new recipe revision, the pull-request is triggered again.
+
 ### 8-August-2022 - 11:25 CEST
 
 - [fix] Take into account status checks from GitHub actions before merging a pull-request.
