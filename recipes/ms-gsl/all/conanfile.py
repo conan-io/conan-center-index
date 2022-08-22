@@ -43,8 +43,13 @@ class MicrosoftGslConan(ConanFile):
             "apple-clang": "3.4",
         }
 
+    def package_id(self):
+        self.info.clear()
+
     def validate(self):
-        check_min_cppstd(self, 14)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 14)
+
         check_min_vs(self, "190")
 
         if not is_msvc(self):
@@ -58,9 +63,6 @@ class MicrosoftGslConan(ConanFile):
     def config_options(self):
         if Version(self.version) >= "3.0.0":
             del self.options.on_contract_violation
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
