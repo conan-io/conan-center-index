@@ -66,8 +66,7 @@ class GoogleCloudCppConan(ConanFile):
             raise ConanInvalidConfiguration("Building requires VS >= 2019")
 
         # TODO: CCI fails
-        if self.version in ["1.34.1", "1.42.0"] \
-            and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) == "12.0" \
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) == "12.0" \
             and self.options.shared:
             raise ConanInvalidConfiguration("This is failing in CCI")
 
