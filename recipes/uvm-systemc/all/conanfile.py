@@ -28,10 +28,6 @@ class UvmSystemC(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
         self.tool_requires("systemc/2.3.3")
@@ -39,6 +35,8 @@ class UvmSystemC(ConanFile):
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos build not supported")
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Windows build not yet supported")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
@@ -49,7 +47,7 @@ class UvmSystemC(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self)
         autotools.configure(configure_dir=os.path.join(self.build_folder, self._source_subfolder)
         ,args=['--with-systemc=%s' % self.deps_cpp_info["systemc"].rootpath])
         autotools.make()
@@ -57,7 +55,7 @@ class UvmSystemC(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("NOTICE", src=self._source_subfolder, dst="licenses")
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "examples"))
