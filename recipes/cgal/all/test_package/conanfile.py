@@ -6,7 +6,6 @@ from conans import CMake
 
 
 class TestPackageConan(ConanFile):
-    name="test_package_cgal"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
