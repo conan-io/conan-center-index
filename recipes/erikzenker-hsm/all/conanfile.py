@@ -29,7 +29,7 @@ class HsmConan(ConanFile):
         self.requires("boost/1.79.0")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         # FIXME: should use self.info.settings instead of self.settings for conan v2
