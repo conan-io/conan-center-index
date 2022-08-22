@@ -1,6 +1,5 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake
-
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 import os
 from conan.tools.build import cross_building
@@ -26,7 +25,7 @@ class DiligentCoreConan(ConanFile):
         'fPIC': True,
         'with_glslang': True
     }
-    generators = 'cmake_find_package', 'cmake_find_package_multi'
+    generators = 'cmake_find_package', 'cmake_find_package_multi', 'cmake'
     _cmake = None
     exports_sources = ['CMakeLists.txt', 'patches/**']
     short_paths = True
@@ -86,7 +85,7 @@ class DiligentCoreConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.files.patch(**patch)
 
     def build_requirements(self):
         self.build_requires('cmake/3.22.0')
@@ -153,7 +152,7 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rename(src=os.path.join(self.package_folder, 'include', 'source_subfolder'),
+        tools.files.rename(src=os.path.join(self.package_folder, 'include', 'source_subfolder'),
         dst=os.path.join(self.package_folder, 'include', 'DiligentCore'))
 
         tools.files.rmdir(os.path.join(self.package_folder, 'Licenses'))
