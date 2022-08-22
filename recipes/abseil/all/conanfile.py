@@ -78,7 +78,7 @@ class AbseilConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = self._configure_cmake()
-        abi_file = _ABIFile("abi.h")
+        abi_file = _ABIFile(self, "abi.h")
         abi_file.replace_in_options_file(os.path.join(self._source_subfolder, "absl", "base", "options.h"))
         cmake.build()
 
@@ -104,7 +104,7 @@ class AbseilConan(ConanFile):
         os.makedirs(os.path.join(self.package_folder, self._module_path))
         with open(os.path.join(self.package_folder, self._module_path, self._cxx_std_build_module), 'w', encoding='utf-8') as f:
             f.write("cmake_minimum_required(VERSION 3.1)\n\n")
-            cxx_std_required = _ABIFile("abi.h").cxx_std()
+            cxx_std_required = _ABIFile(self, "abi.h").cxx_std()
             for _, values in components.items():
                 cmake_target = values["cmake_target"]
                 f.write(f"target_compile_features(absl::{cmake_target} INTERFACE cxx_std_{cxx_std_required})\n")
@@ -202,7 +202,8 @@ class AbseilConan(ConanFile):
 class _ABIFile:
     abi = {}
 
-    def __init__(self, filepath):
+    def __init__(self, conanfile, filepath):
+        self.conanfile = conanfile
         abi_h = load(self, filepath)
         for line in abi_h.splitlines():
             if line.startswith("#define"):
@@ -212,7 +213,7 @@ class _ABIFile:
 
     def replace_in_options_file(self, options_filepath):
         for name, value in self.abi.items():
-            replace_in_file(self, options_filepath,
+            replace_in_file(self.conanfile, options_filepath,
                     "#define ABSL_OPTION_{} 2".format(name),
                     "#define ABSL_OPTION_{} {}".format(name, value))
 
