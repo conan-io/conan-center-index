@@ -53,7 +53,7 @@ class FmtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_with_os_api_option:
             del self.options.with_os_api
