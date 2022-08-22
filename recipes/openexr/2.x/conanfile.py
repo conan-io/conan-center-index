@@ -181,7 +181,7 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.components["ilmbase_half"].requires = ["ilmbase_ilmbaseconfig"]
 
         # Iex
-        self.cpp_info.components["ilmbase_half"].set_property("cmake_target_name", "IlmBase::Iex")
+        self.cpp_info.components["ilmbase_iex"].set_property("cmake_target_name", "IlmBase::Iex")
         self.cpp_info.components["ilmbase_iex"].includedirs.append(include_dir)
         self.cpp_info.components["ilmbase_iex"].libs = ["Iex{}".format(lib_suffix)]
         self.cpp_info.components["ilmbase_iex"].requires = ["ilmbase_ilmbaseconfig"]
