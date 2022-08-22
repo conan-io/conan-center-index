@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -145,7 +146,7 @@ class G3logConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "g3log")
         self.cpp_info.set_property("cmake_target_name", "g3log")
-        self.cpp_info.libs = ["g3logger"]
+        self.cpp_info.libs = ["g3logger" if Version(self.version) < "1.3.4" else "g3log"]
         if self.settings.os in ["Linux", "Android"]:
             self.cpp_info.system_libs.append("pthread")
 
