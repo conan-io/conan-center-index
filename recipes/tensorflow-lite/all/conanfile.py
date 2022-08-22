@@ -89,6 +89,7 @@ class TensorflowLiteConan(ConanFile):
         self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220621")
+            self.requires("pthreadpool/cci.20210218")
 
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
