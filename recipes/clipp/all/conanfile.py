@@ -15,15 +15,15 @@ class ClippConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        tools.files.copy(self, "LICENSE", self._source_subfolder, "licenses")
-        tools.files.copy(self, "*", os.path.join(self._source_subfolder, "include"), "include")
+        tools.files.copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        tools.files.copy(self, "*", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
