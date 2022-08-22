@@ -1,8 +1,8 @@
 from conan import ConanFile, tools
-from conans import CMake, tools as legacy_tools
 from conan.errors import ConanInvalidConfiguration
-import os
 from conan.tools.build import cross_building
+from conans import CMake, tools as legacy_tools
+import os
 
 required_conan_version = '>=1.33.0'
 
@@ -167,7 +167,7 @@ class DiligentCoreConan(ConanFile):
             self.copy(pattern='*.dll', dst='bin', keep_path=False)
             legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.a')
             if self.settings.os != 'Windows':
-                tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.lib')
+                legacy_tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.lib')
         else:
             self.copy(pattern='*.a', dst='lib', keep_path=False)
             self.copy(pattern='*.lib', dst='lib', keep_path=False)
