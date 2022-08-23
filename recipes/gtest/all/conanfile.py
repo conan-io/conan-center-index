@@ -129,9 +129,9 @@ class GTestConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         
         if self.settings.build_type == "Debug":
-            tc.variables["CUSTOM_DEBUG_POSTFIX"] = str(self.options.debug_postfix)
+            tc.cache_variables["CUSTOM_DEBUG_POSTFIX"] = str(self.options.debug_postfix)
         if is_msvc(self) or self._is_clang_cl:
-            tc.variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
+            tc.cache_variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
 
         try:
            check_min_vs(self, "191")
@@ -139,10 +139,10 @@ class GTestConan(ConanFile):
             tc.preprocessor_definitions["GTEST_LANG_CXX11"] = 1
             tc.preprocessor_definitions["GTEST_HAS_TR1_TUPLE"] = 0
             
-        tc.variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
+        tc.cache_variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            tc.variables["gtest_disable_pthreads"] = True
-        tc.variables["gtest_hide_internal_symbols"] = bool(self.options.hide_symbols)
+            tc.cache_variables["gtest_disable_pthreads"] = True
+        tc.cache_variables["gtest_hide_internal_symbols"] = bool(self.options.hide_symbols)
         tc.generate()
 
     def build(self):
