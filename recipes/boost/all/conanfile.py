@@ -1439,7 +1439,7 @@ class BoostConan(ConanFile):
 
             libformatdata = {}
             if not self.options.without_python:
-                pyversion = Version(self._python.version)
+                pyversion = Version(self._python.version.v)
                 libformatdata["py_major"] = pyversion.major
                 libformatdata["py_minor"] = pyversion.minor
 
@@ -1572,7 +1572,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
-                pyversion = Version(self._python.version)
+                pyversion = Version(self._python.version.v)
                 self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
