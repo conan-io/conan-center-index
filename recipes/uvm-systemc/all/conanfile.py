@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans import tools, AutoToolsBuildEnvironment
+from conans import AutoToolsBuildEnvironment
 from conan.tools.files import get, rmdir, rm, copy, rename
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
