@@ -59,6 +59,7 @@ CONFIGURE_OPTIONS = (
     "wave",
 )
 
+
 class PythonVersion:
     def __init__(self, v):
         self.v = v
@@ -66,6 +67,7 @@ class PythonVersion:
     @property
     def xy(self):
         return self.v.replace('.', '')
+
 
 PYTHON_VERSIONS = [PythonVersion(v) for v in (
     "2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"
@@ -980,7 +982,6 @@ class BoostConan(ConanFile):
             python_var = "python=%s" % ",".join([p.version.v for p in self._pythons])
             flags.append(python_var)
 
-
         if self.options.extra_b2_flags:
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
@@ -1095,7 +1096,6 @@ class BoostConan(ConanFile):
 
             for python_xy in self._pythons:
                 contents += create_python_config(python_xy)
-
 
         if not self.options.without_mpi:
             # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
@@ -1437,12 +1437,6 @@ class BoostConan(ConanFile):
             if libsuffix:
                 self.output.info(f"Library layout suffix: {repr(libsuffix)}")
 
-            libformatdata = {}
-            if not self.options.without_python:
-                pyversion = Version(self._python.version.v)
-                libformatdata["py_major"] = pyversion.major
-                libformatdata["py_minor"] = pyversion.minor
-
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
@@ -1453,6 +1447,19 @@ class BoostConan(ConanFile):
             all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.collect_libs(self))
             all_expected_libraries = set()
             incomplete_components = []
+
+            def expand_python_lib_names(name):
+                """ A list of names, one for each enabled python version """
+                libs = []
+                for p in self._pythons:
+                    xy_version = tools.Version(p.version.v)
+                    xy_formatdata = {
+                        "py_major": xy_version.major,
+                        "py_minor": xy_version.minor
+                    }
+                    xy_name = name.format(**xy_formatdata)
+                    libs.append(xy_name)
+                return libs
 
             def filter_transform_module_libraries(names):
                 libs = []
@@ -1467,26 +1474,21 @@ class BoostConan(ConanFile):
                         continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
-                    new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
+                    new_name = add_libprefix(name) + libsuffix
                     if self.options.namespace != 'boost':
                         new_name = new_name.replace("boost_", str(self.options.namespace) + "_")
 
                     if name.startswith("boost_python") or name.startswith("boost_numpy"):
-                        # FIXME: these are missing python_buildid and buildid
-                        for p in self._pythons:
-                            xy_version = tools.Version(p.version.v)
-                            xy_formatdata = {
-                                "py_major": xy_version.major,
-                                "py_minor": xy_version.minor
-                            }
-                            xy_name = add_libprefix(name.format(**xy_formatdata)) + libsuffix
-                            libs.append(xy_name)
-
+                        # must be applied before buildid
                         if self.options.python_buildid:
                             new_name += f"-{self.options.python_buildid}"
                     if self.options.buildid:
                         new_name += f"-{self.options.buildid}"
-                    libs.append(new_name)
+
+                    if name.startswith("boost_python") or name.startswith("boost_numpy"):
+                        libs.extend(expand_python_lib_names(new_name))
+                    else:
+                        libs.append(new_name)
                 return libs
 
             for module in self._dependencies["dependencies"].keys():
