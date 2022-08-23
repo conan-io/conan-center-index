@@ -10,7 +10,7 @@ import os
 required_conan_version = ">=1.45.0"
 
 class UvmSystemC(ConanFile):
-    name = "uvm-systemc"
+    name = "accellera-uvm-systemc"
     description = """Universal Verification Methodology for SystemC"""
     homepage = "https://systemc.org/about/systemc-verification/uvm-systemc-faq"
     url = "https://github.com/conan-io/conan-center-index"
