@@ -33,6 +33,10 @@ class UvmSystemC(ConanFile):
         self.tool_requires("cmake/3.24.0")
         self.tool_requires("systemc/2.3.3")
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+            
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos build not supported")
