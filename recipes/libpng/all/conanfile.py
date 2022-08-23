@@ -138,7 +138,7 @@ class LibpngConan(ConanFile):
         tc.variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
         tc.variables["PNG_PREFIX"] = self.options.api_prefix
         if cross_building(self):
-            system_processor = self.conf_info.get("tools.cmake.cmaketoolchain:system_processor",
+            system_processor = self.conf.get("tools.cmake.cmaketoolchain:system_processor",
                                                   self._libpng_cmake_system_processor, check_type=str)
             tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = system_processor
         if self._has_neon_support:
@@ -187,6 +187,6 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if is_msvc(self) else ""
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["{}png{}{}".format(prefix, major_min_version, suffix)]
+        self.cpp_info.libs = [f"{prefix}png{major_min_version}{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
