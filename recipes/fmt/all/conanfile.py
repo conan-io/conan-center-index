@@ -41,12 +41,12 @@ class FmtConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
-            tc.variables["FMT_DOC"] = False
-            tc.variables["FMT_TEST"] = False
-            tc.variables["FMT_INSTALL"] = True
-            tc.variables["FMT_LIB_DIR"] = "lib"
+            tc.cache_variables["FMT_DOC"] = False
+            tc.cache_variables["FMT_TEST"] = False
+            tc.cache_variables["FMT_INSTALL"] = True
+            tc.cache_variables["FMT_LIB_DIR"] = "lib"
             if self._has_with_os_api_option:
-                tc.variables["FMT_OS"] = bool(self.options.with_os_api)
+                tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
             tc.generate()
 
     def layout(self):
