@@ -58,8 +58,9 @@ class UvmSystemC(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("NOTICE", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "NOTICE", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
         autotools = AutoToolsBuildEnvironment(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "docs"))
