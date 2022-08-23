@@ -43,7 +43,7 @@ class SemVer200Conan(ConanFile):
             check_min_cppstd(self, 14)
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared or self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
