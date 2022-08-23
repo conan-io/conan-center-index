@@ -84,3 +84,5 @@ class LibqrencodeConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libqrencode")
         suffix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"qrencode{suffix}"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
