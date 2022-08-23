@@ -22,6 +22,19 @@ class TestPackageConan(ConanFile):
         except (AttributeError, ConanException):
             return default
 
+    def _all_pythons(self):
+        """Search pythonXY_executable options and parse the version"""
+        pythons = []
+
+        # try to return the later versions of python first
+        for k, exe in reversed(self.options["boost"].items()):
+            if exe and k.startswith("python") and k.endswith("_executable"):
+                xy = k.split("_")[0].split("python")[1]
+                ver = tools.Version(f"{xy[0]}.{xy[1:]}")
+                pythons.append((ver, exe))
+
+        return pythons
+
     def build(self):
         # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
         with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
@@ -31,9 +44,9 @@ class TestPackageConan(ConanFile):
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
             cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
-                pyversion = tools.Version(self.options["boost"].python_version)
-                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
-                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
+                (v, _) = self._all_pythons()[0]
+                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(v.major, v.minor)
+                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(v.major, v.minor)
             cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
             cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
             cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
@@ -79,7 +92,8 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("bin", "json_exe"), run_environment=True)
         if not self.options["boost"].without_python:
             with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
-                self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
+                (_, exe) = self._all_pythons()[0]
+                self.run("{} {}".format(exe, os.path.join(self.source_folder, "python.py")), run_environment=True)
             self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
         if not self.options["boost"].without_stacktrace:
             self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
