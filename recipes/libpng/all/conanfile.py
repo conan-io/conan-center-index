@@ -166,6 +166,7 @@ class LibpngConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        os.unlink(os.path.join(self.package_folder, "lib", "libpng.a"))
 
     def package_info(self):
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
