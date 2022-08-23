@@ -2,7 +2,7 @@
 +++ b/CMakeLists.txt
 @@ -1,16 +1,7 @@
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.4.3)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
  PROJECT(SGP4)
  
 -include(CheckCXXCompilerFlag)
@@ -35,17 +35,18 @@
 -file(COPY SGP4-VER.TLE DESTINATION ${PROJECT_BINARY_DIR})
 --- a/libsgp4/CMakeLists.txt
 +++ b/libsgp4/CMakeLists.txt
-@@ -35,7 +35,10 @@ set(SRCS
+@@ -35,7 +35,11 @@ set(SRCS
       Vector.h
       )
  
 -add_library(sgp4 STATIC ${SRCS} ${INCS})
 -add_library(sgp4s SHARED ${SRCS} ${INCS})
 -install( TARGETS sgp4s LIBRARY DESTINATION lib )
-+add_library(sgp4 ${SRCS} ${INCS})
-+if(WIN32 AND BUILD_SHARED_LIBS)
-+  set_target_properties(sgp4 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
++add_library(sgp4 ${SRCS})
++set_target_properties(sgp4 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
++if(BUILD_SHARED_LIBS)
++  set_target_properties(sgp4 PROPERTIES OUTPUT_NAME sgp4s)
 +endif()
-+set_target_properties(sgp4 PROPERTIES CXX_STANDARD 11)
++target_compile_features(sgp4 PRIVATE cxx_std_11)
 +install( TARGETS sgp4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
  install( FILES ${INCS} DESTINATION include/SGP4 )
