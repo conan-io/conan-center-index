@@ -74,7 +74,7 @@ class UvmSystemC(ConanFile):
         rm(self, "RELEASENOTES", self.package_folder)
         rm(self, "README", self.package_folder)
         rm(self, "INSTALL", self.package_folder)
-        os.rename(os.path.join(self.package_folder, "lib-linux64"), os.path.join(self.package_folder, "lib"))
+        rename(self, os.path.join(self.package_folder, "lib-linux64"), os.path.join(self.package_folder, "lib"))
         rm(self, "libuvm-systemc.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
