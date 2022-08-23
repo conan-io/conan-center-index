@@ -1,6 +1,7 @@
-from shutil import ignore_patterns
-from conans import ConanFile, tools
+from conan import ConanFile
 from conan.tools import files
+
+required_conan_version = ">=1.45.0"
 
 
 class libhal_conan(ConanFile):
@@ -23,4 +24,5 @@ class libhal_conan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        files.get(self,
+                  **self.conan_data["sources"][self.version], strip_root=True)
