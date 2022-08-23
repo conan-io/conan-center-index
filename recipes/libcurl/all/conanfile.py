@@ -578,6 +578,7 @@ class LibcurlConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
+            fix_apple_shared_install_name()
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
