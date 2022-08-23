@@ -27,7 +27,7 @@ class TupletConan(ConanFile):
         return {
             "gcc": "11",
             "Visual Studio": "17",
-            "msvc": "19.22",
+            "msvc": "193",
             "clang": "13",
             "apple-clang": "13"
         }
@@ -39,7 +39,7 @@ class TupletConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
@@ -49,12 +49,7 @@ class TupletConan(ConanFile):
         version = str(self.settings.compiler.version)
 
         minimum_version = self._compilers_minimum_version.get(compiler, False)
-
-        if not minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires C++20. Your compiler configuration ({compiler}-{version}) wasn't validated. \
-                please report an issue if it does actually supports c++20.")
-        elif lazy_lt_semver(version, minimum_version):
+        if minimum_version and loose_lt_semver(version, minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
 
