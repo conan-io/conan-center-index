@@ -76,14 +76,7 @@ class OctoWildcardMatchingCPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "octo-wildcardmatching-cpp")
         self.cpp_info.set_property("cmake_target_name", "octo::octo-wildcardmatching-cpp")
         self.cpp_info.set_property("pkg_config_name", "octo-wildcardmatching-cpp")
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].libs = ["octo-wildcardmatching-cpp"]
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].requires = []
-        self.cpp_info.filenames["cmake_find_package"] = "octo-wildcardmatching-cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "octo-wildcardmatching-cpp"
+        self.cpp_info.libs = ["octo-wildcardmatching-cpp"]
         self.cpp_info.names["cmake_find_package"] = "octo-wildcardmatching-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "octo-wildcardmatching-cpp"
         self.cpp_info.names["pkg_config"] = "octo-wildcardmatching-cpp"
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].names["cmake_find_package"] = "octo-wildcardmatching-cpp"
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].names["cmake_find_package_multi"] = "octo-wildcardmatching-cpp"
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].set_property("cmake_target_name", "octo::octo-wildcardmatching-cpp")
-        self.cpp_info.components["libocto-wildcardmatching-cpp"].set_property("pkg_config_name", "octo-wildcardmatching-cpp")
