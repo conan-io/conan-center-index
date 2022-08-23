@@ -2,7 +2,6 @@ import os
 from conan import ConanFile
 from conan.tools import files
 from conan.tools import scm
-from conan.errors import ConanInvalidConfiguration
 from conans import CMake
 
 class CgalConan(ConanFile):
@@ -49,7 +48,7 @@ class CgalConan(ConanFile):
         self.requires("mpfr/4.1.0")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -68,8 +67,8 @@ class CgalConan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.defines.append("CGAL_HEADER_ONLY=1")
