@@ -1,7 +1,7 @@
 
 # Generate project for soapcpp2 executable
 
-set(STDCPP2_PATH ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/src)
+set(STDCPP2_PATH ${GSOAP_PATH}/gsoap/src)
 
 set(SRC_CPP
     ${STDCPP2_PATH}/symbol2.c
@@ -62,4 +62,4 @@ endif()
 target_include_directories(soapcpp2 PRIVATE ${STDCPP2_PATH})
 set_source_files_properties(${SRC_CPP} PROPERTIES LANGUAGE C)
 add_dependencies(soapcpp2 FLEXBISON_GENERATORS)
-install(TARGETS soapcpp2 RUNTIME DESTINATION bin)
+install(TARGETS soapcpp2 DESTINATION ${CMAKE_INSTALL_BINDIR})
