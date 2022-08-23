@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -578,7 +579,7 @@ class LibcurlConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
-            fix_apple_shared_install_name()
+            fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             if self._is_mingw and self.options.shared:
