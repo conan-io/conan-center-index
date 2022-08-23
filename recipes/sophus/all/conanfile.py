@@ -4,7 +4,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class SophusConan(ConanFile):
@@ -30,7 +30,7 @@ class SophusConan(ConanFile):
             self.requires("fmt/8.1.1")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -48,7 +48,10 @@ class SophusConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Sophus")
         self.cpp_info.set_property("cmake_target_name", "Sophus::Sophus")
         self.cpp_info.set_property("pkg_config_name", "sophus")
-
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         if not self.options.with_fmt:
             self.cpp_info.defines.append("SOPHUS_USE_BASIC_LOGGING=1")
 
