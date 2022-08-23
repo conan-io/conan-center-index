@@ -1085,13 +1085,19 @@ class BoostConan(ConanFile):
         flags.append("pch=on" if self.options.pch else "pch=off")
 
         if tools.is_apple_os(self.settings.os):
-            if self.settings.get_safe("os.version"):
-                cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                    self.settings.get_safe("os.version"),
-                                                                    self.settings.get_safe("os.sdk"),
-                                                                    self.settings.get_safe("os.subsystem"),
-                                                                    self.settings.get_safe("arch")))
-                if self.settings.get_safe("os.subsystem") == "catalyst":
+            os_version = self.settings.get_safe("os.version")
+            if os_version:
+                os_subsystem = self.settings.get_safe("os.subsystem")
+                deployment_target_flag = tools.apple_deployment_target_flag(
+                    self.settings.os,
+                    os_version,
+                    self.settings.get_safe("os.sdk"),
+                    os_subsystem,
+                    self.settings.get_safe("arch")
+                )
+                cxx_flags.append(deployment_target_flag)
+                link_flags.append(deployment_target_flag)
+                if os_subsystem == "catalyst":
                     cxx_flags.append("--target=arm64-apple-ios-macabi")
                     link_flags.append("--target=arm64-apple-ios-macabi")
 
