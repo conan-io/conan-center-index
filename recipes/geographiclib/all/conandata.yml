@@ -9,5 +9,10 @@ sources:
     url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.50.1.tar.gz"
     sha256: "d1765009e068b8cc5e76957e5d6be45ce6cff08c4aad8e5995e84a28354385f1"
 patches:
+  "1.52":
+    - patch_file: "patches/0002-fix-cmake.patch"
+  "1.51":
+    - patch_file: "patches/0002-fix-cmake.patch"
   "1.50.1":
     - patch_file: "patches/0001-streamoff.patch"
+    - patch_file: "patches/0002-fix-cmake.patch"
