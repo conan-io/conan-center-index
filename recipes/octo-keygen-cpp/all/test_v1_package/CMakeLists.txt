@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 find_package(octo-keygen-cpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE octo-keygen-cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE octo::octo-keygen-cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
