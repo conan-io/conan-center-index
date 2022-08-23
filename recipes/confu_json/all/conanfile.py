@@ -58,7 +58,6 @@ class ConfuJson(ConanFile):
                         self.name, self._minimum_cpp_standard,
                         self.settings.compiler,
                         self.settings.compiler.version))
-        self.options["boost"].header_only = True
 
     def requirements(self):
         self.requires("boost/1.79.0")
