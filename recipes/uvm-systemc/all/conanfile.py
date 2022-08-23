@@ -49,8 +49,12 @@ class UvmSystemC(ConanFile):
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
-        autotools.configure(configure_dir=os.path.join(self.build_folder, self._source_subfolder)
-        ,args=['--with-systemc=%s' % self.deps_cpp_info["systemc"].rootpath])
+        args = [f"--with-systemc={self.deps_cpp_info["systemc"].rootpath}"]
+        if self.options.shared:
+            args.extend(["--enable-shared", "--disable-static"])
+        else:
+            args.extend(["--enable-static", "--disable-shared"])
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
         autotools.make()
 
     def package(self):
