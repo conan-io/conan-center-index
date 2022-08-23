@@ -1,11 +1,18 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, cmake_layout
 import os
 
+
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
 
@@ -25,7 +32,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             # test executable
-            self.run("ruby --version", run_environment=True)
+            self.run("ruby --version", env="conanrun")
 
             # test library
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")
