@@ -89,11 +89,6 @@ class LibpngConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def _patch_source(self):
-        if Version(self.version) > "1.5.2":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                "find_library(M_LIBRARY m)",
-                                "set(M_LIBRARY m)")
-
         if self.settings.os == "Windows":
             if is_msvc(self):
                 if Version(self.version) <= "1.5.2":
