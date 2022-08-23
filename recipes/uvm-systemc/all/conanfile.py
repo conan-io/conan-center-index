@@ -17,6 +17,7 @@ class UvmSystemC(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
