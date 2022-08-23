@@ -79,16 +79,8 @@ class OctoEncryptionCPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "octo-encryption-cpp")
         self.cpp_info.set_property("cmake_target_name", "octo::octo-encryption-cpp")
         self.cpp_info.set_property("pkg_config_name", "octo-encryption-cpp")
-        self.cpp_info.components["libocto-encryption-cpp"].libs = ["octo-encryption-cpp"]
-        self.cpp_info.components["libocto-encryption-cpp"].requires = [
-            "openssl::openssl"
-        ]
-        self.cpp_info.filenames["cmake_find_package"] = "octo-encryption-cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "octo-encryption-cpp"
+        self.cpp_info.libs = ["octo-encryption-cpp"]
         self.cpp_info.names["cmake_find_package"] = "octo-encryption-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "octo-encryption-cpp"
         self.cpp_info.names["pkg_config"] = "octo-encryption-cpp"
-        self.cpp_info.components["libocto-encryption-cpp"].names["cmake_find_package"] = "octo-encryption-cpp"
-        self.cpp_info.components["libocto-encryption-cpp"].names["cmake_find_package_multi"] = "octo-encryption-cpp"
-        self.cpp_info.components["libocto-encryption-cpp"].set_property("cmake_target_name", "octo::octo-encryption-cpp")
-        self.cpp_info.components["libocto-encryption-cpp"].set_property("pkg_config_name", "octo-encryption-cpp")
+        self.cpp_info.requires = ["openssl::openssl"]
