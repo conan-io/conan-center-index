@@ -124,5 +124,5 @@ class SimdjsonConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
             self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
-            if tools.Version(self.version) >= "0.9.0" and is_msvc(self):
+            if is_msvc(self):
                 self.cpp_info.defines.append("SIMDJSON_USING_WINDOWS_DYNAMIC_LIBRARY=1")

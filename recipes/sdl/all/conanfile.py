@@ -126,10 +126,10 @@ class SDLConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
             if self.options.alsa:
-                self.requires("libalsa/1.2.5.1")
+                self.requires("libalsa/1.2.7.2")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
             if self.options.opengl:
@@ -138,7 +138,7 @@ class SDLConan(ConanFile):
                 self.requires("nas/1.9.4")
             if self.options.wayland:
                 self.requires("wayland/1.20.0")
-                self.requires("xkbcommon/1.4.0")
+                self.requires("xkbcommon/1.4.1")
                 self.requires("egl/system")
             if self.options.libunwind:
                 self.requires("libunwind/1.6.2")

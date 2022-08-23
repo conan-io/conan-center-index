@@ -17,12 +17,16 @@ github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
 
+# Requirements to merge a given pull-request:
+# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+# * check_runs refers to notifications from GH actions
 #status_checks:
+#  - "license/cla"
 #  - "continuous-integration/jenkins/pr-merge"
 
-slack:
-  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
-  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+#slack:
+#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
@@ -83,7 +87,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20220608"
+        default: "windows20220803"
   Macos:
     x86_64:
       "apple-clang":

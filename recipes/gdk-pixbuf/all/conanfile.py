@@ -1,5 +1,7 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, CMake, Meson, tools
+from conan.tools import files
+from conans.errors import ConanInvalidConfiguration, ConanException
+from tempfile import TemporaryDirectory
 import functools
 import os
 import shutil
@@ -57,12 +59,7 @@ class GdkPixbufConan(ConanFile):
             self.options["glib"].shared = True
 
     def requirements(self):
-        if self.settings.compiler == "clang":
-            # FIXME: cannot bump glib due to "undefined reference to `__muloti4'"
-            # see https://github.com/conan-io/conan-center-index/pull/10154#issuecomment-1094224794
-            self.requires("glib/2.70.4")
-        else:
-            self.requires("glib/2.73.0")
+        self.requires("glib/2.73.0")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
@@ -107,6 +104,40 @@ class GdkPixbufConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
+    @property
+    def _requires_compiler_rt(self):
+        return self.settings.compiler == "clang" and self.settings.build_type == "Debug"
+
+    def _test_for_compiler_rt(self):
+        cmake = CMake(self)
+        with TemporaryDirectory() as tmp:
+            def open_temp_file(file_name):
+                return open(os.path.join(tmp, file_name), "w", encoding="utf-8")
+
+            with open_temp_file("CMakeLists.txt") as cmake_file:
+                cmake_file.write(r"""
+                    cmake_minimum_required(VERSION 3.16)
+                    project(compiler_rt_test)
+                    try_compile(HAS_COMPILER_RT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/test.c OUTPUT_VARIABLE OUTPUT)
+                    if(NOT HAS_COMPILER_RT)
+                    message(FATAL_ERROR compiler-rt not present)
+                    endif()""")
+            with open_temp_file("test.c") as test_source:
+                test_source.write(r"""
+                    extern __int128_t __muloti4(__int128_t a, __int128_t b, int* overflow);
+                    int main() {
+                        __int128_t a;
+                        __int128_t b;
+                        int overflow;
+                        __muloti4(a, b, &overflow);
+                        return 0;
+                    }""")
+            cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-rtlib=compiler-rt"
+            try:
+                cmake.configure(source_folder=tmp)
+            except ConanException as ex:
+                raise ConanInvalidConfiguration("LLVM Compiler RT is required to link gdk-pixbuf in debug mode") from ex
+
     @functools.lru_cache(1)
     def _configure_meson(self):
         meson = Meson(self)
@@ -130,12 +161,20 @@ class GdkPixbufConan(ConanFile):
         defs["builtin_loaders"] = "all"
         defs["gio_sniffing"] = "false"
         defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        args=[]
+        args = []
+        # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
+        # Ony really for the purporses of building on CCI - end users can
+        # workaround this by appropriately setting global linker flags in their profile
+        if self._requires_compiler_rt:
+            args.append('-Dc_link_args="-rtlib=compiler-rt"')
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=".", args=args)
         return meson
 
     def build(self):
+        if self._requires_compiler_rt:
+            self._test_for_compiler_rt()
+
         self._patch_sources()
         if self.options.with_libpng:
             shutil.copy("libpng.pc", "libpng16.pc")
@@ -148,7 +187,7 @@ class GdkPixbufConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
+            files.rename(self, os.path.join(self.package_folder, "lib", "libgdk_pixbuf-2.0.a"), os.path.join(self.package_folder, "lib", "gdk_pixbuf-2.0.lib"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
@@ -161,6 +200,10 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if self._requires_compiler_rt:
+            ldflags = ["-rtlib=compiler-rt"]
+            self.cpp_info.exelinkflags = ldflags
+            self.cpp_info.sharedlinkflags = ldflags
 
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)

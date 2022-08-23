@@ -6,13 +6,15 @@ import os
 
 required_conan_version = ">=1.43.0"
 
+
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
-    description = "c++14 port of ZXing, a barcode scanning library"
+    description = "C++ port of ZXing, a barcode scanning library"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nu-book/zxing-cpp"
     topics = ("zxing", "barcode", "scanner", "generator")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,12 +40,20 @@ class ZXingCppConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _compiler_cpp14_support(self):
+    def _compiler_cpp_support(self):
         return {
-            "gcc": "5" if tools.Version(self.version) < "1.2" else "6",
-            "Visual Studio": "14",
-            "clang": "3.4",
-            "apple-clang": "3.4",
+            "14" : {
+                "gcc": "5",
+                "Visual Studio": "14",
+                "clang": "3.4",
+                "apple-clang": "3.4",
+            },
+            "17" : {
+                "gcc": "7",
+                "Visual Studio": "16",
+                "clang": "5",
+                "apple-clang": "5",
+            }
         }
 
     def export_sources(self):
@@ -60,15 +70,19 @@ class ZXingCppConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        cpp_version = 17 if tools.Version(self.version) >= "1.2.0" else 14
+
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
-        min_version = self._compiler_cpp14_support.get(str(self.settings.compiler))
+            tools.check_min_cppstd(self, cpp_version)
+        min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
+
         if min_version and tools.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
-                "This compiler is too old. {} needs a compiler with c++14 support".format(self.name)
+                "This compiler is too old. {} needs a compiler with c++{} support".format(self.name, cpp_version)
             )
+
         # FIXME: This is a workaround for "The system cannot execute the specified program."
-        if tools.Version(self.version) == "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
+        if tools.Version(self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
 
     def source(self):

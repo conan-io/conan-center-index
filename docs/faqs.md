@@ -21,11 +21,13 @@ This section gathers the most common questions from the community related to pac
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
+  * [What license should I use for a custom project specific license?](#what-license-should-i-use-for-a-custom-project-specific-license)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
   * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [Why not add an option to build unit tests](#why-not-add-an-option-to-build-unit-tests)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
@@ -171,6 +173,11 @@ No. Some projects provide more than a simple library, but also applications. For
 
 [The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
 
+## What license should I use for a custom project specific license?
+
+When a non standard open-source license is used, we have decided to use `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license.
+See [the reviewing guidlines](reviewing.md#license-attribute) for more details.
+
 ## Why is a `tools.check_min_cppstd` call not enough?
 
 Very often C++ projects require a minimum standard version, such as 14 or 17, in order to compile. Conan offers tools which enable checking the relevant setting is enabled and above this support for a certain version is present. Otherwise, it uses the compiler's default.
@@ -226,6 +233,12 @@ in an incompatible Conan package. To deal with those cases, you are allowed to p
 There are different motivations
 - time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
 - ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+## Why not add an option to build unit tests
+
+- Adding a testing option will change the package ID, but will not provide different packaged binaries
+- Use the configuration [skip_test](packaging_policy.md#options) to define the testing behavior.
+
 
 ## What is the policy for supported python versions?
 

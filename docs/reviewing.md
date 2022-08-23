@@ -10,6 +10,7 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
+  * [Exporting Patches](#exporting-patches)
   * [Applying Patches](#applying-patches)
   * [CMake](#cmake)
     * [Caching Helper](#caching-helper)
@@ -81,6 +82,24 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
+Where the SPDX guidelines do not apply, packages should do the following:
+
+- When no license is provided or when it's given to the "public domain", the value should be set to [Unlicense](https://spdx.org/licenses/Unlicense) as per [KB-H056](error_knowledge_base.md#kb-h056-license-public-domain) and [FAQ](faqs.md#what-license-should-i-use-for-public-domain).
+- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains a custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206)
+
+## Exporting Patches
+
+It's ideal to minimize the number of files in a package the exactly whats required. When recipes support multiple versions with differing patches it's strongly encourged to only export the patches that are being used for that given recipe.
+
+Make sure the `export_sources` attribute is replaced by the following:
+
+```py
+def export_sources(self):
+    self.copy("CMakeLists.txt")
+    for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        self.copy(patch["patch_file"])
+```
+
 ## Applying Patches
 
 Patches can be applied in a different protected method, the pattern name is `_patch_sources`. When applying patch files, `tools.patch` is the best option.
@@ -88,8 +107,7 @@ For simple cases, `tools.replace_in_file` is allowed.
 
 ```py
 def _patch_sources(self):
-    for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        tools.patch(**patch)
+    files.apply_conandata_patches(self)
     # remove bundled xxhash
     tools.remove_files_by_mask(os.path.join(self._source_subfolder, "lib"), "whateer.*")
     tools.replace_in_file(os.path.join(self._cmakelists_subfolder, "CMakeLists.txt"), "...", "")

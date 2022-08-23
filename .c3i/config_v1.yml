@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.47.0
+  version: 1.51.3
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -16,7 +16,13 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  check_runs:
+    - "Lint changed files (YAML files)"
+    - "Lint changed conanfile.py (v2 migration)"
 
+# Requirements to merge a given pull-request:
+# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+# * check_runs refers to notifications from GH actions
 status_checks:
   - "license/cla"
   - "continuous-integration/jenkins/pr-merge"
@@ -27,7 +33,7 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
-  conan_v2_run_export: false
+  conan_v2_run_export: true
   write_comments: true
   detailed_status_checks: true
   update_labels: true
@@ -153,7 +159,7 @@ node_labels:
   Windows:
     x86_64:
       "Visual Studio":
-        default: "windows20220608"
+        default: "windows20220803"
   Macos:
     x86_64:
       "apple-clang":

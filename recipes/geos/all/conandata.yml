@@ -1,44 +1,10 @@
 sources:
+  "3.11.0":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.0/geos-3.11.0.tar.bz2"
+    sha256: "79ab8cabf4aa8604d161557b52e3e4d84575acdc0d08cb09ab3f7aaefa4d858a"
   "3.10.3":
     url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.3.tar.gz"
     sha256: "5af5a7ba0cc1225e7301fdcd7818521d65eb77e2f06647168e1969276d800cc1"
   "3.10.2":
     url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.2.tar.gz"
     sha256: "d71932b444c9bd5d0bdf9eab4d22f25d9c31c122a73d619e2ec15294fb32147d"
-  "3.10.1":
-    url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.1.tar.gz"
-    sha256: "15180d727df60ea2e61ece6273feaa3b2a4554db0a447bf6923054df676c78c0"
-  "3.9.1":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.9.1.tar.gz"
-    sha256: "f1103d9efd2d563be93c85cc7342414f39610d3e97070ae119fcfc73a668141f"
-  "3.9.0":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.9.0.tar.gz"
-    sha256: "fd962c548d2aef6772bd1778d9bbf6a3ac362f78b14f042649722e8c7ae720c3"
-  "3.8.1":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.1.tar.gz"
-    sha256: "6753ea1d21d6711e7f653f9a327e6bbd803eb8f090a4b98c5a3d1012c2822206"
-  "3.8.0":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.0.tar.gz"
-    sha256: "90e2ea9db689f5ca8c0bd61e671ac47c749e85998a867b777c3ded8a6399a695"
-patches:
-  "3.10.3":
-    - patch_file: "patches/fix-cmake-3.10.2.patch"
-      base_path: "source_subfolder"
-  "3.10.2":
-    - patch_file: "patches/fix-cmake-3.10.2.patch"
-      base_path: "source_subfolder"
-  "3.10.1":
-    - patch_file: "patches/fix-cmake-3.10.1.patch"
-      base_path: "source_subfolder"
-  "3.9.1":
-    - patch_file: "patches/fix-cmake-3.9.1.patch"
-      base_path: "source_subfolder"
-  "3.9.0":
-    - patch_file: "patches/fix-cmake-3.9.0.patch"
-      base_path: "source_subfolder"
-  "3.8.1":
-    - patch_file: "patches/fix-cmake-3.8.1.patch"
-      base_path: "source_subfolder"
-  "3.8.0":
-    - patch_file: "patches/fix-cmake-3.8.0.patch"
-      base_path: "source_subfolder"

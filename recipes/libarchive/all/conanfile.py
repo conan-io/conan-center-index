@@ -91,17 +91,17 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.9.14")
         if self.options.with_expat:
             self.requires("expat/2.4.8")
         if self.options.with_iconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
             self.requires("pcre/8.45")
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1q")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -113,7 +113,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.1.0")
+            self.requires("mbedtls/3.2.1")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:

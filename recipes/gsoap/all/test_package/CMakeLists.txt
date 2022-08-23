@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
-project(gsoap_example CXX)
+project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(gsoap REQUIRED CONFIG)
 
-find_package(gsoap REQUIRED)
-
-add_executable(${PROJECT_NAME} 
-    example.cpp
+add_executable(${PROJECT_NAME}
+    test_package.cpp
     ${CMAKE_BINARY_DIR}/soapC.cpp
     ${CMAKE_BINARY_DIR}/soapcalcProxy.cpp
 )

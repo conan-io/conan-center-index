@@ -1,49 +1,22 @@
 versions:
   # 3.0.x releases
+  3.0.5:
+    folder: "3.x.x"
+  3.0.4:
+    folder: "3.x.x"
   3.0.3:
     folder: "3.x.x"
-  3.0.2:
-    folder: "3.x.x"
-  3.0.1:
-    folder: "3.x.x"
-  3.0.0:
-    folder: "3.x.x"
+
   # 1.1.1x releases
+  1.1.1q:
+    folder: "1.x.x"
+  1.1.1p:
+    folder: "1.x.x"
   1.1.1o:
-    folder: "1.x.x"
-  1.1.1n:
-    folder: "1.x.x"
-  1.1.1m:
-    folder: "1.x.x"
-  1.1.1l:
-    folder: "1.x.x"
-  1.1.1k:
-    folder: "1.x.x"
-  1.1.1j:
-    folder: "1.x.x"
-  1.1.1i:
-    folder: "1.x.x"
-  1.1.1h:
-    folder: "1.x.x"
-  1.1.1g:
-    folder: "1.x.x"
-  1.1.1f:
-    folder: "1.x.x"
-  1.1.1e:
-    folder: "1.x.x"
-  1.1.1d:
-    folder: "1.x.x"
-  1.1.1c:
     folder: "1.x.x"
   # 1.1.0x releases
   1.1.0l:
     folder: "1.x.x"
-  1.1.0k:
-    folder: "1.x.x"
   # 1.0.2x releases
   1.0.2u:
-    folder: "1.x.x"
-  1.0.2t:
-    folder: "1.x.x"
-  1.0.2s:
     folder: "1.x.x"

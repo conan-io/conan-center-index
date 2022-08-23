@@ -1,19 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, load, save
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.47.0"
 
 
 class Sqlite3Conan(ConanFile):
     name = "sqlite3"
     description = "Self-contained, serverless, in-process SQL database engine."
+    license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
     topics = ("sqlite", "database", "sql", "serverless")
-    license = "Unlicense"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -74,17 +77,11 @@ class Sqlite3Conan(ConanFile):
         "enable_dbpage_vtab": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = "CMakeLists.txt"
 
     @property
     def _has_enable_math_function_option(self):
-        return tools.Version(self.version) >= "3.35.0"
+        return Version(self.version) >= "3.35.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -95,73 +92,83 @@ class Sqlite3Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+           del self.settings.compiler.libcxx
+        except Exception:
+           pass
+        try:
+           del self.settings.compiler.cppstd
+        except Exception:
+           pass
 
     def validate(self):
-        if self.options.build_executable:
-            if not self.options.enable_default_vfs:
+        if self.info.options.build_executable:
+            if not self.info.options.enable_default_vfs:
                 # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
                 raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
-            if self.options.omit_load_extension:
+            if self.info.options.omit_load_extension:
                 raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SQLITE3_VERSION"] = self.version
-        self._cmake.definitions["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
-        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        self._cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
-        self._cmake.definitions["ENABLE_DBSTAT_VTAB"] = self.options.enable_dbstat_vtab
-        self._cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
-        self._cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
-        self._cmake.definitions["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
-        self._cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
-        self._cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
-        self._cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
-        self._cmake.definitions["ENABLE_PREUPDATE_HOOK"] = self.options.enable_preupdate_hook
-        self._cmake.definitions["ENABLE_SOUNDEX"] = self.options.enable_soundex
-        self._cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
-        self._cmake.definitions["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
-        self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
-        self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
-        self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        self._cmake.definitions["OMIT_DEPRECATED"] = self.options.omit_deprecated
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SQLITE3_VERSION"] = self.version
+        tc.variables["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
+        tc.variables["THREADSAFE"] = self.options.threadsafe
+        tc.variables["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
+        tc.variables["ENABLE_DBSTAT_VTAB"] = self.options.enable_dbstat_vtab
+        tc.variables["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
+        tc.variables["ENABLE_FTS3"] = self.options.enable_fts3
+        tc.variables["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
+        tc.variables["ENABLE_FTS4"] = self.options.enable_fts4
+        tc.variables["ENABLE_FTS5"] = self.options.enable_fts5
+        tc.variables["ENABLE_JSON1"] = self.options.enable_json1
+        tc.variables["ENABLE_PREUPDATE_HOOK"] = self.options.enable_preupdate_hook
+        tc.variables["ENABLE_SOUNDEX"] = self.options.enable_soundex
+        tc.variables["ENABLE_RTREE"] = self.options.enable_rtree
+        tc.variables["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
+        tc.variables["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
+        tc.variables["USE_ALLOCA"] = self.options.use_alloca
+        tc.variables["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        tc.variables["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:
-            self._cmake.definitions["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
-        self._cmake.definitions["HAVE_FDATASYNC"] = True
-        self._cmake.definitions["HAVE_GMTIME_R"] = True
-        self._cmake.definitions["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
-        self._cmake.definitions["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools.is_apple_os(self.settings.os))
-        self._cmake.definitions["HAVE_STRERROR_R"] = True
-        self._cmake.definitions["HAVE_USLEEP"] = True
-        self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
+            tc.variables["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
+        tc.variables["HAVE_FDATASYNC"] = True
+        tc.variables["HAVE_GMTIME_R"] = True
+        tc.variables["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
+        tc.variables["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools_legacy.is_apple_os(self.settings.os))
+        tc.variables["HAVE_STRERROR_R"] = True
+        tc.variables["HAVE_USLEEP"] = True
+        tc.variables["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
         if self.options.max_column:
-            self._cmake.definitions["MAX_COLUMN"] = self.options.max_column
+            tc.variables["MAX_COLUMN"] = self.options.max_column
         if self.options.max_variable_number:
-            self._cmake.definitions["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
+            tc.variables["MAX_VARIABLE_NUMBER"] = self.options.max_variable_number
         if self.options.max_blob_size:
-            self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
-        self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
-        self._cmake.definitions["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
-
-        self._cmake.configure()
-        return self._cmake
+            tc.variables["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        tc.variables["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
+        tc.variables["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
-    def package(self):
-        header = tools.load(os.path.join(self._source_subfolder, "sqlite3.h"))
+    def _extract_license(self):
+        header = load(self, os.path.join(self.source_folder, "sqlite3.h"))
         license_content = header[3:header.find("***", 1)]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
-        cmake = self._configure_cmake()
+        return license_content
+
+    def package(self):
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
         cmake.install()
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
@@ -170,8 +177,7 @@ class Sqlite3Conan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             if(DEFINED SQLite_INCLUDE_DIRS)
                 set(SQLite3_INCLUDE_DIRS ${SQLite_INCLUDE_DIRS})
@@ -180,7 +186,7 @@ class Sqlite3Conan(ConanFile):
                 set(SQLite3_LIBRARIES ${SQLite_LIBRARIES})
             endif()
         """)
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):

@@ -32,6 +32,8 @@ class WasmtimeCppConan(ConanFile):
         version = str(self.version)
         if version == "0.35.0":
             version = "0.35.1"
+        elif version == "0.39.0":
+            version = "0.39.1"
         self.requires(f"wasmtime/{version}")
 
     def package_id(self):
