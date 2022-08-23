@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -34,8 +34,6 @@ class UTConan(ConanFile):
             "apple-clang": "11" if Version(self.version) < "1.1.8" else "12",
             "clang": "9",
             "gcc": "9",
-            "msvc": "19",
-            "Visual Studio": "16",
         }
 
     def layout(self):
@@ -51,20 +49,20 @@ class UTConan(ConanFile):
         if Version(self.version) <= "1.1.8" and is_msvc(self):
             raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} "
-                             "compiler support.".format(
-                                 self.name, self.settings.compiler))
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires C++{} support. "
-                    "The current compiler {} {} does not support it.".format(
-                        self.name, self._minimum_cpp_standard,
-                        self.settings.compiler,
-                        self.settings.compiler.version))
+
+        check_min_vs(self, "192")
+
+        if not is_msvc(self):
+            min_version = self._minimum_compilers_version.get(
+                str(self.settings.compiler))
+            if not min_version:
+                self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} "
+                                 "compiler support.")
+            else:
+                if Version(self.settings.compiler.version) < min_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.name} requires C++{self._minimum_cpp_standard} support. "
+                        "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def config_options(self):
         if Version(self.version) <= "1.1.8":
