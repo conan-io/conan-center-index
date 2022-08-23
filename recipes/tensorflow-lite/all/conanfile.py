@@ -109,6 +109,8 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def build(self):
         files.apply_conandata_patches(self)
 
         # Shared build fails on Windows with
@@ -118,7 +120,6 @@ class TensorflowLiteConan(ConanFile):
         if Version(self.version) >= "2.9.1" and self.settings.os == "Windows" and self.options.shared:
             tools.patch(patch_file="patches/remove_simple_memory_arena_debug_dump.patch", base_path="src")
 
-    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
