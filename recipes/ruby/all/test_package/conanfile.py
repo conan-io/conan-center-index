@@ -1,6 +1,6 @@
 from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake
-from conans import tools
 import os
 
 class TestPackageConan(ConanFile):
@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             # test executable
             self.run("ruby --version", run_environment=True)
 
