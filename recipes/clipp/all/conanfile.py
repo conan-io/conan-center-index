@@ -2,7 +2,7 @@ import os
 from conan import ConanFile, tools
 
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 class ClippConan(ConanFile):
     name = "clipp"
