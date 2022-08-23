@@ -17,16 +17,38 @@ sources:
 patches:
   "246.16":
     - patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
+      patch_description: "fix build error with Linux headers >= 5.14 by removing a bundled copy of it"
+      patch_type: "backport"
+      patch_source: "https://github.com/systemd/systemd-stable/commit/06dea04b38ce506c1436cd4fef9bf9919a34f441"
     - patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
+      patch_description: "allow to build with meson >= 0.60.0 by fixing syntax error"
+      patch_type: "backport"
+      patch_source: "https://github.com/systemd/systemd-stable/commit/3d0666d9091dd097022f02fae79890b5746285c1"
     - patch_file: "patches/246.16/0003-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "247.11":
     - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "248.10":
     - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
+      patch_type: "conan"
     - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "249.12":
     - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
+      patch_type: "conan"
     - patch_file: "patches/249.12/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "251.4":
     - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
+      patch_type: "conan"
     - patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
