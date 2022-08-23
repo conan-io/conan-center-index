@@ -3,7 +3,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class OutPtrConan(ConanFile):
@@ -17,7 +17,7 @@ class OutPtrConan(ConanFile):
     no_copy_source = True
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
