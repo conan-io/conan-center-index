@@ -11,12 +11,15 @@ if hasattr(os, "add_dll_directory"):
 PY2 = (2, 0) <= sys.version_info < (3, 0)
 PY3 = (3, 0) <= sys.version_info < (4, 0)
 
+use_2to3 = True
 if PY2:
     subdir = "py2"
     from distutils.core import setup, Extension
 elif PY3:
     subdir = "py3"
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, __version__ as setuptools_versions
+    from conans import tools
+    use_2to3 = tools.Version(setuptools_versions) <= tools.Version("58.0.0")
 else:
     raise Exception
 
@@ -24,7 +27,7 @@ else:
 setup(
     name="test_package",
     version="1.0",
-    use_2to3=True,
+    use_2to3=use_2to3,
     ext_modules=[
         Extension("spam", [os.path.join(subdir, "test_module.c")]),
     ],
