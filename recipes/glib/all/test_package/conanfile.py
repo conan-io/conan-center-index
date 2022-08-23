@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake
 from conan.tools.gnu import PkgConfig
 from conan.tools.layout import cmake_layout
@@ -26,6 +26,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(cmd, env="conanrun")
+        if can_run(self):
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")

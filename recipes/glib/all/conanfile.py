@@ -5,14 +5,13 @@ import re
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, chdir, get, load, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, get, load, rename, replace_in_file, rm, rmdir, save
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans.tools import remove_files_by_mask
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.51.3"
 
 
 class GLibConan(ConanFile):
@@ -102,7 +101,7 @@ class GLibConan(ConanFile):
         self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -212,17 +211,18 @@ class GLibConan(ConanFile):
 
     def package(self):
         if Version(self.version) < "2.73.0":
-            self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
+            copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         else:
-            self.copy(pattern="LGPL-2.1-or-later.txt", dst="licenses", src=os.path.join(self.source_folder, "LICENSES"))
+            copy(self, "LGPL-2.1-or-later.txt", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         self._fix_library_names()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb_file)
-        remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
-        remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pc")
+        # for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+        #     os.unlink(pdb_file)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pc", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
