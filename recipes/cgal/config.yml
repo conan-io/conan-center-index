@@ -19,13 +19,5 @@ versions:
     folder: all
   "5.3":
     folder: all
-  "5.3.1":
-    folder: all
-  "5.3.2":
-    folder: all
-  "5.4":
-    folder: all
-  "5.4.1":
-    folder: all
   "5.5":
     folder: all
