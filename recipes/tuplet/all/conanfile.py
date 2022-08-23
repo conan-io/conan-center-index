@@ -33,7 +33,7 @@ class TupletConan(ConanFile):
         }
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
