@@ -4,6 +4,8 @@ from conan.tools import files
 from conan.tools import scm
 from conans import CMake
 
+required_conan_version = ">=1.50.0"
+
 class CgalConan(ConanFile):
     name = "cgal"
     license = "GPL-3.0-or-later", "LGPL-3.0-or-later"
