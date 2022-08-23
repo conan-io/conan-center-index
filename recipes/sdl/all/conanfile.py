@@ -423,7 +423,7 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("egl::egl")
             if self.options.libunwind:
                 self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
-        elif tools.is_apple_os(self.settings.os):
+        elif tools.is_apple_os(self.settings.os) and not self.options.shared:
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",
                 "AVFoundation", "Foundation", "QuartzCore",
