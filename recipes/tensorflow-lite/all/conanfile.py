@@ -7,7 +7,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class TensorflowLiteConan(ConanFile):
