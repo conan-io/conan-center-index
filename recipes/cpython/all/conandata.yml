@@ -1,4 +1,7 @@
 sources:
+  "3.10.4":
+      url: "https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz"
+      sha256: "f3bcc65b1d5f1dc78675c746c98fcee823c038168fc629c5935b044d0911ad28"
   "3.10.0":
     url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"
     sha256: "c4e0cbad57c90690cb813fb4663ef670b4d0f587d8171e2c42bd4c9245bd2758"
@@ -15,6 +18,17 @@ sources:
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
 patches:
+  "3.10.4":
+    - patch_file: "patches/3.10.0-0001-msvc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.9.7-0002-_msi-vcxproj.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.10.0-0003-_ctypes-ffi.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.10.4-0005-disable-macos-tcltk.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+      base_path: "source_subfolder"
   "3.10.0":
     - patch_file: "patches/3.10.0-0001-msvc.patch"
       base_path: "source_subfolder"

@@ -1,0 +1,13 @@
+--- setup.py
++++ setup.py
+@@ -2109,8 +2109,8 @@
+         # Rather than complicate the code below, detecting and building
+         # AquaTk is a separate method. Only one Tkinter will be built on
+         # Darwin - either AquaTk, if it is found, or X11 based Tk.
+-        if (MACOS and self.detect_tkinter_darwin()):
+-            return True
++        # if (MACOS and self.detect_tkinter_darwin()):
++        #     return True
+
+         # Assume we haven't found any of the libraries or include files
+         # The versions with dots are used on Unix, and the versions without
