@@ -38,7 +38,7 @@ class UvmSystemC(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows build not yet supported")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
