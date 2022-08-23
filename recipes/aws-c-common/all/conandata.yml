@@ -50,4 +50,3 @@ sources:
 patches:
   "0.4.25":
     - patch_file: "patches/0001-disable-fPIC.patch"
-      base_path: "source_subfolder"
