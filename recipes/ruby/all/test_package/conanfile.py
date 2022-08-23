@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def build(self):
-
         cmake = CMake(self)
         # when --static-linked-ext is used, ruby defines EXTSTATIC as 1
         # But when ruby itself is static there's nothing, so:

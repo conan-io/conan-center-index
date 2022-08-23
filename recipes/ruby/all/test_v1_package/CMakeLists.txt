@@ -4,7 +4,7 @@ project(test_package LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(Ruby REQUIRED)
+find_package(Ruby REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 set_target_properties(${PROJECT_NAME}
