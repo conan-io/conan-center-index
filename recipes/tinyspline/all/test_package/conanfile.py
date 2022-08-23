@@ -28,6 +28,9 @@ class TestPackageConan(ConanFile):
         if not cross_building(self):
             bin_c_path = os.path.join(self.cpp.build.bindirs[0], "test_package_c")
             self.run(bin_c_path, run_environment=True)
-            if self.dependencies["tinyspline"].options.cxx:
-                bin_cpp_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
+
+            # TODO: rely on self.dependencies["tinyspline"].options.cxx in CONAN_V2 mode
+            # see https://github.com/conan-io/conan/issues/11940#issuecomment-1223940786
+            bin_cpp_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
+            if os.path.exists(bin_cpp_path):
                 self.run(bin_cpp_path, run_environment=True)
