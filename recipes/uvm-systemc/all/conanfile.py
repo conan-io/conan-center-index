@@ -21,6 +21,7 @@ class UvmSystemC(ConanFile):
     }
     default_options = {
         "fPIC": True,
+        "shared": False,
     }
 
     @property
