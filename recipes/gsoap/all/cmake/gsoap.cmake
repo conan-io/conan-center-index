@@ -14,16 +14,15 @@ set(SRCS_GSOAP_C
 set_source_files_properties(${SRCS_GSOAP_C} PROPERTIES LANGUAGE C)
 add_library(gsoap ${SRCS_GSOAP_C} ${GSOAP_PATH}/gsoap/stdsoap2.h)
 set_target_properties(gsoap PROPERTIES
-    COMPILE_PDB_OUTPUT_DIRECTORY bin
-    PDB_OUTPUT_DIRECTORY bin
     PUBLIC_HEADER ${GSOAP_PATH}/gsoap/stdsoap2.h
+    DEFINE_SYMBOL "SOAP_STD_EXPORTS"
     LINKER_LANGUAGE C
     )
 install(TARGETS gsoap
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            PUBLIC_HEADER DESTINATION include
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
             )
 
 
@@ -35,16 +34,15 @@ set(SRCS_GSOAP_CXX
 set_source_files_properties(${SRCS_GSOAP_CXX} PROPERTIES LANGUAGE CXX)
 add_library(gsoap++ ${SRCS_GSOAP_CXX} ${GSOAP_PATH}/gsoap/stdsoap2.h)
 set_target_properties(gsoap++ PROPERTIES
-    COMPILE_PDB_OUTPUT_DIRECTORY bin
-    PDB_OUTPUT_DIRECTORY bin
     PUBLIC_HEADER ${GSOAP_PATH}/gsoap/stdsoap2.h
+    DEFINE_SYMBOL "SOAP_STD_EXPORTS"
     LINKER_LANGUAGE CXX
     )
 install(TARGETS gsoap++
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            PUBLIC_HEADER DESTINATION include
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
             )
 
 # Add SSL if requested
