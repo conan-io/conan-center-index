@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conans import tools, AutoToolsBuildEnvironment
-from conan.tools.files import get
-from conan.tools.files import rmdir
-from conan.tools.files import rm
+from conan.tools.files import get, rmdir, rm, copy, rename
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
