@@ -207,7 +207,7 @@ class PdalConan(ConanFile):
             set(PDAL_VERSION_MINOR {pdal_version.minor})
             set(PDAL_VERSION_PATCH {pdal_version.patch})
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_vars_file(self):
@@ -223,7 +223,7 @@ class PdalConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_target_file(self):

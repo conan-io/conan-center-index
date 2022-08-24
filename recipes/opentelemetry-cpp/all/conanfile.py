@@ -74,7 +74,7 @@ class OpenTelemetryCppConan(ConanFile):
                                                ${opentelemetry-cpp_INCLUDE_DIRS_DEBUG})
             set(OPENTELEMETRY_CPP_LIBRARIES opentelemetry-cpp::opentelemetry-cpp)
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _source_subfolder(self):

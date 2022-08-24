@@ -758,12 +758,12 @@ class QtConan(ConanFile):
                 with tools.environment_append(build_env):
 
                     if tools.os_info.is_macos:
-                        tools.save(".qmake.stash" , "")
-                        tools.save(".qmake.super" , "")
+                        tools.files.save(self, ".qmake.stash" , "")
+                        tools.files.save(self, ".qmake.super" , "")
 
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                     if tools.os_info.is_macos:
-                        tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                        tools.files.save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
                         "BASH_ENV": os.path.abspath("bash_env")
                     }) if tools.os_info.is_macos else tools.no_op():
@@ -779,7 +779,7 @@ class QtConan(ConanFile):
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
-        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
+        tools.files.save(self, os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
 Prefix = ..
 ArchData = bin/archdatadir
 HostData = bin/archdatadir
@@ -869,7 +869,7 @@ Examples = bin/datadir/examples""")
             endif()
             """ % v.major)
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
-        tools.save(os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
+        tools.files.save(self, os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
             if "Core" not in dependencies:
@@ -890,7 +890,7 @@ Examples = bin/datadir/examples""")
                 )
             endif()""".format(module, self.version, dependencies_string))
 
-            tools.save(os.path.join(self.package_folder, self._cmake_qt5_private_file(module)), contents)
+            tools.files.save(self, os.path.join(self.package_folder, self._cmake_qt5_private_file(module)), contents)
 
         _create_private_module("Core")
 

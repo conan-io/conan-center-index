@@ -28,7 +28,7 @@ class GlmConan(ConanFile):
     def package(self):
         glm_version = self.version if self.version.startswith("cci") else tools.Version(self._get_semver())
         if glm_version == "0.9.8" or (glm_version == "0.9.9" and self._get_tweak_number() < 6):
-            tools.save(os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
+            tools.files.save(self, os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
         else:
             self.copy("copying.txt", dst="licenses", src=self._source_subfolder)
         headers_src_dir = os.path.join(self.source_folder, self._source_subfolder, "glm")

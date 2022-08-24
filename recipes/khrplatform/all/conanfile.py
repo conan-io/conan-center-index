@@ -24,7 +24,7 @@ class KhrplatformConan(ConanFile):
         end = license_data.find("*/")
         license_data = license_data[begin:end]
         license_data = license_data.replace("**", "")
-        tools.save("LICENSE", license_data)
+        tools.files.save(self, "LICENSE", license_data)
         self.copy("LICENSE", dst="licenses")
 
     def package_id(self):

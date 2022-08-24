@@ -117,7 +117,7 @@ class BdwGcConan(ConanFile):
         return readme_md[index+len(copyright_header):]
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "COPYRIGHT"), self._extract_copyright())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "COPYRIGHT"), self._extract_copyright())
         cmake = self._configure_cmake()
         cmake.install()
 

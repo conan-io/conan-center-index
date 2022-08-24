@@ -68,7 +68,7 @@ class BtyaccConan(ConanFile):
               set(BTYACC_EXECUTABLE "${BTYACC_EXECUTABLE}.exe")
             endif()
         """)
-        tools.save(variables, content)
+        tools.files.save(self, variables, content)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")

@@ -294,7 +294,7 @@ class LibcurlConan(ConanFile):
                 # used only for native mingw-make
                 if not cross_building(self):
                     added_content = tools.files.load(self, "lib_Makefile_add.am")
-                    tools.save(lib_makefile, added_content, append=True)
+                    tools.files.save(self, lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
         if not self._is_using_cmake_build:

@@ -124,7 +124,7 @@ class PDCursesConan(ConanFile):
         return match.group(1).strip() + "\n"
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
         if self.settings.os == "Windows":
             self.copy(pattern="curses.h", src=self._source_subfolder, dst="include")

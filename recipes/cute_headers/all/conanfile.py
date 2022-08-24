@@ -33,7 +33,7 @@ class CuteHeadersConan(ConanFile):
             src=self._source_subfolder,
             excludes=("examples_cute_*", "test_cute_*")
         )
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
 
     def package_id(self):
         self.info.header_only()

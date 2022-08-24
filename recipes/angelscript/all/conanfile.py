@@ -76,7 +76,7 @@ class AngelScriptConan(ConanFile):
 
     def _extract_license(self):
         header = tools.files.load(self, os.path.join(self._source_subfolder, "angelscript", "include", "angelscript.h"))
-        tools.save("LICENSE", header[header.find("/*", 1) + 3 : header.find("*/", 1)])
+        tools.files.save(self, "LICENSE", header[header.find("/*", 1) + 3 : header.find("*/", 1)])
 
     def package(self):
         self._extract_license()

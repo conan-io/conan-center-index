@@ -68,7 +68,7 @@ class SdlttfConan(ConanFile):
             tools.files.patch(self, **patch)
 
         # missing from distribution (only in 2.0.15?)
-        tools.save(os.path.join(self._source_subfolder, "SDL2_ttfConfig.cmake"), "")
+        tools.files.save(self, os.path.join(self._source_subfolder, "SDL2_ttfConfig.cmake"), "")
 
     def _configure_cmake(self):
         if self._cmake:

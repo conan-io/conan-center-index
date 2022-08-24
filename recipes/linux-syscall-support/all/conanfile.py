@@ -29,7 +29,7 @@ class LinuxSyscallSupportConan(ConanFile):
         license_content = []
         for i in range(0, 29):
             license_content.append(content_lines[i][3:-1])
-        tools.save("LICENSE", "\n".join(license_content))
+        tools.files.save(self, "LICENSE", "\n".join(license_content))
 
     def package(self):
         self.copy(pattern="linux_syscall_support.h", dst="include")

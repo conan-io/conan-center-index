@@ -102,7 +102,7 @@ class LibgeotiffConan(ConanFile):
                 set(GEOTIFF_LIBRARIES ${GeoTIFF_LIBRARIES})
             endif()
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -114,7 +114,7 @@ class LibgeotiffConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_subfolder(self):

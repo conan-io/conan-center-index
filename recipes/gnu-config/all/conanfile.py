@@ -41,7 +41,7 @@ class GnuConfigConan(ConanFile):
         return "\n".join(txt_lines[start_index:end_index])
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "COPYING"), self._extract_license())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "COPYING"), self._extract_license())
         self.copy("config.guess", src=self._source_subfolder, dst="bin")
         self.copy("config.sub", src=self._source_subfolder, dst="bin")
 

@@ -176,7 +176,7 @@ class XZUtils(ConanFile):
             set(LIBLZMA_VERSION_PATCH {patch})
             set(LIBLZMA_VERSION_STRING "{major}.{minor}.{patch}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):

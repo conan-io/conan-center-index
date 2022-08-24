@@ -87,7 +87,7 @@ class PugiXmlConan(ConanFile):
     def package(self):
         readme_contents = tools.files.load(self, os.path.join(self._source_subfolder, "readme.txt"))
         license_contents = readme_contents[readme_contents.find("This library is"):]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
         if self.options.header_only:
             source_dir = os.path.join(self._source_subfolder, "src")
             self.copy(pattern="*", dst="include", src=source_dir)

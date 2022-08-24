@@ -118,7 +118,7 @@ class IgnitionMathConan(ConanFile):
             set(ignition-math{major}_VERSION_STRING "{major}.{minor}.{patch}")
             set(ignition-math{major}_INCLUDE_DIRS "${{CMAKE_CURRENT_LIST_DIR}}/../../include/ignition/math{major}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
 
     def package_info(self):

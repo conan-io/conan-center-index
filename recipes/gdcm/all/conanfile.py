@@ -150,7 +150,7 @@ class GDCMConan(ConanFile):
                    v_patch=v.patch,
                    build_shared_libs="ON" if self.options.shared else "OFF",
                    gdcm_subdir=self._gdcm_subdir))
-        tools.save(variables_file, content)
+        tools.files.save(self, variables_file, content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -162,7 +162,7 @@ class GDCMConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _gdcm_subdir(self):

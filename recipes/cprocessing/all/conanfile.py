@@ -71,7 +71,7 @@ class CProcessingConan(ConanFile):
         # Extract the License/s from README.md to a file
         tmp = tools.files.load(self, os.path.join(self._source_subfolder, "README.md"))
         license_contents = re.search("(## Author.*)", tmp, re.DOTALL)[1]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE.md"), license_contents)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE.md"), license_contents)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CProcessing")

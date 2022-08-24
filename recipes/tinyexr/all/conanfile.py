@@ -68,7 +68,7 @@ class TinyExrConan(ConanFile):
             tools.files.patch(self, **patch)
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
         self.copy("tinyexr.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):

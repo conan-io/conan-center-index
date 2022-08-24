@@ -89,7 +89,7 @@ class FtjamConan(ConanFile):
     def package(self):
         txt = tools.files.load(self, os.path.join(self._source_subfolder, "jam.c"))
         license_txt = txt[:txt.find("*/")+3]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_txt)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_txt)
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 pass

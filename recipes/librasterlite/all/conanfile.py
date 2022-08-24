@@ -80,7 +80,7 @@ class LibrasterliteConan(ConanFile):
         if self.options.shared:
             optflags.append("-DDLL_EXPORT")
         with tools.chdir(self._source_subfolder):
-            tools.save(os.path.join("headers", "config.h"), "#define VERSION \"{}\"\n".format(self.version))
+            tools.files.save(self, os.path.join("headers", "config.h"), "#define VERSION \"{}\"\n".format(self.version))
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     self.run("nmake -f makefile.vc {} OPTFLAGS=\"{}\" SYSTEM_LIBS=\"{}\"".format(target,

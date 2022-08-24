@@ -130,7 +130,7 @@ class Bullet3Conan(ConanFile):
             set(BULLET_ROOT_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../..")
             set(BULLET_VERSION_STRING {self.version})
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_subfolder(self):

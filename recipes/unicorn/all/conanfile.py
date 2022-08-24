@@ -112,7 +112,7 @@ class UnicornConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self._needs_jwasm:
-            tools.save(self._jwasm_wrapper, textwrap.dedent("""\
+            tools.files.save(self, self._jwasm_wrapper, textwrap.dedent("""\
                 #!/usr/bin/env python
                 import os
                 import sys

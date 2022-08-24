@@ -191,7 +191,7 @@ class MicroprofileConan(ConanFile):
                 defines_list.append("#define {} {}\n".format(define[0], define[1]))
             else:
                 defines_list.append("#define {}\n".format(define))
-        tools.save(filename, "".join(defines_list))
+        tools.files.save(self, filename, "".join(defines_list))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

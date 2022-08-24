@@ -177,7 +177,7 @@ class LibUSBCompatConan(ConanFile):
         if self.settings.os == "Windows":
             cmakelists_in = tools.files.load(self, "CMakeLists.txt.in")
             sources, headers = self._extract_autotools_variables()
-            tools.save(os.path.join(self._source_subfolder, "libusb", "CMakeLists.txt"), cmakelists_in.format(
+            tools.files.save(self, os.path.join(self._source_subfolder, "libusb", "CMakeLists.txt"), cmakelists_in.format(
                 libusb_sources=" ".join(sources),
                 libusb_headers=" ".join(headers),
             ))

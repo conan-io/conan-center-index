@@ -96,7 +96,7 @@ class CharlsConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)

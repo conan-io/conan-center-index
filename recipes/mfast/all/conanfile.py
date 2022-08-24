@@ -160,7 +160,7 @@ class mFASTConan(ConanFile):
             begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
             end = config_file_content.find("endmacro()", begin) + len("endmacro()")
             macro_str = config_file_content[begin:end]
-            tools.save(os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
+            tools.files.save(self, os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
         else:
             shutil.move(
                 os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
@@ -187,7 +187,7 @@ class mFASTConan(ConanFile):
         module_abs_path = os.path.join(self.package_folder, self._fast_type_gen_target_file)
         old_content = tools.files.load(self, module_abs_path)
         new_content = exec_target_content + old_content
-        tools.save(module_abs_path, new_content)
+        tools.files.save(self, module_abs_path, new_content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -199,7 +199,7 @@ class mFASTConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _lib_targets_module_file(self):

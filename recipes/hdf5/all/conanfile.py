@@ -195,7 +195,7 @@ class Hdf5Conan(ConanFile):
                 endif()
             """)
         content += textwrap.dedent("set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF"))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):

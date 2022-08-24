@@ -107,7 +107,7 @@ class OneTBBConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
 
         if str(self._base_compiler) in ["Visual Studio", "msvc"]:
-            tools.save(
+            tools.files.save(self, 
                 os.path.join(self._source_subfolder, "build", "big_iron_msvc.inc"),
                 # copy of big_iron.inc adapted for MSVC
                 textwrap.dedent("""\

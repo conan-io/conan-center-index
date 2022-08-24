@@ -120,7 +120,7 @@ class Nghttp2Conan(ConanFile):
             tools.files.patch(self, **patch)
         if not self.options.shared:
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
-            tools.save(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+            tools.files.save(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
                        "target_include_directories(nghttp2_static INTERFACE\n"
                        "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
                        "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n",

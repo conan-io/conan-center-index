@@ -83,7 +83,7 @@ class IosCMakeConan(ConanFile):
 
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder, keep_path=False)
         # satisfy KB-H014 (header_only recipes require headers)
-        tools.save(os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
+        tools.files.save(self, os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
     def package_info(self):
         if self.settings.os == "Macos":

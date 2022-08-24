@@ -26,11 +26,11 @@ class MesonInstallerConan(ConanFile):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # create wrapper scripts
-        tools.save(os.path.join(self._source_subfolder, "meson.cmd"), textwrap.dedent("""\
+        tools.files.save(self, os.path.join(self._source_subfolder, "meson.cmd"), textwrap.dedent("""\
             @echo off
             CALL python %~dp0/meson.py %*
         """))
-        tools.save(os.path.join(self._source_subfolder, "meson"), textwrap.dedent("""\
+        tools.files.save(self, os.path.join(self._source_subfolder, "meson"), textwrap.dedent("""\
             #!/usr/bin/env bash
             meson_dir=$(dirname "$0")
             exec "$meson_dir/meson.py" "$@"

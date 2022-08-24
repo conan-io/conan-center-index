@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.build_folder, "input.m4")
 
     def build(self):
-        tools.save(self._m4_input_path, textwrap.dedent("""\
+        tools.files.save(self, self._m4_input_path, textwrap.dedent("""\
             m4_define(NAME1, `Harry, Jr.')
             m4_define(NAME2, `Sally')
             m4_define(MET, `$1 met $2')

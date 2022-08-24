@@ -172,7 +172,7 @@ class FreetypeConan(ConanFile):
         cmake.install()
 
         libtool_version = self._extract_libtool_version()
-        tools.save(self._libtool_version_txt, libtool_version)
+        tools.files.save(self, self._libtool_version_txt, libtool_version)
         self._make_freetype_config(libtool_version)
 
         self.copy("FTL.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
@@ -205,7 +205,7 @@ class FreetypeConan(ConanFile):
                 set(FREETYPE_VERSION_STRING ${Freetype_VERSION})
             endif()
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -217,7 +217,7 @@ class FreetypeConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_subfolder(self):

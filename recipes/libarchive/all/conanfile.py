@@ -192,11 +192,11 @@ class LibarchiveConan(ConanFile):
 
         # Exclude static/shared targets from build
         if self.options.shared:
-            tools.save(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
+            tools.files.save(self, os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
                        "set_target_properties(archive_static PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
                        append=True)
         else:
-            tools.save(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
+            tools.files.save(self, os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
                        "set_target_properties(archive PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
                        append=True)
 

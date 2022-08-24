@@ -66,7 +66,7 @@ class LibsassConan(ConanFile):
 
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
-            tools.save(path="VERSION", content="%s" % self.version)
+            tools.files.save(self, path="VERSION", content="%s" % self.version)
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
             autotools = self._configure_autotools()
             autotools.make()

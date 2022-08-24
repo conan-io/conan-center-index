@@ -63,7 +63,7 @@ class RgEtc1Conan(ConanFile):
         license_content = []
         for i in range(52, 75):
             license_content.append(content_lines[i][2:-1])
-        tools.save("LICENSE", "\n".join(license_content))
+        tools.files.save(self, "LICENSE", "\n".join(license_content))
 
     def package(self):
         cmake = self._configure_cmake()

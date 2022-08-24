@@ -48,7 +48,7 @@ class GFortranConan(ConanFile):
     def _extract_license(self):
         info = tools.files.load(self, os.path.join(self.source_folder, "source_subfolder_Linux", "share", "info", "gfortran.info"))
         license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
-        tools.save("LICENSE", license_contents)
+        tools.files.save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()

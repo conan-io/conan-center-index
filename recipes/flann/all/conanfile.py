@@ -81,7 +81,7 @@ class FlannConan(ConanFile):
 
         # Workaround issue with empty sources for a CMake target
         flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
-        tools.save(os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
+        tools.files.save(self, os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
 
         tools.replace_in_file(
             os.path.join(flann_cpp_dir, "CMakeLists.txt"),

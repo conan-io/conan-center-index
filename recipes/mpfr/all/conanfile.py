@@ -142,13 +142,13 @@ class MpfrConan(ConanFile):
                                        "-lgmp", "-lmpir")
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "mpfr.h"),
                                        "<gmp.h>", "<mpir.h>")
-            tools.save("gmp.h", "#pragma once\n#include <mpir.h>\n")
+            tools.files.save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
         with self._build_context():
             autotools = self._configure_autotools()
         if self.settings.os == "Windows":
             cmakelists_in = tools.files.load(self, "CMakeLists.txt.in")
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
-            tools.save(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), cmakelists_in.format(
+            tools.files.save(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), cmakelists_in.format(
                 mpfr_sources=" ".join(sources),
                 mpfr_headers=" ".join(headers),
                 definitions=" ".join(definitions),

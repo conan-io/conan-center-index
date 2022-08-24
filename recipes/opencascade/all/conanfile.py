@@ -396,7 +396,7 @@ class OpenCascadeConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _cmake_module_file_rel_path(self):
@@ -469,7 +469,7 @@ class OpenCascadeConan(ConanFile):
         return modules
 
     def _create_modules_json_file(self, modules):
-        tools.save(self._modules_helper_filepath, json.dumps(modules, indent=4))
+        tools.files.save(self, self._modules_helper_filepath, json.dumps(modules, indent=4))
 
     @property
     def _modules_helper_filepath(self):

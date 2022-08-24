@@ -72,7 +72,7 @@ class SasscConan(ConanFile):
                 self._build_msbuild()
             else:
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
-                tools.save(path="VERSION", content="%s" % self.version)
+                tools.files.save(self, path="VERSION", content="%s" % self.version)
                 autotools = self._configure_autotools()
                 autotools.make()
 

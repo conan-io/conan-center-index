@@ -12,6 +12,6 @@ class DefaultNameConan(ConanFile):
         if tools.cross_building(self.settings):
             return
         tools.mkdir("libs")
-        tools.save("Jamroot", "")
+        tools.files.save(self, "Jamroot", "")
         with tools.environment_append({"BOOST_ROOT": self.build_folder}):
             self.run("boostdep --list-modules", run_environment=True)

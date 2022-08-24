@@ -23,9 +23,9 @@ class MattiasgustavssonLibsConan(ConanFile):
     def _extract_licenses(self):
         header = tools.files.load(self, os.path.join(self._source_subfolder, "thread.h"))
         mit_content = header[header.find("ALTERNATIVE A - "):header.find("ALTERNATIVE B -")]
-        tools.save("LICENSE_MIT", mit_content)
+        tools.files.save(self, "LICENSE_MIT", mit_content)
         unlicense_content = header[header.find("ALTERNATIVE B - "):header.rfind("*/", 1)]
-        tools.save("LICENSE_UNLICENSE", unlicense_content)
+        tools.files.save(self, "LICENSE_UNLICENSE", unlicense_content)
 
     def package(self):
         self.copy(pattern="*.h", dst="include", src=self._source_subfolder)

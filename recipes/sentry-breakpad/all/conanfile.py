@@ -93,7 +93,7 @@ class SentryBreakpadConan(ConanFile):
                 "#include <linux_syscall_support.h>"
             )
 
-        tools.save(os.path.join(self._source_subfolder, "external", "CMakeLists.txt"),
+        tools.files.save(self, os.path.join(self._source_subfolder, "external", "CMakeLists.txt"),
                    textwrap.dedent("""\
                     install(TARGETS breakpad_client
                         ARCHIVE DESTINATION lib

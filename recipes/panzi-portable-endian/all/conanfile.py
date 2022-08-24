@@ -22,7 +22,7 @@ class PanziPortableEndian(ConanFile):
         header = tools.files.load(self, os.path.join(
             self._source_subfolder, "portable_endian.h"))
         license_contents = header[0:(header.find("#ifndef", 1))]
-        tools.save("LICENSE", license_contents)
+        tools.files.save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()

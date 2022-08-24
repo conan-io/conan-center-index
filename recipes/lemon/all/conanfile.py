@@ -48,7 +48,7 @@ class LemonConan(ConanFile):
         return "\n".join(line.strip(" \n*") for line in header[3:header.find("*******", 1)].splitlines())
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license_text())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license_text())
         cmake = self._configure_cmake()
         cmake.install()
 

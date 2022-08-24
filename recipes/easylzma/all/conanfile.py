@@ -54,7 +54,7 @@ class EazylzmaConan(ConanFile):
         cmake.build(target=self._libname)
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
         self.copy(pattern="*.dylib*", dst="lib", src="lib", keep_path=False, symlinks=True)
         self.copy(pattern="*.so*", dst="lib", src="lib", keep_path=False, symlinks=True)

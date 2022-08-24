@@ -121,7 +121,7 @@ class LibdrmConan(ConanFile):
         # Extract the License/s from the header to a file
         tmp = tools.files.load(self, os.path.join(self._source_subfolder, "include", "drm", "drm.h"))
         license_contents = re.search("\*\/.*(\/\*(\*(?!\/)|[^*])*\*\/)", tmp, re.DOTALL)[1]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]

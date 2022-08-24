@@ -54,7 +54,7 @@ class SerfConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         pc_in = os.path.join(self._source_subfolder, "build", "serf.pc.in")
-        tools.save(pc_in, tools.files.load(self, pc_in))
+        tools.files.save(self, pc_in, tools.files.load(self, pc_in))
 
     @property
     def _cc(self):

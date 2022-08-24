@@ -64,7 +64,7 @@ class IqaConan(ConanFile):
         license_content = []
         for i in range(1, 31):
             license_content.append(content_lines[i][3:-1])
-        tools.save("LICENSE", "\n".join(license_content))
+        tools.files.save(self, "LICENSE", "\n".join(license_content))
 
     def package(self):
         cmake = self._configure_cmake()

@@ -57,7 +57,7 @@ class Argtable3Conan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # The initial space is important (the cmake script does OFFSET 0)
-        tools.save(os.path.join(self._source_subfolder, "version.tag"), " {}.0\n".format(self.version))
+        tools.files.save(self, os.path.join(self._source_subfolder, "version.tag"), " {}.0\n".format(self.version))
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -80,7 +80,7 @@ class Argtable3Conan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")

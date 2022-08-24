@@ -46,8 +46,8 @@ class CgltfConan(ConanFile):
             "#define CGLTF_WRITE_IMPLEMENTATION\n"
             "#include \"cgltf_write.h\"\n"
         )
-        tools.save(os.path.join(self.build_folder, self._source_subfolder, "cgltf.c"), cgltf_c)
-        tools.save(os.path.join(self.build_folder, self._source_subfolder, "cgltf_write.c"), cgltf_write_c)
+        tools.files.save(self, os.path.join(self.build_folder, self._source_subfolder, "cgltf.c"), cgltf_c)
+        tools.files.save(self, os.path.join(self.build_folder, self._source_subfolder, "cgltf_write.c"), cgltf_write_c)
 
     def _configure_cmake(self):
         if self._cmake:

@@ -48,7 +48,7 @@ class SConsConan(ConanFile):
             shutil.copytree(os.path.join(self._source_subfolder, "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
 
-        tools.save(self._scons_sh, textwrap.dedent("""\
+        tools.files.save(self, self._scons_sh, textwrap.dedent("""\
             #!/bin/sh
 
             realpath() (
@@ -70,7 +70,7 @@ class SConsConan(ConanFile):
             exec ${PYTHON:-python3} "$currentdir/../res/SCons/__main__.py" "$@"
         """))
         self._chmod_x(self._scons_sh)
-        tools.save(self._scons_cmd, textwrap.dedent(r"""
+        tools.files.save(self, self._scons_cmd, textwrap.dedent(r"""
             @echo off
             set currentdir=%~dp0
             if not defined PYTHON (
@@ -83,7 +83,7 @@ class SConsConan(ConanFile):
         # Mislead CI and create an empty header in the include directory
         include_dir = os.path.join(self.package_folder, "include")
         os.mkdir(include_dir)
-        tools.save(os.path.join(include_dir, "__nop.h"), "")
+        tools.files.save(self, os.path.join(include_dir, "__nop.h"), "")
 
     def package_info(self):
         self.cpp_info.includedirs = []

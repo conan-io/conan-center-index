@@ -526,7 +526,7 @@ class OpenSSLConan(ConanFile):
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
 
-        tools.save(os.path.join(self._source_subfolder, "Configurations", "20-conan.conf"), config)
+        tools.files.save(self, os.path.join(self._source_subfolder, "Configurations", "20-conan.conf"), config)
 
     def _run_make(self, targets=None, makefile=None, parallel=True):
         command = [self._make_program]
@@ -556,7 +556,7 @@ class OpenSSLConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
-                tools.save("ossl_static.pdb", "")
+                tools.files.save(self, "ossl_static.pdb", "")
             args = " ".join(self._configure_args)
 
             if self._use_nmake:
@@ -700,7 +700,7 @@ class OpenSSLConan(ConanFile):
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
         """)
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     @property
     def _module_subfolder(self):

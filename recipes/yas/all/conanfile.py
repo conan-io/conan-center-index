@@ -27,7 +27,7 @@ class YasConan(ConanFile):
             "include", "yas", "binary_oarchive.hpp"))
         license_contents = header[:header.find("#")] \
             .replace("//", "").replace("\n ", "\n").lstrip()
-        tools.save("LICENSE", license_contents)
+        tools.files.save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()

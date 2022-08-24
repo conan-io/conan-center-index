@@ -76,7 +76,7 @@ class MinizipConan(ConanFile):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
             tmp = tools.files.load(self, "zlib.h")
             license_contents = tmp[2:tmp.find("*/", 1)]
-            tools.save("LICENSE", license_contents)
+            tools.files.save(self, "LICENSE", license_contents)
 
     def package(self):
         self._extract_license()

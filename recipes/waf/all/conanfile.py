@@ -34,7 +34,7 @@ class WafConan(ConanFile):
         os.mkdir(binpath)
         os.mkdir(libpath)
 
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
         self.copy("waf", src=self._source_subfolder, dst=binpath)
         self.copy("waf-light", src=self._source_subfolder, dst=binpath)

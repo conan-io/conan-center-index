@@ -79,7 +79,7 @@ class QrCodeGeneratorConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"),
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
                    self._extract_license())
 
     def package_info(self):

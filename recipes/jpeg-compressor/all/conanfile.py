@@ -74,7 +74,7 @@ class JpegCompressorConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self._extract_license()
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENCE.txt"), self._extract_license())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENCE.txt"), self._extract_license())
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

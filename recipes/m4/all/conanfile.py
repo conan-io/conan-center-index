@@ -95,7 +95,7 @@ class M4Conan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            tools.save("help2man", '#!/usr/bin/env bash\n:')
+            tools.files.save(self, "help2man", '#!/usr/bin/env bash\n:')
             if os.name == 'posix':
                 os.chmod("help2man", os.stat("help2man").st_mode | 0o111)
         self._patch_sources()

@@ -203,7 +203,7 @@ class NCursesConan(ConanFile):
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file):
-        tools.save(module_file, textwrap.dedent("""\
+        tools.files.save(self, module_file, textwrap.dedent("""\
             set(CURSES_FOUND ON)
             set(CURSES_INCLUDE_DIRS ${ncurses_libcurses_INCLUDE_DIRS})
             set(CURSES_LIBRARIES ${ncurses_libcurses_LINK_LIBS})

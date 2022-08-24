@@ -35,7 +35,7 @@ class GetoptForVisualStudio(ConanFile):
         return "\n".join(list(l.strip() for l in content[content.find("/**", 3):content.find("#pragma")].split("\n")))
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
         self.copy("getopt.h", src=self._source_subfolder, dst="include")
 
     def package_id(self):

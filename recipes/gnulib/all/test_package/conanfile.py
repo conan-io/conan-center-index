@@ -41,7 +41,7 @@ class TestPackageConan(ConanFile):
             shutil.copy(os.path.join(self.source_folder, src), dst=os.path.join(self.build_folder, src))
         with tools.chdir(self.build_folder):
             for fn in ("COPYING", "NEWS", "INSTALL", "README", "AUTHORS", "ChangeLog"):
-                tools.save(fn, "\n")
+                tools.files.save(self, fn, "\n")
             with tools.run_environment(self):
                 self.run("gnulib-tool --list", win_bash=tools.os_info.is_windows, run_environment=True)
                 self.run("gnulib-tool --import getopt-posix", win_bash=tools.os_info.is_windows, run_environment=True)

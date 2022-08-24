@@ -94,7 +94,7 @@ class LibAVIFConan(ConanFile):
                 )
             endif()
         """)
-        tools.save(alias, content)
+        tools.files.save(self, alias, content)
 
     def package_info(self):
         self.cpp_info.requires = ["libyuv::libyuv", "libaom-av1::libaom-av1"]

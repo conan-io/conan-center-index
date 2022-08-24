@@ -230,7 +230,7 @@ class CrashpadConan(ConanFile):
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*getopt*")
 
-        tools.save(os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
+        tools.files.save(self, os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
                    textwrap.dedent("""\
                     if(TARGET crashpad::mini_chromium_base)
                         target_compile_features(crashpad::mini_chromium_base INTERFACE cxx_std_14)

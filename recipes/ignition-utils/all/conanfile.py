@@ -134,7 +134,7 @@ class IgnitionUitlsConan(ConanFile):
             set(ignition-utils{major}_VERSION_PATCH {patch})
             set(ignition-utils{major}_VERSION_STRING "{major}.{minor}.{patch}")
         """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.save(module_file, content)
+        tools.files.save(self, module_file, content)
 
     def package_info(self):
         version_major = tools.Version(self.version).major

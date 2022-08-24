@@ -87,7 +87,7 @@ class LibharuConan(ConanFile):
         for fn in ("CHANGES", "INSTALL", "README"):
             os.unlink(os.path.join(self.package_folder, fn))
         tools.files.rmdir(self, os.path.join(self.package_folder, "if"))
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
 
     def package_info(self):
         libprefix = "lib" if is_msvc(self) else ""

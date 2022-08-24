@@ -49,7 +49,7 @@ class WinflexbisonConan(ConanFile):
         license_content = []
         for i in range(2, 16):
             license_content.append(content_lines[i][2:-1])
-        tools.save("COPYING.GPL3", "\n".join(license_content))
+        tools.files.save(self, "COPYING.GPL3", "\n".join(license_content))
 
     def package(self):
         if self.settings.build_type in ("Release", "Debug") and tools.Version(self.version) < "2.5.23":

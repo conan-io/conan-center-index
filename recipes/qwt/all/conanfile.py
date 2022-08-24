@@ -73,7 +73,7 @@ class QwtConan(ConanFile):
         qwtconfig += "QWT_CONFIG {}= QwtOpenGL\n".format("+" if self.options.opengl else "-")
         qwtconfig += "QWT_CONFIG {}= QwtMathML\n".format("+" if self.options.mathml else "-")
         qwtconfig += "QWT_CONFIG {}= QwtDesigner\n".format("+" if self.options.designer else "-")
-        tools.save(qwtconfig_path, qwtconfig)
+        tools.files.save(self, qwtconfig_path, qwtconfig)
 
         # qwtbuild.pri
         qwtbuild_path = os.path.join(self.source_folder, self._source_subfolder, "qwtbuild.pri")
@@ -85,7 +85,7 @@ class QwtConan(ConanFile):
         qwtbuild += "CONFIG += {}\n".format("debug" if self.settings.build_type == "Debug" else "release")
         if self.settings.build_type == "RelWithDebInfo":
             qwtbuild += "CONFIG += force_debug_info\n"
-        tools.save(qwtbuild_path, qwtbuild)
+        tools.files.save(self, qwtbuild_path, qwtbuild)
 
     def build(self):
         self._patch_qwt_config_files()

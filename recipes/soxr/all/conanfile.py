@@ -77,7 +77,7 @@ class SoxrConan(ConanFile):
     def _extract_pffft_license(self):
         pffft_c = tools.files.load(self, os.path.join(self._source_subfolder, "src", "pffft.c"))
         license_contents = pffft_c[pffft_c.find("/* Copyright")+3:pffft_c.find("modern CPUs.")+13]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self.copy("LICENCE", dst="licenses", src=self._source_subfolder)

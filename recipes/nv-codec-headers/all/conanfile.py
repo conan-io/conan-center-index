@@ -45,7 +45,7 @@ class FFNvEncHeaders(ConanFile):
         # Extract the License/s from the header to a file
         tmp = tools.files.load(self, os.path.join(self._source_subfolder, "include", "ffnvcodec", "nvEncodeAPI.h"))
         license_contents = tmp[2:tmp.find("*/", 1)] # The license begins with a C comment /* and ends with */
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self._extract_license()

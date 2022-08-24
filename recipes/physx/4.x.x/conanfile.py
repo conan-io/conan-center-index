@@ -258,7 +258,7 @@ class PhysXConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._get_license())
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._get_license())
 
         out_lib_dir = os.path.join(self.package_folder, "lib", self._get_physx_build_type())
         self.copy(pattern="*.a", dst="lib", src=out_lib_dir, keep_path=False)

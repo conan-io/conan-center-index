@@ -70,7 +70,7 @@ class XorgGccmakedep(ConanFile):
         conf_ac_text = tools.files.load(self, os.path.join(self._source_subfolder, "configure.ac"))
         topblock = re.match("((?:dnl[^\n]*\n)+)", conf_ac_text, flags=re.MULTILINE).group(1)
         license_text = re.subn(r"^dnl(|\s+([^\n]*))", r"\1", topblock, flags=re.MULTILINE)[0]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_text)
+        tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_text)
 
         autotools = self._configure_autotools()
         autotools.install()

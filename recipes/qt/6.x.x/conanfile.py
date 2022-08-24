@@ -577,8 +577,8 @@ class QtConan(ConanFile):
             with tools.environment_append(build_env):
 
                 if tools.os_info.is_macos:
-                    tools.save(".qmake.stash" , "")
-                    tools.save(".qmake.super" , "")
+                    tools.files.save(self, ".qmake.stash" , "")
+                    tools.files.save(self, ".qmake.super" , "")
                 yield
 
     @functools.lru_cache(1)
@@ -744,7 +744,7 @@ class QtConan(ConanFile):
         with self._build_context():
             cmake = self._configure_cmake()
             if tools.os_info.is_macos:
-                tools.save("bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                tools.files.save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
             with tools.environment_append({
                 "BASH_ENV": os.path.abspath("bash_env")
             }) if tools.os_info.is_macos else tools.no_op():
@@ -767,7 +767,7 @@ class QtConan(ConanFile):
         with self._build_context():
             cmake = self._configure_cmake()
             cmake.install()
-        tools.save(os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
+        tools.files.save(self, os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
@@ -835,7 +835,7 @@ class QtConan(ConanFile):
             endif()
             """ % ver.major)
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
-        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        tools.files.save(self, os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
             dependencies_string = ';'.join('Qt6::%s' % dependency for dependency in dependencies)
@@ -855,7 +855,7 @@ class QtConan(ConanFile):
                 )
             endif()""".format(module, self.version, dependencies_string))
 
-            tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
+            tools.files.save(self, os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
 
@@ -881,7 +881,7 @@ class QtConan(ConanFile):
                     TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::Core
                     APPEND PROPERTY INTERFACE_LINK_LIBRARIES "$<${entrypoint_conditions}:${QT_CMAKE_EXPORT_NAMESPACE}::EntryPointPrivate>"
                 )""")
-            tools.save(os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
+            tools.files.save(self, os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
 
     def package_id(self):
         del self.info.options.cross_compile

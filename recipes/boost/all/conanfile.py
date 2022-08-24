@@ -1276,7 +1276,7 @@ class BoostConan(ConanFile):
 
         self.output.warn(contents)
         filename = f"{folder}/user-config.jam"
-        tools.save(filename,  contents)
+        tools.files.save(self, filename,  contents)
 
     @property
     def _toolset_version(self):

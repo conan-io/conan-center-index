@@ -105,7 +105,7 @@ class ConanXqilla(ConanFile):
 
         tmp = tools.files.load(self, os.path.join(self._source_subfolder, "src", "yajl", "yajl_buf.h"))
         license_contents = tmp[2:tmp.find("*/", 1)] 
-        tools.save("LICENSE", license_contents)
+        tools.files.save(self, "LICENSE", license_contents)
         self.copy("LICENSE", dst="licenses/LICENSE.yajl",  ignore_case=True, keep_path=False)
 
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
