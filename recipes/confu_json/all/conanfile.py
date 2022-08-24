@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.tools import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration, ConanException
 import os
-from conans.tools import Version
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.33.0"
 

@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conans.tools import Version
+from conan.tools.scm import Version
 import os
 import textwrap
 

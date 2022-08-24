@@ -2,6 +2,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan import ConanFile, tools
 from conans import CMake
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import functools
 import os
 import textwrap

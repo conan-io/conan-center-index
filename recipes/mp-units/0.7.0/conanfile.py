@@ -1,6 +1,6 @@
 from conan import ConanFile, tools
 from conans import CMake
-from conans.tools import Version, check_min_cppstd
+from conan.tools.scm import Version, check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 

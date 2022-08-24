@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
-from conans.tools import Version, ConanInvalidConfiguration
+from conans.tools import ConanInvalidConfiguration
 from conan.tools.files import rename
-
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.43.0"
 

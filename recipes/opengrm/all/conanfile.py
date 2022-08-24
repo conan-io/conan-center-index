@@ -1,7 +1,7 @@
 import conan
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
-from conans.tools import Version, check_min_cppstd, remove_files_by_mask
+from conan.tools.scm import Version, check_min_cppstd, remove_files_by_mask
 
 import functools
 import os
