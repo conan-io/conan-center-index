@@ -472,7 +472,7 @@ class LibcurlConan(ConanFile):
             tc.fpic = self.options.get_safe("fPIC", True)
 
 
-        if cross_building(self) and is_apple_os(self.settings.os):
+        if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
         tc.generate()
