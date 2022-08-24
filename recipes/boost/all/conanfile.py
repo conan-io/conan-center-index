@@ -1451,8 +1451,9 @@ class BoostConan(ConanFile):
             def expand_python_lib_names(name):
                 """ A list of names, one for each enabled python version """
                 libs = []
-                for p in self._pythons:
-                    xy_version = tools.Version(p.version.v)
+                enabled_pythons = [version for version in PYTHON_VERSIONS if self.options.get_safe(f"python{version.xy}")]
+                for p in enabled_pythons:
+                    xy_version = tools.Version(p.v)
                     xy_formatdata = {
                         "py_major": xy_version.major,
                         "py_minor": xy_version.minor
