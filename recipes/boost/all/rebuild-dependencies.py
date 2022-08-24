@@ -117,16 +117,16 @@ class BoostDependencyBuilder(object):
 
     def do_git_update(self) -> None:
         if not self.boost_path.exists():
-            with tools.chdir(str(self.tmppath)):
+            with tools.files.chdir(self, str(self.tmppath)):
                 print("Cloning boost git")
                 subprocess.check_call(["git", "clone", "--", self.git_url, "boost"])
-            with tools.chdir(str(self.boost_path)):
+            with tools.files.chdir(self, str(self.boost_path)):
                 print("Checking out current master")
                 subprocess.check_call(["git", "checkout", "origin/master"])
                 print("Removing master branch")
                 subprocess.check_call(["git", "branch", "-D", "master"])
         else:
-            with tools.chdir(str(self.boost_path)):
+            with tools.files.chdir(self, str(self.boost_path)):
                 print("Updating git repo")
                 subprocess.check_call(["git", "fetch", "origin"])
                 print("Removing all local changes to git repo")
@@ -135,7 +135,7 @@ class BoostDependencyBuilder(object):
                 subprocess.check_call(["git", "checkout", "origin/master"])
 
     def do_git_submodule_update(self):
-        with tools.chdir(str(self.boost_path)):
+        with tools.files.chdir(self, str(self.boost_path)):
             if not self.unsafe:
                 # De-init + init to make sure that boostdep won't detect a new or removed boost library
                 print("De-init git submodules")
@@ -155,13 +155,13 @@ class BoostDependencyBuilder(object):
             subprocess.check_call(["git", "clean", "-d", "-f"])
 
     def do_install_boostdep(self):
-        with tools.chdir(str(self.boost_path)):
+        with tools.files.chdir(self, str(self.boost_path)):
             print("Installing boostdep/{}".format(self.boostdep_version))
             subprocess.check_call(["conan", "install", "boostdep/{}@".format(self.boostdep_version), "-g", "json"])
 
     @property
     def _bin_paths(self):
-        with tools.chdir(str(self.boost_path)):
+        with tools.files.chdir(self, str(self.boost_path)):
             data = json.loads(open("conanbuildinfo.json").read())
             return data["dependencies"][0]["bin_paths"]
 
@@ -227,7 +227,7 @@ class BoostDependencyBuilder(object):
         return list(conan_requirements), system_libs, list(unknown_libs)
 
     def do_boostdep_collect(self) -> BoostDependencies:
-        with tools.chdir(str(self.boost_path)):
+        with tools.files.chdir(self, str(self.boost_path)):
             with tools.environment_append({"PATH": self._bin_paths}):
                 buildables = subprocess.check_output(["boostdep", "--list-buildable"], text=True)
                 buildables = buildables.splitlines()
