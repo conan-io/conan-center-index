@@ -65,7 +65,7 @@ class CryptoPPPEMConan(ConanFile):
         tools.rmdir(src_folder)
         
         # Get license
-        tools.download("https://unlicense.org/UNLICENSE", "UNLICENSE", sha256="7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c")
+        tools.files.download(self, "https://unlicense.org/UNLICENSE", "UNLICENSE", sha256="7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c")
 
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:

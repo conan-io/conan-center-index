@@ -64,7 +64,7 @@ class ApprovalTestsCppConan(ConanFile):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
-            tools.download(url, filename)
+            tools.files.download(self, url, filename)
             tools.check_sha256(filename, source["sha256"])
         rename(self, "ApprovalTests.v.{}.hpp".format(self.version), self._header_file)
 

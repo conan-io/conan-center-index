@@ -21,7 +21,7 @@ class WglextConan(ConanFile):
             raise ConanInvalidConfiguration("wglext is only supported on Windows")
 
     def source(self):
-        tools.download(filename="wglext.h", **self.conan_data["sources"][self.version])
+        tools.files.download(self, filename="wglext.h", **self.conan_data["sources"][self.version])
 
     def package(self):
         self.copy(pattern="wglext.h", dst=os.path.join("include", "GL"))

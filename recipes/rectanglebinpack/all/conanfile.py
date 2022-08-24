@@ -48,7 +48,7 @@ class RectangleBinPackConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][0],
                   strip_root=True, destination=self._source_subfolder)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        tools.files.download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

@@ -28,7 +28,7 @@ class PackageConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][str(self.settings.os)],
                   destination=self.source_folder)
-        tools.download(**self.conan_data["sources"][self.version]["License"], filename="LICENSE.txt")
+        tools.files.download(self, **self.conan_data["sources"][self.version]["License"], filename="LICENSE.txt")
 
     def package(self):
         if self.settings.os != "Windows":

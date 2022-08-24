@@ -38,7 +38,7 @@ class YASMConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][0],
                   destination=self._source_subfolder, strip_root=True)
-        tools.download(**self.conan_data["sources"][self.version][1],
+        tools.files.download(self, **self.conan_data["sources"][self.version][1],
                        filename=os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
 
     @property

@@ -130,7 +130,7 @@ class MicroprofileConan(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        tools.files.download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):
         self._create_defines_file(os.path.join(self._source_subfolder, "microprofile.config.h"))

@@ -52,7 +52,7 @@ class QtXlsxWriterConan(ConanFile):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
             filename = url.rsplit("/", 1)[-1]
-            tools.download(url, filename, sha256=source["sha256"])
+            tools.files.download(self, url, filename, sha256=source["sha256"])
         tools.unzip(os.path.join(self.source_folder, "v0.3.0.zip"), self._source_subfolder, strip_root=True)
 
     def build(self):

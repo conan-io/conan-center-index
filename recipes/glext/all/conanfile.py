@@ -19,7 +19,7 @@ class GlextConan(ConanFile):
         self.requires("khrplatform/cci.20200529")
 
     def source(self):
-        tools.download(filename="glext.h", **self.conan_data["sources"][self.version])
+        tools.files.download(self, filename="glext.h", **self.conan_data["sources"][self.version])
 
     def package(self):
         self.copy(pattern="glext.h", dst=os.path.join("include", "GL"))

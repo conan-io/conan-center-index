@@ -213,7 +213,7 @@ class LibcurlConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
+        tools.files.download(self, "https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     # TODO: remove imports once rpath of shared libs of libcurl dependencies fixed on macOS
     def imports(self):

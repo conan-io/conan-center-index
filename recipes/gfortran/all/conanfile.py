@@ -36,7 +36,7 @@ class GFortranConan(ConanFile):
         for it in url.keys():
             if self.settings.os == "Windows" and it == "Windows":
                 filename = url[it]["filename"]
-                tools.download(**url[it])
+                tools.files.download(self, **url[it])
                 self.run("7z x {0}".format(filename))
                 os.unlink(filename)
                 os.rename("mingw64", "source_subfolder_Windows")

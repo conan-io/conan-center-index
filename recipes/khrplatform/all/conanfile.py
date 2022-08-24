@@ -15,7 +15,7 @@ class KhrplatformConan(ConanFile):
     no_copy_source = True
 
     def source(self):
-        tools.download(filename="khrplatform.h", **self.conan_data["sources"][self.version])
+        tools.files.download(self, filename="khrplatform.h", **self.conan_data["sources"][self.version])
 
     def package(self):
         self.copy(pattern="khrplatform.h", dst=os.path.join("include", "KHR"))

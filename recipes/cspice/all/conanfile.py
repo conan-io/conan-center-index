@@ -90,7 +90,7 @@ class CspiceConan(ConanFile):
         url = data["url"]
         if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
             filename = os.path.basename(url)
-            tools.download(url, filename, sha256=data["sha256"])
+            tools.files.download(self, url, filename, sha256=data["sha256"])
             command = "zcat {} | tar -xf -".format(filename)
             self.run(command=command)
             os.remove(filename)

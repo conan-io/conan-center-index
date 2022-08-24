@@ -59,7 +59,7 @@ class LibrealsenseConan(ConanFile):
         tools.files.get(self, **sources["source"], strip_root=True, destination=self._source_subfolder)
         for firmware in sources["firmware"]:
             filename = os.path.basename(urllib.parse.urlparse(firmware["url"]).path)
-            tools.download(filename=filename, **firmware)
+            tools.files.download(self, filename=filename, **firmware)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

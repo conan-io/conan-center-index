@@ -15,8 +15,8 @@ class Djinni(ConanFile):
 
     def source(self):
         filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
-        tools.download(filename=filename, **self.conan_data["sources"][self.version])
-        tools.download(filename="LICENSE", url="https://raw.githubusercontent.com/cross-language-cpp/djinni-generator/main/LICENSE")
+        tools.files.download(self, filename=filename, **self.conan_data["sources"][self.version])
+        tools.files.download(self, filename="LICENSE", url="https://raw.githubusercontent.com/cross-language-cpp/djinni-generator/main/LICENSE")
 
     def build(self):
         pass # avoid warning for missing build steps

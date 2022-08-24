@@ -41,7 +41,7 @@ class SevenZipConan(ConanFile):
         url = self.conan_data["sources"][self.version]["url"]
         filename = os.path.basename(urlparse(url).path)
         sha256 = self.conan_data["sources"][self.version]["sha256"]
-        tools.download(url, filename)
+        tools.files.download(self, url, filename)
         tools.check_sha256(filename, sha256)
         self._uncompress_7z(filename)
         os.unlink(filename)

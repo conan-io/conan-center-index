@@ -21,8 +21,8 @@ class MozillaBuildConan(ConanFile):
 
     def build(self):
         filename = "mozilla-build.exe"
-        tools.download(**self.conan_data["sources"][self.version][0], filename=filename)
-        tools.download(**self.conan_data["sources"][self.version][1], filename="LICENSE")
+        tools.files.download(self, **self.conan_data["sources"][self.version][0], filename=filename)
+        tools.files.download(self, **self.conan_data["sources"][self.version][1], filename="LICENSE")
         self.run(f"7z x {filename}", run_environment=True)
 
 

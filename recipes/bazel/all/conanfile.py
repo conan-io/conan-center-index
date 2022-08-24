@@ -36,7 +36,7 @@ class BazelConan(ConanFile):
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
             if filename in ["LICENSE", self._bazel_filename]:
-                tools.download(url, filename)
+                tools.files.download(self, url, filename)
                 tools.check_sha256(filename, source["sha256"])
 
     def package(self):

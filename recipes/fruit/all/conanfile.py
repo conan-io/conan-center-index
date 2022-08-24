@@ -68,7 +68,7 @@ class FruitConan(ConanFile):
     def _get_source(self):
         if Version(self.version) == "3.4.0":
             filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
-            tools.download(filename=filename, **self.conan_data["sources"][self.version])
+            tools.files.download(self, filename=filename, **self.conan_data["sources"][self.version])
 
             with tarfile.TarFile.open(filename, 'r:*') as tarredgzippedFile:
                 # NOTE: In fruit v3.4.0, The archive file contains the file names

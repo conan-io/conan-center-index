@@ -68,7 +68,7 @@ class TheoraConan(ConanFile):
         source = self.conan_data["sources"][self.version][1]
         url = source["url"]
         filename = url[url.rfind("/") + 1:]
-        tools.download(url, filename)
+        tools.files.download(self, url, filename)
         tools.check_sha256(filename, source["sha256"])
 
         shutil.move(filename, os.path.join(self._source_subfolder, "lib", filename))

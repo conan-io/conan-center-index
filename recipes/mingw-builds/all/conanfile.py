@@ -60,7 +60,7 @@ class MingwConan(ConanFile):
         # Source should be downloaded in the build step since it depends on specific options
         url = self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
         self.output.info("Downloading: %s" % url["url"])
-        tools.download(url["url"], "file.7z", sha256=url["sha256"])
+        tools.files.download(self, url["url"], "file.7z", sha256=url["sha256"])
         self.run("7z x file.7z")
         os.remove('file.7z')
 

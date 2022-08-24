@@ -53,7 +53,7 @@ class NasRecipe(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][0], destination=self._source_subfolder, strip_root=True)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        tools.files.download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
     def _user_info_build(self):

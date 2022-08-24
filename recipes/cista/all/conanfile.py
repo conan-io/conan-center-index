@@ -47,7 +47,7 @@ class CistaConan(ConanFile):
     def source(self):
         for file in self.conan_data["sources"][self.version]:
             filename = os.path.basename(file["url"])
-            tools.download(filename=filename, **file)
+            tools.files.download(self, filename=filename, **file)
 
     def package(self):
         self.copy("LICENSE", dst="licenses")

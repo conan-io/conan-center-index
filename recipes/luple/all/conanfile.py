@@ -37,7 +37,7 @@ class LupleConan(ConanFile):
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        tools.files.download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
