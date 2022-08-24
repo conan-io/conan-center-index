@@ -1,7 +1,8 @@
 import functools
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 
 class TestPackageConan(ConanFile):
@@ -15,9 +16,9 @@ class TestPackageConan(ConanFile):
         return cmake
 
     def build(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self._configure_cmake().build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.build.cross_building(self, self):
             self._configure_cmake().test()
