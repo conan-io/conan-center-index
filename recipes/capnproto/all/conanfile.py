@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
+from conan import ConanFile, tools
+from conans import CMake, AutoToolsBuildEnvironment
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 import glob

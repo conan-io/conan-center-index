@@ -1,5 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conans import ConanFile, tools, CMake
+from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap

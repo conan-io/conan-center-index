@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 from conans.errors import ConanException
 import os
 import glob

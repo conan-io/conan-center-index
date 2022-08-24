@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake
+from from conan import ConanFile
+from conans import CMake
 
 class IceoryxTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

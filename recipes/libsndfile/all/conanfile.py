@@ -1,5 +1,6 @@
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import os
 
 required_conan_version = ">=1.43.0"

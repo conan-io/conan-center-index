@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, tools, CMake
+from conan import ConanFile, tools
+from conans import CMake
 
 
 class EazylzmaConan(ConanFile):

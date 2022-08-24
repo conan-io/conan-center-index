@@ -1,7 +1,8 @@
 """Conan recipe package for Google FlatBuffers - Flatc
 """
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 
 class FlatcConan(ConanFile):

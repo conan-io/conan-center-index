@@ -4,7 +4,8 @@ from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.tools.files import get, patch, rmdir
 
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 
 from collections import namedtuple
 import functools

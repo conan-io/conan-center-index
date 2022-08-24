@@ -2,7 +2,8 @@ from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.build import can_run
 from conan.tools.scm import Version
 from conan.tools import files
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 import functools
 import os

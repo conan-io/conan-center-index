@@ -1,6 +1,7 @@
 import os
 import glob
-from conans import ConanFile, tools, CMake
+from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 
 class libb2Conan(ConanFile):

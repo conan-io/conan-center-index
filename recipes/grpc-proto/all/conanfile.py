@@ -1,7 +1,8 @@
 import os
 import functools
 from conan import ConanFile
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 

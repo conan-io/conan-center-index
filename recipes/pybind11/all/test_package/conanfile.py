@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import os
 import sys
 from platform import python_version

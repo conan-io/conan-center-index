@@ -1,7 +1,8 @@
 import os
 import shutil
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc_static_runtime, is_msvc
 

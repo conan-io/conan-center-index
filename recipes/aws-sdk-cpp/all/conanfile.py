@@ -2,7 +2,8 @@ import os
 
 from conan.tools.files import rename
 from conan.tools.microsoft import msvc_runtime_flag
-from conans import CMake, ConanFile, tools
+from from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"

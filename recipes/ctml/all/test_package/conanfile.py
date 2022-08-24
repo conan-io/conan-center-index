@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 class TestWrapperConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"

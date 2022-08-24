@@ -3,7 +3,8 @@ import os
 
 from conan import ConanFile
 from conan.tools.files import get, replace_in_file
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.48.0"

@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 class CSVMonkeyTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

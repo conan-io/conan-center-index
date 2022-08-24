@@ -1,5 +1,6 @@
 from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 import functools
 import os
 

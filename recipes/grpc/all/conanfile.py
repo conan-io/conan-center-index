@@ -1,7 +1,8 @@
 import shutil
 from conan import tools
 from conan.tools.scm import Version
-from conans import ConanFile, CMake, tools as tools_legacy
+from conan import ConanFile, tools
+from conans import CMake as tools_legacy
 from conan.errors import ConanInvalidConfiguration
 import os
 

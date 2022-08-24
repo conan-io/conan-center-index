@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, RunEnvironment, tools
+from from conan import ConanFile
+from conans import CMake, RunEnvironment, tools
 import os
 
 

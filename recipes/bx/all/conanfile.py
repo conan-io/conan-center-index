@@ -1,6 +1,7 @@
 import os
 import glob
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 from conan.errors import ConanInvalidConfiguration
 
 class BxConan(ConanFile):

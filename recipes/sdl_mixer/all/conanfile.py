@@ -1,4 +1,5 @@
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 from conan import ConanFile
 from conan.tools.files import get, rmdir
 import os

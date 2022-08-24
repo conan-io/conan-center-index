@@ -1,6 +1,7 @@
 # pylint: skip-file
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conans import CMake
 
 
 class TestPackageConan(ConanFile):

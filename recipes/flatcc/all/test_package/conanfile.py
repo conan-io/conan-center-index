@@ -1,6 +1,7 @@
 import os.path
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conan import ConanFile, tools
+from conans import CMake, RunEnvironment
 from conans.errors import ConanException
 
 

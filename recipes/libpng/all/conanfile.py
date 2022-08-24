@@ -1,5 +1,6 @@
 import os
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, rmdir, replace_in_file

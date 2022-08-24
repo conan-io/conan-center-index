@@ -1,6 +1,7 @@
 import os
 import glob
-from conans import ConanFile, tools, CMake, MSBuild
+from conan import ConanFile, tools
+from conans import CMake, MSBuild
 from conan.errors import ConanInvalidConfiguration
 
 

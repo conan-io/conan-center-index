@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conans import CMake, tools
+from conan import ConanFile
+from conans import CMake
 from conan.tools.files import get, copy, patch
 # TODO: Replace by from conan.tools.build import check_min_cppstd after 1.50
 from conans.tools import check_min_cppstd
