@@ -62,18 +62,18 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/2.9.14")
         if self.options.get_safe("with_wayland"):
-            self.requires("wayland/1.20.0")
-            self.requires("wayland-protocols/1.24")  # FIXME: This should be a build-requires
+            self.requires("wayland/1.21.0")
+            self.requires("wayland-protocols/1.26")  # FIXME: This should be a build-requires
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
 
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
+        self.build_requires("meson/0.63.1")
         self.build_requires("bison/3.7.6")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.20.0")
+            self.build_requires("wayland/1.21.0")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
