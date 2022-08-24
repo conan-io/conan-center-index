@@ -19,7 +19,7 @@ class AudiofileConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 11)
-        if tools.Version(self.version) < "1.1.0":
+        if tools.scm.Version(self, self.version) < "1.1.0":
             self.license = "GPL-3.0-or-later"
 
     def package_id(self):

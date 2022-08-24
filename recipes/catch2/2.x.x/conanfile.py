@@ -60,9 +60,9 @@ class Catch2Conan(ConanFile):
             self.info.header_only()
 
     def validate(self):
-        if tools.Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
+        if tools.scm.Version(self, self.version) < "2.13.1" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARMv8 is supported by 2.13.1+ only! give up!")
-        if self.options.with_main and tools.Version(self.version) < "2.13.4":
+        if self.options.with_main and tools.scm.Version(self, self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported with versions < 2.13.4")
 
     def source(self):

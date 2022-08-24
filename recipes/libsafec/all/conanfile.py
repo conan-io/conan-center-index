@@ -54,7 +54,7 @@ class LibSafeCConan(ConanFile):
     @property
     def _supported_compiler(self):
         compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if compiler == "Visual Studio":
             return False
         if compiler == "gcc" and version < "5":

@@ -18,7 +18,7 @@ class JwtCppConan(ConanFile):
 
     @property
     def _supports_generic_json(self):
-        return tools.Version(self.version) >= "0.5.0"
+        return tools.scm.Version(self, self.version) >= "0.5.0"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

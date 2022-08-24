@@ -42,7 +42,7 @@ class AsioGrpcConan(ConanFile):
             tools.build.check_min_cppstd(self, self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
             self.output.warn(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
@@ -50,7 +50,7 @@ class AsioGrpcConan(ConanFile):
     def configure(self):
         if self.options.use_boost_container == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
-            compiler_version = tools.Version(self.settings.compiler.version)
+            compiler_version = tools.scm.Version(self, self.settings.compiler.version)
             self.options.use_boost_container = libcxx and str(libcxx) == "libc++" or \
                 (self.settings.compiler == "gcc" and compiler_version < "9")  or \
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")

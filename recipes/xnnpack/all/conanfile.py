@@ -50,7 +50,7 @@ class XnnpackConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         compiler = self.settings.compiler
-        compiler_version = tools.Version(compiler.version)
+        compiler_version = tools.scm.Version(self, compiler.version)
         if (compiler == "gcc" and compiler_version < "6") or \
            (compiler == "clang" and compiler_version < "5") or \
            (compiler == "Visual Studio" and compiler_version < "16"):

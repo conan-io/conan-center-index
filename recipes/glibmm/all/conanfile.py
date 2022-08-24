@@ -23,7 +23,7 @@ class GlibmmConan(ConanFile):
     short_paths = True
 
     def _abi_version(self):
-        return "2.68" if tools.Version(self.version) >= "2.68.0" else "2.4"
+        return "2.68" if tools.scm.Version(self, self.version) >= "2.68.0" else "2.4"
 
     def _glibmm_lib(self):
         return f"glibmm-{self._abi_version()}"

@@ -56,7 +56,7 @@ class TinyDnnConan(ConanFile):
             tools.build.check_min_cppstd(self, self, self._min_cppstd)
 
         compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if compiler in self._min_compilers_version and version < self._min_compilers_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(

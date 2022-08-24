@@ -50,7 +50,7 @@ class AwsCCal(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        if tools.Version(self.version) <= "0.5.11":
+        if tools.scm.Version(self, self.version) <= "0.5.11":
             self.requires("aws-c-common/0.6.11")
         else:
             self.requires("aws-c-common/0.7.4")
@@ -113,7 +113,7 @@ class AwsCCal(ConanFile):
                 crypto_symbols = [
                     "HMAC_Update", "HMAC_Final", "HMAC_Init_ex",
                 ]
-                if tools.Version(self.deps_cpp_info["openssl"].version) >= "1.1":
+                if tools.scm.Version(self, self.deps_cpp_info["openssl"].version) >= "1.1":
                     crypto_symbols.extend([
                         "HMAC_CTX_new", "HMAC_CTX_free", "HMAC_CTX_reset",
                     ])

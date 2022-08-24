@@ -27,7 +27,7 @@ class CajunJsonApiConan(ConanFile):
         return file_content[:file_content.find("*/")]
 
     def package(self):
-        package_version = tools.Version(self.version)
+        package_version = tools.scm.Version(self, self.version)
         if package_version < "2.1.0":
             # No dedicated LICENSE file in older versions, extracting license text from comments
             tools.files.save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())

@@ -50,7 +50,7 @@ class OpenEXRConan(ConanFile):
         self.requires("zlib/1.2.12")
 
     def validate(self):
-        if tools.Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.build.cross_building(self, self):
+        if tools.scm.Version(self, self.version) < "2.5.0" and hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             # cross-build supported since https://github.com/AcademySoftwareFoundation/openexr/pull/606
             raise ConanInvalidConfiguration("Cross-build not supported before openexr 2.5.0")
 
@@ -65,7 +65,7 @@ class OpenEXRConan(ConanFile):
         self._cmake.definitions["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
         self._cmake.definitions["ILMBASE_BUILD_BOTH_STATIC_SHARED"] = False
         self._cmake.definitions["PYILMBASE_ENABLE"] = False
-        if tools.Version(self.version) < "2.5.0":
+        if tools.scm.Version(self, self.version) < "2.5.0":
             self._cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
         else:
             self._cmake.definitions["INSTALL_OPENEXR_EXAMPLES"] = False
@@ -77,7 +77,7 @@ class OpenEXRConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        pkg_version = tools.Version(self.version)
+        pkg_version = tools.scm.Version(self, self.version)
         if pkg_version < "2.5.2" and self.settings.os == "Windows":
             # This fixes symlink creation on Windows.
             # OpenEXR's build system no longer creates symlinks on windows, starting with commit
@@ -144,7 +144,7 @@ class OpenEXRConan(ConanFile):
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
 
-        openexr_version = tools.Version(self.version)
+        openexr_version = tools.scm.Version(self, self.version)
         lib_suffix = "-{}_{}".format(openexr_version.major, openexr_version.minor)
         if self.settings.build_type == "Debug":
             lib_suffix += "_d"

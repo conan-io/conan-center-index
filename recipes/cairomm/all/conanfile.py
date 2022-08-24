@@ -30,7 +30,7 @@ class CairommConan(ConanFile):
     short_paths = True
 
     def _abi_version(self):
-        return "1.16" if tools.Version(self.version) >= "1.16.0" else "1.0"
+        return "1.16" if tools.scm.Version(self, self.version) >= "1.16.0" else "1.0"
 
     def validate(self):
         if hasattr(self, "settings_build") and tools.build.cross_building(self, self):

@@ -98,10 +98,10 @@ class GdkPixbufConan(ConanFile):
         tools.files.replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
         tools.files.replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
         tools.files.replace_in_file(self, meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.Version(self.version) >= "2.42.6"
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if tools.scm.Version(self, self.version) >= "2.42.6"
                               else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if tools.Version(self.version) >= "2.42.6":
+        if tools.scm.Version(self, self.version) >= "2.42.6":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build-aux", "post-install.py"),
                                   "close_fds=True", "close_fds=(sys.platform != 'win32')")
 
@@ -143,14 +143,14 @@ class GdkPixbufConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        if tools.Version(self.version) >= "2.42.0":
+        if tools.scm.Version(self, self.version) >= "2.42.0":
             defs["introspection"] = "false"
         else:
             defs["gir"] = "false"
         defs["docs"] = "false"
         defs["man"] = "false"
         defs["installed_tests"] = "false"
-        if tools.Version(self.version) >= "2.42.8":
+        if tools.scm.Version(self, self.version) >= "2.42.8":
             defs["png"] = "enabled" if self.options.with_libpng else "disabled"
             defs["tiff"] = "enabled" if self.options.with_libtiff else "disabled"
             defs["jpeg"] = "enabled" if self.options.with_libjpeg else "disabled"

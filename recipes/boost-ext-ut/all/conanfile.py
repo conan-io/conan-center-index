@@ -22,12 +22,12 @@ class UTConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17 if self.settings.compiler in ["clang", "gcc"] and tools.Version(self.version) <= "1.1.8" else 20
+        return 17 if self.settings.compiler in ["clang", "gcc"] and tools.scm.Version(self, self.version) <= "1.1.8" else 20
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "apple-clang": "11" if tools.Version(self.version) < "1.1.8" else "12",
+            "apple-clang": "11" if tools.scm.Version(self, self.version) < "1.1.8" else "12",
             "clang": "9",
             "gcc": "9",
             "msvc": "19",
@@ -41,7 +41,7 @@ class UTConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
-        if tools.Version(self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
+        if tools.scm.Version(self, self.version) <= "1.1.8" and self.settings.compiler in ["msvc", "Visual Studio"]:
             raise ConanInvalidConfiguration("{} version 1.1.8 may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
         min_version = self._minimum_compilers_version.get(
@@ -51,7 +51,7 @@ class UTConan(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -60,7 +60,7 @@ class UTConan(ConanFile):
                         self.settings.compiler.version))
 
     def config_options(self):
-        if tools.Version(self.version) <= "1.1.8":
+        if tools.scm.Version(self, self.version) <= "1.1.8":
             del self.options.disable_module
 
     def configure(self):
@@ -111,7 +111,7 @@ class UTConan(ConanFile):
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
 
-        if tools.Version(self.version) > "1.1.8":
+        if tools.scm.Version(self, self.version) > "1.1.8":
             self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + self.version, "include")]
 
         if self.options.get_safe("disable_module"):

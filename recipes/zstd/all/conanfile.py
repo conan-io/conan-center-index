@@ -62,7 +62,7 @@ class ZstdConan(ConanFile):
         self._cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
-        if tools.Version(self.version) < "1.4.3":
+        if tools.scm.Version(self, self.version) < "1.4.3":
             # Generate a relocatable shared lib on Macos
             self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -72,7 +72,7 @@ class ZstdConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Don't force PIC
-        if tools.Version(self.version) >= "1.4.5":
+        if tools.scm.Version(self, self.version) >= "1.4.5":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "build", "cmake", "lib", "CMakeLists.txt"),
                                   "POSITION_INDEPENDENT_CODE On", "")
 

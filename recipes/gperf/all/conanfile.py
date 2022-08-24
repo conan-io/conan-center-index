@@ -46,7 +46,7 @@ class GperfConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
+            if self._is_msvc and tools.scm.Version(self, self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
             self._autotools.configure()
         return self._autotools

@@ -47,7 +47,7 @@ class TwitchNativeIpcConan(ConanFile):
 
         min_version = self._compilers_min_version.get(str(self.settings.compiler), False)
         if min_version:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("twitch-native-ipc requires C++17")
         else:
             self.output.warn("unknown compiler, assuming C++17 support")

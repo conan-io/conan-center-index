@@ -86,7 +86,7 @@ class Libdc1394Conan(ConanFile):
         tools.files.rm(self, os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libdc1394-{}".format(tools.Version(self.version).major)
+        self.cpp_info.names["pkg_config"] = "libdc1394-{}".format(tools.scm.Version(self, self.version).major)
         self.cpp_info.libs = ["dc1394"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

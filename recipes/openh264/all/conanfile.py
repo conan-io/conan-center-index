@@ -122,7 +122,7 @@ class OpenH264Conan(ConanFile):
         if self._is_msvc:
             autotools.flags.extend(["-nologo", "-{}".format(self.settings.compiler.runtime)])
             autotools.link_flags.insert(0, "-link")
-            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
+            if not (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < "12"):
                 autotools.flags.append("-FS")
         elif self.settings.compiler in ("apple-clang",):
             if self.settings.arch in ("armv8",):

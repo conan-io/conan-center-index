@@ -53,7 +53,7 @@ class FlannConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if tools.Version(self.version) > "1.9.1" else None
+        return 11 if tools.scm.Version(self, self.version) > "1.9.1" else None
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -76,7 +76,7 @@ class FlannConan(ConanFile):
         # remove embedded lz4
         tools.files.rmdir(self, os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
 
-        if tools.Version(self.version) > "1.9.1":
+        if tools.scm.Version(self, self.version) > "1.9.1":
             return
 
         # Workaround issue with empty sources for a CMake target

@@ -37,7 +37,7 @@ class XtensorConan(ConanFile):
         self.requires("xtl/0.7.4")
         self.requires("nlohmann_json/3.10.5")
         if self.options.xsimd:
-            if tools.Version(self.version) < "0.24.0":
+            if tools.scm.Version(self, self.version) < "0.24.0":
                 self.requires("xsimd/7.5.0")
             else:
                 self.requires("xsimd/8.1.0")
@@ -53,7 +53,7 @@ class XtensorConan(ConanFile):
         # https://github.com/xtensor-stack/xtensor/blob/master/README.md
         # - On Windows platforms, Visual C++ 2015 Update 2, or more recent
         # - On Unix platforms, gcc 4.9 or a recent version of Clang
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         compiler = self.settings.compiler
         if compiler == "Visual Studio" and version < "16":
             raise ConanInvalidConfiguration(

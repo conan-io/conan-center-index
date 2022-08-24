@@ -56,14 +56,14 @@ class NngConan(ConanFile):
 
     def requirements(self):
         if self.options.tls:
-            if tools.Version(self.version) < "1.5.2":
+            if tools.scm.Version(self, self.version) < "1.5.2":
                 self.requires("mbedtls/2.25.0")
             else:
                 self.requires("mbedtls/3.0.0")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
-                tools.Version(self.settings.compiler.version) < 14:
+                tools.scm.Version(self, self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("MSVC < 14 is not supported")
         if not self.options.max_taskq_threads.value.isdigit():
             raise ConanInvalidConfiguration("max_taskq_threads must be an integral number")

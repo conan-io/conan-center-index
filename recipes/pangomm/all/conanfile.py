@@ -22,11 +22,11 @@ class PangommConan(ConanFile):
 
     @property
     def _is_2_48_api(self):
-        return tools.Version(self.version) >= "2.48.0"
+        return tools.scm.Version(self, self.version) >= "2.48.0"
 
     @property
     def _is_1_4_api(self):
-        return tools.Version(self.version) >= "1.4.0" and tools.Version(
+        return tools.scm.Version(self, self.version) >= "1.4.0" and tools.scm.Version(self, 
             self.version) < "2.48.0"
 
     @property

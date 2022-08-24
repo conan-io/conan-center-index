@@ -58,7 +58,7 @@ class MinizConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        if tools.Version(self.version) >= "2.2.0":
+        if tools.scm.Version(self, self.version) >= "2.2.0":
             cmake.definitions["BUILD_EXAMPLES"] = False
             cmake.definitions["BUILD_FUZZERS"] = False
             cmake.definitions["AMALGAMATE_SOURCES"] = False

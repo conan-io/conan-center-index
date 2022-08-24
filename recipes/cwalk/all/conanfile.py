@@ -103,7 +103,7 @@ class CwalkConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Cwalk")
         self.cpp_info.set_property("cmake_target_name", "cwalk")
         self.cpp_info.libs = ["cwalk"]
-        if self.options.shared and tools.Version(self.version) >= "1.2.5":
+        if self.options.shared and tools.scm.Version(self, self.version) >= "1.2.5":
             self.cpp_info.defines.append("CWK_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed

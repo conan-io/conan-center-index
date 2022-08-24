@@ -37,7 +37,7 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration("%s recipe does not support windows. Contributions are welcome!" % self.name)
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "1.71.0":
+        if tools.scm.Version(self, self.version) >= "1.71.0":
             self.build_requires("meson/0.62.2")
         else:
             # https://gitlab.gnome.org/GNOME/gobject-introspection/-/issues/414

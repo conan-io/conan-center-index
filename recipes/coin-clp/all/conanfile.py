@@ -98,7 +98,7 @@ class CoinClpConan(ConanFile):
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ]
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= 12:
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) >= 12:
             self._autotools.flags.append("-FS")
         self._autotools.configure(self._source_subfolder, args=configure_args)
         return self._autotools

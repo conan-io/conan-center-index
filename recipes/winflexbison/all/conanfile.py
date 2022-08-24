@@ -52,7 +52,7 @@ class WinflexbisonConan(ConanFile):
         tools.files.save(self, "COPYING.GPL3", "\n".join(license_content))
 
     def package(self):
-        if self.settings.build_type in ("Release", "Debug") and tools.Version(self.version) < "2.5.23":
+        if self.settings.build_type in ("Release", "Debug") and tools.scm.Version(self, self.version) < "2.5.23":
             actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
             self.copy("*.exe", src=actual_build_path, dst="bin", keep_path=False)
         else:

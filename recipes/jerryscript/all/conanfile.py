@@ -108,7 +108,7 @@ class JerryScriptStackConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         # profile and jerry_match default option value depend on version
-        if tools.Version(self.version) < "2.4.0":
+        if tools.scm.Version(self, self.version) < "2.4.0":
             self.options.profile = "es5.1"
             self.options.jerry_math = True
             if self.settings.compiler == "Visual Studio":
@@ -175,7 +175,7 @@ class JerryScriptStackConan(ConanFile):
         self._cmake = CMake(self)
         amalgamation_definition = "ENABLE_AMALGAM"
         libmath_definition = "JERRY_MATH"
-        if tools.Version(self.version) < tools.Version("2.4.0"):
+        if tools.scm.Version(self, self.version) < tools.scm.Version(self, "2.4.0"):
             amalgamation_definition = "ENABLE_ALL_IN_ONE"
             libmath_definition = "JERRY_LIBM"
         self._cmake.definitions["JERRY_CMDLINE"] = self.options.tool_cmdline
@@ -228,13 +228,13 @@ class JerryScriptStackConan(ConanFile):
         self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
 
         if self._jerry_math:
-            mathlibname = "jerry-libm" if tools.Version(self.version) < "2.4.0" else "jerry-math"
+            mathlibname = "jerry-libm" if tools.scm.Version(self, self.version) < "2.4.0" else "jerry-math"
             self.cpp_info.components["libjerry-math"].names["pkg_config"] = "lib{}".format(mathlibname)
             self.cpp_info.components["libjerry-math"].libs = [mathlibname]
             self.cpp_info.components["libjerry-math"].requires = ["libjerry-port-default"]
             self.cpp_info.components["libjerry-core"].requires.append("libjerry-math")
 
-        if tools.Version(self.version) < "2.4.0":
+        if tools.scm.Version(self, self.version) < "2.4.0":
             self.cpp_info.components["libjerry-port-default-minimal"].names["pkg_config"] = ["libjerry-port-default-minimal"]
             self.cpp_info.components["libjerry-port-default-minimal"].libs = ["jerry-port-default-minimal"]
             self.cpp_info.components["libjerry-port-default"].requires.append("libjerry-port-default-minimal")

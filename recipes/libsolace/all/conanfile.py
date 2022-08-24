@@ -28,7 +28,7 @@ class LibsolaceConan(ConanFile):
         return ["17", "gnu17", "20", "gnu20"]
 
     def configure(self):
-        compiler_version = tools.Version(str(self.settings.compiler.version))
+        compiler_version = tools.scm.Version(self, str(self.settings.compiler.version))
 
         if self.settings.os == "Windows":
           raise ConanInvalidConfiguration("This library is not yet compatible with Windows")

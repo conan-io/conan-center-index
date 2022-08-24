@@ -31,7 +31,7 @@ class NameofConan(ConanFile):
     @property
     def _supported_compiler(self):
         compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
             return True
         if compiler == "gcc" and version >= "7.4":

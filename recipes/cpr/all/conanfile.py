@@ -49,41 +49,41 @@ class CprConan(ConanFile):
     def _supports_openssl(self):
         # https://github.com/libcpr/cpr/commit/b036a3279ba62720d1e43362d32202bf412ea152
         # https://github.com/libcpr/cpr/releases/tag/1.5.0
-        return tools.Version(self.version) >= "1.5.0" and not tools.is_apple_os(self, self.settings.os)
+        return tools.scm.Version(self, self.version) >= "1.5.0" and not tools.is_apple_os(self, self.settings.os)
 
     @property
     def _supports_winssl(self):
         # https://github.com/libcpr/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9
         # https://github.com/libcpr/cpr/releases/tag/1.5.1
-        return tools.Version(self.version) >= "1.5.1" and self.settings.os == "Windows"
+        return tools.scm.Version(self, self.version) >= "1.5.1" and self.settings.os == "Windows"
 
     @property
     def _supports_darwinssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return tools.Version(self.version) >= "1.6.1" and tools.is_apple_os(self, self.settings.os)
+        return tools.scm.Version(self, self.version) >= "1.6.1" and tools.is_apple_os(self, self.settings.os)
 
     @property
     def _can_auto_ssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.0
         return not self._uses_old_cmake_options and not (
            #  https://github.com/libcpr/cpr/issues/546
-            tools.Version(self.version) in ["1.6.0", "1.6.1"]
+            tools.scm.Version(self, self.version) in ["1.6.0", "1.6.1"]
             and tools.is_apple_os(self, self.settings.os)
         )
 
     @property
     def _uses_old_cmake_options(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.0
-        return tools.Version(self.version) < "1.6.0"
+        return tools.scm.Version(self, self.version) < "1.6.0"
 
     @property
     def _uses_valid_abi_and_compiler(self):
         # https://github.com/conan-io/conan-center-index/pull/5194#issuecomment-821908385
         return not (
-            tools.Version(self.version) >= "1.6.0"
+            tools.scm.Version(self, self.version) >= "1.6.0"
             and self.settings.compiler == "clang"
             and self.settings.compiler.libcxx == "libstdc++"
-            and tools.Version(self.settings.compiler.version) < "9"
+            and tools.scm.Version(self, self.settings.compiler.version) < "9"
         )
 
     def export_sources(self):
@@ -139,7 +139,7 @@ class CprConan(ConanFile):
         if is_msvc(self) and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
-        if tools.Version(self.version) == "1.9.0" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+        if tools.scm.Version(self, self.version) == "1.9.0" and self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("{}/{} doesn't support gcc < 6".format(self.name, self.version))
 
     def source(self):

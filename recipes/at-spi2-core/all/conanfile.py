@@ -86,7 +86,7 @@ class AtSpi2CoreConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if tools.Version(self.version) >= "2.42.0":
+        if tools.scm.Version(self, self.version) >= "2.42.0":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "bus", "meson.build"),
                                   "if x11_dep.found()",
                                   "if x11_option == 'yes'")

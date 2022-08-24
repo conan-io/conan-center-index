@@ -21,8 +21,8 @@ class CtreConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
-        ctre_version = tools.Version(self.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        ctre_version = tools.scm.Version(self, self.version)
 
         min_gcc = "7.4" if ctre_version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):

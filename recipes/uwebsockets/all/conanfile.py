@@ -31,7 +31,7 @@ class UwebsocketsConan(ConanFile):
 
     def config_options(self):
         # libdeflate is not supported before 19.0.0
-        if tools.Version(self.version) < "19.0.0":
+        if tools.scm.Version(self, self.version) < "19.0.0":
             del self.options.with_libdeflate
 
     def requirements(self):
@@ -40,7 +40,7 @@ class UwebsocketsConan(ConanFile):
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.10")
 
-        if tools.Version(self.version) >= "19.0.0":
+        if tools.scm.Version(self, self.version) >= "19.0.0":
             self.requires("usockets/0.8.1")
         else:
             self.requires("usockets/0.4.0")
@@ -55,8 +55,8 @@ class UwebsocketsConan(ConanFile):
 
         minimal_version = {
             "Visual Studio": "15",
-            "gcc": "7" if tools.Version(self.version) < "20.11.0" else "8",
-            "clang": "5" if tools.Version(self.version) < "20.11.0" else "7",
+            "gcc": "7" if tools.scm.Version(self, self.version) < "20.11.0" else "8",
+            "clang": "5" if tools.scm.Version(self, self.version) < "20.11.0" else "7",
             "apple-clang": "10",
         }
 
@@ -72,14 +72,14 @@ class UwebsocketsConan(ConanFile):
             )
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s"
                 % (self.name, minimal_cpp_standard)
             )
 
-        if tools.Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
+        if tools.scm.Version(self, self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration("{} needs recent libstdc++ with charconv.".format(self.name))
 
     def source(self):

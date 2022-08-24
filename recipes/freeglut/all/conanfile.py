@@ -70,8 +70,8 @@ class freeglutConan(ConanFile):
             # and https://sourceforge.net/p/freeglut/bugs/218/
             # also, it seems to require `brew cask install xquartz`
             raise ConanInvalidConfiguration("%s does not support macos" % self.name)
-        if (self.settings.compiler == "gcc" and self.settings.compiler.version >= tools.Version("10.0")) or \
-            (self.settings.compiler == "clang" and self.settings.compiler.version >= tools.Version("11.0")):
+        if (self.settings.compiler == "gcc" and self.settings.compiler.version >= tools.scm.Version(self, "10.0")) or \
+            (self.settings.compiler == "clang" and self.settings.compiler.version >= tools.scm.Version(self, "11.0")):
             # see https://github.com/dcnieho/FreeGLUT/issues/86
             raise ConanInvalidConfiguration("%s does not support gcc >= 10 and clang >= 11" % self.name)
 

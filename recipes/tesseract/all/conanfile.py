@@ -55,7 +55,7 @@ class TesseractConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "5.0.0":
+        if tools.scm.Version(self, self.version) < "5.0.0":
             del self.options.with_libcurl
             del self.options.with_libarchive
 
@@ -78,9 +78,9 @@ class TesseractConan(ConanFile):
     def validate(self):
         # Check compiler version
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version.value)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version.value)
 
-        if tools.Version(self.version) >= "5.0.0":
+        if tools.scm.Version(self, self.version) >= "5.0.0":
             # 5.0.0 requires C++-17 compiler
             minimal_version = {
                 "Visual Studio": "16",
@@ -112,7 +112,7 @@ class TesseractConan(ConanFile):
         cmake.definitions["INSTALL_CONFIGS"] = self.options.with_training
 
         # pre-5.0.0 uses custom STATIC variable instead of BUILD_SHARED_LIBS
-        if tools.Version(self.version) < "5.0.0":
+        if tools.scm.Version(self, self.version) < "5.0.0":
             cmake.definitions["STATIC"] = not self.options.shared
 
         # Use CMake-based package build and dependency detection, not the pkg-config, cppan or SW
@@ -122,13 +122,13 @@ class TesseractConan(ConanFile):
         # disable autodetect of vector extensions and march=native
         cmake.definitions["ENABLE_OPTIMIZATIONS"] = self.options.with_auto_optimize
 
-        if tools.Version(self.version) < "5.0.0":
+        if tools.scm.Version(self, self.version) < "5.0.0":
             cmake.definitions["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
         cmake.definitions["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
 
-        if tools.Version(self.version) >= "5.0.0":
+        if tools.scm.Version(self, self.version) >= "5.0.0":
             cmake.definitions["DISABLE_CURL"] = not self.options.with_libcurl
             cmake.definitions["DISABLE_ARCHIVE"] = not self.options.with_libarchive
 
@@ -223,7 +223,7 @@ class TesseractConan(ConanFile):
     def _libname(self):
         suffix = ""
         if self.settings.os == "Windows":
-            v = tools.Version(self.version)
+            v = tools.scm.Version(self, self.version)
             suffix += "{}{}".format(v.major, v.minor)
             if self.settings.build_type == "Debug":
                 suffix += "d"

@@ -53,14 +53,14 @@ class SpirvtoolsConan(ConanFile):
 
     @property
     def _has_spirv_tools_lint(self):
-        return (tools.Version(self.version) < "2016.6" or # spirv-tools with vulkan versioning
-                tools.Version(self.version) >= "2021.3")
+        return (tools.scm.Version(self, self.version) < "2016.6" or # spirv-tools with vulkan versioning
+                tools.scm.Version(self, self.version) >= "2021.3")
 
     @property
     def _has_spirv_tools_diff(self):
         # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
-        return ((self._greater_equal_semver(self.version, "1.3.211") and tools.Version(self.version) < "2016.6") or # spirv-tools with vulkan versioning
-                tools.Version(self.version) >= "2022.2")
+        return ((self._greater_equal_semver(self.version, "1.3.211") and tools.scm.Version(self, self.version) < "2016.6") or # spirv-tools with vulkan versioning
+                tools.scm.Version(self, self.version) >= "2022.2")
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -122,11 +122,11 @@ class SpirvtoolsConan(ConanFile):
         # - Before 2020.5, the shared lib is always built, but static libs might be built as shared
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
         # - From 2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
-        if tools.Version(self.version) >= "2016.6" and tools.Version(self.version) < "2020.5":
+        if tools.scm.Version(self, self.version) >= "2016.6" and tools.scm.Version(self, self.version) < "2020.5":
             cmake.definitions["BUILD_SHARED_LIBS"] = False
         # From 2020.6, same behavior than above but through a weird combination
         # of SPIRV_TOOLS_BUILD_STATIC and BUILD_SHARED_LIBS.
-        if tools.Version(self.version) < "2016.6" or tools.Version(self.version) >= "2020.6":
+        if tools.scm.Version(self, self.version) < "2016.6" or tools.scm.Version(self, self.version) >= "2020.6":
             cmake.definitions["SPIRV_TOOLS_BUILD_STATIC"] = True
         #============
 

@@ -115,10 +115,10 @@ class GtsamConan(ConanFile):
         if self.options.with_TBB and not self.options["onetbb"].tbbmalloc:
             raise ConanInvalidConfiguration("gtsam with tbb requires onetbb:tbbmalloc=True")
 
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) < 15:
+        if is_msvc(self) and tools.scm.Version(self, self.settings.compiler.version) < 15:
             raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
 
-        if is_msvc(self) and tools.Version(self.version) >= '4.1' \
+        if is_msvc(self) and tools.scm.Version(self, self.version) >= '4.1' \
                 and self.options.shared:
             raise ConanInvalidConfiguration("GTSAM does not support shared builds on MSVC. see https://github.com/borglab/gtsam/issues/1087")
 
@@ -228,7 +228,7 @@ class GtsamConan(ConanFile):
             self.cpp_info.components["libgtsam"].requires.append("onetbb::onetbb")
         if self.options.support_nested_dissection:
             self.cpp_info.components["libgtsam"].requires.append("libmetis-gtsam")
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
+        if self.settings.os == "Windows" and tools.scm.Version(self, self.version) >= "4.0.3":
             self.cpp_info.components["libgtsam"].system_libs = ["dbghelp"]
 
         if self.options.build_unstable:

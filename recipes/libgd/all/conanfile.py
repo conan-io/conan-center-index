@@ -85,7 +85,7 @@ class LibgdConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        if tools.Version(self.version) >= "2.3.0":
+        if tools.scm.Version(self, self.version) >= "2.3.0":
             self._cmake.definitions["ENABLE_GD_FORMATS"] = True
         self._cmake.definitions["ENABLE_PNG"] = self.options.with_png
         self._cmake.definitions["ENABLE_LIQ"] = False
@@ -96,10 +96,10 @@ class LibgdConan(ConanFile):
         self._cmake.definitions["ENABLE_FREETYPE"] = self.options.with_freetype
         self._cmake.definitions["ENABLE_FONTCONFIG"] = False
         self._cmake.definitions["ENABLE_WEBP"] = False
-        if tools.Version(self.version) >= "2.3.2":
+        if tools.scm.Version(self, self.version) >= "2.3.2":
             self._cmake.definitions["ENABLE_HEIF"] = False
             self._cmake.definitions["ENABLE_AVIF"] = False
-        if tools.Version(self.version) >= "2.3.0":
+        if tools.scm.Version(self, self.version) >= "2.3.0":
             self._cmake.definitions["ENABLE_RAQM"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

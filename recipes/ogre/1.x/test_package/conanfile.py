@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["OGRE_VERSION"] = tools.Version(self.deps_cpp_info["ogre"].version)
+        cmake.definitions["OGRE_VERSION"] = tools.scm.Version(self, self.deps_cpp_info["ogre"].version)
         cmake.configure()
         cmake.build()
 

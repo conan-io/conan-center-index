@@ -49,7 +49,7 @@ class GetTextConan(ConanFile):
             self.build_requires("automake/1.16.5")
 
     def validate(self):
-        if tools.Version(self.version) < "0.21" and self.settings.compiler == "Visual Studio":
+        if tools.scm.Version(self, self.version) < "0.21" and self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
 
     def package_id(self):

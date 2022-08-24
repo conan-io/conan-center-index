@@ -71,7 +71,7 @@ class EastlConan(ConanFile):
             tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
 
         mininum_compiler_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if mininum_compiler_version and tools.Version(self.settings.compiler.version) < mininum_compiler_version:
+        if mininum_compiler_version and tools.scm.Version(self, self.settings.compiler.version) < mininum_compiler_version:
             raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
 
     def source(self):

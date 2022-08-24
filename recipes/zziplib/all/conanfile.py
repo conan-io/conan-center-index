@@ -115,5 +115,5 @@ class ZziplibConan(ConanFile):
     def _get_decorated_lib(self, name):
         suffix = ""
         if self.settings.build_type == "Release":
-            suffix += "-" + tools.Version(self.version).major
+            suffix += "-" + tools.scm.Version(self, self.version).major
         return name + suffix

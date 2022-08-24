@@ -41,7 +41,7 @@ class AwsCCommon(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "0.6.11":
+        if tools.scm.Version(self, self.version) < "0.6.11":
             del self.options.cpu_extensions
 
     def configure(self):
@@ -98,7 +98,7 @@ class AwsCCommon(ConanFile):
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
-            if tools.Version(self.version) >= "0.6.13":
+            if tools.scm.Version(self, self.version) >= "0.6.13":
                 self.cpp_info.components["aws-c-common-lib"].system_libs.append("shlwapi")
         if not self.options.shared:
             if tools.is_apple_os(self, self.settings.os):

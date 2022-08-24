@@ -27,7 +27,7 @@ class SimpleWebSocketServerConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1q")
         # only version 2.0.2 upwards is able to build against asio 1.18.0 or higher
-        if tools.Version(self.version) <= "2.0.1":
+        if tools.scm.Version(self, self.version) <= "2.0.1":
             if self.options.use_asio_standalone:
                 self.requires("asio/1.16.1")
             else:
@@ -43,9 +43,9 @@ class SimpleWebSocketServerConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "11")
 
     def build(self):
-        if tools.Version(self.version) <= "2.0.1" and "asio" in self.deps_cpp_info.deps and tools.Version(self.deps_cpp_info["asio"].version) >= "1.18.0":
+        if tools.scm.Version(self, self.version) <= "2.0.1" and "asio" in self.deps_cpp_info.deps and tools.scm.Version(self, self.deps_cpp_info["asio"].version) >= "1.18.0":
             raise ConanInvalidConfiguration("simple-websocket-server versions <=2.0.1 require asio < 1.18.0")
-        elif tools.Version(self.version) <= "2.0.1" and "boost" in self.deps_cpp_info.deps and tools.Version(self.deps_cpp_info["boost"].version) >= "1.74.0":
+        elif tools.scm.Version(self, self.version) <= "2.0.1" and "boost" in self.deps_cpp_info.deps and tools.scm.Version(self, self.deps_cpp_info["boost"].version) >= "1.74.0":
             raise ConanInvalidConfiguration("simple-websocket-server versions <=2.0.1 require boost < 1.74.0")
 
     def source(self):

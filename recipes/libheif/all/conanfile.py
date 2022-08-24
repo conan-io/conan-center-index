@@ -44,7 +44,7 @@ class Libheif(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "1.11.0":
+        if tools.scm.Version(self, self.version) < "1.11.0":
             # dav1d supported since 1.10.0 but usable option `WITH_DAV1D`
             # for controlling support exists only since 1.11.0
             del self.options.with_dav1d

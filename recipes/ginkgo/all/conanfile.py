@@ -139,7 +139,7 @@ class GinkgoConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "ginkgo")
 
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-        has_dpcpp_device = tools.Version(self.version) >= "1.4.0"
+        has_dpcpp_device = tools.scm.Version(self, self.version) >= "1.4.0"
 
         self.cpp_info.components["ginkgo_core"].set_property("cmake_target_name", "Ginkgo::ginkgo")
         self.cpp_info.components["ginkgo_core"].set_property("pkg_config_name", "ginkgo")

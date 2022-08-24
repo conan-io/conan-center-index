@@ -42,7 +42,7 @@ class BertrandConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("bertrand requires C++17, which your compiler ({} {}) does not support.".format(
                     self.settings.compiler, self.settings.compiler.version))
         else:

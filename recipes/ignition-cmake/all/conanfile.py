@@ -43,7 +43,7 @@ class IgnitionCmakeConan(ConanFile):
                     destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        version_major = tools.Version(self.version).major
+        version_major = tools.scm.Version(self, self.version).major
         env_build = RunEnvironment(self)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
@@ -55,7 +55,7 @@ class IgnitionCmakeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        version_major = tools.Version(self.version).major
+        version_major = tools.scm.Version(self, self.version).major
         cmake_config_files_dir = os.path.join(self.package_folder, "lib", "cmake",f"ignition-cmake{version_major}")
         files = os.listdir(cmake_config_files_dir)
 
@@ -71,7 +71,7 @@ class IgnitionCmakeConan(ConanFile):
         # add version information for downstream dependencies consuming ign-cmake through cmake_find_package generators 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.Version(self.version)
+            tools.scm.Version(self, self.version)
         )
 
     @staticmethod
@@ -86,7 +86,7 @@ class IgnitionCmakeConan(ConanFile):
         tools.files.save(self, module_file, content)
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
+        version_major = tools.scm.Version(self, self.version).major
         ign_cmake_component = f"ignition-cmake{version_major}"
         base_module_path = os.path.join(self.package_folder, "lib", "cmake", ign_cmake_component)
         ign_cmake_file = os.path.join(base_module_path, f"cmake{version_major}", "IgnCMake.cmake")

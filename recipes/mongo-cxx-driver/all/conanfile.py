@@ -118,7 +118,7 @@ class MongoCxxConan(ConanFile):
             self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if version < self._compilers_minimum_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(

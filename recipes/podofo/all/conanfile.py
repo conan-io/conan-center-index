@@ -88,7 +88,7 @@ class PodofoConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd") and tools.Version(self.version) >= "0.9.7":
+        if self.settings.compiler.get_safe("cppstd") and tools.scm.Version(self, self.version) >= "0.9.7":
             tools.build.check_min_cppstd(self, self, 11)
 
     def source(self):
@@ -103,7 +103,7 @@ class PodofoConan(ConanFile):
         cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
             cmake.definitions["PODOFO_NO_MULTITHREAD"] = True
-        if not tools.valid_min_cppstd(self, 11) and tools.Version(self.version) >= "0.9.7":
+        if not tools.valid_min_cppstd(self, 11) and tools.scm.Version(self, self.version) >= "0.9.7":
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
         # To install relocatable shared lib on Macos
@@ -133,7 +133,7 @@ class PodofoConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        podofo_version = tools.Version(self.version)
+        podofo_version = tools.scm.Version(self, self.version)
         pkg_config_name = f"libpodofo-{podofo_version.major}" if podofo_version < "0.9.7" else "libpodofo"
         self.cpp_info.set_property("pkg_config_name", pkg_config_name)
         self.cpp_info.names["pkg_config"] = pkg_config_name

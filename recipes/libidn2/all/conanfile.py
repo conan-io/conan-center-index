@@ -87,7 +87,7 @@ class LibIdn(ConanFile):
         if not self.options.shared:
             self._autotools.defines.append("IDN2_STATIC")
         if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) >= "12":
+            if tools.scm.Version(self, self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
             self._autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
         yes_no = lambda v: "yes" if v else "no"

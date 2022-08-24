@@ -236,12 +236,12 @@ class LibwebsocketsConan(ConanFile):
             self.requires("wolfssl/4.8.1")
 
     def validate(self):
-        if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.options.shared and self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if tools.Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+        if tools.scm.Version(self, self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.settings.compiler.version) >= "12":
             raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and tools.Version(self.version) >= "4.3.2":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < 16 and tools.scm.Version(self, self.version) >= "4.3.2":
             raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
@@ -427,13 +427,13 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
-        if tools.Version(self.version) >= "4.1.0":
+        if tools.scm.Version(self, self.version) >= "4.1.0":
             self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
             self._cmake.definitions["DISABLE_WERROR"] = True
 
         # Temporary override Windows 10 SDK for Visual Studio 2019, see issue #4450
         # CCI worker has 10.0.17763.0 SDK installed alongside with 10.0.20348 but only 20348 can be used with Visual Studio 2019
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == 16:
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) == 16:
             self._cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.20348"
 
         self._cmake.configure()
@@ -446,15 +446,15 @@ class LibwebsocketsConan(ConanFile):
             "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
             "",
         )
-        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl:
+        if tools.scm.Version(self, self.version) == "4.0.15" and self.options.with_ssl:
             tools.files.replace_in_file(self, 
                 cmakelists,
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
-        if tools.Version(self.version) < "4.1.0":
+        if tools.scm.Version(self, self.version) < "4.1.0":
             tools.files.replace_in_file(self, cmakelists, "-Werror", "")
-        if tools.Version(self.version) >= "4.1.4":
+        if tools.scm.Version(self, self.version) >= "4.1.4":
             tools.files.replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):

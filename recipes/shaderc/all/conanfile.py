@@ -44,7 +44,7 @@ class ShadercConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "2020.4":
+        if tools.scm.Version(self, self.version) >= "2020.4":
             del self.options.spvc
 
     def configure(self):

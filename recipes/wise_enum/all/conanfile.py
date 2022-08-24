@@ -34,7 +34,7 @@ class WiseEnumConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "11")
 
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
 
         minimal_version = {
            "gcc": "5"

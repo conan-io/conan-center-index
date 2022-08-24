@@ -50,11 +50,11 @@ class GtkConan(ConanFile):
 
     @property
     def _gtk4(self):
-        return tools.Version("4.0.0") <= tools.Version(self.version) < tools.Version("5.0.0")
+        return tools.scm.Version(self, "4.0.0") <= tools.scm.Version(self, self.version) < tools.scm.Version(self, "5.0.0")
 
     @property
     def _gtk3(self):
-        return tools.Version("3.0.0") <= tools.Version(self.version) < tools.Version("4.0.0")
+        return tools.scm.Version(self, "3.0.0") <= tools.scm.Version(self, self.version) < tools.scm.Version(self, "4.0.0")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -67,7 +67,7 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
-        if tools.Version(self.version) >= "4.1.0":
+        if tools.scm.Version(self, self.version) >= "4.1.0":
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
@@ -76,16 +76,16 @@ class GtkConan(ConanFile):
             del self.options.with_x11
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.2":
+            if tools.scm.Version(self, self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
             if not self.options["gdk-pixbuf"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.options["cairo"].shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared cairo")
-        if tools.Version(self.version) >= "4.1.0":
+        if tools.scm.Version(self, self.version) >= "4.1.0":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
 
@@ -163,7 +163,7 @@ class GtkConan(ConanFile):
             defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             defs["print-cups"] = enabled_disabled(self.options.with_cups)
-            if tools.Version(self.version) < "4.3.2":
+            if tools.scm.Version(self, self.version) < "4.3.2":
                 defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
@@ -175,11 +175,11 @@ class GtkConan(ConanFile):
             tools.files.patch(self, **patch)
         if self._gtk3:
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
-        if "4.2.0" <= tools.Version(self.version) < "4.6.1":
+        if "4.2.0" <= tools.scm.Version(self, self.version) < "4.6.1":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "gtk_update_icon_cache: true",
                                   "gtk_update_icon_cache: false")
-        if "4.6.2" <= tools.Version(self.version):
+        if "4.6.2" <= tools.scm.Version(self, self.version):
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "dependency(is_msvc_like ? ",
                                   "dependency(false ? ")

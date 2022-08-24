@@ -55,7 +55,7 @@ class SQLiteCppConan(ConanFile):
         self.requires("sqlite3/3.38.5")
 
     def validate(self):
-        if tools.Version(self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
+        if tools.scm.Version(self, self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, 11)
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
@@ -68,9 +68,9 @@ class SQLiteCppConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         if self.settings.compiler == "clang" and \
-           tools.Version(self.settings.compiler.version) < "6.0" and \
+           tools.scm.Version(self, self.settings.compiler.version) < "6.0" and \
            self.settings.compiler.libcxx == "libc++" and \
-           tools.Version(self.version) < "3":
+           tools.scm.Version(self, self.version) < "3":
             tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "include", "SQLiteCpp", "Utils.h"),
                 "const nullptr_t nullptr = {};",

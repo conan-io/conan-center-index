@@ -24,7 +24,7 @@ class VincentlaucsbCsvParserConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 11)
 
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
         if compiler == "gcc" and compiler_version < "7":
             raise ConanInvalidConfiguration("gcc version < 7 not supported")
 

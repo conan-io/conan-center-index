@@ -36,7 +36,7 @@ class PranavCSV2Conan(ConanFile):
 
         minimum_version = self._compiler_required_cpp11.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++11, which your compiler does not support.".format(self.name))
         else:
             self.output.warn("{0} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name))

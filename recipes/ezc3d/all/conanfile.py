@@ -62,7 +62,7 @@ class Ezc3dConan(ConanFile):
         cmake.definitions["USE_MATRIX_FAST_ACCESSOR"] = True
         cmake.definitions["BINDER_PYTHON3"] = False
         cmake.definitions["BINDER_MATLAB"] = False
-        if tools.Version(self.version) >= "1.4.3":
+        if tools.scm.Version(self, self.version) >= "1.4.3":
             cmake.definitions["BINDER_OCTAVE"] = False
         cmake.definitions["BUILD_EXAMPLE"] = False
         cmake.definitions["BUILD_DOC"] = False

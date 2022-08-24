@@ -79,12 +79,12 @@ class LibtorrentConan(ConanFile):
         }.get(str(self.settings.compiler))
         if min_compiler_version is None:
             self.output.warn("Unknown compiler. Assuming it is supporting c++14")
-        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+        if tools.scm.Version(self, self.settings.compiler.version) < min_compiler_version:
             raise ConanInvalidConfiguration("This compiler (version) does not support c++ 14.")
         return True, None
 
     def validate(self):
-        if tools.Version(self.version) < "2.0":
+        if tools.scm.Version(self, self.version) < "2.0":
             if self.settings.compiler.get_safe("cppstd"):
                 tools.build.check_min_cppstd(self, self, 11)
         else:
@@ -93,7 +93,7 @@ class LibtorrentConan(ConanFile):
                 tools.build.check_min_cppstd(self, self, 14)
 
     def requirements(self):
-        if tools.Version(self.version) < "2.0.0":
+        if tools.scm.Version(self, self.version) < "2.0.0":
             self.requires("boost/1.79.0")
         else:
             self.requires("boost/1.76.0")
@@ -103,7 +103,7 @@ class LibtorrentConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def _validate_dependency_graph(self):
-        if tools.Version(self.deps_cpp_info["boost"].version) < "1.69.0" and \
+        if tools.scm.Version(self, self.deps_cpp_info["boost"].version) < "1.69.0" and \
            (self.options["boost"].header_only or self.options["boost"].without_system):
             raise ConanInvalidConfiguration("libtorrent requires boost with system, which is non-header only in boost < 1.69.0")
 
@@ -138,7 +138,7 @@ class LibtorrentConan(ConanFile):
             tools.files.patch(self, **patch_data)
 
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
-        if tools.Version(self.version) < "2.0":
+        if tools.scm.Version(self, self.version) < "2.0":
             if self.options.enable_iconv:
                 replace = "find_public_dependency(Iconv REQUIRED)"
             else:

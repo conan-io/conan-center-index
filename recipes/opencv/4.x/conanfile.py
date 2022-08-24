@@ -220,7 +220,7 @@ class OpenCVConan(ConanFile):
     def validate(self):
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
+        if self.settings.compiler == "clang" and tools.scm.Version(self, self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.with_cuda and not self.options.contrib:
             raise ConanInvalidConfiguration("contrib must be enabled for cuda")
@@ -262,7 +262,7 @@ class OpenCVConan(ConanFile):
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
-        if tools.Version(self.version) < "4.1.2":
+        if tools.scm.Version(self, self.version) < "4.1.2":
             install_layout_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
         else:
             install_layout_file = os.path.join(self._source_subfolder, "cmake", "OpenCVInstallLayout.cmake")
@@ -287,7 +287,7 @@ class OpenCVConan(ConanFile):
               set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
             endif()''')
             # in 'if' block, get_target_property() produces an error
-            if tools.Version(self.version) >= "4.4.0":
+            if tools.scm.Version(self, self.version) >= "4.4.0":
                 tools.files.replace_in_file(self, find_protobuf,
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
@@ -302,9 +302,9 @@ class OpenCVConan(ConanFile):
             gapi_cmake = os.path.join(self._source_subfolder, "modules", "gapi", "CMakeLists.txt")
             tools.files.replace_in_file(self, gapi_cmake, " ade)", " ade::ade)")
 
-        if self.options.contrib and self.options.contrib_sfm and tools.Version(self.version) <= "4.5.2":
+        if self.options.contrib and self.options.contrib_sfm and tools.scm.Version(self, self.version) <= "4.5.2":
             sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
-            ver = tools.Version(self.version)
+            ver = tools.scm.Version(self, self.version)
             if ver <= "4.5.0":
                 search = '  find_package(Glog QUIET)\nendif()'
             else:
@@ -466,7 +466,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath
         if self.options.get_safe("with_jpeg2000") == "openjpeg":
-            openjpeg_version = tools.Version(self.deps_cpp_info["openjpeg"].version)
+            openjpeg_version = tools.scm.Version(self, self.deps_cpp_info["openjpeg"].version)
             self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
             self._cmake.definitions["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
             self._cmake.definitions["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
@@ -561,7 +561,7 @@ class OpenCVConan(ConanFile):
         if gtk_version == "system":
             return self.options["gtk"].version == 2
         else:
-            return tools.Version(gtk_version) < "3.0.0"
+            return tools.scm.Version(self, gtk_version) < "3.0.0"
 
     @property
     def _opencv_components(self):

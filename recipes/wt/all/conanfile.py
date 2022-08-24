@@ -100,7 +100,7 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        if tools.Version(self.version) >= "4.6.0":
+        if tools.scm.Version(self, self.version) >= "4.6.0":
             self.requires("boost/1.78.0")
         else:
             self.requires("boost/1.76.0")

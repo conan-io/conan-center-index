@@ -73,15 +73,15 @@ class LibdbConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
-            if tools.Version(self.settings.compiler.version) == "16":
+            if tools.scm.Version(self, self.settings.compiler.version) == "16":
                 raise ConanInvalidConfiguration("Visual Studio 2019 not supported.")
 
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang":
-                if tools.Version(self.settings.compiler.version) <= "5":
+                if tools.scm.Version(self, self.settings.compiler.version) <= "5":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
             if self.settings.compiler == "apple-clang":
-                if tools.Version(self.settings.compiler.version) < "10":
+                if tools.scm.Version(self, self.settings.compiler.version) < "10":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
 
     def build_requirements(self):
@@ -127,7 +127,7 @@ class LibdbConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+        if self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",

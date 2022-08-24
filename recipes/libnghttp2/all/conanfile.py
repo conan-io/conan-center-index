@@ -80,7 +80,7 @@ class Nghttp2Conan(ConanFile):
     def validate(self):
         if self.options.with_asio and self._is_msvc:
             raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
     def source(self):
@@ -104,7 +104,7 @@ class Nghttp2Conan(ConanFile):
 
         cmake.definitions["ENABLE_ASIO_LIB"] = self.options.with_asio
 
-        if tools.Version(self.version) >= "1.42.0":
+        if tools.scm.Version(self, self.version) >= "1.42.0":
             # backward-incompatible change in 1.42.0
             cmake.definitions["STATIC_LIB_SUFFIX"] = "_static"
 
@@ -161,7 +161,7 @@ class Nghttp2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["nghttp2"].set_property("pkg_config_name", "libnghttp2")
-        suffix = "_static" if tools.Version(self.version) > "1.39.2" and not self.options.shared else ""
+        suffix = "_static" if tools.scm.Version(self, self.version) > "1.39.2" and not self.options.shared else ""
         self.cpp_info.components["nghttp2"].libs = [f"nghttp2{suffix}"]
         if self._is_msvc and not self.options.shared:
             self.cpp_info.components["nghttp2"].defines.append("NGHTTP2_STATICLIB")

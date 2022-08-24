@@ -61,7 +61,7 @@ class STXConan(ConanFile):
             )
 
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
 
         if compiler.get_safe('cppstd'):
             tools.build.check_min_cppstd(self, self, 17)
@@ -101,7 +101,7 @@ class STXConan(ConanFile):
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
-                tools.Version(self.version) <= '1.0.1'):
+                tools.scm.Version(self, self.version) <= '1.0.1'):
             raise ConanInvalidConfiguration(
                 'shared library build does not work on windows with '
                 'STX version <= 1.0.1'

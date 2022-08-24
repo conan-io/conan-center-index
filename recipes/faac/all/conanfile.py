@@ -47,7 +47,7 @@ class FaacConan(ConanFile):
 
     @property
     def _has_mp4_option(self):
-        return tools.Version(self.version) < "1.29.1"
+        return tools.scm.Version(self, self.version) < "1.29.1"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

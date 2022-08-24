@@ -110,7 +110,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.1")
         if self.options.with_opencolorio:
-            if tools.Version(self.version) < "2.3.7.2":
+            if tools.scm.Version(self, self.version) < "2.3.7.2":
                 self.requires("opencolorio/1.1.1")
             else:
                 self.requires("opencolorio/2.1.0")
@@ -142,7 +142,7 @@ class OpenImageIOConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if tools.Version(self.version) >= "2.3.0.0" or self.options.with_openvdb:
+            if tools.scm.Version(self, self.version) >= "2.3.0.0" or self.options.with_openvdb:
                 tools.build.check_min_cppstd(self, self, 14)
             else:
                 tools.build.check_min_cppstd(self, self, 11)

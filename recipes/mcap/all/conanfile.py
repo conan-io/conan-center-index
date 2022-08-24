@@ -30,19 +30,19 @@ class McapConan(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.3")
         self.requires("zstd/1.5.2")
-        if tools.Version(self.version) < "0.1.1":
+        if tools.scm.Version(self, self.version) < "0.1.1":
             self.requires("fmt/8.1.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, "17")
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) <= 11:
+        if self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.settings.compiler.version) <= 11:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.Version(self.settings.compiler.version) <= 8:
+        if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.scm.Version(self, self.settings.compiler.version) <= 8:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if tools.Version(self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
+        if tools.scm.Version(self, self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler support is added in 0.1.1")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16:
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < 16:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
 
     def package(self):

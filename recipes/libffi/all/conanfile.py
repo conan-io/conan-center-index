@@ -73,8 +73,8 @@ class LibffiConan(ConanFile):
         configure_path = os.path.join(self._source_subfolder, "configure")
         tools.files.replace_in_file(self, configure_path, "-install_name \\$rpath/", "-install_name @rpath/")
 
-        if tools.Version(self.version) < "3.3":
-            if self.settings.compiler == "clang" and tools.Version(str(self.settings.compiler.version)) >= 7.0:
+        if tools.scm.Version(self, self.version) < "3.3":
+            if self.settings.compiler == "clang" and tools.scm.Version(self, str(self.settings.compiler.version)) >= 7.0:
                 # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
                 sysv_s_src = os.path.join(self._source_subfolder, "src", "arm", "sysv.S")
                 tools.files.replace_in_file(self, sysv_s_src, "fldmiad", "vldmia")

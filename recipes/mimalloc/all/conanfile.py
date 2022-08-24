@@ -122,7 +122,7 @@ class MimallocConan(ConanFile):
 
         if not minimum_version:
             self.output.warn("mimalloc requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++17")
 
     def source(self):
@@ -140,7 +140,7 @@ class MimallocConan(ConanFile):
         cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
-        if tools.Version(self.version) >= "1.7.0":
+        if tools.scm.Version(self, self.version) >= "1.7.0":
             cmake.definitions["MI_INSTALL_TOPLEVEL"] = "ON"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake

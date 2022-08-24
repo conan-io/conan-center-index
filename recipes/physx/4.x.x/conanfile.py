@@ -85,7 +85,7 @@ class PhysXConan(ConanFile):
         if self.settings.os == "Windows" and not self._is_msvc:
             raise ConanInvalidConfiguration("{} only supports Visual Studio on Windows".format(self.name))
 
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 9:
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < 9:
             raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
 
         if self._is_msvc:
@@ -284,7 +284,7 @@ class PhysXConan(ConanFile):
         # application uses GPU features.
         external_bin_dir = os.path.join(self.source_folder, self._source_subfolder, "physx", "bin")
         physx_build_type = self._get_physx_build_type()
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
 
         if self.settings.os == "Linux" and self.settings.arch == "x86_64":
             physx_gpu_dir = os.path.join(external_bin_dir, "linux.clang", physx_build_type)

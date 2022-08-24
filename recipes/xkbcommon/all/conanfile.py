@@ -42,7 +42,7 @@ class XkbcommonConan(ConanFile):
 
     @property
     def _has_xkbregistry_option(self):
-        return tools.Version(self.version) >= "1.0.0"
+        return tools.scm.Version(self, self.version) >= "1.0.0"
 
     def config_options(self):
         if not self._has_xkbregistry_option:
@@ -145,7 +145,7 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland", "wayland-protocols::wayland-protocols"]
 
-        if tools.Version(self.version) >= "1.0.0":
+        if tools.scm.Version(self, self.version) >= "1.0.0":
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)

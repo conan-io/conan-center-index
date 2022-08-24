@@ -36,7 +36,7 @@ class VerilatorConan(ConanFile):
             
     @property
     def _needs_old_bison(self):
-        return tools.Version(self.version) < "4.100"
+        return tools.scm.Version(self, self.version) < "4.100"
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
@@ -58,7 +58,7 @@ class VerilatorConan(ConanFile):
                 self.build_requires("bison/3.5.3")
             else:
                 self.build_requires("bison/3.7.6")
-        if tools.Version(self.version) >= "4.224":
+        if tools.scm.Version(self, self.version) >= "4.224":
             self.build_requires("autoconf/2.71")
 
 
@@ -76,10 +76,10 @@ class VerilatorConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
-        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if tools.scm.Version(self, self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
         
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.200":
+        if self.settings.os == "Windows" and tools.scm.Version(self, self.version) >= "4.200":
             raise ConanInvalidConfiguration("Windows build is not yet supported. Contributions are welcome")
     @contextmanager
     def _build_context(self):
@@ -115,7 +115,7 @@ class VerilatorConan(ConanFile):
             if yacc.endswith(" -y"):
                 yacc = yacc[:-3]
         with tools.environment_append({"YACC": yacc}):
-            if tools.Version(self.version) >= "4.224":
+            if tools.scm.Version(self, self.version) >= "4.224":
                with tools.files.chdir(self, self._source_subfolder):
                     self.run("autoconf", win_bash=tools.os_info.is_windows, run_environment=True)
             self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
@@ -135,7 +135,7 @@ class VerilatorConan(ConanFile):
         return args
 
     def _patch_sources(self):
-        if tools.Version(self.version) < "4.200":
+        if tools.scm.Version(self, self.version) < "4.200":
             for patch in self.conan_data["patches"][self.version]:
                 tools.files.patch(self, **patch)
 

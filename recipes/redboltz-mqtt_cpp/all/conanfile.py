@@ -40,7 +40,7 @@ class MqttCPPConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not support.".format(self.name))
         else:
             self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))

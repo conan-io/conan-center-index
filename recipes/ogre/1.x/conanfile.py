@@ -130,9 +130,9 @@ class ogrecmakeconan(ConanFile):
          OGRE 1.x is very old and will not work with latest gcc, clang and msvc compilers.
          TODO: determine incompatible msvc compilers
         """
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) >= 11:
+        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) >= 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with gcc version greater than 11")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= 11:
+        if self.settings.compiler == "clang" and tools.scm.Version(self, self.settings.compiler.version) >= 11:
             raise ConanInvalidConfiguration("OGRE 1.x not supported with clang version greater than 11")
         
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
@@ -242,7 +242,7 @@ class ogrecmakeconan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.Version(self.version)
+            tools.scm.Version(self, self.version)
         )
         
         

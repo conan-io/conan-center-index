@@ -67,7 +67,7 @@ class LibaomAv1Conan(ConanFile):
             tools.build.check_min_cppstd(self, self, 11)
         # Check compiler version
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version.value)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version.value)
 
         minimal_version = {
             "Visual Studio": "15",
@@ -84,7 +84,7 @@ class LibaomAv1Conan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder,
-                  strip_root=tools.Version(self.version) >= "3.3.0")
+                  strip_root=tools.scm.Version(self, self.version) >= "3.3.0")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):

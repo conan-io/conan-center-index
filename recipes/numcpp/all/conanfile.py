@@ -30,12 +30,12 @@ class NumCppConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if tools.Version(self.version) < "2.5.0":
+        if tools.scm.Version(self, self.version) < "2.5.0":
             del self.options.with_boost
             self.options.threads = True
 
     def requirements(self):
-        if tools.Version(self.version) < "2.5.0" or self.options.with_boost:
+        if tools.scm.Version(self, self.version) < "2.5.0" or self.options.with_boost:
             self.requires("boost/1.78.0")
 
     def package_id(self):
@@ -58,7 +58,7 @@ class NumCppConan(ConanFile):
             self.output.warn(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
@@ -77,9 +77,9 @@ class NumCppConan(ConanFile):
         if not self.options.get_safe("with_boost", False):
             self.cpp_info.defines.append("NUMCPP_NO_USE_BOOST")
 
-        if tools.Version(self.version) < "2.5.0" and not self.options.threads:
+        if tools.scm.Version(self, self.version) < "2.5.0" and not self.options.threads:
             self.cpp_info.defines.append("NO_MULTITHREAD")
-        if tools.Version(self.version) >= "2.5.0" and self.options.threads:
+        if tools.scm.Version(self, self.version) >= "2.5.0" and self.options.threads:
             self.cpp_info.defines.append("NUMCPP_USE_MULTITHREAD")
 
         self.cpp_info.bindirs = []

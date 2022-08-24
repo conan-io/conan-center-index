@@ -477,13 +477,13 @@ class OpenSceneGraphConanFile(ConanFile):
         if tools.is_apple_os(self, self.settings.os):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
-        if ((self.settings.os == "Macos" and self.settings.os.version and tools.Version(self.settings.os.version) >= "10.8")
-                or (self.settings.os == "iOS" and tools.Version(self.settings.os.version) >= "6.0")):
+        if ((self.settings.os == "Macos" and self.settings.os.version and tools.scm.Version(self, self.settings.os.version) >= "10.8")
+                or (self.settings.os == "iOS" and tools.scm.Version(self, self.settings.os.version) >= "6.0")):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
-        if self.settings.os == "Macos" and self.settings.os.version and tools.Version(self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
+        if self.settings.os == "Macos" and self.settings.os.version and tools.scm.Version(self, self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
             setup_plugin("qt").frameworks = ["QuickTime"]
 
         if self.settings.os == "Macos" and self.settings.arch == "x86":

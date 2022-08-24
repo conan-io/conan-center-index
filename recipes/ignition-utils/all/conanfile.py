@@ -66,7 +66,7 @@ class IgnitionUitlsConan(ConanFile):
                 )
             )
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires c++17 support. The current compiler {} {} does not support it.".format(
                         self.name,
@@ -105,7 +105,7 @@ class IgnitionUitlsConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cli_header_src = os.path.join(self._source_subfolder, "cli", "include")
-        if int(tools.Version(self.version).minor) == 0:
+        if int(tools.scm.Version(self, self.version).minor) == 0:
             cli_header_src = os.path.join(cli_header_src, "ignition", "utils", "cli")
         else:
             cli_header_src = os.path.join(cli_header_src, "external-cli", "ignition", "utils", "cli")
@@ -123,7 +123,7 @@ class IgnitionUitlsConan(ConanFile):
         
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.Version(self.version)
+            tools.scm.Version(self, self.version)
         )
 
     @staticmethod
@@ -137,7 +137,7 @@ class IgnitionUitlsConan(ConanFile):
         tools.files.save(self, module_file, content)
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
+        version_major = tools.scm.Version(self, self.version).major
         lib_name = f"ignition-utils{version_major}"
         build_dirs = os.path.join(self.package_folder, "lib", "cmake")
         include_dir = os.path.join("include", "ignition", "utils"+version_major)

@@ -51,7 +51,7 @@ class LibxlsxwriterConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if tools.Version(self.version) <= "1.0.5" and self.options.md5 == "openssl":
+        if tools.scm.Version(self, self.version) <= "1.0.5" and self.options.md5 == "openssl":
             raise ConanInvalidConfiguration("{0}:md5=openssl is not suppported in {0}/{1}".format(self.name, self.version))
 
     def requirements(self):

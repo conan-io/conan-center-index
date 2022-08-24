@@ -63,9 +63,9 @@ class LibpqxxConan(ConanFile):
                 .format(self.name,))
 
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
 
-        lib_version = tools.Version(self.version)
+        lib_version = tools.scm.Version(self, self.version)
         lib_version_7_6_0_or_later = lib_version >= "7.6.0"
         minimum_compiler_version = {
             "Visual Studio": "16" if lib_version_7_6_0_or_later else "15",
@@ -86,7 +86,7 @@ class LibpqxxConan(ConanFile):
 
         if self.settings.os == "Macos":
             os_version = self.settings.get_safe("os.version")
-            if os_version and tools.Version(os_version) < self._mac_os_minimum_required_version:
+            if os_version and tools.scm.Version(self, os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 

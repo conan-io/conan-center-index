@@ -71,19 +71,19 @@ class ZXingCppConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        cpp_version = 17 if tools.Version(self.version) >= "1.2.0" else 14
+        cpp_version = 17 if tools.scm.Version(self, self.version) >= "1.2.0" else 14
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, cpp_version)
         min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
 
-        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+        if min_version and tools.scm.Version(self, self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
                 "This compiler is too old. {} needs a compiler with c++{} support".format(self.name, cpp_version)
             )
 
         # FIXME: This is a workaround for "The system cannot execute the specified program."
-        if tools.Version(self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
+        if tools.scm.Version(self, self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
 
     def source(self):
@@ -93,7 +93,7 @@ class ZXingCppConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        if tools.Version(self.version) < "1.1":
+        if tools.scm.Version(self, self.version) < "1.1":
             cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
             cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
         else:
@@ -123,7 +123,7 @@ class ZXingCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZXing")
         self.cpp_info.set_property("cmake_target_name", "ZXing::ZXing")
         self.cpp_info.set_property("pkg_config_name", "zxing")
-        self.cpp_info.libs = ["ZXingCore" if tools.Version(self.version) < "1.1" else "ZXing"]
+        self.cpp_info.libs = ["ZXingCore" if tools.scm.Version(self, self.version) < "1.1" else "ZXing"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
 

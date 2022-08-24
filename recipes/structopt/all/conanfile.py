@@ -48,7 +48,7 @@ class StructoptConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
                                                 "(https://github.com/p-ranav/structopt#compiler-compatibility)."
                                                 .format(self.settings.compiler, self.settings.compiler.version))

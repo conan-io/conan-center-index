@@ -57,7 +57,7 @@ class DlibConan(ConanFile):
 
     @property
     def _has_with_webp_option(self):
-        return tools.Version(self.version) >= "19.24"
+        return tools.scm.Version(self, self.version) >= "19.24"
 
     def config_options(self):
         if self.settings.os == "Windows":

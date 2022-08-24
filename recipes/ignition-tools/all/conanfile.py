@@ -56,7 +56,7 @@ class IgnitionToolsConan(ConanFile):
                 )
             )
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires c++17 support. The current compiler {} {} does not support it.".format(
                         self.name,
@@ -95,7 +95,7 @@ class IgnitionToolsConan(ConanFile):
             tools.files.rm(self, os.path.join(self.package_folder, "bin"), dll_pattern_to_remove)
 
     def package_info(self):
-        version_major = tools.Version(self.version).major
+        version_major = tools.scm.Version(self, self.version).major
         self.cpp_info.names["cmake_find_package"] = "ignition-tools{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-tools{}".format(version_major)
 

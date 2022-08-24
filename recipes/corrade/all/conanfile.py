@@ -65,7 +65,7 @@ class CorradeConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if is_msvc(self) and tools.Version(vs_ide_version(self)) < 14:
+        if is_msvc(self) and tools.scm.Version(self, vs_ide_version(self)) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
 
         if not self.options.with_utility and (self.options.with_testsuite or self.options.with_interconnect or self.options.with_pluginmanager):

@@ -242,7 +242,7 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
-        charls = "dcmtkcharls" if tools.Version("3.6.6") <= self.version else "charls"
+        charls = "dcmtkcharls" if tools.scm.Version(self, "3.6.6") <= self.version else "charls"
 
         return {
             "ofstd"   : charset_conversion(),

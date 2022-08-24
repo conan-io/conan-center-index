@@ -37,7 +37,7 @@ class Sol2Conan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, "14")
         compiler = str(self.settings.compiler)
-        comp_version = tools.Version(self.settings.compiler.version)
+        comp_version = tools.scm.Version(self, self.settings.compiler.version)
         compilers = {"Visual Studio": "14", "gcc": "5",
                      "clang": "3.2", "apple-clang": "4.3"}
         min_version = compilers.get(compiler)

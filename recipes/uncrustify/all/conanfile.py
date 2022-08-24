@@ -27,7 +27,7 @@ class UncrustifyConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.name} requires GCC >=8")
 
     def source(self):

@@ -145,7 +145,7 @@ class LeptonicaConan(ConanFile):
                               "if (WEBP_FOUND)\n"
                               "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
         tools.files.replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
-        if tools.Version(self.version) >= "1.79.0":
+        if tools.scm.Version(self, self.version) >= "1.79.0":
             tools.files.replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
         if not self.options.with_webp:
             tools.files.replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
@@ -156,7 +156,7 @@ class LeptonicaConan(ConanFile):
         # There's no error because it's not including the header with the
         # deprecation macros.
         if self.settings.os == "Macos" and self.settings.os.version:
-            if tools.Version(self.settings.os.version) < "10.13":
+            if tools.scm.Version(self, self.settings.os.version) < "10.13":
                 tools.files.replace_in_file(self, cmake_configure,
                                       "set(functions_list\n    "
                                       "fmemopen\n    fstatat\n)",
@@ -167,7 +167,7 @@ class LeptonicaConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if tools.Version(self.version) < "1.79.0":
+        if tools.scm.Version(self, self.version) < "1.79.0":
             self._cmake.definitions["STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_PROG"] = False
         self._cmake.definitions["SW_BUILD"] = False

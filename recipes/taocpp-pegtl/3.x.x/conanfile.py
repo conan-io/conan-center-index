@@ -55,7 +55,7 @@ class TaoCPPPEGTLConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
         if self.version == "3.0.0" and self.settings.compiler == "clang" and \
            compiler_version >= "10" and compiler_version < "12":
             raise ConanInvalidConfiguration("{} {} doesn't support filesystem experimental".format(self.name, self.version))
@@ -82,7 +82,7 @@ class TaoCPPPEGTLConan(ConanFile):
             self.cpp_info.components["_taocpp-pegtl"].requires.append("boost::filesystem")
             self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_BOOST_FILESYSTEM")
         else:
-            compiler_version = tools.Version(self.settings.compiler.version)
+            compiler_version = tools.scm.Version(self, self.settings.compiler.version)
             if self.settings.compiler == "clang" and compiler_version >= "10" and compiler_version < "12":
                 self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_STD_EXPERIMENTAL_FILESYSTEM")
 

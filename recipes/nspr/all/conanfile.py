@@ -57,7 +57,7 @@ class NsprConan(ConanFile):
 
     def validate(self):
         # https://bugzilla.mozilla.org/show_bug.cgi?id=1658671
-        if tools.Version(self.version) < "4.29":
+        if tools.scm.Version(self, self.version) < "4.29":
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("NSPR does not support mac M1 before 4.29")
 

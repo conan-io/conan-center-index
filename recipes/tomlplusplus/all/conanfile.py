@@ -29,7 +29,7 @@ class TomlPlusPlusConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" or tools.Version(self.version) >= "3.0.0" else "15",
+            "Visual Studio": "16" if tools.scm.Version(self, self.version) < "2.2.0" or tools.scm.Version(self, self.version) >= "3.0.0" else "15",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
@@ -50,15 +50,15 @@ class TomlPlusPlusConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires c++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 
-        if self.settings.compiler == "apple-clang" and tools.Version(self.version) < "2.3.0":
+        if self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.version) < "2.3.0":
             raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
                     self.settings.compiler, self.settings.compiler.version))
 
-        if is_msvc(self) and tools.Version(self.version) == "2.1.0":
+        if is_msvc(self) and tools.scm.Version(self, self.version) == "2.1.0":
                 raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
                         self.settings.compiler, self.settings.compiler.version))
 

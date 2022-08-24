@@ -73,8 +73,8 @@ class DateConan(ConanFile):
         cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
         cmake.definitions["BUILD_TZ_LIB"] = not self.options.header_only
         # workaround for clang 5 not having string_view
-        if tools.Version(self.version) >= "3.0.0" and self.settings.compiler == "clang" \
-                and tools.Version(self.settings.compiler.version) <= "5.0":
+        if tools.scm.Version(self, self.version) >= "3.0.0" and self.settings.compiler == "clang" \
+                and tools.scm.Version(self, self.settings.compiler.version) <= "5.0":
             cmake.definitions["DISABLE_STRING_VIEW"] = True
         cmake.configure()
 
@@ -114,7 +114,7 @@ class DateConan(ConanFile):
         if not self.options.header_only:
             self.cpp_info.components["date-tz"].names["cmake_find_package"] = "date-tz"
             self.cpp_info.components["date-tz"].names["cmake_find_package_multi"] = "date-tz"
-            lib_name = "{}tz".format("date-" if tools.Version(self.version) >= "3.0.0" else "")
+            lib_name = "{}tz".format("date-" if tools.scm.Version(self, self.version) >= "3.0.0" else "")
             self.cpp_info.components["date-tz"].libs = [lib_name]
             if self.settings.os == "Linux":
                 self.cpp_info.components["date-tz"].system_libs.append("pthread")

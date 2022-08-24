@@ -78,7 +78,7 @@ class DracoConan(ConanFile):
         cmake = CMake(self)
 
         # use different cmake definitions based on package version
-        if tools.Version(self.version) < "1.4.0":
+        if tools.scm.Version(self, self.version) < "1.4.0":
             cmake.definitions["ENABLE_POINT_CLOUD_COMPRESSION"] = self.options.enable_point_cloud_compression
             cmake.definitions["ENABLE_MESH_COMPRESSION"] = self.options.enable_mesh_compression
             if self.options.enable_mesh_compression:
@@ -147,7 +147,7 @@ class DracoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if tools.Version(self.version) < "1.4.0":
+        if tools.scm.Version(self, self.version) < "1.4.0":
             tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "draco"))
         else:
             tools.files.rmdir(self, os.path.join(self.package_folder, "share"))

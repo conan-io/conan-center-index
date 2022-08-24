@@ -100,7 +100,7 @@ class XmlSecConan(ConanFile):
         with self._msvc_build_environment():
             crypto_engines = []
             if self.options.with_openssl:
-                ov = tools.Version(self.deps_cpp_info["openssl"].version)
+                ov = tools.scm.Version(self, self.deps_cpp_info["openssl"].version)
                 crypto_engines.append("openssl={}{}0".format(ov.major, ov.minor))
             args = [
                 "cscript",
@@ -208,16 +208,16 @@ class XmlSecConan(ConanFile):
 
     def package_info(self):
         prefix = "lib" if self._is_msvc else ""
-        infix = "" if self._is_msvc else str(tools.Version(self.version).major)
+        infix = "" if self._is_msvc else str(tools.scm.Version(self, self.version).major)
         suffix = "_a" if self._is_msvc and not self.options.shared else ""
 
         get_libname = lambda libname: prefix + "xmlsec" + infix + (("-" + libname) if libname else "") + suffix
 
         self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
-        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
+        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.scm.Version(self, self.version).major)))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
         self.cpp_info.components["libxmlsec"].set_property(
-            "pkg_config_name", "xmlsec{}".format(tools.Version(self.version).major)
+            "pkg_config_name", "xmlsec{}".format(tools.scm.Version(self, self.version).major)
         )
         if not self.options.shared:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
@@ -236,5 +236,5 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
             self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
             self.cpp_info.components["openssl"].set_property(
-                "pkg_config_name", "xmlsec{}-openssl".format(tools.Version(self.version).major)
+                "pkg_config_name", "xmlsec{}-openssl".format(tools.scm.Version(self, self.version).major)
             )

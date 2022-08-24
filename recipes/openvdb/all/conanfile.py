@@ -91,7 +91,7 @@ class OpenVDBConan(ConanFile):
 
     def _check_compilier_version(self):
         compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         minimum_version = self._compilers_min_version.get(compiler, False)
         if minimum_version and version < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires a {compiler} version greater than {minimum_version}")

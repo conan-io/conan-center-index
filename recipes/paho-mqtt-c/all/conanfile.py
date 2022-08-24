@@ -42,7 +42,7 @@ class PahoMqttcConan(ConanFile):
 
     @property
     def _has_high_performance_option(self):
-        return tools.Version(self.version) >= "1.3.2"
+        return tools.scm.Version(self, self.version) >= "1.3.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,7 +65,7 @@ class PahoMqttcConan(ConanFile):
             self.requires("openssl/1.1.1q")
 
     def validate(self):
-        if not self.options.shared and tools.Version(self.version) < "1.3.4":
+        if not self.options.shared and tools.scm.Version(self, self.version) < "1.3.4":
             raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
 
     def package_id(self):
@@ -168,6 +168,6 @@ class PahoMqttcConan(ConanFile):
             target += "s"
         if not self.options.shared:
             # https://github.com/eclipse/paho.mqtt.c/blob/317fb008e1541838d1c29076d2bc5c3e4b6c4f53/src/CMakeLists.txt#L154
-            if tools.Version(self.version) < "1.3.2" or self.settings.os == "Windows":
+            if tools.scm.Version(self, self.version) < "1.3.2" or self.settings.os == "Windows":
                 target += "-static"
         return target

@@ -72,7 +72,7 @@ class PROPOSALConan(ConanFile):
             self.output.warn(
                 "PROPOSAL requires C++14. Your compiler is unknown. Assuming it supports C++14."
             )
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "PROPOSAL requires gcc >= 5, clang >= 5 or Visual Studio >= 15 as a compiler!"
             )

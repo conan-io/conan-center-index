@@ -41,7 +41,7 @@ class WaylandProtocolsConan(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        if tools.Version(self.version) <= 1.23:
+        if tools.scm.Version(self, self.version) <= 1.23:
             # fixed upstream in https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/113
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "meson.build"),
                                   "dep_scanner = dependency('wayland-scanner', native: true)",

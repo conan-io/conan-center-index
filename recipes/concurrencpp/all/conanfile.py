@@ -68,7 +68,7 @@ class ConcurrencppConan(ConanFile):
             self.output.warn(
                 "concurrencpp requires C++20. Your compiler is unknown. Assuming it supports C++20."
             )
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "concurrencpp requires clang >= 11 or Visual Studio >= 16.8.2 as a compiler!"
             )

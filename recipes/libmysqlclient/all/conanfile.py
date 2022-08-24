@@ -41,17 +41,17 @@ class LibMysqlClientCConan(ConanFile):
 
     @property
     def _with_zstd(self):
-        return tools.Version(self.version) > "8.0.17"
+        return tools.scm.Version(self, self.version) > "8.0.17"
 
     @property
     def _with_lz4(self):
-        return tools.Version(self.version) > "8.0.17"
+        return tools.scm.Version(self, self.version) > "8.0.17"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16" if tools.Version(self.version) > "8.0.17" else "15",
-            "gcc": "7" if tools.Version(self.version) >= "8.0.27" else "5.3",
+            "Visual Studio": "16" if tools.scm.Version(self, self.version) > "8.0.17" else "15",
+            "gcc": "7" if tools.scm.Version(self, self.version) >= "8.0.27" else "5.3",
             "clang": "6",
         }
 
@@ -101,22 +101,22 @@ class LibMysqlClientCConan(ConanFile):
         #             error: expected unqualified-id MYSQL_VERSION_MAJOR=8
         #             error: no member named 'ptrdiff_t' in the global namespace
         if self.version == "8.0.17" and self.settings.compiler == "apple-clang" and \
-           tools.Version(self.settings.compiler.version) >= "12.0":
+           tools.scm.Version(self, self.settings.compiler.version) >= "12.0":
             raise ConanInvalidConfiguration("libmysqlclient 8.0.17 doesn't support apple-clang >= 12.0")
 
         # mysql>=8.0.17 doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
-        if tools.Version(self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
+        if tools.scm.Version(self, self.version) >= "8.0.17" and self.settings.compiler == "apple-clang" and \
            self.options.shared:
             raise ConanInvalidConfiguration("{}/{} doesn't support shared library".format( self.name, self.version))
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and tools.Version(self.version) < "8.0.29":
+        if self.settings.compiler.get_safe("cppstd") == "20" and tools.scm.Version(self, self.version) < "8.0.29":
             raise ConanInvalidConfiguration("{}/{} doesn't support C++20".format(self.name, self.version))
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self, self.settings.os):
+        if tools.scm.Version(self, self.version) >= "8.0.25" and tools.is_apple_os(self, self.settings.os):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":
@@ -170,7 +170,7 @@ class LibMysqlClientCConan(ConanFile):
 
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL"]
-        if tools.Version(self.version) > "8.0.17":
+        if tools.scm.Version(self, self.version) > "8.0.17":
             deps_shared.extend(["KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"])
         for dep in deps_shared:
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -183,7 +183,7 @@ class LibMysqlClientCConan(ConanFile):
         rename(self, "CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
-                "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
+                "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.scm.Version(self, self.version) < "8.0.25" else "libmysql_api_test"),
                 "COMMAND DYLD_LIBRARY_PATH=%s %s" %(os.path.join(self.build_folder, "library_output_directory"), os.path.join(self.build_folder, "runtime_output_directory", "libmysql_api_test")))
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
             "  INSTALL_DEBUG_SYMBOLS(",
@@ -254,10 +254,10 @@ class LibMysqlClientCConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            if tools.Version(self.version) >= "8.0.25":
+            if tools.scm.Version(self, self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("resolv")
         if self.settings.os == "Windows":
-            if tools.Version(self.version) >= "8.0.25":
+            if tools.scm.Version(self, self.version) >= "8.0.25":
                 self.cpp_info.system_libs.append("dnsapi")
             self.cpp_info.system_libs.append("secur32")
 

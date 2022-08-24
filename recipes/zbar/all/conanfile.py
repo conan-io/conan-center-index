@@ -73,12 +73,12 @@ class ZbarConan(ConanFile):
             self.requires("gtk/4.7.0")
         if self.options.with_qt:
             self.requires("qt/5.15.5")
-        if tools.Version(self.version) >= "0.22":
+        if tools.scm.Version(self, self.version) >= "0.22":
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20210814")
-        if tools.Version(self.version) >= "0.22":
+        if tools.scm.Version(self, self.version) >= "0.22":
             self.build_requires("automake/1.16.5")
             self.build_requires("gettext/0.21")
             self.build_requires("pkgconf/1.7.4")
@@ -91,7 +91,7 @@ class ZbarConan(ConanFile):
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
-        if tools.Version(self.version) >= "0.22" and cross_building(self):
+        if tools.scm.Version(self, self.version) >= "0.22" and cross_building(self):
             raise ConanInvalidConfiguration("{} can't be built on cross building environment currently because autopoint(part of gettext) doesn't execute correctly.".format(self.name))
 
     def source(self):
@@ -100,7 +100,7 @@ class ZbarConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            if tools.Version(self.version) >= "0.22":
+            if tools.scm.Version(self, self.version) >= "0.22":
                 with tools.files.chdir(self, self._source_subfolder):
                     self.run("autoreconf -fiv")
             self._autotools = AutoToolsBuildEnvironment(self)
@@ -135,7 +135,7 @@ class ZbarConan(ConanFile):
         autotools.make()
 
     def package(self):
-        if tools.Version(self.version) < "0.23":
+        if tools.scm.Version(self, self.version) < "0.23":
             self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         else:
             self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")

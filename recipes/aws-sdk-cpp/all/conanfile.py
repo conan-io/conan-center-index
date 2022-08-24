@@ -330,7 +330,7 @@ class AwsSdkCppConan(ConanFile):
 
     @property
     def _use_aws_crt_cpp(self):
-        return tools.Version(self.version) >= "1.9"
+        return tools.scm.Version(self, self.version) >= "1.9"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -340,7 +340,7 @@ class AwsSdkCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "1.9":
+        if tools.scm.Version(self, self.version) < "1.9":
             delattr(self.options, "s3-crt")
 
     def configure(self):
@@ -366,14 +366,14 @@ class AwsSdkCppConan(ConanFile):
     def validate(self):
         if (self.options.shared
             and self.settings.compiler == "gcc"
-            and tools.Version(self.settings.compiler.version) < "6.0"):
+            and tools.scm.Version(self, self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration(
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-        if (tools.Version(self.version) < "1.9.234"
+        if (tools.scm.Version(self, self.version) < "1.9.234"
             and self.settings.compiler == "gcc"
-            and tools.Version(self.settings.compiler.version) >= "11.0"
+            and tools.scm.Version(self, self.settings.compiler.version) >= "11.0"
             and self.settings.build_type == "Release"):
             raise ConanInvalidConfiguration(
                 "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "

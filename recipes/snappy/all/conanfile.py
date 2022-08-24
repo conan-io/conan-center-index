@@ -59,12 +59,12 @@ class SnappyConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SNAPPY_BUILD_TESTS"] = False
-        if tools.Version(self.version) >= "1.1.8":
+        if tools.scm.Version(self, self.version) >= "1.1.8":
             self._cmake.definitions["SNAPPY_FUZZING_BUILD"] = False
             self._cmake.definitions["SNAPPY_REQUIRE_AVX"] = False
             self._cmake.definitions["SNAPPY_REQUIRE_AVX2"] = False
             self._cmake.definitions["SNAPPY_INSTALL"] = True
-        if tools.Version(self.version) >= "1.1.9":
+        if tools.scm.Version(self, self.version) >= "1.1.9":
             self._cmake.definitions["SNAPPY_BUILD_BENCHMARKS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

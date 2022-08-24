@@ -45,7 +45,7 @@ class AwsCAuth(ConanFile):
         self.requires("aws-c-cal/0.5.13")
         self.requires("aws-c-io/0.10.20")
         self.requires("aws-c-http/0.6.13")
-        if tools.Version(self.version) >= "0.6.5":
+        if tools.scm.Version(self, self.version) >= "0.6.5":
             self.requires("aws-c-sdkutils/0.1.2")
 
     def source(self):
@@ -89,5 +89,5 @@ class AwsCAuth(ConanFile):
             "aws-c-io::aws-c-io-lib",
             "aws-c-http::aws-c-http-lib"
         ]
-        if tools.Version(self.version) >= "0.6.5":
+        if tools.scm.Version(self, self.version) >= "0.6.5":
             self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils-lib")

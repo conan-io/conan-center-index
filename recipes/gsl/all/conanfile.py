@@ -109,7 +109,7 @@ class GslConan(ConanFile):
 
         if is_msvc(self):
             if self.settings.compiler == "Visual Studio" and \
-               tools.Version(self.settings.compiler.version) >= "12":
+               tools.scm.Version(self, self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")
             args.extend([

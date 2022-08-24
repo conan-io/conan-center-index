@@ -26,7 +26,7 @@ class CrowConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        if tools.Version(self.deps_cpp_info["boost"].version) >= "1.70.0":
+        if tools.scm.Version(self, self.deps_cpp_info["boost"].version) >= "1.70.0":
             raise ConanInvalidConfiguration("Crow requires Boost <1.70.0")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

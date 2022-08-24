@@ -87,7 +87,7 @@ class GodotCppConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if version < minimal_version[compiler]:
             if compiler in ["apple-clang", "clang"]:
                 raise ConanInvalidConfiguration(

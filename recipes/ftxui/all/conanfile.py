@@ -48,7 +48,7 @@ class FTXUIConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
+        version = tools.scm.Version(self, self.settings.compiler.version)
         if compiler == 'gcc' and version < '8':
             raise ConanInvalidConfiguration("gcc 8 required")
         if compiler.get_safe("cppstd"):

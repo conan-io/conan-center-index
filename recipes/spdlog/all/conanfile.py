@@ -52,13 +52,13 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.10.0":
+        if tools.scm.Version(self, self.version) >= "1.10.0":
             self.requires("fmt/8.1.1")
-        elif tools.Version(self.version) >= "1.9.0":
+        elif tools.scm.Version(self, self.version) >= "1.9.0":
             self.requires("fmt/8.0.1")
-        elif tools.Version(self.version) >= "1.7.0":
+        elif tools.scm.Version(self, self.version) >= "1.7.0":
             self.requires("fmt/7.1.3")
-        elif tools.Version(self.version) >= "1.5.0":
+        elif tools.scm.Version(self, self.version) >= "1.5.0":
             self.requires("fmt/6.2.1")
         else:
             self.requires("fmt/6.0.0")
@@ -67,7 +67,7 @@ class SpdlogConan(ConanFile):
         if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self.options.get_safe("shared", False):
-            if self.settings.os == "Windows" and tools.Version(self.version) < "1.6.0":
+            if self.settings.os == "Windows" and tools.scm.Version(self, self.version) < "1.6.0":
                 raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
@@ -110,7 +110,7 @@ class SpdlogConan(ConanFile):
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
-        if tools.Version(self.version) < "1.7" and tools.Version(self.deps_cpp_info["fmt"].version) >= "7":
+        if tools.scm.Version(self, self.version) < "1.7" and tools.scm.Version(self, self.deps_cpp_info["fmt"].version) >= "7":
             raise ConanInvalidConfiguration("The project {}/{} requires fmt < 7.x".format(self.name, self.version))
 
         self._disable_werror()

@@ -229,7 +229,7 @@ class TkConan(ConanFile):
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
-            tk_version = tools.Version(self.version)
+            tk_version = tools.scm.Version(self, self.version)
             lib_infix = "{}{}".format(tk_version.major, tk_version.minor)
             tk_suffix = "t{}{}{}".format(
                 "" if self.options.shared else "s",
@@ -237,7 +237,7 @@ class TkConan(ConanFile):
                 "x" if "MD" in str(self.settings.compiler.runtime) and not self.options.shared else "",
             )
         else:
-            tk_version = tools.Version(self.version)
+            tk_version = tools.scm.Version(self, self.version)
             lib_infix = "{}.{}".format(tk_version.major, tk_version.minor)
             tk_suffix = ""
         self.cpp_info.libs = ["tk{}{}".format(lib_infix, tk_suffix), "tkstub{}".format(lib_infix)]

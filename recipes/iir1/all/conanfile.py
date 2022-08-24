@@ -53,7 +53,7 @@ class Iir1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "1.9.1":
+        if tools.scm.Version(self, self.version) < "1.9.1":
             del self.options.noexceptions
 
     def configure(self):
@@ -64,7 +64,7 @@ class Iir1Conan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, self._min_cppstd)
 
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
         if self.settings.compiler == "gcc" and compiler_version <= 5:
             raise ConanInvalidConfiguration("GCC version < 5 not supported")
 

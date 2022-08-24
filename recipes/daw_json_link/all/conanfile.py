@@ -29,9 +29,9 @@ class DawJsonLinkConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if tools.Version(self.version) < "2.11.0":
+        if tools.scm.Version(self, self.version) < "2.11.0":
             self.requires("daw_header_libraries/1.29.7")
-        elif tools.Version(self.version) < "2.12.0":
+        elif tools.scm.Version(self, self.version) < "2.12.0":
             self.requires("daw_header_libraries/2.5.3")
         else:
             self.requires("daw_header_libraries/2.68.1")
@@ -43,7 +43,7 @@ class DawJsonLinkConan(ConanFile):
 
         minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
         else:
             self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))

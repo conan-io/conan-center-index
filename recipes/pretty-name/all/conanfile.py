@@ -46,7 +46,7 @@ class PrettyNameConan(ConanFile):
         if not minimum_version:
             self.output.warn(
                 "pretty-name requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "pretty-name requires C++14, which your compiler does not support.")
 

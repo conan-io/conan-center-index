@@ -29,7 +29,7 @@ class PprintConan(ConanFile):
         }.get(str(self.settings.compiler), None)
 
         if min_compiler_version:
-            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("The compiler does not support c++17")
         else:
             self.output.warn("pprint needs a c++17 capable compiler")

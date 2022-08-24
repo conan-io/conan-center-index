@@ -57,7 +57,7 @@ class NvclothConan(ConanFile):
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
             raise ConanInvalidConfiguration("Current build_type is not supported")
 
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) < 9:
+        if is_msvc(self) and tools.scm.Version(self, self.settings.compiler.version) < 9:
             raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
 
     def _configure_cmake(self):

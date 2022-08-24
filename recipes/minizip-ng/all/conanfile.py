@@ -140,7 +140,7 @@ class MinizipNgConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
-        suffix = "" if tools.Version(self.version) < "3.0.5" or self.options.mz_compatibility else "-ng"
+        suffix = "" if tools.scm.Version(self, self.version) < "3.0.5" or self.options.mz_compatibility else "-ng"
         self.cpp_info.components["minizip"].libs = [f"{prefix}minizip{suffix}"]
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append("HAVE_LZMA")

@@ -50,9 +50,9 @@ class LibsystemdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "249.5":
+        if tools.scm.Version(self, self.version) >= "249.5":
             self.build_requires("meson/0.60.2")
-        elif tools.Version(self.version) >= "248.3":
+        elif tools.scm.Version(self, self.version) >= "248.3":
             # Mason 0.60.0.rc1 introduced a breaking change addressed in 249.5
             # https://github.com/mesonbuild/meson/commit/43302d3296baff6aeaf8e03f5d701b0402e37a6c
             # https://github.com/systemd/systemd-stable/commit/c29537f39e4f413a6cbfe9669fa121bdd6d8b36f
@@ -176,5 +176,5 @@ class LibsystemdConan(ConanFile):
         # FIXME: this `.version` should only happen for the `pkg_config`
         #  generator (see https://github.com/conan-io/conan/issues/8202)
         # systemd uses only major version in its .pc file
-        self.cpp_info.version = tools.Version(self.version).major
+        self.cpp_info.version = tools.scm.Version(self, self.version).major
         self.cpp_info.system_libs = ["rt", "pthread", "dl"]

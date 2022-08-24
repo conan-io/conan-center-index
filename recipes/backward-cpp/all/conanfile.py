@@ -42,7 +42,7 @@ class BackwardCppConan(ConanFile):
     @property
     def _supported_os(self):
         supported_os = ["Linux", "Macos", "Android"]
-        if tools.Version(self.version) >= "1.5":
+        if tools.scm.Version(self, self.version) >= "1.5":
             supported_os.append("Windows")
         return supported_os
 

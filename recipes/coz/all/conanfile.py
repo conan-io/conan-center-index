@@ -25,7 +25,7 @@ class CozConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
         if self.settings.os == "Macos" or compiler == "Visual Studio" or (
                 compiler == "gcc" and compiler_version < "5.0"):
             raise ConanInvalidConfiguration(

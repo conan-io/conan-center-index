@@ -49,7 +49,7 @@ class IslConan(ConanFile):
         if self.options.with_int != "gmp":
             # FIXME: missing imath recipe
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < 16 and self.settings.compiler.runtime == "MDd":
             # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
             raise ConanInvalidConfiguration("isl fails to link with this version of visual studio and MDd runtime")
 
@@ -107,9 +107,9 @@ class IslConan(ConanFile):
                 "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
             ])
         if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) >= 15:
+            if tools.scm.Version(self, self.settings.compiler.version) >= 15:
                 self._autotools.flags.append("-Zf")
-            if tools.Version(self.settings.compiler.version) >= 12:
+            if tools.scm.Version(self, self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools

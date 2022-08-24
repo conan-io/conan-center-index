@@ -188,7 +188,7 @@ class QtConan(ConanFile):
             verstr = mybuf.getvalue().strip().split("Python ")[1]
             if verstr.endswith("+"):
                 verstr = verstr[:-1]
-            version = tools.Version(verstr)
+            version = tools.scm.Version(self, verstr)
             # >= 2.7.5 & < 3
             v_min = "2.7.5"
             v_max = "3.0.0"
@@ -212,12 +212,12 @@ class QtConan(ConanFile):
             del self.options.with_fontconfig
             del self.options.with_libalsa
         if self.settings.compiler == "apple-clang":
-            if tools.Version(self.settings.compiler.version) < "10.0":
+            if tools.scm.Version(self, self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
         if self.settings.compiler in ["gcc", "clang"]:
-            if tools.Version(self.settings.compiler.version) < "5.0":
+            if tools.scm.Version(self, self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
-        if self.settings.compiler in ["gcc", "clang"] and tools.Version(self.settings.compiler.version) < "5.3":
+        if self.settings.compiler in ["gcc", "clang"] and tools.scm.Version(self, self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
             self.options.with_mysql = False
@@ -309,7 +309,7 @@ class QtConan(ConanFile):
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
@@ -329,10 +329,10 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
         if self.settings.compiler == "apple-clang":
-            if tools.Version(self.settings.compiler.version) < "10.0":
+            if tools.scm.Version(self, self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
         if self.settings.compiler in ["gcc", "clang"]:
-            if tools.Version(self.settings.compiler.version) < "5.0":
+            if tools.scm.Version(self, self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
 
         if self.options.get_safe("with_pulseaudio", default=False) and not self.options["pulseaudio"].with_glib:
@@ -815,7 +815,7 @@ Examples = bin/datadir/examples""")
         extension = ""
         if self.settings.os == "Windows":
             extension = ".exe"
-        v = tools.Version(self.version)
+        v = tools.scm.Version(self, self.version)
         filecontents = textwrap.dedent("""\
             set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
             set(QT_VERSION_MAJOR {major})

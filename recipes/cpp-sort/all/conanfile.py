@@ -40,7 +40,7 @@ class CppSortConan(ConanFile):
         compiler = self.settings.compiler
         try:
             min_version = self._minimum_compilers_version[str(compiler)]
-            if tools.Version(compiler.version) < min_version:
+            if tools.scm.Version(self, compiler.version) < min_version:
                 msg = (
                     "{} requires C++{} features which are not supported by compiler {} {}."
                 ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
@@ -64,7 +64,7 @@ class CppSortConan(ConanFile):
         cmake.install()
 
         # Copy license files
-        if tools.Version(self.version) < "1.8.0":
+        if tools.scm.Version(self, self.version) < "1.8.0":
             license_files = ["license.txt"]
         else:
             license_files = ["LICENSE.txt", "NOTICE.txt"]

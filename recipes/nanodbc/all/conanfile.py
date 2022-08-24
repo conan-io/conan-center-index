@@ -54,7 +54,7 @@ class NanodbcConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 14)
         _minimum_compiler = self._compiler_cxx14.get(str(self.settings.compiler))
         if _minimum_compiler:
-            if tools.Version(self.settings.compiler.version) < _minimum_compiler:
+            if tools.scm.Version(self, self.settings.compiler.version) < _minimum_compiler:
                 raise ConanInvalidConfiguration("nanodbc requires c++14, which your compiler does not support")
         else:
             self.output.warn("nanodbc requires c++14, but is unknown to this recipe. Assuming your compiler supports c++14.")

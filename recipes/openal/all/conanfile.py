@@ -47,7 +47,7 @@ class OpenALConan(ConanFile):
 
     @property
     def _openal_cxx_backend(self):
-        return tools.Version(self.version) >= "1.20"
+        return tools.scm.Version(self, self.version) >= "1.20"
 
     def configure(self):
         if self.options.shared:
@@ -65,39 +65,39 @@ class OpenALConan(ConanFile):
     @property
     def _supports_cxx14(self):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
+            if tools.scm.Version(self, self.settings.compiler.version) < "9":
                 return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
         min_version = {
             "Visual Studio": "15",
             "gcc": "5",
             "clang": "5",
         }.get(str(self.settings.compiler))
-        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+        if min_version and tools.scm.Version(self, self.settings.compiler.version) < min_version:
             return False, "This compiler version does not support c++14"
         return True, None
 
     @property
     def _supports_cxx11(self):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
+            if tools.scm.Version(self, self.settings.compiler.version) < "9":
                 return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
         min_version = {
             "Visual Studio": "13",
             "gcc": "5",
             "clang": "5",
         }.get(str(self.settings.compiler))
-        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+        if min_version and tools.scm.Version(self, self.settings.compiler.version) < min_version:
             return False, "This compiler version does not support c++11"
         return True, None
 
     def validate(self):
-        if tools.Version(self.version) >= "1.21":
+        if tools.scm.Version(self, self.version) >= "1.21":
             ok, msg = self._supports_cxx14
             if not ok:
                 raise ConanInvalidConfiguration(msg)
             if msg:
                 self.output.warn(msg)
-        elif tools.Version(self.version) >= "1.20":
+        elif tools.scm.Version(self, self.version) >= "1.20":
             ok, msg = self._supports_cxx11
             if not ok:
                 raise ConanInvalidConfiguration(msg)

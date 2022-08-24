@@ -85,7 +85,7 @@ class CryptoPPConan(ConanFile):
         self._cmake.definitions["USE_INTERMEDIATE_OBJECTS_TARGET"] = False
         if self.settings.os == "Android":
             self._cmake.definitions["CRYPTOPP_NATIVE_ARCH"] = True
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) <= "8.4.0":
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.scm.Version(self, self.version) <= "8.4.0":
             self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

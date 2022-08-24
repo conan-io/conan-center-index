@@ -45,7 +45,7 @@ class WasmtimeCppConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 17)
         min_version = self._minimum_compilers_version[str(compiler)]
         try:
-            if tools.Version(compiler.version) < min_version:
+            if tools.scm.Version(self, compiler.version) < min_version:
                 msg = (
                     "{} requires C++{} features which are not supported by compiler {} {} !!"
                 ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)

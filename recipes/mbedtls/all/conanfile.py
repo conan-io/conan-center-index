@@ -45,7 +45,7 @@ class MBedTLSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "3.0.0":
+        if tools.scm.Version(self, self.version) >= "3.0.0":
             # ZLIB support has been ditched on version 3.0.0
             del self.options.with_zlib
 
@@ -54,7 +54,7 @@ class MBedTLSConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if tools.Version(self.version) >= "2.23.0":
+        if tools.scm.Version(self, self.version) >= "2.23.0":
             self.license = "Apache-2.0"
 
     def requirements(self):
@@ -62,14 +62,14 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/1.2.12")
 
     def validate(self):
-        if tools.Version(self.version) >= "2.23.0" \
+        if tools.scm.Version(self, self.version) >= "2.23.0" \
             and self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.name}/{self.version} does not support shared build on Windows"
                 )
 
-        if tools.Version(self.version) >= "2.23.0" \
-            and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if tools.scm.Version(self, self.version) >= "2.23.0" \
+            and self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler}-{self.settings.compiler.version} is not supported by this recipe"
@@ -82,7 +82,7 @@ class MBedTLSConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if tools.Version(self.version) < "2.23.0":
+        if tools.scm.Version(self, self.version) < "2.23.0":
             # No warnings as errors
             cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
             tools.files.replace_in_file(self, cmakelists, "-Werror", "")
@@ -93,13 +93,13 @@ class MBedTLSConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
         cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-        if tools.Version(self.version) < "3.0.0":
+        if tools.scm.Version(self, self.version) < "3.0.0":
             cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         cmake.definitions["ENABLE_PROGRAMS"] = False
-        if tools.Version(self.version) >= "2.23.0":
+        if tools.scm.Version(self, self.version) >= "2.23.0":
             cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
         cmake.definitions["ENABLE_TESTING"] = False
-        if tools.Version(self.version) < "3.0.0":
+        if tools.scm.Version(self, self.version) < "3.0.0":
             # relocatable shared libs on macOS
             cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         cmake.configure()
@@ -112,7 +112,7 @@ class MBedTLSConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        if tools.Version(self.version) < "2.23.0": # less then 2.23 is multi-licensed
+        if tools.scm.Version(self, self.version) < "2.23.0": # less then 2.23 is multi-licensed
             if self._license == "gpl":
                 self.copy("gpl-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
             else:

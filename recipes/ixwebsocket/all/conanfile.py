@@ -39,7 +39,7 @@ class IXWebSocketConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "10.1.5":
+        if tools.scm.Version(self, self.version) < "10.1.5":
             # zlib is always required before 10.1.5
             del self.options.with_zlib
 
@@ -59,7 +59,7 @@ class IXWebSocketConan(ConanFile):
     def _can_use_openssl(self):
         if self.settings.os == "Windows":
             # Future: support for OpenSSL on Windows was introduced in 7.9.3. Earlier versions force MbedTLS
-            return tools.Version(self.version) >= "7.9.3"
+            return tools.scm.Version(self, self.version) >= "7.9.3"
         # The others do, by default, support OpenSSL and MbedTLS. Non-standard operating systems might
         # be a challenge.
         # Older versions doesn't support OpenSSL on Mac, but those are unlikely to be built now.
@@ -68,7 +68,7 @@ class IXWebSocketConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             # After version 11.0.8, IXWebSocket is fully compatible with C++ 11. https://github.com/machinezone/IXWebSocket/commit/ee5a2eb46ee0e109415dc02b0db85a9c76256090
-            tools.build.check_min_cppstd(self, self, 14 if tools.Version(self.version) < "11.0.8" else 11)
+            tools.build.check_min_cppstd(self, self, 14 if tools.scm.Version(self, self.version) < "11.0.8" else 11)
         if self.options.tls == "applessl" and not tools.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
         elif not self._can_use_openssl and self.options.tls == "openssl":
@@ -88,16 +88,16 @@ class IXWebSocketConan(ConanFile):
         tools.files.replace_in_file(self, cmakelists, "MBEDTLS_INCLUDE_DIRS", "MbedTLS_INCLUDE_DIRS")
         tools.files.replace_in_file(self, cmakelists, "MBEDTLS_LIBRARIES", "MbedTLS_LIBRARIES")
         # Do not force PIC
-        if tools.Version(self.version) >= "9.5.7":
+        if tools.scm.Version(self, self.version) >= "9.5.7":
             tools.files.replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         # Allow shared
-        if tools.Version(self.version) < "11.1.4":
+        if tools.scm.Version(self, self.version) < "11.1.4":
             tools.files.replace_in_file(self, cmakelists, "add_library( ixwebsocket STATIC", "add_library( ixwebsocket")
-        if tools.Version(self.version) < "9.8.5":
+        if tools.scm.Version(self, self.version) < "9.8.5":
             tools.files.replace_in_file(self, cmakelists,
                                   "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib",
                                   "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
-        elif tools.Version(self.version) < "11.4.3":
+        elif tools.scm.Version(self, self.version) < "11.4.3":
             tools.files.replace_in_file(self, cmakelists,
                                   "ARCHIVE DESTINATION lib",
                                   "ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
@@ -114,7 +114,7 @@ class IXWebSocketConan(ConanFile):
         self._cmake.definitions["USE_MBED_TLS"] = self.options.tls == "mbedtls"
         self._cmake.definitions["USE_OPEN_SSL"] = self.options.tls == "openssl"
         # Apple configures itself if USE_TLS True, and USE_MBED_TLS + USE_OPEN_SSL False
-        if tools.Version(self.version) >= "10.1.5":
+        if tools.scm.Version(self, self.version) >= "10.1.5":
             self._cmake.definitions["USE_ZLIB"] = self.options.with_zlib
 
         self._cmake.configure()

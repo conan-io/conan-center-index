@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        version = tools.Version(self.deps_cpp_info["openimageio"].version)
+        version = tools.scm.Version(self, self.deps_cpp_info["openimageio"].version)
         cmake = CMake(self)
         cmake.definitions["CMAKE_CXX_STANDARD"] = 14 if version >= "2.3.0.0" else 11
         cmake.configure()

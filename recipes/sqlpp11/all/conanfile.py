@@ -21,7 +21,7 @@ class Sqlpp11Conan(ConanFile):
 
     @property
     def _min_stdcpp_version(self):
-        return 11 if tools.Version(self.version) < "0.61" else 14
+        return 11 if tools.scm.Version(self, self.version) < "0.61" else 14
 
     @property
     def _compilers_minimum_version(self):
@@ -42,7 +42,7 @@ class Sqlpp11Conan(ConanFile):
         if self._min_stdcpp_version > 11:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version:
-                if tools.Version(self.settings.compiler.version) < minimum_version:
+                if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
                     raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
             else:
                 self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")

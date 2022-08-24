@@ -103,7 +103,7 @@ class GlpkConan(ConanFile):
         if is_msvc(self):
             self._autotools.defines.append("__WOE__")
             if self.settings.compiler == "Visual Studio" and \
-               tools.Version(self.settings.compiler.version) >= "12":
+               tools.scm.Version(self, self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools

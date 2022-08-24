@@ -77,7 +77,7 @@ class GlslangConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 11)
 
         # see https://github.com/KhronosGroup/glslang/issues/2283
-        glslang_version = tools.Version(self.version)
+        glslang_version = tools.scm.Version(self, self.version)
         if (self.options.shared and
             (self.settings.os == "Windows" or \
              (glslang_version >= "7.0.0" and glslang_version < "11.0.0" and tools.is_apple_os(self, self.settings.os)))
@@ -117,7 +117,7 @@ class GlslangConan(ConanFile):
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
                 {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
-            glslang_version = tools.Version(self.version)
+            glslang_version = tools.scm.Version(self, self.version)
             if glslang_version >= "7.0.0" and glslang_version < "11.0.0":
                 cmake_files_to_fix.append({"target": "glslang"    , "relpath": os.path.join("glslang", "CMakeLists.txt")})
             else:
@@ -137,7 +137,7 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
         self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
-        glslang_version = tools.Version(self.version)
+        glslang_version = tools.scm.Version(self, self.version)
         if glslang_version < "7.0.0" or glslang_version >= "8.13.3743":
             self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
             self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
@@ -180,7 +180,7 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
 
-        glslang_version = tools.Version(self.version)
+        glslang_version = tools.scm.Version(self, self.version)
         if (glslang_version < "7.0.0" or glslang_version >= "11.0.0"):
             if self.options.shared:
                 self.cpp_info.components["glslang-core"].defines.append("GLSLANG_IS_SHARED_LIBRARY")

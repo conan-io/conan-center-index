@@ -39,7 +39,7 @@ class QuaZIPConan(ConanFile):
 
     @property
     def _qt_major(self):
-        return tools.Version(self.deps_cpp_info["qt"].version).major
+        return tools.scm.Version(self, self.deps_cpp_info["qt"].version).major
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -83,7 +83,7 @@ class QuaZIPConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        quazip_major = tools.Version(self.version).major
+        quazip_major = tools.scm.Version(self, self.version).major
         self.cpp_info.set_property("cmake_file_name", f"QuaZip-Qt{self._qt_major}")
         self.cpp_info.set_property("cmake_target_name", "QuaZip::QuaZip")
         self.cpp_info.set_property("pkg_config_name", f"quazip{quazip_major}-qt{self._qt_major}")

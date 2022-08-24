@@ -58,7 +58,7 @@ class NettleTLS(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
-        if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
+        if tools.scm.Version(self, self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
     @property

@@ -61,7 +61,7 @@ class TaoCPPTaopqConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "17")
         min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
         if min_compiler_version:
-            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("taocpp-taopq requires C++17, which your compiler does not support.")
         else:
             self.output.warn("taocpp-taopq requires C++17. Your compiler is unknown. Assuming it supports C++17.")

@@ -123,7 +123,7 @@ class LibX264Conan(ConanFile):
         if self._is_msvc:
             self._override_env["CC"] = "cl -nologo"
             extra_cflags.extend(self._autotools.flags)
-            if not (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "12"):
+            if not (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < "12"):
                 extra_cflags.append("-FS")
         build_canonical_name = None
         host_canonical_name = None

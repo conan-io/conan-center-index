@@ -32,7 +32,7 @@ class TestPackageConan(ConanFile):
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
             cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
-                pyversion = tools.Version(self.options["boost"].python_version)
+                pyversion = tools.scm.Version(self, self.options["boost"].python_version)
                 cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
                 cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
             cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random

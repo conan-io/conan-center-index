@@ -41,7 +41,7 @@ class GLShaderPPConan(ConanFile):
         if not min_version:
             self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def source(self):

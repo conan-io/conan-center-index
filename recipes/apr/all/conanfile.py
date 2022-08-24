@@ -41,7 +41,7 @@ class AprConan(ConanFile):
     @property
     def _should_call_autoreconf(self):
         return self.settings.compiler == "apple-clang" and \
-               tools.Version(self.settings.compiler.version) >= "12" and \
+               tools.scm.Version(self, self.settings.compiler.version) >= "12" and \
                self.version == "1.7.0"
 
     def export_sources(self):
