@@ -1,6 +1,7 @@
 import os
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake, RunEnvironment
 
 
 class DaggyTestConan(ConanFile):

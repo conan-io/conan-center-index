@@ -1,7 +1,8 @@
 import os
 import glob
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake
 
 class CnpyConan(ConanFile):
     name = "cnpy"
