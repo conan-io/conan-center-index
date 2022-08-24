@@ -166,7 +166,6 @@ class LibpngConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "libpng.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
@@ -181,8 +180,6 @@ class LibpngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libpng")
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
-        prefix = "lib" if is_msvc(self) else ""
-        suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = [f"{prefix}png{major_min_version}{suffix}"]
+        self.cpp_info.libs = ["png"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
