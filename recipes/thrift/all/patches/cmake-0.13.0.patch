@@ -1,6 +1,6 @@
 --- a/build/cmake/DefineOptions.cmake
 +++ b/build/cmake/DefineOptions.cmake
-@@ -39,11 +39,6 @@ option(BUILD_LIBRARIES "Build Thrift libraries" ON)
+@@ -39,10 +39,6 @@ option(BUILD_LIBRARIES "Build Thrift libraries" ON)
  # and enables the library if all are found. This means the default is to build as
  # much as possible but leaving out libraries if their dependencies are not met.
  
@@ -8,11 +8,23 @@
 -    add_definitions(-DBOOST_ALL_DYN_LINK)
 -    add_definitions(-DBOOST_TEST_DYN_LINK)
 -endif()
--
+ 
  # as3
  option(WITH_AS3 "Build ActionScript 3 Thrift Library" ON)
- if (WITH_AS3)
-
+@@ -118,7 +114,12 @@ CMAKE_DEPENDENT_OPTION(BUILD_HASKELL "Build GHC library" ON
+ # Common library options
+ # https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
+ # Default on Windows is static, shared mode library support needs work...
+-CMAKE_DEPENDENT_OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF "WIN32" ON)
++if(WIN32)
++    set(DEFAULT_BUILD_SHARED_LIBS ON)
++else()
++    set(DEFAULT_BUILD_SHARED_LIBS OFF)
++endif()
++option(BUILD_SHARED_LIBS "Build shared libraries" ${DEFAULT_BUILD_SHARED_LIBS})
+ 
+ if (WITH_SHARED_LIB)
+     message(WARNING "WITH_SHARED_LIB is deprecated; use -DBUILD_SHARED_LIBS=ON instead")
 --- a/lib/c_glib/CMakeLists.txt
 +++ b/lib/c_glib/CMakeLists.txt
 @@ -59,13 +59,13 @@ set(thrift_c_glib_SOURCES
