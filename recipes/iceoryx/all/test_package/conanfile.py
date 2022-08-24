@@ -1,5 +1,5 @@
 import os
-from from conan import ConanFile
+from conan import ConanFile
 from conans import CMake
 
 class IceoryxTestConan(ConanFile):
