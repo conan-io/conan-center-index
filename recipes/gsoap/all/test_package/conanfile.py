@@ -17,7 +17,7 @@ class TestGsoapConan(ConanFile):
         # TODO: Add some test for the cross-building scenario
 
         if not cross_building(self):
-            calc_wsdl = os.path.join(os.path.dirname(__file__), 'calc.wsdl')
+            calc_wsdl = os.path.join(self.source_folder, "calc.wsdl")
             self.output.info("Generating code from WSDL '{}'".format(calc_wsdl))
             self.run("wsdl2h -o calc.h {}".format(calc_wsdl), run_environment=True)
             self.run("soapcpp2 -j -CL -I{} calc.h".format(os.path.join(self.deps_cpp_info["gsoap"].rootpath, 'bin', 'import')), run_environment=True)
