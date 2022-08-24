@@ -42,7 +42,7 @@ class ConfuJson(ConanFile):
             raise ConanInvalidConfiguration(
                 "apple-clang is not supported because of missing concept support")
         if self.settings.compiler.get_safe("cppstd"):
-         tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
 
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
