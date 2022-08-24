@@ -186,7 +186,7 @@ class CPythonConan(ConanFile):
             else:
                 self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
         if self.settings.os != "Windows":
-            if not tools.is_apple_os(self.settings.os):
+            if not tools.is_apple_os(self, self.settings.os):
                 self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.25")
         if self.options.get_safe("with_bz2"):
@@ -616,7 +616,7 @@ class CPythonConan(ConanFile):
         return "python{}{}".format(self._version_suffix, lib_ext)
 
     def _fix_install_name(self):
-        if tools.is_apple_os(self.settings.os) and self.options.shared:
+        if tools.is_apple_os(self, self.settings.os) and self.options.shared:
             buffer = StringIO()
             python = os.path.join(self.package_folder, "bin", "python")
             self.run('otool -L "%s"' % python, output=buffer)
@@ -681,7 +681,7 @@ class CPythonConan(ConanFile):
             if self._with_libffi:
                 self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
             if self.settings.os != "Windows":
-                if not tools.is_apple_os(self.settings.os):
+                if not tools.is_apple_os(self, self.settings.os):
                     self.cpp_info.components["_hidden"].requires.append("libuuid::libuuid")
                 self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
@@ -713,14 +713,14 @@ class CPythonConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             pythonhome = os.path.join(self.package_folder, "bin")
-        elif tools.is_apple_os(self.settings.os):
+        elif tools.is_apple_os(self, self.settings.os):
             pythonhome = self.package_folder
         else:
             version = tools.Version(self._version_number_only)
             pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
         self.user_info.pythonhome = pythonhome
 
-        pythonhome_required = self.settings.compiler == "Visual Studio" or tools.is_apple_os(self.settings.os)
+        pythonhome_required = self.settings.compiler == "Visual Studio" or tools.is_apple_os(self, self.settings.os)
         self.user_info.module_requires_pythonhome = pythonhome_required
 
         if self.settings.compiler == "Visual Studio":

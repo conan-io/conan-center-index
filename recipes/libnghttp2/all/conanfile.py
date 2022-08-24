@@ -108,7 +108,7 @@ class Nghttp2Conan(ConanFile):
             # backward-incompatible change in 1.42.0
             cmake.definitions["STATIC_LIB_SUFFIX"] = "_static"
 
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 

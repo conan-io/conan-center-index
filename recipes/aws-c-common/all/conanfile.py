@@ -101,6 +101,6 @@ class AwsCCommon(ConanFile):
             if tools.Version(self.version) >= "0.6.13":
                 self.cpp_info.components["aws-c-common-lib"].system_libs.append("shlwapi")
         if not self.options.shared:
-            if tools.is_apple_os(self.settings.os):
+            if tools.is_apple_os(self, self.settings.os):
                 self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]
         self.cpp_info.components["aws-c-common-lib"].builddirs.append(os.path.join("lib", "cmake"))

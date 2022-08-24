@@ -98,7 +98,7 @@ class HarfbuzzConan(ConanFile):
         cmake.definitions["HB_HAVE_GRAPHITE2"] = False
         cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
         cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             cmake.definitions["HB_HAVE_CORETEXT"] = True
         elif self.settings.os == "Windows":
             cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
@@ -149,7 +149,7 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)

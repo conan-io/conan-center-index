@@ -99,5 +99,5 @@ class OpenvrConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
 
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self.cpp_info.frameworks.append("Foundation")

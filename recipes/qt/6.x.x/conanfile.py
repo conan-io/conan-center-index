@@ -338,7 +338,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.37") # needs to be < 10.38 or qt fails to detect visual studio static library
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.221.0")
-            if tools.is_apple_os(self.settings.os):
+            if tools.is_apple_os(self, self.settings.os):
                 self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
             self.requires("glib/2.73.2")
@@ -911,7 +911,7 @@ class QtConan(ConanFile):
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 libsuffix = "d"
-            if tools.is_apple_os(self.settings.os):
+            if tools.is_apple_os(self, self.settings.os):
                 libsuffix = "_debug"
 
         def _get_corrected_reqs(requires):
@@ -998,7 +998,7 @@ class QtConan(ConanFile):
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
-                if tools.is_apple_os(self.settings.os):
+                if tools.is_apple_os(self, self.settings.os):
                     gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")

@@ -231,7 +231,7 @@ class PdalConan(ConanFile):
 
     @property
     def _pdal_base_name(self):
-        return "pdalcpp" if self.settings.os == "Windows" or tools.is_apple_os(self.settings.os) else "pdal_base"
+        return "pdalcpp" if self.settings.os == "Windows" or tools.is_apple_os(self, self.settings.os) else "pdal_base"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PDAL")

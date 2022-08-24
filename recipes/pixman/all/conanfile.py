@@ -64,7 +64,7 @@ class PixmanConan(ConanFile):
                                   "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.win32.common"),
                                   "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
             test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
             tools.files.replace_in_file(self, test_makefile,

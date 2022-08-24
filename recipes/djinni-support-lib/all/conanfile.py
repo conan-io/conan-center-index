@@ -29,7 +29,7 @@ class DjinniSuppotLib(ConanFile):
     @property
     def objc_support(self):
         if self.options.target == "auto":
-            return tools.is_apple_os(self.settings.os)
+            return tools.is_apple_os(self, self.settings.os)
         else:
             return self.options.target == "objc"
 

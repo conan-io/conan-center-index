@@ -135,7 +135,7 @@ class GiflibConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         with tools.files.chdir(self, self._source_subfolder):
-            if tools.is_apple_os(self.settings.os):
+            if tools.is_apple_os(self, self.settings.os):
                 # relocatable shared lib on macOS
                 tools.files.replace_in_file(self, 
                     "configure",

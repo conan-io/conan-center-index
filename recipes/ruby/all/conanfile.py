@@ -183,7 +183,7 @@ class RubyConan(ConanFile):
         if str(self.settings.compiler) in ("clang", "apple-clang"):
             rubylib.cflags = ["-fdeclspec"]
             rubylib.cxxflags = ["-fdeclspec"]
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             rubylib.frameworks = ["CoreFoundation"]
 
         self.cpp_info.filenames["cmake_find_package"] = "Ruby"

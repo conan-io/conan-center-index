@@ -83,7 +83,7 @@ class MongoCDriverConan(ConanFile):
             self.requires("icu/71.1")
 
     def validate(self):
-        if self.options.with_ssl == "darwin" and not tools.is_apple_os(self.settings.os):
+        if self.options.with_ssl == "darwin" and not tools.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("with_ssl=darwin only allowed on Apple os family")
         if self.options.with_ssl == "windows" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")

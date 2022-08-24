@@ -326,7 +326,7 @@ class OpenCascadeConan(ConanFile):
             cmake.definitions["BUILD_SAMPLES_MFC"] = False
         cmake.definitions["BUILD_SAMPLES_QT"] = False
         cmake.definitions["BUILD_Inspector"] = False
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             cmake.definitions["USE_GLX"] = False
         if self.settings.os == "Windows":
             cmake.definitions["USE_D3D"] = False
@@ -436,8 +436,8 @@ class OpenCascadeConan(ConanFile):
             "CSF_wsock32": {"system_libs": ["wsock32"] if self.settings.os == "Windows" else []},
             "CSF_d3d9": {},
             # Apple OS frameworks
-            "CSF_Appkit": {"frameworks": ["UIKit"] if self.settings.os == "iOS" else ["Appkit"] if tools.is_apple_os(self.settings.os) else []},
-            "CSF_IOKit": {"frameworks": ["IOKit"] if tools.is_apple_os(self.settings.os) else []},
+            "CSF_Appkit": {"frameworks": ["UIKit"] if self.settings.os == "iOS" else ["Appkit"] if tools.is_apple_os(self, self.settings.os) else []},
+            "CSF_IOKit": {"frameworks": ["IOKit"] if tools.is_apple_os(self, self.settings.os) else []},
             "CSF_objc": {},
         }
 

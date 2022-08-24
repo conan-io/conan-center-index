@@ -107,7 +107,7 @@ class TkConan(ConanFile):
             "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
 
     def _get_default_build_system(self):
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             return "macosx"
         elif self.settings.os in ("Linux", "FreeBSD"):
             return "unix"
@@ -182,7 +182,7 @@ class TkConan(ConanFile):
             "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
             "--with-x={}".format(yes_no(self.settings.os == "Linux")),
-            "--enable-aqua={}".format(yes_no(tools.is_apple_os(self.settings.os))),
+            "--enable-aqua={}".format(yes_no(tools.is_apple_os(self, self.settings.os))),
         ]
 
         if self.settings.os == "Windows":

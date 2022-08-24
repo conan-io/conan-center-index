@@ -167,7 +167,7 @@ class SfmlConan(ConanFile):
             return ["log"] if self.settings.os == "Android" else []
 
         def foundation():
-            return ["Foundation"] if tools.is_apple_os(self.settings.os) else []
+            return ["Foundation"] if tools.is_apple_os(self, self.settings.os) else []
 
         def appkit():
             return ["AppKit"] if self.settings.os == "Macos" else []

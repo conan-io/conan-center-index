@@ -174,7 +174,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("decimal", True)
                 self._test_module("ctypes", True)
 
-            if tools.is_apple_os(self.settings.os) and not self.options["cpython"].shared:
+            if tools.is_apple_os(self, self.settings.os) and not self.options["cpython"].shared:
                 self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:

@@ -252,7 +252,7 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-render"])
             if self.options.with_xlib:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::x11", "xorg::xext"])
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
 
 
@@ -279,7 +279,7 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
                 self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
 
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
             self.cpp_info.components["cairo-quartz"].frameworks.extend(["CoreFoundation", "CoreGraphics"])

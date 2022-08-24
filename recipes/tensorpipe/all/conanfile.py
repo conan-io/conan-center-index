@@ -131,7 +131,7 @@ class TensorpipeConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Tensorpipe")
         self.cpp_info.set_property("cmake_target_name", "tensorpipe")
         self.cpp_info.libs = ["tensorpipe"]
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self.cpp_info.frameworks = ["CoreFoundation", "IOKit"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

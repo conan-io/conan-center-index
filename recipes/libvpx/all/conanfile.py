@@ -134,7 +134,7 @@ class LibVPXConan(ConanFile):
         host_os = str(self.settings.os)
         if host_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif tools.is_apple_os(host_os):
+        elif tools.is_apple_os(self, host_os):
             if self.settings.arch in ["x86", "x86_64"]:
                 os_name = 'darwin11'
             elif self.settings.arch == "armv8" and self.settings.os == "Macos":
@@ -159,7 +159,7 @@ class LibVPXConan(ConanFile):
             # gen_msvs_vcxproj.sh doesn't like custom flags
             autotools.cxxflags = []
             autotools.flags = []
-        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
+        if tools.is_apple_os(self, self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
             autotools.link_flags.append("-stdlib=libc++")
         autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)

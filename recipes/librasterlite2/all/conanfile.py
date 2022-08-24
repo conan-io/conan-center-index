@@ -139,7 +139,7 @@ class Librasterlite2Conan(ConanFile):
             # relocatable shared libs on macOS
             tools.files.replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
             # avoid SIP issues on macOS when dependencies are shared
-            if tools.is_apple_os(self.settings.os):
+            if tools.is_apple_os(self, self.settings.os):
                 libpaths = ":".join(self.deps_cpp_info.lib_paths)
                 tools.files.replace_in_file(self, 
                     "configure",

@@ -158,7 +158,7 @@ class ICUBase(ConanFile):
             self._env_build.flags.append("-FS")
         if not self.options.shared:
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             self._env_build.defines.append("_DARWIN_C_SOURCE")
         if "msys2" in self.deps_user_info:
             self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)

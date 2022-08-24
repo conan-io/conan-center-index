@@ -32,7 +32,7 @@ class AwsCCal(ConanFile):
 
     @property
     def _needs_openssl(self):
-        return self.settings.os != "Windows" and not tools.is_apple_os(self.settings.os)
+        return self.settings.os != "Windows" and not tools.is_apple_os(self, self.settings.os)
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
@@ -98,7 +98,7 @@ class AwsCCal(ConanFile):
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
         if self.settings.os == "Windows":
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("ncrypt")
-        elif tools.is_apple_os(self.settings.os):
+        elif tools.is_apple_os(self, self.settings.os):
             self.cpp_info.components["aws-c-cal-lib"].frameworks.append("Security")
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")

@@ -116,7 +116,7 @@ class LibMysqlClientCConan(ConanFile):
             raise ConanInvalidConfiguration("{}/{} doesn't support C++20".format(self.name, self.version))
 
     def build_requirements(self):
-        if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self.settings.os):
+        if tools.Version(self.version) >= "8.0.25" and tools.is_apple_os(self, self.settings.os):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.build_requires("cmake/3.22.5")
         if self.settings.os == "FreeBSD":

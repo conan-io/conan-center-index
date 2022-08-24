@@ -94,7 +94,7 @@ class GmpConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
         # Relocatable shared lib on macOS & fix permission issue
-        if tools.is_apple_os(self.settings.os):
+        if tools.is_apple_os(self, self.settings.os):
             configure_file = os.path.join(self._source_subfolder, "configure")
             tools.files.replace_in_file(self, configure_file, "-install_name \\$rpath/", "-install_name @rpath/")
             configure_stats = os.stat(configure_file)

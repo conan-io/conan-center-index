@@ -63,7 +63,7 @@ class MinizipNgConan(ConanFile):
             del self.options.fPIC
             del self.options.with_iconv
             del self.options.with_libbsd
-        if not tools.is_apple_os(self.settings.os):
+        if not tools.is_apple_os(self, self.settings.os):
             del self.options.with_libcomp
 
     def configure(self):
@@ -144,7 +144,7 @@ class MinizipNgConan(ConanFile):
         self.cpp_info.components["minizip"].libs = [f"{prefix}minizip{suffix}"]
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append("HAVE_LZMA")
-        if tools.is_apple_os(self.settings.os) and self.options.get_safe("with_libcomp"):
+        if tools.is_apple_os(self, self.settings.os) and self.options.get_safe("with_libcomp"):
             self.cpp_info.components["minizip"].defines.append("HAVE_LIBCOMP")
         if self.options.with_bzip2:
             self.cpp_info.components["minizip"].defines.append("HAVE_BZIP2")

@@ -109,7 +109,7 @@ class ProjConan(ConanFile):
 
         # Agressive workaround against SIP on macOS, to handle sqlite3 executable
         # linked to shared sqlite3 lib
-        if tools.is_apple_os(self._settings_build.os):
+        if tools.is_apple_os(self, self._settings_build.os):
             # TODO: no hope for 2 profiles, wait for stable self.dependencies
             #       because we want absolute lib paths of build profile actually
             if not hasattr(self, "settings_build"):
