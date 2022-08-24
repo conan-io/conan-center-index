@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, get, mkdir, rename, rmdir, save, rm
 from conans import CMake
 # TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os
+from conan.tools.apple import is_apple_os
 
 required_conan_version = ">=1.50.0"
 

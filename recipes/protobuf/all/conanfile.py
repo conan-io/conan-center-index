@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conans import CMake
 # TODO: Update to conan.tools.apple after 1.51.3
-from conans.tools import is_apple_os
+from conan.tools.apple import is_apple_os
 
 import functools
 import os
