@@ -2,7 +2,7 @@ from conans import ConanFile, tools, CMake
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.43.0"
 
 
 class SDLImageConan(ConanFile):
@@ -130,11 +130,15 @@ class SDLImageConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SDL2_image")
+        self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
+        if not self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["SDL2_image::SDL2_image-static"])
         self.cpp_info.set_property("pkg_config_name", "SDL2_image")
         self.cpp_info.libs = ["SDL2_image"]
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-        # TODO: Add components in a sane way. SDL2_image might be incorrect, as the current dev version uses SDL2::image
-        # The current dev version is the first version with official CMake support
+
+        # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "SDL2_image"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_image"
         self.cpp_info.names["pkg_config"] = "SDL2_image"
