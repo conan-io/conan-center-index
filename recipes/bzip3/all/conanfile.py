@@ -37,7 +37,7 @@ class BZip3Conan(ConanFile):
             del self.options.fPIC
         # FIXME: could be supported on Windows:
         #  - MinGW with posix thread supports it out of the box
-        #  - otherwise, add libpthread to requirements and link it in CMakeLists
+        #  - otherwise, add pthreads4w to requirements and link it in CMakeLists
         if self.settings.os == "Windows":
             del self.options.with_thread
 
