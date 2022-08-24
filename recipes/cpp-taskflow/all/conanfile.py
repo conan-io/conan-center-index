@@ -21,8 +21,8 @@ class CppTaskflowConan(ConanFile):
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
-        min_req_cppstd = "17" if tools.scm.Version(self, self.version) <= "2.2.0" else "14"
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
+        min_req_cppstd = "17" if tools.scm.Version(self.version) <= "2.2.0" else "14"
 
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, min_req_cppstd)
@@ -53,7 +53,7 @@ class CppTaskflowConan(ConanFile):
         if compiler_version < minimal_version[min_req_cppstd][compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++%s. %s %s is not"
-                                            " supported." % (self.name, min_req_cppstd, compiler, tools.scm.Version(self, self.settings.compiler.version.value)))
+                                            " supported." % (self.name, min_req_cppstd, compiler, tools.scm.Version(self.settings.compiler.version.value)))
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])

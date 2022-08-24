@@ -51,7 +51,7 @@ class PahoMqttCppConan(ConanFile):
             raise ConanInvalidConfiguration("{} requires paho-mqtt-c to have a matching 'ssl' option.".format(self.name))
 
     def requirements(self):
-        if tools.scm.Version(self, self.version) >= "1.2.0":
+        if tools.scm.Version(self.version) >= "1.2.0":
             self.requires("paho-mqtt-c/1.3.9")
         else:
             self.requires("paho-mqtt-c/1.3.1") # https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
@@ -76,7 +76,7 @@ class PahoMqttCppConan(ConanFile):
         # Changed by https://github.com/eclipse/paho.mqtt.c/commit/f875768984574fede6065c8ede0a7eac890a6e09
         # and https://github.com/eclipse/paho.mqtt.c/commit/c116b725fff631180414a6e99701977715a4a690
         # FIXME: after https://github.com/conan-io/conan/pull/8053#pullrequestreview-541120387
-        if tools.scm.Version(self, self.version) < "1.2.0" and tools.scm.Version(self, self.deps_cpp_info["paho-mqtt-c"].version) >= "1.3.2":
+        if tools.scm.Version(self.version) < "1.2.0" and tools.scm.Version(self.deps_cpp_info["paho-mqtt-c"].version) >= "1.3.2":
             raise ConanInvalidConfiguration("{}/{} requires paho-mqtt-c =< 1.3.1".format(self.name, self.version))
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

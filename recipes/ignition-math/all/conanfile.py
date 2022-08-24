@@ -57,7 +57,7 @@ class IgnitionMathConan(ConanFile):
                 )
             )
         else:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires c++17 support. The current compiler {} {} does not support it.".format(
                         self.name,
@@ -72,7 +72,7 @@ class IgnitionMathConan(ConanFile):
         self.requires("swig/4.0.2")
 
     def build_requirements(self):
-        if int(tools.scm.Version(self, self.version).minor) <= 8:
+        if int(tools.scm.Version(self.version).minor) <= 8:
             self.build_requires("ignition-cmake/2.5.0")
         else:
             self.build_requires("ignition-cmake/2.10.0")
@@ -103,7 +103,7 @@ class IgnitionMathConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.scm.Version(self, self.version))
+            tools.scm.Version(self.version))
         
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
@@ -122,7 +122,7 @@ class IgnitionMathConan(ConanFile):
 
 
     def package_info(self):
-        version_major = tools.scm.Version(self, self.version).major
+        version_major = tools.scm.Version(self.version).major
         lib_name = f"ignition-math{version_major}"
 
         self.cpp_info.names["cmake_find_package"] = lib_name

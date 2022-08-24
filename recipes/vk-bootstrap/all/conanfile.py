@@ -86,9 +86,9 @@ class VkBootstrapConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["VK_BOOTSTRAP_TEST"] = False
-        if tools.scm.Version(self, self.version) >= "0.3.0":
+        if tools.scm.Version(self.version) >= "0.3.0":
             cmake.definitions["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = ";".join(self.deps_cpp_info["vulkan-headers"].include_paths)
-        if tools.scm.Version(self, self.version) >= "0.4.0":
+        if tools.scm.Version(self.version) >= "0.4.0":
             cmake.definitions["VK_BOOTSTRAP_WERROR"] = False
         cmake.configure()
         return cmake

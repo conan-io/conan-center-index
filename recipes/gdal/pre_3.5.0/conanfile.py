@@ -164,35 +164,35 @@ class GdalConan(ConanFile):
 
     @property
     def _has_with_exr_option(self):
-        return tools.scm.Version(self, self.version) >= "3.1.0"
+        return tools.scm.Version(self.version) >= "3.1.0"
 
     @property
     def _has_with_libdeflate_option(self):
-        return tools.scm.Version(self, self.version) >= "3.2.0"
+        return tools.scm.Version(self.version) >= "3.2.0"
 
     @property
     def _has_with_heif_option(self):
-        return tools.scm.Version(self, self.version) >= "3.2.0"
+        return tools.scm.Version(self.version) >= "3.2.0"
 
     @property
     def _has_with_blosc_option(self):
-        return tools.scm.Version(self, self.version) >= "3.4.0"
+        return tools.scm.Version(self.version) >= "3.4.0"
 
     @property
     def _has_with_lz4_option(self):
-        return tools.scm.Version(self, self.version) >= "3.4.0"
+        return tools.scm.Version(self.version) >= "3.4.0"
 
     @property
     def _has_with_brunsli_option(self):
-        return tools.scm.Version(self, self.version) >= "3.4.0"
+        return tools.scm.Version(self.version) >= "3.4.0"
 
     @property
     def _has_with_pcre2_option(self):
-        return tools.scm.Version(self, self.version) >= "3.4.1"
+        return tools.scm.Version(self.version) >= "3.4.1"
 
     @property
     def _has_reentrant_qhull_support(self):
-        return tools.scm.Version(self, self.version) >= "3.4.1"
+        return tools.scm.Version(self.version) >= "3.4.1"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -201,7 +201,7 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # if tools.scm.Version(self, self.version) < "3.0.0":
+        # if tools.scm.Version(self.version) < "3.0.0":
         #     del self.options.with_tiledb
         if not self._has_with_exr_option:
             del self.options.with_exr
@@ -247,7 +247,7 @@ class GdalConan(ConanFile):
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.3.0")
         self.requires("proj/9.0.0")
-        if tools.scm.Version(self, self.version) >= "3.1.0":
+        if tools.scm.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.12")
@@ -393,10 +393,10 @@ class GdalConan(ConanFile):
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build tools")
 
     def _validate_dependency_graph(self):
-        if tools.scm.Version(self, self.deps_cpp_info["libtiff"].version) < "4.0.0":
+        if tools.scm.Version(self.deps_cpp_info["libtiff"].version) < "4.0.0":
             raise ConanInvalidConfiguration("gdal {} requires libtiff >= 4.0.0".format(self.version))
         if self.options.with_mongocxx:
-            mongocxx_version = tools.scm.Version(self, self.deps_cpp_info["mongo-cxx-driver"].version)
+            mongocxx_version = tools.scm.Version(self.deps_cpp_info["mongo-cxx-driver"].version)
             if mongocxx_version < "3.0.0":
                 # TODO: handle mongo-cxx-driver v2
                 raise ConanInvalidConfiguration("gdal with mongo-cxx-driver < 3.0.0 not yet supported in this recipe.")
@@ -431,7 +431,7 @@ class GdalConan(ConanFile):
             # os.path.join("ogr", "ogrsf_frmts", "cad", "libopencad"), # TODO: uncomment when libopencad available
             os.path.join("ogr", "ogrsf_frmts", "geojson", "libjson"),
         ]
-        if tools.scm.Version(self, self.version) >= "3.1.0":
+        if tools.scm.Version(self.version) >= "3.1.0":
             embedded_libs.append(os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"))
         for lib_subdir in embedded_libs:
             tools.files.rmdir(self, os.path.join(self._source_subfolder, lib_subdir))
@@ -469,7 +469,7 @@ class GdalConan(ConanFile):
             tools.files.replace_in_file(self, gnumakefile_apps,
                                   "default:	gdal-config-inst gdal-config $(BIN_LIST)",
                                   "default:	gdal-config-inst gdal-config")
-            if tools.scm.Version(self, self.version) < "3.4.0":
+            if tools.scm.Version(self.version) < "3.4.0":
                 clean_pattern = "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst"
             else:
                 clean_pattern = "$(RM) *.o $(BIN_LIST) $(NON_DEFAULT_LIST) core gdal-config gdal-config-inst"
@@ -535,7 +535,7 @@ class GdalConan(ConanFile):
     def _nmake_args(self):
         rootpath = lambda req: self.deps_cpp_info[req].rootpath
         include_paths = lambda req: " -I".join(self.deps_cpp_info[req].include_paths)
-        version = lambda req: tools.scm.Version(self, self.deps_cpp_info[req].version)
+        version = lambda req: tools.scm.Version(self.deps_cpp_info[req].version)
 
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
@@ -602,7 +602,7 @@ class GdalConan(ConanFile):
             ])
             if self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
                 args.append("NETCDF_HAS_NC4=YES")
-            if tools.scm.Version(self, self.version) >= "3.3.0" and \
+            if tools.scm.Version(self.version) >= "3.3.0" and \
                os.path.isfile(os.path.join(self.deps_cpp_info["netcdf"].rootpath, "include", "netcdf_mem.h")):
                 args.append("NETCDF_HAS_NETCDF_MEM=YES")
         if self.options.with_curl:
@@ -736,7 +736,7 @@ class GdalConan(ConanFile):
         # Drivers:
         if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
             # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
-            if tools.scm.Version(self, self.version) < "3.0.0":
+            if tools.scm.Version(self.version) < "3.0.0":
                 args.append("--without-mrf")
             else:
                 args.append("--disable-driver-mrf")
@@ -798,9 +798,9 @@ class GdalConan(ConanFile):
         args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
         args.append("--without-teigha") # commercial library
         args.append("--without-idb") # commercial library
-        if tools.scm.Version(self, self.version) < "3.2.0":
+        if tools.scm.Version(self.version) < "3.2.0":
             args.append("--without-sde") # commercial library
-        if tools.scm.Version(self, self.version) < "3.3.0":
+        if tools.scm.Version(self.version) < "3.3.0":
             args.append("--without-epsilon")
         args.append("--with-webp={}".format(rootpath_no(self.options.with_webp, "libwebp")))
         args.append("--with-geos={}".format(yes_no(self.options.with_geos)))
@@ -827,18 +827,18 @@ class GdalConan(ConanFile):
         args.append("--without-python")
         args.append("--without-java")
         args.append("--without-hdfs")
-        if tools.scm.Version(self, self.version) >= "3.0.0":
+        if tools.scm.Version(self.version) >= "3.0.0":
             args.append("--without-tiledb") # TODO: to implement when tiledb lib available
         args.append("--without-mdb")
         args.append("--without-rasdaman") # TODO: to implement when rasdaman lib available
         if self._has_with_brunsli_option:
             args.append("--with-brunsli={}".format(yes_no(self.options.with_brunsli)))
-        if tools.scm.Version(self, self.version) >= "3.1.0":
+        if tools.scm.Version(self.version) >= "3.1.0":
             args.append("--without-rdb") # commercial library
         args.append("--without-armadillo") # TODO: to implement when armadillo lib available
         args.append("--with-cryptopp={}".format(rootpath_no(self.options.with_cryptopp, "cryptopp")))
         args.append("--with-crypto={}".format(yes_no(self.options.with_crypto)))
-        if tools.scm.Version(self, self.version) >= "3.3.0":
+        if tools.scm.Version(self.version) >= "3.3.0":
             args.append("--with-lerc={}".format(internal_no(not self.options.without_lerc)))
         else:
             args.append("--with-lerc={}".format(yes_no(not self.options.without_lerc)))
@@ -940,7 +940,7 @@ class GdalConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
-            if tools.scm.Version(self, self.version) >= "3.2.0" and is_msvc(self):
+            if tools.scm.Version(self.version) >= "3.2.0" and is_msvc(self):
                 self.cpp_info.system_libs.append("wbemuuid")
             if self.options.with_odbc and not self.options.shared:
                 self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])

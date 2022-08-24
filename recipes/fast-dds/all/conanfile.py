@@ -78,7 +78,7 @@ class FastDDSConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and tools.scm.Version(self, self.settings.compiler.version) < min_version:
+        if min_version and tools.scm.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
                 "{} requires C++{} support. {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard,

@@ -51,7 +51,7 @@ class CgalConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        if tools.scm.Version(self, self.version) < "5.3":
+        if tools.scm.Version(self.version) < "5.3":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                 "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR")
         else:

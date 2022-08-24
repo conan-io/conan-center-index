@@ -118,7 +118,7 @@ class LibjpegTurboConan(ConanFile):
         if is_msvc(self):
             cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
-        if tools.scm.Version(self, self.version) <= "2.1.0":
+        if tools.scm.Version(self.version) <= "2.1.0":
             cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
 
         if tools.build.cross_building(self, self):

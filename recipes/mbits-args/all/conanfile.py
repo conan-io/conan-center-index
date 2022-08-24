@@ -54,11 +54,11 @@ class MBitsArgsConan(ConanFile):
         if not minimum_version:
             self.output.warn(
                 "mbits-args requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("mbits-args: Unsupported compiler: {} {}; "
                                             "minimal version known to work is {}."
                                             .format(self.settings.compiler, self.settings.compiler.version, minimum_version))
-        elif str(self.settings.compiler) == "clang" and tools.scm.Version(self, self.settings.compiler.version) < "8":
+        elif str(self.settings.compiler) == "clang" and tools.scm.Version(self.settings.compiler.version) < "8":
             libcxx = self.settings.compiler.get_safe("libcxx")
             if libcxx and str(libcxx) == "libc++":
                 raise ConanInvalidConfiguration("mbits-args: Unsupported compiler: clang {} with libc++;\n"

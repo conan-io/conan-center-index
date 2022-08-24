@@ -79,7 +79,7 @@ class BehaviorTreeCPPConan(ConanFile):
         if not minimum_version:
             self.output.warn("BehaviorTree.CPP requires C++{}. Your compiler is unknown. Assuming it supports C++14."
                              .format(self._minimum_cppstd_required))
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++{}, which your compiler does not support."
                                             .format(self._minimum_cppstd_required))
 

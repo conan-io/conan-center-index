@@ -27,7 +27,7 @@ class EnhexStrongTypeConan(ConanFile):
             "apple-clang": "9.1"
         }
         compiler = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         if compiler not in minimal_version:
             self.output.info("{} requires a compiler that supports at least C++17".format(self.name))
@@ -36,7 +36,7 @@ class EnhexStrongTypeConan(ConanFile):
         # Exclude compilers not supported
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a compiler that supports at least C++17. {} {} is not".format(
-                self.name, compiler, tools.scm.Version(self, self.settings.compiler.version.value)))
+                self.name, compiler, tools.scm.Version(self.settings.compiler.version.value)))
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

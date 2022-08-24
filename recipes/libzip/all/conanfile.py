@@ -43,7 +43,7 @@ class LibZipConan(ConanFile):
 
     @property
     def _has_zstd_support(self):
-        return tools.scm.Version(self, self.version) >= "1.8.0"
+        return tools.scm.Version(self.version) >= "1.8.0"
 
     def export_sources(self):
         self.copy("CMakeLists.txt")

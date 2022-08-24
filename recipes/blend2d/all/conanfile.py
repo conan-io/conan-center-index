@@ -54,7 +54,7 @@ class Blend2dConan(ConanFile):
 
         # In Visual Studio < 16, there are compilation error. patch is already provided.
         # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
-        if self._is_msvc and tools.scm.Version(self, self.settings.compiler.version) < "16":
+        if self._is_msvc and tools.scm.Version(self.settings.compiler.version) < "16":
             raise tools.ConanInvalidConfiguration("This recipe does not support this compiler version")
 
     def source(self):

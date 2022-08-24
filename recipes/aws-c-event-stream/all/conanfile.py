@@ -43,7 +43,7 @@ class AwsCEventStream(ConanFile):
     def requirements(self):
         self.requires("aws-checksums/0.1.12")
         self.requires("aws-c-common/0.6.19")
-        if tools.scm.Version(self, self.version) >= "0.2":
+        if tools.scm.Version(self.version) >= "0.2":
             self.requires("aws-c-io/0.11.2")
 
     def source(self):
@@ -83,5 +83,5 @@ class AwsCEventStream(ConanFile):
         self.cpp_info.components["aws-c-event-stream-lib"].names["cmake_find_package_multi"] = "aws-c-event-stream"
         self.cpp_info.components["aws-c-event-stream-lib"].libs = ["aws-c-event-stream"]
         self.cpp_info.components["aws-c-event-stream-lib"].requires = ["aws-c-common::aws-c-common-lib", "aws-checksums::aws-checksums"]
-        if tools.scm.Version(self, self.version) >= "0.2":
+        if tools.scm.Version(self.version) >= "0.2":
             self.cpp_info.components["aws-c-event-stream-lib"].requires.append("aws-c-io::aws-c-io-lib")

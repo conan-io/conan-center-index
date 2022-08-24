@@ -41,10 +41,10 @@ class SentryBreakpadConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 11)
 
-        if tools.scm.Version(self, self.version) <= "0.4.1":
+        if tools.scm.Version(self.version) <= "0.4.1":
             if self.settings.os == "Android" or tools.apple.is_apple_os(self, self.settings.os):
                 raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
-        if tools.scm.Version(self, self.version) <= "0.2.6":
+        if tools.scm.Version(self.version) <= "0.2.6":
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
 

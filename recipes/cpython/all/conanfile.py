@@ -92,11 +92,11 @@ class CPythonConan(ConanFile):
 
     @property
     def _is_py3(self):
-        return tools.scm.Version(self, self._version_number_only).major == "3"
+        return tools.scm.Version(self._version_number_only).major == "3"
 
     @property
     def _is_py2(self):
-        return tools.scm.Version(self, self._version_number_only).major == "2"
+        return tools.scm.Version(self._version_number_only).major == "2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -148,12 +148,12 @@ class CPythonConan(ConanFile):
             if self.settings.build_type == "Debug" and "d" not in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Building debug cpython requires a debug runtime (Debug cpython requires _CrtReportMode symbol, which only debug runtimes define)")
             if self._is_py2:
-                if self.settings.compiler.version >= tools.scm.Version(self, "14"):
+                if self.settings.compiler.version >= tools.scm.Version("14"):
                     self.output.warn("Visual Studio versions 14 and higher were never officially supported by the CPython developers")
             if str(self.settings.arch) not in self._msvc_archs:
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecture")
 
-            if not self.options.shared and tools.scm.Version(self, self._version_number_only) >= "3.10":
+            if not self.options.shared and tools.scm.Version(self._version_number_only) >= "3.10":
                 raise ConanInvalidConfiguration("Static msvc build disabled (>=3.10) due to \"AttributeError: module 'sys' has no attribute 'winver'\"")
 
         if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
@@ -170,7 +170,7 @@ class CPythonConan(ConanFile):
     def _with_libffi(self):
         # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self._supports_modules \
-               and (self.settings.compiler != "Visual Studio" or tools.scm.Version(self, self._version_number_only) >= "3.8")
+               and (self.settings.compiler != "Visual Studio" or tools.scm.Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -179,9 +179,9 @@ class CPythonConan(ConanFile):
             self.requires("expat/2.4.1")
             if self._with_libffi:
                 self.requires("libffi/3.2.1")
-            if tools.scm.Version(self, self._version_number_only) < "3.8":
+            if tools.scm.Version(self._version_number_only) < "3.8":
                 self.requires("mpdecimal/2.4.2")
-            elif tools.scm.Version(self, self._version_number_only) < "3.10":
+            elif tools.scm.Version(self._version_number_only) < "3.10":
                 self.requires("mpdecimal/2.5.0")
             else:
                 self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
@@ -265,7 +265,7 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if self._is_py3 and tools.scm.Version(self, self._version_number_only) < "3.10":
+        if self._is_py3 and tools.scm.Version(self._version_number_only) < "3.10":
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")
         if self.settings.compiler == "Visual Studio":
@@ -382,7 +382,7 @@ class CPythonConan(ConanFile):
             "x86": "Win32",
             "x86_64": "x64",
         }
-        if tools.scm.Version(self, self._version_number_only) >= "3.8":
+        if tools.scm.Version(self._version_number_only) >= "3.8":
             archs.update({
                 "armv7": "ARM",
                 "armv8_32": "ARM",
@@ -409,15 +409,15 @@ class CPythonConan(ConanFile):
     def build(self):
         # FIXME: these checks belong in validate, but the versions of dependencies are not available there yet
         if self._supports_modules:
-            if tools.scm.Version(self, self._version_number_only) < "3.8.0":
-                if tools.scm.Version(self, self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
+            if tools.scm.Version(self._version_number_only) < "3.8.0":
+                if tools.scm.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
                     raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
-            elif tools.scm.Version(self, self._version_number_only) >= "3.9.0":
-                if tools.scm.Version(self, self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
+            elif tools.scm.Version(self._version_number_only) >= "3.9.0":
+                if tools.scm.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
-            if tools.scm.Version(self, self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
+            if tools.scm.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
         self._patch_sources()
@@ -433,7 +433,7 @@ class CPythonConan(ConanFile):
             "x86_64": "amd64",
             "x86": "win32",
         }
-        if tools.scm.Version(self, self._version_number_only) >= "3.8":
+        if tools.scm.Version(self._version_number_only) >= "3.8":
             build_subdir_lut.update({
                 "armv7": "arm32",
                 "armv8_32": "arm32",
@@ -515,7 +515,7 @@ class CPythonConan(ConanFile):
             add = True
             if name in packages:
                 pname, pversion = get_name_version(packages[name])
-                add = tools.scm.Version(self, version) > tools.scm.Version(self, pversion)
+                add = tools.scm.Version(version) > tools.scm.Version(pversion)
             if add:
                 packages[name] = fn
         for fname in packages.values():
@@ -599,7 +599,7 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             if self.settings.build_type == "Debug":
                 res += "d"
-            if tools.scm.Version(self, self._version_number_only) < "3.8":
+            if tools.scm.Version(self._version_number_only) < "3.8":
                 if self.options.get_safe("pymalloc", False):
                     res += "m"
         return res
@@ -634,7 +634,7 @@ class CPythonConan(ConanFile):
         # self.cpp_info.names["cmake_find_package_multi"] = "Python"
         # FIXME: conan components need to generate multiple .pc files (python2, python-27)
 
-        py_version = tools.scm.Version(self, self._version_number_only)
+        py_version = tools.scm.Version(self._version_number_only)
         # python component: "Build a C extension for Python"
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
@@ -716,7 +716,7 @@ class CPythonConan(ConanFile):
         elif tools.apple.is_apple_os(self, self.settings.os):
             pythonhome = self.package_folder
         else:
-            version = tools.scm.Version(self, self._version_number_only)
+            version = tools.scm.Version(self._version_number_only)
             pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
         self.user_info.pythonhome = pythonhome
 

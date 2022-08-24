@@ -85,7 +85,7 @@ class DrogonConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not support.".format(self.name))
         else:
             self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
@@ -149,7 +149,7 @@ class DrogonConan(ConanFile):
         self.cpp_info.libs = ["drogon"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version).major == "8":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
 
         if self.options.with_ctl:

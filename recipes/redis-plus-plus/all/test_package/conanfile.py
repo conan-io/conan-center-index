@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["BUILDING_SHARED"] = self.options["redis-plus-plus"].shared
-        if tools.scm.Version(self, self.deps_cpp_info["redis-plus-plus"].version) < "1.3.0":
+        if tools.scm.Version(self.deps_cpp_info["redis-plus-plus"].version) < "1.3.0":
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         else:
             cmake.definitions["CMAKE_CXX_STANDARD"] = 17

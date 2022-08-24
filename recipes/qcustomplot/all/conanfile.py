@@ -50,14 +50,14 @@ class QcustomplotConan(ConanFile):
         self.options["qt"].shared = True
 
     def requirements(self):
-        if int(tools.scm.Version(self, self.version).major) >= 2:
+        if int(tools.scm.Version(self.version).major) >= 2:
             self.requires("qt/6.3.0")
         else:
             self.requires("qt/5.15.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            min_cppstd = "11" if tools.scm.Version(self, self.deps_cpp_info["qt"].version) < "6.0.0" else "17"
+            min_cppstd = "11" if tools.scm.Version(self.deps_cpp_info["qt"].version) < "6.0.0" else "17"
             tools.build.check_min_cppstd(self, self, min_cppstd)
         if not (self.options["qt"].gui and self.options["qt"].widgets):
             raise ConanInvalidConfiguration("qcustomplot requires qt gui and widgets")
@@ -71,7 +71,7 @@ class QcustomplotConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if int(tools.scm.Version(self, self.version).major) >= 2:
+        if int(tools.scm.Version(self.version).major) >= 2:
             # allow static qcustomplot with shared qt, and vice versa
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "qcustomplot.h"),
                                   "#if defined(QT_STATIC_BUILD)",

@@ -45,7 +45,7 @@ class LibStudXmlConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
-            if tools.scm.Version(self, self.settings.compiler.version) < "9":
+            if tools.scm.Version(self.settings.compiler.version) < "9":
                 raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
 
     @property
@@ -76,7 +76,7 @@ class LibStudXmlConan(ConanFile):
         return self._autotools
 
     def _build_vs(self):
-        vc_ver = int(tools.scm.Version(self, self.settings.compiler.version).major)
+        vc_ver = int(tools.scm.Version(self.settings.compiler.version).major)
         sln_path = None
         def get_sln_path():
             return os.path.join(self._source_subfolder, "libstudxml-vc{}.sln".format(vc_ver))

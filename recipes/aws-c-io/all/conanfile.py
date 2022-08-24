@@ -44,7 +44,7 @@ class AwsCIO(ConanFile):
     def requirements(self):
         # the versions of aws-c-common and aws-c-io are tied since aws-c-common/0.6.12 and aws-c-io/0.10.10
         # Please refer https://github.com/conan-io/conan-center-index/issues/7763
-        if tools.scm.Version(self, self.version) <= "0.10.9":
+        if tools.scm.Version(self.version) <= "0.10.9":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-cal/0.5.11")
         else:

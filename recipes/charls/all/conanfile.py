@@ -59,12 +59,12 @@ class CharlsConan(ConanFile):
             tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
         # brace initialization issue for gcc < 5
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
         # name lookup issue for gcc == 5 in charls/2.2.0
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) == "5" and tools.scm.Version(self, self.version) >= "2.2.0":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) == "5" and tools.scm.Version(self.version) >= "2.2.0":
             raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 

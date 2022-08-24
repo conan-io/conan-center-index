@@ -67,5 +67,5 @@ class Box2dConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "box2d"
         self.cpp_info.names["cmake_find_package_multi"] = "box2d"
         self.cpp_info.libs = ["box2d"]
-        if tools.scm.Version(self, self.version) >= "2.4.1" and self.options.shared:
+        if tools.scm.Version(self.version) >= "2.4.1" and self.options.shared:
             self.cpp_info.defines.append("B2_SHARED")

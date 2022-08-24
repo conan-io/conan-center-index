@@ -405,7 +405,7 @@ class ImageMagicConan(ConanFile):
                     pattern="*.h",
                     dst=os.path.join(
                         "include",
-                        "ImageMagick-%s" % tools.scm.Version(self, self.version).major,
+                        "ImageMagick-%s" % tools.scm.Version(self.version).major,
                         module,
                     ),
                     src=os.path.join(self._source_subfolder, module),
@@ -419,7 +419,7 @@ class ImageMagicConan(ConanFile):
             suffix = "HDRI" if self.options.hdri else ""
             return "%s-%s.Q%s%s" % (
                 library,
-                tools.scm.Version(self, self.version).major,
+                tools.scm.Version(self.version).major,
                 self.options.quantum_depth,
                 suffix,
             )
@@ -481,7 +481,7 @@ class ImageMagicConan(ConanFile):
         )
 
         imagemagick_include_dir = (
-            "include/ImageMagick-%s" % tools.scm.Version(self, self.version).major
+            "include/ImageMagick-%s" % tools.scm.Version(self.version).major
         )
 
         self.cpp_info.components["MagickCore"].includedirs = [imagemagick_include_dir]

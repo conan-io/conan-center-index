@@ -41,7 +41,7 @@ class CfgfileConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TESTS"] = False
-        if tools.scm.Version(self, self.version) >= "0.2.9":
+        if tools.scm.Version(self.version) >= "0.2.9":
             self._cmake.definitions["USE_INTERNAL_ARGS_PARSER"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -55,12 +55,12 @@ class CfgfileConan(ConanFile):
             self.output.warn("Unknown compiler, assuming it supports at least C++14")
             return
 
-        version = tools.scm.Version(self, self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
         if version < self._compilers_minimum_version[compiler]:
             raise ConanInvalidConfiguration("cfgfile requires a compiler that supports at least C++14")
 
     def requirements(self):
-        if tools.scm.Version(self, self.version) >= "0.2.10":
+        if tools.scm.Version(self.version) >= "0.2.10":
             self.requires("args-parser/6.2.0.1")
         elif self.version == "0.2.9.1":
             self.requires("args-parser/6.2.0.1")

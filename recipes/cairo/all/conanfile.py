@@ -195,7 +195,7 @@ class CairoConan(ConanFile):
             src = os.path.join(self._source_subfolder, "src")
             cairo_gobject = os.path.join(self._source_subfolder, "util", "cairo-gobject")
             inc = os.path.join("include", "cairo")
-            self.copy(pattern="cairo-version.h", dst=inc, src=(src if tools.scm.Version(self, self.version) >= "1.17.4" else self._source_subfolder))
+            self.copy(pattern="cairo-version.h", dst=inc, src=(src if tools.scm.Version(self.version) >= "1.17.4" else self._source_subfolder))
             self.copy(pattern="cairo-features.h", dst=inc, src=src)
             self.copy(pattern="cairo.h", dst=inc, src=src)
             self.copy(pattern="cairo-deprecated.h", dst=inc, src=src)

@@ -115,7 +115,7 @@ class GDCMConan(ConanFile):
         )
 
     def _create_cmake_variables(self, variables_file):
-        v = tools.scm.Version(self, self.version)
+        v = tools.scm.Version(self.version)
         content = textwrap.dedent("""\
             # The GDCM version number.
             set(GDCM_MAJOR_VERSION "{v_major}")
@@ -166,7 +166,7 @@ class GDCMConan(ConanFile):
 
     @property
     def _gdcm_subdir(self):
-        v = tools.scm.Version(self, self.version)
+        v = tools.scm.Version(self.version)
         return "gdcm-{}.{}".format(v.major, v.minor)
 
     @property

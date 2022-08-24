@@ -73,7 +73,7 @@ class mFASTConan(ConanFile):
             self.requires("sqlite3/3.37.2")
 
     def validate(self):
-        if tools.scm.Version(self, self.version) >= "1.2.2":
+        if tools.scm.Version(self.version) >= "1.2.2":
             if self.settings.compiler.get_safe("cppstd"):
                 tools.build.check_min_cppstd(self, self, 14)
 
@@ -100,7 +100,7 @@ class mFASTConan(ConanFile):
             self._cmake.definitions["BUILD_EXAMPLES"] = False
             self._cmake.definitions["BUILD_PACKAGES"] = False
             self._cmake.definitions["BUILD_SQLITE3"] = self.options.with_sqlite3
-            if tools.scm.Version(self, self.version) >= "1.2.2" and not tools.valid_min_cppstd(self, 14):
+            if tools.scm.Version(self.version) >= "1.2.2" and not tools.valid_min_cppstd(self, 14):
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -155,7 +155,7 @@ class mFASTConan(ConanFile):
         return os.path.join(self._new_mfast_config_dir, "FastTypeGenTarget.cmake")
 
     def _extract_fasttypegentarget_macro(self):
-        if tools.scm.Version(self, self.version) < "1.2.2":
+        if tools.scm.Version(self.version) < "1.2.2":
             config_file_content = tools.files.load(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
             begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
             end = config_file_content.find("endmacro()", begin) + len("endmacro()")

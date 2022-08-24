@@ -32,7 +32,7 @@ class HazelcastCppClient(ConanFile):
 
     @property
     def _cmake_name(self):
-        return "hazelcastcxx" if tools.scm.Version(self, self.version) <= "4.0.0" else "hazelcast-cpp-client"
+        return "hazelcastcxx" if tools.scm.Version(self.version) <= "4.0.0" else "hazelcast-cpp-client"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,7 +58,7 @@ class HazelcastCppClient(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        if tools.scm.Version(self, self.version) <= "4.0.0":
+        if tools.scm.Version(self.version) <= "4.0.0":
             self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
             self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
         else:

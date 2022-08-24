@@ -51,7 +51,7 @@ class JsonSchemaValidatorConan(ConanFile):
         self.requires("nlohmann_json/3.10.5")
 
     def validate(self):
-        version = tools.scm.Version(self, self.version)
+        version = tools.scm.Version(self.version)
         min_vs_version = "16" if version < "2.1.0" else "14"
         min_cppstd = "17" if self.settings.compiler == "Visual Studio" and version < "2.1.0" else "11"
         if self.settings.get_safe("compiler.cppstd"):
@@ -68,7 +68,7 @@ class JsonSchemaValidatorConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires c++{} support. The current compiler {} {} does not support it.".format(
                     self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
 
@@ -82,7 +82,7 @@ class JsonSchemaValidatorConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
-        if tools.scm.Version(self, self.version) < "2.1.0":
+        if tools.scm.Version(self.version) < "2.1.0":
             self._cmake.definitions["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -95,7 +95,7 @@ class JsonSchemaValidatorConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if tools.scm.Version(self, self.version) < "2.1.0":
+        if tools.scm.Version(self.version) < "2.1.0":
             self.copy("json-schema.hpp",
                       dst=os.path.join("include", "nlohmann"),
                       src=os.path.join(self._source_subfolder, "src"))
@@ -126,7 +126,7 @@ class JsonSchemaValidatorConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nlohmann_json_schema_validator")
         self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
-        self.cpp_info.libs = ["json-schema-validator" if tools.scm.Version(self, self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
+        self.cpp_info.libs = ["json-schema-validator" if tools.scm.Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"

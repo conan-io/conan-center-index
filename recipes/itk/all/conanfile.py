@@ -96,7 +96,7 @@ class ITKConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
@@ -288,7 +288,7 @@ class ITKConan(ConanFile):
 
     @property
     def _itk_subdir(self):
-        v = tools.scm.Version(self, self.version)
+        v = tools.scm.Version(self.version)
         return "ITK-{}.{}".format(v.major, v.minor)
 
     @property
@@ -482,7 +482,7 @@ class ITKConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ITK")
         self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_module_dir, "UseITK.cmake")])
 
-        itk_version = tools.scm.Version(self, self.version)
+        itk_version = tools.scm.Version(self.version)
         lib_suffix = "-{}.{}".format(itk_version.major, itk_version.minor)
 
         for name, values in self._itk_components.items():

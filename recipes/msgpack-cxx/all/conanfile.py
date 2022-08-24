@@ -34,7 +34,7 @@ class MsgpackCXXConan(ConanFile):
 
     def configure_options(self):
         # No boost was added in 4.1.0
-        if tools.scm.Version(self, self.version) < "4.1.0":
+        if tools.scm.Version(self.version) < "4.1.0":
             del self.options.use_boost
 
     def requirements(self):
@@ -90,5 +90,5 @@ class MsgpackCXXConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        if tools.scm.Version(self, self.version) >= "4.1.0" and not self.options.use_boost:
+        if tools.scm.Version(self.version) >= "4.1.0" and not self.options.use_boost:
             self.cpp_info.defines.append("MSGPACK_NO_BOOST")

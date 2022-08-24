@@ -57,7 +57,7 @@ class LLVMOpenMpConan(ConanFile):
 
     def validate(self):
         if (
-            tools.scm.Version(self, self.version) <= "10.0.0"
+            tools.scm.Version(self.version) <= "10.0.0"
             and self.settings.os == "Macos"
             and self.settings.arch == "armv8"
         ):

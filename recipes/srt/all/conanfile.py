@@ -31,7 +31,7 @@ class SrtConan(ConanFile):
 
     @property
     def _has_stdcxx_sync(self):
-        return tools.scm.Version(self, self.version) >= "1.4.2"
+        return tools.scm.Version(self.version) >= "1.4.2"
 
     @property
     def _has_posix_threads(self):

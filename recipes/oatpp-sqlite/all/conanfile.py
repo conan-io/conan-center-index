@@ -44,7 +44,7 @@ class OatppsqliteConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp-sqlite can not be built as shared library on Windows")
 
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("oatpp-sqlite requires GCC >=5")
 
     def requirements(self):

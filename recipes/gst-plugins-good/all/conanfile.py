@@ -41,9 +41,9 @@ class GStPluginsGoodConan(ConanFile):
             self.options.shared != self.options["gst-plugins-base"].shared:
                 # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
                 raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
-        if tools.scm.Version(self, self.version) >= "1.18.2" and\
+        if tools.scm.Version(self.version) >= "1.18.2" and\
            self.settings.compiler == "gcc" and\
-           tools.scm.Version(self, self.settings.compiler.version) < "5":
+           tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(
                 "gst-plugins-good %s does not support gcc older than 5" % self.version
             )

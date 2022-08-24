@@ -43,7 +43,7 @@ class OatppLibresslConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp-libressl can not be built as shared library on Windows")
 
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("oatpp-libressl requires GCC >=5")
 
     def requirements(self):

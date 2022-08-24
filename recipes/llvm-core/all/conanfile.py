@@ -86,7 +86,7 @@ class LLVMCoreConan(ConanFile):
 
     def _supports_compiler(self):
         compiler = self.settings.compiler.value
-        version = tools.scm.Version(self, self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
         major_rev, minor_rev = int(version.major), int(version.minor)
 
         unsupported_combinations = [

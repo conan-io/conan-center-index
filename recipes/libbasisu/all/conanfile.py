@@ -65,7 +65,7 @@ class LibBasisUniversalConan(ConanFile):
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
-        elif tools.scm.Version(self, self.settings.compiler.version) < min_version:
+        elif tools.scm.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration("{} {} does not support compiler with version {} {}, minimum supported compiler version is {} ".format(self.name, self.version, self.settings.compiler, self.settings.compiler.version, min_version))
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, 11)

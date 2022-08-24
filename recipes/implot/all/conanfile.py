@@ -38,7 +38,7 @@ class ImplotConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if tools.scm.Version(self, self.version) >= "0.13":
+        if tools.scm.Version(self.version) >= "0.13":
             self.requires("imgui/1.87")
         else:
             self.requires("imgui/1.86")

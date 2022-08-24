@@ -54,7 +54,7 @@ class ProjConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.scm.Version(self, self.version) < "7.0.0":
+        if tools.scm.Version(self.version) < "7.0.0":
             del self.options.with_tiff
             del self.options.with_curl
 
@@ -93,7 +93,7 @@ class ProjConan(ConanFile):
         tools.files.replace_in_file(self, cmakelists, "/W4", "")
 
         # Let CMake install shared lib with a clean rpath !
-        if tools.scm.Version(self, self.version) >= "7.1.0" and tools.scm.Version(self, self.version) < "9.0.0":
+        if tools.scm.Version(self.version) >= "7.1.0" and tools.scm.Version(self.version) < "9.0.0":
             tools.files.replace_in_file(self, cmakelists,
                                   "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                                   "")
@@ -113,7 +113,7 @@ class ProjConan(ConanFile):
             # TODO: no hope for 2 profiles, wait for stable self.dependencies
             #       because we want absolute lib paths of build profile actually
             if not hasattr(self, "settings_build"):
-                if tools.scm.Version(self, self.version) < "8.1.0":
+                if tools.scm.Version(self.version) < "8.1.0":
                     cmake_sqlite_call = "CMakeLists.txt"
                     pattern = "${EXE_SQLITE3}"
                 else:
@@ -129,7 +129,7 @@ class ProjConan(ConanFile):
                 )
 
         # unvendor nlohmann_json
-        if tools.scm.Version(self, self.version) < "8.1.0":
+        if tools.scm.Version(self.version) < "8.1.0":
             tools.files.rmdir(self, os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
 
     def _configure_cmake(self):
@@ -144,7 +144,7 @@ class ProjConan(ConanFile):
         self._cmake.definitions["BUILD_PROJ"] = self.options.build_executables
         self._cmake.definitions["BUILD_PROJINFO"] = self.options.build_executables
         self._cmake.definitions["PROJ_DATA_SUBDIR"] = "res"
-        if tools.scm.Version(self, self.version) < "7.0.0":
+        if tools.scm.Version(self.version) < "7.0.0":
             self._cmake.definitions["PROJ_TESTS"] = False
             self._cmake.definitions["BUILD_LIBPROJ_SHARED"] = self.options.shared
             self._cmake.definitions["ENABLE_LTO"] = False
@@ -155,7 +155,7 @@ class ProjConan(ConanFile):
             self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.definitions["ENABLE_IPO"] = False
             self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
-        if tools.scm.Version(self, self.version) >= "8.1.0":
+        if tools.scm.Version(self.version) >= "8.1.0":
             self._cmake.definitions["NLOHMANN_JSON_ORIGIN"] = "external"
         self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         self._cmake.configure()
@@ -170,7 +170,7 @@ class ProjConan(ConanFile):
         tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        proj_version = tools.scm.Version(self, self.version)
+        proj_version = tools.scm.Version(self.version)
         cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
         cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
         self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
@@ -203,7 +203,7 @@ class ProjConan(ConanFile):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
-        if tools.scm.Version(self, self.version) < "8.2.0":
+        if tools.scm.Version(self.version) < "8.2.0":
             if self.options.shared and self._is_msvc:
                 self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
         else:

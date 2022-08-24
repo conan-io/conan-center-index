@@ -547,7 +547,7 @@ class FFMpegConan(ConanFile):
         if self._is_msvc:
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
-            if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) <= "12":
+            if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
         if tools.build.cross_building(self, self):
@@ -886,7 +886,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_coreimage"):
                 self.cpp_info.components["avfilter"].frameworks.append(
                     "CoreImage")
-            if tools.scm.Version(self, self.version) >= "5.0" and tools.apple.is_apple_os(self, self.settings.os):
+            if tools.scm.Version(self.version) >= "5.0" and tools.apple.is_apple_os(self, self.settings.os):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):
@@ -901,4 +901,4 @@ class FFMpegConan(ConanFile):
                 "vulkan-loader::vulkan-loader")
 
     def _version_supports_vulkan(self):
-        return tools.scm.Version(self, self.version) >= "4.3.0"
+        return tools.scm.Version(self.version) >= "4.3.0"

@@ -96,7 +96,7 @@ class PdalConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.build.check_min_cppstd(self, self, 11)
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < 5:
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < 5:
             raise ConanInvalidConfiguration ("This compiler version is unsupported")
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
@@ -200,7 +200,7 @@ class PdalConan(ConanFile):
         )
 
     def _create_cmake_module_variables(self, module_file):
-        pdal_version = tools.scm.Version(self, self.version)
+        pdal_version = tools.scm.Version(self.version)
         content = textwrap.dedent(f"""\
             set(PDAL_LIBRARIES {self._pdal_base_name} pdal_util)
             set(PDAL_VERSION_MAJOR {pdal_version.major})

@@ -46,7 +46,7 @@ class PlatformDelegatesConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
 
-        if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        if tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("platform.delegates/{} "
                                             "requires C++{} with {}, "
                                             "which is not supported "

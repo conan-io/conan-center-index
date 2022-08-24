@@ -48,7 +48,7 @@ class SkyrUrlConan(ConanFile):
         return {
             "Visual Studio": "16",
             "gcc": "7",
-            "clang": "6" if tools.scm.Version(self, self.version) <= "1.12.0" else "8",
+            "clang": "6" if tools.scm.Version(self.version) <= "1.12.0" else "8",
             "apple-clang": "10",
         }
 
@@ -73,7 +73,7 @@ class SkyrUrlConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 

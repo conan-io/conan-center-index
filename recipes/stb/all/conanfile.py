@@ -32,7 +32,7 @@ class StbConan(ConanFile):
         return str(self.version)[4:]
 
     def config_options(self):
-        if tools.scm.Version(self, self._version) < "20210713":
+        if tools.scm.Version(self._version) < "20210713":
             del self.options.with_deprecated
 
     def source(self):
@@ -43,7 +43,7 @@ class StbConan(ConanFile):
         self.copy("*.h", src=self._source_subfolder, dst="include")
         self.copy("stb_vorbis.c", src=self._source_subfolder, dst="include")
         tools.files.rmdir(self, os.path.join(self.package_folder, "include", "tests"))
-        if tools.scm.Version(self, self._version) >= "20210713":
+        if tools.scm.Version(self._version) >= "20210713":
             tools.files.rmdir(self, os.path.join(self.package_folder, "include", "deprecated"))
         if self.options.get_safe("with_deprecated", False):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "deprecated"), dst="include")

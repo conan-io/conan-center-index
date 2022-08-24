@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["QT_VERSION_MAJOR"] = tools.scm.Version(self, self.deps_cpp_info["qt"].version).major
+        cmake.definitions["QT_VERSION_MAJOR"] = tools.scm.Version(self.deps_cpp_info["qt"].version).major
         cmake.configure()
         cmake.build()
 

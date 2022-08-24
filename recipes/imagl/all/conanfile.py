@@ -46,14 +46,14 @@ class ImaglConan(ConanFile):
                 "clang": "10",
                 "apple-clang": "11"
         }
-        if tools.scm.Version(self, self.version) <= "0.1.1" or tools.scm.Version(self, self.version) == "0.2.0":
+        if tools.scm.Version(self.version) <= "0.1.1" or tools.scm.Version(self.version) == "0.2.0":
             minimum_versions["Visual Studio"] = "16.5"
             minimum_versions["msvc"] = "19.25"
         return minimum_versions
 
     @property
     def _supports_jpeg(self):
-        return tools.scm.Version(self, self.version) >= "0.2.0"
+        return tools.scm.Version(self.version) >= "0.2.0"
 
     def config_options(self):
         if self.settings.os == "Windows":

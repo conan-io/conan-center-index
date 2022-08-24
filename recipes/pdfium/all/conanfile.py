@@ -65,7 +65,7 @@ class PdfiumConan(ConanFile):
         }
         min_compiler_version = minimum_compiler_versions.get(str(self.settings.compiler))
         if min_compiler_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_compiler_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("pdfium needs at least compiler version {}".format(min_compiler_version))
 
     def source(self):

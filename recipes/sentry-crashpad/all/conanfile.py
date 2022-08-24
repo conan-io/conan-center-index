@@ -45,7 +45,7 @@ class SentryCrashpadConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15" if tools.scm.Version(self, self.version) < "0.4.16" else "16",
+            "Visual Studio": "15" if tools.scm.Version(self.version) < "0.4.16" else "16",
             "gcc": "6",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -59,7 +59,7 @@ class SentryCrashpadConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os not in ("Linux", "Android") or tools.scm.Version(self, self.version) < "0.4":
+        if self.settings.os not in ("Linux", "Android") or tools.scm.Version(self.version) < "0.4":
             del self.options.with_tls
 
     def build_requirements(self):
@@ -80,10 +80,10 @@ class SentryCrashpadConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Compiler is unknown. Assuming it supports C++14.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
-        if tools.scm.Version(self, self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if tools.scm.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def source(self):
@@ -103,7 +103,7 @@ class SentryCrashpadConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if tools.scm.Version(self, self.version) > "0.4":
+        if tools.scm.Version(self.version) > "0.4":
             openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "external", "crashpad", "CMakeLists.txt"),
                                   "find_package(OpenSSL)", openssl_repl)
@@ -180,7 +180,7 @@ class SentryCrashpadConan(ConanFile):
             "crashpad_util", "crashpad_mini_chromium",
         ]
 
-        if tools.scm.Version(self, self.version) > "0.3":
+        if tools.scm.Version(self.version) > "0.3":
             if self.settings.os == "Windows":
                 # getopt
                 self.cpp_info.components["crashpad_getopt"].set_property("cmake_target_name", "crashpad::getopt")
@@ -219,7 +219,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package_multi"] = "snapshot"
         self.cpp_info.components["crashpad_minidump"].names["cmake_find_package"] = "minidump"
         self.cpp_info.components["crashpad_minidump"].names["cmake_find_package_multi"] = "minidump"
-        if tools.scm.Version(self, self.version) > "0.3":
+        if tools.scm.Version(self.version) > "0.3":
             if self.settings.os == "Windows":
                 self.cpp_info.components["crashpad_getopt"].names["cmake_find_package"] = "getopt"
                 self.cpp_info.components["crashpad_getopt"].names["cmake_find_package_multi"] = "getopt"

@@ -31,7 +31,7 @@ class CpphttplibConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if tools.scm.Version(self, self.version) < "0.7.2":
+        if tools.scm.Version(self.version) < "0.7.2":
             del self.options.with_brotli
 
     def requirements(self):

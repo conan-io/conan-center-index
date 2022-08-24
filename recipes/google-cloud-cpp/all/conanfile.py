@@ -53,18 +53,18 @@ class GoogleCloudCppConan(ConanFile):
         if hasattr(self, "settings_build") and tools.build.cross_building(self, self):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
-        if tools.scm.Version(self, self.version) >= "1.30.0":
-            if self.settings.compiler == 'clang' and tools.scm.Version(self, self.settings.compiler.version) < "6.0":
+        if tools.scm.Version(self.version) >= "1.30.0":
+            if self.settings.compiler == 'clang' and tools.scm.Version(self.settings.compiler.version) < "6.0":
                 raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
 
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 11)
 
-        if self.settings.compiler == 'gcc' and tools.scm.Version(self, self.settings.compiler.version) < "5.4":
+        if self.settings.compiler == 'gcc' and tools.scm.Version(self.settings.compiler.version) < "5.4":
             raise ConanInvalidConfiguration("Building requires GCC >= 5.4")
-        if self.settings.compiler == 'clang' and tools.scm.Version(self, self.settings.compiler.version) < "3.8":
+        if self.settings.compiler == 'clang' and tools.scm.Version(self.settings.compiler.version) < "3.8":
             raise ConanInvalidConfiguration("Building requires clang >= 3.8")
-        if self.settings.compiler == 'Visual Studio' and tools.scm.Version(self, self.settings.compiler.version) < "16":
+        if self.settings.compiler == 'Visual Studio' and tools.scm.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Building requires VS >= 2019")
 
     def source(self):
@@ -106,7 +106,7 @@ class GoogleCloudCppConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        if tools.scm.Version(self, self.version) < "1.33.0":
+        if tools.scm.Version(self.version) < "1.33.0":
             # Do not override CMAKE_CXX_STANDARD if provided
             tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 textwrap.dedent("""\
@@ -144,7 +144,7 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
         self.cpp_info.components["bigtable"].names["pkg_config"] = "google_cloud_cpp_bigtable"
 
-        if tools.scm.Version(self, self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+        if tools.scm.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
             self.cpp_info.components["experimental-firestore"].requires = ["common"]
             self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
             self.cpp_info.components["experimental-firestore"].names["pkg_config"] = "google_cloud_cpp_firestore"
@@ -238,7 +238,7 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].names["pkg_config"] = "google_cloud_cpp_devtools_cloudtrace_v2_tracing_protos"
 
         cmp_logging_type_type_protos = None
-        if tools.scm.Version(self, self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+        if tools.scm.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
             cmp_logging_type_type_protos = "logging_type_protos"
             self.cpp_info.components[cmp_logging_type_type_protos].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos"]
             self.cpp_info.components[cmp_logging_type_type_protos].libs = ["google_cloud_cpp_logging_type_protos"]
@@ -345,7 +345,7 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["cloud_dialogflow_v2_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2_protos"]
         self.cpp_info.components["cloud_dialogflow_v2_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2_protos"
 
-        if tools.scm.Version(self, self.version) < "1.40.1":  # FIXME: Probably this library was removed before
+        if tools.scm.Version(self.version) < "1.40.1":  # FIXME: Probably this library was removed before
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "longrunning_operations_protos", "rpc_status_protos", "type_latlng_protos"]
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2beta1_protos"]
             self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].names["pkg_config"] = "google_cloud_cpp_cloud_dialogflow_v2beta1_protos"

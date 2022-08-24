@@ -72,7 +72,7 @@ class MozjpegConan(ConanFile):
 
     @property
     def _use_cmake(self):
-        return self.settings.os == "Windows" or tools.scm.Version(self, self.version) >= "4.0.0"
+        return self.settings.os == "Windows" or tools.scm.Version(self.version) >= "4.0.0"
 
     def build_requirements(self):
         if not self._use_cmake:

@@ -59,7 +59,7 @@ class CapnprotoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.scm.Version(self, self.version) < "0.8.0":
+        if tools.scm.Version(self.version) < "0.8.0":
             del self.options.with_zlib
 
     def configure(self):
@@ -78,11 +78,11 @@ class CapnprotoConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Cap'n Proto requires C++14. Your compiler is unknown. Assuming it supports C++14.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Cap'n Proto requires C++14, which your compiler does not support.")
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
-        if self.settings.os == "Windows" and tools.scm.Version(self, self.version) < "0.8.0" and self.options.with_openssl:
+        if self.settings.os == "Windows" and tools.scm.Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pre 0.8.0")
 
     def build_requirements(self):
@@ -111,7 +111,7 @@ class CapnprotoConan(ConanFile):
             "--with-openssl" if self.options.with_openssl else "--without-openssl",
             "--enable-reflection",
         ]
-        if tools.scm.Version(self, self.version) >= "0.8.0":
+        if tools.scm.Version(self.version) >= "0.8.0":
             args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
         autotools = AutoToolsBuildEnvironment(self)
         # Fix rpath on macOS
@@ -199,7 +199,7 @@ class CapnprotoConan(ConanFile):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
-        if tools.scm.Version(self, self.version) >= "0.9.0":
+        if tools.scm.Version(self.version) >= "0.9.0":
             components.append({
                 "name": "capnp-websocket",
                 "requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"],

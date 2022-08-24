@@ -116,14 +116,14 @@ class Hdf5Conan(ConanFile):
         cmake.definitions["HDF5_USE_FOLDERS"] = False
         cmake.definitions["HDF5_NO_PACKAGES"] = True
         cmake.definitions["ALLOW_UNSUPPORTED"] = False
-        if tools.scm.Version(self, self.version) >= "1.10.6":
+        if tools.scm.Version(self.version) >= "1.10.6":
             cmake.definitions["ONLY_SHARED_LIBS"] = self.options.shared
         cmake.definitions["BUILD_STATIC_EXECS"] = False
         cmake.definitions["HDF5_ENABLE_COVERAGE"] = False
         cmake.definitions["HDF5_ENABLE_USING_MEMCHECKER"] = False
-        if tools.scm.Version(self, self.version) >= "1.10.0":
+        if tools.scm.Version(self.version) >= "1.10.0":
             cmake.definitions["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
-        if tools.scm.Version(self, self.version) >= "1.10.5":
+        if tools.scm.Version(self.version) >= "1.10.5":
             cmake.definitions["HDF5_ENABLE_PREADWRITE"] = True
         cmake.definitions["HDF5_ENABLE_DEPRECATED_SYMBOLS"] = True
         cmake.definitions["HDF5_BUILD_GENERATORS"] = False
@@ -146,7 +146,7 @@ class Hdf5Conan(ConanFile):
         cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
         cmake.definitions["HDF5_BUILD_FORTRAN"] = False
         cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
-        if tools.scm.Version(self, self.version) >= "1.10.0":
+        if tools.scm.Version(self.version) >= "1.10.0":
             cmake.definitions["HDF5_BUILD_JAVA"] = False
 
         cmake.configure(build_folder=self._build_subfolder)

@@ -76,7 +76,7 @@ class CAFConan(ConanFile):
 
     @property
     def _cppstd(self):
-        return "11" if tools.scm.Version(self, self.version) <= "0.17.6" else "17"
+        return "11" if tools.scm.Version(self.version) <= "0.17.6" else "17"
 
     def validate(self):
         min_version = self._minimum_compilers_version(self._cppstd).get(str(self.settings.compiler))
@@ -84,11 +84,11 @@ class CAFConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._cppstd, self.settings.compiler, self.settings.compiler.version))
 
-        if self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.settings.compiler.version) > "10.0" and \
+        if self.settings.compiler == "apple-clang" and tools.scm.Version(self.settings.compiler.version) > "10.0" and \
                 self.settings.arch == 'x86':
             raise ConanInvalidConfiguration("clang >= 11.0 does not support x86")
         if self.options.shared and self.settings.os == "Windows":
@@ -104,7 +104,7 @@ class CAFConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cppstd
-            if tools.scm.Version(self, self.version) <= "0.17.6":
+            if tools.scm.Version(self.version) <= "0.17.6":
                 self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
                 self._cmake.definitions["CAF_NO_OPENSSL"] = not self.options.with_openssl
                 for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
@@ -137,7 +137,7 @@ class CAFConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CAF")
 
-        suffix = "_static" if not self.options.shared and tools.scm.Version(self, self.version) <= "0.17.6" else ""
+        suffix = "_static" if not self.options.shared and tools.scm.Version(self.version) <= "0.17.6" else ""
 
         self.cpp_info.components["caf_core"].set_property("cmake_target_name", "CAF::core")
         self.cpp_info.components["caf_core"].libs = ["caf_core{}".format(suffix)]

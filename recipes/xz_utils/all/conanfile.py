@@ -67,7 +67,7 @@ class XZUtils(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _apply_patches(self):
-        if tools.scm.Version(self, self.version) == "5.2.4" and self._is_msvc:
+        if tools.scm.Version(self.version) == "5.2.4" and self._is_msvc:
             # Relax Windows SDK restriction
             # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
             #
@@ -155,7 +155,7 @@ class XZUtils(ConanFile):
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.scm.Version(self, self.version)
+            tools.scm.Version(self.version)
         )
 
     @staticmethod

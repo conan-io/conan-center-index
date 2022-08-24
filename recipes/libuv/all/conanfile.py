@@ -49,7 +49,7 @@ class LibuvConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
-            if tools.scm.Version(self, self.settings.compiler.version) < "14":
+            if tools.scm.Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("Visual Studio 2015 or higher required")
 
     def source(self):

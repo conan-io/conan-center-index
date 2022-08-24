@@ -63,7 +63,7 @@ class LcmsConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
         if (self.settings.compiler == "Visual Studio" and compiler_version >= "14") or \
            str(self.settings.compiler) == "msvc":
             # since VS2015 vsnprintf is built-in
@@ -81,14 +81,14 @@ class LcmsConan(ConanFile):
                                   "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
 
     def _build_visual_studio(self):
-        if tools.scm.Version(self, self.version) <= "2.11":
+        if tools.scm.Version(self.version) <= "2.11":
             vc_sln_subdir = "VC2013"
         else:
             vc_sln_subdir = "VC2015"
         with tools.files.chdir(self, os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             if self.settings.compiler == "Visual Studio" and \
-               tools.scm.Version(self, self.settings.compiler.version) <= "12":
+               tools.scm.Version(self.settings.compiler.version) <= "12":
                 upgrade_project = False
             else:
                 upgrade_project = True

@@ -53,7 +53,7 @@ class ReplxxConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if tools.scm.Version(self, self.version) < "0.0.3":
+        if tools.scm.Version(self.version) < "0.0.3":
             tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "src", "io.cxx"),
                 "#include <array>\n",

@@ -31,20 +31,20 @@ class MdnsResponderConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration("Only Linux and Windows are supported for this package.")
-        if tools.scm.Version(self, self.version) >= "1096.0.2":
+        if tools.scm.Version(self.version) >= "1096.0.2":
             # recent tarballs (since 1096.0.2) are missing mDNSWindows, so for now, Linux only
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Windows is not supported for version {}.".format(self.version))
             # TCP_NOTSENT_LOWAT is causing build failures for packages built with gcc 4.9
             # the best check would probably be for Linux kernel v3.12, but for now...
-            if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+            if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Only gcc 5 or higher is supported for this package.")
             # __has_c_attribute is not available in Clang 5
-            if self.settings.compiler == "clang" and tools.scm.Version(self, self.settings.compiler.version) < "6":
+            if self.settings.compiler == "clang" and tools.scm.Version(self.settings.compiler.version) < "6":
                 raise ConanInvalidConfiguration("Only Clang 6 or higher is supported for this package.")
         # FIXME: Migration of the project files fails with VS 2017 on c3i (conan-center-index's infrastructure)
         # though works OK with VS 2015 and VS 2019, and works with VS 2017 in my local environment
-        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) == "15":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) == "15":
             raise ConanInvalidConfiguration("Visual Studio 2017 is not supported in CCI (yet).")
 
     def source(self):

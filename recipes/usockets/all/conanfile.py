@@ -67,10 +67,10 @@ class UsocketsConan(ConanFile):
         if self.options.eventloop == "gcd" and (self.settings.os != "Linux" or self.settings.compiler != "clang"):
             raise ConanInvalidConfiguration("eventloop=gcd is only supported on Linux with clang")
 
-        if tools.scm.Version(self, self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
+        if tools.scm.Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
             raise ConanInvalidConfiguration(f"eventloop={self.options.eventloop} is not supported with {self.name}/{self.version}")
 
-        if tools.scm.Version(self, self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
+        if tools.scm.Version(self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
             raise ConanInvalidConfiguration(f"with_ssl={self.options.with_ssl} is not supported with {self.name}/{self.version}. https://github.com/uNetworking/uSockets/issues/147")
 
         if self.options.with_ssl == "wolfssl" and not self.options["wolfssl"].opensslextra:
@@ -88,7 +88,7 @@ class UsocketsConan(ConanFile):
 
         minimum_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cppstd))
         else:
             self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, cppstd))

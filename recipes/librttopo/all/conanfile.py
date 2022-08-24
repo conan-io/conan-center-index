@@ -53,11 +53,11 @@ class LibrttopoConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        librttopo_version = tools.scm.Version(self, self.version)
+        librttopo_version = tools.scm.Version(self.version)
         cmake.definitions["LIBRTGEOM_VERSION_MAJOR"] = librttopo_version.major
         cmake.definitions["LIBRTGEOM_VERSION_MINOR"] = librttopo_version.minor
         cmake.definitions["LIBRTGEOM_VERSION_PATCH"] = librttopo_version.patch
-        geos_version = tools.scm.Version(self, self.deps_cpp_info["geos"].version)
+        geos_version = tools.scm.Version(self.deps_cpp_info["geos"].version)
         cmake.definitions["RTGEOM_GEOS_VERSION"] = "{}{}".format(geos_version.major, geos_version.minor)
         cmake.configure()
         return cmake

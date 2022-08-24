@@ -110,7 +110,7 @@ class DjinniSuppotLib(ConanFile):
             tools.build.check_min_cppstd(self, self, "17")
         try:
             minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_required_compiler_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:
                 raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")

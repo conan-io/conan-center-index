@@ -27,7 +27,7 @@ class MgsConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("mgs requires C++14, which your compiler does not fully support.")
         else:
             self.output.warn("mgs requires C++14. Your compiler is unknown. Assuming it supports C++14.")

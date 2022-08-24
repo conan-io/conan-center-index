@@ -37,7 +37,7 @@ class TCSBankUconfigConan(ConanFile):
 
     def validate(self):
         compiler = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         min_req_cppstd = "17"
         if self.settings.compiler.cppstd:

@@ -63,7 +63,7 @@ class GeographiclibConan(ConanFile):
         }.get(str(self.settings.compiler), False)
 
     def validate(self):
-        if tools.scm.Version(self, self.version) >= "1.51":
+        if tools.scm.Version(self.version) >= "1.51":
             if self.settings.compiler.get_safe("cppstd"):
                 tools.build.check_min_cppstd(self, self, 11)
 

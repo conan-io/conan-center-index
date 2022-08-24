@@ -81,7 +81,7 @@ class DimeConan(ConanFile):
         if self.settings.os == "Windows" and is_msvc(self):
             libname = "{}{}{}{}".format(
                 libname,
-                tools.scm.Version(self, self.version).major,
+                tools.scm.Version(self.version).major,
                 "" if self.options.shared else "s",
                 "d" if self.settings.build_type == "Debug" else "",
                 )

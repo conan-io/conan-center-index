@@ -130,7 +130,7 @@ class GTestConan(ConanFile):
         internal_utils = os.path.join(self._source_subfolder, "googletest",
                                       "cmake", "internal_utils.cmake")
         tools.files.replace_in_file(self, internal_utils, "-WX", "")
-        if self.version == "cci.20210126" or tools.scm.Version(self, self.version) < "1.12.0":
+        if self.version == "cci.20210126" or tools.scm.Version(self.version) < "1.12.0":
             tools.files.replace_in_file(self, internal_utils, "-Werror", "")
 
     @functools.lru_cache(1)
@@ -163,7 +163,7 @@ class GTestConan(ConanFile):
     @property
     def _postfix(self):
         # In 1.12.0, gtest remove debug postfix.
-        if self.version != "cci.20210126" and tools.scm.Version(self, self.version) >= "1.12.0":
+        if self.version != "cci.20210126" and tools.scm.Version(self.version) >= "1.12.0":
             return ""
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
@@ -183,8 +183,8 @@ class GTestConan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
         if self.version == "1.8.1":
-            if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) >= "15") or \
-               (str(self.settings.compiler) == "msvc" and tools.scm.Version(self, self.settings.compiler.version) >= "191"):
+            if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) >= "15") or \
+               (str(self.settings.compiler) == "msvc" and tools.scm.Version(self.settings.compiler.version) >= "191"):
                 self.cpp_info.components["libgtest"].defines.append("GTEST_LANG_CXX11=1")
                 self.cpp_info.components["libgtest"].defines.append("GTEST_HAS_TR1_TUPLE=0")
 

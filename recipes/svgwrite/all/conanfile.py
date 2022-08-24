@@ -33,7 +33,7 @@ class SvgwriteConan(ConanFile):
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, "17")

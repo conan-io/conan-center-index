@@ -56,7 +56,7 @@ class OpenColorIOConan(ConanFile):
         self.requires("expat/2.4.8")
         self.requires("openexr/2.5.7")
         self.requires("yaml-cpp/0.7.0")
-        if tools.scm.Version(self, self.version) < "2.0.0":
+        if tools.scm.Version(self.version) < "2.0.0":
             self.requires("tinyxml/2.6.2")
         else:
             self.requires("pystring/1.1.3")
@@ -76,7 +76,7 @@ class OpenColorIOConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
 
-        if tools.scm.Version(self, self.version) >= "2.1.0":
+        if tools.scm.Version(self.version) >= "2.1.0":
             cmake.definitions["OCIO_BUILD_PYTHON"] = False
         else:
             cmake.definitions["OCIO_BUILD_SHARED"] = self.options.shared
@@ -148,7 +148,7 @@ class OpenColorIOConan(ConanFile):
 
         self.cpp_info.libs = ["OpenColorIO"]
 
-        if tools.scm.Version(self, self.version) < "2.1.0":
+        if tools.scm.Version(self.version) < "2.1.0":
             if not self.options.shared:
                 self.cpp_info.defines.append("OpenColorIO_STATIC")
 

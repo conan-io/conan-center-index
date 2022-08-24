@@ -90,7 +90,7 @@ class ApprovalTestsCppConan(ConanFile):
             self._require_at_least_compiler_version("gcc", 5)
 
     def _require_at_least_compiler_version(self, compiler, compiler_version):
-        if self.settings.compiler == compiler and tools.scm.Version(self, self.settings.compiler.version) < compiler_version:
+        if self.settings.compiler == compiler and tools.scm.Version(self.settings.compiler.version) < compiler_version:
             raise ConanInvalidConfiguration(
                 "{}/{} with compiler {} requires at least compiler version {}".
                     format(self.name, self.version, compiler, compiler_version))

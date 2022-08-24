@@ -117,7 +117,7 @@ class BotanConan(ConanFile):
 
         # --single-amalgamation option is no longer available
         # See also https://github.com/randombit/botan/pull/2246
-        if tools.scm.Version(self, self.version) >= '2.14.0':
+        if tools.scm.Version(self.version) >= '2.14.0':
             del self.options.single_amalgamation
 
     def configure(self):
@@ -147,7 +147,7 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration('{0} requires non-header-only static boost, without magic_autolink, and with these components: {1}'.format(self.name, ', '.join(self._required_boost_components)))
 
         compiler = self.settings.compiler
-        version = tools.scm.Version(self, self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
 
         if compiler == 'Visual Studio' and version < '14':
             raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
@@ -163,7 +163,7 @@ class BotanConan(ConanFile):
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if tools.scm.Version(self, self.version) >= '2.14.0' and self.options.amalgamation:
+        if tools.scm.Version(self.version) >= '2.14.0' and self.options.amalgamation:
             if (compiler == 'apple-clang' and version < '10') or \
                (compiler == 'gcc' and version < '8') or \
                (compiler == 'clang' and version < '7'):
@@ -189,7 +189,7 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        major_version = tools.scm.Version(self, self.version).major
+        major_version = tools.scm.Version(self.version).major
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
         self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
         self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]

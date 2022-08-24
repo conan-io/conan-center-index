@@ -182,7 +182,7 @@ class LibpqConan(ConanFile):
                 autotools.make(args=self._make_args, target="generated-headers")
             with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "common")):
                 autotools.make(args=self._make_args)
-            if tools.scm.Version(self, self.version) >= "12":
+            if tools.scm.Version(self.version) >= "12":
                 with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "port")):
                     autotools.make(args=self._make_args)
             with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "include")):
@@ -234,7 +234,7 @@ class LibpqConan(ConanFile):
                 autotools.install(args=self._make_args)
             with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
                 autotools.install(args=self._make_args)
-            if tools.scm.Version(self, self.version) >= "12":
+            if tools.scm.Version(self.version) >= "12":
                 with tools.files.chdir(self, os.path.join(self._source_subfolder, "src", "port")):
                     autotools.install(args=self._make_args)
 
@@ -272,7 +272,7 @@ class LibpqConan(ConanFile):
 
         if not self.options.shared:
             if self._is_msvc:
-                if tools.scm.Version(self, self.version) < "12":
+                if tools.scm.Version(self.version) < "12":
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport"])
                 else:
@@ -280,7 +280,7 @@ class LibpqConan(ConanFile):
                     self.cpp_info.components["pgport"].libs = ["libpgport"]
                     self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
             else:
-                if tools.scm.Version(self, self.version) < "12":
+                if tools.scm.Version(self.version) < "12":
                     self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
                     self.cpp_info.components["pq"].requires.extend(["pgcommon"])
                 else:

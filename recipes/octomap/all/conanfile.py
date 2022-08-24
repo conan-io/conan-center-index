@@ -84,7 +84,7 @@ class OctomapConan(ConanFile):
         # Do not force PIC
         tools.files.replace_in_file(self, compiler_settings, "ADD_DEFINITIONS(-fPIC)", "")
         # No -Werror
-        if tools.scm.Version(self, self.version) >= "1.9.6":
+        if tools.scm.Version(self.version) >= "1.9.6":
             tools.files.replace_in_file(self, compiler_settings, "-Werror", "")
         # we want a clean rpath in installed shared libs
         tools.files.replace_in_file(self, compiler_settings, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")", "")

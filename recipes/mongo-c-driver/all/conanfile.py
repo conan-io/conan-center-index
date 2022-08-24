@@ -166,7 +166,7 @@ class MongoCDriverConan(ConanFile):
         cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
             cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        if tools.scm.Version(self, self.version) >= "1.20.0":
+        if tools.scm.Version(self.version) >= "1.20.0":
             cmake.definitions["MONGO_USE_CCACHE"] = False
         cmake.configure(build_folder=self._build_subfolder)
         return cmake

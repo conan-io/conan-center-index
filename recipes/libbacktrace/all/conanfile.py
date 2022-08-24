@@ -88,7 +88,7 @@ class LibbacktraceConan(ConanFile):
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         autotools.libs = []
-        if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) >= "12") or \
+        if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) >= "12") or \
            str(self.settings.compiler) == "msvc":
             autotools.flags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"

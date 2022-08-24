@@ -92,7 +92,7 @@ class EnjinCppSdk(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(compiler), False)
         if not minimum_version:
             self.output.warn("C++17 support is required. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.scm.Version(self, compiler.version) < minimum_version:
+        elif tools.scm.Version(compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support is required, which your compiler does not support.")
 
         if compiler == "clang" and compiler.libcxx != "libstdc++11":

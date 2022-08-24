@@ -74,7 +74,7 @@ class CrashpadConan(ConanFile):
                 self.output.warn("crashpad needs a shared libcurl library")
         min_compiler_version = self._minimum_compiler_cxx14()
         if min_compiler_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < min_compiler_version:
+            if tools.scm.Version(self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
         else:
             self.output.warn("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")

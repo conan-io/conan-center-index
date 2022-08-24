@@ -93,7 +93,7 @@ class SociConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 11)
 
         compiler = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version.value)
+        compiler_version = tools.scm.Version(self.settings.compiler.version.value)
         if compiler not in self._minimum_compilers_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
         elif compiler_version < self._minimum_compilers_version[compiler]:
@@ -189,7 +189,7 @@ class SociConan(ConanFile):
 
         target_suffix = "" if self.options.shared else "_static"
         lib_prefix = "lib" if self._is_msvc and not self.options.shared else ""
-        version = tools.scm.Version(self, self.version)
+        version = tools.scm.Version(self.version)
         lib_suffix = "_{}_{}".format(version.major, version.minor) if self.settings.os == "Windows" else ""
 
         # soci_core

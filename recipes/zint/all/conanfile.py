@@ -86,7 +86,7 @@ class ZintConan(ConanFile):
         cmake.definitions["DATA_INSTALL_DIR"] = os.path.join(self.package_folder, "lib")
         cmake.definitions["ZINT_USE_QT"] = self.options.with_qt
         if self.options.with_qt:
-            cmake.definitions["QT_VERSION_MAJOR"] = tools.scm.Version(self, self.deps_cpp_info["qt"].version).major
+            cmake.definitions["QT_VERSION_MAJOR"] = tools.scm.Version(self.deps_cpp_info["qt"].version).major
         cmake.definitions["ZINT_USE_PNG"] = self.options.with_libpng
         cmake.configure()
         return cmake

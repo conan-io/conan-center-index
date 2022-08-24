@@ -78,7 +78,7 @@ class EmbreeConan(ConanFile):
 
     @property
     def _embree_has_neon_support(self):
-        return tools.scm.Version(self, self.version) >= "3.13.0"
+        return tools.scm.Version(self.version) >= "3.13.0"
 
     @property
     def _has_neon(self):
@@ -112,7 +112,7 @@ class EmbreeConan(ConanFile):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
             raise ConanInvalidConfiguration("Embree {} doesn't support {}".format(self.version, self.settings.arch))
 
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
         if self.settings.compiler == "clang" and compiler_version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
         elif self.settings.compiler == "Visual Studio" and compiler_version < "15":
@@ -161,7 +161,7 @@ class EmbreeConan(ConanFile):
         self._cmake.definitions["EMBREE_ISA_SSE42"] = self.options.get_safe("sse42", False)
         self._cmake.definitions["EMBREE_ISA_AVX"] = self.options.get_safe("avx", False)
         self._cmake.definitions["EMBREE_ISA_AVX2"] = self.options.get_safe("avx2", False)
-        if tools.scm.Version(self, self.version) < "3.12.2":
+        if tools.scm.Version(self.version) < "3.12.2":
             # TODO: probably broken if avx512 enabled, must cumbersome to add specific options in the recipe
             self._cmake.definitions["EMBREE_ISA_AVX512KNL"] = self.options.get_safe("avx512", False)
             self._cmake.definitions["EMBREE_ISA_AVX512SKX"] = self.options.get_safe("avx512", False)
@@ -232,7 +232,7 @@ class EmbreeConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
             simd_libs = ["embree_sse42", "embree_avx", "embree_avx2"]
-            simd_libs.extend(["embree_avx512knl", "embree_avx512skx"] if tools.scm.Version(self, self.version) < "3.12.2" else ["embree_avx512"])
+            simd_libs.extend(["embree_avx512knl", "embree_avx512skx"] if tools.scm.Version(self.version) < "3.12.2" else ["embree_avx512"])
             for lib in simd_libs:
                 if _lib_exists(lib):
                     self.cpp_info.libs.append(lib)

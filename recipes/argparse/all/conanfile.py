@@ -17,12 +17,12 @@ class ArgparseConan(ConanFile):
     @property
     def _compiler_required_cpp17(self):
         return {
-            "gcc": "7" if tools.scm.Version(self, self.version) <= "2.1" else "8",
-            "clang": "5" if tools.scm.Version(self, self.version) <= "2.1" else "7",
+            "gcc": "7" if tools.scm.Version(self.version) <= "2.1" else "8",
+            "clang": "5" if tools.scm.Version(self.version) <= "2.1" else "7",
             # trantor/2.5 uses [[maybe_unused]] in range-based for loop
             # Visual Studio 15 doesn't support it:
             # https://developercommunity.visualstudio.com/t/compiler-bug-on-parsing-maybe-unused-in-range-base/209488
-            "Visual Studio": "15" if tools.scm.Version(self, self.version) < "2.5" else "16",
+            "Visual Studio": "15" if tools.scm.Version(self.version) < "2.5" else "16",
             "apple-clang": "10",
         }
 
@@ -49,12 +49,12 @@ class ArgparseConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "17")
         try:
             minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_required_compiler_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:
                 raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
-        if tools.scm.Version(self, self.version) > "2.1" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
+        if tools.scm.Version(self.version) > "2.1" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration("This recipe does not permit >2.1 with clang and stdlibc++. There may be an infrastructure issue in CCI.")
 
     def source(self):
@@ -62,7 +62,7 @@ class ArgparseConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if tools.scm.Version(self, self.version) <= "2.1":
+        if tools.scm.Version(self.version) <= "2.1":
             self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "argparse"))
         else:
             self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
@@ -71,7 +71,7 @@ class ArgparseConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "argparse")
         self.cpp_info.set_property("cmake_target_name", "argparse::argparse")
         self.cpp_info.set_property("pkg_config_name", "argparse")
-        if tools.scm.Version(self, self.version) <= "2.1":
+        if tools.scm.Version(self.version) <= "2.1":
             self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []

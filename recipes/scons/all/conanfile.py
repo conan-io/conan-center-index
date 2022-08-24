@@ -41,7 +41,7 @@ class SConsConan(ConanFile):
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
 
-        if tools.scm.Version(self, self.version) < 4:
+        if tools.scm.Version(self.version) < 4:
             shutil.copytree(os.path.join(self._source_subfolder, "engine", "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
         else:

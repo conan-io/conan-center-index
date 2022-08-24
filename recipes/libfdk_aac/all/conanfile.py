@@ -41,7 +41,7 @@ class LibFDKAACConan(ConanFile):
 
     @property
     def _use_cmake(self):
-        return tools.scm.Version(self, self.version) >= "2.0.2"
+        return tools.scm.Version(self.version) >= "2.0.2"
 
     def config_options(self):
         if self.settings.os == "Windows":

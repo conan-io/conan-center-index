@@ -61,7 +61,7 @@ class LibreSSLConan(ConanFile):
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        if tools.scm.Version(self, self.version) >= "3.1.1":
+        if tools.scm.Version(self.version) >= "3.1.1":
             tools.files.replace_in_file(self, 
                     os.path.join(self._source_subfolder, "CMakeLists.txt"),
                     "cmake_minimum_required (VERSION 3.16.4)",
@@ -110,7 +110,7 @@ class LibreSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
-            if tools.scm.Version(self, self.version) >= "3.3.0":
+            if tools.scm.Version(self.version) >= "3.3.0":
                 self.cpp_info.components["crypto"].system_libs.append("bcrypt")
 
         # SSL
@@ -137,7 +137,7 @@ class LibreSSLConan(ConanFile):
         self.cpp_info.components["tls"].names["cmake_find_package_multi"] = "TLS"
 
     def _lib_name(self, name):
-        libressl_version = tools.scm.Version(self, self.version)
+        libressl_version = tools.scm.Version(self.version)
         if self.settings.os == "Windows" and \
            (libressl_version >= "3.1.0" or (libressl_version < "3.1.0" and self.options.shared)):
             lib_fullpath = glob.glob(os.path.join(self.package_folder, "lib", "*{}*".format(name)))[0]

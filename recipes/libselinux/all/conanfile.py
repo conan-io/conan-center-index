@@ -53,7 +53,7 @@ class LibSELinuxConan(ConanFile):
 
     @property
     def _sepol_soversion(self):
-        return "2" if tools.scm.Version(self, self.version) >= "3.2" else "1"
+        return "2" if tools.scm.Version(self.version) >= "3.2" else "1"
 
     @property
     def _selinux_soversion(self):

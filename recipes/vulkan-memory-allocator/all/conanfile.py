@@ -19,7 +19,7 @@ class VulkanMemoryAllocatorConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if tools.scm.Version(self, self.version) < "3.0.0" else "14"
+        return "11" if tools.scm.Version(self.version) < "3.0.0" else "14"
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -45,7 +45,7 @@ class VulkanMemoryAllocatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        if tools.scm.Version(self, self.version) < "3.0.0":
+        if tools.scm.Version(self.version) < "3.0.0":
             include_dir = os.path.join(self._source_subfolder, "src")
         else:
             include_dir = os.path.join(self._source_subfolder, "include")

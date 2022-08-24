@@ -60,7 +60,7 @@ class M4Conan(ConanFile):
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 autotools.link_flags.append("-PDB")
         elif self.settings.compiler == "clang":
-            if tools.scm.Version(self, self.version) < "1.4.19":
+            if tools.scm.Version(self.version) < "1.4.19":
                 autotools.flags.extend(["-rtlib=compiler-rt", "-Wno-unused-command-line-argument"])
         if self.settings.os == 'Windows':
             conf_args.extend(["ac_cv_func__set_invalid_parameter_handler=yes"])

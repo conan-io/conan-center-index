@@ -46,7 +46,7 @@ class RapidYAMLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.scm.Version(self, self.version) < "0.4.0":
+        if tools.scm.Version(self.version) < "0.4.0":
             del self.options.with_tab_tokens
 
     def configure(self):
@@ -62,7 +62,7 @@ class RapidYAMLConan(ConanFile):
 
         minimum_version = self._compiler_required_cpp11.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++11, which your compiler does not support.".format(self.name))
         else:
             self.output.warn("{0} requires C++11. Your compiler is unknown. Assuming it supports C++11.".format(self.name))
@@ -75,7 +75,7 @@ class RapidYAMLConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
-        if tools.scm.Version(self, self.version) >= "0.4.0":
+        if tools.scm.Version(self.version) >= "0.4.0":
             cmake.definitions["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
         cmake.configure()
         return cmake

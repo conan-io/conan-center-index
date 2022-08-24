@@ -77,7 +77,7 @@ class LibarchiveConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.scm.Version(self, self.version) < "3.4.2":
+        if tools.scm.Version(self.version) < "3.4.2":
             del self.options.with_mbedtls
 
     def configure(self):
@@ -159,7 +159,7 @@ class LibarchiveConan(ConanFile):
         self._cmake.definitions["ENABLE_TEST"] = False
         # too strict check
         self._cmake.definitions["ENABLE_WERROR"] = False
-        if tools.scm.Version(self, self.version) >= "3.4.2":
+        if tools.scm.Version(self.version) >= "3.4.2":
             self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         self._cmake.definitions["ENABLE_XATTR"] = self.options.with_xattr
 

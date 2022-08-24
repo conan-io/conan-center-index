@@ -46,7 +46,7 @@ class CcfitsConan(ConanFile):
         self.requires("cfitsio/4.0.0")
 
     def validate(self):
-        if tools.scm.Version(self, self.version) >= "2.6":
+        if tools.scm.Version(self.version) >= "2.6":
             if self.settings.compiler.get_safe("cppstd"):
                 tools.build.check_min_cppstd(self, self, 11)
 

@@ -147,7 +147,7 @@ class LibGit2Conan(ConanFile):
         cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        if tools.scm.Version(self, self.version) >= "1.4.0":
+        if tools.scm.Version(self.version) >= "1.4.0":
             cmake.definitions["BUILD_TESTS"] = False
         cmake.definitions["BUILD_CLAR"] = False
         cmake.definitions["BUILD_EXAMPLES"] = False

@@ -66,13 +66,13 @@ class TrantorConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("trantor requires C++14, which your compiler does not support.")
         else:
             self.output.warn("trantor requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio 16 MDd
-        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) == "16" and \
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) == "16" and \
            self.options.shared == True and self.settings.compiler.runtime == "MDd":
             raise ConanInvalidConfiguration("trantor does not support the MDd runtime on Visual Studio 16.")
 

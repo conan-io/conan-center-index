@@ -40,7 +40,7 @@ class MagicEnumConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("magic_enum requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("magic_enum: Unsupported compiler: {}-{} "
                                             "(https://github.com/Neargye/magic_enum#compiler-compatibility)."
                                             .format(self.settings.compiler, self.settings.compiler.version))

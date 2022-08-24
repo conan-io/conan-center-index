@@ -54,7 +54,7 @@ class RubyConan(ConanFile):
 
     @property
     def _msvc_optflag(self):
-        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < "14":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) < "14":
             return "-O2b2xg-"
         else:
             return "-O2sy-"
@@ -160,7 +160,7 @@ class RubyConan(ConanFile):
         self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)
 
-        version = tools.scm.Version(self, self.version)
+        version = tools.scm.Version(self.version)
         rubylib = self.cpp_info.components["rubylib"]
         config_file = glob.glob(os.path.join(self.package_folder, "include", "**", "ruby", "config.h"), recursive=True)[0]
         rubylib.includedirs = [

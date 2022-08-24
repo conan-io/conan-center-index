@@ -27,7 +27,7 @@ class DbgMacroConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
 
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(
                 "dbg-mcro can't be used by {0} {1}".format(
                     self.settings.compiler,

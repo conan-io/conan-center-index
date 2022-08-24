@@ -50,7 +50,7 @@ class LibXMLPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/2.9.14")
-        if tools.scm.Version(self, self.version) <= "2.42.1":
+        if tools.scm.Version(self.version) <= "2.42.1":
             self.requires("glibmm/2.66.4")
         else:
             self.requires("glibmm/2.72.1")
@@ -112,7 +112,7 @@ class LibXMLPlusPlus(ConanFile):
             meson.build()
 
     def package(self):
-        lib_version = "2.6" if tools.scm.Version(self, self.version) <= "2.42.1" else "5.0"
+        lib_version = "2.6" if tools.scm.Version(self.version) <= "2.42.1" else "5.0"
 
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
@@ -135,7 +135,7 @@ class LibXMLPlusPlus(ConanFile):
                     os.path.join(self.package_folder, "lib", f"xml++-{lib_version}.lib"))
 
     def package_info(self):
-        lib_version = "2.6" if tools.scm.Version(self, self.version) <= "2.42.1" else "5.0"
+        lib_version = "2.6" if tools.scm.Version(self.version) <= "2.42.1" else "5.0"
 
         self.cpp_info.set_property("cmake_module_file_name", "libxml++")
         self.cpp_info.set_property("cmake_module_target_name", "libxml++::libxml++")

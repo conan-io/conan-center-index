@@ -89,7 +89,7 @@ class CityhashConan(ConanFile):
         if self._is_msvc:
             autotools.cxx_flags.append("-EHsc")
             if not (self.settings.compiler == "Visual Studio" and \
-                    tools.scm.Version(self, self.settings.compiler.version) < "12"):
+                    tools.scm.Version(self.settings.compiler.version) < "12"):
                 autotools.flags.append("-FS")
         autotools.configure(configure_dir=self._source_subfolder, args=args)
         return autotools

@@ -155,7 +155,7 @@ class NCursesConan(ConanFile):
                 "ac_cv_func_setvbuf_reversed=no",
             ])
             autotools.cxx_flags.append("-EHsc")
-            if tools.scm.Version(self, self.settings.compiler.version) >= 12:
+            if tools.scm.Version(self.settings.compiler.version) >= 12:
                 autotools.flags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
@@ -199,7 +199,7 @@ class NCursesConan(ConanFile):
 
     @property
     def _major_version(self):
-        return tools.scm.Version(self, self.version).major
+        return tools.scm.Version(self.version).major
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file):

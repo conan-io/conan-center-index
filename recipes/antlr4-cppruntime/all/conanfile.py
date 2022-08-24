@@ -69,8 +69,8 @@ class Antlr4CppRuntimeConan(ConanFile):
             # So far ANTLR delivers macOS binary package.
 
         compiler = self.settings.compiler
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
-        antlr_version = tools.scm.Version(self, self.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
+        antlr_version = tools.scm.Version(self.version)
 
         if compiler == "Visual Studio" and compiler_version < "16":
             raise ConanInvalidConfiguration("library claims C2668 'Ambiguous call to overloaded function'")

@@ -46,7 +46,7 @@ class SourceLocationConan(ConanFile):
         if not minimum_version:
             self.output.warn(
                 "source_location requires C++11. Your compiler is unknown. Assuming it supports C++11 and required functionality.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "source_location requires C++11 and some embedded functionality, which your compiler does not support.")
 

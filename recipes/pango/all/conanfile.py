@@ -30,7 +30,7 @@ class PangoConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
         if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")

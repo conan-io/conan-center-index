@@ -115,7 +115,7 @@ class OpenCVConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 11)
         if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
-        if self.settings.compiler == "clang" and tools.scm.Version(self, self.settings.compiler.version) < "4":
+        if self.settings.compiler == "clang" and tools.scm.Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x cannot build OpenCV 3.x due an internal bug.")
 
     def source(self):
@@ -139,7 +139,7 @@ class OpenCVConan(ConanFile):
         tools.files.replace_in_file(self, os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
-        if tools.scm.Version(self, self.version) < "3.4.8":
+        if tools.scm.Version(self.version) < "3.4.8":
             install_layout_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
         else:
             install_layout_file = os.path.join(self._source_subfolder, "cmake", "OpenCVInstallLayout.cmake")
@@ -148,7 +148,7 @@ class OpenCVConan(ConanFile):
                               "")
         tools.files.replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
-        if self.options.contrib and tools.scm.Version(self, self.version) <= "3.4.12":
+        if self.options.contrib and tools.scm.Version(self.version) <= "3.4.12":
             sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
             search = '  find_package(Glog QUIET)\nendif()'
             tools.files.replace_in_file(self, sfm_cmake, search, """{}

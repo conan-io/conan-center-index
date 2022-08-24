@@ -58,7 +58,7 @@ class TCSBankUriTemplateConan(ConanFile):
 
     def validate(self):
         compiler_name = str(self.settings.compiler)
-        compiler_version = tools.scm.Version(self, self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         # Exclude compiler.cppstd < 17
         min_req_cppstd = "17"

@@ -42,7 +42,7 @@ class PerfettoConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < 7:
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration ("perfetto requires gcc >= 7")
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 11)

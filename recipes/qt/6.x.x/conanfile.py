@@ -255,10 +255,10 @@ class QtConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
-        if tools.scm.Version(self, self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
+        if tools.scm.Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, of to libc++")
 
         if self.options.get_safe("qtwebengine"):
@@ -271,7 +271,7 @@ class QtConan(ConanFile):
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
-            if tools.scm.Version(self, self.version) < "6.3.0":
+            if tools.scm.Version(self.version) < "6.3.0":
                 # Check if a valid python2 is available in PATH or it will failflex
                 # Start by checking if python2 can be found
                 python_exe = tools.which("python2")
@@ -292,7 +292,7 @@ class QtConan(ConanFile):
                 verstr = mybuf.getvalue().strip().split("Python ")[1]
                 if verstr.endswith("+"):
                     verstr = verstr[:-1]
-                version = tools.scm.Version(self, verstr)
+                version = tools.scm.Version(verstr)
                 # >= 2.7.5 & < 3
                 v_min = "2.7.5"
                 v_max = "3.0.0"
@@ -438,7 +438,7 @@ class QtConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
-        if tools.scm.Version(self, self.version) >= "6.2.0":
+        if tools.scm.Version(self.version) >= "6.2.0":
             for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
                 tools.files.replace_in_file(self, os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                                       "  if (enable_precompiled_headers) {\n    if (is_win) {",
@@ -454,8 +454,8 @@ class QtConan(ConanFile):
                 os.remove(file)
 
         # workaround QTBUG-94356
-        if tools.scm.Version(self, self.version) >= "6.1.1":
-            zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.scm.Version(self, self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
+        if tools.scm.Version(self.version) >= "6.1.1":
+            zlib_file_name = "FindWrapSystemZLIB.cmake" if tools.scm.Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
             tools.files.replace_in_file(self, os.path.join("qt6", "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
             tools.files.replace_in_file(self, os.path.join("qt6", "qtbase", "configure.cmake"),
                 "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
@@ -790,7 +790,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             extension = ".exe"
         filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
-        ver = tools.scm.Version(self, self.version)
+        ver = tools.scm.Version(self.version)
         filecontents += "set(QT_VERSION_MAJOR %s)\n" % ver.major
         filecontents += "set(QT_VERSION_MINOR %s)\n" % ver.minor
         filecontents += "set(QT_VERSION_PATCH %s)\n" % ver.patch
@@ -966,21 +966,21 @@ class QtConan(ConanFile):
 
         _create_module("Core", core_reqs)
         if self.settings.os == "Windows":
-            if tools.scm.Version(self, self.version) >= "6.3.0":
+            if tools.scm.Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].system_libs.append("authz")
         if self._is_msvc:
-            if tools.scm.Version(self, self.version) >= "6.3.0":
+            if tools.scm.Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
-            if tools.scm.Version(self, self.version) >= "6.2.0":
+            if tools.scm.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
-            if tools.scm.Version(self, self.version) >= "6.2.1":
+            if tools.scm.Version(self.version) >= "6.2.1":
                 self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
-        if tools.scm.Version(self, self.version) < "6.1.0":
+        if tools.scm.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
             gui_reqs = []
@@ -1083,7 +1083,7 @@ class QtConan(ConanFile):
             _create_module("Core5Compat")
 
         # since https://github.com/qt/qtdeclarative/commit/4fb84137f1c0a49d64b8bef66fef8a4384cc2a68
-        qt_quick_enabled = self.options.gui and (tools.scm.Version(self, self.version) < "6.2.0" or self.options.qtshadertools)
+        qt_quick_enabled = self.options.gui and (tools.scm.Version(self.version) < "6.2.0" or self.options.qtshadertools)
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
@@ -1120,7 +1120,7 @@ class QtConan(ConanFile):
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
         if (self.options.get_safe("qtquickcontrols2") or \
-            (self.options.qtdeclarative and tools.scm.Version(self, self.version) >= "6.2.0")) and qt_quick_enabled:
+            (self.options.qtdeclarative and tools.scm.Version(self.version) >= "6.2.0")) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
@@ -1228,8 +1228,8 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if (self.options.get_safe("qtlocation") and tools.scm.Version(self, self.version) < "6.2.2") or \
-            (self.options.get_safe("qtpositioning") and tools.scm.Version(self, self.version) >= "6.2.2"):
+        if (self.options.get_safe("qtlocation") and tools.scm.Version(self.version) < "6.2.2") or \
+            (self.options.get_safe("qtpositioning") and tools.scm.Version(self.version) >= "6.2.2"):
             _create_module("Positioning")
             _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
             _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])

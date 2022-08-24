@@ -51,7 +51,7 @@ class HighwayConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if tools.scm.Version(self, self.version) < "0.16.0":
+        if tools.scm.Version(self.version) < "0.16.0":
             del self.options.shared
         elif self.options.shared:
             del self.options.fPIC
@@ -65,7 +65,7 @@ class HighwayConan(ConanFile):
             self.output.warn(
                 "{} recipe lacks information about the {} compiler support."
                 .format(self.name, self.settings.compiler))
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "{} requires a {} version >= {}"
                 .format(self.name, self.settings.compiler,
@@ -109,9 +109,9 @@ class HighwayConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libhwy"
 
         self.cpp_info.libs = ["hwy"]
-        if tools.scm.Version(self, self.version) >= "0.12.1":
+        if tools.scm.Version(self.version) >= "0.12.1":
             self.cpp_info.libs.append("hwy_contrib")
-        if tools.scm.Version(self, self.version) >= "0.15.0":
+        if tools.scm.Version(self.version) >= "0.15.0":
             self.cpp_info.libs.append("hwy_test")
-        if tools.scm.Version(self, self.version) >= "0.16.0":
+        if tools.scm.Version(self.version) >= "0.16.0":
             self.cpp_info.defines.append("HWY_SHARED_DEFINE" if self.options.shared else "HWY_STATIC_DEFINE")

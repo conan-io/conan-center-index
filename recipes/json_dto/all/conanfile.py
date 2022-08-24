@@ -39,10 +39,10 @@ class JsondtoConan(ConanFile):
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
             self.output.warn(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimal_version[compiler]:
+        elif tools.scm.Version(self.settings.compiler.version) < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-        if self.settings.compiler == "apple-clang" and tools.scm.Version(self, self.settings.compiler.version) >= "11":
+        if self.settings.compiler == "apple-clang" and tools.scm.Version(self.settings.compiler.version) >= "11":
             raise ConanInvalidConfiguration(f"{self.name} requires apple-clang less then version 11")
 
     def package_id(self):

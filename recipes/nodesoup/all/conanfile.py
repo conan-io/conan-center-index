@@ -48,7 +48,7 @@ class NodesoupConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 14)
         if self.settings.compiler == "clang":
-            if tools.scm.Version(self, self.settings.compiler.version) < "5.0" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.scm.Version(self.settings.compiler.version) < "5.0" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
                 raise ConanInvalidConfiguration("The version of libstdc++(11) of the current compiler does not support building nodesoup")
 
     def source(self):

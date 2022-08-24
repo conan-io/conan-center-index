@@ -45,7 +45,7 @@ class PlatformConvertersConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
 
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("{}/{} requires c++{}, "
                                             "which is not supported by {} {}.".format(
                 self.name, self.version, self._minimum_cpp_standard, self.settings.compiler,

@@ -113,7 +113,7 @@ class CoinCbcConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
-            if tools.scm.Version(self, self.settings.compiler.version) >= 12:
+            if tools.scm.Version(self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
             if self.options.parallel:
                 configure_args.append("--with-pthreadsw32-lib={}".format(tools.microsoft.unix_path(self, os.path.join(self.deps_cpp_info["pthreads4w"].lib_paths[0], self.deps_cpp_info["pthreads4w"].libs[0] + ".lib"))))

@@ -108,7 +108,7 @@ class FlatbuffersConan(ConanFile):
         # Honor conan profile
         self._cmake.definitions["FLATBUFFERS_LIBCXX_WITH_CLANG"] = False
         # Mimic upstream CMake/Version.cmake removed in _patch_sources()
-        version = tools.scm.Version(self, self.version)
+        version = tools.scm.Version(self.version)
         self._cmake.definitions["VERSION_MAJOR"] = version.major
         self._cmake.definitions["VERSION_MINOR"] = version.minor
         self._cmake.definitions["VERSION_PATCH"] = version.patch

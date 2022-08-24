@@ -48,7 +48,7 @@ class CCTZConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
-           tools.scm.Version(self, self.settings.compiler.version) < 14:
+           tools.scm.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("CCTZ requires MSVC >= 14")
 
     def source(self):

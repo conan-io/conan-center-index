@@ -49,7 +49,7 @@ class ZimgConan(ConanFile):
     def validate(self):
         if self.settings.build_type not in ("Release", "Debug"):
             raise ConanInvalidConfiguration("zimg does not support the build type '{}'.".format(self.settings.build_type))
-        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < "15":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
 
     def build_requirements(self):

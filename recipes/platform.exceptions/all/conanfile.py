@@ -39,7 +39,7 @@ class PlatformExceptionsConan(ConanFile):
         return 20
 
     def requirements(self):
-        if tools.scm.Version(self, self.version) >= "0.3.0":
+        if tools.scm.Version(self.version) >= "0.3.0":
             self.requires("platform.delegates/0.2.7")
         else:
             self.requires("platform.delegates/0.1.3")
@@ -51,7 +51,7 @@ class PlatformExceptionsConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
 
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("{}/{} requires c++{}, "
                                             "which is not supported by {} {}.".format(
                 self.name, self.version, self._minimum_cpp_standard, self.settings.compiler,

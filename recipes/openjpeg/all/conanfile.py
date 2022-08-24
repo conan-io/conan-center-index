@@ -64,7 +64,7 @@ class OpenjpegConan(ConanFile):
         cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         cmake.definitions["BUILD_LUTS_GENERATOR"] = False
         cmake.definitions["BUILD_CODEC"] = False
-        if tools.scm.Version(self, self.version) < "2.5.0":
+        if tools.scm.Version(self.version) < "2.5.0":
             cmake.definitions["BUILD_MJ2"] = False
             cmake.definitions["BUILD_JPWL"] = False
             cmake.definitions["BUILD_JP3D"] = False
@@ -113,7 +113,7 @@ class OpenjpegConan(ConanFile):
 
     @property
     def _openjpeg_subdir(self):
-        openjpeg_version = tools.scm.Version(self, self.version)
+        openjpeg_version = tools.scm.Version(self.version)
         return "openjpeg-{}.{}".format(openjpeg_version.major, openjpeg_version.minor)
 
     def package_info(self):

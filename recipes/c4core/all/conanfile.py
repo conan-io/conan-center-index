@@ -51,7 +51,7 @@ class C4CoreConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "11")
 
         ## clang with libc++ is not supported. It is already fixed at 2022-01-03.
-        if tools.scm.Version(self, self.version) <= "0.1.8":
+        if tools.scm.Version(self.version) <= "0.1.8":
             if (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++"):
                 raise ConanInvalidConfiguration(
                     "{}/{} doesn't support clang with libc++".format(self.name, self.version),

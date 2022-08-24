@@ -105,7 +105,7 @@ class XapianCoreConan(ConanFile):
                 vs_ide_version = self.settings.compiler.version
             else:
                 vs_ide_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
-            if tools.scm.Version(self, vs_ide_version) >= "12":
+            if tools.scm.Version(vs_ide_version) >= "12":
                 autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),

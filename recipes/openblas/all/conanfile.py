@@ -88,7 +88,7 @@ class OpenblasConan(ConanFile):
         return cmake
 
     def build(self):
-        if tools.scm.Version(self, self.version) >= "0.3.12":
+        if tools.scm.Version(self.version) >= "0.3.12":
             search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
             replace = (
                 """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""

@@ -45,7 +45,7 @@ class ElfutilsConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-        if tools.scm.Version(self, self.version) < "0.186":
+        if tools.scm.Version(self.version) < "0.186":
             del self.options.libdebuginfod
 
     def configure(self):
@@ -55,7 +55,7 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if tools.scm.Version(self, self.version) >= "0.186":
+        if tools.scm.Version(self.version) >= "0.186":
             if self.settings.compiler in ["Visual Studio", "apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration("Compiler %s not supported. "
                             "elfutils only supports gcc and clang" % self.settings.compiler)
@@ -109,7 +109,7 @@ class ElfutilsConan(ConanFile):
                 "--with-lzma" if self.options.with_lzma else "--without-lzma",
                 "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
             ]
-            if tools.scm.Version(self, self.version) >= "0.186":
+            if tools.scm.Version(self.version) >= "0.186":
                 args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
             args.append('BUILD_STATIC={}'.format("0" if self.options.shared else "1"))
 

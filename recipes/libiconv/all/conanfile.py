@@ -119,7 +119,7 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) >= "12") or \
+        if (self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) >= "12") or \
            self.settings.compiler == "msvc":
             autotools.flags.append("-FS")
 

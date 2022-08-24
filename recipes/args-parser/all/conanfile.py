@@ -35,7 +35,7 @@ class ArgsParserConan(ConanFile):
             self.output.warn("Unknown compiler, assuming it supports at least C++14")
             return
 
-        version = tools.scm.Version(self, self.settings.compiler.version)
+        version = tools.scm.Version(self.settings.compiler.version)
         if version < self._compilers_minimum_version[compiler]:
             raise ConanInvalidConfiguration("args-parser requires a compiler that supports at least C++14")
 

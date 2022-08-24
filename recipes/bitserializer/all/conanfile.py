@@ -29,7 +29,7 @@ class BitserializerConan(ConanFile):
 
     @property
     def _supported_compilers(self):
-        if tools.scm.Version(self, self.version) >= "0.44":
+        if tools.scm.Version(self.version) >= "0.44":
             return {
                 "gcc": "8",
                 "clang": "8",
@@ -62,7 +62,7 @@ class BitserializerConan(ConanFile):
             tools.build.check_min_cppstd(self, self, "17")
         try:
             minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_required_compiler_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:
                 raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
@@ -92,7 +92,7 @@ class BitserializerConan(ConanFile):
         # cpprestjson-core
         self.cpp_info.components["bitserializer-core"].set_property("cmake_target_name", "BitSerializer::core")
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
-            if tools.scm.Version(self, self.settings.compiler.version) < 9:
+            if tools.scm.Version(self.settings.compiler.version) < 9:
                 self.cpp_info.components["bitserializer-core"].system_libs = ["stdc++fs"]
 
         # cpprestjson-archive

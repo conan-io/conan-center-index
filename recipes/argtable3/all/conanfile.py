@@ -101,7 +101,7 @@ class Argtable3Conan(ConanFile):
         suffix = ""
         if not self.options.shared:
             suffix += "_static"
-        if tools.scm.Version(self, self.version) >= "3.2.1" and self.settings.build_type == "Debug":
+        if tools.scm.Version(self.version) >= "3.2.1" and self.settings.build_type == "Debug":
             suffix += "d"
         self.cpp_info.libs = ["argtable3{}".format(suffix)]
         if not self.options.shared:

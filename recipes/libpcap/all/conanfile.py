@@ -71,12 +71,12 @@ class LibPcapConan(ConanFile):
             self.requires("libusb/1.0.24")
 
     def validate(self):
-        if tools.scm.Version(self, self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
+        if tools.scm.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
         if hasattr(self, "settings_build") and tools.build.cross_building(self, self) and \
            self.options.shared and tools.apple.is_apple_os(self, self.settings.os):
             raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
-        if tools.scm.Version(self, self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
+        if tools.scm.Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
             raise ConanInvalidConfiguration("libpcap can not be built static on Windows below version 1.10.1.")
 
     def package_id(self):

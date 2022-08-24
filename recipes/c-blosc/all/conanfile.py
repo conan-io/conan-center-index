@@ -97,7 +97,7 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
-        if tools.scm.Version(self, self.version) >= "1.20.0":
+        if tools.scm.Version(self.version) >= "1.20.0":
             self._cmake.definitions["BUILD_FUZZERS"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
@@ -109,7 +109,7 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
         self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
         self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
-        if tools.scm.Version(self, self.version) < "1.19.0":
+        if tools.scm.Version(self.version) < "1.19.0":
             self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZLIB"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZSTD"] = True

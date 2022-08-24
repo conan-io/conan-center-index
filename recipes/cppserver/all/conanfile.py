@@ -59,7 +59,7 @@ class CppServer(ConanFile):
 
         if not minimum_version:
             self.output.warn("cppserver requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("cppserver requires a compiler that supports at least C++17")
 
     def source(self):

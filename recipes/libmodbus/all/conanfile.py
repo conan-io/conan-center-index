@@ -66,7 +66,7 @@ class LibmodbusConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--enable-static", "--disable-shared"])
-        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) >= "12":
+        if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) >= "12":
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 self._autotools.flags.append("-FS")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)

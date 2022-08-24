@@ -48,11 +48,11 @@ class RuyConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("Compiler is unknown. Assuming it supports C++14.")
-        elif tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+        elif tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
 
-        if str(self.settings.compiler) == "clang" and tools.scm.Version(self, self.settings.compiler.version) <= 5 and self.settings.build_type == "Debug":
+        if str(self.settings.compiler) == "clang" and tools.scm.Version(self.settings.compiler.version) <= 5 and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration("Debug builds are not supported on older versions of Clang (<=5)")
 
     def config_options(self):

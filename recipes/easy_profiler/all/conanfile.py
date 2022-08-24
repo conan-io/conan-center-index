@@ -46,7 +46,7 @@ class EasyProfilerConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime == "MTd" and \
-           self.options.shared and tools.scm.Version(self, self.settings.compiler.version) >= "15":
+           self.options.shared and tools.scm.Version(self.settings.compiler.version) >= "15":
             raise ConanInvalidConfiguration(
                 "{} {} with MTd runtime not supported".format(self.settings.compiler,
                                                               self.settings.compiler.version)

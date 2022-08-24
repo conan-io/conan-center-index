@@ -130,7 +130,7 @@ class PkgConfConan(ConanFile):
     def package_info(self):
         if self.options.enable_lib:
             self.cpp_info.set_property("pkg_config_name", "libpkgconf")
-            if tools.scm.Version(self, self.version) >= "1.7.4":
+            if tools.scm.Version(self.version) >= "1.7.4":
                 self.cpp_info.includedirs.append(os.path.join("include", "pkgconf"))
             self.cpp_info.libs = ["pkgconf"]
             if not self.options.shared:

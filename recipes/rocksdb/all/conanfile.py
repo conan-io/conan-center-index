@@ -103,25 +103,25 @@ class RocksDB(ConanFile):
 
         if self.settings.os == "Windows" and \
            self.settings.compiler == "Visual Studio" and \
-           tools.scm.Version(self, self.settings.compiler.version) < "15":
+           tools.scm.Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("Rocksdb requires Visual Studio 15 or later.")
 
         if self.version == "6.0.2" and \
            self.settings.os == "Windows" and \
            self.settings.compiler == "Visual Studio" and \
-           tools.scm.Version(self, self.settings.compiler.version) > "15":
+           tools.scm.Version(self.settings.compiler.version) > "15":
             raise ConanInvalidConfiguration("Rocksdb 6.0.2 is not compilable with Visual Studio >15.") # See https://github.com/facebook/rocksdb/issues/6048
 
         if self.version == "6.0.2" and \
            self.settings.os == "Linux" and \
            self.settings.compiler == "clang" and \
-           tools.scm.Version(self, self.settings.compiler.version) > "9":
+           tools.scm.Version(self.settings.compiler.version) > "9":
             raise ConanInvalidConfiguration("Rocksdb 6.0.2 is not compilable with clang >9.") # See https://github.com/facebook/rocksdb/pull/7265
 
         if self.version == "6.20.3" and \
            self.settings.os == "Linux" and \
            self.settings.compiler == "gcc" and \
-           tools.scm.Version(self, self.settings.compiler.version) < "5":
+           tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("Rocksdb 6.20.3 is not compilable with gcc <5.") # See https://github.com/facebook/rocksdb/issues/3522
 
     def source(self):

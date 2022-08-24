@@ -31,7 +31,7 @@ class LibdivideConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if tools.scm.Version(self, self.version) < "4.0.0":
+        if tools.scm.Version(self.version) < "4.0.0":
             del self.options.sse2
             del self.options.avx2
             del self.options.avx512
@@ -48,7 +48,7 @@ class LibdivideConan(ConanFile):
                 del self.options.neon
 
     def configure(self):
-        if tools.scm.Version(self, self.version) < "4.0.0" and self.settings.compiler.cppstd:
+        if tools.scm.Version(self.version) < "4.0.0" and self.settings.compiler.cppstd:
             tools.build.check_min_cppstd(self, self, 11)
 
     def package_id(self):

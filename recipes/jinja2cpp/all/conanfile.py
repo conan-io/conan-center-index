@@ -104,7 +104,7 @@ class Jinja2cppConan(ConanFile):
 
     def build(self):
         if self.version == "1.1.0":
-            if tools.scm.Version(self, self.deps_cpp_info["fmt"].version) >= "7.0.0":
+            if tools.scm.Version(self.deps_cpp_info["fmt"].version) >= "7.0.0":
                 raise ConanInvalidConfiguration("jinja2cpp requires fmt < 7.0.0")
         self._patch_sources()
         cmake = self._configure_cmake()

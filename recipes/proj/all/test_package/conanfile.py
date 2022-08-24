@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["PROJ_VERSION_GE_7"] = tools.scm.Version(self, self.deps_cpp_info["proj"].version) >= "7.0.0"
+        cmake.definitions["PROJ_VERSION_GE_7"] = tools.scm.Version(self.deps_cpp_info["proj"].version) >= "7.0.0"
         cmake.configure()
         cmake.build()
 

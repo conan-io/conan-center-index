@@ -119,7 +119,7 @@ class GmpConan(ConanFile):
                 "gmp_cv_asm_label_suffix=:",
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
-            if not (self.settings.compiler == "Visual Studio" and tools.scm.Version(self, self.settings.compiler.version) < 12):
+            if not (self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) < 12):
                 autotools.flags.append("-FS")
             autotools.cxx_flags.append("-EHsc")
         autotools.configure(args=configure_args, configure_dir=self._source_subfolder)

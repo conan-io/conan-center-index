@@ -40,16 +40,16 @@ class PackioConan(ConanFile):
         }
 
     def config_options(self):
-        if tools.scm.Version(self, self.version) < "1.2.0":
+        if tools.scm.Version(self.version) < "1.2.0":
             del self.options.standalone_asio
-        if tools.scm.Version(self, self.version) < "2.0.0":
+        if tools.scm.Version(self.version) < "2.0.0":
             del self.options.msgpack
             del self.options.nlohmann_json
-        if tools.scm.Version(self, self.version) < "2.1.0":
+        if tools.scm.Version(self.version) < "2.1.0":
             del self.options.boost_json
 
     def requirements(self):
-        if self.options.get_safe("msgpack") or tools.scm.Version(self, self.version) < "2.0.0":
+        if self.options.get_safe("msgpack") or tools.scm.Version(self.version) < "2.0.0":
             self.requires("msgpack/3.2.1")
 
         if self.options.get_safe("nlohmann_json"):
@@ -76,7 +76,7 @@ class PackioConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("packio requires C++17, which your compiler does not support.")
         else:
             self.output.warn("packio requires C++17. Your compiler is unknown. Assuming it supports C++17.")
@@ -89,7 +89,7 @@ class PackioConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if tools.scm.Version(self, self.version) < "2.1.0":
+        if tools.scm.Version(self.version) < "2.1.0":
             if self.options.get_safe("standalone_asio"):
                 self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
         else:

@@ -39,7 +39,7 @@ class H5ppConan(ConanFile):
         }
 
     def config_options(self):
-        if tools.scm.Version(self, self.version) < "1.10.0":
+        if tools.scm.Version(self.version) < "1.10.0":
             # These dependencies are always required before h5pp 1.10.0:
             #   * h5pp < 1.10.0 includes any version of headers indiscriminately (e.g. system headers),
             #     and can't tell if the the corresponding library will be linked. This makes the,
@@ -51,9 +51,9 @@ class H5ppConan(ConanFile):
 
     def requirements(self):
         self.requires("hdf5/1.12.1")
-        if tools.scm.Version(self, self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
+        if tools.scm.Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
             self.requires("eigen/3.4.0")
-        if tools.scm.Version(self, self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
+        if tools.scm.Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
             self.requires("spdlog/1.10.0")
 
     def package_id(self):
@@ -64,7 +64,7 @@ class H5ppConan(ConanFile):
             tools.build.check_min_cppstd(self, self, 17)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.scm.Version(self, self.settings.compiler.version) < minimum_version:
+            if tools.scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("h5pp requires C++17, which your compiler does not support.")
         else:
             self.output.warn("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
@@ -75,7 +75,7 @@ class H5ppConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if tools.scm.Version(self, self.version) < "1.9.0":
+        if tools.scm.Version(self.version) < "1.9.0":
             includedir = os.path.join(self._source_subfolder, "h5pp", "include")
         else:
             includedir = os.path.join(self._source_subfolder, "include")
@@ -89,7 +89,7 @@ class H5ppConan(ConanFile):
         self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
         self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
 
-        if tools.scm.Version(self, self.version) >= "1.10.0":
+        if tools.scm.Version(self.version) >= "1.10.0":
             if self.options.with_eigen:
                 self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
@@ -101,7 +101,7 @@ class H5ppConan(ConanFile):
             self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
             self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
 
-        if (self.settings.compiler == "gcc" and tools.scm.Version(self, self.settings.compiler.version) < "9") or \
+        if (self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):
             self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
         if is_msvc(self):

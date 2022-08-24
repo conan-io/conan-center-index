@@ -42,7 +42,7 @@ class WasmerConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Shared Windows build of wasmer are non-working atm (no import libraries are available)")
 
-        if self.settings.os == "Linux" and self.options.shared and tools.scm.Version(self, self.version) >= "2.3.0":
+        if self.settings.os == "Linux" and self.options.shared and tools.scm.Version(self.version) >= "2.3.0":
             raise ConanInvalidConfiguration("Shared Linux build of wasmer are not working. It requires glibc >= 2.25")
 
         if self.settings.compiler == "Visual Studio":
@@ -79,7 +79,7 @@ class WasmerConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread", "dl", "m"]
-                if tools.scm.Version(self, self.version) >= "2.3.0":
+                if tools.scm.Version(self.version) >= "2.3.0":
                     self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]

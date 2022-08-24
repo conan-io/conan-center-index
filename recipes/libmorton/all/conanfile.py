@@ -36,9 +36,9 @@ class LibmortonConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        if tools.scm.Version(self, self.version) < "0.2.7":
+        if tools.scm.Version(self.version) < "0.2.7":
             src_hdrs = os.path.join(self._source_subfolder, "libmorton", "include")
-        elif tools.scm.Version(self, self.version) < "0.2.8":
+        elif tools.scm.Version(self.version) < "0.2.8":
             src_hdrs = os.path.join(self._source_subfolder, "libmorton")
         else:
             src_hdrs = os.path.join(self._source_subfolder, "include", "libmorton")
