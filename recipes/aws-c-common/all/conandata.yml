@@ -50,3 +50,4 @@ sources:
 patches:
   "0.4.25":
     - patch_file: "patches/0001-disable-fPIC.patch"
+    - patch_file: "patches/0002-no-warnings-as-errors.patch"
