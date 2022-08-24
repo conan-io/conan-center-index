@@ -1,7 +1,7 @@
 sources:
-  "api.252004":
-    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/API252004.tar.gz"
-    sha256: "28caa91bc1a7d8b1e7bf0198da23c74a8ea0cfda447c72eeb39b5766d01a754a"
+  "api.252005":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/API252005.tar.gz"
+    sha256: "c5f5b1ad0e31cf5924ae909b189c6a05543b188d37b8a247c88810a7f320ab33"
   "2.5.2":
     url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "6519f3d5871a1119876928531d249c45ef46392237ab7bacc6531b4d538551ca"
