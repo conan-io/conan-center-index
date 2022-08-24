@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 from contextlib import contextmanager
 import os
 import shutil

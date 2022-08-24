@@ -1,5 +1,5 @@
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.45.0"

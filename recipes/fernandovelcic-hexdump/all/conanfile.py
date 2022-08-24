@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 
 class FernandoVelcicHexdumpConan(ConanFile):
     name = "fernandovelcic-hexdump"

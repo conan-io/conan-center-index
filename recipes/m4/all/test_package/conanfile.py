@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 from conans.errors import ConanException
 from io import StringIO
 import os

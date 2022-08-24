@@ -1,6 +1,6 @@
 
 from io import StringIO
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch"

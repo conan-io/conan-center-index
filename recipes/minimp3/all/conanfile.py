@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 
 class Minimp3Conan(ConanFile):
     name = "minimp3"

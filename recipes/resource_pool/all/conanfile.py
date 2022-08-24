@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 from conan.errors import ConanInvalidConfiguration
 from conans.tools import check_min_cppstd
 import os

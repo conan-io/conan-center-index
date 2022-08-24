@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools$
 from conans.tools import ConanInvalidConfiguration
 from conan.tools.files import rename
 from conan.tools.scm import Version
