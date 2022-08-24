@@ -43,7 +43,7 @@ class IosCMakeConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def configure(self):
-        if not tools.apple.is_apple_os(self, self.settings.os):
+        if not tools.apple.is_apple_os(self):
             raise ConanInvalidConfiguration("This package only supports Apple operating systems")
 
     def _guess_toolchain_target(self, os, arch):

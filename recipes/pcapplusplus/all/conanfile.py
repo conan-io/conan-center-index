@@ -74,7 +74,7 @@ class PcapplusplusConan(ConanFile):
             ]
             if self.options.immediate_mode:
                 config_args.append("--use-immediate-mode")
-            if tools.apple.is_apple_os(self, self.settings.os) and "arm" in self.settings.arch:
+            if tools.apple.is_apple_os(self) and "arm" in self.settings.arch:
                 config_args.append("--arm64")
 
             autotools = AutoToolsBuildEnvironment(self)

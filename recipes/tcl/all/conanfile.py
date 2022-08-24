@@ -78,7 +78,7 @@ class TclConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.files.patch(self, **patch)
 
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
+        if tools.apple.is_apple_os(self) and self.settings.arch not in ("x86", "x86_64"):
             tools.files.replace_in_file(self, os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
 
         unix_config_dir = self._get_configure_dir("unix")

@@ -236,7 +236,7 @@ class FFMpegConan(ConanFile):
             del self.options.with_coreimage
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
-        if not tools.apple.is_apple_os(self, self.settings.os):
+        if not tools.apple.is_apple_os(self):
             del self.options.with_avfoundation
         if not self._version_supports_vulkan():
             del self.options.with_vulkan
@@ -298,7 +298,7 @@ class FFMpegConan(ConanFile):
             self.requires("vulkan-loader/1.3.221")
 
     def validate(self):
-        if self.options.with_ssl == "securetransport" and not tools.apple.is_apple_os(self, self.settings.os):
+        if self.options.with_ssl == "securetransport" and not tools.apple.is_apple_os(self):
             raise ConanInvalidConfiguration(
                 "securetransport is only available on Apple")
 
@@ -517,7 +517,7 @@ class FFMpegConan(ConanFile):
         if self._version_supports_vulkan():
             args.append(opt_enable_disable(
                 "vulkan", self.options.get_safe("with_vulkan")))
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
         args.append("--arch={}".format(self._target_arch))
@@ -539,7 +539,7 @@ class FFMpegConan(ConanFile):
             args.append("--cxx={}".format(tools.get_env("CXX")))
         extra_cflags = []
         extra_ldflags = []
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.os.version:
+        if tools.apple.is_apple_os(self) and self.settings.os.version:
             extra_cflags.append(tools.apple_deployment_target_flag(
                 self.settings.os, self.settings.os.version))
             extra_ldflags.append(tools.apple_deployment_target_flag(
@@ -556,7 +556,7 @@ class FFMpegConan(ConanFile):
             else:
                 args.append("--target-os={}".format(self._target_os))
 
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 xcrun = tools.XCRun(self.settings)
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
                 extra_cflags.extend(
@@ -774,7 +774,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avutil"].system_libs = [
                 "user32", "bcrypt"]
             self.cpp_info.components["avformat"].system_libs = ["secur32"]
-        elif tools.apple.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self):
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].frameworks = [
                     "CoreFoundation", "Foundation", "CoreGraphics"]
@@ -886,7 +886,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_coreimage"):
                 self.cpp_info.components["avfilter"].frameworks.append(
                     "CoreImage")
-            if tools.scm.Version(self.version) >= "5.0" and tools.apple.is_apple_os(self, self.settings.os):
+            if tools.scm.Version(self.version) >= "5.0" and tools.apple.is_apple_os(self):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
         if self.options.get_safe("with_vaapi"):

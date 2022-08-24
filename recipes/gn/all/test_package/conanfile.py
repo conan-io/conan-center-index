@@ -41,7 +41,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _target_os(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "mac"
         # Assume gn knows about the os
         return {

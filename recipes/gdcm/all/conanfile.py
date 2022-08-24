@@ -235,7 +235,7 @@ class GDCMConan(ConanFile):
                 self.cpp_info.components["gdcmMSFF"].requires.append("gdcmuuid")
 
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
-                if tools.apple.is_apple_os(self, self.settings.os):
+                if tools.apple.is_apple_os(self):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

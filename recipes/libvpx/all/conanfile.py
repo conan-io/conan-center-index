@@ -159,7 +159,7 @@ class LibVPXConan(ConanFile):
             # gen_msvs_vcxproj.sh doesn't like custom flags
             autotools.cxxflags = []
             autotools.flags = []
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
+        if tools.apple.is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
             autotools.link_flags.append("-stdlib=libc++")
         autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)

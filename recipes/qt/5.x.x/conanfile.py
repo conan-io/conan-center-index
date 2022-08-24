@@ -350,7 +350,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.40")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.221")
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
             self.requires("glib/2.73.2")
@@ -928,7 +928,7 @@ Examples = bin/datadir/examples""")
             if self.settings.build_type == "Debug":
                 if self.settings.os == "Windows":
                     libsuffix = "d"
-                elif tools.apple.is_apple_os(self, self.settings.os):
+                elif tools.apple.is_apple_os(self):
                     libsuffix = "_debug"
 
         def _get_corrected_reqs(requires):
@@ -1008,7 +1008,7 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
-                if tools.apple.is_apple_os(self, self.settings.os):
+                if tools.apple.is_apple_os(self):
                     gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
@@ -1030,7 +1030,7 @@ Examples = bin/datadir/examples""")
             _create_module("FontDatabaseSupport", ["Core", "Gui"])
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtFontDatabaseSupport"].system_libs.extend(["advapi32", "ole32", "user32", "gdi32"])
-            elif tools.apple.is_apple_os(self, self.settings.os):
+            elif tools.apple.is_apple_os(self):
                 self.cpp_info.components["qtFontDatabaseSupport"].frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText","Foundation"])
                 self.cpp_info.components["qtFontDatabaseSupport"].frameworks.append("AppKit" if self.settings.os == "Macos" else "UIKit")
             if self.options.get_safe("with_fontconfig"):
@@ -1044,7 +1044,7 @@ Examples = bin/datadir/examples""")
             if self.options.get_safe("with_vulkan"):
                 _create_module("VulkanSupport", ["Core", "Gui"])
 
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 _create_module("ClipboardSupport", ["Core", "Gui"])
                 self.cpp_info.components["qtClipboardSupport"].frameworks = ["ImageIO"]
                 if self.settings.os == "Macos":
@@ -1441,7 +1441,7 @@ Examples = bin/datadir/examples""")
         if not p in self.deps_cpp_info.deps:
             return []
         libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
         libs += self.deps_cpp_info[p].sharedlinkflags
         for dep in self.deps_cpp_info[p].public_deps:

@@ -87,7 +87,7 @@ class ZbarConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
-        if tools.apple.is_apple_os(self, self.settings.os) and not self.options.shared:
+        if tools.apple.is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
@@ -151,5 +151,5 @@ class ZbarConan(ConanFile):
         self.cpp_info.libs = tools.files.collect_libs(self, self)
         if self.settings.os in ("FreeBSD", "Linux") and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.cpp_info.system_libs = ["iconv"]

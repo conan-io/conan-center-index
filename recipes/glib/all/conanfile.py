@@ -90,7 +90,7 @@ class GLibConan(ConanFile):
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.21")
 
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.requires("libiconv/1.17")
 
     def validate(self):
@@ -117,7 +117,7 @@ class GLibConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
@@ -281,7 +281,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].frameworks += ["Foundation", "CoreServices", "CoreFoundation"]
             self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
 
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         if self.options.with_pcre:

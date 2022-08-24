@@ -74,7 +74,7 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
-        if not tools.apple.is_apple_os(self, self.settings.os) and not self.options.shared:
+        if not tools.apple.is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Static builds are not supported on {}".format(self.settings.os))
         if self.settings.compiler == "Visual Studio" and tools.scm.Version(self.settings.compiler.version) < 15:
             # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
@@ -118,7 +118,7 @@ class VulkanLoaderConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
         if self.settings.os == "Windows":
             self._cmake.definitions["ENABLE_WIN10_ONECORE"] = False
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
         self._cmake.definitions["BUILD_LOADER"] = True
         if self.settings.os == "Windows":

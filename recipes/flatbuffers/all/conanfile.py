@@ -115,7 +115,7 @@ class FlatbuffersConan(ConanFile):
         # To install relocatable shared libs on Macos
         self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Fix iOS/tvOS/watchOS
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
 
         self._cmake.configure()

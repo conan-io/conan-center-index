@@ -83,7 +83,7 @@ class OpenH264Conan(ConanFile):
     def _library_filename(self):
         prefix = "" if (self._is_msvc or self._is_clang_cl) else "lib"
         if self.options.shared:
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 suffix = ".dylib"
             elif self.settings.os == "Windows":
                 suffix = ".dll"

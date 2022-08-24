@@ -288,7 +288,7 @@ class BoostConan(ConanFile):
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
             self.options.i18n_backend_iconv = "off"
-        elif tools.apple.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self):
             self.options.i18n_backend_iconv = "libiconv"
         elif self.settings.os == "Android":
             # bionic provides iconv since API level 28
@@ -1084,7 +1084,7 @@ class BoostConan(ConanFile):
                           "define=BOOST_USE_UCONTEXT=1"])
         flags.append("pch=on" if self.options.pch else "pch=off")
 
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             if self.settings.get_safe("os.version"):
                 cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                     self.settings.get_safe("os.version"),
@@ -1169,7 +1169,7 @@ class BoostConan(ConanFile):
     def _ar(self):
         if os.environ.get("AR"):
             return os.environ["AR"]
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.compiler == "apple-clang":
+        if tools.apple.is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ar
         return None
 
@@ -1177,7 +1177,7 @@ class BoostConan(ConanFile):
     def _ranlib(self):
         if os.environ.get("RANLIB"):
             return os.environ["RANLIB"]
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.compiler == "apple-clang":
+        if tools.apple.is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ranlib
         return None
 
@@ -1185,7 +1185,7 @@ class BoostConan(ConanFile):
     def _cxx(self):
         if os.environ.get("CXX"):
             return os.environ["CXX"]
-        if tools.apple.is_apple_os(self, self.settings.os) and self.settings.compiler == "apple-clang":
+        if tools.apple.is_apple_os(self) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
         compiler_version = str(self.settings.compiler.version)
         major = compiler_version.split(".", maxsplit=1)[0]
@@ -1238,7 +1238,7 @@ class BoostConan(ConanFile):
         else:
             contents += f' {cxx_fwd_slahes}'
 
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             if self.settings.compiler == "apple-clang":
                 contents += f" -isysroot {tools.XCRun(self.settings).sdk_path}"
             if self.settings.get_safe("arch"):
@@ -1295,7 +1295,7 @@ class BoostConan(ConanFile):
             return "clang-win"
         if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
             return "emscripten"
-        if self.settings.compiler == "gcc" and tools.apple.is_apple_os(self, self.settings.os):
+        if self.settings.compiler == "gcc" and tools.apple.is_apple_os(self):
             return "darwin"
         if self.settings.compiler == "apple-clang":
             return "clang-darwin"
@@ -1685,7 +1685,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace_windbg"].system_libs.extend(["ole32", "dbgeng"])
                     self.cpp_info.components["stacktrace_windbg_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
                     self.cpp_info.components["stacktrace_windbg_cached"].system_libs.extend(["ole32", "dbgeng"])
-                elif tools.apple.is_apple_os(self, self.settings.os) or self.settings.os == "FreeBSD":
+                elif tools.apple.is_apple_os(self) or self.settings.os == "FreeBSD":
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:

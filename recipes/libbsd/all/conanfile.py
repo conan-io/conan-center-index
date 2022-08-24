@@ -39,7 +39,7 @@ class LibBsdConan(ConanFile):
         del self.settings.compiler.cppstd
     
     def validate(self):
-        if not tools.apple.is_apple_os(self, self.settings.os) and self.settings.os != "Linux":
+        if not tools.apple.is_apple_os(self) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
@@ -50,7 +50,7 @@ class LibBsdConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
         ]

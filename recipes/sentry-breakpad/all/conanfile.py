@@ -42,7 +42,7 @@ class SentryBreakpadConan(ConanFile):
             tools.build.check_min_cppstd(self, 11)
 
         if tools.scm.Version(self.version) <= "0.4.1":
-            if self.settings.os == "Android" or tools.apple.is_apple_os(self, self.settings.os):
+            if self.settings.os == "Android" or tools.apple.is_apple_os(self):
                 raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
         if tools.scm.Version(self.version) <= "0.2.6":
             if self.settings.os == "Windows":
@@ -145,7 +145,7 @@ class SentryBreakpadConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "breakpad-client"
         self.cpp_info.libs = ["breakpad_client"]
         self.cpp_info.includedirs.append(os.path.join("include", "breakpad"))
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")

@@ -60,7 +60,7 @@ class SerfConan(ConanFile):
     def _cc(self):
         if tools.get_env("CC"):
             return tools.get_env("CC")
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "clang"
         return {
             "Visual Studio": "cl",
@@ -116,7 +116,7 @@ class SerfConan(ConanFile):
 
     @property
     def _shared_ext(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "dylib"
         return {
             "Windows": "dll",

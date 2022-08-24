@@ -81,7 +81,7 @@ class CCTZConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "cctz"
         self.cpp_info.names["cmake_find_package_multi"] = "cctz"
         self.cpp_info.libs = ["cctz"]
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
 
         if self.options.build_tools:

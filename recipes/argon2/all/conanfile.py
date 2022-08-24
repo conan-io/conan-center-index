@@ -44,7 +44,7 @@ class Argon2Conan(ConanFile):
 
     @property
     def _kernel_name(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "Darwin"
         if self.settings.os == "Windows":
             return "MINGW"

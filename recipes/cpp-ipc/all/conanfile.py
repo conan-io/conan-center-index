@@ -45,7 +45,7 @@ class CppIPCConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             raise ConanInvalidConfiguration("{} does not support Apple platform".format(self.name))
 
         if self.settings.compiler.get_safe("cppstd"):

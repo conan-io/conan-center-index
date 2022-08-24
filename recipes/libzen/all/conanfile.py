@@ -110,7 +110,7 @@ class LibzenConan(ConanFile):
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 suffix = "d"
-            elif tools.apple.is_apple_os(self, self.settings.os):
+            elif tools.apple.is_apple_os(self):
                 suffix = "_debug"
         self.cpp_info.libs = ["zen{}".format(suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:

@@ -87,7 +87,7 @@ class XZUtils(ConanFile):
                                   windows_target_platform_version_new)
 
         # Allow to install relocatable shared lib on macOS
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             tools.files.replace_in_file(self, 
                 os.path.join(self._source_subfolder, "configure"),
                 "-install_name \\$rpath/",

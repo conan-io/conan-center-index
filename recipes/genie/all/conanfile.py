@@ -43,7 +43,7 @@ class GenieConan(ConanFile):
 
     @property
     def _os(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "darwin"
         return {
             "Windows": "windows",
@@ -68,7 +68,7 @@ class GenieConan(ConanFile):
         else:
             cc = tools.get_env("CC")
             cxx = tools.get_env("CXX")
-            if tools.apple.is_apple_os(self, self.settings.os):
+            if tools.apple.is_apple_os(self):
                 if not cc:
                     cc = "clang"
                 if not cxx:

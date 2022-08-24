@@ -259,7 +259,7 @@ class BotanConan(ConanFile):
         if self.options.get_safe('fPIC', True):
             botan_extra_cxx_flags.append('-fPIC')
 
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             if self.settings.get_safe('os.version'):
                 # Required, see https://github.com/conan-io/conan-center-index/pull/3456
                 macos_min_version = tools.apple_deployment_target_flag(self.settings.os,

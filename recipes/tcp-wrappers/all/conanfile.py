@@ -72,7 +72,7 @@ class TcpWrappersConan(ConanFile):
 
     @property
     def _shext(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return ".dylib"
         return ".so"
 

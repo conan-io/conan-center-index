@@ -90,5 +90,5 @@ class Libdc1394Conan(ConanFile):
         self.cpp_info.libs = ["dc1394"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        elif tools.apple.is_apple_os(self, self.settings.os):
+        elif tools.apple.is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "IOKit"])

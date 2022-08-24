@@ -107,7 +107,7 @@ class TkConan(ConanFile):
             "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
 
     def _get_default_build_system(self):
-        if tools.apple.is_apple_os(self, self.settings.os):
+        if tools.apple.is_apple_os(self):
             return "macosx"
         elif self.settings.os in ("Linux", "FreeBSD"):
             return "unix"
