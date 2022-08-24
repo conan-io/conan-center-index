@@ -8,7 +8,7 @@ import os
 import sys
 import textwrap
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.50.0"
 
 
 class CrashpadConan(ConanFile):
@@ -53,8 +53,8 @@ class CrashpadConan(ConanFile):
             self.options.http_transport = "socket"
 
     def build_requirements(self):
-        self.build_requires("ninja/1.10.2")
-        self.build_requires("gn/cci.20210429")
+        self.tool_requires("ninja/1.10.2")
+        self.tool_requires("gn/cci.20210429")
 
     def requirements(self):
         # FIXME: use mini_chromium conan package instead of embedded package (if possible)
@@ -64,9 +64,9 @@ class CrashpadConan(ConanFile):
         if self.options.http_transport != "socket":
             del self.options.with_tls
         if self.options.http_transport == "libcurl":
-            self.requires("libcurl/7.82.0")
+            self.requires("libcurl/7.84.0")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1q")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
