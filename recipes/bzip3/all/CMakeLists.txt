@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 project(bzip3 LANGUAGES C)
 
-option(WITH_THREAD "enable thread" OFF)
-option(WITH_UTIL "build and install utility" OFF)
+option(BZIP3_WITH_THREAD "enable thread" OFF)
+option(BZIP3_WITH_UTIL "build and install utility" OFF)
 
 set(BZIP3_INC
     ${BZIP3_SRC_DIR}/include/libbz3.h
@@ -23,13 +23,13 @@ set_target_properties(bzip3 PROPERTIES
     C_VISIBILITY_PRESET hidden
     C_EXTENSIONS OFF
 )
-if (with_thread)
+if (BZIP3_WITH_THREAD)
     find_package(Threads REQUIRED)
     target_link_libraries(bzip3 PRIVATE Threads::Threads)
     target_compile_definitions(bzip3 PRIVATE "PTHREAD")
 endif()
 
-if (WITH_UTIL)
+if (BZIP3_WITH_UTIL)
     add_executable(bzip3_cmd ${BZIP3_SRC_DIR}/src/main.c)
     target_link_libraries(bzip3_cmd bzip3)
     target_compile_definitions(bzip3_cmd PRIVATE "VERSION=\"${VERSION}\"")
@@ -48,6 +48,6 @@ install(
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-if (WITH_UTIL)
+if (BZIP3_WITH_UTIL)
     install(TARGETS bzip3_cmd DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

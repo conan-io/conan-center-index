@@ -63,8 +63,8 @@ class BZip3Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BZIP3_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["WITH_PTHREAD"] = self.options.get_safe("with_thread", False)
-        tc.variables["WITH_UTIL"] = self.options.with_util
+        tc.variables["BZIP3_WITH_PTHREAD"] = self.options.get_safe("with_thread", False)
+        tc.variables["BZIP3_WITH_UTIL"] = self.options.with_util
         tc.variables["VERSION"] = self.version
         tc.generate()
 
