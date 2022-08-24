@@ -46,7 +46,7 @@ class ArgparseConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         try:
             minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
             if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:

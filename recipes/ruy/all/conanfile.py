@@ -43,7 +43,7 @@ class RuyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 14)
+            tools.build.check_min_cppstd(self, 14)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:

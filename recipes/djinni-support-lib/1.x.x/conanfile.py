@@ -107,7 +107,7 @@ class DjinniSuppotLib(ConanFile):
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Python on Windows is not fully yet supported, please see https://github.com/cross-language-cpp/djinni-support-lib/issues.")
         if self.settings.get_safe("compiler.cppstd"):
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         try:
             minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
             if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:

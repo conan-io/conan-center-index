@@ -83,7 +83,7 @@ class BackwardCppConan(ConanFile):
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not"
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self.settings.os == "Macos":
             if self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("Macos M1 not supported yet")

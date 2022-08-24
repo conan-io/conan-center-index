@@ -50,7 +50,7 @@ class Blend2dConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         # In Visual Studio < 16, there are compilation error. patch is already provided.
         # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d

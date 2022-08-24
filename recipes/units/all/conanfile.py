@@ -21,7 +21,7 @@ class UnitsConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "14")
+            tools.build.check_min_cppstd(self, "14")
         minimum_version = {
             "clang": 3.4,
             "gcc": "4.9.3",

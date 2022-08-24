@@ -63,7 +63,7 @@ class MpppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self.options.with_arb:
             raise ConanInvalidConfiguration("{}/{} doesn't supported arb (yet)".format(self.name, self.version))
         if self.options.with_quadmath:

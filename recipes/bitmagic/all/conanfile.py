@@ -43,7 +43,7 @@ class BitmagicConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._cppstd)
+            tools.build.check_min_cppstd(self, self._cppstd)
 
         minimum_version = self._minimum_compilers_version(self._cppstd).get(str(self.settings.compiler), False)
         if minimum_version:

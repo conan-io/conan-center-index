@@ -63,7 +63,7 @@ class Opene57Conan(ConanFile):
             raise ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
             
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:

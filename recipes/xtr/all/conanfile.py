@@ -62,7 +62,7 @@ class XtrConan(ConanFile):
 
         minimal_cpp_standard = 20
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, minimal_cpp_standard)
 
         minimum_version = {"gcc": 10, "clang": 12}
         compiler = str(self.settings.compiler)

@@ -58,7 +58,7 @@ class HighwayConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._minimum_compilers_version.get(
                                                    str(self.settings.compiler))
         if not minimum_version:

@@ -76,7 +76,7 @@ class LibvaultConan(ConanFile):
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, minimum_cpp_standard)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)

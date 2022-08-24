@@ -27,7 +27,7 @@ class Tabulate(ConanFile):
         compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
                              " standard version support" % (self.name, compiler))

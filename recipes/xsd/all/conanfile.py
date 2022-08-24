@@ -55,7 +55,7 @@ class ConanXqilla(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("The xsd recipe currently only supports Linux.")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def package_id(self):
         del self.info.settings.compiler

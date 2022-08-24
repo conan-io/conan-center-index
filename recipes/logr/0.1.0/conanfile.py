@@ -42,7 +42,7 @@ class LogrConan(ConanFile):
     def configure(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, minimal_cpp_standard)
+            tools.build.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "7",
             "clang": "7",

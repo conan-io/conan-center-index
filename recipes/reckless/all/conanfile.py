@@ -41,7 +41,7 @@ class RecklessConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self.settings.os not in ["Windows", "Linux"]:
             raise ConanInvalidConfiguration("reckless only supports Windows and Linux")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":

@@ -26,7 +26,7 @@ class LibCuckooConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

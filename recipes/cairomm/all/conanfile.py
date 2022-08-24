@@ -37,9 +37,9 @@ class CairommConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if self.settings.compiler.get_safe("cppstd"):
             if self._abi_version() == "1.16":
-                tools.build.check_min_cppstd(self, self, 17)
+                tools.build.check_min_cppstd(self, 17)
             else:
-                tools.build.check_min_cppstd(self, self, 11)
+                tools.build.check_min_cppstd(self, 11)
         if self.options.shared and not self.options["cairo"].shared:
             raise ConanInvalidConfiguration(
                 "Linking against static cairo would cause shared cairomm to link "

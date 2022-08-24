@@ -81,7 +81,7 @@ class CImgConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, "11")
+            tools.build.check_min_cppstd(self, "11")
         # TODO: Update requirements when available in CCI
         if self.options.enable_xrandr:
             raise ConanInvalidConfiguration("xrandr not available in CCI yet")

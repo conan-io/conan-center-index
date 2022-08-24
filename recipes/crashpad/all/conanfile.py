@@ -79,7 +79,7 @@ class CrashpadConan(ConanFile):
         else:
             self.output.warn("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 14)
+            tools.build.check_min_cppstd(self, 14)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self._source_subfolder, strip_root=True)

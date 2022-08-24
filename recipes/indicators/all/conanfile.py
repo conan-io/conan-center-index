@@ -19,7 +19,7 @@ class IndicatorsConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         if tools.scm.Version(self.version) < "2.0" and self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(

@@ -35,7 +35,7 @@ class McapConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         if self.settings.compiler == "apple-clang" and tools.scm.Version(self.settings.compiler.version) <= 11:
             raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
         if (self.settings.compiler == "gcc" or self.settings.compiler == "clang") and tools.scm.Version(self.settings.compiler.version) <= 8:

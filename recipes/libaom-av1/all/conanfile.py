@@ -64,7 +64,7 @@ class LibaomAv1Conan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         # Check compiler version
         compiler = str(self.settings.compiler)
         compiler_version = tools.scm.Version(self.settings.compiler.version.value)

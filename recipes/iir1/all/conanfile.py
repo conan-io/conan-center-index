@@ -62,7 +62,7 @@ class Iir1Conan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self._min_cppstd)
 
         compiler_version = tools.scm.Version(self.settings.compiler.version)
         if self.settings.compiler == "gcc" and compiler_version <= 5:

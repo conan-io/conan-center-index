@@ -36,7 +36,7 @@ class SvgwriteConan(ConanFile):
         compiler_version = tools.scm.Version(self.settings.compiler.version)
 
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
 
         minimal_version = {
             "Visual Studio": "16",

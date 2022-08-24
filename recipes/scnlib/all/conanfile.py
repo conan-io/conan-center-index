@@ -63,7 +63,7 @@ class ScnlibConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and tools.scm.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(

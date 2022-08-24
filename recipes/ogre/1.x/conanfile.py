@@ -170,7 +170,7 @@ class ogrecmakeconan(ConanFile):
         cmake.definitions["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = False
         cmake.definitions["OGRE_GLSUPPORT_USE_EGL"] = self.options.glsupport_use_egl
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         else:
             # INFO: OpenEXR requires C++11
             cmake.definitions["CMAKE_CXX_STANDARD"] = 11

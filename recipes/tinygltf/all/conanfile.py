@@ -28,7 +28,7 @@ class TinygltfConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("nlohmann_json/3.9.1")

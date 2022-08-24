@@ -41,7 +41,7 @@ class G3logConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, "14")
+            tools.build.check_min_cppstd(self, "14")
         if not self._has_support_for_cpp14():
             raise ConanInvalidConfiguration("g3log requires C++14 or higher support standard."
                                             " {} {} is not supported."

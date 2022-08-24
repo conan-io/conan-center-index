@@ -47,7 +47,7 @@ class GoogleAPIS(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
 

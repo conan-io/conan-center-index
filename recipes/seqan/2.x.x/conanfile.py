@@ -33,7 +33,7 @@ SeqAn is easy to use and simplifies the development of new software tools with a
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 14)
+            tools.build.check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.scm.Version(self.settings.compiler.version) < minimum_version:

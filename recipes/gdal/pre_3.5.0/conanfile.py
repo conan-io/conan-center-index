@@ -372,7 +372,7 @@ class GdalConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             min_cppstd = 14 if self.options.with_charls else 11
-            tools.build.check_min_cppstd(self, self, min_cppstd)
+            tools.build.check_min_cppstd(self, min_cppstd)
         if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
         if self.options.get_safe("with_pcre2") and not self.options["pcre2"].build_pcre2_8:

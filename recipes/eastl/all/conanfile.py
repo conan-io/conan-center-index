@@ -68,7 +68,7 @@ class EastlConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
 
         mininum_compiler_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if mininum_compiler_version and tools.scm.Version(self.settings.compiler.version) < mininum_compiler_version:

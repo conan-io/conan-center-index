@@ -40,7 +40,7 @@ class SimpleWebSocketServerConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "11")
+            tools.build.check_min_cppstd(self, "11")
 
     def build(self):
         if tools.scm.Version(self.version) <= "2.0.1" and "asio" in self.deps_cpp_info.deps and tools.scm.Version(self.deps_cpp_info["asio"].version) >= "1.18.0":

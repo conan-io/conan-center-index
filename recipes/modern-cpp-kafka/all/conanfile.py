@@ -26,7 +26,7 @@ class ModernCppKafkaConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

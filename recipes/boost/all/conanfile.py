@@ -443,7 +443,7 @@ class BoostConan(ConanFile):
                     raise ConanInvalidConfiguration("This compiler is too old to build Boost.nowide.")
 
             if self.settings.compiler.cppstd:
-                tools.build.check_min_cppstd(self, self, 11)
+                tools.build.check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
@@ -456,7 +456,7 @@ class BoostConan(ConanFile):
         if not all((self.options.without_fiber, self.options.get_safe("without_json", True))):
             # fiber/json require a c++11-able compiler.
             if self.settings.compiler.cppstd:
-                tools.build.check_min_cppstd(self, self, 11)
+                tools.build.check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
@@ -470,7 +470,7 @@ class BoostConan(ConanFile):
             # Starting from 1.76.0, Boost.Math requires a compiler with c++ standard 11 or higher
             if not self.options.without_math:
                 if self.settings.compiler.cppstd:
-                    tools.build.check_min_cppstd(self, self, 11)
+                    tools.build.check_min_cppstd(self, 11)
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:
@@ -481,7 +481,7 @@ class BoostConan(ConanFile):
             # Starting from 1.79.0, Boost.Wave requires a compiler with c++ standard 11 or higher
             if not self.options.without_wave:
                 if self.settings.compiler.cppstd:
-                    tools.build.check_min_cppstd(self, self, 11)
+                    tools.build.check_min_cppstd(self, 11)
                 else:
                     min_compiler_version = self._min_compiler_version_default_cxx11
                     if min_compiler_version is not None:

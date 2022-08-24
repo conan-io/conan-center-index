@@ -74,7 +74,7 @@ class ZXingCppConan(ConanFile):
         cpp_version = 17 if tools.scm.Version(self.version) >= "1.2.0" else 14
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, cpp_version)
+            tools.build.check_min_cppstd(self, cpp_version)
         min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
 
         if min_version and tools.scm.Version(self.settings.compiler.version) < min_version:

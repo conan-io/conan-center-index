@@ -59,7 +59,7 @@ class BitserializerConan(ConanFile):
     def validate(self):
         # Check compiler for supporting C++ 17
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         try:
             minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
             if tools.scm.Version(self.settings.compiler.version) < minimum_required_compiler_version:

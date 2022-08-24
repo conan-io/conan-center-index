@@ -48,7 +48,7 @@ class ConanXqilla(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("The xqilla recipe currently only supports Linux.")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20210814")

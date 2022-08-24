@@ -35,7 +35,7 @@ class Rangev3Conan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("{0} {1} support for range-v3 is unknown, assuming it is supported."

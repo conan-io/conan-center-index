@@ -46,7 +46,7 @@ class GRPCProto(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared):
             raise ConanInvalidConfiguration("If built as shared, protobuf and googleapis must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True`")

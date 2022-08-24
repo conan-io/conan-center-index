@@ -37,7 +37,7 @@ class OpenvrConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "11")
+            tools.build.check_min_cppstd(self, "11")
 
         if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("OpenVR can't be compiled by {0} {1}".format(self.settings.compiler,

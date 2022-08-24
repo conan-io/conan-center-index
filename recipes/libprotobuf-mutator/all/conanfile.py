@@ -40,7 +40,7 @@ class LibProtobufMutatorConan(ConanFile):
         if self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("Requires either compiler.libcxx=libstdc++11")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def _patch_sources(self):
         tools.files.replace_in_file(self, 

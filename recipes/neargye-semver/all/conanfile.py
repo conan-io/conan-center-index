@@ -27,7 +27,7 @@ class NeargyeSemverConan(ConanFile):
 
         min_req_cppstd = "17"
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, min_req_cppstd)
+            tools.build.check_min_cppstd(self, min_req_cppstd)
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
                              " standard version support." % (self.name, compiler))

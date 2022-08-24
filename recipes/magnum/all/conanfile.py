@@ -237,7 +237,7 @@ class MagnumConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "5.0":
             raise ConanInvalidConfiguration("GCC older than 5 is not supported (missing C++11 features)")

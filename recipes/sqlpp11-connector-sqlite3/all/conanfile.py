@@ -35,7 +35,7 @@ class sqlpp11Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("sqlpp11/0.59")

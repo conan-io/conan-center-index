@@ -24,7 +24,7 @@ class SpectraConan(ConanFile):
     def validate(self):
         if tools.scm.Version(self.version) >= "1.0.0":
             if self.settings.compiler.get_safe("cppstd"):
-                tools.build.check_min_cppstd(self, self, 11)
+                tools.build.check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.header_only()

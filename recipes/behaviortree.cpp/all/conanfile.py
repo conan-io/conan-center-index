@@ -74,7 +74,7 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("BehaviorTree.CPP can not be built as shared on Windows.")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._minimum_cppstd_required)
+            tools.build.check_min_cppstd(self, self._minimum_cppstd_required)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("BehaviorTree.CPP requires C++{}. Your compiler is unknown. Assuming it supports C++14."

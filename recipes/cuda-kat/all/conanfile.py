@@ -35,7 +35,7 @@ class CudaKatConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("CUDA-kat library are not compatible on Windows")
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")

@@ -78,7 +78,7 @@ class OsgearthConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         elif self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("With apple-clang cppstd needs to be set, since default is not at least c++11.")
 

@@ -61,7 +61,7 @@ class FpgenConan(ConanFile):
             )
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._min_cppstd)
+            tools.build.check_min_cppstd(self, self._min_cppstd)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]

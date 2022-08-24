@@ -57,7 +57,7 @@ class IgnitionUitlsConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, self._minimum_cpp_standard)
+            tools.build.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn(

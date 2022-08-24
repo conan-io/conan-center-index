@@ -32,7 +32,7 @@ class CozConan(ConanFile):
                 "coz doesn't support compiler: {} on OS: {}.".format(
                     self.settings.compiler, self.settings.os))
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "11")
+            tools.build.check_min_cppstd(self, "11")
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

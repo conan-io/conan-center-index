@@ -40,7 +40,7 @@ class Etc2compConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version])

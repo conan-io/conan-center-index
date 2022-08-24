@@ -19,7 +19,7 @@ class PprintConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
 
         min_compiler_version = {
             "gcc": 7,

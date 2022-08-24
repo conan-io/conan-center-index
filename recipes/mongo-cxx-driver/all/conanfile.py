@@ -108,7 +108,7 @@ class MongoCxxConan(ConanFile):
             raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, self._minimal_std_version)
+            tools.build.check_min_cppstd(self, self._minimal_std_version)
 
         compiler = str(self.settings.compiler)
         if self.options.polyfill == "experimental" and compiler == "apple-clang":

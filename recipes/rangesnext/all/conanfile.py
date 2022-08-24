@@ -22,7 +22,7 @@ class RangesnextConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "20")
+            tools.build.check_min_cppstd(self, "20")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version or tools.scm.Version(self.settings.compiler.version) < minimum_version:

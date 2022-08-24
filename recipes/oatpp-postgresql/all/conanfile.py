@@ -43,7 +43,7 @@ class OatppPostgresqlConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp-postgresql can not be built as shared library on Windows")

@@ -63,7 +63,7 @@ class PistacheConan(ConanFile):
             raise ConanInvalidConfiguration("Clang support is broken. See pistacheio/pistache#835.")
 
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
             if tools.scm.Version(self.settings.compiler.version) < minimum_compiler:

@@ -52,7 +52,7 @@ class PlayrhoConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
 
         compilers_minimum_version = self._compilers_minimum_versions
         minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)

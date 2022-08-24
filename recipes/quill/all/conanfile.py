@@ -67,7 +67,7 @@ class QuillConan(ConanFile):
         cxx_std = "17" if tools.scm.Version(self.version) >= "2.0.0" else "14"
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, cxx_std)
+            tools.build.check_min_cppstd(self, cxx_std)
 
         compilers_minimum_version = self._compilers_minimum_versions[cxx_std]
         minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)

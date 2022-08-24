@@ -86,11 +86,11 @@ class LibtorrentConan(ConanFile):
     def validate(self):
         if tools.scm.Version(self.version) < "2.0":
             if self.settings.compiler.get_safe("cppstd"):
-                tools.build.check_min_cppstd(self, self, 11)
+                tools.build.check_min_cppstd(self, 11)
         else:
             self._check_compiler_supports_cxx14()
             if self.settings.compiler.get_safe("cppstd"):
-                tools.build.check_min_cppstd(self, self, 14)
+                tools.build.check_min_cppstd(self, 14)
 
     def requirements(self):
         if tools.scm.Version(self.version) < "2.0.0":

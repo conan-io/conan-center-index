@@ -58,7 +58,7 @@ class GoogleCloudCppConan(ConanFile):
                 raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
 
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         if self.settings.compiler == 'gcc' and tools.scm.Version(self.settings.compiler.version) < "5.4":
             raise ConanInvalidConfiguration("Building requires GCC >= 5.4")

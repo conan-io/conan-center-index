@@ -62,7 +62,7 @@ class IceoryxConan(ConanFile):
         version = tools.scm.Version(self.settings.compiler.version)
 
         if compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 14)
+            tools.build.check_min_cppstd(self, 14)
 
         if compiler == "Visual Studio":
             if version < "16":

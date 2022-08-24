@@ -45,7 +45,7 @@ class PerfettoConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration ("perfetto requires gcc >= 7")
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
     def source(self):
         tools.files.get(self, **self.conan_data["sources"][self.version],

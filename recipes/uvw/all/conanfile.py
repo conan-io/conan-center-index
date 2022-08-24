@@ -36,7 +36,7 @@ class UvwConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, "17")
+            tools.build.check_min_cppstd(self, "17")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration("uvw requires C++17. {} {} does not support it.".format(
                 str(self.settings.compiler),

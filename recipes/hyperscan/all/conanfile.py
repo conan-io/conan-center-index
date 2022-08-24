@@ -62,7 +62,7 @@ class HyperscanConan(ConanFile):
             self.requires("pcre/8.45")
 
     def validate(self):
-        tools.build.check_min_cppstd(self, self, "11")
+        tools.build.check_min_cppstd(self, "11")
 
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")

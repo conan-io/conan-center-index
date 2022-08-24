@@ -69,7 +69,7 @@ class RapidcheckConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
         if self.options.enable_gmock and not self.deps_cpp_info["gtest"].build_gmock:

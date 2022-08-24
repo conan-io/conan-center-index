@@ -26,7 +26,7 @@ class LibnopConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 14)
+            tools.build.check_min_cppstd(self, 14)
         compiler = self.settings.compiler
         compiler_version = tools.scm.Version(compiler.version)
         if (compiler == "gcc" and compiler_version < "5") or \

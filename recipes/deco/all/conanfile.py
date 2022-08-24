@@ -24,7 +24,7 @@ class DecoConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, self, 17)
+            tools.build.check_min_cppstd(self, 17)
 
         minimal_version = {
             "Visual Studio": "15",

@@ -55,7 +55,7 @@ class AeronConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, 11)
+            tools.build.check_min_cppstd(self, 11)
 
         compiler = str(self.settings.compiler)
         compiler_version = tools.scm.Version(self.settings.compiler.version)

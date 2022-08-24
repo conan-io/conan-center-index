@@ -54,7 +54,7 @@ class SimpleYamlConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.build.check_min_cppstd(self, self, "20")
+            tools.build.check_min_cppstd(self, "20")
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
         minimum_version = self._minimum_compilers_version.get(
