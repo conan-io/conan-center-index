@@ -41,7 +41,7 @@
 -    include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -    list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
 +    #include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
-+    list(APPEND SYSLIBS OpenSSL::OpenSSL)
++    list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
  endif()
  
  
@@ -60,7 +60,7 @@
 -    include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
 -    list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
 +    #include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
-+    list(APPEND SYSLIBS OpenSSL::OpenSSL)
++    list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
  endif()
  
  if(UNIX)
@@ -74,7 +74,7 @@
      ADD_LIBRARY_THRIFT(thriftnb ${thriftcppnb_SOURCES})
      LINK_AGAINST_THRIFT_LIBRARY(thriftnb thrift)
 -    TARGET_LINK_LIBRARIES_THRIFT(thriftnb ${SYSLIBS} ${LIBEVENT_LIBRARIES})
-+    TARGET_LINK_LIBRARIES_THRIFT(thriftnb ${SYSLIBS} libevent::libevent)
++    TARGET_LINK_LIBRARIES_THRIFT(thriftnb ${SYSLIBS} libevent::core libevent::extra)
      ADD_PKGCONFIG_THRIFT(thrift-nb)
  endif()
  
